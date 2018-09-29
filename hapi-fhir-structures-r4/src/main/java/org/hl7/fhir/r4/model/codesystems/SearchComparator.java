@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,35 +37,35 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum SearchComparator {
 
         /**
-         * the value for the parameter in the resource is equal to the provided value
+         * the value for the parameter in the resource is equal to the provided value.
          */
         EQ, 
         /**
-         * the value for the parameter in the resource is not equal to the provided value
+         * the value for the parameter in the resource is not equal to the provided value.
          */
         NE, 
         /**
-         * the value for the parameter in the resource is greater than the provided value
+         * the value for the parameter in the resource is greater than the provided value.
          */
         GT, 
         /**
-         * the value for the parameter in the resource is less than the provided value
+         * the value for the parameter in the resource is less than the provided value.
          */
         LT, 
         /**
-         * the value for the parameter in the resource is greater or equal to the provided value
+         * the value for the parameter in the resource is greater or equal to the provided value.
          */
         GE, 
         /**
-         * the value for the parameter in the resource is less or equal to the provided value
+         * the value for the parameter in the resource is less or equal to the provided value.
          */
         LE, 
         /**
-         * the value for the parameter in the resource starts after the provided value
+         * the value for the parameter in the resource starts after the provided value.
          */
         SA, 
         /**
-         * the value for the parameter in the resource ends before the provided value
+         * the value for the parameter in the resource ends before the provided value.
          */
         EB, 
         /**
@@ -118,14 +118,14 @@ public enum SearchComparator {
         }
         public String getDefinition() {
           switch (this) {
-            case EQ: return "the value for the parameter in the resource is equal to the provided value";
-            case NE: return "the value for the parameter in the resource is not equal to the provided value";
-            case GT: return "the value for the parameter in the resource is greater than the provided value";
-            case LT: return "the value for the parameter in the resource is less than the provided value";
-            case GE: return "the value for the parameter in the resource is greater or equal to the provided value";
-            case LE: return "the value for the parameter in the resource is less or equal to the provided value";
-            case SA: return "the value for the parameter in the resource starts after the provided value";
-            case EB: return "the value for the parameter in the resource ends before the provided value";
+            case EQ: return "the value for the parameter in the resource is equal to the provided value.";
+            case NE: return "the value for the parameter in the resource is not equal to the provided value.";
+            case GT: return "the value for the parameter in the resource is greater than the provided value.";
+            case LT: return "the value for the parameter in the resource is less than the provided value.";
+            case GE: return "the value for the parameter in the resource is greater or equal to the provided value.";
+            case LE: return "the value for the parameter in the resource is less or equal to the provided value.";
+            case SA: return "the value for the parameter in the resource starts after the provided value.";
+            case EB: return "the value for the parameter in the resource ends before the provided value.";
             case AP: return "the value for the parameter in the resource is approximately the same to the provided value.";
             default: return "?";
           }
@@ -135,7 +135,7 @@ public enum SearchComparator {
             case EQ: return "Equals";
             case NE: return "Not Equals";
             case GT: return "Greater Than";
-            case LT: return "Less Then";
+            case LT: return "Less Than";
             case GE: return "Greater or Equals";
             case LE: return "Less of Equal";
             case SA: return "Starts After";

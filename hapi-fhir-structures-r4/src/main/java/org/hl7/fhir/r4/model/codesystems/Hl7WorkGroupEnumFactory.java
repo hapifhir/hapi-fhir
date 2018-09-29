@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -63,6 +63,8 @@ public class Hl7WorkGroupEnumFactory implements EnumFactory<Hl7WorkGroup> {
       return Hl7WorkGroup.INM;
     if ("its".equals(codeString))
       return Hl7WorkGroup.ITS;
+    if ("mnm".equals(codeString))
+      return Hl7WorkGroup.MNM;
     if ("oo".equals(codeString))
       return Hl7WorkGroup.OO;
     if ("pa".equals(codeString))
@@ -73,8 +75,8 @@ public class Hl7WorkGroupEnumFactory implements EnumFactory<Hl7WorkGroup> {
       return Hl7WorkGroup.PHER;
     if ("phx".equals(codeString))
       return Hl7WorkGroup.PHX;
-    if ("rcrim".equals(codeString))
-      return Hl7WorkGroup.RCRIM;
+    if ("brr".equals(codeString))
+      return Hl7WorkGroup.BRR;
     if ("sd".equals(codeString))
       return Hl7WorkGroup.SD;
     if ("sec".equals(codeString))
@@ -113,6 +115,8 @@ public class Hl7WorkGroupEnumFactory implements EnumFactory<Hl7WorkGroup> {
       return "inm";
     if (code == Hl7WorkGroup.ITS)
       return "its";
+    if (code == Hl7WorkGroup.MNM)
+      return "mnm";
     if (code == Hl7WorkGroup.OO)
       return "oo";
     if (code == Hl7WorkGroup.PA)
@@ -123,8 +127,8 @@ public class Hl7WorkGroupEnumFactory implements EnumFactory<Hl7WorkGroup> {
       return "pher";
     if (code == Hl7WorkGroup.PHX)
       return "phx";
-    if (code == Hl7WorkGroup.RCRIM)
-      return "rcrim";
+    if (code == Hl7WorkGroup.BRR)
+      return "brr";
     if (code == Hl7WorkGroup.SD)
       return "sd";
     if (code == Hl7WorkGroup.SEC)

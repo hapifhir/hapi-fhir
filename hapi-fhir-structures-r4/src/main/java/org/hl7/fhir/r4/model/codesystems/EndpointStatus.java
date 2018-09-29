@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum EndpointStatus {
 
         /**
-         * This endpoint is expected to be active and can be used
+         * This endpoint is expected to be active and can be used.
          */
         ACTIVE, 
         /**
-         * This endpoint is temporarily unavailable
+         * This endpoint is temporarily unavailable.
          */
         SUSPENDED, 
         /**
-         * This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken
+         * This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken.
          */
         ERROR, 
         /**
-         * This endpoint is no longer to be used
+         * This endpoint is no longer to be used.
          */
         OFF, 
         /**
@@ -97,10 +97,10 @@ public enum EndpointStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "This endpoint is expected to be active and can be used";
-            case SUSPENDED: return "This endpoint is temporarily unavailable";
-            case ERROR: return "This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken";
-            case OFF: return "This endpoint is no longer to be used";
+            case ACTIVE: return "This endpoint is expected to be active and can be used.";
+            case SUSPENDED: return "This endpoint is temporarily unavailable.";
+            case ERROR: return "This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken.";
+            case OFF: return "This endpoint is no longer to be used.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             case TEST: return "This endpoint is not intended for production usage.";
             default: return "?";

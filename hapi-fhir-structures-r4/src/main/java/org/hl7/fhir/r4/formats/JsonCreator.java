@@ -26,6 +26,7 @@ public interface JsonCreator {
   void value(Boolean value) throws IOException;
 
   void value(BigDecimal value) throws IOException;
+  void valueNum(String value) throws IOException; // allow full control of representation
 
   void value(Integer value) throws IOException;
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ImplantStatus {
 
         /**
-         * The implanted device is working normally
+         * The implanted device is working normally.
          */
         FUNCTIONAL, 
         /**
-         * The implanted device is not working
+         * The implanted device is not working.
          */
         NONFUNCTIONAL, 
         /**
-         * The implanted device has been turned off
+         * The implanted device has been turned off.
          */
         DISABLED, 
         /**
-         * the functional status of the implant has not been determined
+         * the functional status of the implant has not been determined.
          */
         UNKNOWN, 
         /**
@@ -79,14 +79,14 @@ public enum ImplantStatus {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/implant-status";
+          return "http://terminology.hl7.org/CodeSystem/implantStatus";
         }
         public String getDefinition() {
           switch (this) {
-            case FUNCTIONAL: return "The implanted device is working normally";
-            case NONFUNCTIONAL: return "The implanted device is not working";
-            case DISABLED: return "The implanted device has been turned off";
-            case UNKNOWN: return "the functional status of the implant has not been determined";
+            case FUNCTIONAL: return "The implanted device is working normally.";
+            case NONFUNCTIONAL: return "The implanted device is not working.";
+            case DISABLED: return "The implanted device has been turned off.";
+            case UNKNOWN: return "the functional status of the implant has not been determined.";
             default: return "?";
           }
         }

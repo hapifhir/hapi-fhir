@@ -93,7 +93,7 @@ public class ProtoBufGenerator {
       if (ed.getType().size() != 1)
         fld.type = "Unknown";
       else {
-        StructureDefinition td = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+ed.getTypeFirstRep().getCode());
+        StructureDefinition td = context.fetchTypeDefinition(ed.getTypeFirstRep().getCode());
         if (td == null)
           fld.type = "Unresolved";
         else if (td.getKind() == StructureDefinitionKind.PRIMITIVETYPE) {

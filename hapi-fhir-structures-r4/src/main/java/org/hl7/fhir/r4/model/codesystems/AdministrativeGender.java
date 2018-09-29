@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum AdministrativeGender {
 
         /**
-         * Male
+         * Male.
          */
         MALE, 
         /**
-         * Female
+         * Female.
          */
         FEMALE, 
         /**
-         * Other
+         * Other.
          */
         OTHER, 
         /**
-         * Unknown
+         * Unknown.
          */
         UNKNOWN, 
         /**
@@ -83,10 +83,10 @@ public enum AdministrativeGender {
         }
         public String getDefinition() {
           switch (this) {
-            case MALE: return "Male";
-            case FEMALE: return "Female";
-            case OTHER: return "Other";
-            case UNKNOWN: return "Unknown";
+            case MALE: return "Male.";
+            case FEMALE: return "Female.";
+            case OTHER: return "Other.";
+            case UNKNOWN: return "Unknown.";
             default: return "?";
           }
         }

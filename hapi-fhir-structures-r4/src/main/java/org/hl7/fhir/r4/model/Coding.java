@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -76,10 +76,10 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
     protected StringType display;
 
     /**
-     * Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).
+     * Indicates that this coding was chosen by a user directly - e.g. off a pick list of available items (codes or displays).
      */
     @Child(name = "userSelected", type = {BooleanType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="If this coding was chosen directly by the user", formalDefinition="Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays)." )
+    @Description(shortDefinition="If this coding was chosen directly by the user", formalDefinition="Indicates that this coding was chosen by a user directly - e.g. off a pick list of available items (codes or displays)." )
     protected BooleanType userSelected;
 
     private static final long serialVersionUID = -1417514061L;
@@ -300,7 +300,7 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
     }
 
     /**
-     * @return {@link #userSelected} (Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).). This is the underlying object with id, value and extensions. The accessor "getUserSelected" gives direct access to the value
+     * @return {@link #userSelected} (Indicates that this coding was chosen by a user directly - e.g. off a pick list of available items (codes or displays).). This is the underlying object with id, value and extensions. The accessor "getUserSelected" gives direct access to the value
      */
     public BooleanType getUserSelectedElement() { 
       if (this.userSelected == null)
@@ -320,7 +320,7 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
     }
 
     /**
-     * @param value {@link #userSelected} (Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).). This is the underlying object with id, value and extensions. The accessor "getUserSelected" gives direct access to the value
+     * @param value {@link #userSelected} (Indicates that this coding was chosen by a user directly - e.g. off a pick list of available items (codes or displays).). This is the underlying object with id, value and extensions. The accessor "getUserSelected" gives direct access to the value
      */
     public Coding setUserSelectedElement(BooleanType value) { 
       this.userSelected = value;
@@ -328,14 +328,14 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
     }
 
     /**
-     * @return Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).
+     * @return Indicates that this coding was chosen by a user directly - e.g. off a pick list of available items (codes or displays).
      */
     public boolean getUserSelected() { 
       return this.userSelected == null || this.userSelected.isEmpty() ? false : this.userSelected.getValue();
     }
 
     /**
-     * @param value Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).
+     * @param value Indicates that this coding was chosen by a user directly - e.g. off a pick list of available items (codes or displays).
      */
     public Coding setUserSelected(boolean value) { 
         if (this.userSelected == null)
@@ -350,7 +350,7 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
         children.add(new Property("version", "string", "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.", 0, 1, version));
         children.add(new Property("code", "code", "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).", 0, 1, code));
         children.add(new Property("display", "string", "A representation of the meaning of the code in the system, following the rules of the system.", 0, 1, display));
-        children.add(new Property("userSelected", "boolean", "Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).", 0, 1, userSelected));
+        children.add(new Property("userSelected", "boolean", "Indicates that this coding was chosen by a user directly - e.g. off a pick list of available items (codes or displays).", 0, 1, userSelected));
       }
 
       @Override
@@ -360,7 +360,7 @@ public class Coding extends Type implements IBaseCoding, ICompositeType, ICoding
         case 351608024: /*version*/  return new Property("version", "string", "The version of the code system which was used when choosing this code. Note that a well-maintained code system does not need the version reported, because the meaning of codes is consistent across versions. However this cannot consistently be assured, and when the meaning is not guaranteed to be consistent, the version SHOULD be exchanged.", 0, 1, version);
         case 3059181: /*code*/  return new Property("code", "code", "A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination).", 0, 1, code);
         case 1671764162: /*display*/  return new Property("display", "string", "A representation of the meaning of the code in the system, following the rules of the system.", 0, 1, display);
-        case 423643014: /*userSelected*/  return new Property("userSelected", "boolean", "Indicates that this coding was chosen by a user directly - i.e. off a pick list of available items (codes or displays).", 0, 1, userSelected);
+        case 423643014: /*userSelected*/  return new Property("userSelected", "boolean", "Indicates that this coding was chosen by a user directly - e.g. off a pick list of available items (codes or displays).", 0, 1, userSelected);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 

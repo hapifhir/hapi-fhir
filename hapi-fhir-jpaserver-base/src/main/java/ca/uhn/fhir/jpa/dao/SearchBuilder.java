@@ -1186,6 +1186,10 @@ public class SearchBuilder implements ISearchBuilder {
 			BaseCodingDt id = (BaseCodingDt) theParameter;
 			system = id.getSystemElement().getValueAsString();
 			code = (id.getCodeElement().getValue());
+		} else if (theParameter instanceof NumberParam) {
+			NumberParam number = (NumberParam) theParameter;
+			system = null;
+			code = number.getValueAsQueryToken(myContext);
 		} else {
 			throw new IllegalArgumentException("Invalid token type: " + theParameter.getClass());
 		}
@@ -2082,11 +2086,16 @@ public class SearchBuilder implements ISearchBuilder {
 		 * SearchParameters can declare paths on multiple resources
 		 * types. Here we only want the ones that actually apply.
 		 */
-		for (Iterator<String> iter = path.iterator(); iter.hasNext(); ) {
-			if (!iter.next().startsWith(theResourceType + ".")) {
-				iter.remove();
+		path = new ArrayList<>(path);
+
+		for (int i = 0; i < path.size(); i++) {
+			String nextPath = trim(path.get(i));
+			if (!nextPath.contains(theResourceType + ".")) {
+				path.remove(i);
+				i--;
 			}
 		}
+
 		return theFrom.get("mySourcePath").in(path);
 	}
 

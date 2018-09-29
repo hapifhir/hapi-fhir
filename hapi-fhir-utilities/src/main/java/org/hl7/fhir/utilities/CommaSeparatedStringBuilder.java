@@ -33,4 +33,10 @@ public class CommaSeparatedStringBuilder {
   public String toString() {
     return b.toString();
   }
+
+  public void appendIfNotNull(String s) {
+   if (!Utilities.noString(s))
+     append(s);
+    
+  }
 }

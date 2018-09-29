@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActivityDefinitionCategory {
 
         /**
-         * The activity is intended to provide or is related to treatment of the patient
+         * The activity is intended to provide or is related to treatment of the patient.
          */
         TREATMENT, 
         /**
-         * The activity is intended to provide or is related to education of the patient
+         * The activity is intended to provide or is related to education of the patient.
          */
         EDUCATION, 
         /**
-         * The activity is intended to perform or is related to assessment of the patient
+         * The activity is intended to perform or is related to assessment of the patient.
          */
         ASSESSMENT, 
         /**
@@ -72,13 +72,13 @@ public enum ActivityDefinitionCategory {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/activity-definition-category";
+          return "http://terminology.hl7.org/CodeSystem/activity-definition-category";
         }
         public String getDefinition() {
           switch (this) {
-            case TREATMENT: return "The activity is intended to provide or is related to treatment of the patient";
-            case EDUCATION: return "The activity is intended to provide or is related to education of the patient";
-            case ASSESSMENT: return "The activity is intended to perform or is related to assessment of the patient";
+            case TREATMENT: return "The activity is intended to provide or is related to treatment of the patient.";
+            case EDUCATION: return "The activity is intended to provide or is related to education of the patient.";
+            case ASSESSMENT: return "The activity is intended to perform or is related to assessment of the patient.";
             default: return "?";
           }
         }

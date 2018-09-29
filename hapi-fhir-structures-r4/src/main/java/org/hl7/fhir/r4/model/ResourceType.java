@@ -2,7 +2,7 @@ package org.hl7.fhir.r4.model;
 
 import org.hl7.fhir.exceptions.FHIRException;
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 public enum ResourceType {
     Account,
@@ -20,7 +20,9 @@ public enum ResourceType {
     CapabilityStatement,
     CarePlan,
     CareTeam,
+    CatalogEntry,
     ChargeItem,
+    ChargeItemDefinition,
     Claim,
     ClaimResponse,
     ClinicalImpression,
@@ -34,26 +36,24 @@ public enum ResourceType {
     Consent,
     Contract,
     Coverage,
+    CoverageEligibilityRequest,
+    CoverageEligibilityResponse,
     DetectedIssue,
     Device,
-    DeviceComponent,
+    DeviceDefinition,
     DeviceMetric,
     DeviceRequest,
     DeviceUseStatement,
     DiagnosticReport,
     DocumentManifest,
     DocumentReference,
-    EligibilityRequest,
-    EligibilityResponse,
     Encounter,
     Endpoint,
     EnrollmentRequest,
     EnrollmentResponse,
-    EntryDefinition,
     EpisodeOfCare,
     EventDefinition,
     ExampleScenario,
-    ExpansionProfile,
     ExplanationOfBenefit,
     FamilyMemberHistory,
     Flag,
@@ -67,6 +67,7 @@ public enum ResourceType {
     ImmunizationEvaluation,
     ImmunizationRecommendation,
     ImplementationGuide,
+    InsurancePlan,
     Invoice,
     ItemInstance,
     Library,
@@ -85,21 +86,25 @@ public enum ResourceType {
     MedicinalProduct,
     MedicinalProductAuthorization,
     MedicinalProductClinicals,
+    MedicinalProductContraindication,
     MedicinalProductDeviceSpec,
+    MedicinalProductIndication,
     MedicinalProductIngredient,
+    MedicinalProductInteraction,
+    MedicinalProductManufactured,
     MedicinalProductPackaged,
     MedicinalProductPharmaceutical,
+    MedicinalProductUndesirableEffect,
     MessageDefinition,
     MessageHeader,
     NamingSystem,
     NutritionOrder,
     Observation,
     ObservationDefinition,
-    OccupationalData,
     OperationDefinition,
     OperationOutcome,
     Organization,
-    OrganizationRole,
+    OrganizationAffiliation,
     Parameters,
     Patient,
     PaymentNotice,
@@ -111,7 +116,6 @@ public enum ResourceType {
     Procedure,
     ProcessRequest,
     ProcessResponse,
-    ProductPlan,
     Provenance,
     Questionnaire,
     QuestionnaireResponse,
@@ -178,8 +182,12 @@ public enum ResourceType {
       return "careplan";
     case CareTeam:
       return "careteam";
+    case CatalogEntry:
+      return "catalogentry";
     case ChargeItem:
       return "chargeitem";
+    case ChargeItemDefinition:
+      return "chargeitemdefinition";
     case Claim:
       return "claim";
     case ClaimResponse:
@@ -206,12 +214,16 @@ public enum ResourceType {
       return "contract";
     case Coverage:
       return "coverage";
+    case CoverageEligibilityRequest:
+      return "coverageeligibilityrequest";
+    case CoverageEligibilityResponse:
+      return "coverageeligibilityresponse";
     case DetectedIssue:
       return "detectedissue";
     case Device:
       return "device";
-    case DeviceComponent:
-      return "devicecomponent";
+    case DeviceDefinition:
+      return "devicedefinition";
     case DeviceMetric:
       return "devicemetric";
     case DeviceRequest:
@@ -224,10 +236,6 @@ public enum ResourceType {
       return "documentmanifest";
     case DocumentReference:
       return "documentreference";
-    case EligibilityRequest:
-      return "eligibilityrequest";
-    case EligibilityResponse:
-      return "eligibilityresponse";
     case Encounter:
       return "encounter";
     case Endpoint:
@@ -236,16 +244,12 @@ public enum ResourceType {
       return "enrollmentrequest";
     case EnrollmentResponse:
       return "enrollmentresponse";
-    case EntryDefinition:
-      return "entrydefinition";
     case EpisodeOfCare:
       return "episodeofcare";
     case EventDefinition:
       return "eventdefinition";
     case ExampleScenario:
       return "examplescenario";
-    case ExpansionProfile:
-      return "expansionprofile";
     case ExplanationOfBenefit:
       return "explanationofbenefit";
     case FamilyMemberHistory:
@@ -272,6 +276,8 @@ public enum ResourceType {
       return "immunizationrecommendation";
     case ImplementationGuide:
       return "implementationguide";
+    case InsurancePlan:
+      return "insuranceplan";
     case Invoice:
       return "invoice";
     case ItemInstance:
@@ -308,14 +314,24 @@ public enum ResourceType {
       return "medicinalproductauthorization";
     case MedicinalProductClinicals:
       return "medicinalproductclinicals";
+    case MedicinalProductContraindication:
+      return "medicinalproductcontraindication";
     case MedicinalProductDeviceSpec:
       return "medicinalproductdevicespec";
+    case MedicinalProductIndication:
+      return "medicinalproductindication";
     case MedicinalProductIngredient:
       return "medicinalproductingredient";
+    case MedicinalProductInteraction:
+      return "medicinalproductinteraction";
+    case MedicinalProductManufactured:
+      return "medicinalproductmanufactured";
     case MedicinalProductPackaged:
       return "medicinalproductpackaged";
     case MedicinalProductPharmaceutical:
       return "medicinalproductpharmaceutical";
+    case MedicinalProductUndesirableEffect:
+      return "medicinalproductundesirableeffect";
     case MessageDefinition:
       return "messagedefinition";
     case MessageHeader:
@@ -328,16 +344,14 @@ public enum ResourceType {
       return "observation";
     case ObservationDefinition:
       return "observationdefinition";
-    case OccupationalData:
-      return "occupationaldata";
     case OperationDefinition:
       return "operationdefinition";
     case OperationOutcome:
       return "operationoutcome";
     case Organization:
       return "organization";
-    case OrganizationRole:
-      return "organizationrole";
+    case OrganizationAffiliation:
+      return "organizationaffiliation";
     case Parameters:
       return "parameters";
     case Patient:
@@ -360,8 +374,6 @@ public enum ResourceType {
       return "processrequest";
     case ProcessResponse:
       return "processresponse";
-    case ProductPlan:
-      return "productplan";
     case Provenance:
       return "provenance";
     case Questionnaire:
@@ -462,8 +474,12 @@ public enum ResourceType {
       return CarePlan;
     if ("CareTeam".equals(code))
       return CareTeam;
+    if ("CatalogEntry".equals(code))
+      return CatalogEntry;
     if ("ChargeItem".equals(code))
       return ChargeItem;
+    if ("ChargeItemDefinition".equals(code))
+      return ChargeItemDefinition;
     if ("Claim".equals(code))
       return Claim;
     if ("ClaimResponse".equals(code))
@@ -490,12 +506,16 @@ public enum ResourceType {
       return Contract;
     if ("Coverage".equals(code))
       return Coverage;
+    if ("CoverageEligibilityRequest".equals(code))
+      return CoverageEligibilityRequest;
+    if ("CoverageEligibilityResponse".equals(code))
+      return CoverageEligibilityResponse;
     if ("DetectedIssue".equals(code))
       return DetectedIssue;
     if ("Device".equals(code))
       return Device;
-    if ("DeviceComponent".equals(code))
-      return DeviceComponent;
+    if ("DeviceDefinition".equals(code))
+      return DeviceDefinition;
     if ("DeviceMetric".equals(code))
       return DeviceMetric;
     if ("DeviceRequest".equals(code))
@@ -508,10 +528,6 @@ public enum ResourceType {
       return DocumentManifest;
     if ("DocumentReference".equals(code))
       return DocumentReference;
-    if ("EligibilityRequest".equals(code))
-      return EligibilityRequest;
-    if ("EligibilityResponse".equals(code))
-      return EligibilityResponse;
     if ("Encounter".equals(code))
       return Encounter;
     if ("Endpoint".equals(code))
@@ -520,16 +536,12 @@ public enum ResourceType {
       return EnrollmentRequest;
     if ("EnrollmentResponse".equals(code))
       return EnrollmentResponse;
-    if ("EntryDefinition".equals(code))
-      return EntryDefinition;
     if ("EpisodeOfCare".equals(code))
       return EpisodeOfCare;
     if ("EventDefinition".equals(code))
       return EventDefinition;
     if ("ExampleScenario".equals(code))
       return ExampleScenario;
-    if ("ExpansionProfile".equals(code))
-      return ExpansionProfile;
     if ("ExplanationOfBenefit".equals(code))
       return ExplanationOfBenefit;
     if ("FamilyMemberHistory".equals(code))
@@ -556,6 +568,8 @@ public enum ResourceType {
       return ImmunizationRecommendation;
     if ("ImplementationGuide".equals(code))
       return ImplementationGuide;
+    if ("InsurancePlan".equals(code))
+      return InsurancePlan;
     if ("Invoice".equals(code))
       return Invoice;
     if ("ItemInstance".equals(code))
@@ -592,14 +606,24 @@ public enum ResourceType {
       return MedicinalProductAuthorization;
     if ("MedicinalProductClinicals".equals(code))
       return MedicinalProductClinicals;
+    if ("MedicinalProductContraindication".equals(code))
+      return MedicinalProductContraindication;
     if ("MedicinalProductDeviceSpec".equals(code))
       return MedicinalProductDeviceSpec;
+    if ("MedicinalProductIndication".equals(code))
+      return MedicinalProductIndication;
     if ("MedicinalProductIngredient".equals(code))
       return MedicinalProductIngredient;
+    if ("MedicinalProductInteraction".equals(code))
+      return MedicinalProductInteraction;
+    if ("MedicinalProductManufactured".equals(code))
+      return MedicinalProductManufactured;
     if ("MedicinalProductPackaged".equals(code))
       return MedicinalProductPackaged;
     if ("MedicinalProductPharmaceutical".equals(code))
       return MedicinalProductPharmaceutical;
+    if ("MedicinalProductUndesirableEffect".equals(code))
+      return MedicinalProductUndesirableEffect;
     if ("MessageDefinition".equals(code))
       return MessageDefinition;
     if ("MessageHeader".equals(code))
@@ -612,16 +636,14 @@ public enum ResourceType {
       return Observation;
     if ("ObservationDefinition".equals(code))
       return ObservationDefinition;
-    if ("OccupationalData".equals(code))
-      return OccupationalData;
     if ("OperationDefinition".equals(code))
       return OperationDefinition;
     if ("OperationOutcome".equals(code))
       return OperationOutcome;
     if ("Organization".equals(code))
       return Organization;
-    if ("OrganizationRole".equals(code))
-      return OrganizationRole;
+    if ("OrganizationAffiliation".equals(code))
+      return OrganizationAffiliation;
     if ("Parameters".equals(code))
       return Parameters;
     if ("Patient".equals(code))
@@ -644,8 +666,6 @@ public enum ResourceType {
       return ProcessRequest;
     if ("ProcessResponse".equals(code))
       return ProcessResponse;
-    if ("ProductPlan".equals(code))
-      return ProductPlan;
     if ("Provenance".equals(code))
       return Provenance;
     if ("Questionnaire".equals(code))

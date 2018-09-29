@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -55,24 +55,24 @@ public enum AdverseEventSeverity {
         public static AdverseEventSeverity fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("Mild".equals(codeString))
+        if ("mild".equals(codeString))
           return MILD;
-        if ("Moderate".equals(codeString))
+        if ("moderate".equals(codeString))
           return MODERATE;
-        if ("Severe".equals(codeString))
+        if ("severe".equals(codeString))
           return SEVERE;
         throw new FHIRException("Unknown AdverseEventSeverity code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case MILD: return "Mild";
-            case MODERATE: return "Moderate";
-            case SEVERE: return "Severe";
+            case MILD: return "mild";
+            case MODERATE: return "moderate";
+            case SEVERE: return "severe";
             default: return "?";
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/adverse-event-severity";
+          return "http://terminology.hl7.org/CodeSystem/adverse-event-severity";
         }
         public String getDefinition() {
           switch (this) {

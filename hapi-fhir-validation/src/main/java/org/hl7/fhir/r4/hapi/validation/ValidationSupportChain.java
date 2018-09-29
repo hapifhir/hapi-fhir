@@ -1,12 +1,14 @@
 package org.hl7.fhir.r4.hapi.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -45,13 +47,14 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public ValueSetExpansionComponent expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
+	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theCtx, theInclude.getSystem())) {
 				return next.expandValueSet(theCtx, theInclude);
 			}
 		}
-		return myChain.get(0).expandValueSet(theCtx, theInclude);
+
+		throw new InvalidRequestException("unable to find code system " + theInclude.getSystem());
 	}
 
   @Override

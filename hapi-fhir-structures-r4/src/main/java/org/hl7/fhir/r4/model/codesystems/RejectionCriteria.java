@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum RejectionCriteria {
 
         /**
-         * blood specimen hemolized
+         * blood specimen hemolized.
          */
         HEMOLIZED, 
         /**
-         * insufficient quantity of specimen
+         * insufficient quantity of specimen.
          */
         INSUFFICIENT, 
         /**
-         * specimen container broken
+         * specimen container broken.
          */
         BROKEN, 
         /**
-         * specimen clotted
+         * specimen clotted.
          */
         CLOTTED, 
         /**
-         * specimen temperature inappropriate
+         * specimen temperature inappropriate.
          */
         WRONGTEMPERATURE, 
         /**
@@ -86,15 +86,15 @@ public enum RejectionCriteria {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/rejection-criteria";
+          return "http://terminology.hl7.org/CodeSystem/rejection-criteria";
         }
         public String getDefinition() {
           switch (this) {
-            case HEMOLIZED: return "blood specimen hemolized";
-            case INSUFFICIENT: return "insufficient quantity of specimen";
-            case BROKEN: return "specimen container broken";
-            case CLOTTED: return "specimen clotted";
-            case WRONGTEMPERATURE: return "specimen temperature inappropriate";
+            case HEMOLIZED: return "blood specimen hemolized.";
+            case INSUFFICIENT: return "insufficient quantity of specimen.";
+            case BROKEN: return "specimen container broken.";
+            case CLOTTED: return "specimen clotted.";
+            case WRONGTEMPERATURE: return "specimen temperature inappropriate.";
             default: return "?";
           }
         }

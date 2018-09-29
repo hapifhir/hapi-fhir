@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -105,6 +105,10 @@ public enum DataTypes {
          */
         ELEMENTDEFINITION, 
         /**
+         * A expression that is evaluated in a specified context and returns a value. The context of use of the expression must specify the context in which the expression is evaluated, and how the result of the expression is used.
+         */
+        EXPRESSION, 
+        /**
          * Optional Extension Element - found in all resources.
          */
         EXTENSION, 
@@ -113,7 +117,7 @@ public enum DataTypes {
          */
         HUMANNAME, 
         /**
-         * A technical identifier - identifies some entity uniquely and unambiguously.
+         * An identifier - identifies some entity uniquely and unambiguously. Typically this is used for business identifiers.
          */
         IDENTIFIER, 
         /**
@@ -128,6 +132,10 @@ public enum DataTypes {
          * An amount of economic utility in some recognized currency.
          */
         MONEY, 
+        /**
+         * null
+         */
+        MONEYQUANTITY, 
         /**
          * A human-readable formatted text, including images.
          */
@@ -321,6 +329,8 @@ public enum DataTypes {
           return ELEMENT;
         if ("ElementDefinition".equals(codeString))
           return ELEMENTDEFINITION;
+        if ("Expression".equals(codeString))
+          return EXPRESSION;
         if ("Extension".equals(codeString))
           return EXTENSION;
         if ("HumanName".equals(codeString))
@@ -333,6 +343,8 @@ public enum DataTypes {
           return META;
         if ("Money".equals(codeString))
           return MONEY;
+        if ("MoneyQuantity".equals(codeString))
+          return MONEYQUANTITY;
         if ("Narrative".equals(codeString))
           return NARRATIVE;
         if ("ParameterDefinition".equals(codeString))
@@ -430,12 +442,14 @@ public enum DataTypes {
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
+            case EXPRESSION: return "Expression";
             case EXTENSION: return "Extension";
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
             case MARKETINGSTATUS: return "MarketingStatus";
             case META: return "Meta";
             case MONEY: return "Money";
+            case MONEYQUANTITY: return "MoneyQuantity";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
             case PERIOD: return "Period";
@@ -499,12 +513,14 @@ public enum DataTypes {
             case DURATION: return "A length of time.";
             case ELEMENT: return "Base definition for all elements in a resource.";
             case ELEMENTDEFINITION: return "Captures constraints on each element within the resource, profile, or extension.";
+            case EXPRESSION: return "A expression that is evaluated in a specified context and returns a value. The context of use of the expression must specify the context in which the expression is evaluated, and how the result of the expression is used.";
             case EXTENSION: return "Optional Extension Element - found in all resources.";
             case HUMANNAME: return "A human's name with the ability to identify parts and usage.";
-            case IDENTIFIER: return "A technical identifier - identifies some entity uniquely and unambiguously.";
+            case IDENTIFIER: return "An identifier - identifies some entity uniquely and unambiguously. Typically this is used for business identifiers.";
             case MARKETINGSTATUS: return "The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.";
             case META: return "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.";
             case MONEY: return "An amount of economic utility in some recognized currency.";
+            case MONEYQUANTITY: return "";
             case NARRATIVE: return "A human-readable formatted text, including images.";
             case PARAMETERDEFINITION: return "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.";
             case PERIOD: return "A time period defined by a start and end date and optionally time.";
@@ -565,12 +581,14 @@ public enum DataTypes {
             case DURATION: return "Duration";
             case ELEMENT: return "Element";
             case ELEMENTDEFINITION: return "ElementDefinition";
+            case EXPRESSION: return "Expression";
             case EXTENSION: return "Extension";
             case HUMANNAME: return "HumanName";
             case IDENTIFIER: return "Identifier";
             case MARKETINGSTATUS: return "MarketingStatus";
             case META: return "Meta";
             case MONEY: return "Money";
+            case MONEYQUANTITY: return "MoneyQuantity";
             case NARRATIVE: return "Narrative";
             case PARAMETERDEFINITION: return "ParameterDefinition";
             case PERIOD: return "Period";

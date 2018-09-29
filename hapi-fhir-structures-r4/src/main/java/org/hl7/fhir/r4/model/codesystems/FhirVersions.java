@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -81,6 +81,10 @@ public enum FhirVersions {
          */
         _1_0_1, 
         /**
+         * DSTU 2 (Official version) with 1 technical errata
+         */
+        _1_0_2, 
+        /**
          * GAO Ballot + draft changes to main FHIR standard
          */
         _1_1_0, 
@@ -107,7 +111,7 @@ public enum FhirVersions {
         /**
          * Current Development build
          */
-        _3_4_0, 
+        _3_5_0, 
         /**
          * added to help the parsers
          */
@@ -137,6 +141,8 @@ public enum FhirVersions {
           return _1_0_0;
         if ("1.0.1".equals(codeString))
           return _1_0_1;
+        if ("1.0.2".equals(codeString))
+          return _1_0_2;
         if ("1.1.0".equals(codeString))
           return _1_1_0;
         if ("1.4.0".equals(codeString))
@@ -149,8 +155,8 @@ public enum FhirVersions {
           return _3_0_0;
         if ("3.0.1".equals(codeString))
           return _3_0_1;
-        if ("3.4.0".equals(codeString))
-          return _3_4_0;
+        if ("3.5.0".equals(codeString))
+          return _3_5_0;
         throw new FHIRException("Unknown FhirVersions code '"+codeString+"'");
         }
         public String toCode() {
@@ -166,18 +172,19 @@ public enum FhirVersions {
             case _0_5_0: return "0.5.0";
             case _1_0_0: return "1.0.0";
             case _1_0_1: return "1.0.1";
+            case _1_0_2: return "1.0.2";
             case _1_1_0: return "1.1.0";
             case _1_4_0: return "1.4.0";
             case _1_6_0: return "1.6.0";
             case _1_8_0: return "1.8.0";
             case _3_0_0: return "3.0.0";
             case _3_0_1: return "3.0.1";
-            case _3_4_0: return "3.4.0";
+            case _3_5_0: return "3.5.0";
             default: return "?";
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/fhir-versions";
+          return "http://terminology.hl7.org/CodeSystem/fhir-versions";
         }
         public String getDefinition() {
           switch (this) {
@@ -192,13 +199,14 @@ public enum FhirVersions {
             case _0_5_0: return "DSTU 2 Ballot version (May 2015 Ballot)";
             case _1_0_0: return "DSTU 2 QA Preview + CQIF Ballot (Sep 2015)";
             case _1_0_1: return "DSTU 2 (Official version)";
+            case _1_0_2: return "DSTU 2 (Official version) with 1 technical errata";
             case _1_1_0: return "GAO Ballot + draft changes to main FHIR standard";
             case _1_4_0: return "CQF on FHIR Ballot + Connectathon 12 (Montreal)";
             case _1_6_0: return "FHIR STU3 Ballot + Connectathon 13 (Baltimore)";
             case _1_8_0: return "FHIR STU3 Candidate + Connectathon 14 (San Antonio)";
             case _3_0_0: return "FHIR Release 3 (STU)";
             case _3_0_1: return "FHIR Release 3 (STU) with 1 technical errata";
-            case _3_4_0: return "Current Development build";
+            case _3_5_0: return "Current Development build";
             default: return "?";
           }
         }
@@ -215,13 +223,14 @@ public enum FhirVersions {
             case _0_5_0: return "0.5.0";
             case _1_0_0: return "1.0.0";
             case _1_0_1: return "1.0.1";
+            case _1_0_2: return "1.0.2";
             case _1_1_0: return "1.1.0";
             case _1_4_0: return "1.4.0";
             case _1_6_0: return "1.6.0";
             case _1_8_0: return "1.8.0";
             case _3_0_0: return "3.0.0";
             case _3_0_1: return "3.0.1";
-            case _3_4_0: return "3.4.0";
+            case _3_5_0: return "3.5.0";
             default: return "?";
           }
     }

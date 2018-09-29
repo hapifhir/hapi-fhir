@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum VisionEyeCodes {
 
         /**
-         * Right Eye
+         * Right Eye.
          */
         RIGHT, 
         /**
-         * Left Eye
+         * Left Eye.
          */
         LEFT, 
         /**
@@ -69,8 +69,8 @@ public enum VisionEyeCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case RIGHT: return "Right Eye";
-            case LEFT: return "Left Eye";
+            case RIGHT: return "Right Eye.";
+            case LEFT: return "Left Eye.";
             default: return "?";
           }
         }

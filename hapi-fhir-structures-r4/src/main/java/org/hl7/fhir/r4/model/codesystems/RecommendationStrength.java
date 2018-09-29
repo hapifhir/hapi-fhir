@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum RecommendationStrength {
 
         /**
-         * Strong recommendation
+         * Strong recommendation.
          */
         STRONG, 
         /**
-         * Weak recommendation
+         * Weak recommendation.
          */
         WEAK, 
         /**
@@ -65,12 +65,12 @@ public enum RecommendationStrength {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/recommendation-strength";
+          return "http://terminology.hl7.org/CodeSystem/recommendation-strength";
         }
         public String getDefinition() {
           switch (this) {
-            case STRONG: return "Strong recommendation";
-            case WEAK: return "Weak recommendation";
+            case STRONG: return "Strong recommendation.";
+            case WEAK: return "Weak recommendation.";
             default: return "?";
           }
         }

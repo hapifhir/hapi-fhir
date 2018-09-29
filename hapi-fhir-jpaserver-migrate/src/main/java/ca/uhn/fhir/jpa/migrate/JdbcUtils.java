@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +127,11 @@ public class JdbcUtils {
 								return BaseTableColumnTypeTask.ColumnTypeEnum.STRING.getDescriptor(length);
 							case Types.BIGINT:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.LONG.getDescriptor(null);
+							case Types.INTEGER:
+								return BaseTableColumnTypeTask.ColumnTypeEnum.INT.getDescriptor(null);
+							case Types.TIMESTAMP:
+							case Types.TIMESTAMP_WITH_TIMEZONE:
+								return BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP.getDescriptor(null);
 							default:
 								throw new IllegalArgumentException("Don't know how to handle datatype: " + dataType);
 						}

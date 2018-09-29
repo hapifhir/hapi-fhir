@@ -13,6 +13,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.junit.*;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -177,7 +178,7 @@ public class ContextScanningDstu3Test {
 		}
 
 		@Read
-		public Observation read(@IdParam IdType theId) {
+		public Observation read(@IdParam IdType theId) throws FHIRFormatError {
 			Observation retVal = new Observation();
 			retVal.setId(theId);
 			retVal.addIdentifier().setSystem("ISYS").setValue("IVAL");

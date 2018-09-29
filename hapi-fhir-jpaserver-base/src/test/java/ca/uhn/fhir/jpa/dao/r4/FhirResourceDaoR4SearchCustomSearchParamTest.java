@@ -382,7 +382,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.setLoadSynchronous(true);
 		map.add("reason", new ReferenceParam(conditionId));
 		List<String> results = toUnqualifiedVersionlessIdValues(myMedicationRequestDao.search(map));
-		assertThat(results, contains(mrId));
+		assertThat(results.toString(), results, contains(mrId));
 	}
 
 	/**

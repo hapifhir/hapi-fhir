@@ -104,7 +104,7 @@ public class BinaryServerR4Test {
 			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
 
 			String content = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertEquals("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"content\":\"AAECAwQ=\"}", content);
+			assertEquals("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}", content);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}

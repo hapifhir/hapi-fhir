@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,47 +37,47 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum GuideParameterCode {
 
         /**
-         * If the value of this boolean 0..1 parameter is "true" then all conformance resources will have any specified [Resource].version overwritten with the ImplementationGuide.version
+         * If the value of this boolean 0..1 parameter is "true" then all conformance resources will have any specified [Resource].version overwritten with the ImplementationGuide.version.
          */
         APPLYBUSINESSVERSION, 
         /**
-         * If the value of this boolean 0..1 parameter is "true" then all conformance resources will have any specified [Resource].jurisdiction overwritten with the ImplementationGuide.jurisdiction
+         * If the value of this boolean 0..1 parameter is "true" then all conformance resources will have any specified [Resource].jurisdiction overwritten with the ImplementationGuide.jurisdiction.
          */
         APPLYJURISDICTION, 
         /**
-         * The value of this string 0..* parameter is a subfolder of the build context's location that is to be scanned to load resources. Scope is (if present) a particular resource type
+         * The value of this string 0..* parameter is a subfolder of the build context's location that is to be scanned to load resources. Scope is (if present) a particular resource type.
          */
         PATHRESOURCE, 
         /**
-         * The value of this string 0..1 parameter is a subfolder of the build context's location that contains files that are part of the html content processed by the builder
+         * The value of this string 0..1 parameter is a subfolder of the build context's location that contains files that are part of the html content processed by the builder.
          */
         PATHPAGES, 
         /**
-         * The value of this string 0..1 parameter is a subfolder of the build context's location that is used as the terminology cache. If this is not present, the terminology cache is on the local system, not under version control
+         * The value of this string 0..1 parameter is a subfolder of the build context's location that is used as the terminology cache. If this is not present, the terminology cache is on the local system, not under version control.
          */
         PATHTXCACHE, 
         /**
-         * The value of this string 0..1 parameter is a path to the ExpansionProfile used when expanding value sets for this implementation guide. This is particularly used to specify the versions of published terminologies such as SNOMED CT
+         * The value of this string 0..* parameter is a parameter (name=value) when expanding value sets for this implementation guide. This is particularly used to specify the versions of published terminologies such as SNOMED CT.
          */
-        EXPANSIONPROFILE, 
+        EXPANSIONPARAMETER, 
         /**
-         * The value of this string 0..1 parameter is either "warning" or "error" (default = "error"). If the value is "warning" then IG build tools allow the IG to be considered successfully build even when there is no internal broken links
+         * The value of this string 0..1 parameter is either "warning" or "error" (default = "error"). If the value is "warning" then IG build tools allow the IG to be considered successfully build even when there is no internal broken links.
          */
         RULEBROKENLINKS, 
         /**
-         * The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in XML format. If not present, the Publication Tool decides whether to generate XML
+         * The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in XML format. If not present, the Publication Tool decides whether to generate XML.
          */
         GENERATEXML, 
         /**
-         * The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in JSON format. If not present, the Publication Tool decides whether to generate JSON
+         * The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in JSON format. If not present, the Publication Tool decides whether to generate JSON.
          */
         GENERATEJSON, 
         /**
-         * The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in Turtle format. If not present, the Publication Tool decides whether to generate Turtle
+         * The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in Turtle format. If not present, the Publication Tool decides whether to generate Turtle.
          */
         GENERATETURTLE, 
         /**
-         * The value of this string singleton parameter is the name of the file to use as the builder template for each generated page (see templating)
+         * The value of this string singleton parameter is the name of the file to use as the builder template for each generated page (see templating).
          */
         HTMLTEMPLATE, 
         /**
@@ -97,8 +97,8 @@ public enum GuideParameterCode {
           return PATHPAGES;
         if ("path-tx-cache".equals(codeString))
           return PATHTXCACHE;
-        if ("expansion-profile".equals(codeString))
-          return EXPANSIONPROFILE;
+        if ("expansion-parameter".equals(codeString))
+          return EXPANSIONPARAMETER;
         if ("rule-broken-links".equals(codeString))
           return RULEBROKENLINKS;
         if ("generate-xml".equals(codeString))
@@ -118,7 +118,7 @@ public enum GuideParameterCode {
             case PATHRESOURCE: return "path-resource";
             case PATHPAGES: return "path-pages";
             case PATHTXCACHE: return "path-tx-cache";
-            case EXPANSIONPROFILE: return "expansion-profile";
+            case EXPANSIONPARAMETER: return "expansion-parameter";
             case RULEBROKENLINKS: return "rule-broken-links";
             case GENERATEXML: return "generate-xml";
             case GENERATEJSON: return "generate-json";
@@ -132,17 +132,17 @@ public enum GuideParameterCode {
         }
         public String getDefinition() {
           switch (this) {
-            case APPLYBUSINESSVERSION: return "If the value of this boolean 0..1 parameter is \"true\" then all conformance resources will have any specified [Resource].version overwritten with the ImplementationGuide.version";
-            case APPLYJURISDICTION: return "If the value of this boolean 0..1 parameter is \"true\" then all conformance resources will have any specified [Resource].jurisdiction overwritten with the ImplementationGuide.jurisdiction";
-            case PATHRESOURCE: return "The value of this string 0..* parameter is a subfolder of the build context's location that is to be scanned to load resources. Scope is (if present) a particular resource type";
-            case PATHPAGES: return "The value of this string 0..1 parameter is a subfolder of the build context's location that contains files that are part of the html content processed by the builder";
-            case PATHTXCACHE: return "The value of this string 0..1 parameter is a subfolder of the build context's location that is used as the terminology cache. If this is not present, the terminology cache is on the local system, not under version control";
-            case EXPANSIONPROFILE: return "The value of this string 0..1 parameter is a path to the ExpansionProfile used when expanding value sets for this implementation guide. This is particularly used to specify the versions of published terminologies such as SNOMED CT";
-            case RULEBROKENLINKS: return "The value of this string 0..1 parameter is either \"warning\" or \"error\" (default = \"error\"). If the value is \"warning\" then IG build tools allow the IG to be considered successfully build even when there is no internal broken links";
-            case GENERATEXML: return "The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in XML format. If not present, the Publication Tool decides whether to generate XML";
-            case GENERATEJSON: return "The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in JSON format. If not present, the Publication Tool decides whether to generate JSON";
-            case GENERATETURTLE: return "The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in Turtle format. If not present, the Publication Tool decides whether to generate Turtle";
-            case HTMLTEMPLATE: return "The value of this string singleton parameter is the name of the file to use as the builder template for each generated page (see templating)";
+            case APPLYBUSINESSVERSION: return "If the value of this boolean 0..1 parameter is \"true\" then all conformance resources will have any specified [Resource].version overwritten with the ImplementationGuide.version.";
+            case APPLYJURISDICTION: return "If the value of this boolean 0..1 parameter is \"true\" then all conformance resources will have any specified [Resource].jurisdiction overwritten with the ImplementationGuide.jurisdiction.";
+            case PATHRESOURCE: return "The value of this string 0..* parameter is a subfolder of the build context's location that is to be scanned to load resources. Scope is (if present) a particular resource type.";
+            case PATHPAGES: return "The value of this string 0..1 parameter is a subfolder of the build context's location that contains files that are part of the html content processed by the builder.";
+            case PATHTXCACHE: return "The value of this string 0..1 parameter is a subfolder of the build context's location that is used as the terminology cache. If this is not present, the terminology cache is on the local system, not under version control.";
+            case EXPANSIONPARAMETER: return "The value of this string 0..* parameter is a parameter (name=value) when expanding value sets for this implementation guide. This is particularly used to specify the versions of published terminologies such as SNOMED CT.";
+            case RULEBROKENLINKS: return "The value of this string 0..1 parameter is either \"warning\" or \"error\" (default = \"error\"). If the value is \"warning\" then IG build tools allow the IG to be considered successfully build even when there is no internal broken links.";
+            case GENERATEXML: return "The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in XML format. If not present, the Publication Tool decides whether to generate XML.";
+            case GENERATEJSON: return "The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in JSON format. If not present, the Publication Tool decides whether to generate JSON.";
+            case GENERATETURTLE: return "The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in Turtle format. If not present, the Publication Tool decides whether to generate Turtle.";
+            case HTMLTEMPLATE: return "The value of this string singleton parameter is the name of the file to use as the builder template for each generated page (see templating).";
             default: return "?";
           }
         }
@@ -153,7 +153,7 @@ public enum GuideParameterCode {
             case PATHRESOURCE: return "Resource Path";
             case PATHPAGES: return "Pages Path";
             case PATHTXCACHE: return "Terminology Cache Path";
-            case EXPANSIONPROFILE: return "Expansion Profile";
+            case EXPANSIONPARAMETER: return "Expansion Profile";
             case RULEBROKENLINKS: return "Broken Links Rule";
             case GENERATEXML: return "Generate XML";
             case GENERATEJSON: return "Generate JSON";

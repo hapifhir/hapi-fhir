@@ -39,6 +39,7 @@ import java.util.Date;
 public class ResourceLink implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	public static final int SRC_PATH_LENGTH = 200;
 
 	@SequenceGenerator(name = "SEQ_RESLINK_ID", sequenceName = "SEQ_RESLINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
@@ -46,7 +47,7 @@ public class ResourceLink implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "SRC_PATH", length = 100, nullable = false)
+	@Column(name = "SRC_PATH", length = SRC_PATH_LENGTH, nullable = false)
 	private String mySourcePath;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)

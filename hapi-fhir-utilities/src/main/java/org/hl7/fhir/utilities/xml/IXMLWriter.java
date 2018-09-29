@@ -30,6 +30,9 @@ package org.hl7.fhir.utilities.xml;
 
 import java.io.IOException;
 
+import org.hl7.fhir.utilities.ElementDecoration;
+
+
 /**
  * Generalize 
  * @author dennisn
@@ -53,6 +56,7 @@ public interface IXMLWriter {
 	public abstract void namespace(String namespace, String abbreviation) throws IOException;
 	
 	public abstract void comment(String comment, boolean doPretty) throws IOException;
+	public abstract void decorate(ElementDecoration decoration) throws IOException;
 
   public abstract void enter(String name) throws IOException;
 	public abstract void enter(String namespace, String name) throws IOException;

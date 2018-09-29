@@ -34,6 +34,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
+import org.hl7.fhir.utilities.ElementDecoration;
+
 /**
  * XML Writer class.
  */
@@ -877,6 +879,11 @@ public class XMLWriter extends OutputStreamWriter implements IXMLWriter {
   public void link(String href) {
     // ignore this
     
+  }
+
+  @Override
+  public void decorate(ElementDecoration element) throws IOException {
+    // nothing...
   }
 	
 	

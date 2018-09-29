@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -49,18 +49,18 @@ public class Range extends Type implements ICompositeType {
     /**
      * The low limit. The boundary is inclusive.
      */
-    @Child(name = "low", type = {SimpleQuantity.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "low", type = {Quantity.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Low limit", formalDefinition="The low limit. The boundary is inclusive." )
-    protected SimpleQuantity low;
+    protected Quantity low;
 
     /**
      * The high limit. The boundary is inclusive.
      */
-    @Child(name = "high", type = {SimpleQuantity.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "high", type = {Quantity.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="High limit", formalDefinition="The high limit. The boundary is inclusive." )
-    protected SimpleQuantity high;
+    protected Quantity high;
 
-    private static final long serialVersionUID = 1699187994L;
+    private static final long serialVersionUID = -474933350L;
 
   /**
    * Constructor
@@ -72,12 +72,12 @@ public class Range extends Type implements ICompositeType {
     /**
      * @return {@link #low} (The low limit. The boundary is inclusive.)
      */
-    public SimpleQuantity getLow() { 
+    public Quantity getLow() { 
       if (this.low == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Range.low");
         else if (Configuration.doAutoCreate())
-          this.low = new SimpleQuantity(); // cc
+          this.low = new Quantity(); // cc
       return this.low;
     }
 
@@ -88,7 +88,7 @@ public class Range extends Type implements ICompositeType {
     /**
      * @param value {@link #low} (The low limit. The boundary is inclusive.)
      */
-    public Range setLow(SimpleQuantity value) { 
+    public Range setLow(Quantity value) { 
       this.low = value;
       return this;
     }
@@ -96,12 +96,12 @@ public class Range extends Type implements ICompositeType {
     /**
      * @return {@link #high} (The high limit. The boundary is inclusive.)
      */
-    public SimpleQuantity getHigh() { 
+    public Quantity getHigh() { 
       if (this.high == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Range.high");
         else if (Configuration.doAutoCreate())
-          this.high = new SimpleQuantity(); // cc
+          this.high = new Quantity(); // cc
       return this.high;
     }
 
@@ -112,7 +112,7 @@ public class Range extends Type implements ICompositeType {
     /**
      * @param value {@link #high} (The high limit. The boundary is inclusive.)
      */
-    public Range setHigh(SimpleQuantity value) { 
+    public Range setHigh(Quantity value) { 
       this.high = value;
       return this;
     }
@@ -136,8 +136,8 @@ public class Range extends Type implements ICompositeType {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 107348: /*low*/ return this.low == null ? new Base[0] : new Base[] {this.low}; // SimpleQuantity
-        case 3202466: /*high*/ return this.high == null ? new Base[0] : new Base[] {this.high}; // SimpleQuantity
+        case 107348: /*low*/ return this.low == null ? new Base[0] : new Base[] {this.low}; // Quantity
+        case 3202466: /*high*/ return this.high == null ? new Base[0] : new Base[] {this.high}; // Quantity
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -147,10 +147,10 @@ public class Range extends Type implements ICompositeType {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 107348: // low
-          this.low = castToSimpleQuantity(value); // SimpleQuantity
+          this.low = castToQuantity(value); // Quantity
           return value;
         case 3202466: // high
-          this.high = castToSimpleQuantity(value); // SimpleQuantity
+          this.high = castToQuantity(value); // Quantity
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -160,9 +160,9 @@ public class Range extends Type implements ICompositeType {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("low")) {
-          this.low = castToSimpleQuantity(value); // SimpleQuantity
+          this.low = castToQuantity(value); // Quantity
         } else if (name.equals("high")) {
-          this.high = castToSimpleQuantity(value); // SimpleQuantity
+          this.high = castToQuantity(value); // Quantity
         } else
           return super.setProperty(name, value);
         return value;
@@ -191,11 +191,11 @@ public class Range extends Type implements ICompositeType {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("low")) {
-          this.low = new SimpleQuantity();
+          this.low = new Quantity();
           return this.low;
         }
         else if (name.equals("high")) {
-          this.high = new SimpleQuantity();
+          this.high = new Quantity();
           return this.high;
         }
         else

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,6 +45,10 @@ public enum QuestionnaireDisplayCategory {
          */
         SECURITY, 
         /**
+         * The text provides additional guidance on populating the containing item.  Help text isn't necessarily expected to be rendered as part of the form, but may instead be made available through fly-over, pop-up button, link to a "help" page, etc.
+         */
+        HELP, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -55,12 +59,15 @@ public enum QuestionnaireDisplayCategory {
           return INSTRUCTIONS;
         if ("security".equals(codeString))
           return SECURITY;
+        if ("help".equals(codeString))
+          return HELP;
         throw new FHIRException("Unknown QuestionnaireDisplayCategory code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case INSTRUCTIONS: return "instructions";
             case SECURITY: return "security";
+            case HELP: return "help";
             default: return "?";
           }
         }
@@ -71,6 +78,7 @@ public enum QuestionnaireDisplayCategory {
           switch (this) {
             case INSTRUCTIONS: return "The text provides guidance on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).";
             case SECURITY: return "The text provides guidance on how the information should be or will be handled from a security/confidentiality/access control perspective when completed";
+            case HELP: return "The text provides additional guidance on populating the containing item.  Help text isn't necessarily expected to be rendered as part of the form, but may instead be made available through fly-over, pop-up button, link to a \"help\" page, etc.";
             default: return "?";
           }
         }
@@ -78,6 +86,7 @@ public enum QuestionnaireDisplayCategory {
           switch (this) {
             case INSTRUCTIONS: return "Instructions";
             case SECURITY: return "Security";
+            case HELP: return "Help";
             default: return "?";
           }
     }

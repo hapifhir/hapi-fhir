@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum BindingStrength {
 
         /**
-         * To be conformant, the concept in this element SHALL be from the specified value set
+         * To be conformant, the concept in this element SHALL be from the specified value set.
          */
         REQUIRED, 
         /**
@@ -83,7 +83,7 @@ public enum BindingStrength {
         }
         public String getDefinition() {
           switch (this) {
-            case REQUIRED: return "To be conformant, the concept in this element SHALL be from the specified value set";
+            case REQUIRED: return "To be conformant, the concept in this element SHALL be from the specified value set.";
             case EXTENSIBLE: return "To be conformant, the concept in this element SHALL be from the specified value set if any of the codes within the value set can apply to the concept being communicated.  If the value set does not cover the concept (based on human review), alternate codings (or, data type allowing, text) may be included instead.";
             case PREFERRED: return "Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant.";
             case EXAMPLE: return "Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.";

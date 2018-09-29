@@ -194,6 +194,19 @@ private Map<String, Object> userData;
 	  return other != null;
   }  
   
+  public static boolean compareDeep(String s1, String s2, boolean allowNull) {
+    if (allowNull) {
+      boolean noLeft = s1 == null || Utilities.noString(s1);
+      boolean noRight = s2 == null || Utilities.noString(s2);
+      if (noLeft && noRight) {
+        return true;
+      }
+    }
+    if (s1 == null || s2 == null)
+      return false;
+    return s1.equals(s2);   
+  }
+  
 	public static boolean compareDeep(List<? extends Base> e1, List<? extends Base> e2, boolean allowNull) {
 		if (noList(e1) && noList(e2) && allowNull)
 			return true;
@@ -676,13 +689,21 @@ private Map<String, Object> userData;
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a ElementDefinition");
 	}
 
-	public DataRequirement castToDataRequirement(Base b) throws FHIRException {
-		if (b instanceof DataRequirement)
-			return (DataRequirement) b;
-		else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a DataRequirement");
-	}
+  public DataRequirement castToDataRequirement(Base b) throws FHIRException {
+    if (b instanceof DataRequirement)
+      return (DataRequirement) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a DataRequirement");
+  }
 
+  public Expression castToExpression(Base b) throws FHIRException {
+    if (b instanceof Expression)
+      return (Expression) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Expression");
+  }
+
+	
 	public ParameterDefinition castToParameterDefinition(Base b) throws FHIRException {
 		if (b instanceof ParameterDefinition)
 			return (ParameterDefinition) b;

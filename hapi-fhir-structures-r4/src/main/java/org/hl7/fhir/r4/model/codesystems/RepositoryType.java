@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum RepositoryType {
 
         /**
-         * When URL is clicked, the resource can be seen directly (by webpage or by download link format)
+         * When URL is clicked, the resource can be seen directly (by webpage or by download link format).
          */
         DIRECTLINK, 
         /**
-         * When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format)
+         * When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format).
          */
         OPENAPI, 
         /**
@@ -90,8 +90,8 @@ public enum RepositoryType {
         }
         public String getDefinition() {
           switch (this) {
-            case DIRECTLINK: return "When URL is clicked, the resource can be seen directly (by webpage or by download link format)";
-            case OPENAPI: return "When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format)";
+            case DIRECTLINK: return "When URL is clicked, the resource can be seen directly (by webpage or by download link format).";
+            case OPENAPI: return "When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format).";
             case LOGIN: return "When logged into the website, the resource can be seen.";
             case OAUTH: return "When logged in and  follow the API in the website related with URL, the resource can be seen.";
             case OTHER: return "Some other complicated or particular way to get resource from URL.";

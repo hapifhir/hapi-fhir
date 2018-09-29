@@ -59,7 +59,7 @@ public class ClientServerValidationR4Test {
 
 	@Test
 	public void testServerReturnsAppropriateVersionR4() throws Exception {
-		String appropriateFhirVersion = "3.4.0";
+		String appropriateFhirVersion = "3.5.0";
 		assertThat(appropriateFhirVersion, is(FhirVersionEnum.R4.getFhirVersionString()));
 		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion(appropriateFhirVersion);
@@ -123,7 +123,7 @@ public class ClientServerValidationR4Test {
 
    @Test
    public void testServerReturnsRightVersionR4() throws Exception {
-      String appropriateFhirVersion = "3.4.0";
+      String appropriateFhirVersion = "3.5.0";
       assertThat(appropriateFhirVersion, is(FhirVersionEnum.R4.getFhirVersionString()));
       CapabilityStatement conf = new CapabilityStatement();
       conf.setFhirVersion(appropriateFhirVersion);

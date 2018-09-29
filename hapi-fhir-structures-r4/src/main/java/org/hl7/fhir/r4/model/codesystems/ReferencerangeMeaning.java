@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum ReferencerangeMeaning {
          */
         TYPE, 
         /**
-         * Based on 95th percentile for the relevant control population.
+         * Within two standard deviations from the mean and accounting for 95.45% of the relevant control population.
          */
         NORMAL, 
         /**
@@ -77,7 +77,7 @@ public enum ReferencerangeMeaning {
          */
         FOLLICULAR, 
         /**
-         * An expected range in an individual during the follicular stage of the cycle.
+         * An expected range in an individual during the midcycle stage of the cycle.
          */
         MIDCYCLE, 
         /**
@@ -142,12 +142,12 @@ public enum ReferencerangeMeaning {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/referencerange-meaning";
+          return "http://terminology.hl7.org/CodeSystem/referencerange-meaning";
         }
         public String getDefinition() {
           switch (this) {
             case TYPE: return "General types of reference range.";
-            case NORMAL: return "Based on 95th percentile for the relevant control population.";
+            case NORMAL: return "Within two standard deviations from the mean and accounting for 95.45% of the relevant control population.";
             case RECOMMENDED: return "The range that is recommended by a relevant professional body.";
             case TREATMENT: return "The range at which treatment would/should be considered.";
             case THERAPEUTIC: return "The optimal range for best therapeutic outcomes.";
@@ -156,7 +156,7 @@ public enum ReferencerangeMeaning {
             case ENDOCRINE: return "Endocrine related states that change the expected value.";
             case PREPUBERTY: return "An expected range in an individual prior to puberty.";
             case FOLLICULAR: return "An expected range in an individual during the follicular stage of the cycle.";
-            case MIDCYCLE: return "An expected range in an individual during the follicular stage of the cycle.";
+            case MIDCYCLE: return "An expected range in an individual during the midcycle stage of the cycle.";
             case LUTEAL: return "An expected range in an individual during the luteal stage of the cycle.";
             case POSTMENOPAUSAL: return "An expected range in an individual post-menopause.";
             default: return "?";

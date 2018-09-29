@@ -87,7 +87,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.onType(CodeSystem.class)
 			.named("lookup")
 			.withParameter(Parameters.class, "code", new CodeType("ACSN"))
-			.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
+			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -245,7 +245,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.onType(CodeSystem.class)
 			.named("lookup")
 			.withParameter(Parameters.class, "code", new CodeType("M"))
-			.andParameter("system", new UriType("http://hl7.org/fhir/v3/MaritalStatus"))
+			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"))
 			.execute();
 		//@formatter:on
 

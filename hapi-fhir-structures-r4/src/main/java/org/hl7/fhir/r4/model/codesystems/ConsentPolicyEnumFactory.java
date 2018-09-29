@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -65,7 +65,7 @@ public class ConsentPolicyEnumFactory implements EnumFactory<ConsentPolicy> {
       return ConsentPolicy.VA105345;
     if ("va-10-5345a".equals(codeString))
       return ConsentPolicy.VA105345A;
-    if ("va-10-5345a-MHV".equals(codeString))
+    if ("va-10-5345a-mhv".equals(codeString))
       return ConsentPolicy.VA105345AMHV;
     if ("va-10-10116".equals(codeString))
       return ConsentPolicy.VA1010116;
@@ -122,7 +122,7 @@ public class ConsentPolicyEnumFactory implements EnumFactory<ConsentPolicy> {
     if (code == ConsentPolicy.VA105345A)
       return "va-10-5345a";
     if (code == ConsentPolicy.VA105345AMHV)
-      return "va-10-5345a-MHV";
+      return "va-10-5345a-mhv";
     if (code == ConsentPolicy.VA1010116)
       return "va-10-10116";
     if (code == ConsentPolicy.VA214142)

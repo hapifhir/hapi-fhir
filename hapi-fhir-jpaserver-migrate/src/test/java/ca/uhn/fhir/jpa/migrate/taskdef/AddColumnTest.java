@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.sql.SQLException;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class AddColumnTest extends BaseTest {
@@ -24,6 +25,23 @@ public class AddColumnTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL", "NEWCOL"));
+	}
+
+	@Test
+	public void testAddColumnInt() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+
+		AddColumnTask task = new AddColumnTask();
+		task.setTableName("SOMETABLE");
+		task.setColumnName("newcolint");
+		task.setColumnType(AddColumnTask.ColumnTypeEnum.INT);
+		task.setNullable(true);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+
+		String type = JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "newcolint");
+		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.INT.getDescriptor(null), type);
 	}
 
 	@Test

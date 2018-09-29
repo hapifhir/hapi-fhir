@@ -114,7 +114,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
-		include.setSystem("http://hl7.org/fhir/v3/MaritalStatus");
+		include.setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus");
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 
@@ -505,9 +505,9 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
-			.withParameter(Parameters.class, "code", new StringType("BRN"))
-			.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/v2-0487"))
-			.andParameter("system", new StringType("http://hl7.org/fhir/v2/0487"))
+			.withParameter(Parameters.class, "code", new StringType("Y"))
+			.andParameter("url", new StringType("http://hl7.org/fhir/ValueSet/yesnodontknow"))
+			.andParameter("system", new StringType("http://terminology.hl7.org/CodeSystem/v2-0136"))
 			.useHttpGet()
 			.execute();
 
@@ -521,7 +521,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
 
 		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Burn", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("Yes", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@AfterClass

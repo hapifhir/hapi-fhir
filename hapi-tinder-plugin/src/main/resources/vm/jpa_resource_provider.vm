@@ -73,7 +73,10 @@ public class ${className}ResourceProvider extends
 			StringAndListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'token' )
 			@OptionalParam(name="${param.name}")
-			TokenAndListParam the${param.nameCapitalized}, 
+			TokenAndListParam the${param.nameCapitalized},
+#elseif (${param.type} == 'special' )
+			@OptionalParam(name="${param.name}")
+			SpecialAndListParam the${param.nameCapitalized},
 #elseif (${param.type} == 'date' )
 			@OptionalParam(name="${param.name}")
 			DateRangeParam the${param.nameCapitalized}, 

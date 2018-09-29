@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -67,8 +67,12 @@ public class IssueTypeEnumFactory implements EnumFactory<IssueType> {
       return IssueType.NOTSUPPORTED;
     if ("duplicate".equals(codeString))
       return IssueType.DUPLICATE;
+    if ("multiple-matches".equals(codeString))
+      return IssueType.MULTIPLEMATCHES;
     if ("not-found".equals(codeString))
       return IssueType.NOTFOUND;
+    if ("deleted".equals(codeString))
+      return IssueType.DELETED;
     if ("too-long".equals(codeString))
       return IssueType.TOOLONG;
     if ("code-invalid".equals(codeString))
@@ -81,8 +85,6 @@ public class IssueTypeEnumFactory implements EnumFactory<IssueType> {
       return IssueType.BUSINESSRULE;
     if ("conflict".equals(codeString))
       return IssueType.CONFLICT;
-    if ("incomplete".equals(codeString))
-      return IssueType.INCOMPLETE;
     if ("transient".equals(codeString))
       return IssueType.TRANSIENT;
     if ("lock-error".equals(codeString))
@@ -93,6 +95,8 @@ public class IssueTypeEnumFactory implements EnumFactory<IssueType> {
       return IssueType.EXCEPTION;
     if ("timeout".equals(codeString))
       return IssueType.TIMEOUT;
+    if ("incomplete".equals(codeString))
+      return IssueType.INCOMPLETE;
     if ("throttled".equals(codeString))
       return IssueType.THROTTLED;
     if ("informational".equals(codeString))
@@ -129,8 +133,12 @@ public class IssueTypeEnumFactory implements EnumFactory<IssueType> {
       return "not-supported";
     if (code == IssueType.DUPLICATE)
       return "duplicate";
+    if (code == IssueType.MULTIPLEMATCHES)
+      return "multiple-matches";
     if (code == IssueType.NOTFOUND)
       return "not-found";
+    if (code == IssueType.DELETED)
+      return "deleted";
     if (code == IssueType.TOOLONG)
       return "too-long";
     if (code == IssueType.CODEINVALID)
@@ -143,8 +151,6 @@ public class IssueTypeEnumFactory implements EnumFactory<IssueType> {
       return "business-rule";
     if (code == IssueType.CONFLICT)
       return "conflict";
-    if (code == IssueType.INCOMPLETE)
-      return "incomplete";
     if (code == IssueType.TRANSIENT)
       return "transient";
     if (code == IssueType.LOCKERROR)
@@ -155,6 +161,8 @@ public class IssueTypeEnumFactory implements EnumFactory<IssueType> {
       return "exception";
     if (code == IssueType.TIMEOUT)
       return "timeout";
+    if (code == IssueType.INCOMPLETE)
+      return "incomplete";
     if (code == IssueType.THROTTLED)
       return "throttled";
     if (code == IssueType.INFORMATIONAL)

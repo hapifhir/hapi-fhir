@@ -348,17 +348,17 @@
             <item>
                <linkId value="1.1"/>
                <type value="choice"/>
-               <options value="#verbal"/>
+               <answerValueSet value="#verbal"/>
             </item>
             <item>
                <linkId value="1.2"/>
                <type value="choice"/>
-               <options value="#motor"/>
+               <answerValueSet value="#motor"/>
             </item>
             <item>
                <linkId value="1.3"/>
                <type value="choice"/>
-               <options value="#eye"/>
+               <answerValueSet value="#eye"/>
             </item>
          </Questionnaire>
       </resource>

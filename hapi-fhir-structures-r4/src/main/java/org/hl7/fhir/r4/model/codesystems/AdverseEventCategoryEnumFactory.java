@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,66 +39,66 @@ public class AdverseEventCategoryEnumFactory implements EnumFactory<AdverseEvent
   public AdverseEventCategory fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("ProductProblem".equals(codeString))
+    if ("product-problem".equals(codeString))
       return AdverseEventCategory.PRODUCTPROBLEM;
-    if ("ProductQuality".equals(codeString))
+    if ("product-quality".equals(codeString))
       return AdverseEventCategory.PRODUCTQUALITY;
-    if ("ProductUseError".equals(codeString))
+    if ("product-use-error".equals(codeString))
       return AdverseEventCategory.PRODUCTUSEERROR;
-    if ("WrongDose".equals(codeString))
+    if ("wrong-dose".equals(codeString))
       return AdverseEventCategory.WRONGDOSE;
-    if ("IncorrectPrescribingInformation".equals(codeString))
+    if ("incorrect-prescribing-information".equals(codeString))
       return AdverseEventCategory.INCORRECTPRESCRIBINGINFORMATION;
-    if ("WrongTechnique".equals(codeString))
+    if ("wrong-technique".equals(codeString))
       return AdverseEventCategory.WRONGTECHNIQUE;
-    if ("WrongRouteOfAdministration".equals(codeString))
+    if ("wrong-route-of-administration".equals(codeString))
       return AdverseEventCategory.WRONGROUTEOFADMINISTRATION;
-    if ("WrongRate".equals(codeString))
+    if ("wrong-rate".equals(codeString))
       return AdverseEventCategory.WRONGRATE;
-    if ("WrongDuration".equals(codeString))
+    if ("wrong-duration".equals(codeString))
       return AdverseEventCategory.WRONGDURATION;
-    if ("WrongTime".equals(codeString))
+    if ("wrong-time".equals(codeString))
       return AdverseEventCategory.WRONGTIME;
-    if ("ExpiredDrug".equals(codeString))
+    if ("expired-drug".equals(codeString))
       return AdverseEventCategory.EXPIREDDRUG;
-    if ("MedicalDeviceUseError".equals(codeString))
+    if ("medical-device-use-error".equals(codeString))
       return AdverseEventCategory.MEDICALDEVICEUSEERROR;
-    if ("ProblemDifferentManufacturer".equals(codeString))
+    if ("problem-different-manufacturer".equals(codeString))
       return AdverseEventCategory.PROBLEMDIFFERENTMANUFACTURER;
-    if ("UnsafePhysicalEnvironment".equals(codeString))
+    if ("unsafe-physical-environment".equals(codeString))
       return AdverseEventCategory.UNSAFEPHYSICALENVIRONMENT;
     throw new IllegalArgumentException("Unknown AdverseEventCategory code '"+codeString+"'");
   }
 
   public String toCode(AdverseEventCategory code) {
     if (code == AdverseEventCategory.PRODUCTPROBLEM)
-      return "ProductProblem";
+      return "product-problem";
     if (code == AdverseEventCategory.PRODUCTQUALITY)
-      return "ProductQuality";
+      return "product-quality";
     if (code == AdverseEventCategory.PRODUCTUSEERROR)
-      return "ProductUseError";
+      return "product-use-error";
     if (code == AdverseEventCategory.WRONGDOSE)
-      return "WrongDose";
+      return "wrong-dose";
     if (code == AdverseEventCategory.INCORRECTPRESCRIBINGINFORMATION)
-      return "IncorrectPrescribingInformation";
+      return "incorrect-prescribing-information";
     if (code == AdverseEventCategory.WRONGTECHNIQUE)
-      return "WrongTechnique";
+      return "wrong-technique";
     if (code == AdverseEventCategory.WRONGROUTEOFADMINISTRATION)
-      return "WrongRouteOfAdministration";
+      return "wrong-route-of-administration";
     if (code == AdverseEventCategory.WRONGRATE)
-      return "WrongRate";
+      return "wrong-rate";
     if (code == AdverseEventCategory.WRONGDURATION)
-      return "WrongDuration";
+      return "wrong-duration";
     if (code == AdverseEventCategory.WRONGTIME)
-      return "WrongTime";
+      return "wrong-time";
     if (code == AdverseEventCategory.EXPIREDDRUG)
-      return "ExpiredDrug";
+      return "expired-drug";
     if (code == AdverseEventCategory.MEDICALDEVICEUSEERROR)
-      return "MedicalDeviceUseError";
+      return "medical-device-use-error";
     if (code == AdverseEventCategory.PROBLEMDIFFERENTMANUFACTURER)
-      return "ProblemDifferentManufacturer";
+      return "problem-different-manufacturer";
     if (code == AdverseEventCategory.UNSAFEPHYSICALENVIRONMENT)
-      return "UnsafePhysicalEnvironment";
+      return "unsafe-physical-environment";
     return "?";
   }
 

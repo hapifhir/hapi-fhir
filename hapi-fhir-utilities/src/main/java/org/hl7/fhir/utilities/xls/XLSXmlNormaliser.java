@@ -37,17 +37,20 @@ public class XLSXmlNormaliser {
 
   private String source;
   private String dest;
+  private boolean exceptionIfExcelNotNormalised;
   
-  public XLSXmlNormaliser(String source, String dest) {
+  public XLSXmlNormaliser(String source, String dest, boolean exceptionIfExcelNotNormalised) {
     super();
     this.source = source;
     this.dest = dest;
+    this.exceptionIfExcelNotNormalised = exceptionIfExcelNotNormalised;
   }
   
-  public XLSXmlNormaliser(String source) {
+  public XLSXmlNormaliser(String source, boolean exceptionIfExcelNotNormalised) {
     super();
     this.source = source;
     this.dest = source;
+    this.exceptionIfExcelNotNormalised = exceptionIfExcelNotNormalised;
   }
   
   public void go() throws FHIRException, TransformerException, ParserConfigurationException, SAXException, IOException {
@@ -68,6 +71,9 @@ public class XLSXmlNormaliser {
     }
     if (hasComment)
       return;
+    if (exceptionIfExcelNotNormalised)
+      throw new FHIRException("The spreadsheet "+dest+" was committed after editing in excel, but before the build could run *after Excel was closed*");
+    
     System.out.println("normalise: "+source);
     
     XMLUtil.deleteByName(root, "ActiveSheet");
@@ -82,10 +88,6 @@ public class XLSXmlNormaliser {
     
     if (!hasComment)
       root.appendChild(xml.createComment("canonicalized"));
-    String altName = dest+".please-close-this-in-excel-and-return-the-build-prior-to-committing";
-    File f = new File(altName);
-    if (f.exists())
-      f.delete();
     try {
       saveXml(new FileOutputStream(dest));
       String s = TextFile.fileToString(dest);
@@ -94,7 +96,7 @@ public class XLSXmlNormaliser {
       TextFile.stringToFile(s, dest, false);
       new File(dest).setLastModified(time);
     } catch (Exception e) {
-      TextFile.stringToFile("Run process helper", altName);
+      System.out.println("The file "+dest+" is still open in Excel, and you will have to run the build after closing Excel before committing");
     }
   }
 

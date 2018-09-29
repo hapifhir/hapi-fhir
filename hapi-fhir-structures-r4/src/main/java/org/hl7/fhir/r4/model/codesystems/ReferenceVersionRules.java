@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ReferenceVersionRules {
 
         /**
-         * The reference may be either version independent or version specific
+         * The reference may be either version independent or version specific.
          */
         EITHER, 
         /**
-         * The reference must be version independent
+         * The reference must be version independent.
          */
         INDEPENDENT, 
         /**
-         * The reference must be version specific
+         * The reference must be version specific.
          */
         SPECIFIC, 
         /**
@@ -76,9 +76,9 @@ public enum ReferenceVersionRules {
         }
         public String getDefinition() {
           switch (this) {
-            case EITHER: return "The reference may be either version independent or version specific";
-            case INDEPENDENT: return "The reference must be version independent";
-            case SPECIFIC: return "The reference must be version specific";
+            case EITHER: return "The reference may be either version independent or version specific.";
+            case INDEPENDENT: return "The reference must be version independent.";
+            case SPECIFIC: return "The reference must be version specific.";
             default: return "?";
           }
         }

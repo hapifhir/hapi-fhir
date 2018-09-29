@@ -644,9 +644,11 @@ public class RestfulServerUtils {
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
 			if (fullId != null && fullId.hasVersionIdPart()) {
-				response.addHeader(Constants.HEADER_ETAG, "W/\"" + fullId.getVersionIdPart() + '"');
+				String versionIdPart = fullId.getVersionIdPart();
+				response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
 			} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
-				response.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getMeta().getVersionId() + '"');
+				String versionId = theResource.getMeta().getVersionId();
+				response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
 			}
 		}
 
@@ -737,6 +739,10 @@ public class RestfulServerUtils {
 		}
 		//FIXME resource leak
 		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
+	}
+
+	public static String createEtag(String theVersionId) {
+		return "W/\"" + theVersionId + '"';
 	}
 
 	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {

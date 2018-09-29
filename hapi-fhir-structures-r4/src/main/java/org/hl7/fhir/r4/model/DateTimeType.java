@@ -29,14 +29,15 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package org.hl7.fhir.r4.model;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import org.apache.commons.lang3.time.DateUtils;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.zip.DataFormatException;
+
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import org.apache.commons.lang3.time.DateUtils;
+
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
  * Represents a FHIR dateTime datatype. Valid precisions values for this type are:
@@ -51,11 +52,12 @@ import java.util.zip.DataFormatException;
 @DatatypeDef(name = "dateTime")
 public class DateTimeType extends BaseDateTimeType {
 
+	private static final long serialVersionUID = 3L;
+	
 	/**
 	 * The default precision for this type
 	 */
 	public static final TemporalPrecisionEnum DEFAULT_PRECISION = TemporalPrecisionEnum.SECOND;
-	private static final long serialVersionUID = 3L;
 
 	/**
 	 * Constructor
@@ -125,37 +127,6 @@ public class DateTimeType extends BaseDateTimeType {
 	}
 
 	@Override
-	public DateTimeType copy() {
-		return new DateTimeType(getValueAsString());
-	}
-
-	public String fhirType() {
-		return "dateTime";
-	}
-
-	/**
-	 * Returns the default precision for this datatype
-	 * 
-	 * @see #DEFAULT_PRECISION
-	 */
-	@Override
-	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
-		return DEFAULT_PRECISION;
-	}
-
-	public int getTzHour() {
-		return (int) (getTimeZone().getRawOffset() / DateUtils.MILLIS_PER_MINUTE) / 60;
-	}
-
-	public int getTzMin() {
-		return (int) (getTimeZone().getRawOffset() / DateUtils.MILLIS_PER_MINUTE) % 60;
-	}
-
-	public boolean getTzSign() {
-		return getTimeZone().getRawOffset() >= 0;
-	}
-
-	@Override
 	boolean isPrecisionAllowed(TemporalPrecisionEnum thePrecision) {
 		switch (thePrecision) {
 		case YEAR:
@@ -178,6 +149,21 @@ public class DateTimeType extends BaseDateTimeType {
 	}
 
 	/**
+	 * Returns the default precision for this datatype
+	 * 
+	 * @see #DEFAULT_PRECISION
+	 */
+	@Override
+	protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
+		return DEFAULT_PRECISION;
+	}
+
+	@Override
+	public DateTimeType copy() {
+		return new DateTimeType(getValueAsString());
+	}
+
+	/**
 	 * Creates a new instance by parsing an HL7 v3 format date time string
 	 */
 	public static DateTimeType parseV3(String theV3String) {
@@ -191,4 +177,39 @@ public class DateTimeType extends BaseDateTimeType {
 		retVal.setPrecision(TemporalPrecisionEnum.DAY);
 		return retVal;
 	}
+
+	public boolean getTzSign() {
+		return getTimeZone().getRawOffset() >= 0;
+	}
+
+	public int getTzHour() {
+		return (int) (getTimeZone().getRawOffset() / DateUtils.MILLIS_PER_MINUTE) / 60;
+	}
+
+	public int getTzMin() {
+		return (int) (getTimeZone().getRawOffset() / DateUtils.MILLIS_PER_MINUTE) % 60;
+	}
+
+	
+	public String fhirType() {
+		return "dateTime";		
+	}
+
+  public String getAsV3() {
+    String r = getValueAsString();
+    r = stripChar(r, 16, ':');
+    r = stripChar(r, 13, ':');
+    r = stripChar(r, 10, 'T');
+    r = stripChar(r, 7, '-');
+    r = stripChar(r, 4, '-');
+    r = r.replaceAll(":", ""); // might be in the timezone
+    return r;
+  }
+
+  private String stripChar(String r, int i, char c) {
+    if (r.length() <= i || r.charAt(i) != c)
+      return r;
+    return r.substring(0, i)+r.substring(i+1);
+  }
+
 }

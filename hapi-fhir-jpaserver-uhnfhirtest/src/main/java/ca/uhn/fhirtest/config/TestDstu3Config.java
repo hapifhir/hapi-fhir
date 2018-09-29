@@ -59,6 +59,8 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		retVal.setFetchSizeDefaultMaximum(10000);
+		retVal.setReindexThreadCount(1);
+		retVal.setExpungeEnabled(true);
 		return retVal;
 	}
 

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
@@ -159,7 +160,7 @@ public class JsonParserR4Test {
 
 		Encounter enc = new Encounter();
 		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
-		obs.getContext().setResource(enc);
+		obs.getEncounter().setResource(enc);
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
 		ourLog.info(encoded);
@@ -171,7 +172,7 @@ public class JsonParserR4Test {
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
 
-		enc = (Encounter) obs.getContext().getResource();
+		enc = (Encounter) obs.getEncounter().getResource();
 		assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
 	}
 
@@ -187,7 +188,7 @@ public class JsonParserR4Test {
 		Encounter enc = new Encounter();
 		enc.setId("#1");
 		enc.setStatus(Encounter.EncounterStatus.ARRIVED);
-		obs.getContext().setReference("#1");
+		obs.getEncounter().setReference("#1");
 		obs.getContained().add(enc);
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
@@ -200,7 +201,7 @@ public class JsonParserR4Test {
 		pt = (Patient) obs.getSubject().getResource();
 		assertEquals("FAM", pt.getNameFirstRep().getFamily());
 
-		enc = (Encounter) obs.getContext().getResource();
+		enc = (Encounter) obs.getEncounter().getResource();
 		assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
 	}
 
@@ -361,7 +362,7 @@ public class JsonParserR4Test {
 
 	@Test
 	public void testParseExtensionOnPrimitive() throws IOException {
-		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"));
+		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"), Constants.CHARSET_UTF8);
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 		Patient pt = parser.parseResource(Patient.class, input);
 

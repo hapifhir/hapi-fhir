@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -45,6 +45,12 @@ public class QuestionnaireItemControlEnumFactory implements EnumFactory<Question
       return QuestionnaireItemControl.LIST;
     if ("table".equals(codeString))
       return QuestionnaireItemControl.TABLE;
+    if ("htable".equals(codeString))
+      return QuestionnaireItemControl.HTABLE;
+    if ("gtable".equals(codeString))
+      return QuestionnaireItemControl.GTABLE;
+    if ("atable".equals(codeString))
+      return QuestionnaireItemControl.ATABLE;
     if ("header".equals(codeString))
       return QuestionnaireItemControl.HEADER;
     if ("footer".equals(codeString))
@@ -93,6 +99,12 @@ public class QuestionnaireItemControlEnumFactory implements EnumFactory<Question
       return "list";
     if (code == QuestionnaireItemControl.TABLE)
       return "table";
+    if (code == QuestionnaireItemControl.HTABLE)
+      return "htable";
+    if (code == QuestionnaireItemControl.GTABLE)
+      return "gtable";
+    if (code == QuestionnaireItemControl.ATABLE)
+      return "atable";
     if (code == QuestionnaireItemControl.HEADER)
       return "header";
     if (code == QuestionnaireItemControl.FOOTER)

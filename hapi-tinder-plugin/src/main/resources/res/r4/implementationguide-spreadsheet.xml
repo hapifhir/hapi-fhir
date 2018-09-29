@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
+﻿<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
   <LastAuthor>Grahame Grieve</LastAuthor>
@@ -10,11 +10,11 @@
   <AllowPNG/>
  </OfficeDocumentSettings>
  <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
-
-
-
-
-  <ActiveSheet>10</ActiveSheet>
+  
+  
+  
+  
+  <ActiveSheet>1</ActiveSheet>
   <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
@@ -805,9 +805,9 @@
  </Worksheet>
  <Worksheet ss:Name="Data Elements">
   <Names>
-   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R107C22"/>
+   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R111C22"/>
   </Names>
-  <Table ss:ExpandedColumnCount="26" ss:ExpandedRowCount="107" ss:StyleID="s68" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="26" ss:ExpandedRowCount="111" ss:StyleID="s68" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s69" ss:Width="318.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="77.0"/>
    <Column ss:StyleID="s68" ss:Width="29.0"/>
@@ -933,6 +933,31 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">ImplementationGuide.name</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="21" ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"/>
+    <Cell ss:StyleID="s93"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ImplementationGuide.title</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1184,6 +1209,58 @@
     <Cell ss:StyleID="s93"/>
     <Cell ss:StyleID="Default"/>
    </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ImplementationGuide.packageId</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">id</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">NPM Package name for IG</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The NPM package name for this Implementation Guide, used in the NPM package distribution, which is the primary mechanism by which FHIR based tooling manages IG dependencies. This value must be globally unique, and should be assigned with care</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Many (if not all) IG publishing tools will require that this element be present. For implementation guides published through HL7 or the FHIR foundation, the FHIR product director assigns package IDs</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="21" ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"/>
+    <Cell ss:StyleID="s93"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ImplementationGuide.license</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">SPDXLicense</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">SPDX license code for this IG (or not-open-source)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The license that applies to this Implementation Guide, using an SPDX license code, or 'not-open-source'</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="21" ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"/>
+    <Cell ss:StyleID="s93"/>
+    <Cell ss:StyleID="Default"/>
+   </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
     <Cell ss:StyleID="s87"><Data ss:Type="String">ImplementationGuide.fhirVersion</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1239,7 +1316,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">canonical</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">canonical(ImplementationGuide)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1252,6 +1329,31 @@
     <Cell ss:StyleID="s89"><Data ss:Type="String">The canonical URL of the Implementation guide for the dependency</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Usually, the canonical URL of the implementation guide is the same as the master location at which the implementation guide is published</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="21" ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"/>
+    <Cell ss:StyleID="s88"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="45">
+    <Cell ss:StyleID="s87"><Data ss:Type="String">ImplementationGuide.dependsOn.packageId</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">id</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">NPM Package name for IG this depends on</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The NPM package name for the Implementation Guide that this IG depends on</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="21" ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1392,7 +1494,7 @@
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s100"><Data ss:Type="String">Group of resources as used in .page.package</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">Grouping used to present related resources in the IG</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">A logical group of resources. Logical groups can be used when building pages</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1418,8 +1520,8 @@
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s100"><Data ss:Type="String">Name used .resource.package and .page.package</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">The name for the group, as used in ImplementationGuide.definition.resource.package and ImplementationGuide.definition.page.package</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">Descriptive name for the package</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The human-readable title to display for the package of resources when rendering the implementation guide</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1751,7 +1853,7 @@
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s100"><Data ss:Type="String">apply-business-version | apply-jurisdiction | path-resource | path-pages | path-tx-cache | expansion-profile | rule-broken-links | generate-xml | generate-json | generate-turtle | html-template</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s100"><Data ss:Type="String">apply-business-version | apply-jurisdiction | path-resource | path-pages | path-tx-cache | expansion-parameter | rule-broken-links | generate-xml | generate-json | generate-turtle | html-template</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1934,7 +2036,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">1..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String" x:Ticked="1">=ManifestResource</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2034,7 +2136,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String" x:Ticked="1">=ManifestPage</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3433,18 +3535,19 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>21</TopRowBottomPane>
+   <TopRowBottomPane>40</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-
+   
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
-  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R107C22">
+  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R111C22">
   </AutoFilter>
  </Worksheet>
  <Worksheet ss:Name="Invariants">
@@ -3928,7 +4031,7 @@
    <SplitVertical>2</SplitVertical>
    <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-
+   
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
@@ -3967,17 +4070,17 @@
     <Cell ss:StyleID="s125"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
+    <Cell ss:StyleID="s123"><Data ss:Type="String">resource</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s126"/>
+    <Cell ss:StyleID="s126"><Data ss:Type="String">ImplementationGuide.definition.resource.reference</Data></Cell>
     <Cell ss:StyleID="s125"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s123"/>
+    <Cell ss:StyleID="s123"><Data ss:Type="String">global</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">ImplementationGuide.global.profile</Data></Cell>
     <Cell ss:StyleID="s125"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4022,7 +4125,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-
+   
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
@@ -4606,7 +4709,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-
+   
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
@@ -4866,7 +4969,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>3</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-
+   
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
@@ -5139,7 +5242,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-
+   
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
@@ -5532,7 +5635,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-
+   
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
@@ -5546,8 +5649,7 @@
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="27" ss:StyleID="s121" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s121" ss:Width="115.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s121" ss:Width="274.0"/>
-   <Column ss:StyleID="s121" ss:Width="51.0"/>
-   <Column ss:StyleID="s121" ss:Width="45.0"/>
+   <Column ss:Index="4" ss:StyleID="s121" ss:Width="45.0"/>
    <Column ss:StyleID="s121" ss:Width="146.0"/>
    <Column ss:StyleID="s121" ss:Width="172.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s121" ss:Width="97.0"/>
@@ -5602,11 +5704,11 @@
     <Cell ss:StyleID="s125"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s156"/>
-    <Cell ss:StyleID="s88"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
-    <Cell ss:StyleID="s124"/>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">SPDXLicense</Data></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">The license that applies to an Implementation Guide (using an SPDX license Identifiers, or 'not-open-source'). The binding is required but new SPDX license Identifiers are allowed to be used (https://spdx.org/licenses/)</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">code list</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">required</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">#spdx-license</Data></Cell>
     <Cell ss:StyleID="s124"/>
     <Cell ss:StyleID="s124"/>
     <Cell ss:StyleID="s124"/>
@@ -5966,7 +6068,7 @@
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
-
+   
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
@@ -6019,10 +6121,10 @@
     <Cell><Data ss:Type="String">The value of this string 0..1 parameter is a subfolder of the build context's location that is used as the terminology cache. If this is not present, the terminology cache is on the local system, not under version control</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
-    <Cell><Data ss:Type="String">expansion-profile</Data></Cell>
+    <Cell><Data ss:Type="String">expansion-parameter</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="Number">6</Data></Cell>
     <Cell><Data ss:Type="String">Expansion Profile</Data></Cell>
-    <Cell><Data ss:Type="String">The value of this string 0..1 parameter is a path to the ExpansionProfile used when expanding value sets for this implementation guide. This is particularly used to specify the versions of published terminologies such as SNOMED CT</Data></Cell>
+    <Cell><Data ss:Type="String">The value of this string 0..* parameter is a parameter (name=value) when expanding value sets for this implementation guide. This is particularly used to specify the versions of published terminologies such as SNOMED CT</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
     <Cell><Data ss:Type="String">rule-broken-links</Data></Cell>
@@ -6119,8 +6221,2113 @@
     <HorizontalResolution>-1</HorizontalResolution>
     <VerticalResolution>-1</VerticalResolution>
    </Print>
-   <Selected/>
-
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+ <Worksheet ss:Name="spdx-license">
+  <Table ss:ExpandedColumnCount="8" ss:ExpandedRowCount="347" x:FullColumns="1" x:FullRows="1">
+   <Column ss:AutoFitWidth="0" ss:Index="5" ss:Width="415.0"/>
+   <Column ss:AutoFitWidth="0" ss:Width="196.0"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30" ss:StyleID="s147">
+    <Cell ss:StyleID="s111"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">The code to be sent over the wire</Font>       </ss:Data></Comment></Cell>
+    <Cell ss:StyleID="s112"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </ss:Data></Comment></Cell>
+    <Cell ss:StyleID="s112"><Data ss:Type="String">Parent</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">The code this code is a specialization of (if any).  Content should be "#" + the Id of the parent code</Font>       </ss:Data></Comment></Cell>
+    <Cell ss:StyleID="s112"><Data ss:Type="String">Display</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </ss:Data></Comment></Cell>
+    <Cell ss:StyleID="s112"><Data ss:Type="String">Definition</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </ss:Data></Comment></Cell>
+    <Cell ss:StyleID="s112"><Data ss:Type="String">Comments</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Mappings to v2 codes - See wiki for syntax</Font>       </ss:Data></Comment></Cell>
+    <Cell ss:StyleID="s112"><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Mappings to v3 codes - See wiki for syntax</Font>       </ss:Data></Comment></Cell>
+    <Cell ss:StyleID="s113"><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Additional notes about the code.  Not published</Font>       </ss:Data></Comment></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="19">
+    <Cell><Data ss:Type="String">not-open-source</Data></Cell>
+    <Cell><Data ss:Type="Number">999</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Not open source</Data></Cell>
+    <Cell><Data ss:Type="String">Not an open source license</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">0BSD</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD Zero Clause License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD Zero Clause License</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">AAL</Data></Cell>
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Attribution Assurance License</Data></Cell>
+    <Cell><Data ss:Type="String">Attribution Assurance License</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Abstyles</Data></Cell>
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Abstyles License</Data></Cell>
+    <Cell><Data ss:Type="String">Abstyles License</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Adobe-2006</Data></Cell>
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Adobe Systems Incorporated Source Code License Agreement</Data></Cell>
+    <Cell><Data ss:Type="String">Adobe Systems Incorporated Source Code License Agreement</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">Adobe-Glyph</Data></Cell>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Adobe Glyph List License</Data></Cell>
+    <Cell><Data ss:Type="String">Adobe Glyph List License</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">ADSL</Data></Cell>
+    <Cell><Data ss:Type="Number">6</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Amazon Digital Services License</Data></Cell>
+    <Cell><Data ss:Type="String">Amazon Digital Services License</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell><Data ss:Type="String">AFL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Academic Free License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Academic Free License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AFL-1.2</Data></Cell>
+    <Cell><Data ss:Type="Number">8</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Academic Free License v1.2</Data></Cell>
+    <Cell><Data ss:Type="String">Academic Free License v1.2</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AFL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Academic Free License v2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Academic Free License v2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AFL-2.1</Data></Cell>
+    <Cell><Data ss:Type="Number">10</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Academic Free License v2.1</Data></Cell>
+    <Cell><Data ss:Type="String">Academic Free License v2.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AFL-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">11</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Academic Free License v3.0</Data></Cell>
+    <Cell><Data ss:Type="String">Academic Free License v3.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Afmparse</Data></Cell>
+    <Cell><Data ss:Type="Number">12</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Afmparse License</Data></Cell>
+    <Cell><Data ss:Type="String">Afmparse License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AGPL-1.0-only</Data></Cell>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Affero General Public License v1.0 only</Data></Cell>
+    <Cell><Data ss:Type="String">Affero General Public License v1.0 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AGPL-1.0-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Affero General Public License v1.0 or later</Data></Cell>
+    <Cell><Data ss:Type="String">Affero General Public License v1.0 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AGPL-3.0-only</Data></Cell>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Affero General Public License v3.0 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Affero General Public License v3.0 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AGPL-3.0-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">16</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Affero General Public License v3.0 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Affero General Public License v3.0 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Aladdin</Data></Cell>
+    <Cell><Data ss:Type="Number">17</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Aladdin Free Public License</Data></Cell>
+    <Cell><Data ss:Type="String">Aladdin Free Public License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AMDPLPA</Data></Cell>
+    <Cell><Data ss:Type="Number">18</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">AMD's plpa_map.c License</Data></Cell>
+    <Cell><Data ss:Type="String">AMD's plpa_map.c License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AML</Data></Cell>
+    <Cell><Data ss:Type="Number">19</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Apple MIT License</Data></Cell>
+    <Cell><Data ss:Type="String">Apple MIT License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">AMPAS</Data></Cell>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Academy of Motion Picture Arts and Sciences BSD</Data></Cell>
+    <Cell><Data ss:Type="String">Academy of Motion Picture Arts and Sciences BSD</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ANTLR-PD</Data></Cell>
+    <Cell><Data ss:Type="Number">21</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">ANTLR Software Rights Notice</Data></Cell>
+    <Cell><Data ss:Type="String">ANTLR Software Rights Notice</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Apache-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">22</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Apache License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Apache License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Apache-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">23</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Apache License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Apache License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Apache-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">24</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Apache License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Apache License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">APAFML</Data></Cell>
+    <Cell><Data ss:Type="Number">25</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Adobe Postscript AFM License</Data></Cell>
+    <Cell><Data ss:Type="String">Adobe Postscript AFM License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">APL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">26</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Adaptive Public License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Adaptive Public License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">APSL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">27</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Apple Public Source License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Apple Public Source License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">APSL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">28</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Apple Public Source License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Apple Public Source License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">APSL-1.2</Data></Cell>
+    <Cell><Data ss:Type="Number">29</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Apple Public Source License 1.2</Data></Cell>
+    <Cell><Data ss:Type="String">Apple Public Source License 1.2</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">APSL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">30</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Apple Public Source License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Apple Public Source License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Artistic-1.0-cl8</Data></Cell>
+    <Cell><Data ss:Type="Number">31</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Artistic License 1.0 w/clause 8</Data></Cell>
+    <Cell><Data ss:Type="String">Artistic License 1.0 w/clause 8</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Artistic-1.0-Perl</Data></Cell>
+    <Cell><Data ss:Type="Number">32</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Artistic License 1.0 (Perl)</Data></Cell>
+    <Cell><Data ss:Type="String">Artistic License 1.0 (Perl)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Artistic-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">33</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Artistic License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Artistic License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Artistic-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">34</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Artistic License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Artistic License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Bahyph</Data></Cell>
+    <Cell><Data ss:Type="Number">35</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Bahyph License</Data></Cell>
+    <Cell><Data ss:Type="String">Bahyph License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Barr</Data></Cell>
+    <Cell><Data ss:Type="Number">36</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Barr License</Data></Cell>
+    <Cell><Data ss:Type="String">Barr License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Beerware</Data></Cell>
+    <Cell><Data ss:Type="Number">37</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Beerware License</Data></Cell>
+    <Cell><Data ss:Type="String">Beerware License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BitTorrent-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">38</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BitTorrent Open Source License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">BitTorrent Open Source License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BitTorrent-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">39</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BitTorrent Open Source License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">BitTorrent Open Source License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Borceux</Data></Cell>
+    <Cell><Data ss:Type="Number">40</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Borceux license</Data></Cell>
+    <Cell><Data ss:Type="String">Borceux license</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-1-Clause</Data></Cell>
+    <Cell><Data ss:Type="Number">41</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 1-Clause License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 1-Clause License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-2-Clause-FreeBSD</Data></Cell>
+    <Cell><Data ss:Type="Number">42</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 2-Clause FreeBSD License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 2-Clause FreeBSD License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-2-Clause-NetBSD</Data></Cell>
+    <Cell><Data ss:Type="Number">43</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 2-Clause NetBSD License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 2-Clause NetBSD License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-2-Clause-Patent</Data></Cell>
+    <Cell><Data ss:Type="Number">44</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD-2-Clause Plus Patent License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD-2-Clause Plus Patent License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-2-Clause</Data></Cell>
+    <Cell><Data ss:Type="Number">45</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 2-Clause "Simplified" License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 2-Clause "Simplified" License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-3-Clause-Attribution</Data></Cell>
+    <Cell><Data ss:Type="Number">46</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD with attribution</Data></Cell>
+    <Cell><Data ss:Type="String">BSD with attribution</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-3-Clause-Clear</Data></Cell>
+    <Cell><Data ss:Type="Number">47</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 3-Clause Clear License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 3-Clause Clear License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-3-Clause-LBNL</Data></Cell>
+    <Cell><Data ss:Type="Number">48</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Lawrence Berkeley National Labs BSD variant license</Data></Cell>
+    <Cell><Data ss:Type="String">Lawrence Berkeley National Labs BSD variant license</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-3-Clause-No-Nuclear-License-2014</Data></Cell>
+    <Cell><Data ss:Type="Number">49</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 3-Clause No Nuclear License 2014</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 3-Clause No Nuclear License 2014</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-3-Clause-No-Nuclear-License</Data></Cell>
+    <Cell><Data ss:Type="Number">50</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 3-Clause No Nuclear License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 3-Clause No Nuclear License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-3-Clause-No-Nuclear-Warranty</Data></Cell>
+    <Cell><Data ss:Type="Number">51</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 3-Clause No Nuclear Warranty</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 3-Clause No Nuclear Warranty</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-3-Clause</Data></Cell>
+    <Cell><Data ss:Type="Number">52</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 3-Clause "New" or "Revised" License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 3-Clause "New" or "Revised" License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-4-Clause-UC</Data></Cell>
+    <Cell><Data ss:Type="Number">53</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD-4-Clause (University of California-Specific)</Data></Cell>
+    <Cell><Data ss:Type="String">BSD-4-Clause (University of California-Specific)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-4-Clause</Data></Cell>
+    <Cell><Data ss:Type="Number">54</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD 4-Clause "Original" or "Old" License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD 4-Clause "Original" or "Old" License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-Protection</Data></Cell>
+    <Cell><Data ss:Type="Number">55</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD Protection License</Data></Cell>
+    <Cell><Data ss:Type="String">BSD Protection License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSD-Source-Code</Data></Cell>
+    <Cell><Data ss:Type="Number">56</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">BSD Source Code Attribution</Data></Cell>
+    <Cell><Data ss:Type="String">BSD Source Code Attribution</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">BSL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">57</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Boost Software License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Boost Software License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">bzip2-1.0.5</Data></Cell>
+    <Cell><Data ss:Type="Number">58</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">bzip2 and libbzip2 License v1.0.5</Data></Cell>
+    <Cell><Data ss:Type="String">bzip2 and libbzip2 License v1.0.5</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">bzip2-1.0.6</Data></Cell>
+    <Cell><Data ss:Type="Number">59</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">bzip2 and libbzip2 License v1.0.6</Data></Cell>
+    <Cell><Data ss:Type="String">bzip2 and libbzip2 License v1.0.6</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Caldera</Data></Cell>
+    <Cell><Data ss:Type="Number">60</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Caldera License</Data></Cell>
+    <Cell><Data ss:Type="String">Caldera License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CATOSL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">61</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Computer Associates Trusted Open Source License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Computer Associates Trusted Open Source License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">62</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution 1.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution 1.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">63</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution 2.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution 2.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-2.5</Data></Cell>
+    <Cell><Data ss:Type="Number">64</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution 2.5 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution 2.5 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">65</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution 3.0 Unported</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution 3.0 Unported</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-4.0</Data></Cell>
+    <Cell><Data ss:Type="Number">66</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution 4.0 International</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution 4.0 International</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">67</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial 1.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial 1.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">68</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial 2.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial 2.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-2.5</Data></Cell>
+    <Cell><Data ss:Type="Number">69</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial 2.5 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial 2.5 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">70</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial 3.0 Unported</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial 3.0 Unported</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-4.0</Data></Cell>
+    <Cell><Data ss:Type="Number">71</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial 4.0 International</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial 4.0 International</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-ND-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">72</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 1.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 1.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-ND-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">73</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 2.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 2.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-ND-2.5</Data></Cell>
+    <Cell><Data ss:Type="Number">74</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 2.5 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 2.5 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-ND-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">75</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 3.0 Unported</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 3.0 Unported</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-ND-4.0</Data></Cell>
+    <Cell><Data ss:Type="Number">76</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 4.0 International</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial No Derivatives 4.0 International</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-SA-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">77</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 1.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 1.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-SA-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">78</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 2.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 2.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-SA-2.5</Data></Cell>
+    <Cell><Data ss:Type="Number">79</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 2.5 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 2.5 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-SA-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">80</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 3.0 Unported</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 3.0 Unported</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-NC-SA-4.0</Data></Cell>
+    <Cell><Data ss:Type="Number">81</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 4.0 International</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Non Commercial Share Alike 4.0 International</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-ND-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">82</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution No Derivatives 1.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution No Derivatives 1.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-ND-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">83</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution No Derivatives 2.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution No Derivatives 2.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-ND-2.5</Data></Cell>
+    <Cell><Data ss:Type="Number">84</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution No Derivatives 2.5 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution No Derivatives 2.5 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-ND-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">85</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution No Derivatives 3.0 Unported</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution No Derivatives 3.0 Unported</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-ND-4.0</Data></Cell>
+    <Cell><Data ss:Type="Number">86</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution No Derivatives 4.0 International</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution No Derivatives 4.0 International</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-SA-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">87</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Share Alike 1.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Share Alike 1.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-SA-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">88</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Share Alike 2.0 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Share Alike 2.0 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-SA-2.5</Data></Cell>
+    <Cell><Data ss:Type="Number">89</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Share Alike 2.5 Generic</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Share Alike 2.5 Generic</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-SA-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">90</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Share Alike 3.0 Unported</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Share Alike 3.0 Unported</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC-BY-SA-4.0</Data></Cell>
+    <Cell><Data ss:Type="Number">91</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Attribution Share Alike 4.0 International</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Attribution Share Alike 4.0 International</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CC0-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">92</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Creative Commons Zero v1.0 Universal</Data></Cell>
+    <Cell><Data ss:Type="String">Creative Commons Zero v1.0 Universal</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CDDL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">93</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Common Development and Distribution License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Common Development and Distribution License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CDDL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">94</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Common Development and Distribution License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Common Development and Distribution License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CDLA-Permissive-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">95</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Community Data License Agreement Permissive 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Community Data License Agreement Permissive 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CDLA-Sharing-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">96</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Community Data License Agreement Sharing 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Community Data License Agreement Sharing 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CECILL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">97</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CeCILL Free Software License Agreement v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">CeCILL Free Software License Agreement v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CECILL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">98</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CeCILL Free Software License Agreement v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">CeCILL Free Software License Agreement v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CECILL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">99</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CeCILL Free Software License Agreement v2.0</Data></Cell>
+    <Cell><Data ss:Type="String">CeCILL Free Software License Agreement v2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CECILL-2.1</Data></Cell>
+    <Cell><Data ss:Type="Number">100</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CeCILL Free Software License Agreement v2.1</Data></Cell>
+    <Cell><Data ss:Type="String">CeCILL Free Software License Agreement v2.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CECILL-B</Data></Cell>
+    <Cell><Data ss:Type="Number">101</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CeCILL-B Free Software License Agreement</Data></Cell>
+    <Cell><Data ss:Type="String">CeCILL-B Free Software License Agreement</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CECILL-C</Data></Cell>
+    <Cell><Data ss:Type="Number">102</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CeCILL-C Free Software License Agreement</Data></Cell>
+    <Cell><Data ss:Type="String">CeCILL-C Free Software License Agreement</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ClArtistic</Data></Cell>
+    <Cell><Data ss:Type="Number">103</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Clarified Artistic License</Data></Cell>
+    <Cell><Data ss:Type="String">Clarified Artistic License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CNRI-Jython</Data></Cell>
+    <Cell><Data ss:Type="Number">104</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CNRI Jython License</Data></Cell>
+    <Cell><Data ss:Type="String">CNRI Jython License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CNRI-Python-GPL-Compatible</Data></Cell>
+    <Cell><Data ss:Type="Number">105</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CNRI Python Open Source GPL Compatible License Agreement</Data></Cell>
+    <Cell><Data ss:Type="String">CNRI Python Open Source GPL Compatible License Agreement</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CNRI-Python</Data></Cell>
+    <Cell><Data ss:Type="Number">106</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CNRI Python License</Data></Cell>
+    <Cell><Data ss:Type="String">CNRI Python License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Condor-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">107</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Condor Public License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Condor Public License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CPAL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">108</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Common Public Attribution License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Common Public Attribution License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">109</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Common Public License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Common Public License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CPOL-1.02</Data></Cell>
+    <Cell><Data ss:Type="Number">110</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Code Project Open License 1.02</Data></Cell>
+    <Cell><Data ss:Type="String">Code Project Open License 1.02</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Crossword</Data></Cell>
+    <Cell><Data ss:Type="Number">111</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Crossword License</Data></Cell>
+    <Cell><Data ss:Type="String">Crossword License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CrystalStacker</Data></Cell>
+    <Cell><Data ss:Type="Number">112</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CrystalStacker License</Data></Cell>
+    <Cell><Data ss:Type="String">CrystalStacker License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">CUA-OPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">113</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CUA Office Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">CUA Office Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Cube</Data></Cell>
+    <Cell><Data ss:Type="Number">114</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Cube License</Data></Cell>
+    <Cell><Data ss:Type="String">Cube License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">curl</Data></Cell>
+    <Cell><Data ss:Type="Number">115</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">curl License</Data></Cell>
+    <Cell><Data ss:Type="String">curl License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">D-FSL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">116</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Deutsche Freie Software Lizenz</Data></Cell>
+    <Cell><Data ss:Type="String">Deutsche Freie Software Lizenz</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">diffmark</Data></Cell>
+    <Cell><Data ss:Type="Number">117</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">diffmark license</Data></Cell>
+    <Cell><Data ss:Type="String">diffmark license</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">DOC</Data></Cell>
+    <Cell><Data ss:Type="Number">118</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">DOC License</Data></Cell>
+    <Cell><Data ss:Type="String">DOC License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Dotseqn</Data></Cell>
+    <Cell><Data ss:Type="Number">119</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Dotseqn License</Data></Cell>
+    <Cell><Data ss:Type="String">Dotseqn License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">DSDP</Data></Cell>
+    <Cell><Data ss:Type="Number">120</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">DSDP License</Data></Cell>
+    <Cell><Data ss:Type="String">DSDP License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">dvipdfm</Data></Cell>
+    <Cell><Data ss:Type="Number">121</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">dvipdfm License</Data></Cell>
+    <Cell><Data ss:Type="String">dvipdfm License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ECL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">122</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Educational Community License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Educational Community License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ECL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">123</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Educational Community License v2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Educational Community License v2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">EFL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">124</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Eiffel Forum License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Eiffel Forum License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">EFL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">125</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Eiffel Forum License v2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Eiffel Forum License v2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">eGenix</Data></Cell>
+    <Cell><Data ss:Type="Number">126</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">eGenix.com Public License 1.1.0</Data></Cell>
+    <Cell><Data ss:Type="String">eGenix.com Public License 1.1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Entessa</Data></Cell>
+    <Cell><Data ss:Type="Number">127</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Entessa Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Entessa Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">EPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">128</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Eclipse Public License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Eclipse Public License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">EPL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">129</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Eclipse Public License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Eclipse Public License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ErlPL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">130</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Erlang Public License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Erlang Public License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">EUDatagrid</Data></Cell>
+    <Cell><Data ss:Type="Number">131</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">EU DataGrid Software License</Data></Cell>
+    <Cell><Data ss:Type="String">EU DataGrid Software License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">EUPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">132</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">European Union Public License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">European Union Public License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">EUPL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">133</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">European Union Public License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">European Union Public License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">EUPL-1.2</Data></Cell>
+    <Cell><Data ss:Type="Number">134</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">European Union Public License 1.2</Data></Cell>
+    <Cell><Data ss:Type="String">European Union Public License 1.2</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Eurosym</Data></Cell>
+    <Cell><Data ss:Type="Number">135</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Eurosym License</Data></Cell>
+    <Cell><Data ss:Type="String">Eurosym License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Fair</Data></Cell>
+    <Cell><Data ss:Type="Number">136</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Fair License</Data></Cell>
+    <Cell><Data ss:Type="String">Fair License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Frameworx-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">137</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Frameworx Open License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Frameworx Open License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">FreeImage</Data></Cell>
+    <Cell><Data ss:Type="Number">138</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">FreeImage Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">FreeImage Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">FSFAP</Data></Cell>
+    <Cell><Data ss:Type="Number">139</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">FSF All Permissive License</Data></Cell>
+    <Cell><Data ss:Type="String">FSF All Permissive License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">FSFUL</Data></Cell>
+    <Cell><Data ss:Type="Number">140</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">FSF Unlimited License</Data></Cell>
+    <Cell><Data ss:Type="String">FSF Unlimited License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">FSFULLR</Data></Cell>
+    <Cell><Data ss:Type="Number">141</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">FSF Unlimited License (with License Retention)</Data></Cell>
+    <Cell><Data ss:Type="String">FSF Unlimited License (with License Retention)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">FTL</Data></Cell>
+    <Cell><Data ss:Type="Number">142</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Freetype Project License</Data></Cell>
+    <Cell><Data ss:Type="String">Freetype Project License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GFDL-1.1-only</Data></Cell>
+    <Cell><Data ss:Type="Number">143</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Free Documentation License v1.1 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Free Documentation License v1.1 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GFDL-1.1-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">144</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Free Documentation License v1.1 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Free Documentation License v1.1 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GFDL-1.2-only</Data></Cell>
+    <Cell><Data ss:Type="Number">145</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Free Documentation License v1.2 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Free Documentation License v1.2 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GFDL-1.2-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">146</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Free Documentation License v1.2 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Free Documentation License v1.2 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GFDL-1.3-only</Data></Cell>
+    <Cell><Data ss:Type="Number">147</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Free Documentation License v1.3 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Free Documentation License v1.3 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GFDL-1.3-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">148</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Free Documentation License v1.3 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Free Documentation License v1.3 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Giftware</Data></Cell>
+    <Cell><Data ss:Type="Number">149</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Giftware License</Data></Cell>
+    <Cell><Data ss:Type="String">Giftware License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GL2PS</Data></Cell>
+    <Cell><Data ss:Type="Number">150</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GL2PS License</Data></Cell>
+    <Cell><Data ss:Type="String">GL2PS License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Glide</Data></Cell>
+    <Cell><Data ss:Type="Number">151</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">3dfx Glide License</Data></Cell>
+    <Cell><Data ss:Type="String">3dfx Glide License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Glulxe</Data></Cell>
+    <Cell><Data ss:Type="Number">152</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Glulxe License</Data></Cell>
+    <Cell><Data ss:Type="String">Glulxe License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">gnuplot</Data></Cell>
+    <Cell><Data ss:Type="Number">153</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">gnuplot License</Data></Cell>
+    <Cell><Data ss:Type="String">gnuplot License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GPL-1.0-only</Data></Cell>
+    <Cell><Data ss:Type="Number">154</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU General Public License v1.0 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU General Public License v1.0 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GPL-1.0-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">155</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU General Public License v1.0 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU General Public License v1.0 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GPL-2.0-only</Data></Cell>
+    <Cell><Data ss:Type="Number">156</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU General Public License v2.0 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU General Public License v2.0 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GPL-2.0-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">157</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU General Public License v2.0 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU General Public License v2.0 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GPL-3.0-only</Data></Cell>
+    <Cell><Data ss:Type="Number">158</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU General Public License v3.0 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU General Public License v3.0 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">GPL-3.0-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">159</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU General Public License v3.0 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU General Public License v3.0 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">gSOAP-1.3b</Data></Cell>
+    <Cell><Data ss:Type="Number">160</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">gSOAP Public License v1.3b</Data></Cell>
+    <Cell><Data ss:Type="String">gSOAP Public License v1.3b</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">HaskellReport</Data></Cell>
+    <Cell><Data ss:Type="Number">161</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Haskell Language Report License</Data></Cell>
+    <Cell><Data ss:Type="String">Haskell Language Report License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">HPND</Data></Cell>
+    <Cell><Data ss:Type="Number">162</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Historical Permission Notice and Disclaimer</Data></Cell>
+    <Cell><Data ss:Type="String">Historical Permission Notice and Disclaimer</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">IBM-pibs</Data></Cell>
+    <Cell><Data ss:Type="Number">163</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">IBM PowerPC Initialization and Boot Software</Data></Cell>
+    <Cell><Data ss:Type="String">IBM PowerPC Initialization and Boot Software</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ICU</Data></Cell>
+    <Cell><Data ss:Type="Number">164</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">ICU License</Data></Cell>
+    <Cell><Data ss:Type="String">ICU License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">IJG</Data></Cell>
+    <Cell><Data ss:Type="Number">165</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Independent JPEG Group License</Data></Cell>
+    <Cell><Data ss:Type="String">Independent JPEG Group License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ImageMagick</Data></Cell>
+    <Cell><Data ss:Type="Number">166</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">ImageMagick License</Data></Cell>
+    <Cell><Data ss:Type="String">ImageMagick License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">iMatix</Data></Cell>
+    <Cell><Data ss:Type="Number">167</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">iMatix Standard Function Library Agreement</Data></Cell>
+    <Cell><Data ss:Type="String">iMatix Standard Function Library Agreement</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Imlib2</Data></Cell>
+    <Cell><Data ss:Type="Number">168</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Imlib2 License</Data></Cell>
+    <Cell><Data ss:Type="String">Imlib2 License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Info-ZIP</Data></Cell>
+    <Cell><Data ss:Type="Number">169</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Info-ZIP License</Data></Cell>
+    <Cell><Data ss:Type="String">Info-ZIP License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Intel-ACPI</Data></Cell>
+    <Cell><Data ss:Type="Number">170</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Intel ACPI Software License Agreement</Data></Cell>
+    <Cell><Data ss:Type="String">Intel ACPI Software License Agreement</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Intel</Data></Cell>
+    <Cell><Data ss:Type="Number">171</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Intel Open Source License</Data></Cell>
+    <Cell><Data ss:Type="String">Intel Open Source License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Interbase-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">172</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Interbase Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Interbase Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">IPA</Data></Cell>
+    <Cell><Data ss:Type="Number">173</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">IPA Font License</Data></Cell>
+    <Cell><Data ss:Type="String">IPA Font License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">IPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">174</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">IBM Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">IBM Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ISC</Data></Cell>
+    <Cell><Data ss:Type="Number">175</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">ISC License</Data></Cell>
+    <Cell><Data ss:Type="String">ISC License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">JasPer-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">176</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">JasPer License</Data></Cell>
+    <Cell><Data ss:Type="String">JasPer License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">JSON</Data></Cell>
+    <Cell><Data ss:Type="Number">177</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">JSON License</Data></Cell>
+    <Cell><Data ss:Type="String">JSON License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LAL-1.2</Data></Cell>
+    <Cell><Data ss:Type="Number">178</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Licence Art Libre 1.2</Data></Cell>
+    <Cell><Data ss:Type="String">Licence Art Libre 1.2</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LAL-1.3</Data></Cell>
+    <Cell><Data ss:Type="Number">179</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Licence Art Libre 1.3</Data></Cell>
+    <Cell><Data ss:Type="String">Licence Art Libre 1.3</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Latex2e</Data></Cell>
+    <Cell><Data ss:Type="Number">180</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Latex2e License</Data></Cell>
+    <Cell><Data ss:Type="String">Latex2e License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Leptonica</Data></Cell>
+    <Cell><Data ss:Type="Number">181</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Leptonica License</Data></Cell>
+    <Cell><Data ss:Type="String">Leptonica License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LGPL-2.0-only</Data></Cell>
+    <Cell><Data ss:Type="Number">182</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Library General Public License v2 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Library General Public License v2 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LGPL-2.0-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">183</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Library General Public License v2 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Library General Public License v2 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LGPL-2.1-only</Data></Cell>
+    <Cell><Data ss:Type="Number">184</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Lesser General Public License v2.1 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Lesser General Public License v2.1 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LGPL-2.1-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">185</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Lesser General Public License v2.1 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Lesser General Public License v2.1 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LGPL-3.0-only</Data></Cell>
+    <Cell><Data ss:Type="Number">186</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Lesser General Public License v3.0 only</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Lesser General Public License v3.0 only</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LGPL-3.0-or-later</Data></Cell>
+    <Cell><Data ss:Type="Number">187</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">GNU Lesser General Public License v3.0 or later</Data></Cell>
+    <Cell><Data ss:Type="String">GNU Lesser General Public License v3.0 or later</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LGPLLR</Data></Cell>
+    <Cell><Data ss:Type="Number">188</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Lesser General Public License For Linguistic Resources</Data></Cell>
+    <Cell><Data ss:Type="String">Lesser General Public License For Linguistic Resources</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Libpng</Data></Cell>
+    <Cell><Data ss:Type="Number">189</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">libpng License</Data></Cell>
+    <Cell><Data ss:Type="String">libpng License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">libtiff</Data></Cell>
+    <Cell><Data ss:Type="Number">190</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">libtiff License</Data></Cell>
+    <Cell><Data ss:Type="String">libtiff License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LiLiQ-P-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">191</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Licence Libre du Québec – Permissive version 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Licence Libre du Québec – Permissive version 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LiLiQ-R-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">192</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Licence Libre du Québec – Réciprocité version 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Licence Libre du Québec – Réciprocité version 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LiLiQ-Rplus-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">193</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Licence Libre du Québec – Réciprocité forte version 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Licence Libre du Québec – Réciprocité forte version 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Linux-OpenIB</Data></Cell>
+    <Cell><Data ss:Type="Number">194</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Linux Kernel Variant of OpenIB.org license</Data></Cell>
+    <Cell><Data ss:Type="String">Linux Kernel Variant of OpenIB.org license</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">195</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Lucent Public License Version 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Lucent Public License Version 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LPL-1.02</Data></Cell>
+    <Cell><Data ss:Type="Number">196</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Lucent Public License v1.02</Data></Cell>
+    <Cell><Data ss:Type="String">Lucent Public License v1.02</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LPPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">197</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">LaTeX Project Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">LaTeX Project Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LPPL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">198</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">LaTeX Project Public License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">LaTeX Project Public License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LPPL-1.2</Data></Cell>
+    <Cell><Data ss:Type="Number">199</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">LaTeX Project Public License v1.2</Data></Cell>
+    <Cell><Data ss:Type="String">LaTeX Project Public License v1.2</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LPPL-1.3a</Data></Cell>
+    <Cell><Data ss:Type="Number">200</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">LaTeX Project Public License v1.3a</Data></Cell>
+    <Cell><Data ss:Type="String">LaTeX Project Public License v1.3a</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">LPPL-1.3c</Data></Cell>
+    <Cell><Data ss:Type="Number">201</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">LaTeX Project Public License v1.3c</Data></Cell>
+    <Cell><Data ss:Type="String">LaTeX Project Public License v1.3c</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MakeIndex</Data></Cell>
+    <Cell><Data ss:Type="Number">202</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">MakeIndex License</Data></Cell>
+    <Cell><Data ss:Type="String">MakeIndex License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MirOS</Data></Cell>
+    <Cell><Data ss:Type="Number">203</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">MirOS License</Data></Cell>
+    <Cell><Data ss:Type="String">MirOS License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MIT-0</Data></Cell>
+    <Cell><Data ss:Type="Number">204</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">MIT No Attribution</Data></Cell>
+    <Cell><Data ss:Type="String">MIT No Attribution</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MIT-advertising</Data></Cell>
+    <Cell><Data ss:Type="Number">205</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Enlightenment License (e16)</Data></Cell>
+    <Cell><Data ss:Type="String">Enlightenment License (e16)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MIT-CMU</Data></Cell>
+    <Cell><Data ss:Type="Number">206</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">CMU License</Data></Cell>
+    <Cell><Data ss:Type="String">CMU License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MIT-enna</Data></Cell>
+    <Cell><Data ss:Type="Number">207</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">enna License</Data></Cell>
+    <Cell><Data ss:Type="String">enna License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MIT-feh</Data></Cell>
+    <Cell><Data ss:Type="Number">208</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">feh License</Data></Cell>
+    <Cell><Data ss:Type="String">feh License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MIT</Data></Cell>
+    <Cell><Data ss:Type="Number">209</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">MIT License</Data></Cell>
+    <Cell><Data ss:Type="String">MIT License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MITNFA</Data></Cell>
+    <Cell><Data ss:Type="Number">210</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">MIT +no-false-attribs license</Data></Cell>
+    <Cell><Data ss:Type="String">MIT +no-false-attribs license</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Motosoto</Data></Cell>
+    <Cell><Data ss:Type="Number">211</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Motosoto License</Data></Cell>
+    <Cell><Data ss:Type="String">Motosoto License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">mpich2</Data></Cell>
+    <Cell><Data ss:Type="Number">212</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">mpich2 License</Data></Cell>
+    <Cell><Data ss:Type="String">mpich2 License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">213</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Mozilla Public License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Mozilla Public License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MPL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">214</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Mozilla Public License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Mozilla Public License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MPL-2.0-no-copyleft-exception</Data></Cell>
+    <Cell><Data ss:Type="Number">215</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Mozilla Public License 2.0 (no copyleft exception)</Data></Cell>
+    <Cell><Data ss:Type="String">Mozilla Public License 2.0 (no copyleft exception)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MPL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">216</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Mozilla Public License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Mozilla Public License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MS-PL</Data></Cell>
+    <Cell><Data ss:Type="Number">217</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Microsoft Public License</Data></Cell>
+    <Cell><Data ss:Type="String">Microsoft Public License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MS-RL</Data></Cell>
+    <Cell><Data ss:Type="Number">218</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Microsoft Reciprocal License</Data></Cell>
+    <Cell><Data ss:Type="String">Microsoft Reciprocal License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">MTLL</Data></Cell>
+    <Cell><Data ss:Type="Number">219</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Matrix Template Library License</Data></Cell>
+    <Cell><Data ss:Type="String">Matrix Template Library License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Multics</Data></Cell>
+    <Cell><Data ss:Type="Number">220</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Multics License</Data></Cell>
+    <Cell><Data ss:Type="String">Multics License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Mup</Data></Cell>
+    <Cell><Data ss:Type="Number">221</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Mup License</Data></Cell>
+    <Cell><Data ss:Type="String">Mup License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NASA-1.3</Data></Cell>
+    <Cell><Data ss:Type="Number">222</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">NASA Open Source Agreement 1.3</Data></Cell>
+    <Cell><Data ss:Type="String">NASA Open Source Agreement 1.3</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Naumen</Data></Cell>
+    <Cell><Data ss:Type="Number">223</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Naumen Public License</Data></Cell>
+    <Cell><Data ss:Type="String">Naumen Public License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NBPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">224</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Net Boolean Public License v1</Data></Cell>
+    <Cell><Data ss:Type="String">Net Boolean Public License v1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NCSA</Data></Cell>
+    <Cell><Data ss:Type="Number">225</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">University of Illinois/NCSA Open Source License</Data></Cell>
+    <Cell><Data ss:Type="String">University of Illinois/NCSA Open Source License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Net-SNMP</Data></Cell>
+    <Cell><Data ss:Type="Number">226</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Net-SNMP License</Data></Cell>
+    <Cell><Data ss:Type="String">Net-SNMP License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NetCDF</Data></Cell>
+    <Cell><Data ss:Type="Number">227</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">NetCDF license</Data></Cell>
+    <Cell><Data ss:Type="String">NetCDF license</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Newsletr</Data></Cell>
+    <Cell><Data ss:Type="Number">228</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Newsletr License</Data></Cell>
+    <Cell><Data ss:Type="String">Newsletr License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NGPL</Data></Cell>
+    <Cell><Data ss:Type="Number">229</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Nethack General Public License</Data></Cell>
+    <Cell><Data ss:Type="String">Nethack General Public License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NLOD-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">230</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Norwegian Licence for Open Government Data</Data></Cell>
+    <Cell><Data ss:Type="String">Norwegian Licence for Open Government Data</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NLPL</Data></Cell>
+    <Cell><Data ss:Type="Number">231</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">No Limit Public License</Data></Cell>
+    <Cell><Data ss:Type="String">No Limit Public License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Nokia</Data></Cell>
+    <Cell><Data ss:Type="Number">232</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Nokia Open Source License</Data></Cell>
+    <Cell><Data ss:Type="String">Nokia Open Source License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NOSL</Data></Cell>
+    <Cell><Data ss:Type="Number">233</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Netizen Open Source License</Data></Cell>
+    <Cell><Data ss:Type="String">Netizen Open Source License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Noweb</Data></Cell>
+    <Cell><Data ss:Type="Number">234</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Noweb License</Data></Cell>
+    <Cell><Data ss:Type="String">Noweb License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">235</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Netscape Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Netscape Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NPL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">236</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Netscape Public License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Netscape Public License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NPOSL-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">237</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Non-Profit Open Software License 3.0</Data></Cell>
+    <Cell><Data ss:Type="String">Non-Profit Open Software License 3.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NRL</Data></Cell>
+    <Cell><Data ss:Type="Number">238</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">NRL License</Data></Cell>
+    <Cell><Data ss:Type="String">NRL License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">NTP</Data></Cell>
+    <Cell><Data ss:Type="Number">239</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">NTP License</Data></Cell>
+    <Cell><Data ss:Type="String">NTP License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OCCT-PL</Data></Cell>
+    <Cell><Data ss:Type="Number">240</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open CASCADE Technology Public License</Data></Cell>
+    <Cell><Data ss:Type="String">Open CASCADE Technology Public License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OCLC-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">241</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">OCLC Research Public License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">OCLC Research Public License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ODbL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">242</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">ODC Open Database License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">ODC Open Database License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OFL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">243</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">SIL Open Font License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">SIL Open Font License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OFL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">244</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">SIL Open Font License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">SIL Open Font License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OGTSL</Data></Cell>
+    <Cell><Data ss:Type="Number">245</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open Group Test Suite License</Data></Cell>
+    <Cell><Data ss:Type="String">Open Group Test Suite License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">246</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-1.2</Data></Cell>
+    <Cell><Data ss:Type="Number">247</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v1.2</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v1.2</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-1.3</Data></Cell>
+    <Cell><Data ss:Type="Number">248</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v1.3</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v1.3</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-1.4</Data></Cell>
+    <Cell><Data ss:Type="Number">249</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v1.4</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v1.4</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.0.1</Data></Cell>
+    <Cell><Data ss:Type="Number">250</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.0.1</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.0.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">251</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.0 (or possibly 2.0A and 2.0B)</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.0 (or possibly 2.0A and 2.0B)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.1</Data></Cell>
+    <Cell><Data ss:Type="Number">252</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.1</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.2.1</Data></Cell>
+    <Cell><Data ss:Type="Number">253</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.2.1</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.2.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.2.2</Data></Cell>
+    <Cell><Data ss:Type="Number">254</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License 2.2.2</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License 2.2.2</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.2</Data></Cell>
+    <Cell><Data ss:Type="Number">255</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.2</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.2</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.3</Data></Cell>
+    <Cell><Data ss:Type="Number">256</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.3</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.3</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.4</Data></Cell>
+    <Cell><Data ss:Type="Number">257</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.4</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.4</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.5</Data></Cell>
+    <Cell><Data ss:Type="Number">258</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.5</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.5</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.6</Data></Cell>
+    <Cell><Data ss:Type="Number">259</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.6</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.6</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.7</Data></Cell>
+    <Cell><Data ss:Type="Number">260</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.7</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.7</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OLDAP-2.8</Data></Cell>
+    <Cell><Data ss:Type="Number">261</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open LDAP Public License v2.8</Data></Cell>
+    <Cell><Data ss:Type="String">Open LDAP Public License v2.8</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OML</Data></Cell>
+    <Cell><Data ss:Type="Number">262</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open Market License</Data></Cell>
+    <Cell><Data ss:Type="String">Open Market License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OpenSSL</Data></Cell>
+    <Cell><Data ss:Type="Number">263</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">OpenSSL License</Data></Cell>
+    <Cell><Data ss:Type="String">OpenSSL License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">264</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Open Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OSET-PL-2.1</Data></Cell>
+    <Cell><Data ss:Type="Number">265</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">OSET Public License version 2.1</Data></Cell>
+    <Cell><Data ss:Type="String">OSET Public License version 2.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OSL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">266</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open Software License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Open Software License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OSL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">267</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open Software License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Open Software License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OSL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">268</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open Software License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Open Software License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OSL-2.1</Data></Cell>
+    <Cell><Data ss:Type="Number">269</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open Software License 2.1</Data></Cell>
+    <Cell><Data ss:Type="String">Open Software License 2.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">OSL-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">270</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Open Software License 3.0</Data></Cell>
+    <Cell><Data ss:Type="String">Open Software License 3.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">PDDL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">271</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">ODC Public Domain Dedication &amp; License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">ODC Public Domain Dedication &amp; License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">PHP-3.0</Data></Cell>
+    <Cell><Data ss:Type="Number">272</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">PHP License v3.0</Data></Cell>
+    <Cell><Data ss:Type="String">PHP License v3.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">PHP-3.01</Data></Cell>
+    <Cell><Data ss:Type="Number">273</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">PHP License v3.01</Data></Cell>
+    <Cell><Data ss:Type="String">PHP License v3.01</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Plexus</Data></Cell>
+    <Cell><Data ss:Type="Number">274</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Plexus Classworlds License</Data></Cell>
+    <Cell><Data ss:Type="String">Plexus Classworlds License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">PostgreSQL</Data></Cell>
+    <Cell><Data ss:Type="Number">275</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">PostgreSQL License</Data></Cell>
+    <Cell><Data ss:Type="String">PostgreSQL License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">psfrag</Data></Cell>
+    <Cell><Data ss:Type="Number">276</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">psfrag License</Data></Cell>
+    <Cell><Data ss:Type="String">psfrag License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">psutils</Data></Cell>
+    <Cell><Data ss:Type="Number">277</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">psutils License</Data></Cell>
+    <Cell><Data ss:Type="String">psutils License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Python-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">278</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Python License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Python License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Qhull</Data></Cell>
+    <Cell><Data ss:Type="Number">279</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Qhull License</Data></Cell>
+    <Cell><Data ss:Type="String">Qhull License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">QPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">280</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Q Public License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Q Public License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Rdisc</Data></Cell>
+    <Cell><Data ss:Type="Number">281</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Rdisc License</Data></Cell>
+    <Cell><Data ss:Type="String">Rdisc License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">RHeCos-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">282</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Red Hat eCos Public License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Red Hat eCos Public License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">RPL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">283</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Reciprocal Public License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Reciprocal Public License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">RPL-1.5</Data></Cell>
+    <Cell><Data ss:Type="Number">284</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Reciprocal Public License 1.5</Data></Cell>
+    <Cell><Data ss:Type="String">Reciprocal Public License 1.5</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">RPSL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">285</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">RealNetworks Public Source License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">RealNetworks Public Source License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">RSA-MD</Data></Cell>
+    <Cell><Data ss:Type="Number">286</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">RSA Message-Digest License</Data></Cell>
+    <Cell><Data ss:Type="String">RSA Message-Digest License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">RSCPL</Data></Cell>
+    <Cell><Data ss:Type="Number">287</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Ricoh Source Code Public License</Data></Cell>
+    <Cell><Data ss:Type="String">Ricoh Source Code Public License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Ruby</Data></Cell>
+    <Cell><Data ss:Type="Number">288</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Ruby License</Data></Cell>
+    <Cell><Data ss:Type="String">Ruby License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SAX-PD</Data></Cell>
+    <Cell><Data ss:Type="Number">289</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Sax Public Domain Notice</Data></Cell>
+    <Cell><Data ss:Type="String">Sax Public Domain Notice</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Saxpath</Data></Cell>
+    <Cell><Data ss:Type="Number">290</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Saxpath License</Data></Cell>
+    <Cell><Data ss:Type="String">Saxpath License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SCEA</Data></Cell>
+    <Cell><Data ss:Type="Number">291</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">SCEA Shared Source License</Data></Cell>
+    <Cell><Data ss:Type="String">SCEA Shared Source License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Sendmail</Data></Cell>
+    <Cell><Data ss:Type="Number">292</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Sendmail License</Data></Cell>
+    <Cell><Data ss:Type="String">Sendmail License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SGI-B-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">293</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">SGI Free Software License B v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">SGI Free Software License B v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SGI-B-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">294</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">SGI Free Software License B v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">SGI Free Software License B v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SGI-B-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">295</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">SGI Free Software License B v2.0</Data></Cell>
+    <Cell><Data ss:Type="String">SGI Free Software License B v2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SimPL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">296</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Simple Public License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Simple Public License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SISSL-1.2</Data></Cell>
+    <Cell><Data ss:Type="Number">297</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Sun Industry Standards Source License v1.2</Data></Cell>
+    <Cell><Data ss:Type="String">Sun Industry Standards Source License v1.2</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SISSL</Data></Cell>
+    <Cell><Data ss:Type="Number">298</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Sun Industry Standards Source License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Sun Industry Standards Source License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Sleepycat</Data></Cell>
+    <Cell><Data ss:Type="Number">299</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Sleepycat License</Data></Cell>
+    <Cell><Data ss:Type="String">Sleepycat License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SMLNJ</Data></Cell>
+    <Cell><Data ss:Type="Number">300</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Standard ML of New Jersey License</Data></Cell>
+    <Cell><Data ss:Type="String">Standard ML of New Jersey License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SMPPL</Data></Cell>
+    <Cell><Data ss:Type="Number">301</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Secure Messaging Protocol Public License</Data></Cell>
+    <Cell><Data ss:Type="String">Secure Messaging Protocol Public License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SNIA</Data></Cell>
+    <Cell><Data ss:Type="Number">302</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">SNIA Public License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">SNIA Public License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Spencer-86</Data></Cell>
+    <Cell><Data ss:Type="Number">303</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Spencer License 86</Data></Cell>
+    <Cell><Data ss:Type="String">Spencer License 86</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Spencer-94</Data></Cell>
+    <Cell><Data ss:Type="Number">304</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Spencer License 94</Data></Cell>
+    <Cell><Data ss:Type="String">Spencer License 94</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Spencer-99</Data></Cell>
+    <Cell><Data ss:Type="Number">305</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Spencer License 99</Data></Cell>
+    <Cell><Data ss:Type="String">Spencer License 99</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">306</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Sun Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Sun Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SugarCRM-1.1.3</Data></Cell>
+    <Cell><Data ss:Type="Number">307</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">SugarCRM Public License v1.1.3</Data></Cell>
+    <Cell><Data ss:Type="String">SugarCRM Public License v1.1.3</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">SWL</Data></Cell>
+    <Cell><Data ss:Type="Number">308</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Scheme Widget Library (SWL) Software License Agreement</Data></Cell>
+    <Cell><Data ss:Type="String">Scheme Widget Library (SWL) Software License Agreement</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">TCL</Data></Cell>
+    <Cell><Data ss:Type="Number">309</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">TCL/TK License</Data></Cell>
+    <Cell><Data ss:Type="String">TCL/TK License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">TCP-wrappers</Data></Cell>
+    <Cell><Data ss:Type="Number">310</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">TCP Wrappers License</Data></Cell>
+    <Cell><Data ss:Type="String">TCP Wrappers License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">TMate</Data></Cell>
+    <Cell><Data ss:Type="Number">311</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">TMate Open Source License</Data></Cell>
+    <Cell><Data ss:Type="String">TMate Open Source License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">TORQUE-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">312</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">TORQUE v2.5+ Software License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">TORQUE v2.5+ Software License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">TOSL</Data></Cell>
+    <Cell><Data ss:Type="Number">313</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Trusster Open Source License</Data></Cell>
+    <Cell><Data ss:Type="String">Trusster Open Source License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Unicode-DFS-2015</Data></Cell>
+    <Cell><Data ss:Type="Number">314</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Unicode License Agreement - Data Files and Software (2015)</Data></Cell>
+    <Cell><Data ss:Type="String">Unicode License Agreement - Data Files and Software (2015)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Unicode-DFS-2016</Data></Cell>
+    <Cell><Data ss:Type="Number">315</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Unicode License Agreement - Data Files and Software (2016)</Data></Cell>
+    <Cell><Data ss:Type="String">Unicode License Agreement - Data Files and Software (2016)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Unicode-TOU</Data></Cell>
+    <Cell><Data ss:Type="Number">316</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Unicode Terms of Use</Data></Cell>
+    <Cell><Data ss:Type="String">Unicode Terms of Use</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Unlicense</Data></Cell>
+    <Cell><Data ss:Type="Number">317</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">The Unlicense</Data></Cell>
+    <Cell><Data ss:Type="String">The Unlicense</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">UPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">318</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Universal Permissive License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Universal Permissive License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Vim</Data></Cell>
+    <Cell><Data ss:Type="Number">319</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Vim License</Data></Cell>
+    <Cell><Data ss:Type="String">Vim License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">VOSTROM</Data></Cell>
+    <Cell><Data ss:Type="Number">320</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">VOSTROM Public License for Open Source</Data></Cell>
+    <Cell><Data ss:Type="String">VOSTROM Public License for Open Source</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">VSL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">321</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Vovida Software License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Vovida Software License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">W3C-19980720</Data></Cell>
+    <Cell><Data ss:Type="Number">322</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">W3C Software Notice and License (1998-07-20)</Data></Cell>
+    <Cell><Data ss:Type="String">W3C Software Notice and License (1998-07-20)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">W3C-20150513</Data></Cell>
+    <Cell><Data ss:Type="Number">323</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">W3C Software Notice and Document License (2015-05-13)</Data></Cell>
+    <Cell><Data ss:Type="String">W3C Software Notice and Document License (2015-05-13)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">W3C</Data></Cell>
+    <Cell><Data ss:Type="Number">324</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">W3C Software Notice and License (2002-12-31)</Data></Cell>
+    <Cell><Data ss:Type="String">W3C Software Notice and License (2002-12-31)</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Watcom-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">325</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Sybase Open Watcom Public License 1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Sybase Open Watcom Public License 1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Wsuipa</Data></Cell>
+    <Cell><Data ss:Type="Number">326</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Wsuipa License</Data></Cell>
+    <Cell><Data ss:Type="String">Wsuipa License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">WTFPL</Data></Cell>
+    <Cell><Data ss:Type="Number">327</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Do What The F*ck You Want To Public License</Data></Cell>
+    <Cell><Data ss:Type="String">Do What The F*ck You Want To Public License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">X11</Data></Cell>
+    <Cell><Data ss:Type="Number">328</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">X11 License</Data></Cell>
+    <Cell><Data ss:Type="String">X11 License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Xerox</Data></Cell>
+    <Cell><Data ss:Type="Number">329</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Xerox License</Data></Cell>
+    <Cell><Data ss:Type="String">Xerox License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">XFree86-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">330</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">XFree86 License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">XFree86 License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">xinetd</Data></Cell>
+    <Cell><Data ss:Type="Number">331</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">xinetd License</Data></Cell>
+    <Cell><Data ss:Type="String">xinetd License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Xnet</Data></Cell>
+    <Cell><Data ss:Type="Number">332</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">X.Net License</Data></Cell>
+    <Cell><Data ss:Type="String">X.Net License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">xpp</Data></Cell>
+    <Cell><Data ss:Type="Number">333</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">XPP License</Data></Cell>
+    <Cell><Data ss:Type="String">XPP License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">XSkat</Data></Cell>
+    <Cell><Data ss:Type="Number">334</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">XSkat License</Data></Cell>
+    <Cell><Data ss:Type="String">XSkat License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">YPL-1.0</Data></Cell>
+    <Cell><Data ss:Type="Number">335</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Yahoo! Public License v1.0</Data></Cell>
+    <Cell><Data ss:Type="String">Yahoo! Public License v1.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">YPL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">336</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Yahoo! Public License v1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Yahoo! Public License v1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Zed</Data></Cell>
+    <Cell><Data ss:Type="Number">337</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Zed License</Data></Cell>
+    <Cell><Data ss:Type="String">Zed License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Zend-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">338</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Zend License v2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Zend License v2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Zimbra-1.3</Data></Cell>
+    <Cell><Data ss:Type="Number">339</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Zimbra Public License v1.3</Data></Cell>
+    <Cell><Data ss:Type="String">Zimbra Public License v1.3</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Zimbra-1.4</Data></Cell>
+    <Cell><Data ss:Type="Number">340</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Zimbra Public License v1.4</Data></Cell>
+    <Cell><Data ss:Type="String">Zimbra Public License v1.4</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">zlib-acknowledgement</Data></Cell>
+    <Cell><Data ss:Type="Number">341</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">zlib/libpng License with Acknowledgement</Data></Cell>
+    <Cell><Data ss:Type="String">zlib/libpng License with Acknowledgement</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Zlib</Data></Cell>
+    <Cell><Data ss:Type="Number">342</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">zlib License</Data></Cell>
+    <Cell><Data ss:Type="String">zlib License</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ZPL-1.1</Data></Cell>
+    <Cell><Data ss:Type="Number">343</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Zope Public License 1.1</Data></Cell>
+    <Cell><Data ss:Type="String">Zope Public License 1.1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ZPL-2.0</Data></Cell>
+    <Cell><Data ss:Type="Number">344</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Zope Public License 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">Zope Public License 2.0</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">ZPL-2.1</Data></Cell>
+    <Cell><Data ss:Type="Number">345</Data></Cell>
+    <Cell ss:Index="4"><Data ss:Type="String">Zope Public License 2.1</Data></Cell>
+    <Cell><Data ss:Type="String">Zope Public License 2.1</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <PageSetup>
+    <Header x:Margin="0.3"/>
+    <Footer x:Margin="0.3"/>
+    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
+   </PageSetup>
+   <Print>
+    <ValidPrinterInfo/>
+    <PaperSizeIndex>9</PaperSizeIndex>
+    <HorizontalResolution>-1</HorizontalResolution>
+    <VerticalResolution>-1</VerticalResolution>
+   </Print>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>

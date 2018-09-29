@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,27 +37,27 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum GuidanceResponseStatus {
 
         /**
-         * The request was processed successfully
+         * The request was processed successfully.
          */
         SUCCESS, 
         /**
-         * The request was processed successfully, but more data may result in a more complete evaluation
+         * The request was processed successfully, but more data may result in a more complete evaluation.
          */
         DATAREQUESTED, 
         /**
-         * The request was processed, but more data is required to complete the evaluation
+         * The request was processed, but more data is required to complete the evaluation.
          */
         DATAREQUIRED, 
         /**
-         * The request is currently being processed
+         * The request is currently being processed.
          */
         INPROGRESS, 
         /**
-         * The request was not processed successfully
+         * The request was not processed successfully.
          */
         FAILURE, 
         /**
-         * The response was entered in error
+         * The response was entered in error.
          */
         ENTEREDINERROR, 
         /**
@@ -97,12 +97,12 @@ public enum GuidanceResponseStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case SUCCESS: return "The request was processed successfully";
-            case DATAREQUESTED: return "The request was processed successfully, but more data may result in a more complete evaluation";
-            case DATAREQUIRED: return "The request was processed, but more data is required to complete the evaluation";
-            case INPROGRESS: return "The request is currently being processed";
-            case FAILURE: return "The request was not processed successfully";
-            case ENTEREDINERROR: return "The response was entered in error";
+            case SUCCESS: return "The request was processed successfully.";
+            case DATAREQUESTED: return "The request was processed successfully, but more data may result in a more complete evaluation.";
+            case DATAREQUIRED: return "The request was processed, but more data is required to complete the evaluation.";
+            case INPROGRESS: return "The request is currently being processed.";
+            case FAILURE: return "The request was not processed successfully.";
+            case ENTEREDINERROR: return "The response was entered in error.";
             default: return "?";
           }
         }

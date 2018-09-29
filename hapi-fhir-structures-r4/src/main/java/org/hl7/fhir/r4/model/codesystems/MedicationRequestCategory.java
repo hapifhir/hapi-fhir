@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedicationRequestCategory {
 
         /**
-         * Includes orders for medications to be administered or consumed in an inpatient or acute care setting
+         * Includes requests for medications to be administered or consumed in an inpatient or acute care setting.
          */
         INPATIENT, 
         /**
-         * Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)
+         * Includes requests for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office).
          */
         OUTPATIENT, 
         /**
-         * Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.)
+         * Includes requests for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.).
          */
         COMMUNITY, 
         /**
-         * Includes orders for medications created when the patient is being released from a facility
+         * Includes requests for medications created when the patient is being released from a facility.
          */
         DISCHARGE, 
         /**
@@ -79,14 +79,14 @@ public enum MedicationRequestCategory {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medication-request-category";
+          return "http://terminology.hl7.org/CodeSystem/medication-request-category";
         }
         public String getDefinition() {
           switch (this) {
-            case INPATIENT: return "Includes orders for medications to be administered or consumed in an inpatient or acute care setting";
-            case OUTPATIENT: return "Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)";
-            case COMMUNITY: return "Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.)";
-            case DISCHARGE: return "Includes orders for medications created when the patient is being released from a facility";
+            case INPATIENT: return "Includes requests for medications to be administered or consumed in an inpatient or acute care setting.";
+            case OUTPATIENT: return "Includes requests for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office).";
+            case COMMUNITY: return "Includes requests for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.).";
+            case DISCHARGE: return "Includes requests for medications created when the patient is being released from a facility.";
             default: return "?";
           }
         }

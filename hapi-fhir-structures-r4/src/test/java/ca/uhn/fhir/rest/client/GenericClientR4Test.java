@@ -246,7 +246,7 @@ public class GenericClientR4Test {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail();
 		} catch (FhirClientConnectionException e) {
-			assertEquals("java.lang.IllegalStateException", e.getMessage());
+			assertEquals(null, e.getMessage());
 		}
 
 		try {
@@ -1350,12 +1350,12 @@ public class GenericClientR4Test {
 		client.search()
 			.forResource(EpisodeOfCare.class)
 			.where(EpisodeOfCare.PATIENT.hasId("123"))
-			.revInclude(Encounter.INCLUDE_EPISODEOFCARE)
+			.revInclude(Encounter.INCLUDE_EPISODE_OF_CARE)
 			.revInclude(Observation.INCLUDE_ENCOUNTER.asRecursive())
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/EpisodeOfCare?patient=123&_revinclude=Encounter%3Aepisodeofcare&_revinclude%3Arecurse=Observation%3Aencounter",
+		assertEquals("http://example.com/fhir/EpisodeOfCare?patient=123&_revinclude=Encounter%3Aepisode-of-care&_revinclude%3Arecurse=Observation%3Aencounter",
 			capt.getAllValues().get(idx).getURI().toString());
 		idx++;
 

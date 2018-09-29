@@ -41,6 +41,7 @@ cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu
 cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu3/src/org/hl7/fhir/dstu3/utils/ExtensionHelper.java ./hapi-fhir-structures-dstu3/src/main/java/org/hl7/fhir/dstu3/utils/ExtensionHelper.java
 cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.dstu2016may/src/org/hl7/fhir/dstu2016may/utils/ToolingExtensions.java ./hapi-fhir-structures-dstu2.1/src/main/java/org/hl7/fhir/dstu2016may/utils/ToolingExtensions.java
 cp /home/james/workspace/fhir/trunk/build/implementations/java/org.hl7.fhir.r4/src/org/hl7/fhir/r4/formats/JsonParser.java ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/formats/JsonParser.java
+cp /home/james/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.r4/src/org/hl7/fhir/r4/formats/RdfParser.java hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/formats/RdfParser.java
 
 cp /home/james/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.r4/src/org/hl7/fhir/r4/formats/XmlParser.java ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/formats/XmlParser.java
 cp /home/james/workspace/fhir/trunk/build/temp/java/org.hl7.fhir.r4/src/org/hl7/fhir/r4/formats/JsonParser.java ./hapi-fhir-structures-r4/src/main/java/org/hl7/fhir/r4/formats/JsonParser.java

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -49,35 +49,35 @@ public class RelatedArtifact extends Type implements ICompositeType {
 
     public enum RelatedArtifactType {
         /**
-         * Additional documentation for the knowledge resource. This would include additional instructions on usage as well as additional information on clinical context or appropriateness
+         * Additional documentation for the knowledge resource. This would include additional instructions on usage as well as additional information on clinical context or appropriateness.
          */
         DOCUMENTATION, 
         /**
-         * A summary of the justification for the knowledge resource including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the knowledge resource available to the consumer of interventions or results produced by the knowledge resource
+         * A summary of the justification for the knowledge resource including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the knowledge resource available to the consumer of interventions or results produced by the knowledge resource.
          */
         JUSTIFICATION, 
         /**
-         * Bibliographic citation for papers, references, or other relevant material for the knowledge resource. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this knowledge resource
+         * Bibliographic citation for papers, references, or other relevant material for the knowledge resource. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this knowledge resource.
          */
         CITATION, 
         /**
-         * The previous version of the knowledge resource
+         * The previous version of the knowledge resource.
          */
         PREDECESSOR, 
         /**
-         * The next version of the knowledge resource
+         * The next version of the knowledge resource.
          */
         SUCCESSOR, 
         /**
-         * The knowledge resource is derived from the related artifact. This is intended to capture the relationship in which a particular knowledge resource is based on the content of another artifact, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting
+         * The knowledge resource is derived from the related artifact. This is intended to capture the relationship in which a particular knowledge resource is based on the content of another artifact, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting.
          */
         DERIVEDFROM, 
         /**
-         * The knowledge resource depends on the given related artifact
+         * The knowledge resource depends on the given related artifact.
          */
         DEPENDSON, 
         /**
-         * The knowledge resource is composed of the given related artifact
+         * The knowledge resource is composed of the given related artifact.
          */
         COMPOSEDOF, 
         /**
@@ -136,14 +136,14 @@ public class RelatedArtifact extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case DOCUMENTATION: return "Additional documentation for the knowledge resource. This would include additional instructions on usage as well as additional information on clinical context or appropriateness";
-            case JUSTIFICATION: return "A summary of the justification for the knowledge resource including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the knowledge resource available to the consumer of interventions or results produced by the knowledge resource";
-            case CITATION: return "Bibliographic citation for papers, references, or other relevant material for the knowledge resource. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this knowledge resource";
-            case PREDECESSOR: return "The previous version of the knowledge resource";
-            case SUCCESSOR: return "The next version of the knowledge resource";
-            case DERIVEDFROM: return "The knowledge resource is derived from the related artifact. This is intended to capture the relationship in which a particular knowledge resource is based on the content of another artifact, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting";
-            case DEPENDSON: return "The knowledge resource depends on the given related artifact";
-            case COMPOSEDOF: return "The knowledge resource is composed of the given related artifact";
+            case DOCUMENTATION: return "Additional documentation for the knowledge resource. This would include additional instructions on usage as well as additional information on clinical context or appropriateness.";
+            case JUSTIFICATION: return "A summary of the justification for the knowledge resource including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the knowledge resource available to the consumer of interventions or results produced by the knowledge resource.";
+            case CITATION: return "Bibliographic citation for papers, references, or other relevant material for the knowledge resource. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this knowledge resource.";
+            case PREDECESSOR: return "The previous version of the knowledge resource.";
+            case SUCCESSOR: return "The next version of the knowledge resource.";
+            case DERIVEDFROM: return "The knowledge resource is derived from the related artifact. This is intended to capture the relationship in which a particular knowledge resource is based on the content of another artifact, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting.";
+            case DEPENDSON: return "The knowledge resource depends on the given related artifact.";
+            case COMPOSEDOF: return "The knowledge resource is composed of the given related artifact.";
             default: return "?";
           }
         }
@@ -567,7 +567,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
         children.add(new Property("citation", "string", "A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.", 0, 1, citation));
         children.add(new Property("url", "url", "A url for the artifact that can be followed to access the actual content.", 0, 1, url));
         children.add(new Property("document", "Attachment", "The document being referenced, represented as an attachment. This is exclusive with the resource element.", 0, 1, document));
-        children.add(new Property("resource", "canonical", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource));
+        children.add(new Property("resource", "canonical(Any)", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource));
       }
 
       @Override
@@ -578,7 +578,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
         case -1442706713: /*citation*/  return new Property("citation", "string", "A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.", 0, 1, citation);
         case 116079: /*url*/  return new Property("url", "url", "A url for the artifact that can be followed to access the actual content.", 0, 1, url);
         case 861720859: /*document*/  return new Property("document", "Attachment", "The document being referenced, represented as an attachment. This is exclusive with the resource element.", 0, 1, document);
-        case -341064690: /*resource*/  return new Property("resource", "canonical", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource);
+        case -341064690: /*resource*/  return new Property("resource", "canonical(Any)", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -739,7 +739,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
           return false;
         RelatedArtifact o = (RelatedArtifact) other_;
         return compareValues(type, o.type, true) && compareValues(display, o.display, true) && compareValues(citation, o.citation, true)
-           && compareValues(url, o.url, true) && compareValues(resource, o.resource, true);
+           && compareValues(url, o.url, true);
       }
 
       public boolean isEmpty() {

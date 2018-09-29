@@ -11,7 +11,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
-import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -19,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -376,7 +375,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						String compartmentOwnerResourceType = next.getResourceType();
 						if (!StringUtils.equals(appliesToResourceType, compartmentOwnerResourceType)) {
 							List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(compartmentOwnerResourceType);
-							if (params.isEmpty() == false) {
+							if (!params.isEmpty()) {
 
 								/*
 								 * If this is a search, we can at least check whether

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,6 +69,10 @@ public enum CarePlanActivityStatus {
          */
         UNKNOWN, 
         /**
+         * The activity was entered in error and voided.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -91,6 +95,8 @@ public enum CarePlanActivityStatus {
           return STOPPED;
         if ("unknown".equals(codeString))
           return UNKNOWN;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         throw new FHIRException("Unknown CarePlanActivityStatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -103,6 +109,7 @@ public enum CarePlanActivityStatus {
             case CANCELLED: return "cancelled";
             case STOPPED: return "stopped";
             case UNKNOWN: return "unknown";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -119,6 +126,7 @@ public enum CarePlanActivityStatus {
             case CANCELLED: return "The planned activity has been withdrawn.";
             case STOPPED: return "The planned activity has been ended prior to completion after the activity was started.";
             case UNKNOWN: return "The current state of the activity is not known.  Note: This concept is not to be used for \"other\".";
+            case ENTEREDINERROR: return "The activity was entered in error and voided.";
             default: return "?";
           }
         }
@@ -132,6 +140,7 @@ public enum CarePlanActivityStatus {
             case CANCELLED: return "Cancelled";
             case STOPPED: return "Stopped";
             case UNKNOWN: return "Unknown";
+            case ENTEREDINERROR: return "Entered In Error";
             default: return "?";
           }
     }

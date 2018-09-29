@@ -2043,8 +2043,6 @@
                <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"/>
                <!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.22.4.4:2015-08-01-->
             </meta>
-            <clinicalStatus value="active"/>
-            <verificationStatus value="confirmed"/>
             <category>
                <coding>
                   <system value="http://snomed.info/sct"/>
@@ -2116,8 +2114,6 @@
                <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition"/>
                <!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.22.4.4:2015-08-01-->
             </meta>
-            <clinicalStatus value="active"/>
-            <verificationStatus value="confirmed"/>
             <category>
                <coding>
                   <system value="http://hl7.org/fhir/v3/ActCode"/>

@@ -42,7 +42,7 @@ public class ObjectConverter  {
     if (base == null)
       return null;
     String tn = base.fhirType();
-    StructureDefinition sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(tn));
+    StructureDefinition sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(tn, context.getOverrideVersionNs()));
     if (sd == null)
       throw new FHIRException("Unable to find definition for type "+tn);
     Element res = new Element(property.getName(), property);
@@ -86,7 +86,7 @@ public class ObjectConverter  {
     ByteArrayOutputStream bo = new ByteArrayOutputStream();
     try {
       new JsonParser(context).compose(element, bo, OutputStyle.NORMAL, null);
-      TextFile.bytesToFile(bo.toByteArray(), "c:\\temp\\json.json");
+//      TextFile.bytesToFile(bo.toByteArray(), "c:\\temp\\json.json");
       return new org.hl7.fhir.r4.formats.JsonParser().parse(bo.toByteArray());
     } catch (IOException e) {
       // won't happen

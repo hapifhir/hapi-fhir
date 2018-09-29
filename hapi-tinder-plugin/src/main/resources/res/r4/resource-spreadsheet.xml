@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
+﻿<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
   <LastAuthor>Grahame Grieve</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2016-02-04T01:34:39Z</LastSaved>
+  <LastSaved>2018-07-22T20:09:42Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -14,7 +14,7 @@
   
   
   
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>4</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -3278,11 +3278,10 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>3</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>13</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -4022,7 +4021,7 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="=Operations!R1C1:R2C11"/>
   </Names>
-  <Table ss:ExpandedColumnCount="14" ss:ExpandedRowCount="47" ss:StyleID="s111" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="15" ss:ExpandedRowCount="50" ss:StyleID="s111" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="192.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="125.0"/>
    <Column ss:StyleID="s111" ss:Width="24.0"/>
@@ -4045,6 +4044,7 @@
     <Cell><Data ss:Type="String">Example.Request</Data></Cell>
     <Cell><Data ss:Type="String">Example.Response</Data></Cell>
     <Cell><Data ss:Type="String">Standards-Status</Data></Cell>
+    <Cell><Data ss:Type="String">fmm</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="348">
     <Cell ss:StyleID="s113"><Data ss:Type="String">validate</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4057,7 +4057,7 @@
     <Cell ss:StyleID="s114"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s114"><Data ss:Type="String">Validate a resource</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s128"><Data ss:Type="String">The validate operation checks whether the attached content would be acceptable either generally, as a create, an update or as a delete to an existing resource.  The action the server takes depends on the mode parameter:  &#10;&#10;* [mode not provided]: The server checks the content of the resource against any schema, constraint rules, and other general terminology rules &#10;* create: The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not violate any uniqueness constraints) &#10;* update: The server checks the content, and then checks that it would accept it as an update against the nominated specific resource (e.g. that there are no changes to immutable fields the server does not allow to change, and checking version integrity if appropriate) &#10;* delete: The server ignores the content, and checks that the nominated resource is allowed to be deleted (e.g. checking referential integrity rules)  &#10;&#10;Modes update and delete can only be used when the operation is invoked at the resource instance level.   The return from this operation is an [[[OperationOutcome]]]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s129"><Data ss:Type="String">This operation may be used during design and development to validate application design. It can also be used at run-time. One possible use might be that a client asks the server whether a proposed update is valid as the user is editing a dialog and displays an updated error to the user. The operation can be used as part of a light-weight two phase commit protocol but there is no expectation that the server will hold the content of the resource after this operation is used, or that the server guarantees to successfully perform an actual create, update or delete after the validation operation completes.&#10;&#10;This operation returns a 200 OK whether or not the resource is valid. A 4xx or 5xx error means that the validation itself could not be performed, and it is unknown whether the resource is valid or not.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s129"><Data ss:Type="String">This operation may be used during design and development to validate application design. It can also be used at run-time. One possible use might be that a client asks the server whether a proposed update is valid as the user is editing a dialog and displays an updated error to the user. The operation can be used as part of a light-weight two phase commit protocol but there is no expectation that the server will hold the content of the resource after this operation is used, or that the server guarantees to successfully perform an actual create, update or delete after the validation operation completes.&#10;&#10;This operation returns a 200 OK whether or not the resource is valid. A 4xx or 5xx error means that the validation itself could not be performed, and it is unknown whether the resource is valid or not.&#10;&#10;Note: the correct behaviour of validation with regard to language (especially for Coding.display) is currently undefined, and further development and testing may lead to specific requirements or recommendations in subsequent releases</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">$validate-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$validate-response.txt</Data></Cell>
    </Row>
@@ -4128,6 +4128,7 @@
     <Cell><Data ss:Type="String">$meta-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$meta-response.txt</Data></Cell>
     <Cell><Data ss:Type="String">trial-use</Data></Cell>
+    <Cell><Data ss:Type="Number">3</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s116"><Data ss:Type="String">meta.return</Data></Cell>
@@ -4152,11 +4153,12 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Add profiles, tags, and security labels to a resource</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">This operation takes a meta, and adds the profiles, tags, and security labels found in it to the nominated resource.   This operation can also be used on historical entries - to update them without creating a different historical version</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">This operation is special in that executing this operation does not cause a new version of the resource to be created. The meta is updated directly. This is because the content in meta does not affect the meaning of the resource, and the security labels (in particular) are used to apply access rules to existing versions of resources</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">This operation takes a meta, and adds the profiles, tags, and security labels found in it to the nominated resource</Data></Cell>
+    <Cell ss:StyleID="s132"/>
     <Cell><Data ss:Type="String">$meta-add-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$meta-add-response.txt</Data></Cell>
     <Cell><Data ss:Type="String">trial-use</Data></Cell>
+    <Cell><Data ss:Type="Number">3</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="97">
     <Cell ss:StyleID="s116"><Data ss:Type="String">meta-add.meta</Data></Cell>
@@ -4194,11 +4196,12 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s117"><Data ss:Type="String">Delete profiles, tags, and security labels for a resource</Data></Cell>
-    <Cell ss:StyleID="s131"><Data ss:Type="String">This operation takes a meta, and deletes the profiles, tags, and security labels found in it from the nominated resource.   This operation can also be used on historical entries</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">This operation is special in that executing this operation does not cause a new version of the resource to be created. The meta is updated directly. This is because the content in meta does not affect the meaning of the resource, and the security labels (in particular) are used to apply access rules to existing versions of resources</Data></Cell>
+    <Cell ss:StyleID="s131"><Data ss:Type="String">This operation takes a meta, and deletes the profiles, tags, and security labels found in it from the nominated resource</Data></Cell>
+    <Cell ss:StyleID="s132"/>
     <Cell><Data ss:Type="String">$meta-delete-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$meta-delete-response.txt</Data></Cell>
     <Cell><Data ss:Type="String">trial-use</Data></Cell>
+    <Cell><Data ss:Type="Number">3</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="97">
     <Cell ss:StyleID="s116"><Data ss:Type="String">meta-delete.meta</Data></Cell>
@@ -4226,7 +4229,93 @@
     <Cell ss:StyleID="s117"><Data ss:Type="String">Resulting meta for the resource</Data></Cell>
     <Cell ss:StyleID="s132"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Index="46">
+   <Row ss:AutoFitHeight="0" ss:Height="410">
+    <Cell><Data ss:Type="String">convert</Data></Cell>
+    <Cell><Data ss:Type="String">System</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">operation</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">Convert from one form to another</Data></Cell>
+    <Cell><Data ss:Type="String">This operation takes a resource in one form, and returns to in another form. Both input and output are a single resource. The primary use of this operation is to convert between formats (e.g. (XML -&gt; JSON or vice versa)</Data></Cell>
+    <Cell><Data ss:Type="String">While the primary use of this operation is simple - converting a resource from one format to another, there are many potential uses including:&#10;&#10;* converting resources from one version to another&#10;* restructuring information in a resource (e.g. moving method into/out of Observation.code)&#10;* extracting data from a questionnaire&#10;* converting CDA documents or v2 messages (as a binary resource) to a bundle (or vice versa) (or even openEHR or openMHealth). &#10;&#10;These variants would all be associated with parameters that define and control these kind of conversions, though such parameters are not defined at this time. In the absence of any parameters, simple format conversion is all that will occur.&#10;&#10;For this reason, implementers should be aware that:&#10;&#10;* the output resource type may be different from the input resource (particularly, it might be a bundle)&#10;* binary resources may be represented directly using some other content-type (i.e. just post the content directly)&#10;&#10;Implementers are encouraged to provide feedback to HL7 about their use of this operation&#10;</Data></Cell>
+    <Cell><Data ss:Type="String">$convert-request.txt</Data></Cell>
+    <Cell><Data ss:Type="String">$convert-response.txt</Data></Cell>
+    <Cell><Data ss:Type="String">draft</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">convert.input</Data></Cell>
+    <Cell><Data ss:Type="String">in</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">Resource to convert</Data></Cell>
+    <Cell><Data ss:Type="String">The resource that is to be converted</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">convert.output</Data></Cell>
+    <Cell><Data ss:Type="String">out</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Resource</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">Converted resource</Data></Cell>
+    <Cell><Data ss:Type="String">The resource after conversion</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="43">
+    <Cell><Data ss:Type="String">graphql</Data></Cell>
+    <Cell><Data ss:Type="String">system | instance</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">operation</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">Execute a graphql statement</Data></Cell>
+    <Cell><Data ss:Type="String">Execute a graphql statement on a since resource or against the entire system. See the [Using GraphQL with FHIR](graphql.html) page for further details.&#10;&#10;For the purposes of graphQL compatibility, this operation can also be invoked using a POST with the graphQL as the body, or a JSON body (see [graphQL spec](http://graphql.org/) for details)</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="String">trial-use</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">graphql.query</Data></Cell>
+    <Cell><Data ss:Type="String">in</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">string</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">GraphQL statement to execute</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29">
+    <Cell><Data ss:Type="String">graphql.result</Data></Cell>
+    <Cell><Data ss:Type="String">out</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Binary</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">Output from graphQL execution</Data></Cell>
+    <Cell><Data ss:Type="String">The content is always returned as application/json; this SHOULD be specified in the Accept header</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="71">
+    <Cell><Data ss:Type="String">graph</Data></Cell>
+    <Cell><Data ss:Type="String">instance</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="String">operation</Data></Cell>
+    <Cell><Data ss:Type="String">y</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">Return a graph of resources</Data></Cell>
+    <Cell><Data ss:Type="String">Return an entire graph of resources based on a [GraphDefinition](graphdefinition.html). The operation is invoked on a specific instance of a resource, and the graph definition tells the server what other resources to return in the same packaage</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="String">trial-use</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="71">
+    <Cell><Data ss:Type="String">graph.graph</Data></Cell>
+    <Cell><Data ss:Type="String">in</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">uri</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">Graph to use - either a local id, or an absolute URI</Data></Cell>
+    <Cell><Data ss:Type="String">Servers MAY choose to allow any graph definition to be specified, but MAY require that the client choose a graph definition from a specific list of known supported definitions. The server is not required to support a formal definition of the graph on the end point</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="29">
+    <Cell><Data ss:Type="String">graph.result</Data></Cell>
+    <Cell><Data ss:Type="String">out</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Bundle</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">Set of resources in the graph</Data></Cell>
+    <Cell><Data ss:Type="String">The set of resources that were in the graph based on the provided definition</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Index="49">
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s134"/>
@@ -4253,12 +4342,13 @@
     <HorizontalResolution>-1</HorizontalResolution>
     <VerticalResolution>-1</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>2</TopRowBottomPane>
+   <TopRowBottomPane>15</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>7</LeftColumnRightPane>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -5604,8 +5694,7 @@
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="31" ss:StyleID="s111" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s111" ss:Width="115.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="275.0"/>
-   <Column ss:StyleID="s111" ss:Width="51.0"/>
-   <Column ss:StyleID="s111" ss:Width="45.0"/>
+   <Column ss:Index="4" ss:StyleID="s111" ss:Width="45.0"/>
    <Column ss:StyleID="s111" ss:Width="146.0"/>
    <Column ss:StyleID="s111" ss:Width="173.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="98.0"/>
@@ -6149,12 +6238,12 @@
     <Cell ss:StyleID="s143"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s142"/>
-    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s142"><Data ss:Type="String">profile</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Validate Against a Profile</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The server checks an existing resource (must be nominated by id, not provided as a parameter) as valid against the nominated profile</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s143"/>

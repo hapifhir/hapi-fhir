@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -77,6 +77,14 @@ public enum SearchModifierCode {
          */
         TYPE, 
         /**
+         * The search parameter applies to the identifier on the resource, not the reference.
+         */
+        IDENTIFIER, 
+        /**
+         * The search parameter has the format system|code|value, where the system and code refer to a Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present.
+         */
+        OFTYPE, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -103,6 +111,10 @@ public enum SearchModifierCode {
           return ABOVE;
         if ("type".equals(codeString))
           return TYPE;
+        if ("identifier".equals(codeString))
+          return IDENTIFIER;
+        if ("ofType".equals(codeString))
+          return OFTYPE;
         throw new FHIRException("Unknown SearchModifierCode code '"+codeString+"'");
         }
         public String toCode() {
@@ -117,6 +129,8 @@ public enum SearchModifierCode {
             case BELOW: return "below";
             case ABOVE: return "above";
             case TYPE: return "type";
+            case IDENTIFIER: return "identifier";
+            case OFTYPE: return "ofType";
             default: return "?";
           }
         }
@@ -135,6 +149,8 @@ public enum SearchModifierCode {
             case BELOW: return "The search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or hierarchical relationships).";
             case ABOVE: return "The search parameter tests whether the value in a resource subsumes the specified value (is-a, or hierarchical relationships).";
             case TYPE: return "The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc.).";
+            case IDENTIFIER: return "The search parameter applies to the identifier on the resource, not the reference.";
+            case OFTYPE: return "The search parameter has the format system|code|value, where the system and code refer to a Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present.";
             default: return "?";
           }
         }
@@ -150,6 +166,8 @@ public enum SearchModifierCode {
             case BELOW: return "Below";
             case ABOVE: return "Above";
             case TYPE: return "Type";
+            case IDENTIFIER: return "Identifier";
+            case OFTYPE: return "Of Type";
             default: return "?";
           }
     }

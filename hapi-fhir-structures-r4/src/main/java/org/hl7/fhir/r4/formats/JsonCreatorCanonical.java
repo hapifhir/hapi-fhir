@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
-import com.google.gson.stream.JsonWriter;
-
 public class JsonCreatorCanonical implements JsonCreator {
 
   public class JsonCanValue {
@@ -22,6 +20,14 @@ public class JsonCreatorCanonical implements JsonCreator {
   private class JsonCanNumberValue extends JsonCanValue {
     private BigDecimal value;
     private JsonCanNumberValue(String name, BigDecimal value) {
+      super(name);
+      this.value = value;  
+    }
+  }
+
+  private class JsonCanPresentedNumberValue extends JsonCanValue {
+    private String value;
+    private JsonCanPresentedNumberValue(String name, String value) {
       super(name);
       this.value = value;  
     }
@@ -74,12 +80,12 @@ public class JsonCreatorCanonical implements JsonCreator {
 
   Stack<JsonCanObject> stack;
   JsonCanObject root; 
-  JsonWriter gson;
+  JsonCreatorDirect jj;
   String name;
   
   public JsonCreatorCanonical(OutputStreamWriter osw) {
     stack = new Stack<JsonCreatorCanonical.JsonCanObject>();
-    gson = new JsonWriter(osw);
+    jj = new JsonCreatorDirect(osw);
     name = null;
   }
 
@@ -93,7 +99,7 @@ public class JsonCreatorCanonical implements JsonCreator {
   public void setIndent(String indent) {
     if (!indent.equals(""))
       throw new Error("do not use pretty when canonical is set");
-    gson.setIndent(indent);
+    jj.setIndent(indent);
   }
 
   @Override
@@ -135,6 +141,11 @@ public class JsonCreatorCanonical implements JsonCreator {
   public void value(BigDecimal value) throws IOException {
     stack.peek().addProp(new JsonCanNumberValue(takeName(), value));    
   }
+  @Override
+  public void valueNum(String value) throws IOException {
+    stack.peek().addProp(new JsonCanPresentedNumberValue(takeName(), value));    
+  }
+
 
   @Override
   public void value(Integer value) throws IOException {
@@ -161,24 +172,26 @@ public class JsonCreatorCanonical implements JsonCreator {
   }
 
   private void writeObject(JsonCanObject obj) throws IOException {
-    gson.beginObject();
+    jj.beginObject();
     List<String> names = new ArrayList<String>();
     for (JsonCanValue v : obj.children) 
       names.add(v.name);
     Collections.sort(names);
     for (String n : names) {
-      gson.name(n);
+      jj.name(n);
       JsonCanValue v = getPropForName(n, obj.children);
       if (v instanceof JsonCanNumberValue)
-        gson.value(((JsonCanNumberValue) v).value);
+        jj.value(((JsonCanNumberValue) v).value);
+      else if (v instanceof JsonCanPresentedNumberValue)
+        jj.valueNum(((JsonCanPresentedNumberValue) v).value);
       else if (v instanceof JsonCanIntegerValue)
-          gson.value(((JsonCanIntegerValue) v).value);
+        jj.value(((JsonCanIntegerValue) v).value);
       else if (v instanceof JsonCanBooleanValue)
-        gson.value(((JsonCanBooleanValue) v).value);
+        jj.value(((JsonCanBooleanValue) v).value);
       else if (v instanceof JsonCanStringValue)
-        gson.value(((JsonCanStringValue) v).value);
+        jj.value(((JsonCanStringValue) v).value);
       else if (v instanceof JsonCanNullValue)
-        gson.nullValue();
+        jj.nullValue();
       else if (v instanceof JsonCanObject) {
         JsonCanObject o = (JsonCanObject) v;
         if (o.array) 
@@ -188,7 +201,7 @@ public class JsonCreatorCanonical implements JsonCreator {
       } else
         throw new Error("not possible");
     }
-    gson.endObject();
+    jj.endObject();
   }
 
   private JsonCanValue getPropForName(String name, List<JsonCanValue> children) {
@@ -199,18 +212,18 @@ public class JsonCreatorCanonical implements JsonCreator {
   }
 
   private void writeArray(JsonCanObject arr) throws IOException {
-    gson.beginArray();
+    jj.beginArray();
     for (JsonCanValue v : arr.children) { 
       if (v instanceof JsonCanNumberValue)
-        gson.value(((JsonCanNumberValue) v).value);
+        jj.value(((JsonCanNumberValue) v).value);
       else if (v instanceof JsonCanIntegerValue)
-          gson.value(((JsonCanIntegerValue) v).value);
+          jj.value(((JsonCanIntegerValue) v).value);
       else if (v instanceof JsonCanBooleanValue)
-        gson.value(((JsonCanBooleanValue) v).value);
+        jj.value(((JsonCanBooleanValue) v).value);
       else if (v instanceof JsonCanStringValue)
-        gson.value(((JsonCanStringValue) v).value);
+        jj.value(((JsonCanStringValue) v).value);
       else if (v instanceof JsonCanNullValue)
-        gson.nullValue();
+        jj.nullValue();
       else if (v instanceof JsonCanObject) {
         JsonCanObject o = (JsonCanObject) v;
         if (o.array) 
@@ -220,7 +233,7 @@ public class JsonCreatorCanonical implements JsonCreator {
       } else
         throw new Error("not possible");
     }
-    gson.endArray();    
+    jj.endArray();    
   }
 
   @Override

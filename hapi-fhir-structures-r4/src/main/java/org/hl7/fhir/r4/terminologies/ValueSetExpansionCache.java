@@ -39,7 +39,8 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.formats.IParser.OutputStyle;
-import org.hl7.fhir.r4.model.ExpansionProfile;
+import org.hl7.fhir.r4.formats.JsonParser;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Resource;
@@ -56,15 +57,15 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
   public class CacheAwareExpander implements ValueSetExpander {
 
 	  @Override
-	  public ValueSetExpansionOutcome expand(ValueSet source, ExpansionProfile profile) throws ETooCostly, IOException {
-	    String cacheKey = makeCacheKey(source, profile);
+	  public ValueSetExpansionOutcome expand(ValueSet source, Parameters expParams) throws ETooCostly, IOException {
+	    String cacheKey = makeCacheKey(source, expParams);
 	  	if (expansions.containsKey(cacheKey))
 	  		return expansions.get(cacheKey);
-	  	ValueSetExpander vse = new ValueSetExpanderSimple(context, ValueSetExpansionCache.this);
-	  	ValueSetExpansionOutcome vso = vse.expand(source, profile);
+	  	ValueSetExpander vse = new ValueSetExpanderSimple(context);
+	  	ValueSetExpansionOutcome vso = vse.expand(source, expParams);
 	  	if (vso.getError() != null) {
 	  	  // well, we'll see if the designated server can expand it, and if it can, we'll cache it locally
-	  		vso = context.expandVS(source, false, profile == null || !profile.getExcludeNested());
+	  		vso = context.expandVS(source, false, expParams == null || !expParams.getParameterBool("excludeNested"));
 	  		if (cacheFolder != null) {
 	  		  FileOutputStream s = new FileOutputStream(Utilities.path(cacheFolder, makeFileName(source.getUrl())));
 	  		  context.newXmlParser().setOutputStyle(OutputStyle.PRETTY).compose(s, vso.getValueset());
@@ -76,8 +77,12 @@ public class ValueSetExpansionCache implements ValueSetExpanderFactory {
 	  	return vso;
 	  }
 
-    private String makeCacheKey(ValueSet source, ExpansionProfile profile) {
-      return profile == null ? source.getUrl() : source.getUrl() + " " + profile.getUrl()+" "+profile.getExcludeNested(); 
+    private String makeCacheKey(ValueSet source, Parameters expParams) throws IOException {
+      if (expParams == null)
+        return source.getUrl();
+      JsonParser p = new JsonParser();
+      String r = p.composeString(expParams);
+      return source.getUrl() + " " + r.hashCode(); 
     }
 
   }

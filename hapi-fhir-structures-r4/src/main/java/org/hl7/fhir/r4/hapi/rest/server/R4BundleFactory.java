@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Bundle;
@@ -42,6 +43,7 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@SuppressWarnings("Duplicates")
 public class R4BundleFactory implements IVersionSpecificBundleFactory {
   private String myBase;
   private Bundle myBundle;
@@ -205,12 +207,24 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
       BundleEntryComponent entry = myBundle.addEntry().setResource((Resource) next);
       Resource nextAsResource = (Resource) next;
       IIdType id = populateBundleEntryFullUrl(next, entry);
+
+      // Populate Request
       String httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(nextAsResource);
       if (httpVerb != null) {
         entry.getRequest().getMethodElement().setValueAsString(httpVerb);
         if (id != null) {
           entry.getRequest().setUrl(id.getValue());
         }
+      }
+
+      // Populate Response
+      if ("1".equals(id.getVersionIdPart())) {
+        entry.getResponse().setStatus("201 Created");
+      } else if (isNotBlank(id.getVersionIdPart())) {
+        entry.getResponse().setStatus("200 OK");
+      }
+      if (isNotBlank(id.getVersionIdPart())) {
+        entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
       }
 
       String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);

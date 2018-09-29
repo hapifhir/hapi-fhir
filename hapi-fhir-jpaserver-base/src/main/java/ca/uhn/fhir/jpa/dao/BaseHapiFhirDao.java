@@ -388,7 +388,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
-		expungeHistoricalVersion(currentVersion.getId());
+		if (currentVersion != null) {
+			expungeHistoricalVersion(currentVersion.getId());
+		}
 
 		ourLog.info("Deleting current version of resource {}", resource.getIdDt().getValue());
 
@@ -2338,7 +2340,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			IResource res = (IResource) theResource;
 			TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(res);
 			if (tagList != null) {
-				tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+				tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
 				totalMetaCount += tagList.size();
 			}
 			List<IdDt> profileList = ResourceMetadataKeyEnum.PROFILES.get(res);
@@ -2347,7 +2349,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 		} else {
 			IAnyResource res = (IAnyResource) theResource;
-			tag = res.getMeta().getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+			tag = res.getMeta().getTag(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
 			totalMetaCount += res.getMeta().getTag().size();
 			totalMetaCount += res.getMeta().getProfile().size();
 			totalMetaCount += res.getMeta().getSecurity().size();

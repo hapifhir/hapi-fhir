@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,31 +37,31 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ContainerCap {
 
         /**
-         * red cap
+         * red cap.
          */
         RED, 
         /**
-         * yellow cap
+         * yellow cap.
          */
         YELLOW, 
         /**
-         * grey cap
+         * grey cap.
          */
         GREY, 
         /**
-         * violet cap
+         * violet cap.
          */
         VIOLET, 
         /**
-         * blue cap
+         * blue cap.
          */
         BLUE, 
         /**
-         * black cap
+         * black cap.
          */
         BLACK, 
         /**
-         * green cap
+         * green cap.
          */
         GREEN, 
         /**
@@ -100,17 +100,17 @@ public enum ContainerCap {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/container-cap";
+          return "http://terminology.hl7.org/CodeSystem/container-cap";
         }
         public String getDefinition() {
           switch (this) {
-            case RED: return "red cap";
-            case YELLOW: return "yellow cap";
-            case GREY: return "grey cap";
-            case VIOLET: return "violet cap";
-            case BLUE: return "blue cap";
-            case BLACK: return "black cap";
-            case GREEN: return "green cap";
+            case RED: return "red cap.";
+            case YELLOW: return "yellow cap.";
+            case GREY: return "grey cap.";
+            case VIOLET: return "violet cap.";
+            case BLUE: return "blue cap.";
+            case BLACK: return "black cap.";
+            case GREEN: return "green cap.";
             default: return "?";
           }
         }

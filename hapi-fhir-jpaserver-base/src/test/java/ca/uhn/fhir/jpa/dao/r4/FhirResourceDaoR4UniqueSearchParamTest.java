@@ -721,7 +721,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		Observation obs = new Observation();
 		obs.setSubject(new Reference(ptid));
-		obs.setContext(new Reference(encid));
+		obs.setEncounter(new Reference(encid));
 		myObservationDao.create(obs);
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {

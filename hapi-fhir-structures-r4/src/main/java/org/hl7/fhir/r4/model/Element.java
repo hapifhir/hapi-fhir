@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Tue, Apr 3, 2018 06:39+1000 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -362,7 +362,13 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
      }
    }
   
-
+   public void removeExtension(String theUrl) {
+     for (int i = getExtension().size()-1; i >= 0; i--) {
+       if (theUrl.equals(getExtension().get(i).getUrl()))
+         getExtension().remove(i);
+     }
+   }
+   
    /**
     * This is used in the FHIRPath engine to record that no extensions are allowed for this item in the context in which it is used.
     * todo: enforce this....
@@ -377,11 +383,13 @@ public abstract class Element extends Base implements IBaseHasExtensions, IBaseE
     this.disallowExtensions = disallowExtensions;
     return this;
   }
-   
+
   public Element noExtensions() {
     this.disallowExtensions = true;
     return this;
   }
+  
+
 // end addition
 
 }

@@ -2,7 +2,6 @@ package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -13,6 +12,7 @@ import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.io.IOException;
@@ -49,8 +49,8 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   }
 
   @Override
-  public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-    ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
+  public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
+    ValueSetExpander.ValueSetExpansionOutcome retVal = new ValueSetExpander.ValueSetExpansionOutcome(new ValueSet());
 
     Set<String> wantCodes = new HashSet<>();
     for (ConceptReferenceComponent next : theInclude.getConcept()) {
@@ -60,15 +60,15 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     CodeSystem system = fetchCodeSystem(theContext, theInclude.getSystem());
     if (system != null) {
       List<ConceptDefinitionComponent> concepts = system.getConcept();
-      addConcepts(theInclude, retVal, wantCodes, concepts);
+      addConcepts(theInclude, retVal.getValueset().getExpansion(), wantCodes, concepts);
     }
 
     for (UriType next : theInclude.getValueSet()) {
       ValueSet vs = myValueSets.get(defaultString(next.getValueAsString()));
       if (vs != null) {
         for (ConceptSetComponent nextInclude : vs.getCompose().getInclude()) {
-          ValueSetExpansionComponent contents = expandValueSet(theContext, nextInclude);
-          retVal.getContains().addAll(contents.getContains());
+          ValueSetExpander.ValueSetExpansionOutcome contents = expandValueSet(theContext, nextInclude);
+          retVal.getValueset().getExpansion().getContains().addAll(contents.getValueset().getExpansion().getContains());
         }
       }
     }
@@ -230,7 +230,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   private Map<String, StructureDefinition> provideStructureDefinitionMap(FhirContext theContext) {
     Map<String, StructureDefinition> structureDefinitions = myStructureDefinitions;
     if (structureDefinitions == null) {
-      structureDefinitions = new HashMap<String, StructureDefinition>();
+      structureDefinitions = new HashMap<>();
 
       loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r4/model/profile/profiles-resources.xml");
       loadStructureDefinitions(theContext, structureDefinitions, "/org/hl7/fhir/r4/model/profile/profiles-types.xml");

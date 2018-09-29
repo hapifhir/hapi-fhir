@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -49,19 +49,19 @@ public class Contributor extends Type implements ICompositeType {
 
     public enum ContributorType {
         /**
-         * An author of the content of the module
+         * An author of the content of the module.
          */
         AUTHOR, 
         /**
-         * An editor of the content of the module
+         * An editor of the content of the module.
          */
         EDITOR, 
         /**
-         * A reviewer of the content of the module
+         * A reviewer of the content of the module.
          */
         REVIEWER, 
         /**
-         * An endorser of the content of the module
+         * An endorser of the content of the module.
          */
         ENDORSER, 
         /**
@@ -104,10 +104,10 @@ public class Contributor extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case AUTHOR: return "An author of the content of the module";
-            case EDITOR: return "An editor of the content of the module";
-            case REVIEWER: return "A reviewer of the content of the module";
-            case ENDORSER: return "An endorser of the content of the module";
+            case AUTHOR: return "An author of the content of the module.";
+            case EDITOR: return "An editor of the content of the module.";
+            case REVIEWER: return "A reviewer of the content of the module.";
+            case ENDORSER: return "An endorser of the content of the module.";
             default: return "?";
           }
         }

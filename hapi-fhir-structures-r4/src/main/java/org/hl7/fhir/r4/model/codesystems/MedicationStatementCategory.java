@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedicationStatementCategory {
 
         /**
-         * Includes orders for medications to be administered or consumed in an inpatient or acute care setting
+         * Includes orders for medications to be administered or consumed in an inpatient or acute care setting.
          */
         INPATIENT, 
         /**
-         * Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)
+         * Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office).
          */
         OUTPATIENT, 
         /**
-         * Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.)
+         * Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.).
          */
         COMMUNITY, 
         /**
-         * Includes statements about medication use, including over the counter medication, provided by the patient, agent or another provider
+         * Includes statements about medication use, including over the counter medication, provided by the patient, agent or another provider.
          */
         PATIENTSPECIFIED, 
         /**
@@ -79,14 +79,14 @@ public enum MedicationStatementCategory {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medication-statement-category";
+          return "http://terminology.hl7.org/CodeSystem/medication-statement-category";
         }
         public String getDefinition() {
           switch (this) {
-            case INPATIENT: return "Includes orders for medications to be administered or consumed in an inpatient or acute care setting";
-            case OUTPATIENT: return "Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)";
-            case COMMUNITY: return "Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.)";
-            case PATIENTSPECIFIED: return "Includes statements about medication use, including over the counter medication, provided by the patient, agent or another provider";
+            case INPATIENT: return "Includes orders for medications to be administered or consumed in an inpatient or acute care setting.";
+            case OUTPATIENT: return "Includes orders for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office).";
+            case COMMUNITY: return "Includes orders for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.).";
+            case PATIENTSPECIFIED: return "Includes statements about medication use, including over the counter medication, provided by the patient, agent or another provider.";
             default: return "?";
           }
         }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,31 +37,31 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum QuestionnaireEnableOperator {
 
         /**
-         * True if whether an answer exists is equal to the enableWhen answer (which must be a boolean)
+         * True if whether an answer exists is equal to the enableWhen answer (which must be a boolean).
          */
         EXISTS, 
         /**
-         * True if whether at least one answer has a value that is equal to the enableWhen answer
+         * True if whether at least one answer has a value that is equal to the enableWhen answer.
          */
         EQUAL, 
         /**
-         * True if whether at least no answer has a value that is equal to the enableWhen answer
+         * True if whether at least no answer has a value that is equal to the enableWhen answer.
          */
         NOT_EQUAL, 
         /**
-         * True if whether at least no answer has a value that is greater than the enableWhen answer
+         * True if whether at least no answer has a value that is greater than the enableWhen answer.
          */
         GREATER_THAN, 
         /**
-         * True if whether at least no answer has a value that is less than the enableWhen answer
+         * True if whether at least no answer has a value that is less than the enableWhen answer.
          */
         LESS_THAN, 
         /**
-         * True if whether at least no answer has a value that is greater or equal to the enableWhen answer
+         * True if whether at least no answer has a value that is greater or equal to the enableWhen answer.
          */
         GREATER_OR_EQUAL, 
         /**
-         * True if whether at least no answer has a value that is less or equal to the enableWhen answer
+         * True if whether at least no answer has a value that is less or equal to the enableWhen answer.
          */
         LESS_OR_EQUAL, 
         /**
@@ -104,13 +104,13 @@ public enum QuestionnaireEnableOperator {
         }
         public String getDefinition() {
           switch (this) {
-            case EXISTS: return "True if whether an answer exists is equal to the enableWhen answer (which must be a boolean)";
-            case EQUAL: return "True if whether at least one answer has a value that is equal to the enableWhen answer";
-            case NOT_EQUAL: return "True if whether at least no answer has a value that is equal to the enableWhen answer";
-            case GREATER_THAN: return "True if whether at least no answer has a value that is greater than the enableWhen answer";
-            case LESS_THAN: return "True if whether at least no answer has a value that is less than the enableWhen answer";
-            case GREATER_OR_EQUAL: return "True if whether at least no answer has a value that is greater or equal to the enableWhen answer";
-            case LESS_OR_EQUAL: return "True if whether at least no answer has a value that is less or equal to the enableWhen answer";
+            case EXISTS: return "True if whether an answer exists is equal to the enableWhen answer (which must be a boolean).";
+            case EQUAL: return "True if whether at least one answer has a value that is equal to the enableWhen answer.";
+            case NOT_EQUAL: return "True if whether at least no answer has a value that is equal to the enableWhen answer.";
+            case GREATER_THAN: return "True if whether at least no answer has a value that is greater than the enableWhen answer.";
+            case LESS_THAN: return "True if whether at least no answer has a value that is less than the enableWhen answer.";
+            case GREATER_OR_EQUAL: return "True if whether at least no answer has a value that is greater or equal to the enableWhen answer.";
+            case LESS_OR_EQUAL: return "True if whether at least no answer has a value that is less or equal to the enableWhen answer.";
             default: return "?";
           }
         }

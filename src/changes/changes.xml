@@ -35,7 +35,15 @@
 			<action type="add">
 				A new operation has been added to the JPA server called $retrigger-subscription. This can
 				be used to cause a transaction to redeliver a resource that previously triggered.
-			</actiom>
+			</action>
+			<action type="add">
+				When operating in R4 mode, the HAPI FHIR server will now populate Bundle.entry.response
+				for history and search results, which is did not previously do.
+			</action>
+			<action type="add">
+				The JPA database migrator tool has been enhanced so that it now supports migrations from
+				HAPI FHIR 3.3.0 to HAPI FHIR 3.4.0 / 3.5.0+ as well.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -43,6 +43,8 @@ public class QuestionnaireDisplayCategoryEnumFactory implements EnumFactory<Ques
       return QuestionnaireDisplayCategory.INSTRUCTIONS;
     if ("security".equals(codeString))
       return QuestionnaireDisplayCategory.SECURITY;
+    if ("help".equals(codeString))
+      return QuestionnaireDisplayCategory.HELP;
     throw new IllegalArgumentException("Unknown QuestionnaireDisplayCategory code '"+codeString+"'");
   }
 
@@ -51,6 +53,8 @@ public class QuestionnaireDisplayCategoryEnumFactory implements EnumFactory<Ques
       return "instructions";
     if (code == QuestionnaireDisplayCategory.SECURITY)
       return "security";
+    if (code == QuestionnaireDisplayCategory.HELP)
+      return "help";
     return "?";
   }
 

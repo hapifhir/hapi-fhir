@@ -545,6 +545,14 @@ public class ToolingExtensions {
     }
   }
 
+  public static int readIntegerExtension(DomainResource dr, String uri, int defaultValue) {
+    Extension ex = ExtensionHelper.getExtension(dr, uri);
+    if (ex == null)
+      return defaultValue;
+    if (ex.getValue() instanceof IntegerType)
+      return ((IntegerType) ex.getValue()).getValue();
+    throw new Error("Unable to read extension "+uri+" as an integer");
+  }
 
 //  public static boolean hasOID(ValueSet vs) {
 //    return hasExtension(vs, EXT_OID);

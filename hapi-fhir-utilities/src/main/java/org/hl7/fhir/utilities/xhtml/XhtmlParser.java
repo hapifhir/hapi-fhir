@@ -839,6 +839,8 @@ private boolean elementIsOk(String name) throws FHIRFormatError  {
       s.append(XhtmlNode.NBSP);
     else if (c.equals("amp"))
       s.append('&');
+    else if (c.equals("lsquo"))
+      s.append((char) 8216); // right single quotation, U+2019 ISOnum 
     else if (c.equals("rsquo"))
       s.append((char) 8217); // right single quotation, U+2019 ISOnum 
       //s.append((char)0x60); // right single quote

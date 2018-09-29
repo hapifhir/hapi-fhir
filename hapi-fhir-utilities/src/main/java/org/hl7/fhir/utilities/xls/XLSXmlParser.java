@@ -84,7 +84,7 @@ public class XLSXmlParser {
         return "";
       else {
         s = rows.get(row).get(c); 
-        return s == null ? "" : s.trim();
+        return s == null ? "" : s.trim().replace("\t",  "  ").replace("\u00A0", " ");
       }
     }
 

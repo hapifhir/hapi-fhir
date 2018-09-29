@@ -2,6 +2,7 @@ package ca.uhn.fhir.util;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -24,6 +25,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
@@ -40,6 +43,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 
 public class FhirTerser {
 
+	public static final Pattern COMPARTMENT_MATCHER_PATH = Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
 	private FhirContext myContext;
 
 	public FhirTerser(FhirContext theContext) {
@@ -364,8 +368,26 @@ public class FhirTerser {
 		List<RuntimeSearchParam> params = sourceDef.getSearchParamsForCompartmentName(theCompartmentName);
 		for (RuntimeSearchParam nextParam : params) {
 			for (String nextPath : nextParam.getPathsSplit()) {
+
+				/*
+				 * DSTU3 and before just defined compartments as being (e.g.) named
+				 * Patient with a path like CarePlan.subject
+				 *
+				 * R4 uses a fancier format like CarePlan.subject.where(resolve() is Patient)
+				 *
+				 * The following Regex is a hack to make that efficient at runtime.
+				 */
+				String wantType = null;
+				Pattern pattern = COMPARTMENT_MATCHER_PATH;
+				Matcher matcher = pattern.matcher(nextPath);
+				if (matcher.matches()) {
+					nextPath = matcher.group(1);
+					wantType = matcher.group(2);
+				}
+
 				for (IBaseReference nextValue : getValues(theSource, nextPath, IBaseReference.class)) {
-					String nextRef = nextValue.getReferenceElement().toUnqualifiedVersionless().getValue();
+					IIdType nextTargetId = nextValue.getReferenceElement();
+					String nextRef = nextTargetId.toUnqualifiedVersionless().getValue();
 
 					/*
 					 * If the reference isn't an explicit resource ID, but instead is just
@@ -374,12 +396,18 @@ public class FhirTerser {
 					 */
 					if (isBlank(nextRef) && nextValue.getResource() != null) {
 						IBaseResource nextTarget = nextValue.getResource();
-						IIdType nextTargetId = nextTarget.getIdElement().toUnqualifiedVersionless();
+						nextTargetId = nextTarget.getIdElement().toUnqualifiedVersionless();
 						if (!nextTargetId.hasResourceType()) {
 							String resourceType = myContext.getResourceDefinition(nextTarget).getName();
 							nextTargetId.setParts(null, resourceType, nextTargetId.getIdPart(), null);
 						}
 						nextRef = nextTargetId.getValue();
+					}
+
+					if (isNotBlank(wantType)) {
+						if (!nextTargetId.getResourceType().equals(wantType)) {
+							continue;
+						}
 					}
 
 					if (wantRef.equals(nextRef)) {

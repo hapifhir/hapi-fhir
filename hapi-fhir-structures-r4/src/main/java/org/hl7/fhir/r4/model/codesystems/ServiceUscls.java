@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -65,7 +65,7 @@ public enum ServiceUscls {
          */
         _2102, 
         /**
-         * Radiograph, bytewing
+         * Radiograph, bitewing
          */
         _2141, 
         /**
@@ -191,7 +191,7 @@ public enum ServiceUscls {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/ex-USCLS";
+          return "http://terminology.hl7.org/CodeSystem/ex-USCLS";
         }
         public String getDefinition() {
           switch (this) {
@@ -202,7 +202,7 @@ public enum ServiceUscls {
             case _1205: return "Exam, emergency";
             case _2101: return "Radiograph, series (12)";
             case _2102: return "Radiograph, series (16)";
-            case _2141: return "Radiograph, bytewing";
+            case _2141: return "Radiograph, bitewing";
             case _2601: return "Radiograph, panoramic";
             case _11101: return "Polishing, 1 unit";
             case _11102: return "Polishing, 2 unit";
@@ -227,7 +227,7 @@ public enum ServiceUscls {
             case _1205: return "Exam, emergency";
             case _2101: return "Radiograph, series (12)";
             case _2102: return "Radiograph, series (16)";
-            case _2141: return "Radiograph, bytewing";
+            case _2141: return "Radiograph, bitewing";
             case _2601: return "Radiograph, panoramic";
             case _11101: return "Polishing, 1 unit";
             case _11102: return "Polishing, 2 unit";

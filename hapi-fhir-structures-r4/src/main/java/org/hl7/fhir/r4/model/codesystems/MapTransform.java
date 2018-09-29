@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,71 +37,71 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MapTransform {
 
         /**
-         * create(type : string) - type is passed through to the application on the standard API, and must be known by it
+         * create(type : string) - type is passed through to the application on the standard API, and must be known by it.
          */
         CREATE, 
         /**
-         * copy(source)
+         * copy(source).
          */
         COPY, 
         /**
-         * truncate(source, length) - source must be stringy type
+         * truncate(source, length) - source must be stringy type.
          */
         TRUNCATE, 
         /**
-         * escape(source, fmt1, fmt2) - change source from one kind of escaping to another (plain, java, xml, json). note that this is for when the string itself is escaped
+         * escape(source, fmt1, fmt2) - change source from one kind of escaping to another (plain, java, xml, json). note that this is for when the string itself is escaped.
          */
         ESCAPE, 
         /**
-         * cast(source, type?) - case source from one type to another. target type can be left as implicit if there is one and only one target type known
+         * cast(source, type?) - case source from one type to another. target type can be left as implicit if there is one and only one target type known.
          */
         CAST, 
         /**
-         * append(source...) - source is element or string
+         * append(source...) - source is element or string.
          */
         APPEND, 
         /**
-         * translate(source, uri_of_map) - use the translate operation
+         * translate(source, uri_of_map) - use the translate operation.
          */
         TRANSLATE, 
         /**
-         * reference(source : object) - return a string that references the provided tree properly
+         * reference(source : object) - return a string that references the provided tree properly.
          */
         REFERENCE, 
         /**
-         * Perform a date operation. *Parameters to be documented*
+         * Perform a date operation. *Parameters to be documented*.
          */
         DATEOP, 
         /**
-         * Generate a random UUID (in lowercase). No Parameters
+         * Generate a random UUID (in lowercase). No Parameters.
          */
         UUID, 
         /**
-         * Return the appropriate string to put in a reference that refers to the resource provided as a parameter
+         * Return the appropriate string to put in a reference that refers to the resource provided as a parameter.
          */
         POINTER, 
         /**
-         * Execute the supplied FHIRPath expression and use the value returned by that
+         * Execute the supplied FHIRPath expression and use the value returned by that.
          */
         EVALUATE, 
         /**
-         * Create a CodeableConcept. Parameters = (text) or (system. Code[, display])
+         * Create a CodeableConcept. Parameters = (text) or (system. Code[, display]).
          */
         CC, 
         /**
-         * Create a Coding. Parameters = (system. Code[, display])
+         * Create a Coding. Parameters = (system. Code[, display]).
          */
         C, 
         /**
-         * Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit
+         * Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit.
          */
         QTY, 
         /**
-         * Create an identifier. Parameters = (system, value[, type]) where type is a code from the identifier type value set
+         * Create an identifier. Parameters = (system, value[, type]) where type is a code from the identifier type value set.
          */
         ID, 
         /**
-         * Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value
+         * Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value.
          */
         CP, 
         /**
@@ -174,23 +174,23 @@ public enum MapTransform {
         }
         public String getDefinition() {
           switch (this) {
-            case CREATE: return "create(type : string) - type is passed through to the application on the standard API, and must be known by it";
-            case COPY: return "copy(source)";
-            case TRUNCATE: return "truncate(source, length) - source must be stringy type";
-            case ESCAPE: return "escape(source, fmt1, fmt2) - change source from one kind of escaping to another (plain, java, xml, json). note that this is for when the string itself is escaped";
-            case CAST: return "cast(source, type?) - case source from one type to another. target type can be left as implicit if there is one and only one target type known";
-            case APPEND: return "append(source...) - source is element or string";
-            case TRANSLATE: return "translate(source, uri_of_map) - use the translate operation";
-            case REFERENCE: return "reference(source : object) - return a string that references the provided tree properly";
-            case DATEOP: return "Perform a date operation. *Parameters to be documented*";
-            case UUID: return "Generate a random UUID (in lowercase). No Parameters";
-            case POINTER: return "Return the appropriate string to put in a reference that refers to the resource provided as a parameter";
-            case EVALUATE: return "Execute the supplied FHIRPath expression and use the value returned by that";
-            case CC: return "Create a CodeableConcept. Parameters = (text) or (system. Code[, display])";
-            case C: return "Create a Coding. Parameters = (system. Code[, display])";
-            case QTY: return "Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit";
-            case ID: return "Create an identifier. Parameters = (system, value[, type]) where type is a code from the identifier type value set";
-            case CP: return "Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value";
+            case CREATE: return "create(type : string) - type is passed through to the application on the standard API, and must be known by it.";
+            case COPY: return "copy(source).";
+            case TRUNCATE: return "truncate(source, length) - source must be stringy type.";
+            case ESCAPE: return "escape(source, fmt1, fmt2) - change source from one kind of escaping to another (plain, java, xml, json). note that this is for when the string itself is escaped.";
+            case CAST: return "cast(source, type?) - case source from one type to another. target type can be left as implicit if there is one and only one target type known.";
+            case APPEND: return "append(source...) - source is element or string.";
+            case TRANSLATE: return "translate(source, uri_of_map) - use the translate operation.";
+            case REFERENCE: return "reference(source : object) - return a string that references the provided tree properly.";
+            case DATEOP: return "Perform a date operation. *Parameters to be documented*.";
+            case UUID: return "Generate a random UUID (in lowercase). No Parameters.";
+            case POINTER: return "Return the appropriate string to put in a reference that refers to the resource provided as a parameter.";
+            case EVALUATE: return "Execute the supplied FHIRPath expression and use the value returned by that.";
+            case CC: return "Create a CodeableConcept. Parameters = (text) or (system. Code[, display]).";
+            case C: return "Create a Coding. Parameters = (system. Code[, display]).";
+            case QTY: return "Create a quantity. Parameters = (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit.";
+            case ID: return "Create an identifier. Parameters = (system, value[, type]) where type is a code from the identifier type value set.";
+            case CP: return "Create a contact details. Parameters = (value) or (system, value). If no system is provided, the system should be inferred from the content of the value.";
             default: return "?";
           }
         }

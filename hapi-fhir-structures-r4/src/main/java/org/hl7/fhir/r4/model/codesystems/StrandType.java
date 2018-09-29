@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum StrandType {
 
         /**
-         * Watson strand of reference sequence
+         * Watson strand of reference sequence.
          */
         WATSON, 
         /**
-         * Crick strand of reference sequence
+         * Crick strand of reference sequence.
          */
         CRICK, 
         /**
@@ -69,8 +69,8 @@ public enum StrandType {
         }
         public String getDefinition() {
           switch (this) {
-            case WATSON: return "Watson strand of reference sequence";
-            case CRICK: return "Crick strand of reference sequence";
+            case WATSON: return "Watson strand of reference sequence.";
+            case CRICK: return "Crick strand of reference sequence.";
             default: return "?";
           }
         }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,35 +37,35 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum RelatedArtifactType {
 
         /**
-         * Additional documentation for the knowledge resource. This would include additional instructions on usage as well as additional information on clinical context or appropriateness
+         * Additional documentation for the knowledge resource. This would include additional instructions on usage as well as additional information on clinical context or appropriateness.
          */
         DOCUMENTATION, 
         /**
-         * A summary of the justification for the knowledge resource including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the knowledge resource available to the consumer of interventions or results produced by the knowledge resource
+         * A summary of the justification for the knowledge resource including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the knowledge resource available to the consumer of interventions or results produced by the knowledge resource.
          */
         JUSTIFICATION, 
         /**
-         * Bibliographic citation for papers, references, or other relevant material for the knowledge resource. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this knowledge resource
+         * Bibliographic citation for papers, references, or other relevant material for the knowledge resource. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this knowledge resource.
          */
         CITATION, 
         /**
-         * The previous version of the knowledge resource
+         * The previous version of the knowledge resource.
          */
         PREDECESSOR, 
         /**
-         * The next version of the knowledge resource
+         * The next version of the knowledge resource.
          */
         SUCCESSOR, 
         /**
-         * The knowledge resource is derived from the related artifact. This is intended to capture the relationship in which a particular knowledge resource is based on the content of another artifact, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting
+         * The knowledge resource is derived from the related artifact. This is intended to capture the relationship in which a particular knowledge resource is based on the content of another artifact, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting.
          */
         DERIVEDFROM, 
         /**
-         * The knowledge resource depends on the given related artifact
+         * The knowledge resource depends on the given related artifact.
          */
         DEPENDSON, 
         /**
-         * The knowledge resource is composed of the given related artifact
+         * The knowledge resource is composed of the given related artifact.
          */
         COMPOSEDOF, 
         /**
@@ -111,14 +111,14 @@ public enum RelatedArtifactType {
         }
         public String getDefinition() {
           switch (this) {
-            case DOCUMENTATION: return "Additional documentation for the knowledge resource. This would include additional instructions on usage as well as additional information on clinical context or appropriateness";
-            case JUSTIFICATION: return "A summary of the justification for the knowledge resource including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the knowledge resource available to the consumer of interventions or results produced by the knowledge resource";
-            case CITATION: return "Bibliographic citation for papers, references, or other relevant material for the knowledge resource. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this knowledge resource";
-            case PREDECESSOR: return "The previous version of the knowledge resource";
-            case SUCCESSOR: return "The next version of the knowledge resource";
-            case DERIVEDFROM: return "The knowledge resource is derived from the related artifact. This is intended to capture the relationship in which a particular knowledge resource is based on the content of another artifact, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting";
-            case DEPENDSON: return "The knowledge resource depends on the given related artifact";
-            case COMPOSEDOF: return "The knowledge resource is composed of the given related artifact";
+            case DOCUMENTATION: return "Additional documentation for the knowledge resource. This would include additional instructions on usage as well as additional information on clinical context or appropriateness.";
+            case JUSTIFICATION: return "A summary of the justification for the knowledge resource including supporting evidence, relevant guidelines, or other clinically important information. This information is intended to provide a way to make the justification for the knowledge resource available to the consumer of interventions or results produced by the knowledge resource.";
+            case CITATION: return "Bibliographic citation for papers, references, or other relevant material for the knowledge resource. This is intended to allow for citation of related material, but that was not necessarily specifically prepared in connection with this knowledge resource.";
+            case PREDECESSOR: return "The previous version of the knowledge resource.";
+            case SUCCESSOR: return "The next version of the knowledge resource.";
+            case DERIVEDFROM: return "The knowledge resource is derived from the related artifact. This is intended to capture the relationship in which a particular knowledge resource is based on the content of another artifact, but is modified to capture either a different set of overall requirements, or a more specific set of requirements such as those involved in a particular institution or clinical setting.";
+            case DEPENDSON: return "The knowledge resource depends on the given related artifact.";
+            case COMPOSEDOF: return "The knowledge resource is composed of the given related artifact.";
             default: return "?";
           }
         }

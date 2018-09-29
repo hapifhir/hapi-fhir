@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -61,6 +61,8 @@ public class FhirVersionsEnumFactory implements EnumFactory<FhirVersions> {
       return FhirVersions._1_0_0;
     if ("1.0.1".equals(codeString))
       return FhirVersions._1_0_1;
+    if ("1.0.2".equals(codeString))
+      return FhirVersions._1_0_2;
     if ("1.1.0".equals(codeString))
       return FhirVersions._1_1_0;
     if ("1.4.0".equals(codeString))
@@ -73,8 +75,8 @@ public class FhirVersionsEnumFactory implements EnumFactory<FhirVersions> {
       return FhirVersions._3_0_0;
     if ("3.0.1".equals(codeString))
       return FhirVersions._3_0_1;
-    if ("3.4.0".equals(codeString))
-      return FhirVersions._3_4_0;
+    if ("3.5.0".equals(codeString))
+      return FhirVersions._3_5_0;
     throw new IllegalArgumentException("Unknown FhirVersions code '"+codeString+"'");
   }
 
@@ -101,6 +103,8 @@ public class FhirVersionsEnumFactory implements EnumFactory<FhirVersions> {
       return "1.0.0";
     if (code == FhirVersions._1_0_1)
       return "1.0.1";
+    if (code == FhirVersions._1_0_2)
+      return "1.0.2";
     if (code == FhirVersions._1_1_0)
       return "1.1.0";
     if (code == FhirVersions._1_4_0)
@@ -113,8 +117,8 @@ public class FhirVersionsEnumFactory implements EnumFactory<FhirVersions> {
       return "3.0.0";
     if (code == FhirVersions._3_0_1)
       return "3.0.1";
-    if (code == FhirVersions._3_4_0)
-      return "3.4.0";
+    if (code == FhirVersions._3_5_0)
+      return "3.5.0";
     return "?";
   }
 

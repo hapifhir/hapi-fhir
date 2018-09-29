@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ProductStorageScale {
 
         /**
-         * Fahrenheit temperature scale
+         * Fahrenheit temperature scale.
          */
         FARENHEIT, 
         /**
-         * Celsius or centigrade temperature scale
+         * Celsius or centigrade temperature scale.
          */
         CELSIUS, 
         /**
-         * Kelvin absolute thermodynamic temperature scale
+         * Kelvin absolute thermodynamic temperature scale.
          */
         KELVIN, 
         /**
@@ -76,9 +76,9 @@ public enum ProductStorageScale {
         }
         public String getDefinition() {
           switch (this) {
-            case FARENHEIT: return "Fahrenheit temperature scale";
-            case CELSIUS: return "Celsius or centigrade temperature scale";
-            case KELVIN: return "Kelvin absolute thermodynamic temperature scale";
+            case FARENHEIT: return "Fahrenheit temperature scale.";
+            case CELSIUS: return "Celsius or centigrade temperature scale.";
+            case KELVIN: return "Kelvin absolute thermodynamic temperature scale.";
             default: return "?";
           }
         }

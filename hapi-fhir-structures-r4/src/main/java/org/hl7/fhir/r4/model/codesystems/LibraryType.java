@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum LibraryType {
 
         /**
-         * The resource is a shareable library of formalized knowledge
+         * The resource is a shareable library of formalized knowledge.
          */
         LOGICLIBRARY, 
         /**
-         * The resource is a definition of an information model
+         * The resource is a definition of an information model.
          */
         MODELDEFINITION, 
         /**
-         * The resource is a collection of knowledge assets
+         * The resource is a collection of knowledge assets.
          */
         ASSETCOLLECTION, 
         /**
-         * The resource defines the dependencies, parameters, and data requirements for a particular module or evaluation context
+         * The resource defines the dependencies, parameters, and data requirements for a particular module or evaluation context.
          */
         MODULEDEFINITION, 
         /**
@@ -79,14 +79,14 @@ public enum LibraryType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/library-type";
+          return "http://terminology.hl7.org/CodeSystem/library-type";
         }
         public String getDefinition() {
           switch (this) {
-            case LOGICLIBRARY: return "The resource is a shareable library of formalized knowledge";
-            case MODELDEFINITION: return "The resource is a definition of an information model";
-            case ASSETCOLLECTION: return "The resource is a collection of knowledge assets";
-            case MODULEDEFINITION: return "The resource defines the dependencies, parameters, and data requirements for a particular module or evaluation context";
+            case LOGICLIBRARY: return "The resource is a shareable library of formalized knowledge.";
+            case MODELDEFINITION: return "The resource is a definition of an information model.";
+            case ASSETCOLLECTION: return "The resource is a collection of knowledge assets.";
+            case MODULEDEFINITION: return "The resource defines the dependencies, parameters, and data requirements for a particular module or evaluation context.";
             default: return "?";
           }
         }

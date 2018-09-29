@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao.r4;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -48,14 +49,16 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorR4.class);
-
 	@Autowired
 	private org.hl7.fhir.r4.hapi.ctx.IValidationSupport myValidationSupport;
 
@@ -108,10 +111,11 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
 		ArrayList<PathAndRef> retVal = new ArrayList<>();
 
-		String[] nextPathsSplit = SPLIT.split(theNextSpDef.getPath());
+		String[] nextPathsSplit = SPLIT_R4.split(theNextSpDef.getPath());
 		for (String path : nextPathsSplit) {
 			path = path.trim();
 			if (isNotBlank(path)) {
+
 				for (Object next : extractValues(path, theResource)) {
 					retVal.add(new PathAndRef(path, next));
 				}
@@ -447,7 +451,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 							addSearchTerm(theEntity, retVal, nextSpName, value.toPlainString());
 						}
 					} else if (nextObject instanceof Range) {
-						SimpleQuantity low = ((Range) nextObject).getLow();
+						Quantity low = ((Range) nextObject).getLow();
 						if (low != null) {
 							BigDecimal value = low.getValue();
 							if (value != null) {
@@ -708,9 +712,10 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
 		IWorkerContext worker = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
 		FHIRPathEngine fp = new FHIRPathEngine(worker);
+		fp.setHostServices(new SearchParamExtractorR4HostServices());
 
 		List<Object> values = new ArrayList<>();
-		String[] nextPathsSplit = SPLIT.split(thePaths);
+		String[] nextPathsSplit = SPLIT_R4.split(thePaths);
 		for (String nextPath : nextPathsSplit) {
 			List<Base> allValues;
 			try {
@@ -746,6 +751,90 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
 		}
 		return null;
+	}
+
+
+	private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
+		@Override
+		public Base resolveConstant(Object appContext, String name) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public boolean log(String argument, List<Base> focus) {
+			return false;
+		}
+
+		@Override
+		public FunctionDetails resolveFunction(String functionName) {
+			return null;
+		}
+
+		@Override
+		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
+			return null;
+		}
+
+		@Override
+		public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters) {
+			return null;
+		}
+
+		private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
+
+		@Override
+		public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
+
+			/*
+			 * When we're doing resolution within the SearchParamExtractor, if we want
+			 * to do a resolve() it's just to check the type, so there is no point
+			 * going through the heavyweight test. We can just return a stub and
+			 * that's good enough since we're just doing something like
+			 *    Encounter.patient.where(resolve() is Patient)
+			 */
+			IdType url = new IdType(theUrl);
+			Base retVal = null;
+			if (isNotBlank(url.getResourceType())) {
+
+				retVal = myResourceTypeToStub.get(url.getResourceType());
+				if (retVal != null) {
+					return retVal;
+				}
+
+				ResourceType resourceType = ResourceType.fromCode(url.getResourceType());
+				if (resourceType != null) {
+					retVal = new Resource(){
+						@Override
+						public Resource copy() {
+							return this;
+						}
+
+						@Override
+						public ResourceType getResourceType() {
+							return resourceType;
+						}
+
+						@Override
+						public String fhirType() {
+							return url.getResourceType();
+						}
+
+					};
+					myResourceTypeToStub.put(url.getResourceType(), retVal);
+				}
+			}
+			return retVal;
+		}
+
+		@Override
+		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
+			return false;
+		}
 	}
 
 }

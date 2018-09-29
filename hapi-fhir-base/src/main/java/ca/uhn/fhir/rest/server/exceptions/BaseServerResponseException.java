@@ -160,7 +160,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 *            The underlying cause exception
 	 */
 	public BaseServerResponseException(int theStatusCode, Throwable theCause) {
-		super(theCause.toString(), theCause);
+		super(theCause.getMessage(), theCause);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = null;
 	}

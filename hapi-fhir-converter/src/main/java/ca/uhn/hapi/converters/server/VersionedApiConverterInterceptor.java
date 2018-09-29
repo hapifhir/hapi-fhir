@@ -98,9 +98,9 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 		IBaseResource converted = null;
 		try {
 			if (wantVersion == FhirVersionEnum.R4 && haveVersion == FhirVersionEnum.DSTU3) {
-				converted = myVersionConvertor_30_40.convertResource(toDstu3(responseResource));
+				converted = myVersionConvertor_30_40.convertResource(toDstu3(responseResource), true);
 			} else if (wantVersion == FhirVersionEnum.DSTU3 && haveVersion == FhirVersionEnum.R4) {
-				converted = myVersionConvertor_30_40.convertResource(toR4(responseResource));
+				converted = myVersionConvertor_30_40.convertResource(toR4(responseResource), true);
 			} else if (wantVersion == FhirVersionEnum.DSTU2 && haveVersion == FhirVersionEnum.R4) {
 				converted = myVersionConvertor_10_40.convertResource(toR4(responseResource));
 			} else if (wantVersion == FhirVersionEnum.R4 && haveVersion == FhirVersionEnum.DSTU2) {

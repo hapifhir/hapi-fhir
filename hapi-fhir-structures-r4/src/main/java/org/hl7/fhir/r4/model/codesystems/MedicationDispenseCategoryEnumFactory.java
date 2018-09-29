@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -45,6 +45,8 @@ public class MedicationDispenseCategoryEnumFactory implements EnumFactory<Medica
       return MedicationDispenseCategory.OUTPATIENT;
     if ("community".equals(codeString))
       return MedicationDispenseCategory.COMMUNITY;
+    if ("discharge".equals(codeString))
+      return MedicationDispenseCategory.DISCHARGE;
     throw new IllegalArgumentException("Unknown MedicationDispenseCategory code '"+codeString+"'");
   }
 
@@ -55,6 +57,8 @@ public class MedicationDispenseCategoryEnumFactory implements EnumFactory<Medica
       return "outpatient";
     if (code == MedicationDispenseCategory.COMMUNITY)
       return "community";
+    if (code == MedicationDispenseCategory.DISCHARGE)
+      return "discharge";
     return "?";
   }
 

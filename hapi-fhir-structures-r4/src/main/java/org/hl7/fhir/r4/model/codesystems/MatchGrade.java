@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum MatchGrade {
          */
         POSSIBLE, 
         /**
-         * This record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the matching engine
+         * This record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the matching engine.
          */
         CERTAINLYNOT, 
         /**
@@ -79,14 +79,14 @@ public enum MatchGrade {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/match-grade";
+          return "http://terminology.hl7.org/CodeSystem/match-grade";
         }
         public String getDefinition() {
           switch (this) {
             case CERTAIN: return "This record meets the matching criteria to be automatically considered as a full match.";
             case PROBABLE: return "This record is a close match, but not a certain match. Additional review (e.g. by a human) may be required before using this as a match.";
             case POSSIBLE: return "This record may be a matching one. Additional review (e.g. by a human) SHOULD be performed before using this as a match.";
-            case CERTAINLYNOT: return "This record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the matching engine";
+            case CERTAINLYNOT: return "This record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the matching engine.";
             default: return "?";
           }
         }

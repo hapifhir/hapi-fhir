@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -42,7 +42,7 @@ public enum ResearchStudyStatus {
         ACTIVE, 
         /**
          * Study is completed prematurely and will not resume; patients are no longer examined nor treated.
-Tagged
+Tagged.
          */
         ADMINISTRATIVELYCOMPLETED, 
         /**
@@ -135,7 +135,7 @@ or intervention but are still being followed according to the primary objective 
         public String getDefinition() {
           switch (this) {
             case ACTIVE: return "Study is opened for accrual.";
-            case ADMINISTRATIVELYCOMPLETED: return "Study is completed prematurely and will not resume; patients are no longer examined nor treated.\nTagged";
+            case ADMINISTRATIVELYCOMPLETED: return "Study is completed prematurely and will not resume; patients are no longer examined nor treated.\nTagged.";
             case APPROVED: return "Protocol is approved by the review board.";
             case CLOSEDTOACCRUAL: return "Study is closed for accrual; patients can be examined and treated.";
             case CLOSEDTOACCRUALANDINTERVENTION: return "Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment or intervention but are still being followed according to the primary objective of the study.";

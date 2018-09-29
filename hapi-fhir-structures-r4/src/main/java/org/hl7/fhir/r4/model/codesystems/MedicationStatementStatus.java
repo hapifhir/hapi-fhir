@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum MedicationStatementStatus {
          */
         COMPLETED, 
         /**
-         * Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account
+         * Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account.
          */
         ENTEREDINERROR, 
         /**
@@ -53,7 +53,7 @@ public enum MedicationStatementStatus {
          */
         INTENDED, 
         /**
-         * Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error
+         * Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error.
          */
         STOPPED, 
         /**
@@ -65,7 +65,7 @@ public enum MedicationStatementStatus {
          */
         UNKNOWN, 
         /**
-         * The medication was not consumed by the patient
+         * The medication was not consumed by the patient.
          */
         NOTTAKEN, 
         /**
@@ -113,12 +113,12 @@ public enum MedicationStatementStatus {
           switch (this) {
             case ACTIVE: return "The medication is still being taken.";
             case COMPLETED: return "The medication is no longer being taken.";
-            case ENTEREDINERROR: return "Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account";
+            case ENTEREDINERROR: return "Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account.";
             case INTENDED: return "The medication may be taken at some time in the future.";
-            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error";
+            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error.";
             case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case UNKNOWN: return "The state of the medication use is not currently known.";
-            case NOTTAKEN: return "The medication was not consumed by the patient";
+            case NOTTAKEN: return "The medication was not consumed by the patient.";
             default: return "?";
           }
         }

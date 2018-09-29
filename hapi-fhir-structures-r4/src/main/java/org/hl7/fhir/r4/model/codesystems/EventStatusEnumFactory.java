@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -45,10 +45,10 @@ public class EventStatusEnumFactory implements EnumFactory<EventStatus> {
       return EventStatus.INPROGRESS;
     if ("not-done".equals(codeString))
       return EventStatus.NOTDONE;
-    if ("suspended".equals(codeString))
-      return EventStatus.SUSPENDED;
-    if ("aborted".equals(codeString))
-      return EventStatus.ABORTED;
+    if ("on-hold".equals(codeString))
+      return EventStatus.ONHOLD;
+    if ("stopped".equals(codeString))
+      return EventStatus.STOPPED;
     if ("completed".equals(codeString))
       return EventStatus.COMPLETED;
     if ("entered-in-error".equals(codeString))
@@ -65,10 +65,10 @@ public class EventStatusEnumFactory implements EnumFactory<EventStatus> {
       return "in-progress";
     if (code == EventStatus.NOTDONE)
       return "not-done";
-    if (code == EventStatus.SUSPENDED)
-      return "suspended";
-    if (code == EventStatus.ABORTED)
-      return "aborted";
+    if (code == EventStatus.ONHOLD)
+      return "on-hold";
+    if (code == EventStatus.STOPPED)
+      return "stopped";
     if (code == EventStatus.COMPLETED)
       return "completed";
     if (code == EventStatus.ENTEREDINERROR)

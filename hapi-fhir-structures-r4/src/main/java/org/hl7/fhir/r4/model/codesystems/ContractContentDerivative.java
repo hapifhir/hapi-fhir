@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -79,7 +79,7 @@ public enum ContractContentDerivative {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/contract-content-derivative";
+          return "http://terminology.hl7.org/CodeSystem/contract-content-derivative";
         }
         public String getDefinition() {
           switch (this) {
