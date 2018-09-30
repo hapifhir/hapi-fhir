@@ -273,7 +273,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				txTemplate.execute(t -> {
 					expungeHistoricalVersionsOfId(next, remainingCount);
 					if (remainingCount.get() <= 0) {
-						ourLog.info("Expunge limit has been hit - Stopping operation");
+						ourLog.debug("Expunge limit has been hit - Stopping operation");
 						return toExpungeOutcome(theExpungeOptions, remainingCount);
 					}
 					return null;
@@ -286,10 +286,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			for (Long next : resourceIds) {
 				txTemplate.execute(t -> {
 					expungeCurrentVersionOfResource(next, remainingCount);
-					if (remainingCount.get() <= 0) {
-						ourLog.info("Expunge limit has been hit - Stopping operation");
-						return toExpungeOutcome(theExpungeOptions, remainingCount);
-					}
 					return null;
 				});
 			}
@@ -444,7 +440,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		Pageable page = PageRequest.of(0, theRemainingCount.get());
 
 		Slice<Long> versionIds = myResourceHistoryTableDao.findForResourceId(page, resource.getId(), resource.getVersion());
-		ourLog.info("Found {} versions of resource {} to expunge", versionIds.getNumberOfElements(), resource.getIdDt().getValue());
+		ourLog.debug("Found {} versions of resource {} to expunge", versionIds.getNumberOfElements(), resource.getIdDt().getValue());
 		for (Long nextVersionId : versionIds) {
 			expungeHistoricalVersion(nextVersionId);
 			if (theRemainingCount.decrementAndGet() <= 0) {
