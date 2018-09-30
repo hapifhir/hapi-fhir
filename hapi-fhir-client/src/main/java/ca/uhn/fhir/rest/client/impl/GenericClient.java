@@ -98,7 +98,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
-																	  SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
+																	  List<SummaryEnum> theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -127,7 +127,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			invocation.addHeader(Constants.HEADER_IF_NONE_MATCH, '"' + theIfVersionMatches + '"');
 		}
 
-		boolean allowHtmlResponse = (theSummary == SummaryEnum.TEXT) || (theSummary == null && getSummary() == SummaryEnum.TEXT);
+		boolean allowHtmlResponse = (theSummary != null && theSummary.contains(SummaryEnum.TEXT)) || (theSummary == null && getSummary() == SummaryEnum.TEXT);
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
@@ -368,7 +368,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		protected EncodingEnum myParamEncoding;
 		protected Boolean myPrettyPrint;
-		protected SummaryEnum mySummaryMode;
+		protected List<SummaryEnum> mySummaryMode;
 		protected CacheControlDirective myCacheControlDirective;
 		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
 		private boolean myQueryLogRequestAndResponse;
@@ -483,8 +483,15 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public T summaryMode(SummaryEnum theSummary) {
-			mySummaryMode = theSummary;
+		public T summaryMode(SummaryEnum... theSummary) {
+			mySummaryMode = null;
+			if (theSummary != null) {
+				if (theSummary.length == 1) {
+					mySummaryMode = Collections.singletonList(theSummary[0]);
+				} else {
+					mySummaryMode = Arrays.asList(theSummary);
+				}
+			}
 			return ((T) this);
 		}
 

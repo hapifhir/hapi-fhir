@@ -381,6 +381,14 @@
 				handled properly by the validator. Thanks to Anthony Sute
 				for the Pull Request!
 			</action>
+			<action type="add">
+				The JPA server now performs a count query instead of a more expensive data query
+				when searches using
+				<![CDATA[<code>_summary=count</code>]]>.
+				This means that a total will always be returned in the Bundle (this isn't always
+				guaranteed otherwise, since the Search Controller can result in data being returned
+				before the total number of results is known).
+			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">
 			<action type="add">

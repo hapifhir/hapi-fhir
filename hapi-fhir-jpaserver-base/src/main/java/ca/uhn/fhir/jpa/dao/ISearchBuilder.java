@@ -35,6 +35,8 @@ public interface ISearchBuilder {
 
 	Iterator<Long> createQuery(SearchParameterMap theParams, String theSearchUuid);
 
+	Iterator createCountQuery(SearchParameterMap theParams, String theSearchUuid);
+
 	void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager theEntityManager,
 									FhirContext theContext, IDao theDao);
 

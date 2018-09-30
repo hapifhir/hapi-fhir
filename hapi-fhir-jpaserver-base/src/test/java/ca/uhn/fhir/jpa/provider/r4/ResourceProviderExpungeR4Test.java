@@ -259,7 +259,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(2, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);

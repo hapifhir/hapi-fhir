@@ -75,7 +75,7 @@ public class SummaryEnumParameter implements IParameter {
 				retVal = toCollectionOrNull(SummaryEnum.fromCode(summary[0].toLowerCase()));
 			}
 		} else {
-			retVal = new HashSet<SummaryEnum>();
+			retVal = new HashSet<>();
 			for (String next : summary) {
 				SummaryEnum value = SummaryEnum.fromCode(next);
 				if (value == null) {

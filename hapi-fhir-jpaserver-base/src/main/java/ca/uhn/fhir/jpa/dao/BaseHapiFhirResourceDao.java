@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -84,6 +84,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  * The SearchBuilder is responsible for actually forming the SQL query that handles
  * searches for resources
  */
+@SuppressWarnings("JpaQlInspection")
 public class SearchBuilder implements ISearchBuilder {
 
 	private static final List<Long> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<Long>());
@@ -93,6 +94,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
 	private static String ourLastHandlerThreadForUnitTest;
 	private static boolean ourTrackHandlersForUnitTest;
+	protected IResourceTagDao myResourceTagDao;
+	protected IResourceSearchViewDao myResourceSearchViewDao;
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
@@ -113,17 +116,14 @@ public class SearchBuilder implements ISearchBuilder {
 	private IHapiTerminologySvc myTerminologySvc;
 	private int myFetchSize;
 
-	protected IResourceTagDao myResourceTagDao;
-	protected IResourceSearchViewDao myResourceSearchViewDao;
-
 	/**
 	 * Constructor
 	 */
 	public SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager,
-			IFulltextSearchSvc theFulltextSearchSvc, BaseHapiFhirDao<?> theDao,
-			IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao,
-			IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry,
-			IResourceTagDao theResourceTagDao, IResourceSearchViewDao theResourceViewDao) {
+								IFulltextSearchSvc theFulltextSearchSvc, BaseHapiFhirDao<?> theDao,
+								IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao,
+								IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry,
+								IResourceTagDao theResourceTagDao, IResourceSearchViewDao theResourceViewDao) {
 		myContext = theFhirContext;
 		myEntityManager = theEntityManager;
 		myFulltextSearchSvc = theFulltextSearchSvc;
@@ -286,7 +286,7 @@ public class SearchBuilder implements ISearchBuilder {
 				String invalidMessageName = "invalidNumberPrefix";
 
 				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName);
-				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, predicateNumeric );
+				Predicate predicateOuter = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, join, predicateNumeric);
 				codePredicates.add(predicateOuter);
 
 			} else {
@@ -1267,6 +1267,16 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
+	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid) {
+		myParams = theParams;
+		myBuilder = myEntityManager.getCriteriaBuilder();
+		mySearchUuid = theSearchUuid;
+
+		TypedQuery<Long> query = createQuery(null, null, true);
+		return new CountQueryIterator(query);
+	}
+
+	@Override
 	public Iterator<Long> createQuery(SearchParameterMap theParams, String theSearchUuid) {
 		myParams = theParams;
 		myBuilder = myEntityManager.getCriteriaBuilder();
@@ -1325,7 +1335,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return new QueryIterator();
 	}
 
-	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults) {
+	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount) {
 		CriteriaQuery<Long> outerQuery;
 		/*
 		 * Sort
@@ -1334,6 +1344,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * finds the appropriate resources) in an outer search which is then sorted
 		 */
 		if (sort != null) {
+			assert !theCount;
 
 			outerQuery = myBuilder.createQuery(Long.class);
 			Root<ResourceTable> outerQueryFrom = outerQuery.from(ResourceTable.class);
@@ -1365,7 +1376,11 @@ public class SearchBuilder implements ISearchBuilder {
 			outerQuery = myBuilder.createQuery(Long.class);
 			myResourceTableQuery = outerQuery;
 			myResourceTableRoot = myResourceTableQuery.from(ResourceTable.class);
-			outerQuery.multiselect(myResourceTableRoot.get("myId").as(Long.class));
+			if (theCount) {
+				outerQuery.multiselect(myBuilder.count(myResourceTableRoot.get("myId").as(Long.class)));
+			} else {
+				outerQuery.multiselect(myResourceTableRoot.get("myId").as(Long.class));
+			}
 
 		}
 
@@ -1501,37 +1516,37 @@ public class SearchBuilder implements ISearchBuilder {
 		switch (param.getParamType()) {
 			case STRING:
 				joinAttrName = "myParamsString";
-				sortAttrName = new String[] {"myValueExact"};
+				sortAttrName = new String[]{"myValueExact"};
 				joinType = JoinEnum.STRING;
 				break;
 			case DATE:
 				joinAttrName = "myParamsDate";
-				sortAttrName = new String[] {"myValueLow"};
+				sortAttrName = new String[]{"myValueLow"};
 				joinType = JoinEnum.DATE;
 				break;
 			case REFERENCE:
 				joinAttrName = "myResourceLinks";
-				sortAttrName = new String[] {"myTargetResourcePid"};
+				sortAttrName = new String[]{"myTargetResourcePid"};
 				joinType = JoinEnum.REFERENCE;
 				break;
 			case TOKEN:
 				joinAttrName = "myParamsToken";
-				sortAttrName = new String[] {"mySystem", "myValue"};
+				sortAttrName = new String[]{"mySystem", "myValue"};
 				joinType = JoinEnum.TOKEN;
 				break;
 			case NUMBER:
 				joinAttrName = "myParamsNumber";
-				sortAttrName = new String[] {"myValue"};
+				sortAttrName = new String[]{"myValue"};
 				joinType = JoinEnum.NUMBER;
 				break;
 			case URI:
 				joinAttrName = "myParamsUri";
-				sortAttrName = new String[] {"myUri"};
+				sortAttrName = new String[]{"myUri"};
 				joinType = JoinEnum.URI;
 				break;
 			case QUANTITY:
 				joinAttrName = "myParamsQuantity";
-				sortAttrName = new String[] {"myValue"};
+				sortAttrName = new String[]{"myValue"};
 				joinType = JoinEnum.QUANTITY;
 				break;
 			case COMPOSITE:
@@ -1653,7 +1668,7 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Long> idList = new ArrayList<Long>(theResourceSearchViewList.size());
 
 		//-- find all resource has tags
-		for (ResourceSearchView resource: theResourceSearchViewList) {
+		for (ResourceSearchView resource : theResourceSearchViewList) {
 			if (resource.isHasTags())
 				idList.add(resource.getId());
 		}
@@ -2033,116 +2048,6 @@ public class SearchBuilder implements ISearchBuilder {
 		return qp;
 	}
 
-	/**
-	 * Figures out the tolerance for a search. For example, if the user is searching for <code>4.00</code>, this method
-	 * returns <code>0.005</code> because we shold actually match values which are
-	 * <code>4 (+/-) 0.005</code> according to the FHIR specs.
-	 */
-	static BigDecimal calculateFuzzAmount(ParamPrefixEnum cmpValue, BigDecimal theValue) {
-		if (cmpValue == ParamPrefixEnum.APPROXIMATE) {
-			return theValue.multiply(new BigDecimal(0.1));
-		} else {
-			String plainString = theValue.toPlainString();
-			int dotIdx = plainString.indexOf('.');
-			if (dotIdx == -1) {
-				return new BigDecimal(0.5);
-			}
-
-			int precision = plainString.length() - (dotIdx);
-			double mul = Math.pow(10, -precision);
-			double val = mul * 5.0d;
-			return new BigDecimal(val);
-		}
-	}
-
-	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
-		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
-		if (theLastUpdated != null) {
-			if (theLastUpdated.getLowerBoundAsInstant() != null) {
-				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
-				Predicate predicateLower = builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
-				lastUpdatedPredicates.add(predicateLower);
-			}
-			if (theLastUpdated.getUpperBoundAsInstant() != null) {
-				Predicate predicateUpper = builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
-				lastUpdatedPredicates.add(predicateUpper);
-			}
-		}
-		return lastUpdatedPredicates;
-	}
-
-	private static String createLeftAndRightMatchLikeExpression(String likeExpression) {
-		return "%" + likeExpression.replace("%", "[%]") + "%";
-	}
-
-	private static String createLeftMatchLikeExpression(String likeExpression) {
-		return likeExpression.replace("%", "[%]") + "%";
-	}
-
-	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
-																				String theResourceType) {
-		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
-		RuntimeSearchParam param = theCallingDao.getSearchParamByName(resourceDef, theParamName);
-		List<String> path = param.getPathsSplit();
-
-		/*
-		 * SearchParameters can declare paths on multiple resources
-		 * types. Here we only want the ones that actually apply.
-		 */
-		path = new ArrayList<>(path);
-
-		for (int i = 0; i < path.size(); i++) {
-			String nextPath = trim(path.get(i));
-			if (!nextPath.contains(theResourceType + ".")) {
-				path.remove(i);
-				i--;
-			}
-		}
-
-		return theFrom.get("mySourcePath").in(path);
-	}
-
-	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {
-		if (thePids.isEmpty()) {
-			return Collections.emptyList();
-		}
-		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
-		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
-		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(thePids));
-
-		cq.where(SearchBuilder.toArray(lastUpdatedPredicates));
-		TypedQuery<Long> query = theEntityManager.createQuery(cq);
-
-		List<Long> resultList = query.getResultList();
-		return resultList;
-	}
-
-	@VisibleForTesting
-	public static HandlerTypeEnum getLastHandlerMechanismForUnitTest() {
-		return ourLastHandlerMechanismForUnitTest;
-	}
-
-	@VisibleForTesting
-	public static String getLastHandlerParamsForUnitTest() {
-		return ourLastHandlerParamsForUnitTest.toString() + " on thread [" + ourLastHandlerThreadForUnitTest +"]";
-	}
-
-	@VisibleForTesting
-	public static void resetLastHandlerMechanismForUnitTest() {
-		ourLastHandlerMechanismForUnitTest = null;
-		ourLastHandlerParamsForUnitTest = null;
-		ourLastHandlerThreadForUnitTest = null;
-		ourTrackHandlersForUnitTest = true;
-	}
-
-	static Predicate[] toArray(List<Predicate> thePredicates) {
-		return thePredicates.toArray(new Predicate[thePredicates.size()]);
-	}
-
 	public enum HandlerTypeEnum {
 		UNIQUE_INDEX, STANDARD_QUERY
 	}
@@ -2247,7 +2152,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myResultsIterator == null) {
 				Integer maximumResults = myCallingDao.getConfig().getFetchSizeDefaultMaximum();
 
-				final TypedQuery<Long> query = createQuery(mySort, maximumResults);
+				final TypedQuery<Long> query = createQuery(mySort, maximumResults, false);
 
 				Query<Long> hibernateQuery = (Query<Long>) query;
 				hibernateQuery.setFetchSize(myFetchSize);
@@ -2370,6 +2275,38 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
+	private static class CountQueryIterator implements Iterator<Long> {
+		private final TypedQuery<Long> myQuery;
+		private boolean myCountLoaded;
+		private Long myCount;
+
+		public CountQueryIterator(TypedQuery<Long> theQuery) {
+			myQuery = theQuery;
+		}
+
+		@Override
+		public boolean hasNext() {
+			boolean retVal = myCount != null;
+			if (!retVal) {
+				if (myCountLoaded == false) {
+					myCount = myQuery.getSingleResult();
+					retVal = true;
+					myCountLoaded = true;
+				}
+			}
+			return retVal;
+		}
+
+		@Override
+		public Long next() {
+			Validate.isTrue(hasNext());
+			Validate.isTrue(myCount != null);
+			Long retVal = myCount;
+			myCount = null;
+			return retVal;
+		}
+	}
+
 	private static class JoinKey {
 		private final JoinEnum myJoinType;
 		private final String myParamName;
@@ -2396,6 +2333,116 @@ public class SearchBuilder implements ISearchBuilder {
 				.append(myJoinType)
 				.toHashCode();
 		}
+	}
+
+	/**
+	 * Figures out the tolerance for a search. For example, if the user is searching for <code>4.00</code>, this method
+	 * returns <code>0.005</code> because we shold actually match values which are
+	 * <code>4 (+/-) 0.005</code> according to the FHIR specs.
+	 */
+	static BigDecimal calculateFuzzAmount(ParamPrefixEnum cmpValue, BigDecimal theValue) {
+		if (cmpValue == ParamPrefixEnum.APPROXIMATE) {
+			return theValue.multiply(new BigDecimal(0.1));
+		} else {
+			String plainString = theValue.toPlainString();
+			int dotIdx = plainString.indexOf('.');
+			if (dotIdx == -1) {
+				return new BigDecimal(0.5);
+			}
+
+			int precision = plainString.length() - (dotIdx);
+			double mul = Math.pow(10, -precision);
+			double val = mul * 5.0d;
+			return new BigDecimal(val);
+		}
+	}
+
+	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
+		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
+		if (theLastUpdated != null) {
+			if (theLastUpdated.getLowerBoundAsInstant() != null) {
+				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
+				Predicate predicateLower = builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
+				lastUpdatedPredicates.add(predicateLower);
+			}
+			if (theLastUpdated.getUpperBoundAsInstant() != null) {
+				Predicate predicateUpper = builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
+				lastUpdatedPredicates.add(predicateUpper);
+			}
+		}
+		return lastUpdatedPredicates;
+	}
+
+	private static String createLeftAndRightMatchLikeExpression(String likeExpression) {
+		return "%" + likeExpression.replace("%", "[%]") + "%";
+	}
+
+	private static String createLeftMatchLikeExpression(String likeExpression) {
+		return likeExpression.replace("%", "[%]") + "%";
+	}
+
+	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
+																				String theResourceType) {
+		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
+		RuntimeSearchParam param = theCallingDao.getSearchParamByName(resourceDef, theParamName);
+		List<String> path = param.getPathsSplit();
+
+		/*
+		 * SearchParameters can declare paths on multiple resources
+		 * types. Here we only want the ones that actually apply.
+		 */
+		path = new ArrayList<>(path);
+
+		for (int i = 0; i < path.size(); i++) {
+			String nextPath = trim(path.get(i));
+			if (!nextPath.contains(theResourceType + ".")) {
+				path.remove(i);
+				i--;
+			}
+		}
+
+		return theFrom.get("mySourcePath").in(path);
+	}
+
+	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {
+		if (thePids.isEmpty()) {
+			return Collections.emptyList();
+		}
+		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+
+		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
+		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(thePids));
+
+		cq.where(SearchBuilder.toArray(lastUpdatedPredicates));
+		TypedQuery<Long> query = theEntityManager.createQuery(cq);
+
+		List<Long> resultList = query.getResultList();
+		return resultList;
+	}
+
+	@VisibleForTesting
+	public static HandlerTypeEnum getLastHandlerMechanismForUnitTest() {
+		return ourLastHandlerMechanismForUnitTest;
+	}
+
+	@VisibleForTesting
+	public static String getLastHandlerParamsForUnitTest() {
+		return ourLastHandlerParamsForUnitTest.toString() + " on thread [" + ourLastHandlerThreadForUnitTest + "]";
+	}
+
+	@VisibleForTesting
+	public static void resetLastHandlerMechanismForUnitTest() {
+		ourLastHandlerMechanismForUnitTest = null;
+		ourLastHandlerParamsForUnitTest = null;
+		ourLastHandlerThreadForUnitTest = null;
+		ourTrackHandlersForUnitTest = true;
+	}
+
+	static Predicate[] toArray(List<Predicate> thePredicates) {
+		return thePredicates.toArray(new Predicate[thePredicates.size()]);
 	}
 
 }

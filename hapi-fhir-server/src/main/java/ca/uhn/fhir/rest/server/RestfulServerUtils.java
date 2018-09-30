@@ -78,9 +78,9 @@ public class RestfulServerUtils {
 		}
 
 		if (summaryMode != null) {
-			if (summaryMode.contains(SummaryEnum.COUNT)) {
+			if (summaryMode.contains(SummaryEnum.COUNT) && summaryMode.size() == 1) {
 				parser.setEncodeElements(Collections.singleton("Bundle.total"));
-			} else if (summaryMode.contains(SummaryEnum.TEXT)) {
+			} else if (summaryMode.contains(SummaryEnum.TEXT) && summaryMode.size() == 1) {
 				parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
 			} else {
 				parser.setSuppressNarratives(summaryMode.contains(SummaryEnum.DATA));
@@ -688,7 +688,7 @@ public class RestfulServerUtils {
 			responseEncoding = new ResponseEncoding(theServer.getFhirContext(), theServer.getDefaultResponseEncoding(), null);
 		}
 
-		boolean encodingDomainResourceAsText = theSummaryMode.contains(SummaryEnum.TEXT);
+		boolean encodingDomainResourceAsText = theSummaryMode.size() == 1 && theSummaryMode.contains(SummaryEnum.TEXT);
 		if (encodingDomainResourceAsText) {
 			/*
 			 * If the user requests "text" for a bundle, only suppress the non text elements in the Element.entry.resource

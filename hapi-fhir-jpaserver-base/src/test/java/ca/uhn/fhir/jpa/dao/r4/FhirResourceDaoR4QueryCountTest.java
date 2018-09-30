@@ -11,7 +11,7 @@ import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @TestPropertySource(properties = {
 	"scheduling_disabled=true"
@@ -71,7 +71,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 	}
 
 
-		@Test
+	@Test
 	public void testOneRowPerUpdate() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,10 +29,10 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
+import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.ObjectUtils;
@@ -253,7 +254,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					 * since we're returning a static bundle with all the results
 					 * pre-loaded. This is ok because syncronous requests are not
 					 * expected to be paged
-					 * 
+					 *
 					 * On the other hand for async queries we load includes/revincludes
 					 * individually for pages as we return them to clients
 					 */
@@ -321,27 +322,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		Search search = new Search();
-		search.setDeleted(false);
-		search.setUuid(searchUuid);
-		search.setCreated(new Date());
-		search.setSearchLastReturned(new Date());
-		search.setTotalCount(null);
-		search.setNumFound(0);
-		search.setPreferredPageSize(theParams.getCount());
-		search.setSearchType(theParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
-		search.setLastUpdated(theParams.getLastUpdated());
-		search.setResourceType(theResourceType);
-		search.setStatus(SearchStatusEnum.LOADING);
-
-		search.setSearchQueryString(queryString);
-		search.setSearchQueryStringHash(queryString.hashCode());
-
-		for (Include next : theParams.getIncludes()) {
-			search.addInclude(new SearchInclude(search, next.getValue(), false, next.isRecurse()));
-		}
-		for (Include next : theParams.getRevIncludes()) {
-			search.addInclude(new SearchInclude(search, next.getValue(), true, next.isRecurse()));
-		}
+		populateSearchEntity(theParams, theResourceType, searchUuid, queryString, search);
 
 		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType, searchUuid);
 		myIdToSearchTask.put(search.getUuid(), task);
@@ -411,45 +392,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	/**
-	 * Creates a {@link Pageable} using a start and end index
-	 */
-	@SuppressWarnings("WeakerAccess")
-	public static @Nullable	Pageable toPage(final int theFromIndex, int theToIndex) {
-		int pageSize = theToIndex - theFromIndex;
-		if (pageSize < 1) {
-			return null;
-		}
-
-		int pageIndex = theFromIndex / pageSize;
-
-		Pageable page = new PageRequest(pageIndex, pageSize) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public long getOffset() {
-				return theFromIndex;
-			}
-		};
-
-		return page;
-	}
-
-	static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {
-		if (theSearch.getStatus() == SearchStatusEnum.FAILED) {
-			Integer status = theSearch.getFailureCode();
-			status = ObjectUtils.defaultIfNull(status, 500);
-
-			String message = theSearch.getFailureMessage();
-			throw BaseServerResponseException.newInstance(status, message);
-		}
-	}
-
-	/**
 	 * A search task is a Callable task that runs in
 	 * a thread pool to handle an individual search. One instance
 	 * is created for any requested search and runs from the
 	 * beginning to the end of the search.
-	 *
+	 * <p>
 	 * Understand:
 	 * This class executes in its own thread separate from the
 	 * web server client thread that made the request. We do that
@@ -587,9 +534,32 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		private void doSearch() {
-			Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
-			ISearchBuilder sb = myCallingDao.newSearchBuilder();
-			sb.setType(resourceTypeClass, myResourceType);
+
+			boolean wantCount = myParams.getSummaryMode().contains(SummaryEnum.COUNT);
+			boolean wantOnlyCount = wantCount && myParams.getSummaryMode().size() == 1;
+			if (wantCount) {
+				ISearchBuilder sb = newSearchBuilder();
+				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearchUuid);
+				Long count = countIterator.next();
+
+				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
+				txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
+				txTemplate.execute(new TransactionCallbackWithoutResult() {
+					@Override
+					protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+						mySearch.setTotalCount(count.intValue());
+						if (wantOnlyCount) {
+							mySearch.setStatus(SearchStatusEnum.FINISHED);
+						}
+						doSaveSearch();
+					}
+				});
+				if (wantOnlyCount) {
+					return;
+				}
+			}
+
+			ISearchBuilder sb = newSearchBuilder();
 			Iterator<Long> theResultIterator = sb.createQuery(myParams, mySearchUuid);
 
 			while (theResultIterator.hasNext()) {
@@ -628,6 +598,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			Validate.isTrue(myAbortRequested == false, "Abort has been requested");
 
 			saveUnsynced(theResultIterator);
+		}
+
+		private ISearchBuilder newSearchBuilder() {
+			Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
+			ISearchBuilder sb = myCallingDao.newSearchBuilder();
+			sb.setType(resourceTypeClass, myResourceType);
+			return sb;
 		}
 
 		public CountDownLatch getCompletionLatch() {
@@ -742,6 +719,65 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		}
 
+	}
+
+	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch) {
+		theSearch.setDeleted(false);
+		theSearch.setUuid(theSearchUuid);
+		theSearch.setCreated(new Date());
+		theSearch.setSearchLastReturned(new Date());
+		theSearch.setTotalCount(null);
+		theSearch.setNumFound(0);
+		theSearch.setPreferredPageSize(theParams.getCount());
+		theSearch.setSearchType(theParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
+		theSearch.setLastUpdated(theParams.getLastUpdated());
+		theSearch.setResourceType(theResourceType);
+		theSearch.setStatus(SearchStatusEnum.LOADING);
+
+		theSearch.setSearchQueryString(theQueryString);
+		theSearch.setSearchQueryStringHash(theQueryString.hashCode());
+
+		for (Include next : theParams.getIncludes()) {
+			theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), false, next.isRecurse()));
+		}
+		for (Include next : theParams.getRevIncludes()) {
+			theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), true, next.isRecurse()));
+		}
+	}
+
+	/**
+	 * Creates a {@link Pageable} using a start and end index
+	 */
+	@SuppressWarnings("WeakerAccess")
+	public static @Nullable
+	Pageable toPage(final int theFromIndex, int theToIndex) {
+		int pageSize = theToIndex - theFromIndex;
+		if (pageSize < 1) {
+			return null;
+		}
+
+		int pageIndex = theFromIndex / pageSize;
+
+		Pageable page = new PageRequest(pageIndex, pageSize) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public long getOffset() {
+				return theFromIndex;
+			}
+		};
+
+		return page;
+	}
+
+	static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {
+		if (theSearch.getStatus() == SearchStatusEnum.FAILED) {
+			Integer status = theSearch.getFailureCode();
+			status = ObjectUtils.defaultIfNull(status, 500);
+
+			String message = theSearch.getFailureMessage();
+			throw BaseServerResponseException.newInstance(status, message);
+		}
 	}
 
 }
