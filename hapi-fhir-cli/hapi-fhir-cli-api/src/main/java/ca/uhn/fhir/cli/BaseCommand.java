@@ -90,18 +90,23 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected String promptUser(String thePrompt) throws ParseException {
 		System.out.print(ansi().bold().fgBrightDefault());
 		System.out.print(thePrompt);
-		System.out.print(ansi().bold().fgBrightGreen());
+		System.out.print(ansi().boldOff().fgBlack().bgDefault());
 		System.out.flush();
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		Console console = System.console();
 		String retVal;
-		try {
-			retVal = reader.readLine();
-		} catch (IOException e) {
-			throw new ParseException("Failed to read input from user: " + e.toString());
+		if (console == null) {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			try {
+				retVal = reader.readLine();
+			} catch (IOException e) {
+				throw new ParseException("Failed to read input from user: " + e.toString());
+			}
+		} else {
+			retVal = new String(console.readPassword());
 		}
 
-		System.out.print(ansi().boldOff().fgDefault());
+		System.out.print(ansi().boldOff().fgDefault().bgDefault());
 
 		return retVal;
 	}
@@ -254,7 +259,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		if (theCommandLine.hasOption(theOptionName)) {
 			String optionValue = theCommandLine.getOptionValue(theOptionName);
 			if (PROMPT.equals(optionValue)) {
-				promptUser("Enter Basic Auth Credentials (format is \"username:password\"): ");
+				optionValue = promptUser("Enter Basic Auth Credentials (format is \"username:password\"): ");
+				optionValue = trim(optionValue);
 			}
 
 			byte[] basicAuth = optionValue.getBytes();

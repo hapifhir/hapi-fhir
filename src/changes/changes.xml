@@ -44,6 +44,10 @@
 				The JPA database migrator tool has been enhanced so that it now supports migrations from
 				HAPI FHIR 3.3.0 to HAPI FHIR 3.4.0 / 3.5.0+ as well.
 			</action>
+			<action type="fix">
+				When using the HAPI FHIR CLI, user-prompted passwords were not correctly encoded, meaning that the
+				"--basic-auth PROMPT" action was not usable. This has been corrected.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">
