@@ -24,6 +24,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.convertors.NullVersionConverterAdvisor40;
 import org.hl7.fhir.convertors.VersionConvertorAdvisor40;
 import org.hl7.fhir.convertors.VersionConvertor_10_40;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -819,7 +820,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			ValueSet convertedVs = null;
 			try {
 				if (vs != null) {
-					convertedVs = new VersionConvertor_10_40(null).convertValueSet(vs);
+					VersionConvertorAdvisor40 advisor40 = new NullVersionConverterAdvisor40();
+					convertedVs = new VersionConvertor_10_40(advisor40).convertValueSet(vs);
 				}
 			} catch (FHIRException e) {
 				throw new InternalErrorException(e);
