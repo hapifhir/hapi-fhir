@@ -33,7 +33,8 @@
 				has been corrected so that an IllegalArgumentException is now thrown.
 			</action>
 			<action type="add">
-				A new operation has been added to the JPA server called $retrigger-subscription. This can
+				A new operation has been added to the JPA server called
+				<![CDATA[<code>$retrigger-subscription</code>]]>. This can
 				be used to cause a transaction to redeliver a resource that previously triggered.
 			</action>
 			<action type="add">
@@ -47,6 +48,22 @@
 			<action type="fix">
 				When using the HAPI FHIR CLI, user-prompted passwords were not correctly encoded, meaning that the
 				"--basic-auth PROMPT" action was not usable. This has been corrected.
+			</action>
+			<action type="add">
+				The JPA server SearchCoordinator has been refactored to make searches more efficient:
+				When a search is performed, the SearchCoordinator loads multiple pages of results even
+				if the user has only requested a small number. This is done in order to prevent needing
+				to re-run the search for every page of results that is loaded.
+				In previous versions of HAPI FHIR, when a search was made the SearchCoordinator would
+				prefetch as many results as the user could possibly request across all pages (even if
+				this meant prefetching thousands or millions of resources).
+				As of this version, a new option has been added to DaoConfig that specifies how many
+				resources to prefetch. This can have a significant impact on performance for servers
+				with a large number of resources, where users often only want the first page
+				of results.
+				See
+				<![CDATA[<code>DatConfig#setSearchPreFetchThresholds()</code>]]>
+				for configuration of this feature.
 			</action>
 		</release>
 
@@ -392,6 +409,14 @@
 				This means that a total will always be returned in the Bundle (this isn't always
 				guaranteed otherwise, since the Search Controller can result in data being returned
 				before the total number of results is known).
+			</action>
+			<action type="add">
+				The JPA server SearchCoordinator now prefetches only a smaller and configurable number
+				of results during the initial search request, and more may be requested in subsequent
+				page requests. This change may have a significant improvement on performance: in
+				previous versions of HAPI FHIR, even if the user only wanted the first page of 10
+				results, many many more might be prefetched, consuming database resources and
+				server time.
 			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">

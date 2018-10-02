@@ -1,5 +1,7 @@
 <div>
 
+{{ Patient.name.given }}
+
 	{% if name.empty() == false %}
 		{{ name[0].family }}
 		{{ name[0].given }}

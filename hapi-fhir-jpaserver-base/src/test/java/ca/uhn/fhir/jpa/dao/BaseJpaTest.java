@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -35,6 +36,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -211,15 +213,30 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
-		List<String> retVal = new ArrayList<String>();
-		Integer size = theFound.size();
-		ourLog.info("Found {} results", size);
+		int fromIndex = 0;
+		Integer toIndex = theFound.size();
+		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
+	}
 
-		if (size == null) {
-			size = 99999;
+	@Autowired
+	private DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
+
+
+	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex, boolean theFirstCall) {
+		if (theToIndex == null) {
+			theToIndex = 99999;
 		}
 
-		List<IBaseResource> resources = theFound.getResources(0, size);
+		List<String> retVal = new ArrayList<>();
+
+		IBundleProvider bundleProvider;
+		if (theFirstCall) {
+			bundleProvider = theFound;
+		} else {
+			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(theFound.getUuid());
+		}
+
+		List<IBaseResource> resources = bundleProvider.getResources(theFromIndex, theToIndex);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}

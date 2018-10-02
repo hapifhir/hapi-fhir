@@ -63,12 +63,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-		List<IBaseResource> retVal = txTemplate.execute(new TransactionCallback<List<IBaseResource>>() {
-			@Override
-			public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-				return toResourceList(mySearchBuilder, pids);
-			}
-		});
+		List<IBaseResource> retVal = txTemplate.execute(theStatus -> toResourceList(mySearchBuilder, pids));
 
 		ourLog.trace("Loaded resources to return");
 

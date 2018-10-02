@@ -1,7 +1,12 @@
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.apache.commons.lang3.SerializationUtils;
+import org.hibernate.annotations.OptimisticLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -79,6 +84,7 @@ public class Search implements Serializable {
 	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SEARCH_LAST_RETURNED", nullable = false, updatable = false)
+	@OptimisticLock(excluded = true)
 	private Date mySearchLastReturned;
 	@Lob()
 	@Basic(fetch = FetchType.LAZY)
@@ -96,6 +102,13 @@ public class Search implements Serializable {
 	private Integer myTotalCount;
 	@Column(name = "SEARCH_UUID", length = UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
+	@SuppressWarnings("unused")
+	@Version
+	@Column(name = "OPTLOCK_VERSION", nullable = true)
+	private Integer myVersion;
+	@Lob
+	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
+	private byte[] mySearchParameterMap;
 
 	/**
 	 * Constructor
@@ -241,6 +254,14 @@ public class Search implements Serializable {
 		myStatus = theStatus;
 	}
 
+	/** FIXME: remove */
+	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
+	/** FIXME: remove */
+	@PrePersist
+	public void preSave() {
+		ourLog.info("** PREPERSIST - Version is {}", myVersion);
+	}
+
 	public Integer getTotalCount() {
 		return myTotalCount;
 	}
@@ -267,7 +288,7 @@ public class Search implements Serializable {
 	}
 
 	private Set<Include> toIncList(boolean theWantReverse) {
-		HashSet<Include> retVal = new HashSet<Include>();
+		HashSet<Include> retVal = new HashSet<>();
 		for (SearchInclude next : getIncludes()) {
 			if (theWantReverse == next.isReverse()) {
 				retVal.add(new Include(next.getInclude(), next.isRecurse()));
@@ -286,5 +307,17 @@ public class Search implements Serializable {
 
 	public void addInclude(SearchInclude theInclude) {
 		getIncludes().add(theInclude);
+	}
+
+	public Integer getVersion() {
+		return myVersion;
+	}
+
+	public SearchParameterMap getSearchParameterMap() {
+		return SerializationUtils.deserialize(mySearchParameterMap);
+	}
+
+	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
+		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
 	}
 }

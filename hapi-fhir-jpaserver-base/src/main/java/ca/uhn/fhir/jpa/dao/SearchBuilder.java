@@ -70,6 +70,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
@@ -115,6 +116,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private String mySearchUuid;
 	private IHapiTerminologySvc myTerminologySvc;
 	private int myFetchSize;
+	private Integer myMaxResultsToFetch;
+	private Set<Long> myPidSet;
 
 	/**
 	 * Constructor
@@ -134,6 +137,11 @@ public class SearchBuilder implements ISearchBuilder {
 		mySearchParamRegistry = theSearchParamRegistry;
 		myResourceTagDao = theResourceTagDao;
 		myResourceSearchViewDao = theResourceViewDao;
+	}
+
+	@Override
+	public void setMaxResultsToFetch(Integer theMaxResultsToFetch) {
+		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
 	private void addPredicateComposite(String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd) {
@@ -1276,6 +1284,14 @@ public class SearchBuilder implements ISearchBuilder {
 		return new CountQueryIterator(query);
 	}
 
+	/**
+	 * @param thePidSet May be null
+	 */
+	@Override
+	public void setPreviouslyAddedResourcePids(@Nullable List<Long> thePidSet) {
+		myPidSet = new HashSet<>(thePidSet);
+	}
+
 	@Override
 	public Iterator<Long> createQuery(SearchParameterMap theParams, String theSearchUuid) {
 		myParams = theParams;
@@ -1332,6 +1348,11 @@ public class SearchBuilder implements ISearchBuilder {
 			ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.STANDARD_QUERY;
 			ourLastHandlerThreadForUnitTest = Thread.currentThread().getName();
 		}
+
+		if (myPidSet == null) {
+			myPidSet = new HashSet<>();
+		}
+
 		return new QueryIterator();
 	}
 
@@ -2028,7 +2049,7 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 				IQueryParameterType leftParam = toParameterType(compositeOf.get(0));
 				IQueryParameterType rightParam = toParameterType(compositeOf.get(1));
-				qp = new CompositeParam<IQueryParameterType, IQueryParameterType>(leftParam, rightParam);
+				qp = new CompositeParam<>(leftParam, rightParam);
 				break;
 			case REFERENCE:
 				qp = new ReferenceParam();
@@ -2072,7 +2093,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private int myPageSize = myCallingDao.getConfig().getEverythingIncludesFetchPageSize();
 
 		public IncludesIterator(Set<Long> thePidSet) {
-			myCurrentPids = new ArrayList<Long>(thePidSet);
+			myCurrentPids = new ArrayList<>(thePidSet);
 			myCurrentIterator = EMPTY_LONG_LIST.iterator();
 			myCurrentOffset = 0;
 		}
@@ -2123,7 +2144,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private final class QueryIterator extends BaseIterator<Long> implements Iterator<Long> {
 
-		private final Set<Long> myPidSet = new HashSet<Long>();
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private Long myNext;
@@ -2150,9 +2170,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 			// If we don't have a query yet, create one
 			if (myResultsIterator == null) {
-				Integer maximumResults = myCallingDao.getConfig().getFetchSizeDefaultMaximum();
-
-				final TypedQuery<Long> query = createQuery(mySort, maximumResults, false);
+				Integer maxResultsToFetch = myMaxResultsToFetch;
+				if (maxResultsToFetch == null) {
+					maxResultsToFetch = myCallingDao.getConfig().getFetchSizeDefaultMaximum();
+				}
+				final TypedQuery<Long> query = createQuery(mySort, maxResultsToFetch, false);
 
 				Query<Long> hibernateQuery = (Query<Long>) query;
 				hibernateQuery.setFetchSize(myFetchSize);
