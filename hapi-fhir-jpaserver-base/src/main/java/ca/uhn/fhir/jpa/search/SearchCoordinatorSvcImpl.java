@@ -89,7 +89,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Autowired
 	private PlatformTransactionManager myManagedTxManager;
 	@Autowired
-	private IFhirSystemDao<?, ?> mySystemDao;
+	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IPagingProvider myPagingProvider;
 
@@ -170,9 +170,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				if (newSearch.isPresent()) {
 					search = newSearch.get();
 					String resourceType = search.getResourceType();
-					Class<? extends IBaseResource> type = myContext.getResourceDefinition(resourceType).getImplementingClass();
 					SearchParameterMap params = search.getSearchParameterMap();
-					SearchContinuationTask task = new SearchContinuationTask(search, mySystemDao.getDao(type), params, resourceType);
+					SearchContinuationTask task = new SearchContinuationTask(search, myDaoRegistry.getResourceDao(resourceType), params, resourceType);
 					myIdToSearchTask.put(search.getUuid(), task);
 					myExecutor.submit(task);
 				}
