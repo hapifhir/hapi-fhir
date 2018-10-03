@@ -33,7 +33,7 @@ import java.util.Set;
 
 public interface ISearchBuilder {
 
-	Iterator<Long> createQuery(SearchParameterMap theParams, String theSearchUuid);
+	IResultIterator createQuery(SearchParameterMap theParams, String theSearchUuid);
 
 	void setMaxResultsToFetch(Integer theMaxResultsToFetch);
 
@@ -53,4 +53,5 @@ public interface ISearchBuilder {
 	void setType(Class<? extends IBaseResource> theResourceType, String theResourceName);
 
 	void setPreviouslyAddedResourcePids(List<Long> thePreviouslyAddedResourcePids);
+
 }

@@ -1293,7 +1293,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public Iterator<Long> createQuery(SearchParameterMap theParams, String theSearchUuid) {
+	public IResultIterator createQuery(SearchParameterMap theParams, String theSearchUuid) {
 		myParams = theParams;
 		myBuilder = myEntityManager.getCriteriaBuilder();
 		mySearchUuid = theSearchUuid;
@@ -2142,7 +2142,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
-	private final class QueryIterator extends BaseIterator<Long> implements Iterator<Long> {
+	private final class QueryIterator extends BaseIterator<Long> implements IResultIterator {
 
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
@@ -2170,11 +2170,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 			// If we don't have a query yet, create one
 			if (myResultsIterator == null) {
-				Integer maxResultsToFetch = myMaxResultsToFetch;
-				if (maxResultsToFetch == null) {
-					maxResultsToFetch = myCallingDao.getConfig().getFetchSizeDefaultMaximum();
+				if (myMaxResultsToFetch == null) {
+					myMaxResultsToFetch = myCallingDao.getConfig().getFetchSizeDefaultMaximum();
 				}
-				final TypedQuery<Long> query = createQuery(mySort, maxResultsToFetch, false);
+				final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false);
 
 				Query<Long> hibernateQuery = (Query<Long>) query;
 				hibernateQuery.setFetchSize(myFetchSize);
@@ -2261,7 +2260,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private class UniqueIndexIterator implements Iterator<Long> {
+	private class UniqueIndexIterator implements IResultIterator {
 		private final Set<String> myUniqueQueryStrings;
 		private Iterator<Long> myWrap = null;
 

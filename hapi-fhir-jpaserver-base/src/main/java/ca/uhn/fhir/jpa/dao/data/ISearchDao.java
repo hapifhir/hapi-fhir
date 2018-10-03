@@ -52,4 +52,8 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 	@Modifying
 	@Query("UPDATE Search s SET s.myDeleted = :deleted WHERE s.myId = :pid")
 	void updateDeleted(@Param("pid") Long thePid, @Param("deleted") boolean theDeleted);
+
+	@Modifying
+	@Query("DELETE FROM Search s WHERE s.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
 }

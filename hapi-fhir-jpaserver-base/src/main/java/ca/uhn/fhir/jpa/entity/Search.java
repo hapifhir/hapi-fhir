@@ -24,9 +24,9 @@ import static org.apache.commons.lang3.StringUtils.left;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,6 +52,7 @@ public class Search implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
+	@OptimisticLock(excluded = true)
 	@Column(name = "SEARCH_DELETED", nullable = true)
 	private Boolean myDeleted;
 	@Column(name = "FAILURE_CODE", nullable = true)
@@ -79,7 +80,7 @@ public class Search implements Serializable {
 	private Long myResourceId;
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
-	@OneToMany(mappedBy = "mySearch")
+	@OneToMany(mappedBy = "mySearch", fetch = FetchType.LAZY)
 	private Collection<SearchResult> myResults;
 	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
@@ -252,14 +253,6 @@ public class Search implements Serializable {
 
 	public void setStatus(SearchStatusEnum theStatus) {
 		myStatus = theStatus;
-	}
-
-	/** FIXME: remove */
-	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
-	/** FIXME: remove */
-	@PrePersist
-	public void preSave() {
-		ourLog.info("** PREPERSIST - Version is {}", myVersion);
 	}
 
 	public Integer getTotalCount() {

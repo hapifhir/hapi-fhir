@@ -16,6 +16,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
@@ -54,16 +55,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public abstract class BaseJpaTest {
-
-	static {
-		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
-	}
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
@@ -73,11 +71,18 @@ public abstract class BaseJpaTest {
 	protected static final String VS_URL = "http://example.com/my_value_set";
 	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
+
+	static {
+		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
+	}
+
 	@Rule
 	public LoggingRule myLoggingRule = new LoggingRule();
 	protected ServletRequestDetails mySrd;
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
+	@Autowired
+	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 
 	@After
 	public void afterPerformCleanup() {
@@ -142,6 +147,16 @@ public abstract class BaseJpaTest {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				theRunnable.run();
+			}
+		});
+	}
+
+	public <T> T runInTransaction(Callable<T> theRunnable) {
+		return newTxTemplate().execute(t->{
+			try {
+				return theRunnable.call();
+			} catch (Exception theE) {
+				throw new InternalErrorException(theE);
 			}
 		});
 	}
@@ -217,10 +232,6 @@ public abstract class BaseJpaTest {
 		Integer toIndex = theFound.size();
 		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
 	}
-
-	@Autowired
-	private DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
-
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex, boolean theFirstCall) {
 		if (theToIndex == null) {
@@ -353,7 +364,7 @@ public abstract class BaseJpaTest {
 		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
 		theDaoConfig.setExpungeEnabled(true);
 
-		for (int count = 0;; count++) {
+		for (int count = 0; ; count++) {
 			try {
 				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
 				break;
@@ -408,7 +419,7 @@ public abstract class BaseJpaTest {
 						return "null";
 					}
 					if (t instanceof IBaseResource) {
-						return ((IBaseResource)t).getIdElement().getValue();
+						return ((IBaseResource) t).getIdElement().getValue();
 					}
 					return t.toString();
 				})

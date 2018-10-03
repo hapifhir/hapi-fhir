@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -43,4 +44,8 @@ public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
 
 	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
 	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
+
+	@Modifying
+	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")
+	void deleteByIds(@Param("ids") List<Long> theContent);
 }

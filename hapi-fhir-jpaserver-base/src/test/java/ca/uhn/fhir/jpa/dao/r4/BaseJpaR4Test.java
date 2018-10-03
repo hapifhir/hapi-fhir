@@ -210,6 +210,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected ISearchResultDao mySearchResultDao;
 	@Autowired
+	protected ISearchIncludeDao mySearchIncludeDao;
+	@Autowired
 	@Qualifier("mySearchParameterDaoR4")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
 	@Autowired
