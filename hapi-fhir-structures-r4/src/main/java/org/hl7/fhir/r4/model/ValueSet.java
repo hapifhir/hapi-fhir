@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A ValueSet resource instances specifies a set of codes drawn from one or more code systems, intended for use in a particular context. Value sets link between [[[CodeSystem]]] definitions and their use in [coded elements](terminologies.html).
  */
-@ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/Profile/ValueSet")
+@ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/StructureDefinition/ValueSet")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "immutable", "purpose", "copyright", "compose", "expansion"})
 public class ValueSet extends MetadataResource {
 

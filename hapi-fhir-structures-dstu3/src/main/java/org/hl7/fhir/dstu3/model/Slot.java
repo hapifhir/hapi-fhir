@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A slot of time on a schedule that may be available for booking appointments.
  */
-@ResourceDef(name="Slot", profile="http://hl7.org/fhir/Profile/Slot")
+@ResourceDef(name="Slot", profile="http://hl7.org/fhir/StructureDefinition/Slot")
 public class Slot extends DomainResource {
 
     public enum SlotStatus {

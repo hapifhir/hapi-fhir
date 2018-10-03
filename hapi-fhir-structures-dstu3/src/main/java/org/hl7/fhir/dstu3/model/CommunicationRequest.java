@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.
  */
-@ResourceDef(name="CommunicationRequest", profile="http://hl7.org/fhir/Profile/CommunicationRequest")
+@ResourceDef(name="CommunicationRequest", profile="http://hl7.org/fhir/StructureDefinition/CommunicationRequest")
 public class CommunicationRequest extends DomainResource {
 
     public enum CommunicationRequestStatus {

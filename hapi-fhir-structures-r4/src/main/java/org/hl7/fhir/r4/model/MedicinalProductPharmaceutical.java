@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A pharmaceutical product described in terms of its composition and dose form.
  */
-@ResourceDef(name="MedicinalProductPharmaceutical", profile="http://hl7.org/fhir/Profile/MedicinalProductPharmaceutical")
+@ResourceDef(name="MedicinalProductPharmaceutical", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductPharmaceutical")
 public class MedicinalProductPharmaceutical extends DomainResource {
 
     @Block()

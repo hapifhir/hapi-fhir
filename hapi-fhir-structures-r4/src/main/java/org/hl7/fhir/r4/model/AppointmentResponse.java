@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.
  */
-@ResourceDef(name="AppointmentResponse", profile="http://hl7.org/fhir/Profile/AppointmentResponse")
+@ResourceDef(name="AppointmentResponse", profile="http://hl7.org/fhir/StructureDefinition/AppointmentResponse")
 public class AppointmentResponse extends DomainResource {
 
     public enum ParticipantStatus {

@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a request for a medication, substance or device used in the healthcare setting.
  */
-@ResourceDef(name="SupplyRequest", profile="http://hl7.org/fhir/Profile/SupplyRequest")
+@ResourceDef(name="SupplyRequest", profile="http://hl7.org/fhir/StructureDefinition/SupplyRequest")
 public class SupplyRequest extends DomainResource {
 
     public enum SupplyRequestStatus {

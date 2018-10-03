@@ -44,7 +44,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The regulatory authorization of a medicinal product.
  */
-@ResourceDef(name="MedicinalProductAuthorization", profile="http://hl7.org/fhir/Profile/MedicinalProductAuthorization")
+@ResourceDef(name="MedicinalProductAuthorization", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductAuthorization")
 public class MedicinalProductAuthorization extends DomainResource {
 
     @Block()

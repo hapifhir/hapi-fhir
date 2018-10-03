@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes validation requirements, source(s), status and dates for one or more elements.
  */
-@ResourceDef(name="VerificationResult", profile="http://hl7.org/fhir/Profile/VerificationResult")
+@ResourceDef(name="VerificationResult", profile="http://hl7.org/fhir/StructureDefinition/VerificationResult")
 public class VerificationResult extends DomainResource {
 
     public enum Status {

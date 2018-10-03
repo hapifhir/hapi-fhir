@@ -44,7 +44,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The manufactured item as contained in the packaged medicinal product.
  */
-@ResourceDef(name="MedicinalProductManufactured", profile="http://hl7.org/fhir/Profile/MedicinalProductManufactured")
+@ResourceDef(name="MedicinalProductManufactured", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductManufactured")
 public class MedicinalProductManufactured extends DomainResource {
 
     /**

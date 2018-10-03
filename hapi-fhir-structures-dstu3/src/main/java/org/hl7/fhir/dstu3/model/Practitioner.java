@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A person who is directly or indirectly involved in the provisioning of healthcare.
  */
-@ResourceDef(name="Practitioner", profile="http://hl7.org/fhir/Profile/Practitioner")
+@ResourceDef(name="Practitioner", profile="http://hl7.org/fhir/StructureDefinition/Practitioner")
 public class Practitioner extends DomainResource {
 
     @Block()

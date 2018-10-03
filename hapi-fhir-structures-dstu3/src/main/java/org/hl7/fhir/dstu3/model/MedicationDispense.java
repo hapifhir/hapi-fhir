@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.
  */
-@ResourceDef(name="MedicationDispense", profile="http://hl7.org/fhir/Profile/MedicationDispense")
+@ResourceDef(name="MedicationDispense", profile="http://hl7.org/fhir/StructureDefinition/MedicationDispense")
 public class MedicationDispense extends DomainResource {
 
     public enum MedicationDispenseStatus {

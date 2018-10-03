@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
  */
-@ResourceDef(name="MessageDefinition", profile="http://hl7.org/fhir/Profile/MessageDefinition")
+@ResourceDef(name="MessageDefinition", profile="http://hl7.org/fhir/StructureDefinition/MessageDefinition")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "replaces", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "base", "parent", "event[x]", "category", "focus", "responseRequired", "allowedResponse", "graph"})
 public class MessageDefinition extends MetadataResource {
 

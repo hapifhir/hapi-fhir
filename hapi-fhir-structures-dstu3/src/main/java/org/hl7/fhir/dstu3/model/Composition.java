@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A set of healthcare-related information that is assembled together into a single logical document that provides a single coherent statement of meaning, establishes its own context and that has clinical attestation with regard to who is making the statement. While a Composition defines the structure, it does not actually contain the content: rather the full content of a document is contained in a Bundle, of which the Composition is the first resource contained.
  */
-@ResourceDef(name="Composition", profile="http://hl7.org/fhir/Profile/Composition")
+@ResourceDef(name="Composition", profile="http://hl7.org/fhir/StructureDefinition/Composition")
 public class Composition extends DomainResource {
 
     public enum CompositionStatus {

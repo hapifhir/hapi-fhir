@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Financial instrument which may be used to reimburse or pay for health care products and services.
  */
-@ResourceDef(name="Coverage", profile="http://hl7.org/fhir/Profile/Coverage")
+@ResourceDef(name="Coverage", profile="http://hl7.org/fhir/StructureDefinition/Coverage")
 public class Coverage extends DomainResource {
 
     public enum CoverageStatus {

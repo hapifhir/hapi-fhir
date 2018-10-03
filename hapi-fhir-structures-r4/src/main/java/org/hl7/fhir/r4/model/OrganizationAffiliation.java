@@ -44,7 +44,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Defines an affiliation/assotiation/relationship between 2 distinct oganizations, that is not a part-of relationship/sub-division relationship.
  */
-@ResourceDef(name="OrganizationAffiliation", profile="http://hl7.org/fhir/Profile/OrganizationAffiliation")
+@ResourceDef(name="OrganizationAffiliation", profile="http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation")
 public class OrganizationAffiliation extends DomainResource {
 
     /**

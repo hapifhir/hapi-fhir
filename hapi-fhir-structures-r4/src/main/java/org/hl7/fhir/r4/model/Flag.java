@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Prospective warnings of potential issues when providing care to the patient.
  */
-@ResourceDef(name="Flag", profile="http://hl7.org/fhir/Profile/Flag")
+@ResourceDef(name="Flag", profile="http://hl7.org/fhir/StructureDefinition/Flag")
 public class Flag extends DomainResource {
 
     public enum FlagStatus {

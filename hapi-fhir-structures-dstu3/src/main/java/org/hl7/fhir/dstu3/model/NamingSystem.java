@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A curated namespace that issues unique symbols within that namespace for the identification of concepts, people, devices, etc.  Represents a "System" used within the Identifier and Coding data types.
  */
-@ResourceDef(name="NamingSystem", profile="http://hl7.org/fhir/Profile/NamingSystem")
+@ResourceDef(name="NamingSystem", profile="http://hl7.org/fhir/StructureDefinition/NamingSystem")
 @ChildOrder(names={"name", "status", "kind", "date", "publisher", "contact", "responsible", "type", "description", "useContext", "jurisdiction", "usage", "uniqueId", "replacedBy"})
 public class NamingSystem extends MetadataResource {
 

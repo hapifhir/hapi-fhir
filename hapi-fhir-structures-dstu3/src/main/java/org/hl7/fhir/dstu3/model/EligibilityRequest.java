@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The EligibilityRequest provides patient and insurance coverage information to an insurer for them to respond, in the form of an EligibilityResponse, with information regarding whether the stated coverage is valid and in-force and optionally to provide the insurance details of the policy.
  */
-@ResourceDef(name="EligibilityRequest", profile="http://hl7.org/fhir/Profile/EligibilityRequest")
+@ResourceDef(name="EligibilityRequest", profile="http://hl7.org/fhir/StructureDefinition/EligibilityRequest")
 public class EligibilityRequest extends DomainResource {
 
     public enum EligibilityRequestStatus {

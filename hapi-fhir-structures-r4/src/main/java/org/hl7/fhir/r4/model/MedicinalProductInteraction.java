@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The interactions of the medicinal product with other medicinal products, or other forms of interactions.
  */
-@ResourceDef(name="MedicinalProductInteraction", profile="http://hl7.org/fhir/Profile/MedicinalProductInteraction")
+@ResourceDef(name="MedicinalProductInteraction", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductInteraction")
 public class MedicinalProductInteraction extends DomainResource {
 
     /**

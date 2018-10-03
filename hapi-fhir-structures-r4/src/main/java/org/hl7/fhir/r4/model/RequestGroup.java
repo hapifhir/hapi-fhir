@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A group of related requests that can be used to capture intended activities that have inter-dependencies such as "give this medication after that one".
  */
-@ResourceDef(name="RequestGroup", profile="http://hl7.org/fhir/Profile/RequestGroup")
+@ResourceDef(name="RequestGroup", profile="http://hl7.org/fhir/StructureDefinition/RequestGroup")
 public class RequestGroup extends DomainResource {
 
     public enum RequestStatus {

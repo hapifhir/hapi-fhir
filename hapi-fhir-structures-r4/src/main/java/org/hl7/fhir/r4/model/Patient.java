@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Demographics and other administrative information about an individual or animal receiving care or other health-related services.
  */
-@ResourceDef(name="Patient", profile="http://hl7.org/fhir/Profile/Patient")
+@ResourceDef(name="Patient", profile="http://hl7.org/fhir/StructureDefinition/Patient")
 public class Patient extends DomainResource {
 
     public enum LinkType {

@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.
  */
-@ResourceDef(name="ObservationDefinition", profile="http://hl7.org/fhir/Profile/ObservationDefinition")
+@ResourceDef(name="ObservationDefinition", profile="http://hl7.org/fhir/StructureDefinition/ObservationDefinition")
 public class ObservationDefinition extends DomainResource {
 
     @Block()

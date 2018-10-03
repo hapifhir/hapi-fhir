@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An ingredient of a manufactured item or pharmaceutical product.
  */
-@ResourceDef(name="MedicinalProductIngredient", profile="http://hl7.org/fhir/Profile/MedicinalProductIngredient")
+@ResourceDef(name="MedicinalProductIngredient", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductIngredient")
 public class MedicinalProductIngredient extends DomainResource {
 
     @Block()
