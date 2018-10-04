@@ -38,7 +38,7 @@ public class DaoRegistry implements ApplicationContextAware {
 
 	@Autowired
 	private FhirContext myCtx;
-	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao = new HashMap<>();
+	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 
 	@Override
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
@@ -47,14 +47,14 @@ public class DaoRegistry implements ApplicationContextAware {
 
 	public IFhirResourceDao<?> getResourceDao(String theResourceName) {
 		IFhirResourceDao<?> retVal = getResourceNameToResourceDao().get(theResourceName);
-		Validate.notNull(retVal, "No DAO exists for resource type %s", theResourceName);
+		Validate.notNull(retVal, "No DAO exists for resource type %s - Have: %s", theResourceName, myResourceNameToResourceDao);
 		return retVal;
 
 	}
 
 	private Map<String, IFhirResourceDao<?>> getResourceNameToResourceDao() {
 		Map<String, IFhirResourceDao<?>> retVal = myResourceNameToResourceDao;
-		if (retVal == null) {
+		if (retVal == null || retVal.isEmpty()) {
 			retVal = new HashMap<>();
 			Map<String, IFhirResourceDao> resourceDaos = myAppCtx.getBeansOfType(IFhirResourceDao.class);
 			for (IFhirResourceDao nextResourceDao : resourceDaos.values()) {
