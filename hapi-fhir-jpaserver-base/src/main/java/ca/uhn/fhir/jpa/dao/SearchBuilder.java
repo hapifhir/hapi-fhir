@@ -997,6 +997,8 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 		}
 
+		ourLog.trace("Date range is {} - {}", lowerBound, upperBound);
+
 		if (lb != null && ub != null) {
 			return (theBuilder.and(lb, ub));
 		} else if (lb != null) {

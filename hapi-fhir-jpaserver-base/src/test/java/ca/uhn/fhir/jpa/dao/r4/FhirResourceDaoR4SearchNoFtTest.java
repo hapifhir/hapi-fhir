@@ -38,10 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -3225,6 +3222,79 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		// We expect a new one because we don't cache the search URL for very long search URLs
 		assertEquals(2, mySearchEntityDao.count());
 
+	}
+
+	@Test
+	public void testDateSearchParametersShouldBeTimezoneIndependent() {
+
+		createObservationWithEffective("NO1", "2011-01-02T23:00:00-11:30");
+		createObservationWithEffective("NO2", "2011-01-03T00:00:00+01:00");
+
+		createObservationWithEffective("YES01", "2011-01-02T00:00:00-11:30");
+		createObservationWithEffective("YES02", "2011-01-02T00:00:00-10:00");
+		createObservationWithEffective("YES03", "2011-01-02T00:00:00-09:00");
+		createObservationWithEffective("YES04", "2011-01-02T00:00:00-08:00");
+		createObservationWithEffective("YES05", "2011-01-02T00:00:00-07:00");
+		createObservationWithEffective("YES06", "2011-01-02T00:00:00-06:00");
+		createObservationWithEffective("YES07", "2011-01-02T00:00:00-05:00");
+		createObservationWithEffective("YES08", "2011-01-02T00:00:00-04:00");
+		createObservationWithEffective("YES09", "2011-01-02T00:00:00-03:00");
+		createObservationWithEffective("YES10", "2011-01-02T00:00:00-02:00");
+		createObservationWithEffective("YES11", "2011-01-02T00:00:00-01:00");
+		createObservationWithEffective("YES12", "2011-01-02T00:00:00Z");
+		createObservationWithEffective("YES13", "2011-01-02T00:00:00+01:00");
+		createObservationWithEffective("YES14", "2011-01-02T00:00:00+02:00");
+		createObservationWithEffective("YES15", "2011-01-02T00:00:00+03:00");
+		createObservationWithEffective("YES16", "2011-01-02T00:00:00+04:00");
+		createObservationWithEffective("YES17", "2011-01-02T00:00:00+05:00");
+		createObservationWithEffective("YES18", "2011-01-02T00:00:00+06:00");
+		createObservationWithEffective("YES19", "2011-01-02T00:00:00+07:00");
+		createObservationWithEffective("YES20", "2011-01-02T00:00:00+08:00");
+		createObservationWithEffective("YES21", "2011-01-02T00:00:00+09:00");
+		createObservationWithEffective("YES22", "2011-01-02T00:00:00+10:00");
+		createObservationWithEffective("YES23", "2011-01-02T00:00:00+11:00");
+
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_DATE, new DateParam("2011-01-02"));
+		IBundleProvider results = myObservationDao.search(map);
+		List<String> values = toUnqualifiedVersionlessIdValues(results);
+		Collections.sort(values);
+		assertThat(values.toString(), values, contains(
+			"Observation/YES01",
+			"Observation/YES02",
+			"Observation/YES03",
+			"Observation/YES04",
+			"Observation/YES05",
+			"Observation/YES06",
+			"Observation/YES07",
+			"Observation/YES08",
+			"Observation/YES09",
+			"Observation/YES10",
+			"Observation/YES11",
+			"Observation/YES12",
+			"Observation/YES13",
+			"Observation/YES14",
+			"Observation/YES15",
+			"Observation/YES16",
+			"Observation/YES17",
+			"Observation/YES18",
+			"Observation/YES19",
+			"Observation/YES20",
+			"Observation/YES21",
+			"Observation/YES22",
+			"Observation/YES23"
+			));
+	}
+
+	private void createObservationWithEffective(String theId, String theEffective) {
+		Observation obs = new Observation();
+		obs.setId(theId);
+		obs.setEffective(new DateTimeType(theEffective));
+		myObservationDao.update(obs);
+
+		ourLog.info("Obs {} has time {}", theId, obs.getEffectiveDateTimeType().getValue().toString());
 	}
 
 	/**

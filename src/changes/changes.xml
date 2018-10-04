@@ -65,6 +65,12 @@
 				<![CDATA[<code>DatConfig#setSearchPreFetchThresholds()</code>]]>
 				for configuration of this feature.
 			</action>
+			<action type="add">
+				When performing a JPA server using a date parameter, if a time is not specified in
+				the query URL, the date range is expanded slightly to include all possible
+				timezones where the date that could apply. This makes the search slightly more
+				inclusive, which errs on the side of caution.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

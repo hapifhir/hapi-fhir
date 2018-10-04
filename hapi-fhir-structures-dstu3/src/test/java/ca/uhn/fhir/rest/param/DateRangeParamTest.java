@@ -39,6 +39,14 @@ public class DateRangeParamTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	@Test
+	public void testGetLowerRange() {
+		ourLog.info("Time is {}", new Date());
+
+		DateRangeParam param = new DateRangeParam(new DateParam("2011-01-02"));
+		ourLog.info("Adjusted time is " + param.getLowerBoundAsInstant().toString());
+	}
+
 	private static DateRangeParam create(String theLower, String theUpper) throws InvalidRequestException {
 		DateRangeParam p = new DateRangeParam();
 		List<QualifiedParamList> tokens = new ArrayList<QualifiedParamList>();

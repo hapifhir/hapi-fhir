@@ -144,8 +144,8 @@ public class RetriggeringDstu3Test extends BaseResourceProviderDstu3Test {
 			.withParameter(Parameters.class, SubscriptionRetriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
 			.execute();
 
-		OperationOutcome oo = (OperationOutcome) response.getParameter().get(0).getResource();
-		assertEquals("Triggered resource " + obsId.getValue() + " for subscription", oo.getIssue().get(0).getDiagnostics());
+		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
+		assertEquals("Triggered resource " + obsId.getValue() + " for subscription", responseValue);
 
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
@@ -181,8 +181,8 @@ public class RetriggeringDstu3Test extends BaseResourceProviderDstu3Test {
 			.withParameter(Parameters.class, SubscriptionRetriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
 			.execute();
 
-		OperationOutcome oo = (OperationOutcome) response.getParameter().get(0).getResource();
-		assertEquals("Triggered resource " + obsId.getValue() + " for subscription", oo.getIssue().get(0).getDiagnostics());
+		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
+		assertEquals("Triggered resource " + obsId.getValue() + " for subscription", responseValue);
 
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);

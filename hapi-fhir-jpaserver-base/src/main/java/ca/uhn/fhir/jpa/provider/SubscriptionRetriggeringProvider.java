@@ -29,16 +29,15 @@ import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.instance.model.IdType;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -54,7 +53,7 @@ public class SubscriptionRetriggeringProvider implements IResourceProvider {
 	private List<BaseSubscriptionInterceptor<?>> mySubscriptionInterceptorList;
 
 	@Operation(name= JpaConstants.OPERATION_RETRIGGER_SUBSCRIPTION)
-	public IBaseOperationOutcome reTriggerSubscription(
+	public IBaseParameters reTriggerSubscription(
 		@IdParam IIdType theSubscriptionId,
 		@OperationParam(name= RESOURCE_ID) UriParam theResourceId) {
 
@@ -77,8 +76,10 @@ public class SubscriptionRetriggeringProvider implements IResourceProvider {
 			next.submitResourceModified(msg);
 		}
 
-		IBaseOperationOutcome retVal = OperationOutcomeUtil.newInstance(myFhirContext);
-		OperationOutcomeUtil.addIssue(myFhirContext, retVal, "information", "Triggered resource " + theResourceId.getValue() + " for subscription", null, null);
+		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
+		IPrimitiveType<?> value = (IPrimitiveType<?>) myFhirContext.getElementDefinition("string").newInstance();
+		value.setValueAsString("Triggered resource " + theResourceId.getValue() + " for subscription");
+		ParametersUtil.addParameterToParameters(myFhirContext, retVal, "information", value);
 		return retVal;
 	}
 
