@@ -316,7 +316,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 		Date retVal = myUpperBound.getValue();
 
-		if (myLowerBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
+		if (myUpperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
 			Calendar cal = DateUtils.toCalendar(retVal);
 			cal.setTimeZone(TimeZone.getTimeZone("GMT+11:30"));
 			cal = DateUtils.truncate(cal, Calendar.DATE);
