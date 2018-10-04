@@ -32,10 +32,7 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Rule;
+import org.junit.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -126,11 +123,6 @@ public abstract class BaseJpaTest {
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
 	}
 
-	@Before
-	public void beforeRandomizeLocale() {
-		randomizeLocale();
-	}
-
 	protected abstract FhirContext getContext();
 
 	protected abstract PlatformTransactionManager getTxManager();
@@ -152,7 +144,7 @@ public abstract class BaseJpaTest {
 	}
 
 	public <T> T runInTransaction(Callable<T> theRunnable) {
-		return newTxTemplate().execute(t->{
+		return newTxTemplate().execute(t -> {
 			try {
 				return theRunnable.call();
 			} catch (Exception theE) {
@@ -331,6 +323,11 @@ public abstract class BaseJpaTest {
 			retVal.add(next.getValue());
 		}
 		return retVal.toArray(new String[retVal.size()]);
+	}
+
+	@BeforeClass
+	public static void beforeClassRandomizeLocale() {
+		randomizeLocale();
 	}
 
 	@SuppressWarnings("RedundantThrows")
