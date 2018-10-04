@@ -81,8 +81,8 @@ public class DateRangeParamSearchR4Test {
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
 
-		assertEquals(parse("2012-01-01 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
-		assertEquals(parseM1("2012-01-02 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
+		assertEquals(parseLower("2012-01-01 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
+		assertEquals(parseUpper("2012-01-02 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
 		assertEquals(ParamPrefixEnum.EQUAL, ourLastDateRange.getLowerBound().getPrefix());
 		assertEquals(ParamPrefixEnum.EQUAL, ourLastDateRange.getUpperBound().getPrefix());
 	}
@@ -98,8 +98,8 @@ public class DateRangeParamSearchR4Test {
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
 
-		assertEquals(parse("2012-01-01 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
-		assertEquals(parseM1("2012-01-02 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
+		assertEquals(parseLower("2012-01-01 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
+		assertEquals(parseUpper("2012-01-02 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
 		assertEquals(ParamPrefixEnum.EQUAL, ourLastDateRange.getLowerBound().getPrefix());
 		assertEquals(ParamPrefixEnum.EQUAL, ourLastDateRange.getUpperBound().getPrefix());
 	}
@@ -115,7 +115,7 @@ public class DateRangeParamSearchR4Test {
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertEquals(null, ourLastDateRange.getUpperBound());
 
-		assertEquals(parse("2012-01-02 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
+		assertEquals(parseLower("2012-01-02 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
 		assertEquals(null, ourLastDateRange.getUpperBoundAsInstant());
 		assertEquals(ParamPrefixEnum.GREATERTHAN, ourLastDateRange.getLowerBound().getPrefix());
 		assertEquals(null, ourLastDateRange.getUpperBound());
@@ -133,7 +133,7 @@ public class DateRangeParamSearchR4Test {
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
 
 		assertEquals(null, ourLastDateRange.getLowerBoundAsInstant());
-		assertEquals(parseM1("2012-01-01 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
+		assertEquals(parseUpper("2012-01-01 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
 		assertEquals(null, ourLastDateRange.getLowerBound());
 		assertEquals(ParamPrefixEnum.LESSTHAN, ourLastDateRange.getUpperBound().getPrefix());
 	}
@@ -149,7 +149,7 @@ public class DateRangeParamSearchR4Test {
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertEquals(null, ourLastDateRange.getUpperBound());
 
-		assertEquals(parse("2012-01-01 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
+		assertEquals(parseLower("2012-01-01 00:00:00.0000"), ourLastDateRange.getLowerBoundAsInstant());
 		assertEquals(null, ourLastDateRange.getUpperBoundAsInstant());
 		assertEquals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, ourLastDateRange.getLowerBound().getPrefix());
 		assertEquals(null, ourLastDateRange.getUpperBound());
@@ -167,7 +167,7 @@ public class DateRangeParamSearchR4Test {
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
 
 		assertEquals(null, ourLastDateRange.getLowerBoundAsInstant());
-		assertEquals(parseM1("2012-01-02 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
+		assertEquals(parseUpper("2012-01-02 00:00:00.0000"), ourLastDateRange.getUpperBoundAsInstant());
 		assertEquals(null, ourLastDateRange.getLowerBound());
 		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, ourLastDateRange.getUpperBound().getPrefix());
 	}
@@ -195,13 +195,13 @@ public class DateRangeParamSearchR4Test {
 
 	}
 
-	public static Date parse(String theString) throws ParseException {
+	public static Date parseLower(String theString) throws ParseException {
 		Date retVal = ourFmtLower.parse(theString);
 		retVal = DateUtils.addDays(retVal, -1);
 		return retVal;
 	}
 
-	public static Date parseM1(String theString) throws ParseException {
+	public static Date parseUpper(String theString) throws ParseException {
 		return new Date(ourFmtUpper.parse(theString).getTime() - 1L);
 	}
 
