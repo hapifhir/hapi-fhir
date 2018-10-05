@@ -1051,13 +1051,6 @@
 				<artifactId>javax.json</artifactId>
 				<version>1.0.4</version>
 			</dependency>
-			<!--
-			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>${jaxb_runtime_version}</version>
-			</dependency>
-			-->
 			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-server</artifactId>
@@ -1147,6 +1140,11 @@
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>42.2.5.jre7</version>
+			</dependency>
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.3.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>

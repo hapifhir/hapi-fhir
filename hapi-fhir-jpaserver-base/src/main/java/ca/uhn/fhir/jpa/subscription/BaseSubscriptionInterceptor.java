@@ -99,8 +99,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDaoR4;
 	@Autowired()
 	private PlatformTransactionManager myTxManager;
+	// AAAAA
 	@Autowired
-	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
