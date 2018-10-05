@@ -1333,15 +1333,17 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	/**
-	 * Register a group of providers. These could be Resource Providers, "plain" providers or a mixture of the two.
+	 * Register a group of theProviders. These could be Resource Providers, "plain" theProviders or a mixture of the two.
 	 *
-	 * @param providers a {@code Collection} of providers. The parameter could be null or an empty {@code Collection}
+	 * @param theProviders a {@code Collection} of theProviders. The parameter could be null or an empty {@code Collection}
 	 */
-	public void registerProviders(Collection<?> providers) {
+	public void registerProviders(Collection<?> theProviders) {
+		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
+
 		myProviderRegistrationMutex.lock();
 		try {
 			if (!myStarted) {
-				for (Object provider : providers) {
+				for (Object provider : theProviders) {
 					ourLog.info("Registration of provider [" + provider.getClass().getName() + "] will be delayed until FHIR server startup");
 					if (provider instanceof IResourceProvider) {
 						myResourceProviders.add((IResourceProvider) provider);
@@ -1354,19 +1356,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		} finally {
 			myProviderRegistrationMutex.unlock();
 		}
-		registerProviders(providers, false);
+		registerProviders(theProviders, false);
 	}
 
 	/*
-	 * Inner method to actually register providers
+	 * Inner method to actually register theProviders
 	 */
-	protected void registerProviders(Collection<?> providers, boolean inInit) {
+	protected void registerProviders(Collection<?> theProviders, boolean inInit) {
+		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
+
 		List<IResourceProvider> newResourceProviders = new ArrayList<>();
 		List<Object> newPlainProviders = new ArrayList<>();
 		ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
 
-		if (providers != null) {
-			for (Object provider : providers) {
+		if (theProviders != null) {
+			for (Object provider : theProviders) {
 				if (provider instanceof IResourceProvider) {
 					IResourceProvider rsrcProvider = (IResourceProvider) provider;
 					Class<? extends IBaseResource> resourceType = rsrcProvider.getResourceType();
@@ -1520,12 +1524,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets (or clears) the list of interceptors
 	 *
-	 * @param theList The list of interceptors (may be null)
+	 * @param theInterceptors The list of interceptors (may be null)
 	 */
-	public void setInterceptors(IServerInterceptor... theList) {
+	public void setInterceptors(IServerInterceptor... theInterceptors) {
+		Validate.noNullElements(theInterceptors, "theInterceptors must not contain any null elements");
+
 		myInterceptors.clear();
-		if (theList != null) {
-			myInterceptors.addAll(Arrays.asList(theList));
+		if (theInterceptors != null) {
+			myInterceptors.addAll(Arrays.asList(theInterceptors));
 		}
 	}
 
@@ -1535,6 +1541,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * @see #setResourceProviders(Collection)
 	 */
 	public void setPlainProviders(Collection<Object> theProviders) {
+		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
+
 		myPlainProviders.clear();
 		if (theProviders != null) {
 			myPlainProviders.addAll(theProviders);
@@ -1547,6 +1555,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * @see #setResourceProviders(Collection)
 	 */
 	public void setProviders(Object... theProviders) {
+		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
+
 		myPlainProviders.clear();
 		if (theProviders != null) {
 			myPlainProviders.addAll(Arrays.asList(theProviders));
@@ -1556,10 +1566,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
+	public void setResourceProviders(Collection<IResourceProvider> theProviders) {
+		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
+
 		myResourceProviders.clear();
-		if (theResourceProviders != null) {
-			myResourceProviders.addAll(theResourceProviders);
+		if (theProviders != null) {
+			myResourceProviders.addAll(theProviders);
 		}
 	}
 
