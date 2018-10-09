@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -24,6 +25,7 @@ import java.util.concurrent.Future;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -60,10 +62,63 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		assertEquals(200, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
 		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
 	}
+
+	@Test
+	public void testFetchCountWithMultipleIndexesOnOneResource() {
+
+		// Already have 200, let's add number 201 with a bunch of similar names
+		Patient p = new Patient();
+		p.setId("PT" + leftPad(Integer.toString(201), 5, '0'));
+		p.addName().setFamily("FAM" + leftPad(Integer.toString(201), 5, '0'));
+		p.addName().setFamily("FAM" + leftPad(Integer.toString(201), 5, '0') + "A");
+		p.addName().setFamily("FAM" + leftPad(Integer.toString(201), 5, '0') + "AA");
+		p.addName().setFamily("FAM" + leftPad(Integer.toString(201), 5, '0') + "AAA");
+		p.addName().addGiven("FAMA");
+		p.addName().addGiven("FAMB");
+		myPatientDao.update(p);
+
+		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+
+		// Seach with count only
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Patient.SP_NAME, new StringParam("FAM"));
+		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
+		IBundleProvider results = myPatientDao.search(params);
+		String uuid = results.getUuid();
+		assertEquals(201, results.size().intValue());
+		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertThat(ids, empty());
+		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+
+		// Seach with count and dat
+		params = new SearchParameterMap();
+		params.add(Patient.SP_NAME, new StringParam("FAM"));
+		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
+		results = myPatientDao.search(params);
+		uuid = results.getUuid();
+		assertEquals(201, results.size().intValue());
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertThat(ids, hasSize(10));
+		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+
+		// Seach with count only
+		params = new SearchParameterMap();
+		params.add(Patient.SP_NAME, new StringParam().setMissing(false));
+		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
+		results = myPatientDao.search(params);
+		uuid = results.getUuid();
+		assertEquals(201, results.size().intValue());
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertThat(ids, empty());
+		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+
+	}
+
 
 	@Test
 	public void testFetchCountAndData() {
@@ -75,6 +130,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		assertEquals(200, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));

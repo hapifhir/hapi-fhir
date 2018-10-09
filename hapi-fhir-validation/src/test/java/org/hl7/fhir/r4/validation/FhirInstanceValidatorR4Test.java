@@ -223,6 +223,25 @@ public class FhirInstanceValidatorR4Test {
 		return retVal;
 	}
 
+	@Test
+	public void testValidateCodeWithTailingSpace() {
+		Patient p = new Patient();
+		p
+			.getMaritalStatus()
+			.addCoding()
+			.setSystem("http://foo")
+			.setCode("AA  ");
+
+		FhirValidator val = ourCtx.newValidator();
+		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));
+
+		ValidationResult result = val.validateWithResult(p);
+		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
+		assertFalse(result.isSuccessful());
+		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
+
+	}
+
 	/**
 	 * See #938
 	 */

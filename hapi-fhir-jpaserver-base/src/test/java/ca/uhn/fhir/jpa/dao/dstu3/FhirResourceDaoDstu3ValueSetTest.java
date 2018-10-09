@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -62,7 +61,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testExpandById() throws IOException {
+	public void testExpandById() {
 		String resp;
 
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null, mySrd);
