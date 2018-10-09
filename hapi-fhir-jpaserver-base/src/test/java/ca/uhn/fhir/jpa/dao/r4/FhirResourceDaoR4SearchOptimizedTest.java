@@ -78,6 +78,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM" + leftPad(Integer.toString(201), 5, '0') + "A");
 		p.addName().setFamily("FAM" + leftPad(Integer.toString(201), 5, '0') + "AA");
 		p.addName().setFamily("FAM" + leftPad(Integer.toString(201), 5, '0') + "AAA");
+		p.addName().addGiven("FAMA");
+		p.addName().addGiven("FAMB");
 		myPatientDao.update(p);
 
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
@@ -103,6 +105,18 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, hasSize(10));
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+
+		// Seach with count only
+		params = new SearchParameterMap();
+		params.add(Patient.SP_NAME, new StringParam().setMissing(false));
+		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
+		results = myPatientDao.search(params);
+		uuid = results.getUuid();
+		assertEquals(201, results.size().intValue());
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertThat(ids, empty());
+		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+
 	}
 
 

@@ -1400,7 +1400,7 @@ public class SearchBuilder implements ISearchBuilder {
 			myResourceTableQuery = outerQuery;
 			myResourceTableRoot = myResourceTableQuery.from(ResourceTable.class);
 			if (theCount) {
-				outerQuery.multiselect(myBuilder.countDistinct(myResourceTableRoot.get("myId").as(Long.class)));
+				outerQuery.multiselect(myBuilder.countDistinct(myResourceTableRoot));
 			} else {
 				outerQuery.multiselect(myResourceTableRoot.get("myId").as(Long.class));
 			}
