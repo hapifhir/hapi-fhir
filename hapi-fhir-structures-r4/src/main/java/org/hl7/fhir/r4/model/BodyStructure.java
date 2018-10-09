@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Record details about an anatomical structure.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.
  */
-@ResourceDef(name="BodyStructure", profile="http://hl7.org/fhir/Profile/BodyStructure")
+@ResourceDef(name="BodyStructure", profile="http://hl7.org/fhir/StructureDefinition/BodyStructure")
 public class BodyStructure extends DomainResource {
 
     /**

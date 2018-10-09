@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A medicinal product in a container or package.
  */
-@ResourceDef(name="MedicinalProductPackaged", profile="http://hl7.org/fhir/Profile/MedicinalProductPackaged")
+@ResourceDef(name="MedicinalProductPackaged", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductPackaged")
 public class MedicinalProductPackaged extends DomainResource {
 
     @Block()

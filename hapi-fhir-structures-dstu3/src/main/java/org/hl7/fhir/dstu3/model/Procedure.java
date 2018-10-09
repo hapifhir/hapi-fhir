@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An action that is or was performed on a patient. This can be a physical intervention like an operation, or less invasive like counseling or hypnotherapy.
  */
-@ResourceDef(name="Procedure", profile="http://hl7.org/fhir/Profile/Procedure")
+@ResourceDef(name="Procedure", profile="http://hl7.org/fhir/StructureDefinition/Procedure")
 public class Procedure extends DomainResource {
 
     public enum ProcedureStatus {

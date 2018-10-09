@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Details of a Health Insurance product/plan provided by an organization.
  */
-@ResourceDef(name="InsurancePlan", profile="http://hl7.org/fhir/Profile/InsurancePlan")
+@ResourceDef(name="InsurancePlan", profile="http://hl7.org/fhir/StructureDefinition/InsurancePlan")
 public class InsurancePlan extends DomainResource {
 
     @Block()

@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
  */
-@ResourceDef(name="CarePlan", profile="http://hl7.org/fhir/Profile/CarePlan")
+@ResourceDef(name="CarePlan", profile="http://hl7.org/fhir/StructureDefinition/CarePlan")
 public class CarePlan extends DomainResource {
 
     public enum CarePlanStatus {

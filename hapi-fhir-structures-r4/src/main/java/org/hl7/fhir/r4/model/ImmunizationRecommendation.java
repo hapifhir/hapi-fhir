@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A patient's point-in-time set of recommendations (i.e. forecasting) according to a published schedule with optional supporting justification.
  */
-@ResourceDef(name="ImmunizationRecommendation", profile="http://hl7.org/fhir/Profile/ImmunizationRecommendation")
+@ResourceDef(name="ImmunizationRecommendation", profile="http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation")
 public class ImmunizationRecommendation extends DomainResource {
 
     @Block()

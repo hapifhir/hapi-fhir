@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource allows for the definition of some activity to be performed, independent of a particular patient, practitioner, or other performance context.
  */
-@ResourceDef(name="ActivityDefinition", profile="http://hl7.org/fhir/Profile/ActivityDefinition")
+@ResourceDef(name="ActivityDefinition", profile="http://hl7.org/fhir/StructureDefinition/ActivityDefinition")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "subtitle", "status", "experimental", "subject[x]", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "usage", "copyright", "approvalDate", "lastReviewDate", "effectivePeriod", "topic", "author", "editor", "reviewer", "endorser", "relatedArtifact", "library", "kind", "profile", "code", "intent", "priority", "doNotPerform", "timing[x]", "location", "participant", "product[x]", "quantity", "dosage", "bodySite", "specimenRequirement", "observationRequirement", "observationResultRequirement", "transform", "dynamicValue"})
 public class ActivityDefinition extends MetadataResource {
 

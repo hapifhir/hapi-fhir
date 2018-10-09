@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Todo.
  */
-@ResourceDef(name="SubstancePolymer", profile="http://hl7.org/fhir/Profile/SubstancePolymer")
+@ResourceDef(name="SubstancePolymer", profile="http://hl7.org/fhir/StructureDefinition/SubstancePolymer")
 public class SubstancePolymer extends DomainResource {
 
     @Block()

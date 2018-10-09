@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A sample to be used for analysis.
  */
-@ResourceDef(name="Specimen", profile="http://hl7.org/fhir/Profile/Specimen")
+@ResourceDef(name="Specimen", profile="http://hl7.org/fhir/StructureDefinition/Specimen")
 public class Specimen extends DomainResource {
 
     public enum SpecimenStatus {

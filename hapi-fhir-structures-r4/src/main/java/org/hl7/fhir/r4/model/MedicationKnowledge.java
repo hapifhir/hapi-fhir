@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Information about a medication that is used to support knowledge.
  */
-@ResourceDef(name="MedicationKnowledge", profile="http://hl7.org/fhir/Profile/MedicationKnowledge")
+@ResourceDef(name="MedicationKnowledge", profile="http://hl7.org/fhir/StructureDefinition/MedicationKnowledge")
 public class MedicationKnowledge extends DomainResource {
 
     public enum MedicationKnowledgeStatus {

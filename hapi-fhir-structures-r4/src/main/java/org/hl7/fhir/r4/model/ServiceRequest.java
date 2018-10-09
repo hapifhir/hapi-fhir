@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a request for service such as diagnostic investigations, treatments, or operations to be performed.
  */
-@ResourceDef(name="ServiceRequest", profile="http://hl7.org/fhir/Profile/ServiceRequest")
+@ResourceDef(name="ServiceRequest", profile="http://hl7.org/fhir/StructureDefinition/ServiceRequest")
 public class ServiceRequest extends DomainResource {
 
     public enum ServiceRequestStatus {

@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A task to be performed.
  */
-@ResourceDef(name="Task", profile="http://hl7.org/fhir/Profile/Task")
+@ResourceDef(name="Task", profile="http://hl7.org/fhir/StructureDefinition/Task")
 public class Task extends DomainResource {
 
     public enum TaskStatus {

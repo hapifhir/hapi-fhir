@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Todo.
  */
-@ResourceDef(name="SubstanceReferenceInformation", profile="http://hl7.org/fhir/Profile/SubstanceReferenceInformation")
+@ResourceDef(name="SubstanceReferenceInformation", profile="http://hl7.org/fhir/StructureDefinition/SubstanceReferenceInformation")
 public class SubstanceReferenceInformation extends DomainResource {
 
     @Block()

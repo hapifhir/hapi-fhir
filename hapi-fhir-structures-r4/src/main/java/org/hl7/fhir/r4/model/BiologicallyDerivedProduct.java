@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A material substance originating from a biological entity intended to be transplanted or infused
 into another (possibly the same) biological entity.
  */
-@ResourceDef(name="BiologicallyDerivedProduct", profile="http://hl7.org/fhir/Profile/BiologicallyDerivedProduct")
+@ResourceDef(name="BiologicallyDerivedProduct", profile="http://hl7.org/fhir/StructureDefinition/BiologicallyDerivedProduct")
 public class BiologicallyDerivedProduct extends DomainResource {
 
     public enum BiologicallyDerivedProductCategory {

@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A set of rules of how FHIR is used to solve a particular problem. This resource is used to gather all the parts of an implementation guide into a logical whole and to publish a computable definition of all the parts.
  */
-@ResourceDef(name="ImplementationGuide", profile="http://hl7.org/fhir/Profile/ImplementationGuide")
+@ResourceDef(name="ImplementationGuide", profile="http://hl7.org/fhir/StructureDefinition/ImplementationGuide")
 @ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "copyright", "fhirVersion", "dependency", "package", "global", "binary", "page"})
 public class ImplementationGuide extends MetadataResource {
 

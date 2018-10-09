@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A formal computable definition of an operation (on the RESTful interface) or a named query (using the search interaction).
  */
-@ResourceDef(name="OperationDefinition", profile="http://hl7.org/fhir/Profile/OperationDefinition")
+@ResourceDef(name="OperationDefinition", profile="http://hl7.org/fhir/StructureDefinition/OperationDefinition")
 @ChildOrder(names={"url", "version", "name", "title", "status", "kind", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "affectsState", "code", "comment", "base", "resource", "system", "type", "instance", "inputProfile", "outputProfile", "parameter", "overload"})
 public class OperationDefinition extends MetadataResource {
 

@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes a comparison of an immunization event against published recommendations to determine if the administration is "valid" in relation to those  recommendations.
  */
-@ResourceDef(name="ImmunizationEvaluation", profile="http://hl7.org/fhir/Profile/ImmunizationEvaluation")
+@ResourceDef(name="ImmunizationEvaluation", profile="http://hl7.org/fhir/StructureDefinition/ImmunizationEvaluation")
 public class ImmunizationEvaluation extends DomainResource {
 
     public enum ImmunizationEvaluationStatus {

@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.
  */
-@ResourceDef(name="ResearchSubject", profile="http://hl7.org/fhir/Profile/ResearchSubject")
+@ResourceDef(name="ResearchSubject", profile="http://hl7.org/fhir/StructureDefinition/ResearchSubject")
 public class ResearchSubject extends DomainResource {
 
     public enum ResearchSubjectStatus {

@@ -48,7 +48,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides the adjudication details from the processing of a Claim resource.
  */
-@ResourceDef(name="ClaimResponse", profile="http://hl7.org/fhir/Profile/ClaimResponse")
+@ResourceDef(name="ClaimResponse", profile="http://hl7.org/fhir/StructureDefinition/ClaimResponse")
 public class ClaimResponse extends DomainResource {
 
     public enum ClaimResponseStatus {

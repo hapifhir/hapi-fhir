@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Invoice containing collected ChargeItems from an Account with calculated individual and total price for Billing purpose.
  */
-@ResourceDef(name="Invoice", profile="http://hl7.org/fhir/Profile/Invoice")
+@ResourceDef(name="Invoice", profile="http://hl7.org/fhir/StructureDefinition/Invoice")
 public class Invoice extends DomainResource {
 
     public enum InvoiceStatus {

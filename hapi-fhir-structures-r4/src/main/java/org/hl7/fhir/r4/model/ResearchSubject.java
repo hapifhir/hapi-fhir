@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A physical entity which is the primary unit of operational and/or administrative interest in a study.
  */
-@ResourceDef(name="ResearchSubject", profile="http://hl7.org/fhir/Profile/ResearchSubject")
+@ResourceDef(name="ResearchSubject", profile="http://hl7.org/fhir/StructureDefinition/ResearchSubject")
 public class ResearchSubject extends DomainResource {
 
     public enum ResearchSubjectStatus {

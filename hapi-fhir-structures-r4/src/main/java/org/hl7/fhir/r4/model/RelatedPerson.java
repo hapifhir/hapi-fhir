@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Information about a person that is involved in the care for a patient, but who is not the target of healthcare, nor has a formal responsibility in the care process.
  */
-@ResourceDef(name="RelatedPerson", profile="http://hl7.org/fhir/Profile/RelatedPerson")
+@ResourceDef(name="RelatedPerson", profile="http://hl7.org/fhir/StructureDefinition/RelatedPerson")
 public class RelatedPerson extends DomainResource {
 
     /**

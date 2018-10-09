@@ -44,7 +44,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Indication for the Medicinal Product.
  */
-@ResourceDef(name="MedicinalProductIndication", profile="http://hl7.org/fhir/Profile/MedicinalProductIndication")
+@ResourceDef(name="MedicinalProductIndication", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductIndication")
 public class MedicinalProductIndication extends DomainResource {
 
     @Block()

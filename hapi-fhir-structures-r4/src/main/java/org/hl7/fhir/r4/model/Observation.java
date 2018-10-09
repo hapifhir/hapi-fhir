@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Measurements and simple assertions made about a patient, device or other subject.
  */
-@ResourceDef(name="Observation", profile="http://hl7.org/fhir/Profile/Observation")
+@ResourceDef(name="Observation", profile="http://hl7.org/fhir/StructureDefinition/Observation")
 public class Observation extends DomainResource {
 
     public enum ObservationStatus {

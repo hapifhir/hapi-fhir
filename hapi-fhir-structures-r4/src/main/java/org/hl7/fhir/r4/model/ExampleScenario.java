@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Example of workflow instance.
  */
-@ResourceDef(name="ExampleScenario", profile="http://hl7.org/fhir/Profile/ExampleScenario")
+@ResourceDef(name="ExampleScenario", profile="http://hl7.org/fhir/StructureDefinition/ExampleScenario")
 @ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "date", "publisher", "contact", "useContext", "jurisdiction", "copyright", "purpose", "actor", "instance", "process", "workflow"})
 public class ExampleScenario extends MetadataResource {
 

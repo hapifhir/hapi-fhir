@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The EventDefinition resource provides a reusable description of when a particular event can occur.
  */
-@ResourceDef(name="EventDefinition", profile="http://hl7.org/fhir/Profile/EventDefinition")
+@ResourceDef(name="EventDefinition", profile="http://hl7.org/fhir/StructureDefinition/EventDefinition")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "subtitle", "status", "experimental", "subject[x]", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "usage", "copyright", "approvalDate", "lastReviewDate", "effectivePeriod", "topic", "author", "editor", "reviewer", "endorser", "relatedArtifact", "trigger"})
 public class EventDefinition extends MetadataResource {
 

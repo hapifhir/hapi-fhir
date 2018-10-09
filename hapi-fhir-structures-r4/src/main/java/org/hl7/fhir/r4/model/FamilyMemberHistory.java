@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Significant health conditions for a person related to the patient relevant in the context of care for the patient.
  */
-@ResourceDef(name="FamilyMemberHistory", profile="http://hl7.org/fhir/Profile/FamilyMemberHistory")
+@ResourceDef(name="FamilyMemberHistory", profile="http://hl7.org/fhir/StructureDefinition/FamilyMemberHistory")
 public class FamilyMemberHistory extends DomainResource {
 
     public enum FamilyHistoryStatus {

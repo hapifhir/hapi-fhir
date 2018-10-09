@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A search parameter that defines a named search item that can be used to search/filter on a resource.
  */
-@ResourceDef(name="SearchParameter", profile="http://hl7.org/fhir/Profile/SearchParameter")
+@ResourceDef(name="SearchParameter", profile="http://hl7.org/fhir/StructureDefinition/SearchParameter")
 @ChildOrder(names={"url", "version", "name", "derivedFrom", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "code", "base", "type", "expression", "xpath", "xpathUsage", "target", "multipleOr", "multipleAnd", "comparator", "modifier", "chain", "component"})
 public class SearchParameter extends MetadataResource {
 

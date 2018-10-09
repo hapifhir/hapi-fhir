@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
  */
-@ResourceDef(name="Encounter", profile="http://hl7.org/fhir/Profile/Encounter")
+@ResourceDef(name="Encounter", profile="http://hl7.org/fhir/StructureDefinition/Encounter")
 public class Encounter extends DomainResource {
 
     public enum EncounterStatus {

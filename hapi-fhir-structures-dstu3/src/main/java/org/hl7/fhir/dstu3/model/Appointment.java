@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).
  */
-@ResourceDef(name="Appointment", profile="http://hl7.org/fhir/Profile/Appointment")
+@ResourceDef(name="Appointment", profile="http://hl7.org/fhir/StructureDefinition/Appointment")
 public class Appointment extends DomainResource {
 
     public enum AppointmentStatus {

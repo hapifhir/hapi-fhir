@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A detailed description of a device, typically as part of a regulated medicinal product. It is not intended to replace the Device resource, which covers use of device instances.
  */
-@ResourceDef(name="MedicinalProductDeviceSpec", profile="http://hl7.org/fhir/Profile/MedicinalProductDeviceSpec")
+@ResourceDef(name="MedicinalProductDeviceSpec", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductDeviceSpec")
 public class MedicinalProductDeviceSpec extends DomainResource {
 
     @Block()
