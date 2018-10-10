@@ -148,7 +148,7 @@ public class TestUtil {
 		}
 	}
 
-	public static void sleepAtLeast(int theMillis) {
+	public static void sleepAtLeast(long theMillis) {
 		long start = System.currentTimeMillis();
 		while (System.currentTimeMillis() <= start + theMillis) {
 			try {

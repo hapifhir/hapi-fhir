@@ -119,7 +119,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
 		final Slice<Long> toDelete = tt.execute(theStatus ->
-			mySearchDao.findWhereLastReturnedBefore(cutoff, PageRequest.of(0, 1000))
+			mySearchDao.findWhereLastReturnedBefore(cutoff, new Date(now()), PageRequest.of(0, 1000))
 		);
 		for (final Long nextSearchToDelete : toDelete) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);

@@ -36,14 +36,14 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 	@Query("SELECT s FROM Search s WHERE s.myUuid = :uuid")
 	Search findByUuid(@Param("uuid") String theUuid);
 
-	@Query("SELECT s.myId FROM Search s WHERE s.mySearchLastReturned < :cutoff")
-	Slice<Long> findWhereLastReturnedBefore(@Param("cutoff") Date theCutoff, Pageable thePage);
+	@Query("SELECT s.myId FROM Search s WHERE (s.mySearchLastReturned < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now)")
+	Slice<Long> findWhereLastReturnedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
 
 //	@Query("SELECT s FROM Search s WHERE s.myCreated < :cutoff")
 //	public Collection<Search> findWhereCreatedBefore(@Param("cutoff") Date theCutoff);
 
-	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND s.myCreated > :cutoff AND s.myDeleted = false")
-	Collection<Search> find(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);
+	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND ((s.myCreated > :cutoff) OR (s.myExpiryOrNull > :now)) AND s.myDeleted = false")
+	Collection<Search> findWithCutoffOrExpiry(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff, @Param("now") Date theNow);
 
 	@Modifying
 	@Query("UPDATE Search s SET s.mySearchLastReturned = :last WHERE s.myId = :pid")

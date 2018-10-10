@@ -19,6 +19,7 @@ import org.springframework.test.util.AopTestUtils;
 import java.util.Date;
 import java.util.UUID;
 
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -52,13 +53,11 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		//@formatter:off
 		IClientExecutable<IQuery<Bundle>, Bundle> search = ourClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.NAME.matches().value("Everything"))
 			.returnBundle(Bundle.class);
-		//@formatter:on
 
 		Bundle resp1 = search.execute();
 
@@ -151,6 +150,40 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 		// It should take one pass to delete the search fully
 		assertEquals(1, mySearchEntityDao.count());
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		assertEquals(0, mySearchEntityDao.count());
+
+	}
+
+	@Test
+	public void testDontDeleteSearchBeforeExpiry() {
+		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
+
+		runInTransaction(() -> {
+			Search search = new Search();
+
+			// Expires in one second, so it should not be deleted right away,
+			// but it should be deleted if we try again after one second...
+			search.setExpiryOrNull(DateUtils.addMilliseconds(new Date(), 1000));
+
+			search.setStatus(SearchStatusEnum.FINISHED);
+			search.setUuid(UUID.randomUUID().toString());
+			search.setCreated(DateUtils.addDays(new Date(), -10000));
+			search.setSearchType(SearchTypeEnum.SEARCH);
+			search.setResourceType("Patient");
+			search.setSearchLastReturned(DateUtils.addDays(new Date(), -10000));
+			search = mySearchEntityDao.save(search);
+
+		});
+
+		// Should not delete right now
+		assertEquals(1, mySearchEntityDao.count());
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		assertEquals(1, mySearchEntityDao.count());
+
+		sleepAtLeast(1100);
+
+		// Now it's time to delete
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		assertEquals(0, mySearchEntityDao.count());
 

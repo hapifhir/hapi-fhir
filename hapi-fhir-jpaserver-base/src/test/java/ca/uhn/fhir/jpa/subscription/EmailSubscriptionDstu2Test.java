@@ -16,13 +16,11 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetup;
-import com.icegreen.greenmail.util.ServerSetupTest;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -31,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -43,9 +41,8 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
-	@Autowired
-	private AsyncTaskExecutor myAsyncTaskExecutor;
 
+	@Override
 	@After
 	public void after() throws Exception {
 		ourLog.info("** AFTER **");
@@ -59,6 +56,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		ourRestServer.unregisterInterceptor(mySubscriber);
 	}
 
+	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
@@ -73,7 +71,6 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriber.setResourceDaos(myResourceDaos);
 		mySubscriber.setFhirContext(myFhirCtx);
 		mySubscriber.setTxManager(ourTxManager);
-		mySubscriber.setAsyncTaskExecutorForUnitTest(myAsyncTaskExecutor);
 		mySubscriber.start();
 		ourRestServer.registerInterceptor(mySubscriber);
 

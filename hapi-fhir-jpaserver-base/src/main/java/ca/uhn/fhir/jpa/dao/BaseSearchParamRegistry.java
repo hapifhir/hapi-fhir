@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,20 +23,24 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -58,6 +62,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	private DaoConfig myDaoConfig;
 	private volatile long myLastRefresh;
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private ISchedulerService mySchedulerSvc;
 
 	public BaseSearchParamRegistry() {
 		super();
@@ -85,7 +91,6 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		}
 		return retVal;
 	}
-
 
 	@Override
 	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
@@ -235,6 +240,13 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		myBuiltInSearchParams = Collections.unmodifiableMap(resourceNameToSearchParams);
 
 		refreshCacheIfNecessary();
+
+		// Create scheduled job for refreshing the cache
+		long period = 10 * DateUtils.MILLIS_PER_SECOND;
+		ScheduledJobDefinition definition = new ScheduledJobDefinition();
+		definition.setJobClass(SearchParamRegistryRefreshTask.class);
+		definition.setId("BaseSearchParamRegistry#refresh");
+		mySchedulerSvc.scheduleFixedDelay(period, false, definition);
 	}
 
 	@Override
@@ -325,17 +337,23 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		}
 	}
 
-	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
-	public void refreshCacheOnSchedule() {
-		refreshCacheIfNecessary();
-	}
-
 	@Override
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
 		myApplicationContext = theApplicationContext;
 	}
 
 	protected abstract RuntimeSearchParam toRuntimeSp(SP theNextSp);
+
+	public static class SearchParamRegistryRefreshTask implements Job {
+		@Autowired
+		private ISearchParamRegistry mySearchParamRegistry;
+
+		@Override
+		public void execute(JobExecutionContext context) throws JobExecutionException {
+			mySearchParamRegistry.refreshCacheIfNecessary();
+		}
+
+	}
 
 
 }

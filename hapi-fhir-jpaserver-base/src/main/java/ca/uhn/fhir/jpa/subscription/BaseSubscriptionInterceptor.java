@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,12 +23,12 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -43,22 +43,29 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -71,11 +78,12 @@ import javax.annotation.PreDestroy;
 import java.util.*;
 import java.util.concurrent.*;
 
-public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> extends ServerOperationInterceptorAdapter {
+public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> extends ServerOperationInterceptorAdapter implements BeanNameAware {
 
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
+	private static final String BEAN_NAME = BaseSubscriptionInterceptor.class.getName() + "_BEAN_NAME";
 	private final Object myInitSubscriptionsLock = new Object();
 	private SubscribableChannel myProcessingChannel;
 	private Map<String, SubscribableChannel> myDeliveryChannel;
@@ -99,11 +107,12 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDaoR4;
 	@Autowired()
 	private PlatformTransactionManager myTxManager;
-	// AAAAA
-	@Autowired
-	private AsyncTaskExecutor myAsyncTaskExecutor;
+	private ThreadPoolTaskExecutor myAsyncTaskExecutor;
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
+	private String myBeanName;
+	@Autowired
+	private ISchedulerService mySchedulerService;
 
 	/**
 	 * Constructor
@@ -111,6 +120,11 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	public BaseSubscriptionInterceptor() {
 		super();
 		setExecutorThreadCount(5);
+	}
+
+	@Override
+	public final void setBeanName(String theBeanName) {
+		myBeanName = theBeanName;
 	}
 
 	protected CanonicalSubscription canonicalize(S theSubscription) {
@@ -121,6 +135,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 				return canonicalizeDstu3(theSubscription);
 			case R4:
 				return canonicalizeR4(theSubscription);
+			case DSTU2_HL7ORG:
+			case DSTU2_1:
 			default:
 				throw new ConfigurationException("Subscription not supported for version: " + myCtx.getVersion().getVersion());
 		}
@@ -488,11 +504,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 	}
 
-	@VisibleForTesting
-	public void setAsyncTaskExecutorForUnitTest(AsyncTaskExecutor theAsyncTaskExecutor) {
-		myAsyncTaskExecutor = theAsyncTaskExecutor;
-	}
-
 	public void setFhirContext(FhirContext theCtx) {
 		myCtx = theCtx;
 	}
@@ -508,6 +519,12 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	@PostConstruct
 	public void start() {
+
+		// Create task executor
+		myAsyncTaskExecutor = new ThreadPoolTaskExecutor();
+		myAsyncTaskExecutor.setMaxPoolSize(1);
+		myAsyncTaskExecutor.setThreadNamePrefix(myBeanName);
+
 		for (IFhirResourceDao<?> next : myResourceDaos) {
 			if (next.getResourceType() != null) {
 				if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
@@ -563,6 +580,21 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 				initSubscriptions();
 			}
 		});
+
+		/*
+		 * Create a recurring job that scans for new subscriptions once in a while.
+		 * See InitSubscriptionsJob javadoc for an explanation of why
+		 */
+		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
+		jobDefinition.setJobClass(InitSubscriptionsJob.class);
+		jobDefinition.setId("InitSubscriptionsJob-" + myBeanName);
+		jobDefinition.addJobData(BEAN_NAME, myBeanName);
+		mySchedulerService.scheduleFixedDelay(5 * DateUtils.MILLIS_PER_MINUTE, false, jobDefinition);
+	}
+
+	@PreDestroy
+	public final void stop() {
+		myAsyncTaskExecutor.shutdown();
 	}
 
 	/**
@@ -613,6 +645,32 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		mySubscribableChannel.remove(subscriptionId);
 
 		return myIdToSubscription.remove(subscriptionId);
+	}
+
+	/*
+	 * Recurring job that scans for new subscriptions once in a while. This is
+	 * done because in a clustered environment it's possible that a subscription
+	 * got created or updated on another node in the cluster. There are better ways
+	 * of sharing this information but they would require inter-node communication
+	 * of some sort and we don't yet have a mechanism for that. Hopefully at
+	 * some point we will.
+	 */
+	public static class InitSubscriptionsJob implements Job, ApplicationContextAware {
+
+		private ApplicationContext myApplicationContext;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			String beanName = theContext.getJobDetail().getJobDataMap().getString(BEAN_NAME);
+			Validate.notBlank(beanName);
+			BaseSubscriptionInterceptor interceptor = myApplicationContext.getBean(beanName, BaseSubscriptionInterceptor.class);
+			interceptor.initSubscriptions();
+		}
+
+		@Override
+		public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+			myApplicationContext = theApplicationContext;
+		}
 	}
 
 

@@ -313,7 +313,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		if (theParams.getEverythingMode() == null) {
 			if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null && useCache) {
 
-				final Date createdCutoff = new Date(System.currentTimeMillis() - myDaoConfig.getReuseCachedSearchResultsForMillis());
+				long nowMillis = System.currentTimeMillis();
+				final Date createdCutoff = new Date(nowMillis - myDaoConfig.getReuseCachedSearchResultsForMillis());
+				final Date now = new Date(nowMillis);
 				final String resourceType = theResourceType;
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
@@ -321,7 +323,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					Search searchToUse = null;
 
 					int hashCode = queryString.hashCode();
-					Collection<Search> candidates = mySearchDao.find(resourceType, hashCode, createdCutoff);
+					Collection<Search> candidates = mySearchDao.findWithCutoffOrExpiry(resourceType, hashCode, createdCutoff, now);
 					for (Search nextCandidateSearch : candidates) {
 						if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
 							searchToUse = nextCandidateSearch;
