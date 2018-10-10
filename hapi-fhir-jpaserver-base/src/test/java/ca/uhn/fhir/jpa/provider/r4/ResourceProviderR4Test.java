@@ -343,7 +343,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCountParam() {
-		List<IBaseResource> resources = new ArrayList<IBaseResource>();
+		List<IBaseResource> resources = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
 			Organization org = new Organization();
 			org.setName("rpr4_testCountParam_01");
@@ -351,12 +351,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpr4_testCountParam_01")).count(10).returnBundle(Bundle.class).execute();
-		assertEquals(100, found.getTotal());
+		Bundle found = ourClient
+			.search()
+			.forResource(Organization.class)
+			.where(Organization.NAME.matches().value("rpr4_testCountParam_01"))
+			.count(10)
+			.returnBundle(Bundle.class)
+			.execute();
 		assertEquals(10, found.getEntry().size());
 
 		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpr4_testCountParam_01")).count(999).returnBundle(Bundle.class).execute();
-		assertEquals(100, found.getTotal());
 		assertEquals(50, found.getEntry().size());
 
 	}
@@ -1647,7 +1651,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Bundle responseBundle = ourClient.operation().onInstance(id).named("everything").withParameter(Parameters.class, "_count", new IntegerType(50)).useHttpGet().returnResourceType(Bundle.class)
 			.execute();
 
-		TreeSet<String> ids = new TreeSet<String>();
+		TreeSet<String> ids = new TreeSet<>();
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
 			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
 				ids.add(nextEntry.getResource().getIdElement().getIdPart());
@@ -1671,10 +1675,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		assertThat(ids, hasItem(id.getIdPart()));
-		for (int i = 1; i < 77; i++) {
-			assertThat(ids, hasItem("A" + StringUtils.leftPad(Integer.toString(i), 2, '0')));
-		}
 		assertEquals(77, ids.size());
+		for (int i = 1; i < 77; i++) {
+			assertThat(ids.size() + " ids: " + ids, ids, hasItem("A" + StringUtils.leftPad(Integer.toString(i), 2, '0')));
+		}
 	}
 
 	@Test
