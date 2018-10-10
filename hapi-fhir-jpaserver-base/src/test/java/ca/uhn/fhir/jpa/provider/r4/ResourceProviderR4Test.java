@@ -346,16 +346,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<IBaseResource> resources = new ArrayList<IBaseResource>();
 		for (int i = 0; i < 100; i++) {
 			Organization org = new Organization();
-			org.setName("rpdstu2_testCountParam_01");
+			org.setName("rpr4_testCountParam_01");
 			resources.add(org);
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(10).returnBundle(Bundle.class).execute();
+		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpr4_testCountParam_01")).count(10).returnBundle(Bundle.class).execute();
 		assertEquals(100, found.getTotal());
 		assertEquals(10, found.getEntry().size());
 
-		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(999).returnBundle(Bundle.class).execute();
+		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpr4_testCountParam_01")).count(999).returnBundle(Bundle.class).execute();
 		assertEquals(100, found.getTotal());
 		assertEquals(50, found.getEntry().size());
 
@@ -2687,10 +2687,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSaveAndRetrieveWithContained() {
 		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSaveAndRetrieveWithContained01");
+		p1.addIdentifier().setSystem("urn:system:rpr4").setValue("testSaveAndRetrieveWithContained01");
 
 		Organization o1 = new Organization();
-		o1.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSaveAndRetrieveWithContained02");
+		o1.addIdentifier().setSystem("urn:system:rpr4").setValue("testSaveAndRetrieveWithContained02");
 
 		p1.getManagingOrganization().setResource(o1);
 
@@ -2703,7 +2703,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Bundle b = ourClient
 			.search()
 			.forResource("Patient")
-			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system:rpdstu2", "testSaveAndRetrieveWithContained01"))
+			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system:rpr4", "testSaveAndRetrieveWithContained01"))
 			.prettyPrint()
 			.returnBundle(Bundle.class)
 			.execute();
@@ -3579,7 +3579,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		for (int i = 0; i < 10; i++) {
 			Patient pat = new Patient();
-			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
+			pat.addIdentifier().setSystem("urn:system:rpr4").setValue("test" + i);
 			ourClient.create().resource(pat).execute();
 		}
 
@@ -3622,7 +3622,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		for (int i = 0; i < 10; i++) {
 			Patient pat = new Patient();
-			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
+			pat.addIdentifier().setSystem("urn:system:rpr4").setValue("test" + i);
 			ourClient.create().resource(pat).execute();
 		}
 
@@ -3650,7 +3650,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		for (int i = 0; i < 10; i++) {
 			Patient pat = new Patient();
-			pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("test" + i);
+			pat.addIdentifier().setSystem("urn:system:rpr4").setValue("test" + i);
 			ourClient.create().resource(pat).execute();
 		}
 
@@ -3705,18 +3705,18 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithInclude() {
 		Organization org = new Organization();
-		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude01");
+		org.addIdentifier().setSystem("urn:system:rpr4").setValue("testSearchWithInclude01");
 		IdType orgId = (IdType) ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId();
 
 		Patient pat = new Patient();
-		pat.addIdentifier().setSystem("urn:system:rpdstu2").setValue("testSearchWithInclude02");
+		pat.addIdentifier().setSystem("urn:system:rpr4").setValue("testSearchWithInclude02");
 		pat.getManagingOrganization().setReferenceElement(orgId.toUnqualifiedVersionless());
 		ourClient.create().resource(pat).prettyPrint().encodedXml().execute().getId();
 
 		Bundle found = ourClient
 			.search()
 			.forResource(Patient.class)
-			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpdstu2", "testSearchWithInclude02"))
+			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("urn:system:rpr4", "testSearchWithInclude02"))
 			.include(Patient.INCLUDE_ORGANIZATION)
 			.prettyPrint()
 			.returnBundle(Bundle.class)
@@ -3806,12 +3806,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
 		org = new Organization();
-		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
+		org.addIdentifier().setSystem("urn:system:rpr4").setValue(methodName + "01");
 		org.setName(methodName + "name");
 		IIdType orgNotMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
 
 		org = new Organization();
-		org.addIdentifier().setSystem("urn:system:rpdstu2").setValue(methodName + "01");
+		org.addIdentifier().setSystem("urn:system:rpr4").setValue(methodName + "01");
 		IIdType orgMissing = ourClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
 
 		{
@@ -4529,19 +4529,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testUpdateWithClientSuppliedIdWhichDoesntExist() {
 		Patient p1 = new Patient();
-		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2");
+		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExistrpr4");
 
-		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2").execute();
+		MethodOutcome outcome = ourClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExistrpr4").execute();
 		assertEquals(true, outcome.getCreated().booleanValue());
 		IdType p1Id = (IdType) outcome.getId();
 
-		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history"));
+		assertThat(p1Id.getValue(), containsString("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistrpr4/_history"));
 
 		//@formatter:off
 		Bundle actual = ourClient
 			.search()
 			.forResource(Patient.class)
-			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2"))
+			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:system", "testUpdateWithClientSuppliedIdWhichDoesntExistrpr4"))
 			.encodedJson()
 			.prettyPrint()
 			.returnBundle(Bundle.class)
