@@ -2019,6 +2019,19 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 		assertEquals(0, patients.size());
 
+		// Try with different casing
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_FAMILY, new StringParam("tester_testsearchstringparam"));
+		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+		assertThat(patients, containsInAnyOrder(pid1, pid2));
+		assertEquals(2, patients.size());
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_FAMILY, new StringParam("TESTER_TESTSEARCHSTRINGPARAM"));
+		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
+		assertThat(patients, containsInAnyOrder(pid1, pid2));
+		assertEquals(2, patients.size());
 	}
 
 	@Test
