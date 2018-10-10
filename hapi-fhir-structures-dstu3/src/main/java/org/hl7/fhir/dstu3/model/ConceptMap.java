@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A statement of relationships from one set of concepts to one or more other concepts - either code systems or data elements, or classes in class models.
  */
-@ResourceDef(name="ConceptMap", profile="http://hl7.org/fhir/Profile/ConceptMap")
+@ResourceDef(name="ConceptMap", profile="http://hl7.org/fhir/StructureDefinition/ConceptMap")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "source[x]", "target[x]", "group"})
 public class ConceptMap extends MetadataResource {
 

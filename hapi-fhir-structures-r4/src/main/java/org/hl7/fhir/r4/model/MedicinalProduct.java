@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Detailed definition of a medicinal product, typically for uses other than direct patient care (e.g. regulatory use).
  */
-@ResourceDef(name="MedicinalProduct", profile="http://hl7.org/fhir/Profile/MedicinalProduct")
+@ResourceDef(name="MedicinalProduct", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProduct")
 public class MedicinalProduct extends DomainResource {
 
     @Block()

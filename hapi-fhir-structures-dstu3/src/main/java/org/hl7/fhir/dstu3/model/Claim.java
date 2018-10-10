@@ -48,7 +48,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A provider issued list of services and products provided, or to be provided, to a patient which is provided to an insurer for payment recovery.
  */
-@ResourceDef(name="Claim", profile="http://hl7.org/fhir/Profile/Claim")
+@ResourceDef(name="Claim", profile="http://hl7.org/fhir/StructureDefinition/Claim")
 public class Claim extends DomainResource {
 
     public enum ClaimStatus {

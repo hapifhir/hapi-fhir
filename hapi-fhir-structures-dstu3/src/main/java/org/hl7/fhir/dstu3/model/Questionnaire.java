@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A structured set of questions intended to guide the collection of answers from end-users. Questionnaires provide detailed control over order, presentation, phraseology and grouping to allow coherent, consistent data collection.
  */
-@ResourceDef(name="Questionnaire", profile="http://hl7.org/fhir/Profile/Questionnaire")
+@ResourceDef(name="Questionnaire", profile="http://hl7.org/fhir/StructureDefinition/Questionnaire")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "description", "purpose", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "contact", "copyright", "code", "subjectType", "item"})
 public class Questionnaire extends MetadataResource {
 

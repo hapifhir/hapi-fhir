@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A summary of information based on the results of executing a TestScript.
  */
-@ResourceDef(name="TestReport", profile="http://hl7.org/fhir/Profile/TestReport")
+@ResourceDef(name="TestReport", profile="http://hl7.org/fhir/StructureDefinition/TestReport")
 public class TestReport extends DomainResource {
 
     public enum TestReportStatus {

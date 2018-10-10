@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource is primarily used for the identification and definition of a medication for the purposes of prescribing, dispensing, and administering a medication as well as for making statements about medication use.
  */
-@ResourceDef(name="Medication", profile="http://hl7.org/fhir/Profile/Medication")
+@ResourceDef(name="Medication", profile="http://hl7.org/fhir/StructureDefinition/Medication")
 public class Medication extends DomainResource {
 
     public enum MedicationStatus {

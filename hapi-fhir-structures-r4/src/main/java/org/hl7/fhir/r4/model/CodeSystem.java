@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.
  */
-@ResourceDef(name="CodeSystem", profile="http://hl7.org/fhir/Profile/CodeSystem")
+@ResourceDef(name="CodeSystem", profile="http://hl7.org/fhir/StructureDefinition/CodeSystem")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "caseSensitive", "valueSet", "hierarchyMeaning", "compositional", "versionNeeded", "content", "supplements", "count", "filter", "property", "concept"})
 public class CodeSystem extends MetadataResource {
 

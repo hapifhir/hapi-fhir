@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.
  */
-@ResourceDef(name="RiskAssessment", profile="http://hl7.org/fhir/Profile/RiskAssessment")
+@ResourceDef(name="RiskAssessment", profile="http://hl7.org/fhir/StructureDefinition/RiskAssessment")
 public class RiskAssessment extends DomainResource {
 
     public enum RiskAssessmentStatus {

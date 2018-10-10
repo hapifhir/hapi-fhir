@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides eligibility and plan details from the processing of an CoverageEligibilityRequest resource.
  */
-@ResourceDef(name="CoverageEligibilityResponse", profile="http://hl7.org/fhir/Profile/CoverageEligibilityResponse")
+@ResourceDef(name="CoverageEligibilityResponse", profile="http://hl7.org/fhir/StructureDefinition/CoverageEligibilityResponse")
 public class CoverageEligibilityResponse extends DomainResource {
 
     public enum EligibilityResponseStatus {

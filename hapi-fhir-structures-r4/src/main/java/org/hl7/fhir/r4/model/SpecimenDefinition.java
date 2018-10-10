@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A kind of specimen with associated set of requirements.
  */
-@ResourceDef(name="SpecimenDefinition", profile="http://hl7.org/fhir/Profile/SpecimenDefinition")
+@ResourceDef(name="SpecimenDefinition", profile="http://hl7.org/fhir/StructureDefinition/SpecimenDefinition")
 public class SpecimenDefinition extends DomainResource {
 
     public enum SpecimenContainedPreference {

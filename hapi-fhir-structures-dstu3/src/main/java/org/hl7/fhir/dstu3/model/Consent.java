@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A record of a healthcare consumer’s policy choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
  */
-@ResourceDef(name="Consent", profile="http://hl7.org/fhir/Profile/Consent")
+@ResourceDef(name="Consent", profile="http://hl7.org/fhir/StructureDefinition/Consent")
 public class Consent extends DomainResource {
 
     public enum ConsentState {

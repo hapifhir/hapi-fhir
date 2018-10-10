@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.
  */
-@ResourceDef(name="ProcessRequest", profile="http://hl7.org/fhir/Profile/ProcessRequest")
+@ResourceDef(name="ProcessRequest", profile="http://hl7.org/fhir/StructureDefinition/ProcessRequest")
 public class ProcessRequest extends DomainResource {
 
     public enum ProcessRequestStatus {

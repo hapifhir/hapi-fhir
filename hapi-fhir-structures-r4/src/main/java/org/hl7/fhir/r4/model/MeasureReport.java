@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The MeasureReport resource contains the results of the calculation of a measure; and optionally a reference to the resources involved in that calculation.
  */
-@ResourceDef(name="MeasureReport", profile="http://hl7.org/fhir/Profile/MeasureReport")
+@ResourceDef(name="MeasureReport", profile="http://hl7.org/fhir/StructureDefinition/MeasureReport")
 public class MeasureReport extends DomainResource {
 
     public enum MeasureReportStatus {

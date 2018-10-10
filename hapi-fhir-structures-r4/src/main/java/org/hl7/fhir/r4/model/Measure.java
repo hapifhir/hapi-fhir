@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The Measure resource provides the definition of a quality measure.
  */
-@ResourceDef(name="Measure", profile="http://hl7.org/fhir/Profile/Measure")
+@ResourceDef(name="Measure", profile="http://hl7.org/fhir/StructureDefinition/Measure")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "subtitle", "status", "experimental", "subject[x]", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "usage", "copyright", "approvalDate", "lastReviewDate", "effectivePeriod", "topic", "author", "editor", "reviewer", "endorser", "relatedArtifact", "library", "disclaimer", "scoring", "compositeScoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "group", "supplementalData"})
 public class Measure extends MetadataResource {
 

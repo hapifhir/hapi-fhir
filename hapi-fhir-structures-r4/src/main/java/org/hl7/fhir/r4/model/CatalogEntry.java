@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Catalog entries are wrappers that contextualize items included in a catalog.
  */
-@ResourceDef(name="CatalogEntry", profile="http://hl7.org/fhir/Profile/CatalogEntry")
+@ResourceDef(name="CatalogEntry", profile="http://hl7.org/fhir/StructureDefinition/CatalogEntry")
 public class CatalogEntry extends DomainResource {
 
     public enum CatalogEntryRelationType {

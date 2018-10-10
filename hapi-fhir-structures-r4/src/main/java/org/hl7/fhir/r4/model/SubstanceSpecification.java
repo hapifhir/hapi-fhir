@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The detailed description of a substance, typically at a level beyond what is used for prescribing.
  */
-@ResourceDef(name="SubstanceSpecification", profile="http://hl7.org/fhir/Profile/SubstanceSpecification")
+@ResourceDef(name="SubstanceSpecification", profile="http://hl7.org/fhir/StructureDefinition/SubstanceSpecification")
 public class SubstanceSpecification extends DomainResource {
 
     @Block()

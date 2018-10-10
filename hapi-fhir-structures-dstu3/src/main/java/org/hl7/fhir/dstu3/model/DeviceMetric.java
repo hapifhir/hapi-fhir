@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Describes a measurement, calculation or setting capability of a medical device.
  */
-@ResourceDef(name="DeviceMetric", profile="http://hl7.org/fhir/Profile/DeviceMetric")
+@ResourceDef(name="DeviceMetric", profile="http://hl7.org/fhir/StructureDefinition/DeviceMetric")
 public class DeviceMetric extends DomainResource {
 
     public enum DeviceMetricOperationalStatus {

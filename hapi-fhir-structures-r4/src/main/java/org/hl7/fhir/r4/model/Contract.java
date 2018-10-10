@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Legally enforceable, formally recorded unilateral or bilateral directive i.e., a policy or agreement.
  */
-@ResourceDef(name="Contract", profile="http://hl7.org/fhir/Profile/Contract")
+@ResourceDef(name="Contract", profile="http://hl7.org/fhir/StructureDefinition/Contract")
 public class Contract extends DomainResource {
 
     public enum ContractStatus {

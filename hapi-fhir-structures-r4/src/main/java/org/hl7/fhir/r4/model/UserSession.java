@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Information about a user's current session.
  */
-@ResourceDef(name="UserSession", profile="http://hl7.org/fhir/Profile/UserSession")
+@ResourceDef(name="UserSession", profile="http://hl7.org/fhir/StructureDefinition/UserSession")
 public class UserSession extends DomainResource {
 
     public enum UserSessionStatus {

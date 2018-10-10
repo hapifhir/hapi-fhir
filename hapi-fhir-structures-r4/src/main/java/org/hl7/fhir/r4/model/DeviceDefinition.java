@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The characteristics, operational status and capabilities of a medical-related component of a medical device.
  */
-@ResourceDef(name="DeviceDefinition", profile="http://hl7.org/fhir/Profile/DeviceDefinition")
+@ResourceDef(name="DeviceDefinition", profile="http://hl7.org/fhir/StructureDefinition/DeviceDefinition")
 public class DeviceDefinition extends DomainResource {
 
     public enum DeviceNameType {

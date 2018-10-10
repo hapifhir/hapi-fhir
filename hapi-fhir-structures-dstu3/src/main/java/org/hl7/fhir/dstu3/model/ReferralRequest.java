@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Used to record and send details about a request for referral service or transfer of a patient to the care of another provider or provider organization.
  */
-@ResourceDef(name="ReferralRequest", profile="http://hl7.org/fhir/Profile/ReferralRequest")
+@ResourceDef(name="ReferralRequest", profile="http://hl7.org/fhir/StructureDefinition/ReferralRequest")
 public class ReferralRequest extends DomainResource {
 
     public enum ReferralRequestStatus {

@@ -44,7 +44,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A clinical condition, problem, diagnosis, or other event, situation, issue, or clinical concept that has risen to a level of concern.
  */
-@ResourceDef(name="Condition", profile="http://hl7.org/fhir/Profile/Condition")
+@ResourceDef(name="Condition", profile="http://hl7.org/fhir/StructureDefinition/Condition")
 public class Condition extends DomainResource {
 
     @Block()

@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A collection of documents compiled for a purpose together with metadata that applies to the collection.
  */
-@ResourceDef(name="DocumentManifest", profile="http://hl7.org/fhir/Profile/DocumentManifest")
+@ResourceDef(name="DocumentManifest", profile="http://hl7.org/fhir/StructureDefinition/DocumentManifest")
 public class DocumentManifest extends DomainResource {
 
     @Block()

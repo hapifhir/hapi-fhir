@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The clinical particulars - indications, contraindications etc. of a medicinal product, including for regulatory purposes.
  */
-@ResourceDef(name="MedicinalProductClinicals", profile="http://hl7.org/fhir/Profile/MedicinalProductClinicals")
+@ResourceDef(name="MedicinalProductClinicals", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductClinicals")
 public class MedicinalProductClinicals extends DomainResource {
 
     @Block()

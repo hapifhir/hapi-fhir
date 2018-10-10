@@ -44,7 +44,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describe the undesirable effects of the medicinal product.
  */
-@ResourceDef(name="MedicinalProductUndesirableEffect", profile="http://hl7.org/fhir/Profile/MedicinalProductUndesirableEffect")
+@ResourceDef(name="MedicinalProductUndesirableEffect", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductUndesirableEffect")
 public class MedicinalProductUndesirableEffect extends DomainResource {
 
     @Block()

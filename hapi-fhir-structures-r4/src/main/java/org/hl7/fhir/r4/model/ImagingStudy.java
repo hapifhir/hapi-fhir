@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
  */
-@ResourceDef(name="ImagingStudy", profile="http://hl7.org/fhir/Profile/ImagingStudy")
+@ResourceDef(name="ImagingStudy", profile="http://hl7.org/fhir/StructureDefinition/ImagingStudy")
 public class ImagingStudy extends DomainResource {
 
     public enum ImagingStudyStatus {

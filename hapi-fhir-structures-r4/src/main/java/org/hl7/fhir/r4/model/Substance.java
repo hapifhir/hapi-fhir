@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A homogeneous material with a definite composition.
  */
-@ResourceDef(name="Substance", profile="http://hl7.org/fhir/Profile/Substance")
+@ResourceDef(name="Substance", profile="http://hl7.org/fhir/StructureDefinition/Substance")
 public class Substance extends DomainResource {
 
     public enum FHIRSubstanceStatus {

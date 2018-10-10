@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Actual or  potential/avoided event causing unintended physical injury resulting from or contributed to by medical care, a research study or other healthcare setting factors that requires additional monitoring, treatment, or hospitalization, or that results in death.
  */
-@ResourceDef(name="AdverseEvent", profile="http://hl7.org/fhir/Profile/AdverseEvent")
+@ResourceDef(name="AdverseEvent", profile="http://hl7.org/fhir/StructureDefinition/AdverseEvent")
 public class AdverseEvent extends DomainResource {
 
     public enum AdverseEventActuality {

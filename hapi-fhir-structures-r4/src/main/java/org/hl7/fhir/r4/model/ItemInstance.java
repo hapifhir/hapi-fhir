@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A physical, countable instance of an item, for example one box or one unit.
  */
-@ResourceDef(name="ItemInstance", profile="http://hl7.org/fhir/Profile/ItemInstance")
+@ResourceDef(name="ItemInstance", profile="http://hl7.org/fhir/StructureDefinition/ItemInstance")
 public class ItemInstance extends DomainResource {
 
     /**

@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A resource that represents the data of a single raw artifact as digital content accessible in its native format.  A Binary resource can contain any content, whether text, image, pdf, zip archive, etc.
  */
-@ResourceDef(name="Binary", profile="http://hl7.org/fhir/Profile/Binary")
+@ResourceDef(name="Binary", profile="http://hl7.org/fhir/StructureDefinition/Binary")
 public class Binary extends BaseBinary implements IBaseBinary {
 
     /**
