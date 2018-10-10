@@ -61,7 +61,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		switch (msg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
-			case MANUALLY_RETRIGGERED:
+			case MANUALLY_TRIGGERED:
 				break;
 			case DELETE:
 			default:

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.provider.SubscriptionRetriggeringProvider;
+import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -33,9 +33,9 @@ import static org.junit.Assert.assertEquals;
  * Test the rest-hook subscriptions
  */
 @SuppressWarnings("Duplicates")
-public class RetriggeringDstu3Test extends BaseResourceProviderDstu3Test {
+public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RetriggeringDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionTriggeringDstu3Test.class);
 	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
@@ -117,7 +117,7 @@ public class RetriggeringDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testRetriggerResourceToSpecificSubscription() throws Exception {
+	public void testTriggerResourceToSpecificSubscription() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -140,8 +140,8 @@ public class RetriggeringDstu3Test extends BaseResourceProviderDstu3Test {
 		Parameters response = ourClient
 			.operation()
 			.onInstance(subscriptionId)
-			.named(JpaConstants.OPERATION_RETRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionRetriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
+			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+			.withParameter(Parameters.class, SubscriptionTriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
 			.execute();
 
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
@@ -154,7 +154,7 @@ public class RetriggeringDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testRetriggerResourceToSpecificSubscriptionWhichDoesntMatch() throws Exception {
+	public void testTriggerResourceToSpecificSubscriptionWhichDoesntMatch() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -177,8 +177,8 @@ public class RetriggeringDstu3Test extends BaseResourceProviderDstu3Test {
 		Parameters response = ourClient
 			.operation()
 			.onInstance(subscriptionId)
-			.named(JpaConstants.OPERATION_RETRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, SubscriptionRetriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
+			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+			.withParameter(Parameters.class, SubscriptionTriggeringProvider.RESOURCE_ID, new UriType(obsId.toUnqualifiedVersionless().getValue()))
 			.execute();
 
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();

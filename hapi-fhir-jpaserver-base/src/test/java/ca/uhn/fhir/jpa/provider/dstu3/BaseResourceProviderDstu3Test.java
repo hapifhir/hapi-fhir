@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.provider.SubscriptionRetriggeringProvider;
+import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
@@ -100,8 +100,8 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderDstu3.class);
 			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider);
 
-			SubscriptionRetriggeringProvider subscriptionRetriggeringProvider = myAppCtx.getBean(SubscriptionRetriggeringProvider.class);
-			ourRestServer.registerProvider(subscriptionRetriggeringProvider);
+			SubscriptionTriggeringProvider subscriptionTriggeringProvider = myAppCtx.getBean(SubscriptionTriggeringProvider.class);
+			ourRestServer.registerProvider(subscriptionTriggeringProvider);
 
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");

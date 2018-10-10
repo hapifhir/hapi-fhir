@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.provider.SubscriptionRetriggeringProvider;
+import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.*;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
@@ -117,8 +117,8 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	@Bean
 	@Lazy
-	public SubscriptionRetriggeringProvider mySubscriptionRetriggeringProvider() {
-		return new SubscriptionRetriggeringProvider();
+	public SubscriptionTriggeringProvider mySubscriptionTriggeringProvider() {
+		return new SubscriptionTriggeringProvider();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

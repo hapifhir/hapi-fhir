@@ -42,7 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-public class SubscriptionRetriggeringProvider implements IResourceProvider {
+public class SubscriptionTriggeringProvider implements IResourceProvider {
 
 	public static final String RESOURCE_ID = "resourceId";
 	@Autowired
@@ -52,8 +52,8 @@ public class SubscriptionRetriggeringProvider implements IResourceProvider {
 	@Autowired(required = false)
 	private List<BaseSubscriptionInterceptor<?>> mySubscriptionInterceptorList;
 
-	@Operation(name= JpaConstants.OPERATION_RETRIGGER_SUBSCRIPTION)
-	public IBaseParameters reTriggerSubscription(
+	@Operation(name= JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+	public IBaseParameters triggerSubscription(
 		@IdParam IIdType theSubscriptionId,
 		@OperationParam(name= RESOURCE_ID) UriParam theResourceId) {
 
@@ -64,13 +64,13 @@ public class SubscriptionRetriggeringProvider implements IResourceProvider {
 
 		Class<? extends IBaseResource> resourceType = myFhirContext.getResourceDefinition(resourceId.getResourceType()).getImplementingClass();
 		IFhirResourceDao<? extends IBaseResource> dao = mySystemDao.getDao(resourceType);
-		IBaseResource resourceToRetrigger = dao.read(resourceId);
+		IBaseResource resourceToTrigger = dao.read(resourceId);
 
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
-		msg.setId(resourceToRetrigger.getIdElement());
+		msg.setId(resourceToTrigger.getIdElement());
 		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 		msg.setSubscriptionId(theSubscriptionId.toUnqualifiedVersionless().getValue());
-		msg.setNewPayload(myFhirContext, resourceToRetrigger);
+		msg.setNewPayload(myFhirContext, resourceToTrigger);
 
 		for (BaseSubscriptionInterceptor<?> next :mySubscriptionInterceptorList) {
 			next.submitResourceModified(msg);

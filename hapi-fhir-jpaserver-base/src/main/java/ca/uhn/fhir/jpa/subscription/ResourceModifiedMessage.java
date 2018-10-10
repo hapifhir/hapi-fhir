@@ -39,7 +39,7 @@ public class ResourceModifiedMessage {
 	@JsonProperty("operationType")
 	private OperationTypeEnum myOperationType;
 	/**
-	 * This will only be set if the resource is being retriggered for a specific
+	 * This will only be set if the resource is being triggered for a specific
 	 * subscription
 	 */
 	@JsonProperty(value = "subscriptionId", required = false)
@@ -97,7 +97,7 @@ public class ResourceModifiedMessage {
 		CREATE,
 		UPDATE,
 		DELETE,
-		MANUALLY_RETRIGGERED;
+		MANUALLY_TRIGGERED;
 
 	}
 

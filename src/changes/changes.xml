@@ -34,7 +34,7 @@
 			</action>
 			<action type="add">
 				A new operation has been added to the JPA server called
-				<![CDATA[<code>$retrigger-subscription</code>]]>. This can
+				<![CDATA[<code>$trigger-subscription</code>]]>. This can
 				be used to cause a transaction to redeliver a resource that previously triggered.
 			</action>
 			<action type="add">

@@ -176,7 +176,7 @@ public class JpaConstants {
 	public static final String OPERATION_DOCUMENT = "$document";
 
 	/**
-	 * Retrigger a subscription manually for a given resource
+	 * Trigger a subscription manually for a given resource
 	 */
-	public static final String OPERATION_RETRIGGER_SUBSCRIPTION = "$retrigger-subscription";
+	public static final String OPERATION_TRIGGER_SUBSCRIPTION = "$trigger-subscription";
 }
