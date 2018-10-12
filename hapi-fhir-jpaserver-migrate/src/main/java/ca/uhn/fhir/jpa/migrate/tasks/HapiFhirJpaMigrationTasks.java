@@ -185,6 +185,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("HASH_NORM_PREFIX", "SP_VALUE_NORMALIZED");
 		spidxString
+			.addColumn("HASH_EXACT")
+			.nullable()
+			.type(AddColumnTask.ColumnTypeEnum.LONG);
+		spidxString
 			.addIndex("IDX_SP_STRING_HASH_EXCT")
 			.unique(false)
 			.withColumns("HASH_EXACT");
