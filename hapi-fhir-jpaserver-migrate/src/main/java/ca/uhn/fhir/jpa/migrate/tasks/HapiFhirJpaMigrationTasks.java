@@ -259,6 +259,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("HASH_IDENTITY", "SP_URI");
 		spidxUri
+			.addColumn("HASH_URI")
+			.nullable()
+			.type(AddColumnTask.ColumnTypeEnum.LONG);
+		spidxUri
 			.addIndex("IDX_SP_URI_HASH_URI")
 			.unique(false)
 			.withColumns("HASH_URI");
