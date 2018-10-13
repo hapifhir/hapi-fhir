@@ -111,8 +111,9 @@ public class SearchParamPresent implements Serializable {
 		return b.build();
 	}
 
-	public static long calculateHashPresence(String theResourceType, String theParamName, boolean thePresent) {
-		return BaseResourceIndexedSearchParam.hash(theResourceType, theParamName, Boolean.toString(thePresent));
+	public static long calculateHashPresence(String theResourceType, String theParamName, Boolean thePresent) {
+		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
+		return BaseResourceIndexedSearchParam.hash(theResourceType, theParamName, string);
 	}
 
 }

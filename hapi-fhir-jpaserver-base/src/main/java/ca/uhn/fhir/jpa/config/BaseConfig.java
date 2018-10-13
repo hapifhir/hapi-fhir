@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.config;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,7 +32,10 @@ import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
 import ca.uhn.fhir.jpa.util.IReindexController;
 import ca.uhn.fhir.jpa.util.ReindexController;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.query.criteria.LiteralHandlingMode;
+import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -52,6 +55,7 @@ import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 @Configuration
@@ -85,7 +89,22 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	 * factory with HAPI FHIR customizations
 	 */
 	protected LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean();
+		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean() {
+			@Override
+			public Map<String, Object> getJpaPropertyMap() {
+				Map<String, Object> retVal = super.getJpaPropertyMap();
+
+				if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
+					retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);
+				}
+
+				if (!retVal.containsKey(AvailableSettings.CONNECTION_HANDLING)) {
+					retVal.put(AvailableSettings.CONNECTION_HANDLING, PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
+				}
+
+				return retVal;
+			}
+		};
 		configureEntityManagerFactory(retVal, fhirContext());
 		return retVal;
 	}

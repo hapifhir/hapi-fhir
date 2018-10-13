@@ -150,6 +150,13 @@ public class Search implements Serializable {
 		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
 	}
 
+	// FIXME: remove this
+	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
+	@PrePersist
+	public void prePersist() {
+		ourLog.info("*** SAVING WITH VERSION {} TOTAL {}", myVersion, myTotalCount);
+	}
+
 	public Long getId() {
 		return myId;
 	}

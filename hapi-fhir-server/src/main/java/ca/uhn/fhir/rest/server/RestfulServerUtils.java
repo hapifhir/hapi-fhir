@@ -731,7 +731,15 @@ public class RestfulServerUtils {
 		if (theResource == null) {
 			// No response is being returned
 		} else if (encodingDomainResourceAsText && theResource instanceof IResource) {
+			// DSTU2
 			writer.append(((IResource) theResource).getText().getDiv().getValueAsString());
+		} else if (encodingDomainResourceAsText && theResource instanceof IDomainResource) {
+			// DSTU3+
+			try {
+				writer.append(((IDomainResource) theResource).getText().getDivAsString());
+			} catch (Exception e) {
+				throw new InternalErrorException(e);
+			}
 		} else {
 			FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
 			IParser parser = getNewParser(theServer.getFhirContext(), forVersion, theRequestDetails);

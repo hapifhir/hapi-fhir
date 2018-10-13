@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -15,6 +16,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 
 import java.util.ArrayList;
@@ -26,17 +28,23 @@ import java.util.concurrent.Future;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchOptimizedTest.class);
+	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcImpl;
+
+	@Before
+	public void before() {
+		mySearchCoordinatorSvcImpl = (SearchCoordinatorSvcImpl) AopProxyUtils.getSingletonTarget(mySearchCoordinatorSvc);
+	}
 
 	@After
 	public final void after() {
+		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
+		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 	}
 
 	@Before
@@ -119,6 +127,30 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testFetchCountAndDataForSlowLoading() {
+		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(25);
+		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(10);
+
+		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(1000, -1));
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setSort(new SortSpec(Patient.SP_NAME));
+		params.setCount(5);
+		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
+		IBundleProvider results = myPatientDao.search(params);
+		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
+
+//		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+		assertEquals(200, results.size().intValue());
+		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 5, true);
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00004", ids.get(4));
+
+		ourLog.info("** About to make new query for search with UUID: {}", uuid);
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+	}
 
 	@Test
 	public void testFetchCountAndData() {
@@ -135,6 +167,21 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
 		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+
+		// Try the same query again. This time the same thing should come back, but
+		// from the cache...
+
+		params = new SearchParameterMap();
+		params.setSort(new SortSpec(Patient.SP_NAME));
+		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
+		results = myPatientDao.search(params);
+		uuid = results.getUuid();
+		assertEquals(200, results.size().intValue());
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+
 	}
 
 	@Test
@@ -190,7 +237,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 
-		@Test
+	@Test
 	public void testFetchOnlySmallBatches() {
 
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
@@ -348,7 +395,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 
-		@Test
+	@Test
 	public void testFetchUnlimited() {
 
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, -1));
@@ -405,7 +452,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 
-		@Test
+	@Test
 	public void testFetchSecondBatchInManyThreads() throws Throwable {
 
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, -1));
@@ -500,7 +547,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 
-		@AfterClass
+	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
