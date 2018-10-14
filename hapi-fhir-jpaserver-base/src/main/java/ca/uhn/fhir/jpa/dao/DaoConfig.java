@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.collect.Sets;
@@ -22,9 +23,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -153,6 +154,7 @@ public class DaoConfig {
 	private Set<String> myBundleTypesAllowedForStorage;
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
 	private List<Integer> myPreFetchThresholds = Arrays.asList(500, 2000, -1);
+	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -169,6 +171,22 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * Returns a set of searches that should be kept "warm", meaning that
+	 * searches will periodically be performed in the background to
+	 * keep results ready for this search
+	 */
+	public List<WarmCacheEntry> getWarmCacheEntries() {
+		if (myWarmCacheEntries == null) {
+			myWarmCacheEntries = new ArrayList<>();
+		}
+		return myWarmCacheEntries;
+	}
+
+	public void setWarmCacheEntries(List<WarmCacheEntry> theWarmCacheEntries) {
+		myWarmCacheEntries = theWarmCacheEntries;
 	}
 
 	/**

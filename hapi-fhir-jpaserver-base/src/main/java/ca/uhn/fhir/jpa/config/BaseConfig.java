@@ -25,6 +25,8 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.provider.SubscriptionRetriggeringProvider;
 import ca.uhn.fhir.jpa.search.*;
+import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
@@ -110,6 +112,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	}
 
 	public abstract FhirContext fhirContext();
+
+	@Bean
+	public ICacheWarmingSvc cacheWarmingSvc() {
+		return new CacheWarmingSvcImpl();
+	}
 
 	@Bean
 	public HibernateExceptionTranslator hibernateExceptionTranslator() {

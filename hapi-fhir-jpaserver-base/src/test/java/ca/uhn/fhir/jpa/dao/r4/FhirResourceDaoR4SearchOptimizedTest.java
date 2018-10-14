@@ -70,6 +70,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(200, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
@@ -98,6 +99,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(201, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
@@ -109,6 +111,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
 		results = myPatientDao.search(params);
 		uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, hasSize(10));
@@ -120,6 +123,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
 		results = myPatientDao.search(params);
 		uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
@@ -144,12 +148,15 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 //		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
 		assertEquals(200, results.size().intValue());
+		ourLog.info("** Asking for results");
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 5, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00004", ids.get(4));
 
 		ourLog.info("** About to make new query for search with UUID: {}", uuid);
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+		IBundleProvider search2 = myDatabaseBackedPagingProvider.retrieveResultList(uuid);
+		Integer search2Size = search2.size();
+		assertEquals(200, search2Size.intValue());
 	}
 
 	@Test
@@ -162,6 +169,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(200, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
@@ -176,6 +184,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
 		results = myPatientDao.search(params);
 		uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(200, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
@@ -197,6 +206,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSort(new SortSpec(Patient.SP_NAME));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 200, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00199", ids.get(199));
@@ -250,6 +260,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSort(new SortSpec(Patient.SP_NAME));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
@@ -375,6 +386,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setCount(50);
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 50, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00049", ids.get(49));
@@ -408,6 +420,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSort(new SortSpec(Patient.SP_NAME));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
@@ -465,6 +478,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSort(new SortSpec(Patient.SP_NAME));
 		final IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
@@ -529,6 +543,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.add(Patient.SP_RES_ID, new TokenParam("PT00000"));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals(1, ids.size());

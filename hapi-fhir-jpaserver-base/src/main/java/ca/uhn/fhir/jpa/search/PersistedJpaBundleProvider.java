@@ -166,8 +166,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 						return false;
 					}
 
-					// FIXME: remove
-					ourLog.info("** Retrieved search with version {} and total {}", mySearchEntity.getVersion(), mySearchEntity.getTotalCount());
+					ourLog.trace("Retrieved search with version {} and total {}", mySearchEntity.getVersion(), mySearchEntity.getTotalCount());
 
 					// Load the includes now so that they are available outside of this transaction
 					mySearchEntity.getIncludes().size();

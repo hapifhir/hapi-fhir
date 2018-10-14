@@ -46,9 +46,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -363,7 +361,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, sb, myManagedTxManager);
 		populateBundleProvider(retVal);
 
-		ourLog.info("Search initial phase completed in {}ms", w.getMillis());
+		ourLog.debug("Search initial phase completed in {}ms", w.getMillis());
 		return retVal;
 
 	}
@@ -675,25 +673,21 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		private void doSaveSearch() {
 
-			// FIXME: remove
-			Integer totalCount = mySearch.getTotalCount();
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					ourLog.info("Have flushed save with total {}", totalCount);
-				}
-			});
-			ourLog.info("** Saving search version {} count {}", mySearch.getVersion(), totalCount);
-
+			Search newSearch;
 			if (mySearch.getId() == null) {
-				mySearch = mySearchDao.saveAndFlush(mySearch);
+				newSearch = mySearchDao.save(mySearch);
 				for (SearchInclude next : mySearch.getIncludes()) {
 					mySearchIncludeDao.save(next);
 				}
 			} else {
-				mySearch = mySearchDao.saveAndFlush(mySearch);
+				newSearch = mySearchDao.save(mySearch);
 			}
 
+			// mySearchDao.save is not supposed to return null, but in unit tests
+			// it can if the mock search dao isn't set up to handle that
+			if (newSearch != null) {
+				mySearch = newSearch;
+			}
 		}
 
 		/**
@@ -712,14 +706,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			boolean wantCount = myParams.getSummaryMode().contains(SummaryEnum.COUNT);
 			boolean wantOnlyCount = wantCount && myParams.getSummaryMode().size() == 1;
 			if (wantCount) {
-				ourLog.info("** performing count");
+				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
 				Iterator<Long> countIterator = sb.createCountQuery(myParams, mySearch.getUuid());
 				Long count = countIterator.next();
-				ourLog.info("** got count {}", count);
+				ourLog.trace("Got count {}", count);
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-//				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 				txTemplate.execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
@@ -728,6 +721,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							mySearch.setStatus(SearchStatusEnum.FINISHED);
 						}
 						doSaveSearch();
+						mySearchDao.flush();
 					}
 				});
 				if (wantOnlyCount) {
@@ -735,7 +729,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			}
 
-			ourLog.info("** done count");
+			ourLog.trace("Done count");
 			ISearchBuilder sb = newSearchBuilder();
 
 			/*
@@ -957,12 +951,32 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		int pageIndex = theFromIndex / pageSize;
 
-		Pageable page = new PageRequest(pageIndex, pageSize) {
+		Pageable page = new AbstractPageRequest(pageIndex, pageSize) {
 			private static final long serialVersionUID = 1L;
 
 			@Override
 			public long getOffset() {
 				return theFromIndex;
+			}
+
+			@Override
+			public Sort getSort() {
+				return Sort.unsorted();
+			}
+
+			@Override
+			public Pageable next() {
+				return null;
+			}
+
+			@Override
+			public Pageable previous() {
+				return null;
+			}
+
+			@Override
+			public Pageable first() {
+				return null;
 			}
 		};
 

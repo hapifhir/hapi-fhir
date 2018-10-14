@@ -298,7 +298,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			"where HFJ_RES_PARAM_PRESENT.HASH_PRESENCE is null";
 		consolidateSearchParamPresenceIndexesTask.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
 			Long pid = (Long) t.get("PID");
-			Boolean present = (Boolean) t.get("HASH_PRESENCE");
+			Boolean present = (Boolean) t.get("SP_PRESENT");
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
 			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);

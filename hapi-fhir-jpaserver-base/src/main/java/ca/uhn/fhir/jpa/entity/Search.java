@@ -5,8 +5,6 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.annotations.OptimisticLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -148,13 +146,6 @@ public class Search implements Serializable {
 
 	public void setFailureMessage(String theFailureMessage) {
 		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
-	}
-
-	// FIXME: remove this
-	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
-	@PrePersist
-	public void prePersist() {
-		ourLog.info("*** SAVING WITH VERSION {} TOTAL {}", myVersion, myTotalCount);
 	}
 
 	public Long getId() {
