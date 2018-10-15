@@ -91,6 +91,10 @@
 				be performed periodically in the background in order to keep a reasonably fresh copy
 				of the results in the query cache.
 			</action>
+			<action type="fix">
+				When using the testpage overlay to delete a resource, currently a crash can occur
+				if an unqualified ID is placed in the ID text box. This has been corrected.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

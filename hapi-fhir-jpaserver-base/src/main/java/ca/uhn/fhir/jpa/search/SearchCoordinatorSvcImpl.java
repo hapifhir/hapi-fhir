@@ -108,7 +108,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 		}
 		if (myCustomIsolationSupported == false) {
-			ourLog.warn("JPA dialect does not support transaction isolation! This can have an impact on search performance.")
+			ourLog.warn("JPA dialect does not support transaction isolation! This can have an impact on search performance.");
 		}
 	}
 
