@@ -519,7 +519,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			});
 		}
 
-		private void saveUnsynced(final Iterator<Long> theResultIter) {
+		private void saveUnsynced(final IResultIterator theResultIter) {
 			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -547,7 +547,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 						if (theResultIter.hasNext() == false) {
 							mySearch.setNumFound(myCountSaved);
-							if (myMaxResultsToFetch != null && myCountSaved < myMaxResultsToFetch) {
+							int loadedCountThisPass = theResultIter.getSkippedCount() + myCountSaved;
+							if (myMaxResultsToFetch != null && loadedCountThisPass < myMaxResultsToFetch) {
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSaved);
 							} else if (myAdditionalPrefetchThresholdsRemaining) {
@@ -785,7 +786,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * Construct the SQL query we'll be sending to the database
 			 */
-			Iterator<Long> theResultIterator = sb.createQuery(myParams, mySearch.getUuid());
+			IResultIterator theResultIterator = sb.createQuery(myParams, mySearch.getUuid());
 
 			/*
 			 * The following loop actually loads the PIDs of the resources

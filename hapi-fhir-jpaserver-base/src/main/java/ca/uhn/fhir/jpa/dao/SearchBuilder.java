@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -1779,7 +1779,8 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	/**
-	 * THIS SHOULD RETURN HASHSET and not just Set because we add to it later (so it can't be Collections.emptySet())
+	 * THIS SHOULD RETURN HASHSET and not just Set because we add to it later
+	 * so it can't be Collections.emptySet() or some such thing
 	 */
 	@Override
 	public HashSet<Long> loadIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
@@ -2173,6 +2174,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
 		private StopWatch myStopwatch = null;
+		private int mySkipCount = 0;
 
 		private QueryIterator() {
 			mySort = myParams.getSort();
@@ -2212,20 +2214,26 @@ public class SearchBuilder implements ISearchBuilder {
 				if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
 					while (myPreResultsIterator.hasNext()) {
 						Long next = myPreResultsIterator.next();
-						if (next != null && myPidSet.add(next)) {
-							myNext = next;
-							break;
-						}
+						if (next != null)
+							if (myPidSet.add(next)) {
+								myNext = next;
+								break;
+							} else {
+								mySkipCount++;
+							}
 					}
 				}
 
 				if (myNext == null) {
 					while (myResultsIterator.hasNext()) {
 						Long next = myResultsIterator.next();
-						if (next != null && myPidSet.add(next)) {
-							myNext = next;
-							break;
-						}
+						if (next != null)
+							if (myPidSet.add(next)) {
+								myNext = next;
+								break;
+							} else {
+								mySkipCount++;
+							}
 					}
 				}
 
@@ -2237,10 +2245,13 @@ public class SearchBuilder implements ISearchBuilder {
 					if (myIncludesIterator != null) {
 						while (myIncludesIterator.hasNext()) {
 							Long next = myIncludesIterator.next();
-							if (next != null && myPidSet.add(next)) {
-								myNext = next;
-								break;
-							}
+							if (next != null)
+								if (myPidSet.add(next)) {
+									myNext = next;
+									break;
+								} else {
+									mySkipCount++;
+								}
 						}
 						if (myNext == null) {
 							myNext = NO_MORE;
@@ -2279,6 +2290,11 @@ public class SearchBuilder implements ISearchBuilder {
 			Validate.isTrue(retVal != NO_MORE, "No more elements");
 			return retVal;
 		}
+
+		@Override
+		public int getSkippedCount() {
+			return mySkipCount;
+		}
 	}
 
 	private class UniqueIndexIterator implements IResultIterator {
@@ -2314,6 +2330,11 @@ public class SearchBuilder implements ISearchBuilder {
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int getSkippedCount() {
+			return 0;
 		}
 	}
 
