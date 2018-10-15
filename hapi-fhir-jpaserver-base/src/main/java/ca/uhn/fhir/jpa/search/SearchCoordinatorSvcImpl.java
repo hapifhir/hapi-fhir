@@ -54,13 +54,10 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
-import javax.transaction.TransactionManager;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -736,7 +733,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * Figure out how many results we're actually going to fetch from the
 			 * database in this pass. This calculation takes into consideration the
-			 * "pre-fetch thresholds" specified in DaoConfig#getPreFetchThresholds()
+			 * "pre-fetch thresholds" specified in DaoConfig#getSearchPreFetchThresholds()
 			 * as well as the value of the _count parameter.
 			 */
 			int currentlyLoaded = defaultIfNull(mySearch.getNumFound(), 0);
@@ -747,7 +744,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				minWanted += currentlyLoaded;
 			}
 
-			for (Iterator<Integer> iter = myDaoConfig.getPreFetchThresholds().iterator(); iter.hasNext(); ) {
+			for (Iterator<Integer> iter = myDaoConfig.getSearchPreFetchThresholds().iterator(); iter.hasNext(); ) {
 				int next = iter.next();
 				if (next != -1 && next <= currentlyLoaded) {
 					continue;

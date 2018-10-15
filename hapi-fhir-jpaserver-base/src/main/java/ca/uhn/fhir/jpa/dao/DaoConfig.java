@@ -153,7 +153,7 @@ public class DaoConfig {
 	private int myReindexThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
-	private List<Integer> myPreFetchThresholds = Arrays.asList(500, 2000, -1);
+	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 
 	/**
@@ -1363,7 +1363,7 @@ public class DaoConfig {
 			Validate.isTrue(last != -1, "Prefetch thresholds must be sequential");
 			last = nextInt;
 		}
-		myPreFetchThresholds = thePreFetchThresholds;
+		mySearchPreFetchThresholds = thePreFetchThresholds;
 	}
 
 	/**
@@ -1379,8 +1379,8 @@ public class DaoConfig {
 	 * given number.
 	 * </p>
 	 */
-	public List<Integer> getPreFetchThresholds() {
-		return myPreFetchThresholds;
+	public List<Integer> getSearchPreFetchThresholds() {
+		return mySearchPreFetchThresholds;
 	}
 
 	public enum IndexEnabledEnum {
