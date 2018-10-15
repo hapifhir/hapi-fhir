@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -1359,6 +1359,8 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount) {
+		myPredicates = new ArrayList<>();
+
 		CriteriaQuery<Long> outerQuery;
 		/*
 		 * Sort
@@ -1369,30 +1371,48 @@ public class SearchBuilder implements ISearchBuilder {
 		if (sort != null) {
 			assert !theCount;
 
+//			outerQuery = myBuilder.createQuery(Long.class);
+//			Root<ResourceTable> outerQueryFrom = outerQuery.from(ResourceTable.class);
+//
+//			List<Order> orders = Lists.newArrayList();
+//			List<Predicate> predicates = Lists.newArrayList();
+//
+//			createSort(myBuilder, outerQueryFrom, sort, orders, predicates);
+//			if (orders.size() > 0) {
+//				outerQuery.orderBy(orders);
+//			}
+//
+//			Subquery<Long> subQ = outerQuery.subquery(Long.class);
+//			Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
+//
+//			myResourceTableQuery = subQ;
+//			myResourceTableRoot = subQfrom;
+//
+//			Expression<Long> selectExpr = subQfrom.get("myId").as(Long.class);
+//			subQ.select(selectExpr);
+//
+//			predicates.add(0, myBuilder.in(outerQueryFrom.get("myId").as(Long.class)).value(subQ));
+//
+//			outerQuery.multiselect(outerQueryFrom.get("myId").as(Long.class));
+//			outerQuery.where(predicates.toArray(new Predicate[0]));
+
 			outerQuery = myBuilder.createQuery(Long.class);
-			Root<ResourceTable> outerQueryFrom = outerQuery.from(ResourceTable.class);
+			myResourceTableQuery = outerQuery;
+			myResourceTableRoot = myResourceTableQuery.from(ResourceTable.class);
+			if (theCount) {
+				outerQuery.multiselect(myBuilder.countDistinct(myResourceTableRoot));
+			} else {
+				outerQuery.multiselect(myResourceTableRoot.get("myId").as(Long.class));
+			}
 
 			List<Order> orders = Lists.newArrayList();
-			List<Predicate> predicates = Lists.newArrayList();
+			List<Predicate> predicates = myPredicates; // Lists.newArrayList();
 
-			createSort(myBuilder, outerQueryFrom, sort, orders, predicates);
+			createSort(myBuilder, myResourceTableRoot, sort, orders, predicates);
 			if (orders.size() > 0) {
 				outerQuery.orderBy(orders);
 			}
 
-			Subquery<Long> subQ = outerQuery.subquery(Long.class);
-			Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
-
-			myResourceTableQuery = subQ;
-			myResourceTableRoot = subQfrom;
-
-			Expression<Long> selectExpr = subQfrom.get("myId").as(Long.class);
-			subQ.select(selectExpr);
-
-			predicates.add(0, myBuilder.in(outerQueryFrom.get("myId").as(Long.class)).value(subQ));
-
-			outerQuery.multiselect(outerQueryFrom.get("myId").as(Long.class));
-			outerQuery.where(predicates.toArray(new Predicate[0]));
 
 		} else {
 
@@ -1406,8 +1426,6 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 		}
-
-		myPredicates = new ArrayList<>();
 
 		if (myParams.getEverythingMode() != null) {
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
@@ -1590,7 +1608,8 @@ public class SearchBuilder implements ISearchBuilder {
 			if (param.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 				thePredicates.add(join.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
 			} else {
-				Predicate joinParam1 = theBuilder.equal(join.get("myParamName"), theSort.getParamName());
+				Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myResourceName, theSort.getParamName());
+				Predicate joinParam1 = theBuilder.equal(join.get("myHashIdentity"), hashIdentity);
 				thePredicates.add(joinParam1);
 			}
 		} else {
@@ -1760,7 +1779,8 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	/**
-	 * THIS SHOULD RETURN HASHSET and not just Set because we add to it later (so it can't be Collections.emptySet())
+	 * THIS SHOULD RETURN HASHSET and not just Set because we add to it later
+	 * so it can't be Collections.emptySet() or some such thing
 	 */
 	@Override
 	public HashSet<Long> loadIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
@@ -1940,11 +1960,11 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		if (theParamName.equals(BaseResource.SP_RES_ID)) {
+		if (theParamName.equals(IAnyResource.SP_RES_ID)) {
 
 			addPredicateResourceId(theAndOrParams);
 
-		} else if (theParamName.equals(BaseResource.SP_RES_LANGUAGE)) {
+		} else if (theParamName.equals(IAnyResource.SP_RES_LANGUAGE)) {
 
 			addPredicateLanguage(theAndOrParams);
 
@@ -2154,6 +2174,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
 		private StopWatch myStopwatch = null;
+		private int mySkipCount = 0;
 
 		private QueryIterator() {
 			mySort = myParams.getSort();
@@ -2193,20 +2214,26 @@ public class SearchBuilder implements ISearchBuilder {
 				if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
 					while (myPreResultsIterator.hasNext()) {
 						Long next = myPreResultsIterator.next();
-						if (next != null && myPidSet.add(next)) {
-							myNext = next;
-							break;
-						}
+						if (next != null)
+							if (myPidSet.add(next)) {
+								myNext = next;
+								break;
+							} else {
+								mySkipCount++;
+							}
 					}
 				}
 
 				if (myNext == null) {
 					while (myResultsIterator.hasNext()) {
 						Long next = myResultsIterator.next();
-						if (next != null && myPidSet.add(next)) {
-							myNext = next;
-							break;
-						}
+						if (next != null)
+							if (myPidSet.add(next)) {
+								myNext = next;
+								break;
+							} else {
+								mySkipCount++;
+							}
 					}
 				}
 
@@ -2218,10 +2245,13 @@ public class SearchBuilder implements ISearchBuilder {
 					if (myIncludesIterator != null) {
 						while (myIncludesIterator.hasNext()) {
 							Long next = myIncludesIterator.next();
-							if (next != null && myPidSet.add(next)) {
-								myNext = next;
-								break;
-							}
+							if (next != null)
+								if (myPidSet.add(next)) {
+									myNext = next;
+									break;
+								} else {
+									mySkipCount++;
+								}
 						}
 						if (myNext == null) {
 							myNext = NO_MORE;
@@ -2260,6 +2290,11 @@ public class SearchBuilder implements ISearchBuilder {
 			Validate.isTrue(retVal != NO_MORE, "No more elements");
 			return retVal;
 		}
+
+		@Override
+		public int getSkippedCount() {
+			return mySkipCount;
+		}
 	}
 
 	private class UniqueIndexIterator implements IResultIterator {
@@ -2295,6 +2330,11 @@ public class SearchBuilder implements ISearchBuilder {
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int getSkippedCount() {
+			return 0;
 		}
 	}
 

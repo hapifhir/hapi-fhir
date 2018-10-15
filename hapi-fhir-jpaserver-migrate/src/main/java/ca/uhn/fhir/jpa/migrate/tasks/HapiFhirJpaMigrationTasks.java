@@ -185,6 +185,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("HASH_NORM_PREFIX", "SP_VALUE_NORMALIZED");
 		spidxString
+			.addColumn("HASH_EXACT")
+			.nullable()
+			.type(AddColumnTask.ColumnTypeEnum.LONG);
+		spidxString
 			.addIndex("IDX_SP_STRING_HASH_EXCT")
 			.unique(false)
 			.withColumns("HASH_EXACT");
@@ -255,6 +259,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("HASH_IDENTITY", "SP_URI");
 		spidxUri
+			.addColumn("HASH_URI")
+			.nullable()
+			.type(AddColumnTask.ColumnTypeEnum.LONG);
+		spidxUri
 			.addIndex("IDX_SP_URI_HASH_URI")
 			.unique(false)
 			.withColumns("HASH_URI");
@@ -290,7 +298,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			"where HFJ_RES_PARAM_PRESENT.HASH_PRESENCE is null";
 		consolidateSearchParamPresenceIndexesTask.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
 			Long pid = (Long) t.get("PID");
-			Boolean present = (Boolean) t.get("HASH_PRESENCE");
+			Boolean present = (Boolean) t.get("SP_PRESENT");
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
 			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);

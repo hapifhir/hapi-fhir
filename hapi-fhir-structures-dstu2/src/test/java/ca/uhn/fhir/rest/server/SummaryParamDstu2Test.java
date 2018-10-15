@@ -36,13 +36,13 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-public class SummaryParamTest {
+public class SummaryParamDstu2Test {
 
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static SummaryEnum ourLastSummary;
 	private static List<SummaryEnum> ourLastSummaryList;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SummaryParamTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SummaryParamDstu2Test.class);
 	private static int ourPort;
 
 	private static Server ourServer;

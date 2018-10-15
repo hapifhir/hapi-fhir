@@ -71,6 +71,11 @@
 				timezones where the date that could apply. This makes the search slightly more
 				inclusive, which errs on the side of caution.
 			</action>
+			<action type="fix">
+				A bug was fixed in the JPA server $expunge operation where a database connection
+				could sometimes be opened and not returned to the pool immediately, leading to
+				pool starvation if the operation was called many times in a row.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

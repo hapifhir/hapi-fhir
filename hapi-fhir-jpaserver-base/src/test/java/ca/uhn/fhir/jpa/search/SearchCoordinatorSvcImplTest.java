@@ -422,6 +422,10 @@ public class SearchCoordinatorSvcImplTest {
 			return myWrap.next();
 		}
 
+		@Override
+		public int getSkippedCount() {
+			return myWrap.getSkippedCount();
+		}
 	}
 
 	public static class ResultIterator extends BaseIterator<Long> implements IResultIterator {
@@ -441,15 +445,28 @@ public class SearchCoordinatorSvcImplTest {
 		public Long next() {
 			return myWrap.next();
 		}
+
+		@Override
+		public int getSkippedCount() {
+			return 0;
+		}
 	}
 
 	public static class SlowIterator extends BaseIterator<Long> implements IResultIterator {
 
+		private final IResultIterator myResultIteratorWrap;
 		private int myDelay;
 		private Iterator<Long> myWrap;
 
 		public SlowIterator(Iterator<Long> theWrap, int theDelay) {
 			myWrap = theWrap;
+			myDelay = theDelay;
+			myResultIteratorWrap = null;
+		}
+
+		public SlowIterator(IResultIterator theWrap, int theDelay) {
+			myWrap = theWrap;
+			myResultIteratorWrap = theWrap;
 			myDelay = theDelay;
 		}
 
@@ -466,6 +483,15 @@ public class SearchCoordinatorSvcImplTest {
 				// ignore
 			}
 			return myWrap.next();
+		}
+
+		@Override
+		public int getSkippedCount() {
+			if (myResultIteratorWrap == null) {
+				return 0;
+			} else {
+				return myResultIteratorWrap.getSkippedCount();
+			}
 		}
 
 	}

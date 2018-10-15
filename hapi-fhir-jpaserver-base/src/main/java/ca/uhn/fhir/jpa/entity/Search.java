@@ -5,8 +5,6 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.annotations.OptimisticLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
