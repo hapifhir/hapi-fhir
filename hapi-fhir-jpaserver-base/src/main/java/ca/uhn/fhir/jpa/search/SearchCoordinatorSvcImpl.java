@@ -47,6 +47,9 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.orm.jpa.JpaDialect;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -57,6 +60,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.concurrent.*;
@@ -92,6 +96,21 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private IPagingProvider myPagingProvider;
 
 	private int mySyncSize = DEFAULT_SYNC_SIZE;
+	/** Set in {@link #start()} */
+	private boolean myCustomIsolationSupported;
+
+	@PostConstruct
+	public void start() {
+		if (myManagedTxManager instanceof JpaTransactionManager) {
+			JpaDialect jpaDialect = ((JpaTransactionManager) myManagedTxManager).getJpaDialect();
+			if (jpaDialect instanceof HibernateJpaDialect) {
+				myCustomIsolationSupported = true;
+			}
+		}
+		if (myCustomIsolationSupported == false) {
+			ourLog.warn("JPA dialect does not support transaction isolation! This can have an impact on search performance.")
+		}
+	}
 
 	/**
 	 * Constructor
@@ -612,7 +631,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-				txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
+
+				if (myCustomIsolationSupported) {
+					txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
+				}
+
 				txTemplate.execute(new TransactionCallbackWithoutResult() {
 					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
