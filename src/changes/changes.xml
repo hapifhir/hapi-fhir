@@ -7,6 +7,15 @@
 	</properties>
 	<body>
 		<release version="3.6.0" date="TBD">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>Karaf (OSGi): 4.1.4 -&gt; 4.1.6</li>
+					</ul>
+				]]>
+			</action>
 			<action type="fix">
 				A bug in the JPA migration tasks from 3.4.0 to 3.5.0 caused a failure if the HFJ_SEARCH_PARM
 				table did not exist. This table existed in previous versions of HAPI FHIR but was dropped
