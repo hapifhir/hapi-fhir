@@ -76,6 +76,12 @@
 				could sometimes be opened and not returned to the pool immediately, leading to
 				pool starvation if the operation was called many times in a row.
 			</action>
+			<action type="add">
+				A new setting has been added to the JPA server DaoConfig that causes the server
+				to keep certain searches "warm" in the cache. This means that the search will
+				be performed periodically in the background in order to keep a reasonably fresh copy
+				of the results in the query cache.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">
