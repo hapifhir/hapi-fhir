@@ -1,8 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Patient;
@@ -10,6 +13,8 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.springframework.test.util.AopTestUtils;
+
+import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,6 +31,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 		myDaoConfig.setCountSearchResultsUpTo(null);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
+		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
 
 	@Override
@@ -34,8 +40,10 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 		myDaoConfig.setCountSearchResultsUpTo(5);
 
 		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(250);
+		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(5);
+
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(20, 50, -1));
 
 		runInTransaction(() -> {
 			for (int i = 0; i < 104; i++) {
