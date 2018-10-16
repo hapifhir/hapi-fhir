@@ -66,6 +66,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static Server ourServer;
 	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
+	protected static SubscriptionTriggeringProvider ourSubscriptionTriggeringProvider;
 
 	public BaseResourceProviderDstu3Test() {
 		super();
@@ -160,6 +161,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourRestHookSubscriptionInterceptor = wac.getBean(SubscriptionRestHookInterceptor.class);
 			ourEmailSubscriptionInterceptor = wac.getBean(SubscriptionEmailInterceptor.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
+			ourSubscriptionTriggeringProvider = wac.getBean(SubscriptionTriggeringProvider.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);

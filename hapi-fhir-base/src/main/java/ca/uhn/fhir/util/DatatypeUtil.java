@@ -9,9 +9,9 @@ package ca.uhn.fhir.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.util;
 
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +36,7 @@ public class DatatypeUtil {
 		HashSet<String> retVal = new HashSet<>();
 		if (theStringList != null) {
 			for (IPrimitiveType<?> string : theStringList) {
-				if (string != null && string.getValue()!=null) {
+				if (string != null && string.getValue() != null) {
 					retVal.add(string.getValueAsString());
 				}
 			}
@@ -44,7 +45,7 @@ public class DatatypeUtil {
 	}
 
 	/**
-	 * Joins a list of strings with a single space (' ') between each string 
+	 * Joins a list of strings with a single space (' ') between each string
 	 */
 	public static String joinStringsSpaceSeparated(List<? extends IPrimitiveType<String>> theStrings) {
 		StringBuilder b = new StringBuilder();

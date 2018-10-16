@@ -117,7 +117,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		results = query.getResultList();
 
-		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+		ArrayList<IBaseResource> retVal = new ArrayList<>();
 		for (ResourceHistoryTable next : results) {
 			BaseHasResource resource;
 			resource = next;
