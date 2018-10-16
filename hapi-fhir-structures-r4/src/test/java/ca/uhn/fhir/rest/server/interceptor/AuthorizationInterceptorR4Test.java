@@ -469,7 +469,7 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
-	public void testBatchWhenOnlyTransactionAllowed() throws Exception {
+	public void testBatchAllowed() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -498,7 +498,7 @@ public class AuthorizationInterceptorR4Test {
 		httpPost.setEntity(createFhirResourceEntity(input));
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
