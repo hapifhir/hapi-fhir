@@ -173,6 +173,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 		synchronized (myActiveJobs) {
 			myActiveJobs.add(jobDetails);
 		}
+		ourLog.info("Subscription triggering requested for {} resource and {} search - Gave job ID: {}", resourceIds.size(), searchUrls.size(), jobDetails.getJobId());
 
 		// Create a parameters response
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);

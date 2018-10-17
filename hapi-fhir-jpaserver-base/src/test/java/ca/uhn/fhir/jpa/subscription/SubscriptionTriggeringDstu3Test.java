@@ -62,8 +62,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourLog.info("Deleting all subscriptions");
-		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
-		ourClient.delete().resourceConditionalByUrl("Observation?code:missing=false").execute();
+		ourClient.delete().resourceConditionalByUrl("Subscription?_lastUpdated=lt3000").execute();
+		ourClient.delete().resourceConditionalByUrl("Observation?_lastUpdated=lt3000").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
@@ -151,8 +151,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
-
 		Parameters response = ourClient
 			.operation()
 			.onInstance(subscriptionId)
@@ -198,8 +196,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		beforeReset();
 
 		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(33);
-
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 		Parameters response = ourClient
 			.operation()
@@ -256,8 +252,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		beforeReset();
 
 		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(33);
-
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 		Parameters response = ourClient
 			.operation()
@@ -321,8 +315,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		beforeReset();
 
 		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(50);
-
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 		Parameters response = ourClient
 			.operation()
