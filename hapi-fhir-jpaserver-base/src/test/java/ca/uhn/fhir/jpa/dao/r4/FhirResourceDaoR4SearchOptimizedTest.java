@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -69,7 +70,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
-		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
+		params.setSummaryMode(SummaryEnum.COUNT);
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
@@ -98,7 +99,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// Seach with count only
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
-		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
+		params.setSummaryMode((SummaryEnum.COUNT));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
@@ -107,10 +108,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(ids, empty());
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
 
-		// Seach with count and dat
+		// Seach with total expicitly requested
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
-		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
+		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 		results = myPatientDao.search(params);
 		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
@@ -122,7 +123,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// Seach with count only
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam().setMissing(false));
-		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT));
+		params.setSummaryMode(SummaryEnum.COUNT);
 		results = myPatientDao.search(params);
 		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
@@ -134,7 +135,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testFetchCountAndDataForSlowLoading() {
+	public void testFetchTotalAccurateForSlowLoading() {
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(25);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(10);
 
@@ -143,7 +144,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
 		params.setCount(5);
-		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
+		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
@@ -168,7 +169,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
-		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
+		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		params.setSummaryMode(SummaryEnum.DATA);
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
@@ -183,7 +185,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
-		params.setSummaryMode(Sets.newHashSet(SummaryEnum.COUNT, SummaryEnum.DATA));
+		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		params.setSummaryMode(SummaryEnum.DATA);
 		results = myPatientDao.search(params);
 		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);

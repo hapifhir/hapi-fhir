@@ -205,7 +205,7 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint,
-							 boolean theLogRequestAndResponse, List<SummaryEnum> theSummaryMode, Set<String> theSubsetElements, CacheControlDirective theCacheControlDirective) {
+							 boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements, CacheControlDirective theCacheControlDirective) {
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
@@ -227,8 +227,7 @@ public abstract class BaseClient implements IRestfulClient {
 			}
 
 			if (theSummaryMode != null) {
-				List<String> summaryModeStrings = theSummaryMode.stream().map(SummaryEnum::getCode).collect(Collectors.toList());;
-				params.put(Constants.PARAM_SUMMARY, summaryModeStrings);
+				params.put(Constants.PARAM_SUMMARY, Collections.singletonList(theSummaryMode.getCode()));
 			} else if (mySummary != null) {
 				params.put(Constants.PARAM_SUMMARY, Collections.singletonList(mySummary.getCode()));
 			}

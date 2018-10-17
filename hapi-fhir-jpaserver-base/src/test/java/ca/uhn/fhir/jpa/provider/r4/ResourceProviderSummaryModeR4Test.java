@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
@@ -79,12 +80,12 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	 * Count and data - Should include both a count and the data portions of results
 	 */
 	@Test
-	public void testSearchWithCountAndData() {
+	public void testSearchWithTotalAccurate() {
 		Bundle outcome = ourClient
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.ACTIVE.exactly().code("true"))
-			.summaryMode(SummaryEnum.COUNT, SummaryEnum.DATA)
+			.totalMode(SearchTotalModeEnum.ACCURATE)
 			.returnBundle(Bundle.class)
 			.execute();
 

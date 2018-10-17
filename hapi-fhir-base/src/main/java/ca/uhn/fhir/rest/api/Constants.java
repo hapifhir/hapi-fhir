@@ -197,6 +197,7 @@ public class Constants {
 	 * This is provided for testing only! Use with caution as this property may change.
 	 */
 	public static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = "TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
+	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

@@ -2,7 +2,9 @@ package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 
@@ -79,6 +81,14 @@ public interface IQuery<Y> extends IBaseQuery<IQuery<Y>>, IClientExecutable<IQue
 	 * or <code>ca.uhn.fhir.model.dstu2.resource.Bundle.class</code>
 	 */
 	<B extends IBaseBundle> IQuery<B> returnBundle(Class<B> theClass);
+
+	/**
+	 * Request that the server modify the response using the <code>_total</code> param
+	 *
+	 * THIS IS AN EXPERIMENTAL FEATURE - Use with caution, as it may be
+	 * removed or modified in a future version.
+	 */
+	IQuery<Y> totalMode(SearchTotalModeEnum theTotalMode);
 
 	/**
 	 * Add a "_revinclude" specification

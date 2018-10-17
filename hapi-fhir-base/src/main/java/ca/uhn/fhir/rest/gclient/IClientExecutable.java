@@ -89,6 +89,6 @@ public interface IClientExecutable<T extends IClientExecutable<?,Y>, Y> {
 	/**
 	 * Request that the server modify the response using the <code>_summary</code> param 
 	 */
-	T summaryMode(SummaryEnum... theSummary);
+	T summaryMode(SummaryEnum theSummary);
 
 }

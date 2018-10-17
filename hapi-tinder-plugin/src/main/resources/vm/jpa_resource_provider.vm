@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
@@ -133,7 +134,9 @@ public class ${className}ResourceProvider extends
 			@ca.uhn.fhir.rest.annotation.Count
 			Integer theCount,
 
-			Set<SummaryEnum> theSummaryMode
+			SummaryEnum theSummaryMode,
+
+			SearchTotalModeEnum theSearchTotalMode
 
 			) {
 		startRequest(theServletRequest);
@@ -156,6 +159,7 @@ public class ${className}ResourceProvider extends
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
 			paramMap.setSummaryMode(theSummaryMode);
+			paramMap.setSearchTotalMode(theSearchTotalMode);
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 
