@@ -248,7 +248,6 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 			theJobDetails.setCurrentSearchUuid(search.getUuid());
 			theJobDetails.setCurrentSearchResourceType(resourceType);
 			theJobDetails.setCurrentSearchCount(params.getCount());
-			theJobDetails.setCurrentSearchCount(null);
 			theJobDetails.setCurrentSearchLastUploadedIndex(-1);
 		}
 
