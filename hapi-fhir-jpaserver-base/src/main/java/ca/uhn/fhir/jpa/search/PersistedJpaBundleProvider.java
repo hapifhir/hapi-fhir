@@ -157,7 +157,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 			TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-			txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
+			txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
 			return txTemplate.execute(s -> {
 				try {
 					setSearchEntity(mySearchDao.findByUuid(myUuid));
