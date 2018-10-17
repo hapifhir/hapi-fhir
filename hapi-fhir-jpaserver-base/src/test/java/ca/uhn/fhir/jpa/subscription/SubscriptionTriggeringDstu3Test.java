@@ -71,6 +71,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 		ourSubscriptionTriggeringProvider.cancelAll();
 		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(null);
+
+		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
 
 	@Before
@@ -169,6 +171,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@Test
 	public void testTriggerUsingMultipleSearches() throws Exception {
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(13, 22, 100));
+
 		String payload = "application/fhir+json";
 		IdType sub1id = createSubscription("Observation?", payload, ourListenerServerBase).getIdElement();
 		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
@@ -215,6 +219,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			.execute();
 		responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
+
+//		Thread.sleep(1000000000);
 
 		waitForSize(51, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
