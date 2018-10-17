@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -24,6 +25,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -493,6 +495,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
+		waitForSize(20, () -> runInTransaction(()-> mySearchEntityDao.findByUuid(uuid).getNumFound()));
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuid(uuid);
 			assertEquals(20, search.getNumFound());
@@ -545,7 +548,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setSort(new SortSpec(Patient.SP_NAME));
-		params.add(Patient.SP_RES_ID, new TokenParam("PT00000"));
+		params.add(IAnyResource.SP_RES_ID, new TokenParam("PT00000"));
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
