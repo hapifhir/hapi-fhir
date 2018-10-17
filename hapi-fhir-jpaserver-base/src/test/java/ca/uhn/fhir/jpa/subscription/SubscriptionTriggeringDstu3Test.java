@@ -314,7 +314,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(0, ourUpdatedPatients);
 		beforeReset();
 
-		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(33);
+		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(50);
 
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
