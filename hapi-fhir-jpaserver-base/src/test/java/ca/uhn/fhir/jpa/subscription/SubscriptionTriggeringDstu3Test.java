@@ -300,7 +300,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		IdType sub1id = createSubscription("Observation?", payload, ourListenerServerBase).getIdElement();
 		IdType sub2id = createSubscription("Observation?status=final", payload, ourListenerServerBase).getIdElement();
 
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < 10; i++) {
 			Observation o = new Observation();
 			o.setId("O" + i);
 			o.setStatus(Observation.ObservationStatus.FINAL);
@@ -308,7 +308,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			ourClient.update().resource(o).execute();
 		}
 
-		waitForSize(100, ourUpdatedObservations);
+		waitForSize(20, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(0, ourCreatedPatients);
 		waitForSize(0, ourUpdatedPatients);
@@ -327,7 +327,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
-		waitForSize(100, ourUpdatedObservations);
+		waitForSize(20, ourUpdatedObservations);
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(0, ourCreatedPatients);
 		waitForSize(0, ourUpdatedPatients);
