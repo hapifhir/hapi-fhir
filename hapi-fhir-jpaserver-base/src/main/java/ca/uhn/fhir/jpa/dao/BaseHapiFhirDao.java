@@ -1765,7 +1765,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		ourLog.debug("Starting entity update");
 
-i
 		/*
 		 * This should be the very first thing..
 		 */
