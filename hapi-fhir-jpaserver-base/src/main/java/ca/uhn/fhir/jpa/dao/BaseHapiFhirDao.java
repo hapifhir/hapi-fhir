@@ -1761,11 +1761,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		Validate.notNull(theEntity);
-		Validate.isTrue(theDeletedTimestampOrNull != null || theResource != null, "Must have either a resource[{}] or a deleted timestamp[{}] for resource PID[{}]", theDeletedTimestampOrNull != null, theResource != null, theEntity.getId());
+		Validate.isTrue(theDeletedTimestampOrNull != null || theResource != null, "Must have either a resource[%s] or a deleted timestamp[%s] for resource PID[%s]", theDeletedTimestampOrNull != null, theResource != null, theEntity.getId());
 
 		ourLog.debug("Starting entity update");
 
-
+i
 		/*
 		 * This should be the very first thing..
 		 */

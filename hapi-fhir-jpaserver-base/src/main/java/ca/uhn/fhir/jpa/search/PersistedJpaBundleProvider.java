@@ -253,7 +253,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		mySearchDao = theSearchDao;
 	}
 
-	void setSearchEntity(Search theSearchEntity) {
+	// Note: Leave as protected, HSPC depends on this
+	@SuppressWarnings("WeakerAccess")
+	protected void setSearchEntity(Search theSearchEntity) {
 		mySearchEntity = theSearchEntity;
 	}
 
@@ -269,7 +271,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return Math.max(0, size);
 	}
 
-	List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
+	// Note: Leave as protected, HSPC depends on this
+	@SuppressWarnings("WeakerAccess")
+	protected List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
 		Set<Long> includedPids = new HashSet<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			includedPids.addAll(sb.loadIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
