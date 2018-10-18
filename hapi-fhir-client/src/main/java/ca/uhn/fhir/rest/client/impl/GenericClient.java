@@ -98,7 +98,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
-																	  List<SummaryEnum> theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
+																	  SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -127,8 +127,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			invocation.addHeader(Constants.HEADER_IF_NONE_MATCH, '"' + theIfVersionMatches + '"');
 		}
 
-		boolean allowHtmlResponse = (theSummary != null && theSummary.contains(SummaryEnum.TEXT)) || (theSummary == null && getSummary() == SummaryEnum.TEXT);
-		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
+		boolean allowHtmlResponse = SummaryEnum.TEXT.equals(theSummary);
+		ResourceResponseHandler<T> binding = new ResourceResponseHandler<>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
 			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null);
@@ -368,7 +368,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		protected EncodingEnum myParamEncoding;
 		protected Boolean myPrettyPrint;
-		protected List<SummaryEnum> mySummaryMode;
+		protected SummaryEnum mySummaryMode;
 		protected CacheControlDirective myCacheControlDirective;
 		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
 		private boolean myQueryLogRequestAndResponse;
@@ -483,15 +483,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public T summaryMode(SummaryEnum... theSummary) {
-			mySummaryMode = null;
-			if (theSummary != null) {
-				if (theSummary.length == 1) {
-					mySummaryMode = Collections.singletonList(theSummary[0]);
-				} else {
-					mySummaryMode = Arrays.asList(theSummary);
-				}
-			}
+		public T summaryMode(SummaryEnum theSummary) {
+			mySummaryMode = theSummary;
 			return ((T) this);
 		}
 
@@ -1657,20 +1650,21 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class SearchInternal<OUTPUT> extends BaseSearch<IQuery<OUTPUT>, IQuery<OUTPUT>, OUTPUT> implements IQuery<OUTPUT>, IUntypedQuery<IQuery<OUTPUT>> {
 
 		private String myCompartmentName;
-		private List<Include> myInclude = new ArrayList<Include>();
+		private List<Include> myInclude = new ArrayList<>();
 		private DateRangeParam myLastUpdated;
 		private Integer myParamLimit;
-		private List<Collection<String>> myProfiles = new ArrayList<Collection<String>>();
+		private List<Collection<String>> myProfiles = new ArrayList<>();
 		private String myResourceId;
 		private String myResourceName;
 		private Class<? extends IBaseResource> myResourceType;
 		private Class<? extends IBaseBundle> myReturnBundleType;
-		private List<Include> myRevInclude = new ArrayList<Include>();
+		private List<Include> myRevInclude = new ArrayList<>();
 		private SearchStyleEnum mySearchStyle;
 		private String mySearchUrl;
-		private List<TokenParam> mySecurity = new ArrayList<TokenParam>();
-		private List<SortInternal> mySort = new ArrayList<SortInternal>();
-		private List<TokenParam> myTags = new ArrayList<TokenParam>();
+		private List<TokenParam> mySecurity = new ArrayList<>();
+		private List<SortInternal> mySort = new ArrayList<>();
+		private List<TokenParam> myTags = new ArrayList<>();
+		private SearchTotalModeEnum myTotalMode;
 
 		public SearchInternal() {
 			myResourceType = null;
@@ -1792,6 +1786,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				}
 			}
 
+			if (myTotalMode != null) {
+				addParam(params, Constants.PARAM_SEARCH_TOTAL_MODE, myTotalMode.getCode());
+			}
+
 			IClientResponseHandler<? extends IBase> binding;
 			binding = new ResourceResponseHandler(myReturnBundleType, getPreferResponseTypes(myResourceType));
 
@@ -1841,6 +1839,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IQuery limitTo(int theLimitTo) {
 			return count(theLimitTo);
+		}
+
+		@Override
+		public IQuery<OUTPUT> totalMode(SearchTotalModeEnum theSearchTotalModeEnum) {
+			myTotalMode = theSearchTotalModeEnum;
+			return this;
 		}
 
 		@Override

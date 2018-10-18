@@ -478,6 +478,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCommit() {
+					// FIXME: remove
+					ourLog.info("** Sending processing message " + theMessage + " for: " + theMessage.getNewPayload(myCtx));
 					ourLog.trace("Sending resource modified message to processing channel");
 					getProcessingChannel().send(new ResourceModifiedJsonMessage(theMessage));
 				}

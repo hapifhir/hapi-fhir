@@ -67,7 +67,7 @@ public enum SummaryEnum {
 	public static SummaryEnum fromCode(String theCode) {
 		Map<String, SummaryEnum> c2s = ourCodeToSummary;
 		if (c2s == null) {
-			c2s = new HashMap<String, SummaryEnum>();
+			c2s = new HashMap<>();
 			for (SummaryEnum next : values()) {
 				c2s.put(next.getCode(), next);
 			}

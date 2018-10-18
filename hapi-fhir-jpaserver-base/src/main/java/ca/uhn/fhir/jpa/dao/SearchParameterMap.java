@@ -5,10 +5,7 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.util.ObjectUtil;
@@ -31,9 +28,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +51,8 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	private Integer myLoadSynchronousUpTo;
 	private Set<Include> myRevIncludes;
 	private SortSpec mySort;
-	private Set<SummaryEnum> mySummaryMode;
+	private SummaryEnum mySummaryMode;
+	private SearchTotalModeEnum mySearchTotalMode;
 
 	/**
 	 * Constructor
@@ -70,18 +68,20 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		add(theName, theParam);
 	}
 
-	/**
-	 * @return An unmodifiable set
-	 */
-	public Set<SummaryEnum> getSummaryMode() {
-		if (mySummaryMode == null) {
-			return Collections.emptySet();
-		}
-		return Collections.unmodifiableSet(mySummaryMode);
+	public SummaryEnum getSummaryMode() {
+		return mySummaryMode;
 	}
 
-	public void setSummaryMode(Set<SummaryEnum> theSummaryMode) {
+	public void setSummaryMode(SummaryEnum theSummaryMode) {
 		mySummaryMode = theSummaryMode;
+	}
+
+	public SearchTotalModeEnum getSearchTotalMode() {
+		return mySearchTotalMode;
+	}
+
+	public void setSearchTotalMode(SearchTotalModeEnum theSearchTotalMode) {
+		mySearchTotalMode = theSearchTotalMode;
 	}
 
 	public SearchParameterMap add(String theName, DateParam theDateParam) {
@@ -261,7 +261,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	/**
 	 * This will only return true if all parameters have no modifier of any kind
 	 */
-	public boolean isAllParametersHaveNoModifier() {
+	boolean isAllParametersHaveNoModifier() {
 		for (List<List<? extends IQueryParameterType>> nextParamName : values()) {
 			for (List<? extends IQueryParameterType> nextAnd : nextParamName) {
 				for (IQueryParameterType nextOr : nextAnd) {
@@ -408,12 +408,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 		// Summary
 		if (getSummaryMode() != null) {
-			for (SummaryEnum next : getSummaryMode()) {
-				addUrlParamSeparator(b);
-				b.append(Constants.PARAM_SUMMARY);
-				b.append('=');
-				b.append(next.getCode());
-			}
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_SUMMARY);
+			b.append('=');
+			b.append(getSummaryMode().getCode());
 		}
 
 		if (b.length() == 0) {
@@ -489,7 +487,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	public class QueryParameterOrComparator implements Comparator<List<IQueryParameterType>> {
 		private final FhirContext myCtx;
 
-		public QueryParameterOrComparator(FhirContext theCtx) {
+		QueryParameterOrComparator(FhirContext theCtx) {
 			myCtx = theCtx;
 		}
 
@@ -505,7 +503,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 		private final FhirContext myCtx;
 
-		public QueryParameterTypeComparator(FhirContext theCtx) {
+		QueryParameterTypeComparator(FhirContext theCtx) {
 			myCtx = theCtx;
 		}
 
@@ -516,7 +514,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 
 	}
 
-	static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
+	private static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
 		int retVal;
 		if (theO1.getMissing() == null && theO2.getMissing() == null) {
 			retVal = 0;

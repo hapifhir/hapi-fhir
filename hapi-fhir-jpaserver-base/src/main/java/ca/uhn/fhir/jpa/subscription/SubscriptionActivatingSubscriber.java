@@ -69,7 +69,7 @@ public class SubscriptionActivatingSubscriber {
 		Validate.notNull(theTaskExecutor);
 	}
 
-	public synchronized boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
+	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
 		String subscriptionChannelType = myCtx
@@ -180,7 +180,7 @@ public class SubscriptionActivatingSubscriber {
 
 	}
 
-	private synchronized void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {
+	private void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -190,7 +190,7 @@ public class SubscriptionActivatingSubscriber {
 		});
 	}
 
-	protected boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
+	protected synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
 		CanonicalSubscription existingSubscription = mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement());
 		CanonicalSubscription newSubscription = mySubscriptionInterceptor.canonicalize(theSubscription);
 
