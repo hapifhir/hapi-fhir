@@ -132,7 +132,7 @@ public class CanonicalSubscription implements Serializable {
 		return retVal;
 	}
 
-	String getIdElementString() {
+	public String getIdElementString() {
 		return myIdElement;
 	}
 

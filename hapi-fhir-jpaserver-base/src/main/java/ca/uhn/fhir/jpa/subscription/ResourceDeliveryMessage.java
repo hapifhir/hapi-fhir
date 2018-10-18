@@ -48,6 +48,13 @@ public class ResourceDeliveryMessage {
 		return myOperationType;
 	}
 
+	/**
+	 * Constructor
+	 */
+	public ResourceDeliveryMessage() {
+		super();
+	}
+
 	public void setOperationType(ResourceModifiedMessage.OperationTypeEnum theOperationType) {
 		myOperationType = theOperationType;
 	}
