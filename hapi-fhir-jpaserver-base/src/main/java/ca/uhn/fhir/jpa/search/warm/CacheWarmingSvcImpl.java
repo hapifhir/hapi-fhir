@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.parser.DataFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -68,7 +69,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	private void refreshNow(WarmCacheEntry theCacheEntry) {
 		String nextUrl = theCacheEntry.getUrl();
 
-		RuntimeResourceDefinition resourceDef = parseWarmUrlResourceType(nextUrl);
+		RuntimeResourceDefinition resourceDef = parseUrlResourceType(myCtx, nextUrl);
 		IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceDef.getName());
 		String queryPart = parseWarmUrlParamPart(nextUrl);
 		SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(callingDao, myCtx, queryPart, resourceDef);
@@ -84,14 +85,18 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 		return theNextUrl.substring(paramIndex);
 	}
 
-	private RuntimeResourceDefinition parseWarmUrlResourceType(String theNextUrl) {
-		int paramIndex = theNextUrl.indexOf('?');
-		String resourceName = theNextUrl.substring(0, paramIndex);
+	/**
+	 * TODO: this method probably belongs in a utility class, not here
+	 *
+	 * @throws DataFormatException If the resource type is not known
+	 */
+	public static RuntimeResourceDefinition parseUrlResourceType(FhirContext theCtx, String theUrl) throws DataFormatException {
+		int paramIndex = theUrl.indexOf('?');
+		String resourceName = theUrl.substring(0, paramIndex);
 		if (resourceName.contains("/")) {
 			resourceName = resourceName.substring(resourceName.lastIndexOf('/') + 1);
 		}
-		RuntimeResourceDefinition resourceDef = myCtx.getResourceDefinition(resourceName);
-		return resourceDef;
+		return theCtx.getResourceDefinition(resourceName);
 	}
 
 	@PostConstruct
@@ -107,7 +112,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 			// Validate
 			parseWarmUrlParamPart(next.getUrl());
-			parseWarmUrlResourceType(next.getUrl());
+			parseUrlResourceType(myCtx, next.getUrl());
 
 			myCacheEntryToNextRefresh.put(next, 0L);
 		}

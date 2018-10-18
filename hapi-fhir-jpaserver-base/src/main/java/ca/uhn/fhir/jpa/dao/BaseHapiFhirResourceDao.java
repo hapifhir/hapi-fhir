@@ -833,6 +833,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
+	public IBaseResource readByPid(Long thePid) {
+		StopWatch w = new StopWatch();
+
+		Optional<ResourceTable> entity = myResourceTableDao.findById(thePid);
+		if (!entity.isPresent()) {
+			throw new ResourceNotFoundException("No resource found with PID " + thePid);
+		}
+		if (entity.get().getDeleted() != null) {
+			throw new ResourceGoneException("Resource was deleted at " + new InstantType(entity.get().getDeleted()).getValueAsString());
+		}
+
+		T retVal = toResource(myResourceType, entity.get(), null, false);
+
+		ourLog.debug("Processed read on {} in {}ms", thePid, w.getMillis());
+		return retVal;
+	}
+
+
+	@Override
 	public T read(IIdType theId) {
 		return read(theId, null);
 	}

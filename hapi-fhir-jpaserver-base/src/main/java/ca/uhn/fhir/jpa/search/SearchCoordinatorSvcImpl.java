@@ -634,7 +634,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
 				if (myCustomIsolationSupported) {
-					txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_UNCOMMITTED);
+					txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
 				}
 
 				txTemplate.execute(new TransactionCallbackWithoutResult() {

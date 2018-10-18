@@ -95,6 +95,11 @@
 				When using the testpage overlay to delete a resource, currently a crash can occur
 				if an unqualified ID is placed in the ID text box. This has been corrected.
 			</action>
+			<action type="fix">
+				AuthorizationInterceptor did not allow FHIR batch operations when the transaction() 
+				permission is granted. This has been corrected so that transaction() allows both
+				batch and transaction requests to proceed.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">
