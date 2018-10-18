@@ -70,7 +70,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Autowired
 	protected Environment myEnv;
 
-	@Bean
+	@Bean(name="myDaoRegistry")
 	public DaoRegistry daoRegistry() {
 		return new DaoRegistry();
 	}
