@@ -499,6 +499,45 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
+
+
+
+	}
+
+	@Test
+	public void testBatchAllowedWithGets() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.build();
+			}
+		});
+
+		HttpPost httpPost;
+		HttpResponse status;
+
+		// Bundle with GETs
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.BATCH);
+		input.addEntry().getRequest().setUrl("Patient?").setMethod(Bundle.HTTPVerb.GET);
+
+		Bundle output = new Bundle();
+		output.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		output.addEntry().getResponse().setLocation("/Patient/1");
+
+		ourReturn = Collections.singletonList(output);
+		ourHitMethod = false;
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(input));
+		status = ourClient.execute(httpPost);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
 	}
 
 	@Test

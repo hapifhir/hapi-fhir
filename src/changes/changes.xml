@@ -100,6 +100,11 @@
 				permission is granted. This has been corrected so that transaction() allows both
 				batch and transaction requests to proceed.
 			</action>
+			<action type="fix">
+				The AuthorizationInterceptor was previously not able to authorize the FHIR 
+				batch operation. As of this version, when authorizing a transaction operation
+				(via the transaction() rule), both batch and transaction will be allowed.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">
