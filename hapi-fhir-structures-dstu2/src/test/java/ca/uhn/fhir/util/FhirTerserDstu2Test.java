@@ -1,24 +1,5 @@
 package ca.uhn.fhir.util;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.List;
-
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -31,9 +12,26 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.model.primitive.MarkdownDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.junit.AfterClass;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FhirTerserDstu2Test {
 
@@ -179,6 +177,215 @@ public class FhirTerserDstu2Test {
 		List<IBaseReference> refs = ourCtx.newTerser().getAllPopulatedChildElementsOfType(p, IBaseReference.class);
 		assertEquals(1, refs.size());
 		assertSame(ref, refs.get(0));
+	}
+
+	@Test
+	public void testGetValues() {
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
+		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IPrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertTrue(((BooleanDt) values.get(0)).getValue());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("value", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testGetValuesAndModify() {
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
+		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IPrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertTrue(((BooleanDt) values.get(0)).getValue());
+
+		((BooleanDt) values.get(0)).setValue(Boolean.FALSE);
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		values = ourCtx.newTerser().getValues(p, "Patient.active");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IPrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertFalse(((BooleanDt) values.get(0)).getValue());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("value", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
+		((ExtensionDt) values.get(0)).setValue(new StringDt("modifiedValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifiedValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testGetValuesMultiple() {
+		Patient p = new Patient();
+		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value1"));
+		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value2"));
+		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
+		assertEquals(2, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("value1", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(1)).getUrl());
+		assertEquals("value2", ((StringDt) ((ExtensionDt) values.get(1)).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testGetValuesWithWantedClass() {
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
+		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<IPrimitiveType> values = ourCtx.newTerser().getValues(p, "Patient.active", IPrimitiveType.class);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertTrue(((BooleanDt) values.get(0)).getValue());
+
+		List<ExtensionDt> extValues = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", ExtensionDt.class);
+		assertEquals(1, extValues.size());
+		assertTrue(extValues.get(0).getValue() instanceof StringDt);
+		assertEquals("http://acme.org/extension", extValues.get(0).getUrl());
+		assertEquals("value", ((StringDt) (extValues.get(0).getValue())).getValueAsString());
+	}
+
+	@Test
+	public void testGetValuesWithWantedClassAndModify() {
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
+		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<IPrimitiveType> values = ourCtx.newTerser().getValues(p, "Patient.active", IPrimitiveType.class);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertTrue(((BooleanDt) values.get(0)).getValue());
+
+		((BooleanDt) values.get(0)).setValue(Boolean.FALSE);
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		values = ourCtx.newTerser().getValues(p, "Patient.active", IPrimitiveType.class);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertFalse(((BooleanDt) values.get(0)).getValue());
+
+		List<ExtensionDt> extValues = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", ExtensionDt.class);
+		assertEquals(1, extValues.size());
+		assertTrue(extValues.get(0).getValue() instanceof StringDt);
+		assertEquals("http://acme.org/extension", extValues.get(0).getUrl());
+		assertEquals("value", ((StringDt) (extValues.get(0).getValue())).getValueAsString());
+
+		extValues.get(0).setValue(new StringDt("modifiedValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		extValues = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", ExtensionDt.class);
+		assertEquals(1, extValues.size());
+		assertTrue(extValues.get(0).getValue() instanceof StringDt);
+		assertEquals("http://acme.org/extension", extValues.get(0).getUrl());
+		assertEquals("modifiedValue", ((StringDt) (extValues.get(0).getValue())).getValueAsString());
+	}
+
+	@Test
+	public void testGetValuesWithWantedClassAndTheCreate() {
+		Patient p = new Patient();
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<IPrimitiveType> values = ourCtx.newTerser().getValues(p, "Patient.active", IPrimitiveType.class, true);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertNull(((BooleanDt) values.get(0)).getValue());
+
+		List<ExtensionDt> extValues = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", ExtensionDt.class, true);
+		assertEquals(1, extValues.size());
+		assertEquals("http://acme.org/extension", extValues.get(0).getUrl());
+		assertNull(extValues.get(0).getValue());
+	}
+
+	@Test
+	public void testGetValuesWithTheCreate() {
+		Patient p = new Patient();
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active", true);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IPrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertNull(((BooleanDt) values.get(0)).getValue());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", true);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertNull(((ExtensionDt) values.get(0)).getValue());
+	}
+
+	@Test
+	public void testGetValuesWithTheCreateAndNoOverwrite() {
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
+		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active", true);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IPrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertTrue(((BooleanDt) values.get(0)).getValue());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("value", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
 	}
 	
 	@Test
