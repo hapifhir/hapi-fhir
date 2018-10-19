@@ -35,9 +35,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -174,7 +174,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					return null;
 				}
 				break;
-			case BATCH:
 			case TRANSACTION:
 				if (!(theOperation == RestOperationTypeEnum.TRANSACTION)) {
 					return null;
@@ -185,12 +184,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					}
 					List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
 					Verdict verdict = null;
+
+					boolean allComponentsAreGets = true;
 					for (BundleEntryParts nextPart : inputResources) {
 
 						IBaseResource inputResource = nextPart.getResource();
 						RestOperationTypeEnum operation = null;
 						if (nextPart.getRequestType() == RequestTypeEnum.GET) {
 							continue;
+						} else {
+							allComponentsAreGets = false;
 						}
 						if (nextPart.getRequestType() == RequestTypeEnum.POST) {
 							operation = RestOperationTypeEnum.CREATE;
@@ -219,6 +222,15 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							verdict = newVerdict;
 						}
 					}
+
+					/*
+					 * If we're handling a transaction with all gets and nothing else, we'll
+					 * be applying security on the way out
+					 */
+					if (allComponentsAreGets) {
+						return newVerdict();
+					}
+
 					return verdict;
 				} else if (theOutputResource != null) {
 
@@ -453,9 +465,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		//noinspection EnumSwitchStatementWhichMissesCases
 		switch (theOp) {
 			case TRANSACTION:
-				return "transaction".equals(bundleType);
-			case BATCH:
-				return "batch".equals(bundleType);
+				return "transaction".equals(bundleType)
+					|| "batch".equals(bundleType);
 			default:
 				return false;
 		}

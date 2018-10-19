@@ -525,14 +525,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					rule.setOp(RuleOpEnum.TRANSACTION);
 					rule.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
 					myRules.add(rule);
-
-					// Allow batch
-					rule = new RuleImplOp(myRuleName);
-					rule.setMode(myRuleMode);
-					rule.setOp(RuleOpEnum.BATCH);
-					rule.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
-					myRules.add(rule);
-
 					return new RuleBuilderFinished(rule);
 				}
 
