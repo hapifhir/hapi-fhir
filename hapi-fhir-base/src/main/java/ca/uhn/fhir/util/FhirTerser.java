@@ -1,8 +1,23 @@
 package ca.uhn.fhir.util;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.*;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 /*
  * #%L
@@ -13,9 +28,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,23 +38,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.base.composite.BaseContainedDt;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.parser.DataFormatException;
 
 public class FhirTerser {
 
@@ -215,8 +213,12 @@ public class FhirTerser {
 		return retVal.get(0);
 	}
 
-	@SuppressWarnings("unchecked")
 	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
+		return getValues(theCurrentDef, theCurrentObj, theSubList, theWantedClass, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass, boolean theCreate) {
 		String name = theSubList.get(0);
 		List<T> retVal = new ArrayList<>();
 
@@ -227,14 +229,71 @@ public class FhirTerser {
 				extensionUrl = extensionUrl.substring(0, endIndex);
 			}
 
-			List<ExtensionDt> extensions= Collections.emptyList();
+			// DSTU2
+			List<ExtensionDt> extensionDts = Collections.emptyList();
 			if (theCurrentObj instanceof ISupportsUndeclaredExtensions) {
-				extensions = ((ISupportsUndeclaredExtensions) theCurrentObj).getUndeclaredExtensionsByUrl(extensionUrl);
+				extensionDts = ((ISupportsUndeclaredExtensions) theCurrentObj).getUndeclaredExtensionsByUrl(extensionUrl);
+
+				if (extensionDts.isEmpty() && theCreate) {
+					// FIXME: Add a new extension with extensionUrl and null value.
+					// FIXME: Discern between extensions and modifier extensions.
+				}
 			} else if (theCurrentObj instanceof IBaseExtension) {
-				extensions = ((IBaseExtension)theCurrentObj).getExtension();
+				extensionDts = ((IBaseExtension) theCurrentObj).getExtension();
+
+				if (extensionDts.isEmpty() && theCreate) {
+					// FIXME: Add a new extension with extensionUrl and null value.
+				}
 			}
 
-			for (ExtensionDt next : extensions) {
+			for (ExtensionDt next : extensionDts) {
+				if (theWantedClass.isAssignableFrom(next.getClass())) {
+					retVal.add((T) next);
+				}
+			}
+
+			// DSTU3+
+			final String extensionUrlForLambda = extensionUrl;
+			List<IBaseExtension> extensions = Collections.emptyList();
+			if (theCurrentObj instanceof IBaseHasExtensions) {
+				extensions = ((IBaseHasExtensions) theCurrentObj).getExtension()
+					.stream()
+					.filter(t -> t.getUrl().equals(extensionUrlForLambda))
+					.distinct()
+					.collect(Collectors.toList());
+
+				if (extensions.isEmpty() && theCreate) {
+					IBaseExtension extension = ((IBaseHasExtensions) theCurrentObj).addExtension();
+					extension.setUrl(extensionUrl);
+					extensions.add(extension);
+				}
+			}
+//			List<IBaseExtension> modifierExtensions = Collections.emptyList();
+//			if (theCurrentObj instanceof IBaseHasModifierExtensions) {
+//				modifierExtensions = ((IBaseHasModifierExtensions) theCurrentObj).getModifierExtension()
+//					.stream()
+//					.filter(t -> t.getUrl().equals(extensionUrlForLambda))
+//					.collect(Collectors.toList());
+//
+//				if (modifierExtensions.isEmpty() && theCreate) {
+//					IBaseExtension modifierExtension = ((IBaseHasModifierExtensions) theCurrentObj).addModifierExtension();
+//					modifierExtension.setUrl(extensionUrl);
+//					modifierExtensions.add(modifierExtension);
+//				}
+//			}
+//
+//			List<IBaseExtension> allExtensions = Stream.of(extensions, modifierExtensions)
+//				.flatMap(Collection::stream)
+//				.distinct()
+//				.collect(Collectors.toList());
+//
+//			for (IBaseExtension next : allExtensions) {
+//				if (theWantedClass.isAssignableFrom(next.getClass())) {
+//					retVal.add((T) next);
+//				}
+//			}
+
+			for (IBaseExtension next : extensions) {
 				if (theWantedClass.isAssignableFrom(next.getClass())) {
 					retVal.add((T) next);
 				}
@@ -255,6 +314,14 @@ public class FhirTerser {
 
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
 		List<? extends IBase> values = nextDef.getAccessor().getValues(theCurrentObj);
+
+		if (values.isEmpty() && theCreate) {
+			IBase value = nextDef.getChildByName(name).newInstance();
+			nextDef.getMutator().addValue(theCurrentObj, value);
+			List<IBase> list = new ArrayList<>();
+			list.add(value);
+			values = list;
+		}
 
 		if (theSubList.size() == 1) {
 			if (nextDef instanceof RuntimeChildChoiceDefinition) {
@@ -297,13 +364,24 @@ public class FhirTerser {
 		Class<Object> wantedClass = Object.class;
 
 		return getValues(theResource, thePath, wantedClass);
+	}
 
+	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
+		Class<Object> wantedClass = Object.class;
+
+		return getValues(theResource, thePath, wantedClass, theCreate);
 	}
 
 	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
 		return getValues(def, theResource, parts, theWantedClass);
+	}
+
+	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		List<String> parts = parsePath(def, thePath);
+		return getValues(def, theResource, parts, theWantedClass, theCreate);
 	}
 
 	private List<String> parsePath(BaseRuntimeElementCompositeDefinition<?> theElementDef, String thePath) {
