@@ -105,6 +105,17 @@
 				batch operation. As of this version, when authorizing a transaction operation
 				(via the transaction() rule), both batch and transaction will be allowed.
 			</action>
+			<action type="add">
+				The JPA server now automatically supplies several appropriate hibernate performance
+				settings as long as the JPA EntityManagerFactory was created using HAPI FHIR's
+				built-in method for creating it.
+				<![CDATA[<br/><br/>]]>
+				Existing JPA projects should consider using 
+				<![CDATA[<code>super.entityManagerFactory()</code>]]>
+				as shown in
+				<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java#L62">the example project</a>]]>
+				if they are not already.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

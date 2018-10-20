@@ -34,8 +34,6 @@ public class SubscriptionRestHookInterceptor extends BaseSubscriptionInterceptor
 	@Override
 	protected Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
 		SubscriptionDeliveringRestHookSubscriber value = new SubscriptionDeliveringRestHookSubscriber(getSubscriptionDao(), getChannelType(), this);
-		// FIXME: remove
-		ourLog.info("** Creating delivery subscriber " + value + " for " + theSubscription.getIdElementString());
 		return Optional.of(value);
 	}
 

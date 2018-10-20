@@ -46,7 +46,9 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -62,7 +64,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -84,6 +86,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private ApplicationContext myAppCtx;
+	private ExecutorService myExecutorService;
 
 	/**
 	 * Sets the maximum number of resources that will be submitted in a single pass
@@ -105,6 +108,37 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 		Collection values1 = myAppCtx.getBeansOfType(BaseSubscriptionInterceptor.class).values();
 		Collection<BaseSubscriptionInterceptor<?>> values = (Collection<BaseSubscriptionInterceptor<?>>) values1;
 		mySubscriptionInterceptorList.addAll(values);
+
+
+		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
+		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
+			.namingPattern("SubscriptionTriggering-%d")
+			.daemon(false)
+			.priority(Thread.NORM_PRIORITY)
+			.build();
+		RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
+			@Override
+			public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
+				ourLog.info("Note: Subscription triggering queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
+				StopWatch sw = new StopWatch();
+				try {
+					executorQueue.put(theRunnable);
+				} catch (InterruptedException theE) {
+					throw new RejectedExecutionException("Task " + theRunnable.toString() +
+						" rejected from " + theE.toString());
+				}
+				ourLog.info("Slot become available after {}ms", sw.getMillis());
+			}
+		};
+		myExecutorService = new ThreadPoolExecutor(
+			0,
+			10,
+			0L,
+			TimeUnit.MILLISECONDS,
+			executorQueue,
+			threadFactory,
+			rejectedExecutionHandler);
+
 	}
 
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
@@ -227,10 +261,17 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 
 		// Submit individual resources
 		int totalSubmitted = 0;
+		List<Pair<String, Future<Void>>> futures = new ArrayList<>();
 		while (theJobDetails.getRemainingResourceIds().size() > 0 && totalSubmitted < myMaxSubmitPerPass) {
 			totalSubmitted++;
 			String nextResourceId = theJobDetails.getRemainingResourceIds().remove(0);
-			submitResource(theJobDetails.getSubscriptionId(), nextResourceId);
+			Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResourceId);
+			futures.add(Pair.of(nextResourceId, future));
+		}
+
+		// Make sure these all succeeded in submitting
+		if (validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
+			return;
 		}
 
 		// If we don't have an active search started, and one needs to be.. start it
@@ -267,14 +308,22 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 			List<Long> resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
 
 			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
+			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
+
 			for (Long next : resourceIds) {
 				IBaseResource nextResource = resourceDao.readByPid(next);
-				submitResource(theJobDetails.getSubscriptionId(), nextResource);
+				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
+				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));
 				totalSubmitted++;
-				theJobDetails.setCurrentSearchLastUploadedIndex(theJobDetails.getCurrentSearchLastUploadedIndex()+1);
+				highestIndexSubmitted++;
 			}
 
-			int expectedCount = toIndex - fromIndex;
+			if (validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
+				return;
+			}
+
+			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted);
+
 			if (resourceIds.size() == 0 || (theJobDetails.getCurrentSearchCount() != null && toIndex >= theJobDetails.getCurrentSearchCount())) {
 				ourLog.info("Triggering job[{}] search {} has completed ", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid());
 				theJobDetails.setCurrentSearchResourceType(null);
@@ -287,15 +336,34 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 		ourLog.info("Subscription trigger job[{}] triggered {} resources in {}ms ({} res / second)", theJobDetails.getJobId(), totalSubmitted, sw.getMillis(), sw.getThroughput(totalSubmitted, TimeUnit.SECONDS));
 	}
 
-	private void submitResource(String theSubscriptionId, String theResourceIdToTrigger) {
+	private boolean validateFuturesAndReturnTrueIfWeShouldAbort(List<Pair<String, Future<Void>>> theIdToFutures) {
+
+		for (Pair<String, Future<Void>> next : theIdToFutures) {
+			String nextDeliveredId = next.getKey();
+			try {
+				Future<Void> nextFuture = next.getValue();
+				nextFuture.get();
+				ourLog.info("Finished redelivering {}", nextDeliveredId);
+			} catch (Exception e) {
+				ourLog.error("Failure triggering resource " + nextDeliveredId, e);
+				return true;
+			}
+		}
+
+		// Clear the list since it will potentially get reused
+		theIdToFutures.clear();
+		return false;
+	}
+
+	private Future<Void> submitResource(String theSubscriptionId, String theResourceIdToTrigger) {
 		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(theResourceIdToTrigger);
 		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
 		IBaseResource resourceToTrigger = dao.read(resourceId);
 
-		submitResource(theSubscriptionId, resourceToTrigger);
+		return submitResource(theSubscriptionId, resourceToTrigger);
 	}
 
-	private void submitResource(String theSubscriptionId, IBaseResource theResourceToTrigger) {
+	private Future<Void> submitResource(String theSubscriptionId, IBaseResource theResourceToTrigger) {
 
 		ourLog.info("Submitting resource {} to subscription {}", theResourceToTrigger.getIdElement().toUnqualifiedVersionless().getValue(), theSubscriptionId);
 
@@ -305,9 +373,13 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 		msg.setSubscriptionId(new IdType(theSubscriptionId).toUnqualifiedVersionless().getValue());
 		msg.setNewPayload(myFhirContext, theResourceToTrigger);
 
-		for (BaseSubscriptionInterceptor<?> next : mySubscriptionInterceptorList) {
-			next.submitResourceModified(msg);
-		}
+		return myExecutorService.submit(()->{
+			for (BaseSubscriptionInterceptor<?> next : mySubscriptionInterceptorList) {
+				next.submitResourceModified(msg);
+			}
+			return null;
+		});
+
 	}
 
 	public void cancelAll() {
