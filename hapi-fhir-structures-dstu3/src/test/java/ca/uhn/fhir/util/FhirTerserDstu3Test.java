@@ -535,8 +535,6 @@ public class FhirTerserDstu3Test {
 	public void testGetValuesWithTheCreate() {
    	Patient p = new Patient();
 
-		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
-
    	List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active", true);
    	assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof PrimitiveType);
@@ -557,12 +555,7 @@ public class FhirTerserDstu3Test {
 		assertEquals("http://acme.org/modifierExtension", ((Extension) values.get(0)).getUrl());
 		assertNull(((Extension) values.get(0)).getValue());
 
-		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
-
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true);
-
-		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
-
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof  IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
