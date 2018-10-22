@@ -168,7 +168,7 @@
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> <em class="jxr_javadoccomment">	 *            The underlying cause exception</em>
 <a class="jxr_linenumber" name="L161" href="#L161">161</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html">BaseServerResponseException</a>(<strong class="jxr_keyword">int</strong> theStatusCode, Throwable theCause) {
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 		<strong class="jxr_keyword">super</strong>(theCause.toString(), theCause);
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 		<strong class="jxr_keyword">super</strong>(theCause.getMessage(), theCause);
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 		myStatusCode = theStatusCode;
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> 		myBaseOperationOutcome = <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L166" href="#L166">166</a> 	}

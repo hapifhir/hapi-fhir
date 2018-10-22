@@ -1,0 +1,9 @@
+ca.uhn.fhir.rest.api.server
+ca.uhn.fhir.rest.server
+ca.uhn.fhir.rest.server.interceptor
+ca.uhn.fhir.rest.server.interceptor.auth
+ca.uhn.fhir.rest.server.method
+ca.uhn.fhir.rest.server.provider
+ca.uhn.fhir.rest.server.servlet
+ca.uhn.fhir.rest.server.tenant
+ca.uhn.fhir.rest.server.util

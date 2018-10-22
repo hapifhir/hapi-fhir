@@ -1,0 +1,4 @@
+ca.uhn.fhir.rest.client.apache
+ca.uhn.fhir.rest.client.impl
+ca.uhn.fhir.rest.client.interceptor
+ca.uhn.fhir.rest.client.method
