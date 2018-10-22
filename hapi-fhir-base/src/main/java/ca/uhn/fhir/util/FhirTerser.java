@@ -287,7 +287,7 @@ public class FhirTerser {
 				retVal = new ArrayList<>();
 				for (T nextElement : values) {
 					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
-					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass);
+					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate);
 					retVal.addAll(foundValues);
 				}
 			}
@@ -332,7 +332,7 @@ public class FhirTerser {
 				retVal = new ArrayList<>();
 				for (T nextElement : values) {
 					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
-					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass);
+					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate);
 					retVal.addAll(foundValues);
 				}
 			}
@@ -381,7 +381,7 @@ public class FhirTerser {
 		} else {
 			for (IBase nextElement : values) {
 				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
-				List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass);
+				List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate);
 				retVal.addAll(foundValues);
 			}
 		}
