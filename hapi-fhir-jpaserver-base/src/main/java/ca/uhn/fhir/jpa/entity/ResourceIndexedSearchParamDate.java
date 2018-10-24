@@ -83,6 +83,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		myOriginalValue = theOriginalValue;
 	}
 
+	@Override
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashIdentity == null) {

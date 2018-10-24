@@ -31,7 +31,7 @@ import java.util.List;
  * @author james
  *
  */
-public class StringClientParam extends BaseClientParam implements IParam {
+public class  StringClientParam extends BaseClientParam implements IParam {
 
 	private final String myParamName;
 

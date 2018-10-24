@@ -116,6 +116,11 @@
 				<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java#L62">the example project</a>]]>
 				if they are not already.
 			</action>
+			<action type="fix">
+				When updating resources in the JPA server, a bug caused index table entries to be refreshed
+				sometimes even though the index value hadn't changed. This issue did not cause incorrect search
+				results but had an effect on write performance. This has been corrected.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

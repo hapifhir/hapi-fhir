@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.TestUtil;
-import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -18,10 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4CreateTest.class);
@@ -37,22 +35,22 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Patient p = myFhirCtx.newXmlParser().parseResource(Patient.class, input);
 		String id = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
 
-		SearchParameterMap map= new SearchParameterMap();
+		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_FAMILY, new StringParam("김"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
 
-		map= new SearchParameterMap();
+		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("준"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
 
-		map= new SearchParameterMap();
+		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("준수"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(id));
 
-		map= new SearchParameterMap();
+		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("수")); // rightmost character only
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
@@ -60,7 +58,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithUuidResourceStrategy() throws Exception {
+	public void testCreateWithUuidResourceStrategy() {
 		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
 
 		Patient p = new Patient();
@@ -108,26 +106,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		assertThat(output.getEntry().get(0).getResponse().getLocation(), matchesPattern("Organization/[a-z0-9]{8}-.*"));
 		assertThat(output.getEntry().get(1).getResponse().getLocation(), matchesPattern("Patient/[a-z0-9]{8}-.*"));
-
-
-	}
-
-	@Test
-	public void testWritesPerformMinimalSqlStatements() {
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("sys1").setValue("val1");
-		p.addIdentifier().setSystem("sys2").setValue("val2");
-
-		ourLog.info("** About to perform write");
-		new ThreadQueryCountHolder().getOrCreateQueryCount("").setInsert(0);
-		new ThreadQueryCountHolder().getOrCreateQueryCount("").setUpdate(0);
-
-		myPatientDao.create(p);
-
-		ourLog.info("** Done performing write");
-
-		ourLog.info("Inserts: {}", new ThreadQueryCountHolder().getOrCreateQueryCount("").getInsert());
-		ourLog.info("Updates: {}", new ThreadQueryCountHolder().getOrCreateQueryCount("").getUpdate());
 
 
 	}

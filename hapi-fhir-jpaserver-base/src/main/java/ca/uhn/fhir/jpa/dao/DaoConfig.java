@@ -155,6 +155,7 @@ public class DaoConfig {
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
 	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
+	private boolean myDisableHashBasedSearches;
 
 	/**
 	 * Constructor
@@ -1381,6 +1382,34 @@ public class DaoConfig {
 	 */
 	public List<Integer> getSearchPreFetchThresholds() {
 		return mySearchPreFetchThresholds;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false) the server will not use
+	 * hash based searches. These searches were introduced in HAPI FHIR 3.5.0
+	 * and are the new default way of searching. However they require a very
+	 * large data migration if an existing system has a large amount of data
+	 * so this setting can be used to use the old search mechanism while data
+	 * is migrated.
+	 *
+	 * @since 3.6.0
+	 */
+	public boolean getDisableHashBasedSearches() {
+		return myDisableHashBasedSearches;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false) the server will not use
+	 * hash based searches. These searches were introduced in HAPI FHIR 3.5.0
+	 * and are the new default way of searching. However they require a very
+	 * large data migration if an existing system has a large amount of data
+	 * so this setting can be used to use the old search mechanism while data
+	 * is migrated.
+	 *
+	 * @since 3.6.0
+	 */
+	public void setDisableHashBasedSearches(boolean theDisableHashBasedSearches) {
+		myDisableHashBasedSearches = theDisableHashBasedSearches;
 	}
 
 	public enum IndexEnabledEnum {
