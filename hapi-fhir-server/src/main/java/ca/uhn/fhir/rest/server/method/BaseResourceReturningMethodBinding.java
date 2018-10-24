@@ -191,7 +191,16 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		 * Make sure all returned resources have an ID (if not, this is a bug
 		 * in the user server code)
 		 */
+		String resourceType = theRequest.getResourceName();
+		int requestedResourceTotalNum = 0;
 		for (IBaseResource next : resourceList) {
+			String resourceName = null;
+			if(next instanceof IResource){
+				resourceName = ((IResource)next).getResourceName();
+			}
+			if(resourceType != null  && resourceType.equals(resourceName)){
+				requestedResourceTotalNum++;
+			}
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
@@ -215,9 +224,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 		} else if (searchId != null) {
-			int offset = theOffset + resourceList.size();
+			int offset = theOffset + requestedResourceTotalNum;
 
-			// We're doing offset pages
+			// Using the returned resources that match the requested resource to determine next links.
 			if (numTotalResults == null || offset < numTotalResults) {
 				linkNext = (RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, offset, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
 			}
