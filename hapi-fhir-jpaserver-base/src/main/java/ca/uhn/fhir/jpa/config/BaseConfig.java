@@ -104,8 +104,30 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 					retVal.put(AvailableSettings.CONNECTION_HANDLING, PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
 				}
 
+				/*
+				 * Set some performance options
+				 */
+
+				if (!retVal.containsKey(AvailableSettings.STATEMENT_BATCH_SIZE)) {
+					retVal.put(AvailableSettings.STATEMENT_BATCH_SIZE, "30");
+				}
+
+				if (!retVal.containsKey(AvailableSettings.ORDER_INSERTS)) {
+					retVal.put(AvailableSettings.ORDER_INSERTS, "true");
+				}
+
+				if (!retVal.containsKey(AvailableSettings.ORDER_UPDATES)) {
+					retVal.put(AvailableSettings.ORDER_UPDATES, "true");
+				}
+
+				if (!retVal.containsKey(AvailableSettings.BATCH_VERSIONED_DATA)) {
+					retVal.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
+				}
+
 				return retVal;
 			}
+
+
 		};
 		configureEntityManagerFactory(retVal, fhirContext());
 		return retVal;

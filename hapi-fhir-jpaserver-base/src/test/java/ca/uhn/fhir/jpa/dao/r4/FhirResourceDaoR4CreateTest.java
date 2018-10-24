@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.TestUtil;
+import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -107,6 +108,26 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		assertThat(output.getEntry().get(0).getResponse().getLocation(), matchesPattern("Organization/[a-z0-9]{8}-.*"));
 		assertThat(output.getEntry().get(1).getResponse().getLocation(), matchesPattern("Patient/[a-z0-9]{8}-.*"));
+
+
+	}
+
+	@Test
+	public void testWritesPerformMinimalSqlStatements() {
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("sys1").setValue("val1");
+		p.addIdentifier().setSystem("sys2").setValue("val2");
+
+		ourLog.info("** About to perform write");
+		new ThreadQueryCountHolder().getOrCreateQueryCount("").setInsert(0);
+		new ThreadQueryCountHolder().getOrCreateQueryCount("").setUpdate(0);
+
+		myPatientDao.create(p);
+
+		ourLog.info("** Done performing write");
+
+		ourLog.info("Inserts: {}", new ThreadQueryCountHolder().getOrCreateQueryCount("").getInsert());
+		ourLog.info("Updates: {}", new ThreadQueryCountHolder().getOrCreateQueryCount("").getUpdate());
 
 
 	}

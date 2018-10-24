@@ -105,7 +105,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 			.countQuery(new ThreadQueryCountHolder())
 			.build();
@@ -125,7 +125,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.jdbc.batch_size", "1");
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
