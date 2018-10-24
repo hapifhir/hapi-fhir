@@ -185,6 +185,7 @@ public class FhirTerserDstu2Test {
 		p.setActive(true);
 		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
 		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+		p.addUndeclaredExtension(true, "http://acme.org/modifierExtension", new StringDt("modifierValue"));
 		p.addUndeclaredExtension(false, "http://acme.org/parentExtension").addUndeclaredExtension(false, "http://acme.org/childExtension", new StringDt("nestedValue"));
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
@@ -202,6 +203,13 @@ public class FhirTerserDstu2Test {
 		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
 		assertEquals("value", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
 
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifierValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof IBaseExtension);
@@ -216,6 +224,7 @@ public class FhirTerserDstu2Test {
 		p.setActive(true);
 		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
 		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+		p.addUndeclaredExtension(true, "http://acme.org/modifierExtension", new StringDt("modifierValue"));
 		p.addUndeclaredExtension(false, "http://acme.org/parentExtension").addUndeclaredExtension(false, "http://acme.org/childExtension", new StringDt("nestedValue"));
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
@@ -254,6 +263,24 @@ public class FhirTerserDstu2Test {
 		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
 		assertEquals("modifiedValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
 
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifierValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
+		((ExtensionDt) values.get(0)).setValue(new StringDt("modifiedModifierValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifiedModifierValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof IBaseExtension);
@@ -279,6 +306,8 @@ public class FhirTerserDstu2Test {
 		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value1"));
 		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value2"));
 		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+		p.addUndeclaredExtension(true, "http://acme.org/modifierExtension", new StringDt("modifierValue1"));
+		p.addUndeclaredExtension(true, "http://acme.org/modifierExtension", new StringDt("modifierValue2"));
 		p.addUndeclaredExtension(false, "http://acme.org/parentExtension").addUndeclaredExtension(false, "http://acme.org/childExtension", new StringDt("nestedValue1"));
 		p.addUndeclaredExtension(false, "http://acme.org/parentExtension").addUndeclaredExtension(false, "http://acme.org/childExtension", new StringDt("nestedValue2"));
 
@@ -294,6 +323,17 @@ public class FhirTerserDstu2Test {
 		assertTrue(values.get(1) instanceof ExtensionDt);
 		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(1)).getUrl());
 		assertEquals("value2", ((StringDt) ((ExtensionDt) values.get(1)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
+		assertEquals(2, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifierValue1", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(1)).getUrl());
+		assertEquals("modifierValue2", ((StringDt) ((ExtensionDt) values.get(1)).getValue()).getValueAsString());
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertEquals(2, values.size());
@@ -313,6 +353,7 @@ public class FhirTerserDstu2Test {
 		p.setActive(true);
 		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
 		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+		p.addUndeclaredExtension(true, "http://acme.org/modifierExtension", new StringDt("modifierValue"));
 		p.addUndeclaredExtension(false, "http://acme.org/parentExtension").addUndeclaredExtension(false, "http://acme.org/childExtension", new StringDt("nestedValue"));
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
@@ -328,6 +369,12 @@ public class FhirTerserDstu2Test {
 		assertEquals("http://acme.org/extension", extValues.get(0).getUrl());
 		assertEquals("value", ((StringDt) extValues.get(0).getValue()).getValueAsString());
 
+		extValues = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", ExtensionDt.class);
+		assertEquals(1, extValues.size());
+		assertTrue(extValues.get(0).getValue() instanceof StringDt);
+		assertEquals("http://acme.org/modifierExtension", extValues.get(0).getUrl());
+		assertEquals("modifierValue", ((StringDt) (extValues.get(0).getValue())).getValueAsString());
+
 		extValues = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", ExtensionDt.class);
 		assertEquals(1, extValues.size());
 		assertTrue(extValues.get(0).getValue() instanceof StringDt);
@@ -341,6 +388,7 @@ public class FhirTerserDstu2Test {
 		p.setActive(true);
 		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
 		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+		p.addUndeclaredExtension(true, "http://acme.org/modifierExtension", new StringDt("modifierValue"));
 		p.addUndeclaredExtension(false, "http://acme.org/parentExtension").addUndeclaredExtension(false, "http://acme.org/childExtension", new StringDt("nestedValue"));
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
@@ -375,6 +423,22 @@ public class FhirTerserDstu2Test {
 		assertEquals("http://acme.org/extension", extValues.get(0).getUrl());
 		assertEquals("modifiedValue", ((StringDt) (extValues.get(0).getValue())).getValueAsString());
 
+		extValues = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", ExtensionDt.class);
+		assertEquals(1, extValues.size());
+		assertTrue(extValues.get(0).getValue() instanceof StringDt);
+		assertEquals("http://acme.org/modifierExtension", extValues.get(0).getUrl());
+		assertEquals("modifierValue", ((StringDt) (extValues.get(0).getValue())).getValueAsString());
+
+		extValues.get(0).setValue(new StringDt("modifiedModifierValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		extValues = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", ExtensionDt.class);
+		assertEquals(1, extValues.size());
+		assertTrue(extValues.get(0).getValue() instanceof StringDt);
+		assertEquals("http://acme.org/modifierExtension", extValues.get(0).getUrl());
+		assertEquals("modifiedModifierValue", ((StringDt) (extValues.get(0).getValue())).getValueAsString());
+
 		extValues = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", ExtensionDt.class);
 		assertEquals(1, extValues.size());
 		assertTrue(extValues.get(0).getValue() instanceof StringDt);
@@ -408,10 +472,123 @@ public class FhirTerserDstu2Test {
 		assertEquals("http://acme.org/extension", extValues.get(0).getUrl());
 		assertNull(extValues.get(0).getValue());
 
+		extValues = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", ExtensionDt.class, true);
+		assertEquals(1, extValues.size());
+		assertEquals("http://acme.org/modifierExtension", extValues.get(0).getUrl());
+		assertNull(extValues.get(0).getValue());
+
 		extValues = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", ExtensionDt.class, true);
 		assertEquals(1, extValues.size());
 		assertEquals("http://acme.org/childExtension", extValues.get(0).getUrl());
 		assertNull(extValues.get(0).getValue());
+	}
+
+	@Test
+	public void testGetValuesWithTheAddExtensionAndModify() {
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
+		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+		p.addUndeclaredExtension(true, "http://acme.org/modifierExtension", new StringDt("modifierValue"));
+		p.addUndeclaredExtension(false, "http://acme.org/parentExtension").addUndeclaredExtension(false, "http://acme.org/childExtension", new StringDt("nestedValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IPrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertTrue(((BooleanDt) values.get(0)).getValue());
+
+		// No change.
+		values = ourCtx.newTerser().getValues(p, "Patient.active", false, true);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IPrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertTrue(((BooleanDt) values.get(0)).getValue());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("value", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", false, true);
+		assertEquals(2, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("value", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(1)).getUrl());
+		assertNull(((ExtensionDt) values.get(1)).getValue());
+
+		((ExtensionDt) values.get(1)).setValue(new StringDt("addedValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(1)).getUrl());
+		assertEquals("addedValue", ((StringDt) ((ExtensionDt) values.get(1)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifierValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", false, true);
+		assertEquals(2, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifierValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(1)).getUrl());
+		assertNull(((ExtensionDt) values.get(1)).getValue());
+
+		((ExtensionDt) values.get(1)).setValue(new StringDt("addedModifierValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(1)).getUrl());
+		assertEquals("addedModifierValue", ((StringDt) ((ExtensionDt) values.get(1)).getValue()).getValueAsString());
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/childExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("nestedValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", false, true);
+		assertEquals(2, values.size());
+		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/childExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("nestedValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+		assertTrue(values.get(1) instanceof  IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/childExtension", ((ExtensionDt) values.get(1)).getUrl());
+		assertNull(((ExtensionDt) values.get(1)).getValue());
+
+		((ExtensionDt) values.get(1)).setValue(new StringDt("addedNestedValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		assertTrue(values.get(1) instanceof  IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/childExtension", ((ExtensionDt) values.get(1)).getUrl());
+		assertEquals("addedNestedValue", ((StringDt) ((ExtensionDt) values.get(1)).getValue()).getValueAsString());
 	}
 
 	@Test
@@ -433,6 +610,13 @@ public class FhirTerserDstu2Test {
 		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
 		assertNull(((ExtensionDt) values.get(0)).getValue());
 
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", true);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertNull(((ExtensionDt) values.get(0)).getValue());
+
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true);
 		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof IBaseExtension);
@@ -442,11 +626,118 @@ public class FhirTerserDstu2Test {
 	}
 
 	@Test
+	public void testGetValuesWithTheCreateAndTheAddExtensionAndModify() {
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
+		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+		p.addUndeclaredExtension(true, "http://acme.org/modifierExtension", new StringDt("modifierValue"));
+		p.addUndeclaredExtension(false, "http://acme.org/parentExtension").addUndeclaredExtension(false, "http://acme.org/childExtension", new StringDt("nestedValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IPrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertTrue(((BooleanDt) values.get(0)).getValue());
+
+		// No change.
+		values = ourCtx.newTerser().getValues(p, "Patient.active", true, true);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IPrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanDt);
+		assertTrue(((BooleanDt) values.get(0)).getValue());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("value", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", true, true);
+		assertEquals(2, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("value", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(1)).getUrl());
+		assertNull(((ExtensionDt) values.get(1)).getValue());
+
+		((ExtensionDt) values.get(1)).setValue(new StringDt("addedValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(1)).getUrl());
+		assertEquals("addedValue", ((StringDt) ((ExtensionDt) values.get(1)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifierValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", true, true);
+		assertEquals(2, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifierValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(1)).getUrl());
+		assertNull(((ExtensionDt) values.get(1)).getValue());
+
+		((ExtensionDt) values.get(1)).setValue(new StringDt("addedModifierValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(1)).getUrl());
+		assertEquals("addedModifierValue", ((StringDt) ((ExtensionDt) values.get(1)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/childExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("nestedValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true, true);
+		assertEquals(2, values.size());
+		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/childExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("nestedValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+		assertTrue(values.get(1) instanceof  IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/childExtension", ((ExtensionDt) values.get(1)).getUrl());
+		assertNull(((ExtensionDt) values.get(1)).getValue());
+
+		((ExtensionDt) values.get(1)).setValue(new StringDt("addedNestedValue"));
+
+		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		assertTrue(values.get(1) instanceof  IBaseExtension);
+		assertTrue(values.get(1) instanceof ExtensionDt);
+		assertEquals("http://acme.org/childExtension", ((ExtensionDt) values.get(1)).getUrl());
+		assertEquals("addedNestedValue", ((StringDt) ((ExtensionDt) values.get(1)).getValue()).getValueAsString());
+	}
+
+	@Test
 	public void testGetValuesWithTheCreateAndNoOverwrite() {
 		Patient p = new Patient();
 		p.setActive(true);
 		p.addUndeclaredExtension(false, "http://acme.org/extension", new StringDt("value"));
 		p.addUndeclaredExtension(false, "http://acme.org/otherExtension", new StringDt("otherValue"));
+		p.addUndeclaredExtension(true, "http://acme.org/modifierExtension", new StringDt("modifierValue"));
 		p.addUndeclaredExtension(false, "http://acme.org/parentExtension").addUndeclaredExtension(false, "http://acme.org/childExtension", new StringDt("nestedValue"));
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
@@ -463,6 +754,13 @@ public class FhirTerserDstu2Test {
 		assertTrue(values.get(0) instanceof ExtensionDt);
 		assertEquals("http://acme.org/extension", ((ExtensionDt) values.get(0)).getUrl());
 		assertEquals("value", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
+
+		values = ourCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", true);
+		assertEquals(1, values.size());
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof ExtensionDt);
+		assertEquals("http://acme.org/modifierExtension", ((ExtensionDt) values.get(0)).getUrl());
+		assertEquals("modifierValue", ((StringDt) ((ExtensionDt) values.get(0)).getValue()).getValueAsString());
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true);
 		assertEquals(1, values.size());
