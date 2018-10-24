@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A technical identifier - identifies some entity uniquely and unambiguously.
+ * An identifier - identifies some entity uniquely and unambiguously. Typically this is used for business identifiers.
  */
 @DatatypeDef(name="Identifier")
 public class Identifier extends Type implements ICompositeType {
@@ -54,7 +54,7 @@ public class Identifier extends Type implements ICompositeType {
          */
         USUAL, 
         /**
-         * The identifier considered to be most trusted for the identification of this item.
+         * The identifier considered to be most trusted for the identification of this item. Sometimes also known as "primary" and "main". The determination of "official" is subjective and implementation guides often provide additional guidelines for use.
          */
         OFFICIAL, 
         /**
@@ -114,7 +114,7 @@ public class Identifier extends Type implements ICompositeType {
         public String getDefinition() {
           switch (this) {
             case USUAL: return "The identifier recommended for display and use in real-world interactions.";
-            case OFFICIAL: return "The identifier considered to be most trusted for the identification of this item.";
+            case OFFICIAL: return "The identifier considered to be most trusted for the identification of this item. Sometimes also known as \"primary\" and \"main\". The determination of \"official\" is subjective and implementation guides often provide additional guidelines for use.";
             case TEMP: return "A temporary identifier.";
             case SECONDARY: return "An identifier that was assigned in secondary use - it serves to identify the object in a relative context, but cannot be consistently assigned to the same object again in a different context.";
             case OLD: return "The identifier id no longer considered valid, but may be relevant for search purposes.  E.g. Changes to identifier schemes, account merges, etc.";

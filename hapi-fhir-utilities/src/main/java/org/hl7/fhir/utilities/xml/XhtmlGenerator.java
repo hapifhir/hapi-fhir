@@ -84,6 +84,8 @@ public class XhtmlGenerator {
     out.write("<p>"+Utilities.escapeXml(desc)+"</p>\r\n"); 
     if (adorn) {
       out.write("<pre class=\"xml\">\r\n");
+      out.write("&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;\r\n");
+      out.write("\r\n");
 
       XhtmlGeneratorAdornerState state = null; // adorner == null ? new XhtmlGeneratorAdornerState("", "") : adorner.getState(this, null, null);
 	  	for (int i = 0; i < doc.getChildNodes().getLength(); i++)

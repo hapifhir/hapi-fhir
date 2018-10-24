@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CompartmentType {
 
         /**
-         * The compartment definition is for the patient compartment
+         * The compartment definition is for the patient compartment.
          */
         PATIENT, 
         /**
-         * The compartment definition is for the encounter compartment
+         * The compartment definition is for the encounter compartment.
          */
         ENCOUNTER, 
         /**
-         * The compartment definition is for the related-person compartment
+         * The compartment definition is for the related-person compartment.
          */
         RELATEDPERSON, 
         /**
-         * The compartment definition is for the practitioner compartment
+         * The compartment definition is for the practitioner compartment.
          */
         PRACTITIONER, 
         /**
-         * The compartment definition is for the device compartment
+         * The compartment definition is for the device compartment.
          */
         DEVICE, 
         /**
@@ -90,11 +90,11 @@ public enum CompartmentType {
         }
         public String getDefinition() {
           switch (this) {
-            case PATIENT: return "The compartment definition is for the patient compartment";
-            case ENCOUNTER: return "The compartment definition is for the encounter compartment";
-            case RELATEDPERSON: return "The compartment definition is for the related-person compartment";
-            case PRACTITIONER: return "The compartment definition is for the practitioner compartment";
-            case DEVICE: return "The compartment definition is for the device compartment";
+            case PATIENT: return "The compartment definition is for the patient compartment.";
+            case ENCOUNTER: return "The compartment definition is for the encounter compartment.";
+            case RELATEDPERSON: return "The compartment definition is for the related-person compartment.";
+            case PRACTITIONER: return "The compartment definition is for the practitioner compartment.";
+            case DEVICE: return "The compartment definition is for the device compartment.";
             default: return "?";
           }
         }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A process where a researcher or organization plans and then executes a series of steps intended to increase the field of healthcare-related knowledge.  This includes studies of safety, efficacy, comparative effectiveness and other information about medications, devices, therapies and other interventional and investigative techniques.  A ResearchStudy involves the gathering of information about human or animal subjects.
  */
-@ResourceDef(name="ResearchStudy", profile="http://hl7.org/fhir/Profile/ResearchStudy")
+@ResourceDef(name="ResearchStudy", profile="http://hl7.org/fhir/StructureDefinition/ResearchStudy")
 public class ResearchStudy extends DomainResource {
 
     public enum ResearchStudyStatus {
@@ -56,7 +56,7 @@ public class ResearchStudy extends DomainResource {
         ACTIVE, 
         /**
          * Study is completed prematurely and will not resume; patients are no longer examined nor treated.
-Tagged
+Tagged.
          */
         ADMINISTRATIVELYCOMPLETED, 
         /**
@@ -165,7 +165,7 @@ or intervention but are still being followed according to the primary objective 
         public String getDefinition() {
           switch (this) {
             case ACTIVE: return "Study is opened for accrual.";
-            case ADMINISTRATIVELYCOMPLETED: return "Study is completed prematurely and will not resume; patients are no longer examined nor treated.\nTagged";
+            case ADMINISTRATIVELYCOMPLETED: return "Study is completed prematurely and will not resume; patients are no longer examined nor treated.\nTagged.";
             case APPROVED: return "Protocol is approved by the review board.";
             case CLOSEDTOACCRUAL: return "Study is closed for accrual; patients can be examined and treated.";
             case CLOSEDTOACCRUALANDINTERVENTION: return "Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment or intervention but are still being followed according to the primary objective of the study.";
@@ -885,14 +885,10 @@ or intervention but are still being followed according to the primary objective 
     /**
      * The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion "healthy volunteer", but the target condition code would be a Lupus SNOMED code.
      */
-    @Child(name = "condition", type = {Condition.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "condition", type = {CodeableConcept.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Condition being studied", formalDefinition="The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion \"healthy volunteer\", but the target condition code would be a Lupus SNOMED code." )
-    protected List<Reference> condition;
-    /**
-     * The actual objects that are the target of the reference (The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion "healthy volunteer", but the target condition code would be a Lupus SNOMED code.)
-     */
-    protected List<Condition> conditionTarget;
-
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
+    protected List<CodeableConcept> condition;
 
     /**
      * Contact details to assist a user in learning more about or engaging with the study.
@@ -1014,7 +1010,7 @@ or intervention but are still being followed according to the primary objective 
     @Description(shortDefinition="A goal for the study", formalDefinition="A goal that the study is aiming to achieve in terms of a scientific question to be answered by the analysis of data collected during the study." )
     protected List<ResearchStudyObjectiveComponent> objective;
 
-    private static final long serialVersionUID = 220174930L;
+    private static final long serialVersionUID = 339148025L;
 
   /**
    * Constructor
@@ -1485,16 +1481,16 @@ or intervention but are still being followed according to the primary objective 
     /**
      * @return {@link #condition} (The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion "healthy volunteer", but the target condition code would be a Lupus SNOMED code.)
      */
-    public List<Reference> getCondition() { 
+    public List<CodeableConcept> getCondition() { 
       if (this.condition == null)
-        this.condition = new ArrayList<Reference>();
+        this.condition = new ArrayList<CodeableConcept>();
       return this.condition;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ResearchStudy setCondition(List<Reference> theCondition) { 
+    public ResearchStudy setCondition(List<CodeableConcept> theCondition) { 
       this.condition = theCondition;
       return this;
     }
@@ -1502,25 +1498,25 @@ or intervention but are still being followed according to the primary objective 
     public boolean hasCondition() { 
       if (this.condition == null)
         return false;
-      for (Reference item : this.condition)
+      for (CodeableConcept item : this.condition)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addCondition() { //3
-      Reference t = new Reference();
+    public CodeableConcept addCondition() { //3
+      CodeableConcept t = new CodeableConcept();
       if (this.condition == null)
-        this.condition = new ArrayList<Reference>();
+        this.condition = new ArrayList<CodeableConcept>();
       this.condition.add(t);
       return t;
     }
 
-    public ResearchStudy addCondition(Reference t) { //3
+    public ResearchStudy addCondition(CodeableConcept t) { //3
       if (t == null)
         return this;
       if (this.condition == null)
-        this.condition = new ArrayList<Reference>();
+        this.condition = new ArrayList<CodeableConcept>();
       this.condition.add(t);
       return this;
     }
@@ -1528,33 +1524,11 @@ or intervention but are still being followed according to the primary objective 
     /**
      * @return The first repetition of repeating field {@link #condition}, creating it if it does not already exist
      */
-    public Reference getConditionFirstRep() { 
+    public CodeableConcept getConditionFirstRep() { 
       if (getCondition().isEmpty()) {
         addCondition();
       }
       return getCondition().get(0);
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public List<Condition> getConditionTarget() { 
-      if (this.conditionTarget == null)
-        this.conditionTarget = new ArrayList<Condition>();
-      return this.conditionTarget;
-    }
-
-    /**
-     * @deprecated Use Reference#setResource(IBaseResource) instead
-     */
-    @Deprecated
-    public Condition addConditionTarget() { 
-      Condition r = new Condition();
-      if (this.conditionTarget == null)
-        this.conditionTarget = new ArrayList<Condition>();
-      this.conditionTarget.add(r);
-      return r;
     }
 
     /**
@@ -2274,7 +2248,7 @@ or intervention but are still being followed according to the primary objective 
         children.add(new Property("phase", "CodeableConcept", "The stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.", 0, 1, phase));
         children.add(new Property("category", "CodeableConcept", "Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("focus", "CodeableConcept", "The medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.", 0, java.lang.Integer.MAX_VALUE, focus));
-        children.add(new Property("condition", "Reference(Condition)", "The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion \"healthy volunteer\", but the target condition code would be a Lupus SNOMED code.", 0, java.lang.Integer.MAX_VALUE, condition));
+        children.add(new Property("condition", "CodeableConcept", "The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion \"healthy volunteer\", but the target condition code would be a Lupus SNOMED code.", 0, java.lang.Integer.MAX_VALUE, condition));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in learning more about or engaging with the study.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("relatedArtifact", "RelatedArtifact", "Citations, references and other related documents.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact));
         children.add(new Property("keyword", "CodeableConcept", "Key terms to aid in searching for or filtering the study.", 0, java.lang.Integer.MAX_VALUE, keyword));
@@ -2303,7 +2277,7 @@ or intervention but are still being followed according to the primary objective 
         case 106629499: /*phase*/  return new Property("phase", "CodeableConcept", "The stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.", 0, 1, phase);
         case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Codes categorizing the type of study such as investigational vs. observational, type of blinding, type of randomization, safety vs. efficacy, etc.", 0, java.lang.Integer.MAX_VALUE, category);
         case 97604824: /*focus*/  return new Property("focus", "CodeableConcept", "The medication(s), food(s), therapy(ies), device(s) or other concerns or interventions that the study is seeking to gain more information about.", 0, java.lang.Integer.MAX_VALUE, focus);
-        case -861311717: /*condition*/  return new Property("condition", "Reference(Condition)", "The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion \"healthy volunteer\", but the target condition code would be a Lupus SNOMED code.", 0, java.lang.Integer.MAX_VALUE, condition);
+        case -861311717: /*condition*/  return new Property("condition", "CodeableConcept", "The condition that is the focus of the study.  For example, In a study to examine risk factors for Lupus, might have as an inclusion criterion \"healthy volunteer\", but the target condition code would be a Lupus SNOMED code.", 0, java.lang.Integer.MAX_VALUE, condition);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in learning more about or engaging with the study.", 0, java.lang.Integer.MAX_VALUE, contact);
         case 666807069: /*relatedArtifact*/  return new Property("relatedArtifact", "RelatedArtifact", "Citations, references and other related documents.", 0, java.lang.Integer.MAX_VALUE, relatedArtifact);
         case -814408215: /*keyword*/  return new Property("keyword", "CodeableConcept", "Key terms to aid in searching for or filtering the study.", 0, java.lang.Integer.MAX_VALUE, keyword);
@@ -2335,7 +2309,7 @@ or intervention but are still being followed according to the primary objective 
         case 106629499: /*phase*/ return this.phase == null ? new Base[0] : new Base[] {this.phase}; // CodeableConcept
         case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case 97604824: /*focus*/ return this.focus == null ? new Base[0] : this.focus.toArray(new Base[this.focus.size()]); // CodeableConcept
-        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // Reference
+        case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // CodeableConcept
         case 951526432: /*contact*/ return this.contact == null ? new Base[0] : this.contact.toArray(new Base[this.contact.size()]); // ContactDetail
         case 666807069: /*relatedArtifact*/ return this.relatedArtifact == null ? new Base[0] : this.relatedArtifact.toArray(new Base[this.relatedArtifact.size()]); // RelatedArtifact
         case -814408215: /*keyword*/ return this.keyword == null ? new Base[0] : this.keyword.toArray(new Base[this.keyword.size()]); // CodeableConcept
@@ -2387,7 +2361,7 @@ or intervention but are still being followed according to the primary objective 
           this.getFocus().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -861311717: // condition
-          this.getCondition().add(castToReference(value)); // Reference
+          this.getCondition().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 951526432: // contact
           this.getContact().add(castToContactDetail(value)); // ContactDetail
@@ -2458,7 +2432,7 @@ or intervention but are still being followed according to the primary objective 
         } else if (name.equals("focus")) {
           this.getFocus().add(castToCodeableConcept(value));
         } else if (name.equals("condition")) {
-          this.getCondition().add(castToReference(value));
+          this.getCondition().add(castToCodeableConcept(value));
         } else if (name.equals("contact")) {
           this.getContact().add(castToContactDetail(value));
         } else if (name.equals("relatedArtifact")) {
@@ -2536,7 +2510,7 @@ or intervention but are still being followed according to the primary objective 
         case 106629499: /*phase*/ return new String[] {"CodeableConcept"};
         case 50511102: /*category*/ return new String[] {"CodeableConcept"};
         case 97604824: /*focus*/ return new String[] {"CodeableConcept"};
-        case -861311717: /*condition*/ return new String[] {"Reference"};
+        case -861311717: /*condition*/ return new String[] {"CodeableConcept"};
         case 951526432: /*contact*/ return new String[] {"ContactDetail"};
         case 666807069: /*relatedArtifact*/ return new String[] {"RelatedArtifact"};
         case -814408215: /*keyword*/ return new String[] {"CodeableConcept"};
@@ -2678,8 +2652,8 @@ or intervention but are still being followed according to the primary objective 
             dst.focus.add(i.copy());
         };
         if (condition != null) {
-          dst.condition = new ArrayList<Reference>();
-          for (Reference i : condition)
+          dst.condition = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : condition)
             dst.condition.add(i.copy());
         };
         if (contact != null) {

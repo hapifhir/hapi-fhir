@@ -123,7 +123,12 @@ public class Controller extends BaseController {
 
 		long start = System.currentTimeMillis();
 		try {
-			client.delete().resourceById(new IdDt(id)).execute();
+			IdDt resourceId = new IdDt(id);
+			if (!resourceId.hasResourceType()) {
+				resourceId = resourceId.withResourceType(def.getName());
+			}
+
+			client.delete().resourceById(resourceId).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
 		}

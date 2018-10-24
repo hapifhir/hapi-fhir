@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.
  */
 @DatatypeDef(name="MarketingStatus")
-public class MarketingStatus extends BackboneElement implements ICompositeType {
+public class MarketingStatus extends BackboneType implements ICompositeType {
 
     /**
      * The country in which the marketing authorisation has been granted shall be specified It should be specified using the ISO 3166 ‑ 1 alpha-2 code elements.

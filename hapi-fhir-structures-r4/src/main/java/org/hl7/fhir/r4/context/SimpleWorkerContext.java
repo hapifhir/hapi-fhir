@@ -61,6 +61,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.CSFileInputStream;
 import org.hl7.fhir.utilities.OIDUtils;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
@@ -92,12 +93,13 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
   private String date;
   private IValidatorFactory validatorFactory;
   private UcumService ucumService;
+  private boolean ignoreProfileErrors;
   
-  public SimpleWorkerContext() {
+  public SimpleWorkerContext() throws FileNotFoundException, IOException, FHIRException {
     super();
   }
   
-  public SimpleWorkerContext(SimpleWorkerContext other) {
+  public SimpleWorkerContext(SimpleWorkerContext other) throws FileNotFoundException, IOException, FHIRException {
     super();
     copy(other);
   }
@@ -127,6 +129,26 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
   public static SimpleWorkerContext fromPack(String path) throws FileNotFoundException, IOException, FHIRException {
     SimpleWorkerContext res = new SimpleWorkerContext();
     res.loadFromPack(path, null);
+    return res;
+  }
+
+  public static SimpleWorkerContext fromPackage(NpmPackage pi, boolean allowDuplicates) throws FileNotFoundException, IOException, FHIRException {
+    SimpleWorkerContext res = new SimpleWorkerContext();
+    res.setAllowLoadingDuplicates(allowDuplicates);
+    res.loadFromPackage(pi, null);
+    return res;
+  }
+
+  public static SimpleWorkerContext fromPackage(NpmPackage pi) throws FileNotFoundException, IOException, FHIRException {
+    SimpleWorkerContext res = new SimpleWorkerContext();
+    res.loadFromPackage(pi, null);
+    return res;
+  }
+
+  public static SimpleWorkerContext fromPackage(NpmPackage pi, IContextResourceLoader loader) throws FileNotFoundException, IOException, FHIRException {
+    SimpleWorkerContext res = new SimpleWorkerContext();
+    res.setAllowLoadingDuplicates(true);
+    res.loadFromPackage(pi, loader);
     return res;
   }
 
@@ -224,28 +246,42 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
 	}
 
   private void loadFromFileJson(InputStream stream, String name, IContextResourceLoader loader) throws IOException, FHIRException {
-    Bundle f;
+    Bundle f = null;
     try {
       if (loader != null)
         f = loader.loadBundle(stream, true);
       else {
         JsonParser json = new JsonParser();
-        f = (Bundle) json.parse(stream);
+        Resource r = json.parse(stream);
+        if (r instanceof Bundle)
+          f = (Bundle) r;
+        else
+          cacheResource(r);
       }
     } catch (FHIRFormatError e1) {
       throw new org.hl7.fhir.exceptions.FHIRFormatError(e1.getMessage(), e1);
     }
-    for (BundleEntryComponent e : f.getEntry()) {
-
-      if (e.getFullUrl() == null) {
-        logger.logDebugMessage(LogCategory.CONTEXT, "unidentified resource in " + name+" (no fullUrl)");
-      }
-      cacheResource(e.getResource());
+    if (f != null)
+      for (BundleEntryComponent e : f.getEntry()) {
+        cacheResource(e.getResource());
     }
   }
 
 	private void loadFromPack(String path, IContextResourceLoader loader) throws FileNotFoundException, IOException, FHIRException {
 		loadFromStream(new CSFileInputStream(path), loader);
+	}
+  
+	public void loadFromPackage(NpmPackage pi, IContextResourceLoader loader, String... types) throws FileNotFoundException, IOException, FHIRException {
+	  if (types.length == 0)
+	    types = new String[] { "StructureDefinition", "ValueSet", "CodeSystem", "SearchParameter", "OperationDefinition", "Questionnaire","ConceptMap","StructureMap", "NamingSystem"};
+	  for (String s : pi.list("package")) {
+	    if (s.contains("-") && s.endsWith(".json")) {
+	      String t = s.substring(0, s.indexOf("-"));
+	      if (Utilities.existsInList(t, types)) {
+	        loadDefinitionItem(s, pi.load("package", s), loader);
+	      }
+	    }
+	  }
 	}
 
   public void loadFromFile(String file, IContextResourceLoader loader) throws IOException, FHIRException {
@@ -423,6 +459,18 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
     return result;
   }
 
+  public void loadBinariesFromFolder(String folder) throws FileNotFoundException, Exception {
+    for (String n : new File(folder).list()) {
+      loadBytes(n, new FileInputStream(Utilities.path(folder, n)));
+    }
+  }
+  
+  public void loadBinariesFromFolder(NpmPackage pi) throws FileNotFoundException, Exception {
+    for (String n : pi.list("other")) {
+      loadBytes(n, pi.load("other", n));
+    }
+  }
+  
   public void loadFromFolder(String folder) throws FileNotFoundException, Exception {
     for (String n : new File(folder).list()) {
       if (n.endsWith(".json")) 
@@ -507,12 +555,13 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
         List<ValidationMessage> msgs = new ArrayList<ValidationMessage>();
         List<String> errors = new ArrayList<String>();
         ProfileUtilities pu = new ProfileUtilities(this, msgs, this);
+        pu.setThrowException(false);
         pu.sortDifferential(sd, p, p.getUrl(), errors);
         for (String err : errors)
           msgs.add(new ValidationMessage(Source.ProfileValidator, IssueType.EXCEPTION, p.getUserString("path"), "Error sorting Differential: "+err, ValidationMessage.IssueSeverity.ERROR));
         pu.generateSnapshot(sd, p, p.getUrl(), p.getName());
         for (ValidationMessage msg : msgs) {
-          if (msg.getLevel() == ValidationMessage.IssueSeverity.ERROR || msg.getLevel() == ValidationMessage.IssueSeverity.FATAL)
+          if ((!ignoreProfileErrors && msg.getLevel() == ValidationMessage.IssueSeverity.ERROR) || msg.getLevel() == ValidationMessage.IssueSeverity.FATAL)
             throw new DefinitionException("Profile "+p.getName()+" ("+p.getUrl()+"). Error generating snapshot: "+msg.getMessage());
         }
         if (!p.hasSnapshot())
@@ -529,6 +578,14 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
 
   public void setUcumService(UcumService ucumService) {
     this.ucumService = ucumService;
+  }
+
+  public boolean isIgnoreProfileErrors() {
+    return ignoreProfileErrors;
+  }
+
+  public void setIgnoreProfileErrors(boolean ignoreProfileErrors) {
+    this.ignoreProfileErrors = ignoreProfileErrors;
   }
 
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,17 +46,17 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A formal computable definition of a graph of resources - that is, a coherent set of resources that form a graph by following references. The Graph Definition resource defines a set and makes rules about the set.
  */
-@ResourceDef(name="GraphDefinition", profile="http://hl7.org/fhir/Profile/GraphDefinition")
+@ResourceDef(name="GraphDefinition", profile="http://hl7.org/fhir/StructureDefinition/GraphDefinition")
 @ChildOrder(names={"url", "version", "name", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "start", "profile", "link"})
 public class GraphDefinition extends MetadataResource {
 
     public enum GraphCompartmentUse {
         /**
-         * This compartment rule is a condition for whether the rule applies
+         * This compartment rule is a condition for whether the rule applies.
          */
         CONDITION, 
         /**
-         * This compartment rule is enforced on any relationships that meet the conditions
+         * This compartment rule is enforced on any relationships that meet the conditions.
          */
         REQUIREMENT, 
         /**
@@ -91,8 +91,8 @@ public class GraphDefinition extends MetadataResource {
         }
         public String getDefinition() {
           switch (this) {
-            case CONDITION: return "This compartment rule is a condition for whether the rule applies";
-            case REQUIREMENT: return "This compartment rule is enforced on any relationships that meet the conditions";
+            case CONDITION: return "This compartment rule is a condition for whether the rule applies.";
+            case REQUIREMENT: return "This compartment rule is enforced on any relationships that meet the conditions.";
             default: return "?";
           }
         }
@@ -144,23 +144,23 @@ public class GraphDefinition extends MetadataResource {
 
     public enum CompartmentCode {
         /**
-         * The compartment definition is for the patient compartment
+         * The compartment definition is for the patient compartment.
          */
         PATIENT, 
         /**
-         * The compartment definition is for the encounter compartment
+         * The compartment definition is for the encounter compartment.
          */
         ENCOUNTER, 
         /**
-         * The compartment definition is for the related-person compartment
+         * The compartment definition is for the related-person compartment.
          */
         RELATEDPERSON, 
         /**
-         * The compartment definition is for the practitioner compartment
+         * The compartment definition is for the practitioner compartment.
          */
         PRACTITIONER, 
         /**
-         * The compartment definition is for the device compartment
+         * The compartment definition is for the device compartment.
          */
         DEVICE, 
         /**
@@ -207,11 +207,11 @@ public class GraphDefinition extends MetadataResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PATIENT: return "The compartment definition is for the patient compartment";
-            case ENCOUNTER: return "The compartment definition is for the encounter compartment";
-            case RELATEDPERSON: return "The compartment definition is for the related-person compartment";
-            case PRACTITIONER: return "The compartment definition is for the practitioner compartment";
-            case DEVICE: return "The compartment definition is for the device compartment";
+            case PATIENT: return "The compartment definition is for the patient compartment.";
+            case ENCOUNTER: return "The compartment definition is for the encounter compartment.";
+            case RELATEDPERSON: return "The compartment definition is for the related-person compartment.";
+            case PRACTITIONER: return "The compartment definition is for the practitioner compartment.";
+            case DEVICE: return "The compartment definition is for the device compartment.";
             default: return "?";
           }
         }
@@ -284,19 +284,19 @@ public class GraphDefinition extends MetadataResource {
 
     public enum GraphCompartmentRule {
         /**
-         * The compartment must be identical (the same literal reference)
+         * The compartment must be identical (the same literal reference).
          */
         IDENTICAL, 
         /**
-         * The compartment must be the same - the record must be about the same patient, but the reference may be different
+         * The compartment must be the same - the record must be about the same patient, but the reference may be different.
          */
         MATCHING, 
         /**
-         * The compartment must be different
+         * The compartment must be different.
          */
         DIFFERENT, 
         /**
-         * The compartment rule is defined in the accompanying FHIRPath expression
+         * The compartment rule is defined in the accompanying FHIRPath expression.
          */
         CUSTOM, 
         /**
@@ -339,10 +339,10 @@ public class GraphDefinition extends MetadataResource {
         }
         public String getDefinition() {
           switch (this) {
-            case IDENTICAL: return "The compartment must be identical (the same literal reference)";
-            case MATCHING: return "The compartment must be the same - the record must be about the same patient, but the reference may be different";
-            case DIFFERENT: return "The compartment must be different";
-            case CUSTOM: return "The compartment rule is defined in the accompanying FHIRPath expression";
+            case IDENTICAL: return "The compartment must be identical (the same literal reference).";
+            case MATCHING: return "The compartment must be the same - the record must be about the same patient, but the reference may be different.";
+            case DIFFERENT: return "The compartment must be different.";
+            case CUSTOM: return "The compartment rule is defined in the accompanying FHIRPath expression.";
             default: return "?";
           }
         }
@@ -1933,7 +1933,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this graph definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this graph definition is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the graph definition is stored on different servers.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1953,7 +1953,7 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this graph definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this graph definition is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the graph definition is stored on different servers.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public GraphDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -1961,14 +1961,14 @@ public class GraphDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this graph definition is (or will be) published.
+     * @return An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this graph definition is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the graph definition is stored on different servers.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this graph definition is (or will be) published.
+     * @param value An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this graph definition is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the graph definition is stored on different servers.
      */
     public GraphDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2669,7 +2669,7 @@ public class GraphDefinition extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this graph definition is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this graph definition is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the graph definition is stored on different servers.", 0, 1, url));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the graph definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("status", "code", "The status of this graph definition. Enables tracking the life-cycle of the content.", 0, 1, status));
@@ -2689,7 +2689,7 @@ public class GraphDefinition extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this graph definition is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this graph definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this graph definition is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the graph definition is stored on different servers.", 0, 1, url);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the graph definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the graph definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the graph definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case -892481550: /*status*/  return new Property("status", "code", "The status of this graph definition. Enables tracking the life-cycle of the content.", 0, 1, status);
@@ -3019,6 +3019,26 @@ public class GraphDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
 
  /**
+   * Search parameter: <b>context-type-value</b>
+   * <p>
+   * Description: <b>A use context type and value assigned to the graph definition</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type-value", path="GraphDefinition.useContext", description="A use context type and value assigned to the graph definition", type="composite", compositeOf={"context-type", "context"} )
+  public static final String SP_CONTEXT_TYPE_VALUE = "context-type-value";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type-value</b>
+   * <p>
+   * Description: <b>A use context type and value assigned to the graph definition</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam> CONTEXT_TYPE_VALUE = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam>(SP_CONTEXT_TYPE_VALUE);
+
+ /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
    * Description: <b>Intended jurisdiction for the graph definition</b><br>
@@ -3037,26 +3057,6 @@ public class GraphDefinition extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam JURISDICTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_JURISDICTION);
-
- /**
-   * Search parameter: <b>name</b>
-   * <p>
-   * Description: <b>Computationally friendly name of the graph definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>GraphDefinition.name</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="name", path="GraphDefinition.name", description="Computationally friendly name of the graph definition", type="string" )
-  public static final String SP_NAME = "name";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>name</b>
-   * <p>
-   * Description: <b>Computationally friendly name of the graph definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>GraphDefinition.name</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
 
  /**
    * Search parameter: <b>start</b>
@@ -3099,24 +3099,24 @@ public class GraphDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
 
  /**
-   * Search parameter: <b>publisher</b>
+   * Search parameter: <b>context-type</b>
    * <p>
-   * Description: <b>Name of the publisher of the graph definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>GraphDefinition.publisher</b><br>
+   * Description: <b>A type of use context assigned to the graph definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>GraphDefinition.useContext.code</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="publisher", path="GraphDefinition.publisher", description="Name of the publisher of the graph definition", type="string" )
-  public static final String SP_PUBLISHER = "publisher";
+  @SearchParamDefinition(name="context-type", path="GraphDefinition.useContext.code", description="A type of use context assigned to the graph definition", type="token" )
+  public static final String SP_CONTEXT_TYPE = "context-type";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <b>Fluent Client</b> search parameter constant for <b>context-type</b>
    * <p>
-   * Description: <b>Name of the publisher of the graph definition</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>GraphDefinition.publisher</b><br>
+   * Description: <b>A type of use context assigned to the graph definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>GraphDefinition.useContext.code</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT_TYPE);
 
  /**
    * Search parameter: <b>version</b>
@@ -3157,6 +3157,106 @@ public class GraphDefinition extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
+
+ /**
+   * Search parameter: <b>context-quantity</b>
+   * <p>
+   * Description: <b>A quantity- or range-valued use context assigned to the graph definition</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>GraphDefinition.useContext.valueQuantity, GraphDefinition.useContext.valueRange</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-quantity", path="(GraphDefinition.useContext.value as Quantity) | (GraphDefinition.useContext.value as Range)", description="A quantity- or range-valued use context assigned to the graph definition", type="quantity" )
+  public static final String SP_CONTEXT_QUANTITY = "context-quantity";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-quantity</b>
+   * <p>
+   * Description: <b>A quantity- or range-valued use context assigned to the graph definition</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>GraphDefinition.useContext.valueQuantity, GraphDefinition.useContext.valueRange</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam CONTEXT_QUANTITY = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_CONTEXT_QUANTITY);
+
+ /**
+   * Search parameter: <b>name</b>
+   * <p>
+   * Description: <b>Computationally friendly name of the graph definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>GraphDefinition.name</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="name", path="GraphDefinition.name", description="Computationally friendly name of the graph definition", type="string" )
+  public static final String SP_NAME = "name";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>name</b>
+   * <p>
+   * Description: <b>Computationally friendly name of the graph definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>GraphDefinition.name</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the graph definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>GraphDefinition.useContext.valueCodeableConcept</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context", path="(GraphDefinition.useContext.value as CodeableConcept)", description="A use context assigned to the graph definition", type="token" )
+  public static final String SP_CONTEXT = "context";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the graph definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>GraphDefinition.useContext.valueCodeableConcept</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
+
+ /**
+   * Search parameter: <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the graph definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>GraphDefinition.publisher</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="publisher", path="GraphDefinition.publisher", description="Name of the publisher of the graph definition", type="string" )
+  public static final String SP_PUBLISHER = "publisher";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>publisher</b>
+   * <p>
+   * Description: <b>Name of the publisher of the graph definition</b><br>
+   * Type: <b>string</b><br>
+   * Path: <b>GraphDefinition.publisher</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>context-type-quantity</b>
+   * <p>
+   * Description: <b>A use context type and quantity- or range-based value assigned to the graph definition</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type-quantity", path="GraphDefinition.useContext", description="A use context type and quantity- or range-based value assigned to the graph definition", type="composite", compositeOf={"context-type", "context-quantity"} )
+  public static final String SP_CONTEXT_TYPE_QUANTITY = "context-type-quantity";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type-quantity</b>
+   * <p>
+   * Description: <b>A use context type and quantity- or range-based value assigned to the graph definition</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.QuantityClientParam> CONTEXT_TYPE_QUANTITY = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.QuantityClientParam>(SP_CONTEXT_TYPE_QUANTITY);
 
  /**
    * Search parameter: <b>status</b>

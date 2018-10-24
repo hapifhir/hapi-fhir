@@ -83,7 +83,8 @@ public interface IAuthRuleBuilderRule {
 
 	/**
 	 * This rule applies to the FHIR transaction operation. Transaction is a special
-	 * case in that it bundles other operations
+	 * case in that it bundles other operations. This permission also allows FHIR
+	 * batch to be performed.
 	 */
 	IAuthRuleBuilderRuleTransaction transaction();
 

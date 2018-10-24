@@ -422,7 +422,7 @@ public class QuestionnaireBuilder {
   private ValueSet makeTypeList(StructureDefinition profile, List<TypeRefComponent> types, String path) {
     ValueSet vs = new ValueSet();
     vs.setName("Type options for "+path);
-    vs.setDescription(vs.getName());
+    vs.setDescription(vs.present());
 	  vs.setStatus(PublicationStatus.ACTIVE);
     vs.setExpansion(new ValueSetExpansionComponent());
     vs.getExpansion().setIdentifier(Factory.createUUID());
@@ -536,7 +536,7 @@ public class QuestionnaireBuilder {
     QuestionnaireItemComponent result = group.addItem();
     if (vs != null) {
       if (vs.getExpansion() == null) {
-        result.setOptions(vs.getUrl());
+        result.setAnswerValueSet(vs.getUrl());
         ToolingExtensions.addControl(result, "lookup"); 
       } else {
         if (Utilities.noString(vs.getId())) {
@@ -549,7 +549,7 @@ public class QuestionnaireBuilder {
           vs.setPublisherElement(null);
           vs.setCopyrightElement(null);
         }
-        result.setOptions("#"+vs.getId());
+        result.setAnswerValueSet("#"+vs.getId());
       }
     }
   
@@ -684,7 +684,7 @@ public class QuestionnaireBuilder {
 
   private boolean isPrimitive(TypeRefComponent t) {
     String code = t.getCode();
-    StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+code);
+    StructureDefinition sd = context.fetchTypeDefinition(code);
     return sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;
   }
 
@@ -751,7 +751,7 @@ public class QuestionnaireBuilder {
     } else if (t.getCode().equals("SampledData"))
       addSampledDataQuestions(group, element, path, answerGroups);
     else if (!t.getCode().equals("Narrative") && !t.getCode().equals("Resource") && !t.getCode().equals("Meta") && !t.getCode().equals("Signature")) {
-      StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+t.getCode());
+      StructureDefinition sd = context.fetchTypeDefinition(t.getCode());
       if (sd == null)
         throw new NotImplementedException("Unhandled Data Type: "+t.getCode()+" on element "+element.getPath());
       buildGroup(group, sd, sd.getSnapshot().getElementFirstRep(), parents, answerGroups);

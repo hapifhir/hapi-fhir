@@ -29,9 +29,9 @@ import java.util.Map;
 public enum SummaryEnum {
 
 	/**
-	 * Return only those elements marked as 'summary' in the base definition of the resource(s)
+	 * Search only: just return a count of the matching resources, without returning the actual matches
 	 */
-	TRUE("true"),
+	COUNT("count"),
 
 	/**
 	 * Return only the 'text' element, and any mandatory elements
@@ -44,9 +44,9 @@ public enum SummaryEnum {
 	DATA("data"),
 
 	/**
-	 * Search only: just return a count of the matching resources, without returning the actual matches
+	 * Return only those elements marked as 'summary' in the base definition of the resource(s)
 	 */
-	COUNT("count"),
+	TRUE("true"),
 
 	/**
 	 * Return all parts of the resource(s)
@@ -67,7 +67,7 @@ public enum SummaryEnum {
 	public static SummaryEnum fromCode(String theCode) {
 		Map<String, SummaryEnum> c2s = ourCodeToSummary;
 		if (c2s == null) {
-			c2s = new HashMap<String, SummaryEnum>();
+			c2s = new HashMap<>();
 			for (SummaryEnum next : values()) {
 				c2s.put(next.getCode(), next);
 			}

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,27 +37,27 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum HttpVerb {
 
         /**
-         * HTTP GET
+         * HTTP GET Command.
          */
         GET, 
         /**
-         * HTTP HEAD
+         * HTTP HEAD Command.
          */
         HEAD, 
         /**
-         * HTTP POST
+         * HTTP POST Command.
          */
         POST, 
         /**
-         * HTTP PUT
+         * HTTP PUT Command.
          */
         PUT, 
         /**
-         * HTTP DELETE
+         * HTTP DELETE Command.
          */
         DELETE, 
         /**
-         * HTTP PATCH
+         * HTTP PATCH Command.
          */
         PATCH, 
         /**
@@ -97,12 +97,12 @@ public enum HttpVerb {
         }
         public String getDefinition() {
           switch (this) {
-            case GET: return "HTTP GET";
-            case HEAD: return "HTTP HEAD";
-            case POST: return "HTTP POST";
-            case PUT: return "HTTP PUT";
-            case DELETE: return "HTTP DELETE";
-            case PATCH: return "HTTP PATCH";
+            case GET: return "HTTP GET Command.";
+            case HEAD: return "HTTP HEAD Command.";
+            case POST: return "HTTP POST Command.";
+            case PUT: return "HTTP PUT Command.";
+            case DELETE: return "HTTP DELETE Command.";
+            case PATCH: return "HTTP PATCH Command.";
             default: return "?";
           }
         }

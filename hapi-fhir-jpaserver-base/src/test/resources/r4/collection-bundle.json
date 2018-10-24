@@ -11,7 +11,6 @@
 			},
 			"id": "cf-1505178568463",
 			"subject": {"reference": "Patient/2344"},
-			"clinicalStatus": "active",
 			"code": {"coding": [{
 				"system": "http://snomed.info/sct",
 				"code": "170631002",

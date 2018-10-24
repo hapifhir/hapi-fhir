@@ -48,7 +48,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides: the claim details; adjudication details from the processing of a Claim; and optionally account balance information, for informing the subscriber of the benefits provided.
  */
-@ResourceDef(name="ExplanationOfBenefit", profile="http://hl7.org/fhir/Profile/ExplanationOfBenefit")
+@ResourceDef(name="ExplanationOfBenefit", profile="http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit")
 public class ExplanationOfBenefit extends DomainResource {
 
     public enum ExplanationOfBenefitStatus {

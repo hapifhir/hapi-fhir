@@ -1,6 +1,9 @@
 package org.hl7.fhir.r4.conformance;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hl7.fhir.exceptions.DefinitionException;
+import org.hl7.fhir.exceptions.FHIRFormatError;
+import org.hl7.fhir.r4.conformance.ProfileComparer.ProfileComparison;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.formats.IParser;
 import org.hl7.fhir.r4.model.Base;
@@ -16,6 +22,7 @@ import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionConstraintComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionMappingComponent;
+import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionSlicingComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -34,12 +41,14 @@ import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.r4.utils.DefinitionNavigator;
 import org.hl7.fhir.r4.utils.ToolingExtensions;
-import org.hl7.fhir.exceptions.DefinitionException;
-import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
+import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.Logger.LogMessageType;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
+
+import com.google.gson.JsonObject;
 
 /**
  * A engine that generates difference analysis between two sets of structure 
@@ -398,8 +407,11 @@ public class ProfileComparer {
       if (isExtension(left.path()))
         return compareExtensions(outcome, path, superset, subset, left, right);
 //      return true;
-      else
+      else {
+        ElementDefinitionSlicingComponent slicingL = left.current().getSlicing();
+        ElementDefinitionSlicingComponent slicingR = right.current().getSlicing();
         throw new DefinitionException("Slicing is not handled yet");
+      }
     // todo: name 
     }
 
@@ -629,8 +641,8 @@ public class ProfileComparer {
             return false;          
           }
         }
-        subBinding.setValueSet(new Reference().setReference("#"+addValueSet(cvs)));
-        superBinding.setValueSet(new Reference().setReference("#"+addValueSet(unite(superset, outcome, path, lvs, rvs))));
+        subBinding.setValueSet("#"+addValueSet(cvs));
+        superBinding.setValueSet("#"+addValueSet(unite(superset, outcome, path, lvs, rvs)));
       }
     }
     return false;
@@ -649,11 +661,11 @@ public class ProfileComparer {
       ValueSet lvs = resolveVS(outcome.left, left.getValueSet());
       ValueSet rvs = resolveVS(outcome.left, right.getValueSet());
       if (lvs != null && rvs != null)
-        union.setValueSet(new Reference().setReference("#"+addValueSet(unite(ed, outcome, path, lvs, rvs))));
+        union.setValueSet("#"+addValueSet(unite(ed, outcome, path, lvs, rvs)));
       else if (lvs != null)
-        union.setValueSet(new Reference().setReference("#"+addValueSet(lvs)));
+        union.setValueSet("#"+addValueSet(lvs));
       else if (rvs != null)
-        union.setValueSet(new Reference().setReference("#"+addValueSet(rvs)));
+        union.setValueSet("#"+addValueSet(rvs));
     }
     return union;
   }
@@ -710,17 +722,10 @@ public class ProfileComparer {
     return false;
   }
 
-  private ValueSet resolveVS(StructureDefinition ctxtLeft, Type vsRef) {
+  private ValueSet resolveVS(StructureDefinition ctxtLeft, String vsRef) {
     if (vsRef == null)
       return null;
-    if (vsRef instanceof UriType)
-      return null;
-    else {
-      Reference ref = (Reference) vsRef;
-      if (!ref.hasReference())
-        return null;
-      return context.fetchResource(ValueSet.class, ref.getReference());
-    }
+    return context.fetchResource(ValueSet.class, vsRef);
   }
 
   private ValueSet intersectByDefinition(ValueSet lvs, ValueSet rvs) {
@@ -1164,6 +1169,100 @@ public class ProfileComparer {
 
   public void setRightName(String rightName) {
     this.rightName = rightName;
+  }
+
+  private String genPCLink(String leftName, String leftLink) {
+    return "<a href=\""+leftLink+"\">"+Utilities.escapeXml(leftName)+"</a>";
+  }
+  
+  private String genPCTable() {
+    StringBuilder b = new StringBuilder();
+
+    b.append("<table class=\"grid\">\r\n");
+    b.append("<tr>");
+    b.append(" <td><b>Left</b></td>");
+    b.append(" <td><b>Right</b></td>");
+    b.append(" <td><b>Comparison</b></td>");
+    b.append(" <td><b>Error #</b></td>");
+    b.append(" <td><b>Warning #</b></td>");
+    b.append(" <td><b>Hint #</b></td>");
+    b.append("</tr>");
+
+    for (ProfileComparison cmp : getComparisons()) {
+      b.append("<tr>");
+      b.append(" <td><a href=\""+cmp.getLeft().getUserString("path")+"\">"+Utilities.escapeXml(cmp.getLeft().getName())+"</a></td>");
+      b.append(" <td><a href=\""+cmp.getRight().getUserString("path")+"\">"+Utilities.escapeXml(cmp.getRight().getName())+"</a></td>");
+      b.append(" <td><a href=\""+getId()+"."+cmp.getId()+".html\">Click Here</a></td>");
+      b.append(" <td>"+cmp.getErrorCount()+"</td>");
+      b.append(" <td>"+cmp.getWarningCount()+"</td>");
+      b.append(" <td>"+cmp.getHintCount()+"</td>");
+      b.append("</tr>");
+    }
+    b.append("</table>\r\n");
+
+    return b.toString();
+  }
+
+
+  public String generate(String dest) throws IOException {
+    // ok, all compared; now produce the output
+    // first page we produce is simply the index
+    Map<String, String> vars = new HashMap<String, String>();
+    vars.put("title", getTitle());
+    vars.put("left", genPCLink(getLeftName(), getLeftLink()));
+    vars.put("right", genPCLink(getRightName(), getRightLink()));
+    vars.put("table", genPCTable());
+    producePage(summaryTemplate(), Utilities.path(dest, getId()+".html"), vars);
+    
+//    page.log("   ... generate", LogMessageType.Process);
+//    String src = TextFile.fileToString(page.getFolders().srcDir + "template-comparison-set.html");
+//    src = page.processPageIncludes(n+".html", src, "?type", null, "??path", null, null, "Comparison", pc, null, null, page.getDefinitions().getWorkgroups().get("fhir"));
+//    TextFile.stringToFile(src, Utilities.path(page.getFolders().dstDir, n+".html"));
+//    cachePage(n + ".html", src, "Comparison "+pc.getTitle(), false);
+//
+//    // then we produce a comparison page for each pair
+//    for (ProfileComparison cmp : pc.getComparisons()) {
+//      src = TextFile.fileToString(page.getFolders().srcDir + "template-comparison.html");
+//      src = page.processPageIncludes(n+"."+cmp.getId()+".html", src, "?type", null, "??path", null, null, "Comparison", cmp, null, null, page.getDefinitions().getWorkgroups().get("fhir"));
+//      TextFile.stringToFile(src, Utilities.path(page.getFolders().dstDir, n+"."+cmp.getId()+".html"));
+//      cachePage(n +"."+cmp.getId()+".html", src, "Comparison "+pc.getTitle(), false);
+//    }
+//      //   and also individual pages for each pair outcome
+//    // then we produce value set pages for each value set
+//
+//    // TODO Auto-generated method stub
+    return null;
+  }
+
+  private void producePage(String src, String path, Map<String, String> vars) throws IOException {
+    while (src.contains("[%"))
+    {
+      int i1 = src.indexOf("[%");
+      int i2 = src.substring(i1).indexOf("%]")+i1;
+      String s1 = src.substring(0, i1);
+      String s2 = src.substring(i1 + 2, i2).trim();
+      String s3 = src.substring(i2+2);
+      String v = vars.containsKey(s2) ? vars.get(s2) : "???";
+      src = s1+v+s3;
+    }
+    TextFile.stringToFile(src, path);
+  }
+
+  private String summaryTemplate() throws IOException {
+    return cachedFetch("04a9d69a-47f2-4250-8645-bf5d880a8eaa-1.fhir-template", "http://build.fhir.org/template-comparison-set.html.template");
+  }
+
+  private String cachedFetch(String id, String source) throws IOException {
+    String tmpDir = System.getProperty("java.io.tmpdir");
+    String local = Utilities.path(tmpDir, id);
+    File f = new File(local);
+    if (f.exists())
+      return TextFile.fileToString(f);
+    URL url = new URL(source);
+    URLConnection c = url.openConnection();
+    String result = TextFile.streamToString(c.getInputStream());
+    TextFile.stringToFile(result, f);
+    return result;
   }
 
 

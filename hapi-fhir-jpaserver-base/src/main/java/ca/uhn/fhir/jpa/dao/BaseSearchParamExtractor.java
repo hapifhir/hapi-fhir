@@ -41,6 +41,7 @@ import java.util.regex.Pattern;
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	public static final Pattern SPLIT = Pattern.compile("\\||( or )");
+	public static final Pattern SPLIT_R4 = Pattern.compile("\\|");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 	@Autowired
 	private FhirContext myContext;

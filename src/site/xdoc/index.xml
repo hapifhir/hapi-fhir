@@ -75,7 +75,7 @@
 			<p>
 				This release is happening a little bit later than we had hoped. This release features
 				a complete reworking of the way that search indexes in the JPA server work, as well
-				as a new database migration tool that can be used to miograte to a new version of
+				as a new database migration tool that can be used to migrate to a new version of
 				HAPI FHIR. Testing these features ended up taking longer than we had hoped, but
 				we think it will be worth the wait.
 			</p>

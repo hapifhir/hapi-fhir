@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -43,9 +43,9 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A detailed description of a device, typically as part of a regulated medicinal product. It is not intended to relace the Device resource, which covers use of device instances.
+ * A detailed description of a device, typically as part of a regulated medicinal product. It is not intended to replace the Device resource, which covers use of device instances.
  */
-@ResourceDef(name="MedicinalProductDeviceSpec", profile="http://hl7.org/fhir/Profile/MedicinalProductDeviceSpec")
+@ResourceDef(name="MedicinalProductDeviceSpec", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductDeviceSpec")
 public class MedicinalProductDeviceSpec extends DomainResource {
 
     @Block()
@@ -415,9 +415,9 @@ public class MedicinalProductDeviceSpec extends DomainResource {
     /**
      * Shelf Life and storage information.
      */
-    @Child(name = "shelfLife", type = {ProductShelfLife.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "shelfLifeStorage", type = {ProductShelfLife.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Shelf Life and storage information", formalDefinition="Shelf Life and storage information." )
-    protected List<ProductShelfLife> shelfLife;
+    protected List<ProductShelfLife> shelfLifeStorage;
 
     /**
      * Dimensions, color etc.
@@ -459,7 +459,7 @@ public class MedicinalProductDeviceSpec extends DomainResource {
     @Description(shortDefinition="A substance used to create the material(s) of which the device is made", formalDefinition="A substance used to create the material(s) of which the device is made." )
     protected List<MedicinalProductDeviceSpecMaterialComponent> material;
 
-    private static final long serialVersionUID = 839400430L;
+    private static final long serialVersionUID = -814003919L;
 
   /**
    * Constructor
@@ -821,56 +821,56 @@ public class MedicinalProductDeviceSpec extends DomainResource {
     }
 
     /**
-     * @return {@link #shelfLife} (Shelf Life and storage information.)
+     * @return {@link #shelfLifeStorage} (Shelf Life and storage information.)
      */
-    public List<ProductShelfLife> getShelfLife() { 
-      if (this.shelfLife == null)
-        this.shelfLife = new ArrayList<ProductShelfLife>();
-      return this.shelfLife;
+    public List<ProductShelfLife> getShelfLifeStorage() { 
+      if (this.shelfLifeStorage == null)
+        this.shelfLifeStorage = new ArrayList<ProductShelfLife>();
+      return this.shelfLifeStorage;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public MedicinalProductDeviceSpec setShelfLife(List<ProductShelfLife> theShelfLife) { 
-      this.shelfLife = theShelfLife;
+    public MedicinalProductDeviceSpec setShelfLifeStorage(List<ProductShelfLife> theShelfLifeStorage) { 
+      this.shelfLifeStorage = theShelfLifeStorage;
       return this;
     }
 
-    public boolean hasShelfLife() { 
-      if (this.shelfLife == null)
+    public boolean hasShelfLifeStorage() { 
+      if (this.shelfLifeStorage == null)
         return false;
-      for (ProductShelfLife item : this.shelfLife)
+      for (ProductShelfLife item : this.shelfLifeStorage)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ProductShelfLife addShelfLife() { //3
+    public ProductShelfLife addShelfLifeStorage() { //3
       ProductShelfLife t = new ProductShelfLife();
-      if (this.shelfLife == null)
-        this.shelfLife = new ArrayList<ProductShelfLife>();
-      this.shelfLife.add(t);
+      if (this.shelfLifeStorage == null)
+        this.shelfLifeStorage = new ArrayList<ProductShelfLife>();
+      this.shelfLifeStorage.add(t);
       return t;
     }
 
-    public MedicinalProductDeviceSpec addShelfLife(ProductShelfLife t) { //3
+    public MedicinalProductDeviceSpec addShelfLifeStorage(ProductShelfLife t) { //3
       if (t == null)
         return this;
-      if (this.shelfLife == null)
-        this.shelfLife = new ArrayList<ProductShelfLife>();
-      this.shelfLife.add(t);
+      if (this.shelfLifeStorage == null)
+        this.shelfLifeStorage = new ArrayList<ProductShelfLife>();
+      this.shelfLifeStorage.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #shelfLife}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #shelfLifeStorage}, creating it if it does not already exist
      */
-    public ProductShelfLife getShelfLifeFirstRep() { 
-      if (getShelfLife().isEmpty()) {
-        addShelfLife();
+    public ProductShelfLife getShelfLifeStorageFirstRep() { 
+      if (getShelfLifeStorage().isEmpty()) {
+        addShelfLifeStorage();
       }
-      return getShelfLife().get(0);
+      return getShelfLifeStorage().get(0);
     }
 
     /**
@@ -1143,7 +1143,7 @@ public class MedicinalProductDeviceSpec extends DomainResource {
         children.add(new Property("sterilisationRequirement", "CodeableConcept", "Whether the device must be sterilised before use.", 0, 1, sterilisationRequirement));
         children.add(new Property("usage", "CodeableConcept", "Usage pattern including the number of times that the device may be used.", 0, 1, usage));
         children.add(new Property("nomenclature", "CodeableConcept", "A nomenclature term for the device.", 0, java.lang.Integer.MAX_VALUE, nomenclature));
-        children.add(new Property("shelfLife", "ProductShelfLife", "Shelf Life and storage information.", 0, java.lang.Integer.MAX_VALUE, shelfLife));
+        children.add(new Property("shelfLifeStorage", "ProductShelfLife", "Shelf Life and storage information.", 0, java.lang.Integer.MAX_VALUE, shelfLifeStorage));
         children.add(new Property("physicalCharacteristics", "ProdCharacteristic", "Dimensions, color etc.", 0, 1, physicalCharacteristics));
         children.add(new Property("otherCharacteristics", "CodeableConcept", "Other codeable characteristics.", 0, java.lang.Integer.MAX_VALUE, otherCharacteristics));
         children.add(new Property("batchIdentifier", "Identifier", "Batch number or expiry date of a device.", 0, java.lang.Integer.MAX_VALUE, batchIdentifier));
@@ -1164,7 +1164,7 @@ public class MedicinalProductDeviceSpec extends DomainResource {
         case 693339497: /*sterilisationRequirement*/  return new Property("sterilisationRequirement", "CodeableConcept", "Whether the device must be sterilised before use.", 0, 1, sterilisationRequirement);
         case 111574433: /*usage*/  return new Property("usage", "CodeableConcept", "Usage pattern including the number of times that the device may be used.", 0, 1, usage);
         case 895910775: /*nomenclature*/  return new Property("nomenclature", "CodeableConcept", "A nomenclature term for the device.", 0, java.lang.Integer.MAX_VALUE, nomenclature);
-        case 1796889670: /*shelfLife*/  return new Property("shelfLife", "ProductShelfLife", "Shelf Life and storage information.", 0, java.lang.Integer.MAX_VALUE, shelfLife);
+        case 172049237: /*shelfLifeStorage*/  return new Property("shelfLifeStorage", "ProductShelfLife", "Shelf Life and storage information.", 0, java.lang.Integer.MAX_VALUE, shelfLifeStorage);
         case -1599676319: /*physicalCharacteristics*/  return new Property("physicalCharacteristics", "ProdCharacteristic", "Dimensions, color etc.", 0, 1, physicalCharacteristics);
         case 722135304: /*otherCharacteristics*/  return new Property("otherCharacteristics", "CodeableConcept", "Other codeable characteristics.", 0, java.lang.Integer.MAX_VALUE, otherCharacteristics);
         case -1688395901: /*batchIdentifier*/  return new Property("batchIdentifier", "Identifier", "Batch number or expiry date of a device.", 0, java.lang.Integer.MAX_VALUE, batchIdentifier);
@@ -1188,7 +1188,7 @@ public class MedicinalProductDeviceSpec extends DomainResource {
         case 693339497: /*sterilisationRequirement*/ return this.sterilisationRequirement == null ? new Base[0] : new Base[] {this.sterilisationRequirement}; // CodeableConcept
         case 111574433: /*usage*/ return this.usage == null ? new Base[0] : new Base[] {this.usage}; // CodeableConcept
         case 895910775: /*nomenclature*/ return this.nomenclature == null ? new Base[0] : this.nomenclature.toArray(new Base[this.nomenclature.size()]); // CodeableConcept
-        case 1796889670: /*shelfLife*/ return this.shelfLife == null ? new Base[0] : this.shelfLife.toArray(new Base[this.shelfLife.size()]); // ProductShelfLife
+        case 172049237: /*shelfLifeStorage*/ return this.shelfLifeStorage == null ? new Base[0] : this.shelfLifeStorage.toArray(new Base[this.shelfLifeStorage.size()]); // ProductShelfLife
         case -1599676319: /*physicalCharacteristics*/ return this.physicalCharacteristics == null ? new Base[0] : new Base[] {this.physicalCharacteristics}; // ProdCharacteristic
         case 722135304: /*otherCharacteristics*/ return this.otherCharacteristics == null ? new Base[0] : this.otherCharacteristics.toArray(new Base[this.otherCharacteristics.size()]); // CodeableConcept
         case -1688395901: /*batchIdentifier*/ return this.batchIdentifier == null ? new Base[0] : this.batchIdentifier.toArray(new Base[this.batchIdentifier.size()]); // Identifier
@@ -1232,8 +1232,8 @@ public class MedicinalProductDeviceSpec extends DomainResource {
         case 895910775: // nomenclature
           this.getNomenclature().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case 1796889670: // shelfLife
-          this.getShelfLife().add(castToProductShelfLife(value)); // ProductShelfLife
+        case 172049237: // shelfLifeStorage
+          this.getShelfLifeStorage().add(castToProductShelfLife(value)); // ProductShelfLife
           return value;
         case -1599676319: // physicalCharacteristics
           this.physicalCharacteristics = castToProdCharacteristic(value); // ProdCharacteristic
@@ -1277,8 +1277,8 @@ public class MedicinalProductDeviceSpec extends DomainResource {
           this.usage = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("nomenclature")) {
           this.getNomenclature().add(castToCodeableConcept(value));
-        } else if (name.equals("shelfLife")) {
-          this.getShelfLife().add(castToProductShelfLife(value));
+        } else if (name.equals("shelfLifeStorage")) {
+          this.getShelfLifeStorage().add(castToProductShelfLife(value));
         } else if (name.equals("physicalCharacteristics")) {
           this.physicalCharacteristics = castToProdCharacteristic(value); // ProdCharacteristic
         } else if (name.equals("otherCharacteristics")) {
@@ -1307,7 +1307,7 @@ public class MedicinalProductDeviceSpec extends DomainResource {
         case 693339497:  return getSterilisationRequirement(); 
         case 111574433:  return getUsage(); 
         case 895910775:  return addNomenclature(); 
-        case 1796889670:  return addShelfLife(); 
+        case 172049237:  return addShelfLifeStorage(); 
         case -1599676319:  return getPhysicalCharacteristics(); 
         case 722135304:  return addOtherCharacteristics(); 
         case -1688395901:  return addBatchIdentifier(); 
@@ -1331,7 +1331,7 @@ public class MedicinalProductDeviceSpec extends DomainResource {
         case 693339497: /*sterilisationRequirement*/ return new String[] {"CodeableConcept"};
         case 111574433: /*usage*/ return new String[] {"CodeableConcept"};
         case 895910775: /*nomenclature*/ return new String[] {"CodeableConcept"};
-        case 1796889670: /*shelfLife*/ return new String[] {"ProductShelfLife"};
+        case 172049237: /*shelfLifeStorage*/ return new String[] {"ProductShelfLife"};
         case -1599676319: /*physicalCharacteristics*/ return new String[] {"ProdCharacteristic"};
         case 722135304: /*otherCharacteristics*/ return new String[] {"CodeableConcept"};
         case -1688395901: /*batchIdentifier*/ return new String[] {"Identifier"};
@@ -1380,8 +1380,8 @@ public class MedicinalProductDeviceSpec extends DomainResource {
         else if (name.equals("nomenclature")) {
           return addNomenclature();
         }
-        else if (name.equals("shelfLife")) {
-          return addShelfLife();
+        else if (name.equals("shelfLifeStorage")) {
+          return addShelfLifeStorage();
         }
         else if (name.equals("physicalCharacteristics")) {
           this.physicalCharacteristics = new ProdCharacteristic();
@@ -1425,10 +1425,10 @@ public class MedicinalProductDeviceSpec extends DomainResource {
           for (CodeableConcept i : nomenclature)
             dst.nomenclature.add(i.copy());
         };
-        if (shelfLife != null) {
-          dst.shelfLife = new ArrayList<ProductShelfLife>();
-          for (ProductShelfLife i : shelfLife)
-            dst.shelfLife.add(i.copy());
+        if (shelfLifeStorage != null) {
+          dst.shelfLifeStorage = new ArrayList<ProductShelfLife>();
+          for (ProductShelfLife i : shelfLifeStorage)
+            dst.shelfLifeStorage.add(i.copy());
         };
         dst.physicalCharacteristics = physicalCharacteristics == null ? null : physicalCharacteristics.copy();
         if (otherCharacteristics != null) {
@@ -1469,7 +1469,7 @@ public class MedicinalProductDeviceSpec extends DomainResource {
            && compareDeep(quantity, o.quantity, true) && compareDeep(listingNumber, o.listingNumber, true)
            && compareDeep(modelNumber, o.modelNumber, true) && compareDeep(sterilityIndicator, o.sterilityIndicator, true)
            && compareDeep(sterilisationRequirement, o.sterilisationRequirement, true) && compareDeep(usage, o.usage, true)
-           && compareDeep(nomenclature, o.nomenclature, true) && compareDeep(shelfLife, o.shelfLife, true)
+           && compareDeep(nomenclature, o.nomenclature, true) && compareDeep(shelfLifeStorage, o.shelfLifeStorage, true)
            && compareDeep(physicalCharacteristics, o.physicalCharacteristics, true) && compareDeep(otherCharacteristics, o.otherCharacteristics, true)
            && compareDeep(batchIdentifier, o.batchIdentifier, true) && compareDeep(manufacturer, o.manufacturer, true)
            && compareDeep(material, o.material, true);
@@ -1489,8 +1489,8 @@ public class MedicinalProductDeviceSpec extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, tradeName
           , quantity, listingNumber, modelNumber, sterilityIndicator, sterilisationRequirement
-          , usage, nomenclature, shelfLife, physicalCharacteristics, otherCharacteristics, batchIdentifier
-          , manufacturer, material);
+          , usage, nomenclature, shelfLifeStorage, physicalCharacteristics, otherCharacteristics
+          , batchIdentifier, manufacturer, material);
       }
 
   @Override

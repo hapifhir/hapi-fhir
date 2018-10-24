@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.collect.Sets;
@@ -152,6 +153,8 @@ public class DaoConfig {
 	private int myReindexThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
+	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
+	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -164,11 +167,26 @@ public class DaoConfig {
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);
 
-
 		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * Returns a set of searches that should be kept "warm", meaning that
+	 * searches will periodically be performed in the background to
+	 * keep results ready for this search
+	 */
+	public List<WarmCacheEntry> getWarmCacheEntries() {
+		if (myWarmCacheEntries == null) {
+			myWarmCacheEntries = new ArrayList<>();
+		}
+		return myWarmCacheEntries;
+	}
+
+	public void setWarmCacheEntries(List<WarmCacheEntry> theWarmCacheEntries) {
+		myWarmCacheEntries = theWarmCacheEntries;
 	}
 
 	/**
@@ -1319,6 +1337,50 @@ public class DaoConfig {
 
 	public void setSubscriptionPurgeInactiveAfterSeconds(int theSeconds) {
 		setSubscriptionPurgeInactiveAfterMillis(theSeconds * DateUtils.MILLIS_PER_SECOND);
+	}
+
+	/**
+	 * This setting sets the number of search results to prefetch. For example, if this list
+	 * is set to [100, 1000, -1] then the server will initially load 100 results and not
+	 * attempt to load more. If the user requests subsequent page(s) of results and goes
+	 * past 100 results, the system will load the next 900 (up to the following threshold of 1000).
+	 * The system will progressively work through these thresholds.
+	 *
+	 * <p>
+	 * A threshold of -1 means to load all results. Note that if the final threshold is a
+	 * number other than <code>-1</code>, the system will never prefetch more than the
+	 * given number.
+	 * </p>
+	 */
+	public void setSearchPreFetchThresholds(List<Integer> thePreFetchThresholds) {
+		Validate.isTrue(thePreFetchThresholds.size() > 0, "thePreFetchThresholds must not be empty");
+		int last = 0;
+		for (Integer nextInteger : thePreFetchThresholds) {
+			int nextInt = nextInteger.intValue();
+			Validate.isTrue(nextInt > 0 || nextInt == -1, nextInt + " is not a valid prefetch threshold");
+			Validate.isTrue(nextInt != last, "Prefetch thresholds must be sequential");
+			Validate.isTrue(nextInt > last || nextInt == -1, "Prefetch thresholds must be sequential");
+			Validate.isTrue(last != -1, "Prefetch thresholds must be sequential");
+			last = nextInt;
+		}
+		mySearchPreFetchThresholds = thePreFetchThresholds;
+	}
+
+	/**
+	 * This setting sets the number of search results to prefetch. For example, if this list
+	 * is set to [100, 1000, -1] then the server will initially load 100 results and not
+	 * attempt to load more. If the user requests subsequent page(s) of results and goes
+	 * past 100 results, the system will load the next 900 (up to the following threshold of 1000).
+	 * The system will progressively work through these thresholds.
+	 *
+	 * <p>
+	 * A threshold of -1 means to load all results. Note that if the final threshold is a
+	 * number other than <code>-1</code>, the system will never prefetch more than the
+	 * given number.
+	 * </p>
+	 */
+	public List<Integer> getSearchPreFetchThresholds() {
+		return mySearchPreFetchThresholds;
 	}
 
 	public enum IndexEnabledEnum {

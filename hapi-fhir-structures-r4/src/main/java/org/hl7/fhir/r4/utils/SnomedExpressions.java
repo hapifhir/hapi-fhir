@@ -280,7 +280,7 @@ public class SnomedExpressions {
         res.setCharAt(i, next());
         i++;
       }
-      rule(i > 0, "Concept not found (next char = \""+peekDisp()+"\")");
+      rule(i > 0, "Concept not found (next char = \""+peekDisp()+"\", in '"+source+"')");
       return res.substring(0, i);
     }
 

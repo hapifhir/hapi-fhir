@@ -7,7 +7,6 @@ import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.hibernate.query.criteria.LiteralHandlingMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -23,7 +22,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 @Configuration
 @EnableTransactionManagement()
@@ -39,6 +38,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		 * starvation
 		 */
 		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+		ourMaxThreads = 1;
 	}
 
 	private Exception myLastStackTrace;
@@ -125,7 +125,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.jdbc.batch_size", "1");
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
@@ -134,7 +133,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.search.default.directory_provider", "ram");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.autoregister_listeners", "true");
-		extraProperties.put("hibernate.criteria.literal_handling_mode", LiteralHandlingMode.BIND);
 
 		return extraProperties;
 	}

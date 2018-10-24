@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,27 +37,27 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum InvoicePriceComponentType {
 
         /**
-         * the amount is the base price used for calculating the total price before applying surcharges, discount or taxes
+         * the amount is the base price used for calculating the total price before applying surcharges, discount or taxes.
          */
         BASE, 
         /**
-         * the amount is a surcharge applied on the base price
+         * the amount is a surcharge applied on the base price.
          */
         SURCHARGE, 
         /**
-         * the amount is a deduction applied on the base price
+         * the amount is a deduction applied on the base price.
          */
         DEDUCTION, 
         /**
-         * the amount is a discount applied on the base price
+         * the amount is a discount applied on the base price.
          */
         DISCOUNT, 
         /**
-         * the amount is the tax component of the total price
+         * the amount is the tax component of the total price.
          */
         TAX, 
         /**
-         * the amount is of informational character, it has not been applied in the calculation of the total price
+         * the amount is of informational character, it has not been applied in the calculation of the total price.
          */
         INFORMATIONAL, 
         /**
@@ -97,12 +97,12 @@ public enum InvoicePriceComponentType {
         }
         public String getDefinition() {
           switch (this) {
-            case BASE: return "the amount is the base price used for calculating the total price before applying surcharges, discount or taxes";
-            case SURCHARGE: return "the amount is a surcharge applied on the base price";
-            case DEDUCTION: return "the amount is a deduction applied on the base price";
-            case DISCOUNT: return "the amount is a discount applied on the base price";
-            case TAX: return "the amount is the tax component of the total price";
-            case INFORMATIONAL: return "the amount is of informational character, it has not been applied in the calculation of the total price";
+            case BASE: return "the amount is the base price used for calculating the total price before applying surcharges, discount or taxes.";
+            case SURCHARGE: return "the amount is a surcharge applied on the base price.";
+            case DEDUCTION: return "the amount is a deduction applied on the base price.";
+            case DISCOUNT: return "the amount is a discount applied on the base price.";
+            case TAX: return "the amount is the tax component of the total price.";
+            case INFORMATIONAL: return "the amount is of informational character, it has not been applied in the calculation of the total price.";
             default: return "?";
           }
         }

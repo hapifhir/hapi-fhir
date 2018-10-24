@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -300,6 +300,18 @@ public class CodeableConcept extends Type implements ICompositeType {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(coding, text);
       }
 
+// added from java-adornments.txt:
+ 
+  public boolean hasCoding(String system, String code) {
+    for (Coding c : getCoding()) {
+      if (system.equals(c.getSystem()) && code.equals(c.getCode()))
+        return true;
+    }
+    return false;
+  } 
+      
+
+// end addition
 
 }
 

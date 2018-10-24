@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).
  */
-@ResourceDef(name="Appointment", profile="http://hl7.org/fhir/Profile/Appointment")
+@ResourceDef(name="Appointment", profile="http://hl7.org/fhir/StructureDefinition/Appointment")
 public class Appointment extends DomainResource {
 
     public enum AppointmentStatus {
@@ -62,7 +62,7 @@ public class Appointment extends DomainResource {
          */
         BOOKED, 
         /**
-         * The patient/patients has/have arrived and is/are waiting to be seen
+         * The patient/patients has/have arrived and is/are waiting to be seen.
          */
         ARRIVED, 
         /**
@@ -82,7 +82,7 @@ public class Appointment extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present)
+         * When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present).
          */
         CHECKEDIN, 
         /**
@@ -148,12 +148,12 @@ public class Appointment extends DomainResource {
             case PROPOSED: return "None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time might not be set yet.";
             case PENDING: return "Some or all of the participant(s) have not finalized their acceptance of the appointment request.";
             case BOOKED: return "All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified.";
-            case ARRIVED: return "The patient/patients has/have arrived and is/are waiting to be seen";
+            case ARRIVED: return "The patient/patients has/have arrived and is/are waiting to be seen.";
             case FULFILLED: return "This appointment has completed and may have resulted in an encounter.";
             case CANCELLED: return "The appointment has been cancelled.";
             case NOSHOW: return "Some or all of the participant(s) have not/did not appear for the appointment (usually the patient).";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
-            case CHECKEDIN: return "When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present)";
+            case CHECKEDIN: return "When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present).";
             default: return "?";
           }
         }
@@ -976,7 +976,7 @@ public class Appointment extends DomainResource {
      */
     @Child(name = "appointmentType", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The style of appointment or patient that has been booked in the slot (not service type)", formalDefinition="The style of appointment or patient that has been booked in the slot (not service type)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0276")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v2-0276")
     protected CodeableConcept appointmentType;
 
     /**
@@ -2752,7 +2752,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.basedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="based-on", path="Appointment.basedOn", description="The service request this appointment is allocated to assess", type="reference", target={ServiceRequest.class } )
+  @SearchParamDefinition(name="based-on", path="Appointment.basedOn.where(resolve() is ServiceRequest)", description="The service request this appointment is allocated to assess", type="reference", target={ServiceRequest.class } )
   public static final String SP_BASED_ON = "based-on";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>based-on</b>
@@ -2778,7 +2778,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor", description="One of the individuals of the appointment is this practitioner", type="reference", target={Practitioner.class } )
+  @SearchParamDefinition(name="practitioner", path="Appointment.participant.actor.where(resolve() is Practitioner)", description="One of the individuals of the appointment is this practitioner", type="reference", target={Practitioner.class } )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -2824,7 +2824,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Appointment.participant.actor", description="One of the individuals of the appointment is this patient", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="Appointment.participant.actor.where(resolve() is Patient)", description="One of the individuals of the appointment is this patient", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2890,7 +2890,7 @@ public class Appointment extends DomainResource {
    * Path: <b>Appointment.participant.actor</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Appointment.participant.actor", description="This location is listed in the participants of the appointment", type="reference", target={Location.class } )
+  @SearchParamDefinition(name="location", path="Appointment.participant.actor.where(resolve() is Location)", description="This location is listed in the participants of the appointment", type="reference", target={Location.class } )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>

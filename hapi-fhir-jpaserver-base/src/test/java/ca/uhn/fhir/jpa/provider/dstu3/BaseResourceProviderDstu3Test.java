@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
+import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
@@ -65,6 +66,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static Server ourServer;
 	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
+	protected static SubscriptionTriggeringProvider ourSubscriptionTriggeringProvider;
 
 	public BaseResourceProviderDstu3Test() {
 		super();
@@ -97,8 +99,10 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderDstu3.class);
-
 			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider);
+
+			SubscriptionTriggeringProvider subscriptionTriggeringProvider = myAppCtx.getBean(SubscriptionTriggeringProvider.class);
+			ourRestServer.registerProvider(subscriptionTriggeringProvider);
 
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
@@ -157,6 +161,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourRestHookSubscriptionInterceptor = wac.getBean(SubscriptionRestHookInterceptor.class);
 			ourEmailSubscriptionInterceptor = wac.getBean(SubscriptionEmailInterceptor.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
+			ourSubscriptionTriggeringProvider = wac.getBean(SubscriptionTriggeringProvider.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);

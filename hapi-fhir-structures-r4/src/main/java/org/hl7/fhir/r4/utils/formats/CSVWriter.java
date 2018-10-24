@@ -158,10 +158,8 @@ public class CSVWriter  extends TextStreamWriter  {
       line.addString(ed.getBinding().getDescription());
       if (ed.getBinding().getValueSet()==null)
         line.addString("");
-      else if (ed.getBinding().getValueSet() instanceof CanonicalType)
-      line.addString(ed.getBinding().getValueSetCanonicalType().getValue());
       else
-      line.addString(ed.getBinding().getValueSetUriType().getValue());
+        line.addString(ed.getBinding().getValueSet());
     } else {
       line.addValue("");
       line.addValue("");

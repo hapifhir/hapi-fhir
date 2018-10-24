@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum GoalAcceptanceStatus {
 
         /**
-         * Stakeholder supports pursuit of the goal
+         * Stakeholder supports pursuit of the goal.
          */
         AGREE, 
         /**
-         * Stakeholder is not in support of the pursuit of the goal
+         * Stakeholder is not in support of the pursuit of the goal.
          */
         DISAGREE, 
         /**
-         * Stakeholder has not yet made a decision on whether they support the goal
+         * Stakeholder has not yet made a decision on whether they support the goal.
          */
         PENDING, 
         /**
@@ -72,13 +72,13 @@ public enum GoalAcceptanceStatus {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/goal-acceptance-status";
+          return "http://terminology.hl7.org/CodeSystem/goal-acceptance-status";
         }
         public String getDefinition() {
           switch (this) {
-            case AGREE: return "Stakeholder supports pursuit of the goal";
-            case DISAGREE: return "Stakeholder is not in support of the pursuit of the goal";
-            case PENDING: return "Stakeholder has not yet made a decision on whether they support the goal";
+            case AGREE: return "Stakeholder supports pursuit of the goal.";
+            case DISAGREE: return "Stakeholder is not in support of the pursuit of the goal.";
+            case PENDING: return "Stakeholder has not yet made a decision on whether they support the goal.";
             default: return "?";
           }
         }

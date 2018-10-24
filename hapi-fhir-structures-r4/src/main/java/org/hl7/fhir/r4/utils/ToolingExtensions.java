@@ -36,7 +36,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.fhir.ucum.Utilities;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -53,12 +56,14 @@ import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.utilities.StandardsStatus;
 import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 
 
@@ -87,12 +92,13 @@ public class ToolingExtensions {
   public static final String EXT_REFERENCEFILTER = "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceFilter";
   public static final String EXT_CODE_GENERATION_PARENT = "http://hl7.org/fhir/StructureDefinition/structuredefinition-codegen-super";
   public static final String EXT_HIERARCHY = "http://hl7.org/fhir/StructureDefinition/structuredefinition-hierarchy";
-
+  public static final String EXT_BEST_PRACTICE = "http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice";
+  public static final String EXT_BEST_PRACTICE_EXPLANATION = "http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice-explanation";
   // unregistered?
   public static final String EXT_MAPPING_PREFIX = "http://hl7.org/fhir/tools/StructureDefinition/logical-mapping-prefix";
   public static final String EXT_MAPPING_SUFFIX = "http://hl7.org/fhir/tools/StructureDefinition/logical-mapping-suffix";
 
-//  public static final String EXT_FLYOVER = "http://hl7.org/fhir/Profile/questionnaire-extensions#flyover";
+//  public static final String EXT_FLYOVER = "http://hl7.org/fhir/StructureDefinition/questionnaire-extensions#flyover";
   public static final String EXT_QTYPE = "http://hl7.org/fhir/StructureDefinition/questionnnaire-baseType";
 //  private static final String EXT_QREF = "http://www.healthintersections.com.au/fhir/Profile/metadata#reference";
 //  private static final String EXTENSION_FILTER_ONLY = "http://www.healthintersections.com.au/fhir/Profile/metadata#expandNeedsFilter";
@@ -107,7 +113,16 @@ public class ToolingExtensions {
   public static final String EXT_TABLE_NAME = "http://hl7.org/fhir/StructureDefinition/structuredefinition-table-name";
   public static final String EXT_OO_FILE = "http://hl7.org/fhir/StructureDefinition/operationoutcome-file";
   public static final String EXT_WORKGROUP = "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg";
-  public static final String EXT_BALLOT_STATUS = "http://hl7.org/fhir/StructureDefinition/structuredefinition-ballot-status";
+  public static final String EXT_STANDARDS_STATUS = "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status";
+  public static final String EXT_IGP_BASE = "http://hl7.org/fhir/StructureDefinition/igpublisher-res-base";
+  public static final String EXT_IGP_DEFNS = "http://hl7.org/fhir/StructureDefinition/igpublisher-res-defns";
+  public static final String EXT_IGP_FORMAT = "http://hl7.org/fhir/StructureDefinition/igpublisher-res-format";
+  public static final String EXT_IGP_SOURCE = "http://hl7.org/fhir/StructureDefinition/igpublisher-res-source";
+  public static final String EXT_IGP_VERSION = "http://hl7.org/fhir/StructureDefinition/igpublisher-res-version";
+  public static final String EXT_IGP_RESOURCES = "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-resource";
+  public static final String EXT_IGP_PAGES = "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages";
+  public static final String EXT_IGP_SPREADSHEET = "http://hl7.org/fhir/StructureDefinition/igpublisher-spreadsheet";
+  public static final String EXT_IGP_BUNDLE = "http://hl7.org/fhir/StructureDefinition/igpublisher-bundle";
 
 
   // specific extension helpers
@@ -213,7 +228,7 @@ public class ToolingExtensions {
 //  }
 //
   public static void addSubsumes(ConceptDefinitionComponent nc, String code) {
-    nc.getModifierExtension().add(Factory.newExtension(EXT_SUBSUMES, Factory.newCode(code), true));   
+    nc.getExtension().add(Factory.newExtension(EXT_SUBSUMES, Factory.newCode(code), true));   
   }
 
   public static void addDefinition(Element nc, String definition) {
@@ -236,6 +251,8 @@ public class ToolingExtensions {
       return null;
     if (ex.getValue() instanceof UriType)
       return ((UriType) ex.getValue()).getValue();
+    if (ex.getValue() instanceof CanonicalType)
+      return ((CanonicalType) ex.getValue()).getValue();
     if (ex.getValue() instanceof CodeType)
       return ((CodeType) ex.getValue()).getValue();
     if (ex.getValue() instanceof IntegerType)
@@ -291,6 +308,33 @@ public class ToolingExtensions {
   }
 
   public static boolean findBooleanExtension(Element c, String uri) {
+    Extension ex = ExtensionHelper.getExtension(c, uri);
+    if (ex == null)
+      return false;
+    if (!(ex.getValue() instanceof BooleanType))
+      return false;
+    return true;
+  }
+
+  public static Boolean readBooleanExtension(DomainResource c, String uri) {
+    Extension ex = ExtensionHelper.getExtension(c, uri);
+    if (ex == null)
+      return null;
+    if (!(ex.getValue() instanceof BooleanType))
+      return null;
+    return ((BooleanType) ex.getValue()).getValue();
+  }
+
+  public static boolean readBoolExtension(DomainResource c, String uri) {
+    Extension ex = ExtensionHelper.getExtension(c, uri);
+    if (ex == null)
+      return false;
+    if (!(ex.getValue() instanceof BooleanType))
+      return false;
+    return ((BooleanType) ex.getValue()).getValue();
+  }
+
+  public static boolean findBooleanExtension(DomainResource c, String uri) {
     Extension ex = ExtensionHelper.getExtension(c, uri);
     if (ex == null)
       return false;
@@ -391,7 +435,9 @@ public class ToolingExtensions {
   }
 
   public static void setStringExtension(DomainResource resource, String uri, String value) {
-    Extension ext = getExtension(resource, uri);
+    if (Utilities.noString(value))
+      return;
+        Extension ext = getExtension(resource, uri);
     if (ext != null)
       ext.setValue(new StringType(value));
     else
@@ -399,6 +445,9 @@ public class ToolingExtensions {
   }
 
   public static void setCodeExtension(DomainResource resource, String uri, String value) {
+    if (Utilities.noString(value))
+      return;
+    
     Extension ext = getExtension(resource, uri);
     if (ext != null)
       ext.setValue(new CodeType(value));
@@ -470,6 +519,9 @@ public class ToolingExtensions {
   }
 
   public static void addLanguageTranslation(Element element, String lang, String value) {
+    if (Utilities.noString(lang) || Utilities.noString(value))
+      return;
+    
     Extension extension = new Extension().setUrl(EXT_TRANSLATION);
     extension.addExtension().setUrl("lang").setValue(new StringType(lang));
     extension.addExtension().setUrl("content").setValue(new StringType(value));
@@ -574,6 +626,17 @@ public class ToolingExtensions {
       }
     }
     return res;
+  }
+
+  public static StandardsStatus getStandardsStatus(DomainResource dr) throws FHIRException {
+    return StandardsStatus.fromCode(ToolingExtensions.readStringExtension(dr, ToolingExtensions.EXT_STANDARDS_STATUS));
+  }
+
+  public static void setStandardsStatus(DomainResource dr, StandardsStatus status) {
+    if (status == null)
+      ToolingExtensions.removeExtension(dr, ToolingExtensions.EXT_STANDARDS_STATUS);
+    else
+      ToolingExtensions.setStringExtension(dr, ToolingExtensions.EXT_STANDARDS_STATUS, status.toDisplay());
   }
 
 //  public static boolean hasOID(ValueSet vs) {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ConsentAction {
 
         /**
-         * Gather/acquire information by an entity to achieve a stated purpose
+         * Gather retrieved information for storage
          */
         COLLECT, 
         /**
-         * Provide an entity access to information to achieve a stated purpose
+         * Retrieval without permitting collection, use or disclosure. e.g., no screen-scraping for collection, use or disclosure (view-only access)
          */
         ACCESS, 
         /**
-         * Use of stored information by an entity fo the stated purpose
+         * Utilize the retrieved information
          */
         USE, 
         /**
-         * Release / transfer of information to an entity 
+         * Transfer retrieved information
          */
         DISCLOSE, 
         /**
-         * Allowing an entity to correct a patient's information
+         * Allow retrieval of a patient's information for the purpose of update or rectify
          */
         CORRECT, 
         /**
@@ -86,15 +86,15 @@ public enum ConsentAction {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/consentaction";
+          return "http://terminology.hl7.org/CodeSystem/consentaction";
         }
         public String getDefinition() {
           switch (this) {
-            case COLLECT: return "Gather/acquire information by an entity to achieve a stated purpose";
-            case ACCESS: return "Provide an entity access to information to achieve a stated purpose";
-            case USE: return "Use of stored information by an entity fo the stated purpose";
-            case DISCLOSE: return "Release / transfer of information to an entity ";
-            case CORRECT: return "Allowing an entity to correct a patient's information";
+            case COLLECT: return "Gather retrieved information for storage";
+            case ACCESS: return "Retrieval without permitting collection, use or disclosure. e.g., no screen-scraping for collection, use or disclosure (view-only access)";
+            case USE: return "Utilize the retrieved information";
+            case DISCLOSE: return "Transfer retrieved information";
+            case CORRECT: return "Allow retrieval of a patient's information for the purpose of update or rectify";
             default: return "?";
           }
         }

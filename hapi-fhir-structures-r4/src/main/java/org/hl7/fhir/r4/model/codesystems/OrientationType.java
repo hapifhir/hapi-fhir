@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum OrientationType {
          */
         SENSE, 
         /**
-         * Antisense orientation of reference sequence
+         * Antisense orientation of reference sequence.
          */
         ANTISENSE, 
         /**
@@ -70,7 +70,7 @@ public enum OrientationType {
         public String getDefinition() {
           switch (this) {
             case SENSE: return "Sense orientation of reference sequence.";
-            case ANTISENSE: return "Antisense orientation of reference sequence";
+            case ANTISENSE: return "Antisense orientation of reference sequence.";
             default: return "?";
           }
         }

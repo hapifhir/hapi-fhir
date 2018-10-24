@@ -344,7 +344,7 @@ public class GraphQLSchemaGenerator {
 
   private boolean isPrimitive(TypeRefComponent type) {
     String typeName = type.getCode();
-    StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+typeName);
+    StructureDefinition sd = context.fetchTypeDefinition(typeName);
     if (sd == null)
       return false;
     return sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;

@@ -8,6 +8,7 @@ import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import com.google.gson.*;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
@@ -343,6 +344,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public Base resolveReference(Object theAppContext, String theUrl) {
 			return null;
+		}
+
+		@Override
+		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
+			return false;
 		}
 
 	}

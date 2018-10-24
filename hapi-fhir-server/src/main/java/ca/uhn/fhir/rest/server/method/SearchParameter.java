@@ -96,6 +96,12 @@ public class SearchParameter extends BaseQueryParameter {
 		ourParamTypes.put(HasParam.class, RestSearchParameterTypeEnum.HAS);
 		ourParamTypes.put(HasOrListParam.class, RestSearchParameterTypeEnum.HAS);
 		ourParamTypes.put(HasAndListParam.class, RestSearchParameterTypeEnum.HAS);
+
+		ourParamTypes.put(SpecialParam.class, RestSearchParameterTypeEnum.SPECIAL);
+		ourParamTypes.put(SpecialOrListParam.class, RestSearchParameterTypeEnum.SPECIAL);
+		ourParamTypes.put(SpecialAndListParam.class, RestSearchParameterTypeEnum.SPECIAL);
+		ourParamQualifiers.put(RestSearchParameterTypeEnum.SPECIAL, CollectionUtil.newSet(Constants.PARAMQUALIFIER_MISSING));
+
 	}
 
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes = Collections.emptyList();

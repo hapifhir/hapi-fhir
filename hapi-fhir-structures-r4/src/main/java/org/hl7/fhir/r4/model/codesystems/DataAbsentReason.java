@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,7 +61,7 @@ public enum DataAbsentReason {
          */
         MASKED, 
         /**
-         * There is no proper value for this element (e.g. last menstrual period for a male)
+         * There is no proper value for this element (e.g. last menstrual period for a male).
          */
         NOTAPPLICABLE, 
         /**
@@ -93,7 +93,7 @@ public enum DataAbsentReason {
          */
         NOTPERFORMED, 
         /**
-         * The value is not permitted in this context (e.g. due to profiles, or the base data types)
+         * The value is not permitted in this context (e.g. due to profiles, or the base data types).
          */
         NOTPERMITTED, 
         /**
@@ -156,7 +156,7 @@ public enum DataAbsentReason {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/data-absent-reason";
+          return "http://terminology.hl7.org/CodeSystem/data-absent-reason";
         }
         public String getDefinition() {
           switch (this) {
@@ -166,7 +166,7 @@ public enum DataAbsentReason {
             case NOTASKED: return "The workflow didn't lead to this value being known.";
             case ASKEDDECLINED: return "The source was asked but declined to answer.";
             case MASKED: return "The information is not available due to security, privacy or related reasons.";
-            case NOTAPPLICABLE: return "There is no proper value for this element (e.g. last menstrual period for a male)";
+            case NOTAPPLICABLE: return "There is no proper value for this element (e.g. last menstrual period for a male).";
             case UNSUPPORTED: return "The source system wasn't capable of supporting this element.";
             case ASTEXT: return "The content of the data is represented in the resource narrative.";
             case ERROR: return "Some system or workflow process error means that the information is not available.";
@@ -174,7 +174,7 @@ public enum DataAbsentReason {
             case NEGATIVEINFINITY: return "The numeric value is excessively low and unrepresentable due to a floating point processing error.";
             case POSITIVEINFINITY: return "The numeric value is excessively high and unrepresentable due to a floating point processing error.";
             case NOTPERFORMED: return "The value is not available because the observation procedure (test, etc.) was not performed.";
-            case NOTPERMITTED: return "The value is not permitted in this context (e.g. due to profiles, or the base data types)";
+            case NOTPERMITTED: return "The value is not permitted in this context (e.g. due to profiles, or the base data types).";
             default: return "?";
           }
         }

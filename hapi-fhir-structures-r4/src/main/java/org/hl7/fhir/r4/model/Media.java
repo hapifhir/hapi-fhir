@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.
  */
-@ResourceDef(name="Media", profile="http://hl7.org/fhir/Profile/Media")
+@ResourceDef(name="Media", profile="http://hl7.org/fhir/StructureDefinition/Media")
 public class Media extends DomainResource {
 
     public enum MediaStatus {
@@ -55,27 +55,27 @@ public class Media extends DomainResource {
          */
         PREPARATION, 
         /**
-         * The event is currently occurring
+         * The event is currently occurring.
          */
         INPROGRESS, 
         /**
-         * The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)
+         * The event was terminated prior to any activity beyond preparation.  I.e. The 'main' activity has not yet begun.  The boundary between preparatory and the 'main' activity is context-specific.
          */
         NOTDONE, 
         /**
-         * The event has been temporarily stopped but is expected to resume in the future
+         * The event has been temporarily stopped but is expected to resume in the future.
          */
-        SUSPENDED, 
+        ONHOLD, 
         /**
-         * The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.
+         * The event was terminated prior to the full completion of the intended activity but after at least some of the 'main' activity (beyond preparation) has occurred.
          */
-        ABORTED, 
+        STOPPED, 
         /**
-         * The event has now concluded
+         * The event has now concluded.
          */
         COMPLETED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
@@ -95,10 +95,10 @@ public class Media extends DomainResource {
           return INPROGRESS;
         if ("not-done".equals(codeString))
           return NOTDONE;
-        if ("suspended".equals(codeString))
-          return SUSPENDED;
-        if ("aborted".equals(codeString))
-          return ABORTED;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("stopped".equals(codeString))
+          return STOPPED;
         if ("completed".equals(codeString))
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -115,8 +115,8 @@ public class Media extends DomainResource {
             case PREPARATION: return "preparation";
             case INPROGRESS: return "in-progress";
             case NOTDONE: return "not-done";
-            case SUSPENDED: return "suspended";
-            case ABORTED: return "aborted";
+            case ONHOLD: return "on-hold";
+            case STOPPED: return "stopped";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             case UNKNOWN: return "unknown";
@@ -128,8 +128,8 @@ public class Media extends DomainResource {
             case PREPARATION: return "http://hl7.org/fhir/event-status";
             case INPROGRESS: return "http://hl7.org/fhir/event-status";
             case NOTDONE: return "http://hl7.org/fhir/event-status";
-            case SUSPENDED: return "http://hl7.org/fhir/event-status";
-            case ABORTED: return "http://hl7.org/fhir/event-status";
+            case ONHOLD: return "http://hl7.org/fhir/event-status";
+            case STOPPED: return "http://hl7.org/fhir/event-status";
             case COMPLETED: return "http://hl7.org/fhir/event-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/event-status";
             case UNKNOWN: return "http://hl7.org/fhir/event-status";
@@ -139,12 +139,12 @@ public class Media extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes.";
-            case INPROGRESS: return "The event is currently occurring";
-            case NOTDONE: return "The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)";
-            case SUSPENDED: return "The event has been temporarily stopped but is expected to resume in the future";
-            case ABORTED: return "The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.";
-            case COMPLETED: return "The event has now concluded";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case INPROGRESS: return "The event is currently occurring.";
+            case NOTDONE: return "The event was terminated prior to any activity beyond preparation.  I.e. The 'main' activity has not yet begun.  The boundary between preparatory and the 'main' activity is context-specific.";
+            case ONHOLD: return "The event has been temporarily stopped but is expected to resume in the future.";
+            case STOPPED: return "The event was terminated prior to the full completion of the intended activity but after at least some of the 'main' activity (beyond preparation) has occurred.";
+            case COMPLETED: return "The event has now concluded.";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
@@ -154,8 +154,8 @@ public class Media extends DomainResource {
             case PREPARATION: return "Preparation";
             case INPROGRESS: return "In Progress";
             case NOTDONE: return "Not Done";
-            case SUSPENDED: return "Suspended";
-            case ABORTED: return "Aborted";
+            case ONHOLD: return "On Hold";
+            case STOPPED: return "Stopped";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
             case UNKNOWN: return "Unknown";
@@ -175,10 +175,10 @@ public class Media extends DomainResource {
           return MediaStatus.INPROGRESS;
         if ("not-done".equals(codeString))
           return MediaStatus.NOTDONE;
-        if ("suspended".equals(codeString))
-          return MediaStatus.SUSPENDED;
-        if ("aborted".equals(codeString))
-          return MediaStatus.ABORTED;
+        if ("on-hold".equals(codeString))
+          return MediaStatus.ONHOLD;
+        if ("stopped".equals(codeString))
+          return MediaStatus.STOPPED;
         if ("completed".equals(codeString))
           return MediaStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -201,10 +201,10 @@ public class Media extends DomainResource {
           return new Enumeration<MediaStatus>(this, MediaStatus.INPROGRESS);
         if ("not-done".equals(codeString))
           return new Enumeration<MediaStatus>(this, MediaStatus.NOTDONE);
-        if ("suspended".equals(codeString))
-          return new Enumeration<MediaStatus>(this, MediaStatus.SUSPENDED);
-        if ("aborted".equals(codeString))
-          return new Enumeration<MediaStatus>(this, MediaStatus.ABORTED);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<MediaStatus>(this, MediaStatus.ONHOLD);
+        if ("stopped".equals(codeString))
+          return new Enumeration<MediaStatus>(this, MediaStatus.STOPPED);
         if ("completed".equals(codeString))
           return new Enumeration<MediaStatus>(this, MediaStatus.COMPLETED);
         if ("entered-in-error".equals(codeString))
@@ -220,10 +220,10 @@ public class Media extends DomainResource {
         return "in-progress";
       if (code == MediaStatus.NOTDONE)
         return "not-done";
-      if (code == MediaStatus.SUSPENDED)
-        return "suspended";
-      if (code == MediaStatus.ABORTED)
-        return "aborted";
+      if (code == MediaStatus.ONHOLD)
+        return "on-hold";
+      if (code == MediaStatus.STOPPED)
+        return "stopped";
       if (code == MediaStatus.COMPLETED)
         return "completed";
       if (code == MediaStatus.ENTEREDINERROR)
@@ -376,7 +376,7 @@ public class Media extends DomainResource {
     /**
      * The device used to collect the media.
      */
-    @Child(name = "device", type = {Device.class, DeviceMetric.class, DeviceComponent.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "device", type = {Device.class, DeviceMetric.class, Device.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Observing Device", formalDefinition="The device used to collect the media." )
     protected Reference device;
 
@@ -1419,7 +1419,7 @@ public class Media extends DomainResource {
         children.add(new Property("reasonCode", "CodeableConcept", "Describes why the event occurred in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
         children.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made (i.e. the target site).", 0, 1, bodySite));
         children.add(new Property("deviceName", "string", "The name of the device / manufacturer of the device  that was used to make the recording.", 0, 1, deviceName));
-        children.add(new Property("device", "Reference(Device|DeviceMetric|DeviceComponent)", "The device used to collect the media.", 0, 1, device));
+        children.add(new Property("device", "Reference(Device|DeviceMetric|Device)", "The device used to collect the media.", 0, 1, device));
         children.add(new Property("height", "positiveInt", "Height of the image in pixels (photo/video).", 0, 1, height));
         children.add(new Property("width", "positiveInt", "Width of the image in pixels (photo/video).", 0, 1, width));
         children.add(new Property("frames", "positiveInt", "The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.", 0, 1, frames));
@@ -1449,7 +1449,7 @@ public class Media extends DomainResource {
         case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Describes why the event occurred in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
         case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made (i.e. the target site).", 0, 1, bodySite);
         case 780988929: /*deviceName*/  return new Property("deviceName", "string", "The name of the device / manufacturer of the device  that was used to make the recording.", 0, 1, deviceName);
-        case -1335157162: /*device*/  return new Property("device", "Reference(Device|DeviceMetric|DeviceComponent)", "The device used to collect the media.", 0, 1, device);
+        case -1335157162: /*device*/  return new Property("device", "Reference(Device|DeviceMetric|Device)", "The device used to collect the media.", 0, 1, device);
         case -1221029593: /*height*/  return new Property("height", "positiveInt", "Height of the image in pixels (photo/video).", 0, 1, height);
         case 113126854: /*width*/  return new Property("width", "positiveInt", "Width of the image in pixels (photo/video).", 0, 1, width);
         case -1266514778: /*frames*/  return new Property("frames", "positiveInt", "The number of frames in a photo. This is used with a multi-page fax, or an imaging acquisition context that takes multiple slices in a single image, or an animated gif. If there is more than one frame, this SHALL have a value in order to alert interface software that a multi-frame capable rendering widget is required.", 0, 1, frames);
@@ -2069,7 +2069,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Media.subject", description="Who/What this Media is a record of", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="Media.subject.where(resolve() is Patient)", description="Who/What this Media is a record of", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2121,7 +2121,7 @@ public class Media extends DomainResource {
    * Path: <b>Media.device</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device", path="Media.device", description="Observing Device", type="reference", target={Device.class, DeviceComponent.class, DeviceMetric.class } )
+  @SearchParamDefinition(name="device", path="Media.device", description="Observing Device", type="reference", target={Device.class, DeviceMetric.class } )
   public static final String SP_DEVICE = "device";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device</b>

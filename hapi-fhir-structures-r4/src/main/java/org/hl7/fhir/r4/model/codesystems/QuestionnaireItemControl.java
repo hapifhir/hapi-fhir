@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,9 +45,21 @@ public enum QuestionnaireItemControl {
          */
         LIST, 
         /**
-         * Questions within the group are rows in the table with possible answers as columns
+         * Questions within the group are rows in the table with possible answers as columns.  Used for 'choice' questions.
          */
         TABLE, 
+        /**
+         * Questions within the group are columns in the table with possible answers as rows.  Used for 'choice' questions.
+         */
+        HTABLE, 
+        /**
+         * Questions within the group are columns in the table with each group repetition as a row.  Used for single-answer questions.
+         */
+        GTABLE, 
+        /**
+         * This table has one row - for the question.  Permitted answers are columns.  Used for choice questions.
+         */
+        ATABLE, 
         /**
          * The group is to be continuously visible at the top of the questionnaire
          */
@@ -137,6 +149,12 @@ public enum QuestionnaireItemControl {
           return LIST;
         if ("table".equals(codeString))
           return TABLE;
+        if ("htable".equals(codeString))
+          return HTABLE;
+        if ("gtable".equals(codeString))
+          return GTABLE;
+        if ("atable".equals(codeString))
+          return ATABLE;
         if ("header".equals(codeString))
           return HEADER;
         if ("footer".equals(codeString))
@@ -182,6 +200,9 @@ public enum QuestionnaireItemControl {
             case GROUP: return "group";
             case LIST: return "list";
             case TABLE: return "table";
+            case HTABLE: return "htable";
+            case GTABLE: return "gtable";
+            case ATABLE: return "atable";
             case HEADER: return "header";
             case FOOTER: return "footer";
             case TEXT: return "text";
@@ -211,7 +232,10 @@ public enum QuestionnaireItemControl {
           switch (this) {
             case GROUP: return "UI controls relevant to organizing groups of questions";
             case LIST: return "Questions within the group should be listed sequentially";
-            case TABLE: return "Questions within the group are rows in the table with possible answers as columns";
+            case TABLE: return "Questions within the group are rows in the table with possible answers as columns.  Used for 'choice' questions.";
+            case HTABLE: return "Questions within the group are columns in the table with possible answers as rows.  Used for 'choice' questions.";
+            case GTABLE: return "Questions within the group are columns in the table with each group repetition as a row.  Used for single-answer questions.";
+            case ATABLE: return "This table has one row - for the question.  Permitted answers are columns.  Used for choice questions.";
             case HEADER: return "The group is to be continuously visible at the top of the questionnaire";
             case FOOTER: return "The group is to be continuously visible at the bottom of the questionnaire";
             case TEXT: return "UI controls relevant to rendering questionnaire text items";
@@ -238,7 +262,10 @@ public enum QuestionnaireItemControl {
           switch (this) {
             case GROUP: return "group";
             case LIST: return "List";
-            case TABLE: return "Table";
+            case TABLE: return "Vertical Answer Table";
+            case HTABLE: return "Horizontal Answer Table";
+            case GTABLE: return "Group Table";
+            case ATABLE: return "Answer Table";
             case HEADER: return "Header";
             case FOOTER: return "Footer";
             case TEXT: return "text";

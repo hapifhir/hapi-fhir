@@ -31,6 +31,8 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -49,6 +51,7 @@ import java.util.*;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaBundleProvider.class);
 	private FhirContext myContext;
 	private IDao myDao;
 	private EntityManager myEntityManager;
@@ -114,7 +117,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		results = query.getResultList();
 
-		ArrayList<IBaseResource> retVal = new ArrayList<IBaseResource>();
+		ArrayList<IBaseResource> retVal = new ArrayList<>();
 		for (ResourceHistoryTable next : results) {
 			BaseHasResource resource;
 			resource = next;
@@ -152,25 +155,25 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity == null) {
 			ensureDependenciesInjected();
 
-			TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
-			template.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
-			return template.execute(new TransactionCallback<Boolean>() {
-				@Override
-				public Boolean doInTransaction(TransactionStatus theStatus) {
-					try {
-						setSearchEntity(mySearchDao.findByUuid(myUuid));
+			TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+			txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
+			return txTemplate.execute(s -> {
+				try {
+					setSearchEntity(mySearchDao.findByUuid(myUuid));
 
-						if (mySearchEntity == null) {
-							return false;
-						}
-
-						// Load the includes now so that they are available outside of this transaction
-						mySearchEntity.getIncludes().size();
-
-						return true;
-					} catch (NoResultException e) {
+					if (mySearchEntity == null) {
 						return false;
 					}
+
+					ourLog.trace("Retrieved search with version {} and total {}", mySearchEntity.getVersion(), mySearchEntity.getTotalCount());
+
+					// Load the includes now so that they are available outside of this transaction
+					mySearchEntity.getIncludes().size();
+
+					return true;
+				} catch (NoResultException e) {
+					return false;
 				}
 			});
 		}
@@ -250,7 +253,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		mySearchDao = theSearchDao;
 	}
 
-	void setSearchEntity(Search theSearchEntity) {
+	// Note: Leave as protected, HSPC depends on this
+	@SuppressWarnings("WeakerAccess")
+	protected void setSearchEntity(Search theSearchEntity) {
 		mySearchEntity = theSearchEntity;
 	}
 
@@ -266,7 +271,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return Math.max(0, size);
 	}
 
-	List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
+	// Note: Leave as protected, HSPC depends on this
+	@SuppressWarnings("WeakerAccess")
+	protected List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
 		Set<Long> includedPids = new HashSet<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
 			includedPids.addAll(sb.loadIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));

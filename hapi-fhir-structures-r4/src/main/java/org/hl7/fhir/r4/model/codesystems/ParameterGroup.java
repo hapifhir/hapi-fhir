@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,39 +37,39 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ParameterGroup {
 
         /**
-         * Haemodynamic Parameter Group - MDC_PGRP_HEMO
+         * Haemodynamic Parameter Group - MDC_PGRP_HEMO.
          */
         HAEMODYNAMIC, 
         /**
-         * ECG Parameter Group - MDC_PGRP_ECG
+         * ECG Parameter Group - MDC_PGRP_ECG.
          */
         ECG, 
         /**
-         * Respiratory Parameter Group - MDC_PGRP_RESP
+         * Respiratory Parameter Group - MDC_PGRP_RESP.
          */
         RESPIRATORY, 
         /**
-         * Ventilation Parameter Group - MDC_PGRP_VENT
+         * Ventilation Parameter Group - MDC_PGRP_VENT.
          */
         VENTILATION, 
         /**
-         * Neurological Parameter Group - MDC_PGRP_NEURO
+         * Neurological Parameter Group - MDC_PGRP_NEURO.
          */
         NEUROLOGICAL, 
         /**
-         * Drug Delivery Parameter Group - MDC_PGRP_DRUG
+         * Drug Delivery Parameter Group - MDC_PGRP_DRUG.
          */
         DRUGDELIVERY, 
         /**
-         * Fluid Chemistry Parameter Group - MDC_PGRP_FLUID
+         * Fluid Chemistry Parameter Group - MDC_PGRP_FLUID.
          */
         FLUIDCHEMISTRY, 
         /**
-         * Blood Chemistry Parameter Group - MDC_PGRP_BLOOD_CHEM
+         * Blood Chemistry Parameter Group - MDC_PGRP_BLOOD_CHEM.
          */
         BLOODCHEMISTRY, 
         /**
-         * Miscellaneous Parameter Group - MDC_PGRP_MISC
+         * Miscellaneous Parameter Group - MDC_PGRP_MISC.
          */
         MISCELLANEOUS, 
         /**
@@ -114,19 +114,19 @@ public enum ParameterGroup {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/parameter-group";
+          return "http://terminology.hl7.org/CodeSystem/parameter-group";
         }
         public String getDefinition() {
           switch (this) {
-            case HAEMODYNAMIC: return "Haemodynamic Parameter Group - MDC_PGRP_HEMO";
-            case ECG: return "ECG Parameter Group - MDC_PGRP_ECG";
-            case RESPIRATORY: return "Respiratory Parameter Group - MDC_PGRP_RESP";
-            case VENTILATION: return "Ventilation Parameter Group - MDC_PGRP_VENT";
-            case NEUROLOGICAL: return "Neurological Parameter Group - MDC_PGRP_NEURO";
-            case DRUGDELIVERY: return "Drug Delivery Parameter Group - MDC_PGRP_DRUG";
-            case FLUIDCHEMISTRY: return "Fluid Chemistry Parameter Group - MDC_PGRP_FLUID";
-            case BLOODCHEMISTRY: return "Blood Chemistry Parameter Group - MDC_PGRP_BLOOD_CHEM";
-            case MISCELLANEOUS: return "Miscellaneous Parameter Group - MDC_PGRP_MISC";
+            case HAEMODYNAMIC: return "Haemodynamic Parameter Group - MDC_PGRP_HEMO.";
+            case ECG: return "ECG Parameter Group - MDC_PGRP_ECG.";
+            case RESPIRATORY: return "Respiratory Parameter Group - MDC_PGRP_RESP.";
+            case VENTILATION: return "Ventilation Parameter Group - MDC_PGRP_VENT.";
+            case NEUROLOGICAL: return "Neurological Parameter Group - MDC_PGRP_NEURO.";
+            case DRUGDELIVERY: return "Drug Delivery Parameter Group - MDC_PGRP_DRUG.";
+            case FLUIDCHEMISTRY: return "Fluid Chemistry Parameter Group - MDC_PGRP_FLUID.";
+            case BLOODCHEMISTRY: return "Blood Chemistry Parameter Group - MDC_PGRP_BLOOD_CHEM.";
+            case MISCELLANEOUS: return "Miscellaneous Parameter Group - MDC_PGRP_MISC.";
             default: return "?";
           }
         }

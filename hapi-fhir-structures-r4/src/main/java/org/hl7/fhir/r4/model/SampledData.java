@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -51,9 +51,9 @@ public class SampledData extends Type implements ICompositeType {
     /**
      * The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.
      */
-    @Child(name = "origin", type = {SimpleQuantity.class}, order=0, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "origin", type = {Quantity.class}, order=0, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Zero value and units", formalDefinition="The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series." )
-    protected SimpleQuantity origin;
+    protected Quantity origin;
 
     /**
      * The length of time between sampling times, measured in milliseconds.
@@ -97,7 +97,7 @@ public class SampledData extends Type implements ICompositeType {
     @Description(shortDefinition="Decimal values with spaces, or \"E\" | \"U\" | \"L\"", formalDefinition="A series of data points which are decimal values separated by a single space (character u20). The special values \"E\" (error), \"L\" (below detection limit) and \"U\" (above detection limit) can also be used in place of a decimal value." )
     protected StringType data;
 
-    private static final long serialVersionUID = -1763278368L;
+    private static final long serialVersionUID = -1984181262L;
 
   /**
    * Constructor
@@ -109,7 +109,7 @@ public class SampledData extends Type implements ICompositeType {
   /**
    * Constructor
    */
-    public SampledData(SimpleQuantity origin, DecimalType period, PositiveIntType dimensions) {
+    public SampledData(Quantity origin, DecimalType period, PositiveIntType dimensions) {
       super();
       this.origin = origin;
       this.period = period;
@@ -119,12 +119,12 @@ public class SampledData extends Type implements ICompositeType {
     /**
      * @return {@link #origin} (The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.)
      */
-    public SimpleQuantity getOrigin() { 
+    public Quantity getOrigin() { 
       if (this.origin == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create SampledData.origin");
         else if (Configuration.doAutoCreate())
-          this.origin = new SimpleQuantity(); // cc
+          this.origin = new Quantity(); // cc
       return this.origin;
     }
 
@@ -135,7 +135,7 @@ public class SampledData extends Type implements ICompositeType {
     /**
      * @param value {@link #origin} (The base quantity that a measured value of zero represents. In addition, this provides the units of the entire measurement series.)
      */
-    public SampledData setOrigin(SimpleQuantity value) { 
+    public SampledData setOrigin(Quantity value) { 
       this.origin = value;
       return this;
     }
@@ -527,7 +527,7 @@ public class SampledData extends Type implements ICompositeType {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : new Base[] {this.origin}; // SimpleQuantity
+        case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : new Base[] {this.origin}; // Quantity
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // DecimalType
         case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
         case 1209133370: /*lowerLimit*/ return this.lowerLimit == null ? new Base[0] : new Base[] {this.lowerLimit}; // DecimalType
@@ -543,7 +543,7 @@ public class SampledData extends Type implements ICompositeType {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1008619738: // origin
-          this.origin = castToSimpleQuantity(value); // SimpleQuantity
+          this.origin = castToQuantity(value); // Quantity
           return value;
         case -991726143: // period
           this.period = castToDecimal(value); // DecimalType
@@ -571,7 +571,7 @@ public class SampledData extends Type implements ICompositeType {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("origin")) {
-          this.origin = castToSimpleQuantity(value); // SimpleQuantity
+          this.origin = castToQuantity(value); // Quantity
         } else if (name.equals("period")) {
           this.period = castToDecimal(value); // DecimalType
         } else if (name.equals("factor")) {
@@ -622,7 +622,7 @@ public class SampledData extends Type implements ICompositeType {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("origin")) {
-          this.origin = new SimpleQuantity();
+          this.origin = new Quantity();
           return this.origin;
         }
         else if (name.equals("period")) {

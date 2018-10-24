@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CopyNumberEvent {
 
         /**
-         * amplification
+         * amplification.
          */
         AMP, 
         /**
-         * deletion
+         * deletion.
          */
         DEL, 
         /**
-         * loss of function
+         * loss of function.
          */
         LOF, 
         /**
@@ -72,13 +72,13 @@ public enum CopyNumberEvent {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/copy-number-event";
+          return "http://terminology.hl7.org/CodeSystem/copy-number-event";
         }
         public String getDefinition() {
           switch (this) {
-            case AMP: return "amplification";
-            case DEL: return "deletion";
-            case LOF: return "loss of function";
+            case AMP: return "amplification.";
+            case DEL: return "deletion.";
+            case LOF: return "loss of function.";
             default: return "?";
           }
         }

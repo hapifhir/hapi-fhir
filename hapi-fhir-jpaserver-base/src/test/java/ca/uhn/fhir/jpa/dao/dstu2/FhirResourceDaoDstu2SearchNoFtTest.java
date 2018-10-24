@@ -462,12 +462,12 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	public void testSearchCompositeParamDate() {
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
-		o1.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01T11:11:11")).setEnd(new DateTimeDt("2001-01-01T12:11:11")));
+		o1.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-01T11:11:11Z")).setEnd(new DateTimeDt("2001-01-01T12:11:11Z")));
 		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation o2 = new Observation();
 		o2.getCode().addCoding().setSystem("foo").setCode("testSearchCompositeParamDateN01");
-		o2.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-02T12:12:12")).setEnd(new DateTimeDt("2001-01-02T12:11:11")));
+		o2.setValue(new PeriodDt().setStart(new DateTimeDt("2001-01-02T12:12:12Z")).setEnd(new DateTimeDt("2001-01-02T12:11:11Z")));
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
 
 		{
@@ -481,7 +481,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		{
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamDateN01");
 			// TODO: this should also work with ">2001-01-01T15:12:12" since the two times only have a lower bound
-			DateParam v1 = new DateParam(">2001-01-01T10:12:12");
+			DateParam v1 = new DateParam(">2001-01-01T10:12:12Z");
 			CompositeParam<TokenParam, DateParam> val = new CompositeParam<TokenParam, DateParam>(v0, v1);
 			IBundleProvider result = myObservationDao.search(new SearchParameterMap(Observation.SP_CODE_VALUE_DATE, val).setLoadSynchronous(true));
 			assertEquals(2, result.size().intValue());

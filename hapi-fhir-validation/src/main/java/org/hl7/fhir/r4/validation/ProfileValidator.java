@@ -82,7 +82,7 @@ public class ProfileValidator extends BaseValidator {
           warning(errors, IssueType.BUSINESSRULE, diffElement.getId(), !checkMustSupport || snapElement.hasMustSupport(), "Elements included in the differential should declare mustSupport");
           if (checkAggregation) {
             for (TypeRefComponent type : snapElement.getType()) {
-              if (type.getCode().equals("http://hl7.org/fhir/Reference") || type.getCode().equals("http://hl7.org/fhir/canonical")) {
+              if ("http://hl7.org/fhir/Reference".equals(type.getCode()) || "http://hl7.org/fhir/canonical".equals(type.getCode())) {
                 warning(errors, IssueType.BUSINESSRULE, diffElement.getId(), type.hasAggregation(), "Elements with type Reference or canonical should declare aggregation");
               }
             }

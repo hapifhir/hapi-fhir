@@ -446,7 +446,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theResource.getIdElement());
-		msg.setOperationType(RestOperationTypeEnum.CREATE);
+		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		msg.setNewPayload(myCtx, theResource);
 		submitResourceModified(msg);
 	}
@@ -455,7 +455,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theResource.getIdElement());
-		msg.setOperationType(RestOperationTypeEnum.DELETE);
+		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.DELETE);
 		submitResourceModified(msg);
 	}
 
@@ -467,7 +467,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	void submitResourceModifiedForUpdate(IBaseResource theNewResource) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theNewResource.getIdElement());
-		msg.setOperationType(RestOperationTypeEnum.UPDATE);
+		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 		msg.setNewPayload(myCtx, theNewResource);
 		submitResourceModified(msg);
 	}
@@ -482,6 +482,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCommit() {
+					// FIXME: remove
+					ourLog.info("** Sending processing message " + theMessage + " for: " + theMessage.getNewPayload(myCtx));
 					ourLog.trace("Sending resource modified message to processing channel");
 					getProcessingChannel().send(new ResourceModifiedJsonMessage(theMessage));
 				}
@@ -513,8 +515,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@PostConstruct
 	public void start() {
 		for (IFhirResourceDao<?> next : myResourceDaos) {
-			if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
-				mySubscriptionDao = next;
+			if (next.getResourceType() != null) {
+				if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
+					mySubscriptionDao = next;
+				}
 			}
 		}
 		Validate.notNull(mySubscriptionDao);
@@ -567,7 +571,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		});
 	}
 
-	protected void submitResourceModified(final ResourceModifiedMessage theMsg) {
+	/**
+	 * This is an internal API - Use with caution!
+	 */
+	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		mySubscriptionActivatingSubscriber.handleMessage(theMsg.getOperationType(), theMsg.getId(myCtx), theMsg.getNewPayload(myCtx));
 		sendToProcessingChannel(theMsg);
 	}

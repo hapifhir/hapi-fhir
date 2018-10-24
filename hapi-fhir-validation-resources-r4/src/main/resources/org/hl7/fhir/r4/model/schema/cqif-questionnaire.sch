@@ -41,13 +41,13 @@
       <sch:assert test="not(f:type/@value=('group', 'display') and f:*[starts-with(local-name(.), 'initial')])">Read-only can't be specified for &quot;display&quot; items (inherited)</sch:assert>
       <sch:assert test="not(f:type/@value=('group', 'display') and f:*[starts-with(local-name(.), 'initial')])">Initial values can't be specified for groups or display items (inherited)</sch:assert>
       <sch:assert test="not(f:type/@value='display' and (f:required or f:repeats))">Required and repeat aren't permitted for display items (inherited)</sch:assert>
-      <sch:assert test="f:type/@value=('choice','open-choice','decimal','integer','date','dateTime','time','string','quantity',') or not(f:option or f:options)">Only 'choice' items can have options (inherited)</sch:assert>
-      <sch:assert test="not(f:options and f:option)">A question cannot have both option and options (inherited)</sch:assert>
+      <sch:assert test="f:type/@value=('choice','open-choice','decimal','integer','date','dateTime','time','string','quantity',') or not(f:answerOption or f:answerValueSet)">Only 'choice' items can have answerValueSet (inherited)</sch:assert>
+      <sch:assert test="not(f:answerValueSet and f:answerOption)">A question cannot have both answerOption and answerValueSet (inherited)</sch:assert>
       <sch:assert test="not(f:type/@value='display' and f:code)">Display items cannot have a &quot;code&quot; asserted (inherited)</sch:assert>
       <sch:assert test="f:type/@value=('boolean', 'decimal', 'integer', 'open-choice', 'string', 'text', 'url') or not(f:maxLength)">Maximum length can only be declared for simple question types (inherited)</sch:assert>
       <sch:assert test="not((f:type/@value='group' and not(f:item)) or (f:type/@value='display' and f:item))">Group items must have nested items, display items cannot have nested items (inherited)</sch:assert>
-      <sch:assert test="not(f:option) or not(count(f:*[starts-with(local-name(.), 'initial')]))">If one or more option is present, initial[x] must be missing (inherited)</sch:assert>
-      <sch:assert test="not(f:option) or not(count(f:*[starts-with(local-name(.), 'initial')]))">If there are more than one enableWhen, enableBehavior must be specified (inherited)</sch:assert>
+      <sch:assert test="not(f:answerOption) or not(count(f:*[starts-with(local-name(.), 'initial')]))">If one or more answerOption is present, initial[x] must be missing (inherited)</sch:assert>
+      <sch:assert test="not(f:answerOption) or not(count(f:*[starts-with(local-name(.), 'initial')]))">If there are more than one enableWhen, enableBehavior must be specified (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
@@ -69,14 +69,14 @@
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
-    <sch:title>Questionnaire.item.option</sch:title>
-    <sch:rule context="f:Questionnaire/f:item/f:option">
+    <sch:title>Questionnaire.item.answerOption</sch:title>
+    <sch:rule context="f:Questionnaire/f:item/f:answerOption">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
-    <sch:title>Questionnaire.item.option.extension</sch:title>
-    <sch:rule context="f:Questionnaire/f:item/f:option/f:extension">
+    <sch:title>Questionnaire.item.answerOption.extension</sch:title>
+    <sch:rule context="f:Questionnaire/f:item/f:answerOption/f:extension">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
       <sch:assert test="exists(f:extension)!=exists(f:*[starts-with(local-name(.), 'value')])">Must have either extensions or value[x], not both (inherited)</sch:assert>
     </sch:rule>

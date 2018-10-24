@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ReportStatusCodes {
 
         /**
-         * All test operations have completed
+         * All test operations have completed.
          */
         COMPLETED, 
         /**
-         * A test operations is currently executing
+         * A test operations is currently executing.
          */
         INPROGRESS, 
         /**
-         * A test operation is waiting for an external client request
+         * A test operation is waiting for an external client request.
          */
         WAITING, 
         /**
-         * The test script execution was manually stopped
+         * The test script execution was manually stopped.
          */
         STOPPED, 
         /**
-         * This test report was entered or created in error
+         * This test report was entered or created in error.
          */
         ENTEREDINERROR, 
         /**
@@ -90,11 +90,11 @@ public enum ReportStatusCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLETED: return "All test operations have completed";
-            case INPROGRESS: return "A test operations is currently executing";
-            case WAITING: return "A test operation is waiting for an external client request";
-            case STOPPED: return "The test script execution was manually stopped";
-            case ENTEREDINERROR: return "This test report was entered or created in error";
+            case COMPLETED: return "All test operations have completed.";
+            case INPROGRESS: return "A test operations is currently executing.";
+            case WAITING: return "A test operation is waiting for an external client request.";
+            case STOPPED: return "The test script execution was manually stopped.";
+            case ENTEREDINERROR: return "This test report was entered or created in error.";
             default: return "?";
           }
         }

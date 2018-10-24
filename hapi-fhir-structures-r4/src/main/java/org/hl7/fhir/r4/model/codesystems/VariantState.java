@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum VariantState {
 
         /**
-         * the variant is detected
+         * the variant is detected.
          */
         POSITIVE, 
         /**
-         * no variant is detected
+         * no variant is detected.
          */
         NEGATIVE, 
         /**
-         * result of the variant is missing
+         * result of the variant is missing.
          */
         ABSENT, 
         /**
@@ -72,13 +72,13 @@ public enum VariantState {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/variant-state";
+          return "http://terminology.hl7.org/CodeSystem/variant-state";
         }
         public String getDefinition() {
           switch (this) {
-            case POSITIVE: return "the variant is detected";
-            case NEGATIVE: return "no variant is detected";
-            case ABSENT: return "result of the variant is missing";
+            case POSITIVE: return "the variant is detected.";
+            case NEGATIVE: return "no variant is detected.";
+            case ABSENT: return "result of the variant is missing.";
             default: return "?";
           }
         }

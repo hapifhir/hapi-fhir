@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.TypeDetails;
 import org.hl7.fhir.r4.utils.ToolingExtensions;
+import org.hl7.fhir.r4.utils.TypesUtilities;
 import org.hl7.fhir.utilities.Utilities;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.DefinitionException;
@@ -88,7 +89,10 @@ public class Property {
 			} else
         throw new Error("logic error, gettype when types > 1, name mismatch for "+elementName+" on at "+ed.getPath());
     } else if (ed.getType().get(0).getCode() == null) {
-      return structure.getId();
+      if (Utilities.existsInList(ed.getId(), "Element.id", "Extension.url"))
+        return "string";
+      else
+        return structure.getId();
 		} else
       return ed.getType().get(0).getCode();
 	}
@@ -135,8 +139,10 @@ public class Property {
 	 * @param E.g. "integer"
 	 */
 	public boolean isPrimitive(String code) {
-		StructureDefinition sd = context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+code);
-      return sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;
+	  return TypesUtilities.isPrimitive(code);
+	 // was this... but this can be very inefficient compared to hard coding the list
+//		StructureDefinition sd = context.fetchTypeDefinition(code);
+//      return sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE;
 	}
 
 	private String lowFirst(String t) {
@@ -191,7 +197,7 @@ public class Property {
   		return false;
   	StructureDefinition sd = context.fetchResource(StructureDefinition.class, structure.getUrl().substring(0, structure.getUrl().lastIndexOf("/")+1)+getType(name));
   	if (sd == null)
-  	  sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(getType(name)));
+  	  sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(getType(name), context.getOverrideVersionNs()));
     if (sd != null && sd.getKind() == StructureDefinitionKind.PRIMITIVETYPE)
       return true;
   	if (sd == null || sd.getKind() != StructureDefinitionKind.LOGICAL)
@@ -274,7 +280,7 @@ public class Property {
               assert aType.getProfile().size() == 1; 
               url = aType.getProfile().get(0).getValue();
             } else {
-              url = ProfileUtilities.sdNs(t);
+              url = ProfileUtilities.sdNs(t, context.getOverrideVersionNs());
             }
             break;
           }

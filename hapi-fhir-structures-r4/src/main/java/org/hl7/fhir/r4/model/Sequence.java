@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,20 +46,20 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Raw data describing a biological sequence.
  */
-@ResourceDef(name="Sequence", profile="http://hl7.org/fhir/Profile/Sequence")
+@ResourceDef(name="Sequence", profile="http://hl7.org/fhir/StructureDefinition/Sequence")
 public class Sequence extends DomainResource {
 
     public enum SequenceType {
         /**
-         * Amino acid sequence
+         * Amino acid sequence.
          */
         AA, 
         /**
-         * DNA Sequence
+         * DNA Sequence.
          */
         DNA, 
         /**
-         * RNA Sequence
+         * RNA Sequence.
          */
         RNA, 
         /**
@@ -98,9 +98,9 @@ public class Sequence extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case AA: return "Amino acid sequence";
-            case DNA: return "DNA Sequence";
-            case RNA: return "RNA Sequence";
+            case AA: return "Amino acid sequence.";
+            case DNA: return "DNA Sequence.";
+            case RNA: return "RNA Sequence.";
             default: return "?";
           }
         }
@@ -163,7 +163,7 @@ public class Sequence extends DomainResource {
          */
         SENSE, 
         /**
-         * Antisense orientation of reference sequence
+         * Antisense orientation of reference sequence.
          */
         ANTISENSE, 
         /**
@@ -199,7 +199,7 @@ public class Sequence extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case SENSE: return "Sense orientation of reference sequence.";
-            case ANTISENSE: return "Antisense orientation of reference sequence";
+            case ANTISENSE: return "Antisense orientation of reference sequence.";
             default: return "?";
           }
         }
@@ -251,11 +251,11 @@ public class Sequence extends DomainResource {
 
     public enum StrandType {
         /**
-         * Watson strand of reference sequence
+         * Watson strand of reference sequence.
          */
         WATSON, 
         /**
-         * Crick strand of reference sequence
+         * Crick strand of reference sequence.
          */
         CRICK, 
         /**
@@ -290,8 +290,8 @@ public class Sequence extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case WATSON: return "Watson strand of reference sequence";
-            case CRICK: return "Crick strand of reference sequence";
+            case WATSON: return "Watson strand of reference sequence.";
+            case CRICK: return "Crick strand of reference sequence.";
             default: return "?";
           }
         }
@@ -343,15 +343,15 @@ public class Sequence extends DomainResource {
 
     public enum QualityType {
         /**
-         * INDEL Comparison
+         * INDEL Comparison.
          */
         INDEL, 
         /**
-         * SNP Comparison
+         * SNP Comparison.
          */
         SNP, 
         /**
-         * UNKNOWN Comparison
+         * UNKNOWN Comparison.
          */
         UNKNOWN, 
         /**
@@ -390,9 +390,9 @@ public class Sequence extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case INDEL: return "INDEL Comparison";
-            case SNP: return "SNP Comparison";
-            case UNKNOWN: return "UNKNOWN Comparison";
+            case INDEL: return "INDEL Comparison.";
+            case SNP: return "SNP Comparison.";
+            case UNKNOWN: return "UNKNOWN Comparison.";
             default: return "?";
           }
         }
@@ -451,11 +451,11 @@ public class Sequence extends DomainResource {
 
     public enum RepositoryType {
         /**
-         * When URL is clicked, the resource can be seen directly (by webpage or by download link format)
+         * When URL is clicked, the resource can be seen directly (by webpage or by download link format).
          */
         DIRECTLINK, 
         /**
-         * When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format)
+         * When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format).
          */
         OPENAPI, 
         /**
@@ -514,8 +514,8 @@ public class Sequence extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case DIRECTLINK: return "When URL is clicked, the resource can be seen directly (by webpage or by download link format)";
-            case OPENAPI: return "When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format)";
+            case DIRECTLINK: return "When URL is clicked, the resource can be seen directly (by webpage or by download link format).";
+            case OPENAPI: return "When the API method (e.g. [base_url]/[parameter]) related with the URL of the website is executed, the resource can be seen directly (usually in JSON or XML format).";
             case LOGIN: return "When logged into the website, the resource can be seen.";
             case OAUTH: return "When logged in and  follow the API in the website related with URL, the resource can be seen.";
             case OTHER: return "Some other complicated or particular way to get resource from URL.";

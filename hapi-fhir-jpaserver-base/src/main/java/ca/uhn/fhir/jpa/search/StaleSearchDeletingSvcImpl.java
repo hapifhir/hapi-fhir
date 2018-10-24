@@ -24,7 +24,6 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
-import ca.uhn.fhir.jpa.entity.Search;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.InstantType;
@@ -33,13 +32,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Date;
 
 /**
@@ -48,6 +46,12 @@ import java.util.Date;
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	public static final long DEFAULT_CUTOFF_SLACK = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
+	/*
+	 * Be careful increasing this number! We use the number of params here in a
+	 * DELETE FROM foo WHERE params IN (aaaa)
+	 * type query and this can fail if we have 1000s of params
+	 */
+	public static int ourMaximumResultsToDelete = 500;
 	private static Long ourNowForUnitTests;
 	/*
 	 * We give a bit of extra leeway just to avoid race conditions where a query result
@@ -65,13 +69,32 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	private ISearchResultDao mySearchResultDao;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
+	@PersistenceContext()
+	private EntityManager myEntityManager;
 
 	private void deleteSearch(final Long theSearchPid) {
 		mySearchDao.findById(theSearchPid).ifPresent(searchToDelete -> {
 			ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
 			mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
-			mySearchResultDao.deleteForSearch(searchToDelete.getId());
-			mySearchDao.delete(searchToDelete);
+
+			/*
+			 * Note, we're only deleting up to 500 results in an individual search here. This
+			 * is to prevent really long running transactions in cases where there are
+			 * huge searches with tons of results in them. By the time we've gotten here
+			 * we have marked the parent Search entity as deleted, so it's not such a
+			 * huge deal to be only partially deleting search results. They'll get deleted
+			 * eventually
+			 */
+			int max = ourMaximumResultsToDelete;
+			Slice<Long> resultPids = mySearchResultDao.findForSearch(PageRequest.of(0, max), searchToDelete.getId());
+			if (resultPids.hasContent()) {
+				mySearchResultDao.deleteByIds(resultPids.getContent());
+			}
+
+			// Only delete if we don't have results left in this search
+			if (resultPids.getNumberOfElements() < max) {
+				mySearchDao.deleteByPid(searchToDelete.getId());
+			}
 		});
 	}
 
@@ -95,31 +118,25 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		ourLog.debug("Searching for searches which are before {}", cutoff);
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
-		final Slice<Long> toDelete = tt.execute(new TransactionCallback<Slice<Long>>() {
-			@Override
-			public Slice<Long> doInTransaction(TransactionStatus theStatus) {
-				return mySearchDao.findWhereLastReturnedBefore(cutoff, new PageRequest(0, 1000));
-			}
-		});
-
+		final Slice<Long> toDelete = tt.execute(theStatus ->
+			mySearchDao.findWhereLastReturnedBefore(cutoff, PageRequest.of(0, 1000))
+		);
 		for (final Long nextSearchToDelete : toDelete) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
-			tt.execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(TransactionStatus status) {
-					deleteSearch(nextSearchToDelete);
-				}
+			tt.execute(t -> {
+				mySearchDao.updateDeleted(nextSearchToDelete, true);
+				return null;
+			});
+
+			tt.execute(t -> {
+				deleteSearch(nextSearchToDelete);
+				return null;
 			});
 		}
 
 		int count = toDelete.getContent().size();
 		if (count > 0) {
-			long total = tt.execute(new TransactionCallback<Long>() {
-				@Override
-				public Long doInTransaction(TransactionStatus theStatus) {
-					return mySearchDao.count();
-				}
-			});
+			long total = tt.execute(t -> mySearchDao.count());
 			ourLog.info("Deleted {} searches, {} remaining", count, total);
 		}
 
@@ -137,6 +154,11 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@VisibleForTesting
 	public void setCutoffSlackForUnitTest(long theCutoffSlack) {
 		myCutoffSlack = theCutoffSlack;
+	}
+
+	@VisibleForTesting
+	public static void setMaximumResultsToDeleteForUnitTest(int theMaximumResultsToDelete) {
+		ourMaximumResultsToDelete = theMaximumResultsToDelete;
 	}
 
 	private static long now() {

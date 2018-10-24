@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -47,6 +47,8 @@ public class ImmunizationOriginEnumFactory implements EnumFactory<ImmunizationOr
       return ImmunizationOrigin.RECALL;
     if ("school".equals(codeString))
       return ImmunizationOrigin.SCHOOL;
+    if ("jurisdiction".equals(codeString))
+      return ImmunizationOrigin.JURISDICTION;
     throw new IllegalArgumentException("Unknown ImmunizationOrigin code '"+codeString+"'");
   }
 
@@ -59,6 +61,8 @@ public class ImmunizationOriginEnumFactory implements EnumFactory<ImmunizationOr
       return "recall";
     if (code == ImmunizationOrigin.SCHOOL)
       return "school";
+    if (code == ImmunizationOrigin.JURISDICTION)
+      return "jurisdiction";
     return "?";
   }
 

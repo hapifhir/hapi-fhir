@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,28 +45,28 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Information about a user's current session.
  */
-@ResourceDef(name="UserSession", profile="http://hl7.org/fhir/Profile/UserSession")
+@ResourceDef(name="UserSession", profile="http://hl7.org/fhir/StructureDefinition/UserSession")
 public class UserSession extends DomainResource {
 
     public enum UserSessionStatus {
         /**
-         * The user session is activating
+         * The user session is activating.
          */
         ACTIVATING, 
         /**
-         * The user session is active
+         * The user session is active.
          */
         ACTIVE, 
         /**
-         * The user session is suspended
+         * The user session is suspended.
          */
         SUSPENDED, 
         /**
-         * The user session is closing
+         * The user session is closing.
          */
         CLOSING, 
         /**
-         * The user session is closed
+         * The user session is closed.
          */
         CLOSED, 
         /**
@@ -113,11 +113,11 @@ public class UserSession extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVATING: return "The user session is activating";
-            case ACTIVE: return "The user session is active";
-            case SUSPENDED: return "The user session is suspended";
-            case CLOSING: return "The user session is closing";
-            case CLOSED: return "The user session is closed";
+            case ACTIVATING: return "The user session is activating.";
+            case ACTIVE: return "The user session is active.";
+            case SUSPENDED: return "The user session is suspended.";
+            case CLOSING: return "The user session is closing.";
+            case CLOSED: return "The user session is closed.";
             default: return "?";
           }
         }
@@ -190,11 +190,11 @@ public class UserSession extends DomainResource {
 
     public enum UserSessionStatusSource {
         /**
-         * The status was reported by the user
+         * The status was reported by the user.
          */
         USER, 
         /**
-         * The status was reported by the system
+         * The status was reported by the system.
          */
         SYSTEM, 
         /**
@@ -229,8 +229,8 @@ public class UserSession extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case USER: return "The status was reported by the user";
-            case SYSTEM: return "The status was reported by the system";
+            case USER: return "The status was reported by the user.";
+            case SYSTEM: return "The status was reported by the system.";
             default: return "?";
           }
         }
@@ -1456,7 +1456,7 @@ public class UserSession extends DomainResource {
    * Path: <b>UserSession.focus</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="UserSession.focus", description="The identity of a patient to search for user sessions", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="UserSession.focus.where(resolve() is Patient)", description="The identity of a patient to search for user sessions", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

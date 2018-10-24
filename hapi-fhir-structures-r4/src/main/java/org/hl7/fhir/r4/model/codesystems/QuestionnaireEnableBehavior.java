@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum QuestionnaireEnableBehavior {
 
         /**
-         * Enable the question when all the enableWhen criteria are satisfied
+         * Enable the question when all the enableWhen criteria are satisfied.
          */
         ALL, 
         /**
-         * Enable the question when any of the enableWhen criteria are satisfied
+         * Enable the question when any of the enableWhen criteria are satisfied.
          */
         ANY, 
         /**
@@ -69,8 +69,8 @@ public enum QuestionnaireEnableBehavior {
         }
         public String getDefinition() {
           switch (this) {
-            case ALL: return "Enable the question when all the enableWhen criteria are satisfied";
-            case ANY: return "Enable the question when any of the enableWhen criteria are satisfied";
+            case ALL: return "Enable the question when all the enableWhen criteria are satisfied.";
+            case ANY: return "Enable the question when any of the enableWhen criteria are satisfied.";
             default: return "?";
           }
         }

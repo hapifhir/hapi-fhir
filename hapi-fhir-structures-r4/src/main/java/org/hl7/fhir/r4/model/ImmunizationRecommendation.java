@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A patient's point-in-time set of recommendations (i.e. forecasting) according to a published schedule with optional supporting justification.
  */
-@ResourceDef(name="ImmunizationRecommendation", profile="http://hl7.org/fhir/Profile/ImmunizationRecommendation")
+@ResourceDef(name="ImmunizationRecommendation", profile="http://hl7.org/fhir/StructureDefinition/ImmunizationRecommendation")
 public class ImmunizationRecommendation extends DomainResource {
 
     @Block()
@@ -1823,21 +1823,21 @@ public class ImmunizationRecommendation extends DomainResource {
    * Search parameter: <b>dose-sequence</b>
    * <p>
    * Description: <b>Recommended number of doses for immunity</b><br>
-   * Type: <b>number</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.seriesDoses[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.seriesDoses", description="Recommended number of doses for immunity", type="number" )
+  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.seriesDoses", description="Recommended number of doses for immunity", type="token" )
   public static final String SP_DOSE_SEQUENCE = "dose-sequence";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dose-sequence</b>
    * <p>
    * Description: <b>Recommended number of doses for immunity</b><br>
-   * Type: <b>number</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.seriesDoses[x]</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.NumberClientParam DOSE_SEQUENCE = new ca.uhn.fhir.rest.gclient.NumberClientParam(SP_DOSE_SEQUENCE);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam DOSE_SEQUENCE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_DOSE_SEQUENCE);
 
  /**
    * Search parameter: <b>target-disease</b>
@@ -1909,21 +1909,21 @@ public class ImmunizationRecommendation extends DomainResource {
    * Search parameter: <b>dose-number</b>
    * <p>
    * Description: <b>Recommended dose number within series</b><br>
-   * Type: <b>number</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.doseNumber[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number within series", type="number" )
+  @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number within series", type="token" )
   public static final String SP_DOSE_NUMBER = "dose-number";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>dose-number</b>
    * <p>
    * Description: <b>Recommended dose number within series</b><br>
-   * Type: <b>number</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>ImmunizationRecommendation.recommendation.doseNumber[x]</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.NumberClientParam DOSE_NUMBER = new ca.uhn.fhir.rest.gclient.NumberClientParam(SP_DOSE_NUMBER);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam DOSE_NUMBER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_DOSE_NUMBER);
 
  /**
    * Search parameter: <b>information</b>

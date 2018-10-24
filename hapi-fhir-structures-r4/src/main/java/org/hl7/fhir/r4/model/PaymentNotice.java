@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the status of the payment for goods and services rendered, and the request and response resource references.
  */
-@ResourceDef(name="PaymentNotice", profile="http://hl7.org/fhir/Profile/PaymentNotice")
+@ResourceDef(name="PaymentNotice", profile="http://hl7.org/fhir/StructureDefinition/PaymentNotice")
 public class PaymentNotice extends DomainResource {
 
     public enum PaymentNoticeStatus {
@@ -212,10 +212,10 @@ public class PaymentNotice extends DomainResource {
     protected Resource responseTarget;
 
     /**
-     * The date when the above payment action occurrred.
+     * The date when the above payment action occurred.
      */
     @Child(name = "statusDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Payment or clearing date", formalDefinition="The date when the above payment action occurrred." )
+    @Description(shortDefinition="Payment or clearing date", formalDefinition="The date when the above payment action occurred." )
     protected DateType statusDate;
 
     /**
@@ -447,7 +447,7 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @return {@link #statusDate} (The date when the above payment action occurrred.). This is the underlying object with id, value and extensions. The accessor "getStatusDate" gives direct access to the value
+     * @return {@link #statusDate} (The date when the above payment action occurred.). This is the underlying object with id, value and extensions. The accessor "getStatusDate" gives direct access to the value
      */
     public DateType getStatusDateElement() { 
       if (this.statusDate == null)
@@ -467,7 +467,7 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @param value {@link #statusDate} (The date when the above payment action occurrred.). This is the underlying object with id, value and extensions. The accessor "getStatusDate" gives direct access to the value
+     * @param value {@link #statusDate} (The date when the above payment action occurred.). This is the underlying object with id, value and extensions. The accessor "getStatusDate" gives direct access to the value
      */
     public PaymentNotice setStatusDateElement(DateType value) { 
       this.statusDate = value;
@@ -475,14 +475,14 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @return The date when the above payment action occurrred.
+     * @return The date when the above payment action occurred.
      */
     public Date getStatusDate() { 
       return this.statusDate == null ? null : this.statusDate.getValue();
     }
 
     /**
-     * @param value The date when the above payment action occurrred.
+     * @param value The date when the above payment action occurred.
      */
     public PaymentNotice setStatusDate(Date value) { 
       if (value == null)
@@ -657,7 +657,7 @@ public class PaymentNotice extends DomainResource {
         children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
         children.add(new Property("request", "Reference(Any)", "Reference of resource for which payment is being made.", 0, 1, request));
         children.add(new Property("response", "Reference(Any)", "Reference of response to resource for which payment is being made.", 0, 1, response));
-        children.add(new Property("statusDate", "date", "The date when the above payment action occurrred.", 0, 1, statusDate));
+        children.add(new Property("statusDate", "date", "The date when the above payment action occurred.", 0, 1, statusDate));
         children.add(new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created));
         children.add(new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, target));
         children.add(new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider));
@@ -671,7 +671,7 @@ public class PaymentNotice extends DomainResource {
         case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
         case 1095692943: /*request*/  return new Property("request", "Reference(Any)", "Reference of resource for which payment is being made.", 0, 1, request);
         case -340323263: /*response*/  return new Property("response", "Reference(Any)", "Reference of response to resource for which payment is being made.", 0, 1, response);
-        case 247524032: /*statusDate*/  return new Property("statusDate", "date", "The date when the above payment action occurrred.", 0, 1, statusDate);
+        case 247524032: /*statusDate*/  return new Property("statusDate", "date", "The date when the above payment action occurred.", 0, 1, statusDate);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created);
         case -880905839: /*target*/  return new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, target);
         case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider);

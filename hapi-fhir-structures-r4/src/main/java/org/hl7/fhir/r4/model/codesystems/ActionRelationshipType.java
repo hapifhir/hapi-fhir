@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,39 +37,39 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActionRelationshipType {
 
         /**
-         * The action must be performed before the start of the related action
+         * The action must be performed before the start of the related action.
          */
         BEFORESTART, 
         /**
-         * The action must be performed before the related action
+         * The action must be performed before the related action.
          */
         BEFORE, 
         /**
-         * The action must be performed before the end of the related action
+         * The action must be performed before the end of the related action.
          */
         BEFOREEND, 
         /**
-         * The action must be performed concurrent with the start of the related action
+         * The action must be performed concurrent with the start of the related action.
          */
         CONCURRENTWITHSTART, 
         /**
-         * The action must be performed concurrent with the related action
+         * The action must be performed concurrent with the related action.
          */
         CONCURRENT, 
         /**
-         * The action must be performed concurrent with the end of the related action
+         * The action must be performed concurrent with the end of the related action.
          */
         CONCURRENTWITHEND, 
         /**
-         * The action must be performed after the start of the related action
+         * The action must be performed after the start of the related action.
          */
         AFTERSTART, 
         /**
-         * The action must be performed after the related action
+         * The action must be performed after the related action.
          */
         AFTER, 
         /**
-         * The action must be performed after the end of the related action
+         * The action must be performed after the end of the related action.
          */
         AFTEREND, 
         /**
@@ -118,15 +118,15 @@ public enum ActionRelationshipType {
         }
         public String getDefinition() {
           switch (this) {
-            case BEFORESTART: return "The action must be performed before the start of the related action";
-            case BEFORE: return "The action must be performed before the related action";
-            case BEFOREEND: return "The action must be performed before the end of the related action";
-            case CONCURRENTWITHSTART: return "The action must be performed concurrent with the start of the related action";
-            case CONCURRENT: return "The action must be performed concurrent with the related action";
-            case CONCURRENTWITHEND: return "The action must be performed concurrent with the end of the related action";
-            case AFTERSTART: return "The action must be performed after the start of the related action";
-            case AFTER: return "The action must be performed after the related action";
-            case AFTEREND: return "The action must be performed after the end of the related action";
+            case BEFORESTART: return "The action must be performed before the start of the related action.";
+            case BEFORE: return "The action must be performed before the related action.";
+            case BEFOREEND: return "The action must be performed before the end of the related action.";
+            case CONCURRENTWITHSTART: return "The action must be performed concurrent with the start of the related action.";
+            case CONCURRENT: return "The action must be performed concurrent with the related action.";
+            case CONCURRENTWITHEND: return "The action must be performed concurrent with the end of the related action.";
+            case AFTERSTART: return "The action must be performed after the start of the related action.";
+            case AFTER: return "The action must be performed after the related action.";
+            case AFTEREND: return "The action must be performed after the end of the related action.";
             default: return "?";
           }
         }

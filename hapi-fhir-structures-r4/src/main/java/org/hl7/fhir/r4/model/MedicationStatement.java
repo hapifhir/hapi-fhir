@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
  */
-@ResourceDef(name="MedicationStatement", profile="http://hl7.org/fhir/Profile/MedicationStatement")
+@ResourceDef(name="MedicationStatement", profile="http://hl7.org/fhir/StructureDefinition/MedicationStatement")
 public class MedicationStatement extends DomainResource {
 
     public enum MedicationStatementStatus {
@@ -58,7 +58,7 @@ public class MedicationStatement extends DomainResource {
          */
         COMPLETED, 
         /**
-         * Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account
+         * Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account.
          */
         ENTEREDINERROR, 
         /**
@@ -66,7 +66,7 @@ public class MedicationStatement extends DomainResource {
          */
         INTENDED, 
         /**
-         * Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error
+         * Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error.
          */
         STOPPED, 
         /**
@@ -78,7 +78,7 @@ public class MedicationStatement extends DomainResource {
          */
         UNKNOWN, 
         /**
-         * The medication was not consumed by the patient
+         * The medication was not consumed by the patient.
          */
         NOTTAKEN, 
         /**
@@ -139,12 +139,12 @@ public class MedicationStatement extends DomainResource {
           switch (this) {
             case ACTIVE: return "The medication is still being taken.";
             case COMPLETED: return "The medication is no longer being taken.";
-            case ENTEREDINERROR: return "Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account";
+            case ENTEREDINERROR: return "Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account.";
             case INTENDED: return "The medication may be taken at some time in the future.";
-            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error";
+            case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error.";
             case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case UNKNOWN: return "The state of the medication use is not currently known.";
-            case NOTTAKEN: return "The medication was not consumed by the patient";
+            case NOTTAKEN: return "The medication was not consumed by the patient.";
             default: return "?";
           }
         }
@@ -284,10 +284,10 @@ public class MedicationStatement extends DomainResource {
     protected List<CodeableConcept> statusReason;
 
     /**
-     * Indicates type of medication statement and where the medication is expected to be consumed or administered.
+     * Indicates where the medication is expected to be consumed or administered.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Type of medication usage", formalDefinition="Indicates type of medication statement and where the medication is expected to be consumed or administered." )
+    @Description(shortDefinition="Type of medication usage", formalDefinition="Indicates where the medication is expected to be consumed or administered." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-statement-category")
     protected CodeableConcept category;
 
@@ -692,7 +692,7 @@ public class MedicationStatement extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (Indicates type of medication statement and where the medication is expected to be consumed or administered.)
+     * @return {@link #category} (Indicates where the medication is expected to be consumed or administered.)
      */
     public CodeableConcept getCategory() { 
       if (this.category == null)
@@ -708,7 +708,7 @@ public class MedicationStatement extends DomainResource {
     }
 
     /**
-     * @param value {@link #category} (Indicates type of medication statement and where the medication is expected to be consumed or administered.)
+     * @param value {@link #category} (Indicates where the medication is expected to be consumed or administered.)
      */
     public MedicationStatement setCategory(CodeableConcept value) { 
       this.category = value;
@@ -1275,7 +1275,7 @@ public class MedicationStatement extends DomainResource {
         children.add(new Property("partOf", "Reference(MedicationAdministration|MedicationDispense|MedicationStatement|Procedure|Observation)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
         children.add(new Property("status", "code", "A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed.", 0, 1, status));
         children.add(new Property("statusReason", "CodeableConcept", "Captures the reason for the current state of the MedicationStatement.", 0, java.lang.Integer.MAX_VALUE, statusReason));
-        children.add(new Property("category", "CodeableConcept", "Indicates type of medication statement and where the medication is expected to be consumed or administered.", 0, 1, category));
+        children.add(new Property("category", "CodeableConcept", "Indicates where the medication is expected to be consumed or administered.", 0, 1, category));
         children.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication));
         children.add(new Property("subject", "Reference(Patient|Group)", "The person, animal or group who is/was taking the medication.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this MedicationStatement.", 0, 1, context));
@@ -1297,7 +1297,7 @@ public class MedicationStatement extends DomainResource {
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(MedicationAdministration|MedicationDispense|MedicationStatement|Procedure|Observation)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
         case -892481550: /*status*/  return new Property("status", "code", "A code representing the patient or other source's judgment about the state of the medication used that this statement is about.  Generally this will be active or completed.", 0, 1, status);
         case 2051346646: /*statusReason*/  return new Property("statusReason", "CodeableConcept", "Captures the reason for the current state of the MedicationStatement.", 0, java.lang.Integer.MAX_VALUE, statusReason);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates type of medication statement and where the medication is expected to be consumed or administered.", 0, 1, category);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates where the medication is expected to be consumed or administered.", 0, 1, category);
         case 1458402129: /*medication[x]*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case 1998965455: /*medication*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case -209845038: /*medicationCodeableConcept*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
@@ -1723,7 +1723,7 @@ public class MedicationStatement extends DomainResource {
    * Path: <b>MedicationStatement.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationStatement.medication.as(CodeableConcept)", description="Return statements of this medication code", type="token" )
+  @SearchParamDefinition(name="code", path="(MedicationStatement.medication as CodeableConcept)", description="Return statements of this medication code", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -1769,7 +1769,7 @@ public class MedicationStatement extends DomainResource {
    * Path: <b>MedicationStatement.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MedicationStatement.subject", description="Returns statements for a specific patient.", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="MedicationStatement.subject.where(resolve() is Patient)", description="Returns statements for a specific patient.", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1821,7 +1821,7 @@ public class MedicationStatement extends DomainResource {
    * Path: <b>MedicationStatement.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationStatement.medication.as(Reference)", description="Return statements of this medication reference", type="reference", target={Medication.class } )
+  @SearchParamDefinition(name="medication", path="(MedicationStatement.medication as Reference)", description="Return statements of this medication reference", type="reference", target={Medication.class } )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>

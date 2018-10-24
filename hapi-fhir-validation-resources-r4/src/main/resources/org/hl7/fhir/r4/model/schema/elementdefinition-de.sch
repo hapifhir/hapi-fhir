@@ -26,17 +26,20 @@
   <sch:pattern>
     <sch:title>ElementDefinition</sch:title>
     <sch:rule context="f:ElementDefinition">
+      <sch:assert test="matches(path/@value, '[^\s#\/]+')">Element names cannot include some special characters (inherited)</sch:assert>
       <sch:assert test="not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (number(f:max/@value) &gt;= f:min/@value)">Min &lt;= Max (inherited)</sch:assert>
       <sch:assert test="not(exists(f:contentReference) and (exists(f:type) or exists(f:*[starts-with(local-name(.), 'value')]) or exists(f:*[starts-with(local-name(.), 'defaultValue')])  or exists(f:*[starts-with(local-name(.), 'fixed')]) or exists(f:*[starts-with(local-name(.), 'pattern')]) or exists(f:*[starts-with(local-name(.), 'example')]) or exists(f:*[starts-with(local-name(.), 'f:minValue')]) or exists(f:*[starts-with(local-name(.), 'f:maxValue')]) or exists(f:maxLength) or exists(f:binding)))">if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding (inherited)</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)&lt;=1)">Pattern may only be specified if there is one type (inherited)</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)&lt;=1)">Fixed value may only be specified if there is one type (inherited)</sch:assert>
       <sch:assert test="not(exists(f:binding)) or (count(f:type/f:code) = 0) or  f:type/f:code/@value=('code','Coding','CodeableConcept','Quantity','string', 'uri')">Binding can only be present for coded elements, string, and uri (inherited)</sch:assert>
+      <sch:assert test="exists(f:sliceName) or not(exists(f:sliceIsConstraining))">sliceIsConstraining can only appear if slicename is present (inherited)</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'fixed')]))">Pattern and value are mutually exclusive (inherited)</sch:assert>
       <sch:assert test="count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))">Constraints must be unique by key (inherited)</sch:assert>
       <sch:assert test="not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value))">Types must be unique by code (inherited)</sch:assert>
       <sch:assert test="not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\/\-_\[\]\@]+$')">sliceName must be composed of proper tokens separated by &quot;/&quot; (inherited)</sch:assert>
       <sch:assert test="not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))">default value and meaningWhenMissing are mutually exclusive (inherited)</sch:assert>
       <sch:assert test="not(f:isModifier/@value = 'true') or exists(f:isModifierReason)">Must have a modifier reason if isModifier = true (inherited)</sch:assert>
+      <sch:assert test="matches(path/@value, '[A-Za-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*(\[x])?)*')">Element names should be simple alphanumerics, or code generation tools may be broken (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
@@ -90,7 +93,7 @@
     <sch:rule context="f:ElementDefinition/f:type">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
       <sch:assert test="not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])">Aggregation may only be specified if one of the allowed types for the element is a reference (inherited)</sch:assert>
-      <sch:assert test="not(exists(f:targetProfile)) or (f:code/@value = 'Reference')">targetProfie is only allowed if the type is reference (inherited)</sch:assert>
+      <sch:assert test="not(exists(f:targetProfile)) or (f:code/@value = 'Reference')">targetProfile is only allowed if the type is reference or canonical (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
@@ -103,13 +106,14 @@
     <sch:title>ElementDefinition.constraint</sch:title>
     <sch:rule context="f:ElementDefinition/f:constraint">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
+      <sch:assert test="exists(f:expression/@value)">Constraints should have an expression or else validators will not be able to enforce them (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>
     <sch:title>ElementDefinition.binding</sch:title>
     <sch:rule context="f:ElementDefinition/f:binding">
       <sch:assert test="@value|f:*|h:div">All FHIR elements must have a @value or children (inherited)</sch:assert>
-      <sch:assert test="not(exists(f:valueSetUri)) or (starts-with(string(f:valueSetUri/@value), 'http:') or starts-with(string(f:valueSetUri/@value), 'https:') or starts-with(string(f:valueSetUri/@value), 'urn:'))">ValueSet as a URI SHALL start with http:// or https:// or urn: (inherited)</sch:assert>
+      <sch:assert test="(starts-with(string(f:valueSet/@value), 'http:') or starts-with(string(f:valueSet/@value), 'https:') or starts-with(string(f:valueSet/@value), 'urn:'))">ValueSet SHALL start with http:// or https:// or urn: (inherited)</sch:assert>
     </sch:rule>
   </sch:pattern>
   <sch:pattern>

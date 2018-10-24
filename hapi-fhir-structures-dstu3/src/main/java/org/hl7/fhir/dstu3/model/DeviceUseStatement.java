@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A record of a device being used by a patient where the record is the result of a report from the patient or another clinician.
  */
-@ResourceDef(name="DeviceUseStatement", profile="http://hl7.org/fhir/Profile/DeviceUseStatement")
+@ResourceDef(name="DeviceUseStatement", profile="http://hl7.org/fhir/StructureDefinition/DeviceUseStatement")
 public class DeviceUseStatement extends DomainResource {
 
     public enum DeviceUseStatementStatus {

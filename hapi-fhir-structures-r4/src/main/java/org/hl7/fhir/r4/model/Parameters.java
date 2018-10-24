@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.
  */
-@ResourceDef(name="Parameters", profile="http://hl7.org/fhir/Profile/Parameters")
+@ResourceDef(name="Parameters", profile="http://hl7.org/fhir/StructureDefinition/Parameters")
 public class Parameters extends Resource implements IBaseParameters {
 
     @Block()
@@ -549,6 +549,10 @@ public class Parameters extends Resource implements IBaseParameters {
           this.value = new TriggerDefinition();
           return this.value;
         }
+        else if (name.equals("valueExpression")) {
+          this.value = new Expression();
+          return this.value;
+        }
         else if (name.equals("valueUsageContext")) {
           this.value = new UsageContext();
           return this.value;
@@ -802,6 +806,102 @@ public class Parameters extends Resource implements IBaseParameters {
     return ResourceType.Parameters;
    }
 
+// added from java-adornments.txt:
+ 
+  public Parameters addParameter(String name, boolean b) {
+    addParameter().setName(name).setValue(new BooleanType(b));
+    return this;
+  }
+
+  public Parameters addParameter(String name, String s) {
+    if (s != null)
+      addParameter().setName(name).setValue(new StringType(s));
+    return this;
+  }
+
+  public Parameters addParameter(String name, Type v) {
+    if (v != null)
+      addParameter().setName(name).setValue(v);
+    return this;
+  }
+
+  public Parameters setParameter(String name, boolean b) {
+    for (ParametersParameterComponent p : getParameter()) {
+      if (p.getName().equals(name)) {
+        p.setValue(new BooleanType(b));
+        return this;
+      }
+    }
+    addParameter().setName(name).setValue(new BooleanType(b));
+    return this;
+  }
+
+  public Parameters setParameter(String name, String s) {
+    if (s != null) {
+      for (ParametersParameterComponent p : getParameter()) {
+        if (p.getName().equals(name)) {
+          p.setValue(new StringType(s));
+          return this;
+        }
+      }
+      addParameter().setName(name).setValue(new StringType(s));
+    }
+    return this;
+  }
+
+  public Parameters setParameter(String name, Type v) {
+    if (v != null) {
+      for (ParametersParameterComponent p : getParameter()                                                                                     ) {
+        if (p.getName().equals(name)) {
+          p.setValue(v);
+          return this;
+        }
+      }
+      addParameter().setName(name).setValue(v);
+    }
+    return this;
+  }
+
+  public boolean hasParameter(String name) {
+    for (ParametersParameterComponent p : getParameter()) {
+      if (p.getName().equals(name))
+        return true;
+    }
+    return false;
+  }
+
+  public Type getParameter(String name) {
+    for (ParametersParameterComponent p : getParameter()) {
+      if (p.getName().equals(name))
+        return p.getValue();
+    }
+    return null;
+  }
+
+  public List<Type> getParameters(String name) {
+    List<Type> res = new ArrayList<Type>();
+    for (ParametersParameterComponent p : getParameter()) {
+      if (p.getName().equals(name))
+        res.add(p.getValue());
+    }
+    return res;
+  }
+  
+  
+  public boolean getParameterBool(String name) {
+    for (ParametersParameterComponent p : getParameter()) {
+      if (p.getName().equals(name)) {
+        if (p.getValue() instanceof BooleanType)
+          return ((BooleanType) p.getValue()).booleanValue();
+        boolean ok = Boolean.getBoolean(p.getValue().primitiveValue());
+        return ok;
+      }
+    }
+    return false;
+  }
+ 
+
+// end addition
 
 }
 

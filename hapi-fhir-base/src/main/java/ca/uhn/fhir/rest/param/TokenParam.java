@@ -19,17 +19,17 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 
@@ -47,9 +47,8 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	/**
 	 * Constructor which copies the {@link InternalCodingDt#getSystemElement() system} and
 	 * {@link InternalCodingDt#getCodeElement() code} from a {@link InternalCodingDt} instance and adds it as a parameter
-	 * 
-	 * @param theCodingDt
-	 *           The coding
+	 *
+	 * @param theCodingDt The coding
 	 */
 	public TokenParam(BaseCodingDt theCodingDt) {
 		this(toSystemValue(theCodingDt.getSystemElement()), theCodingDt.getCodeElement().getValue());
@@ -59,9 +58,8 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	 * Constructor which copies the {@link BaseIdentifierDt#getSystemElement() system} and
 	 * {@link BaseIdentifierDt#getValueElement() value} from a {@link BaseIdentifierDt} instance and adds it as a
 	 * parameter
-	 * 
-	 * @param theIdentifierDt
-	 *           The identifier
+	 *
+	 * @param theIdentifierDt The identifier
 	 */
 	public TokenParam(BaseIdentifierDt theIdentifierDt) {
 		this(toSystemValue(theIdentifierDt.getSystemElement()), theIdentifierDt.getValueElement().getValue());
@@ -79,6 +77,13 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		setSystem(theSystem);
 		setValue(theValue);
 		setText(theText);
+	}
+
+	/**
+	 * Constructor that takes a code but no system
+	 */
+	public TokenParam(String theCode) {
+		this(null, theCode);
 	}
 
 	@Override
@@ -109,7 +114,7 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		if (theQualifier != null) {
 			TokenParamModifier modifier = TokenParamModifier.forValue(theQualifier);
 			setModifier(modifier);
-			
+
 			if (modifier == TokenParamModifier.TEXT) {
 				setSystem(null);
 				setValue(ParameterUtil.unescape(theParameter));
@@ -138,13 +143,18 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		return myModifier;
 	}
 
+	public TokenParam setModifier(TokenParamModifier theModifier) {
+		myModifier = theModifier;
+		return this;
+	}
+
 	/**
 	 * Returns the system for this token. Note that if a {@link #getModifier()} is being used, the entire value of the
-	 * parameter will be placed in {@link #getValue() value} and this method will return <code>null</code>. 
+	 * parameter will be placed in {@link #getValue() value} and this method will return <code>null</code>.
 	 * <p
 	 * Also note that this value may be <code>null</code> or <code>""</code> (empty string) and that
 	 * each of these have a different meaning. When a token is passed on a URL and it has no
-	 * vertical bar (often meaning "return values that match the given code in any codesystem") 
+	 * vertical bar (often meaning "return values that match the given code in any codesystem")
 	 * this method will return <code>null</code>. When a token is passed on a URL and it has
 	 * a vetical bar but nothing before the bar (often meaning "return values that match the
 	 * given code but that have no codesystem) this method will return <code>""</code>
@@ -154,12 +164,22 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		return mySystem;
 	}
 
+	public TokenParam setSystem(String theSystem) {
+		mySystem = theSystem;
+		return this;
+	}
+
 	/**
 	 * Returns the value for the token (generally the value to the right of the
-	 * vertical bar on the URL) 
+	 * vertical bar on the URL)
 	 */
 	public String getValue() {
 		return myValue;
+	}
+
+	public TokenParam setValue(String theValue) {
+		myValue = theValue;
+		return this;
 	}
 
 	public InternalCodingDt getValueAsCoding() {
@@ -181,16 +201,6 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		return myModifier == TokenParamModifier.TEXT;
 	}
 
-	public TokenParam setModifier(TokenParamModifier theModifier) {
-		myModifier = theModifier;
-		return this;
-	}
-
-	public TokenParam setSystem(String theSystem) {
-		mySystem = theSystem;
-		return this;
-	}
-
 	/**
 	 * @deprecated Use {@link #setModifier(TokenParamModifier)} instead
 	 */
@@ -201,11 +211,6 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		} else {
 			myModifier = null;
 		}
-		return this;
-	}
-
-	public TokenParam setValue(String theValue) {
-		myValue = theValue;
 		return this;
 	}
 

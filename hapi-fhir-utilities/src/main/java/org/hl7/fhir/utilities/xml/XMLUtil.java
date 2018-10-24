@@ -31,9 +31,11 @@ package org.hl7.fhir.utilities.xml;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -41,12 +43,15 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.lang3.text.FormattableUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
 import org.w3c.dom.Attr;
@@ -497,6 +502,57 @@ public class XMLUtil {
     if (e.hasAttributeNS(namespaceURI, localName))
       e.removeAttributeNS(namespaceURI, localName);
     
+  }
+
+  public static Node[] children(Element ed) {
+    Node[] res = new Node[ed.getChildNodes().getLength()];
+    for (int i = 0; i < ed.getChildNodes().getLength(); i++)
+      res[i] = ed.getChildNodes().item(i);
+    return res;
+  }
+
+  public static Element insertChild(Document doc, Element element, String name, String namespace, int indent) {
+    Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+    Element child = doc.createElementNS(namespace, name);
+    element.insertBefore(child, element.getFirstChild());
+    element.insertBefore(node, element.getFirstChild());
+    return child;
+  }
+
+  public static Element insertChild(Document doc, Element element, String name, String namespace, Node before, int indent) {
+    if (before == null) {
+      Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+      element.insertBefore(node, before);
+    }
+    Element child = doc.createElementNS(namespace, name);
+    element.insertBefore(child, before);
+    if (before != null) {
+      Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+      element.insertBefore(node, before);
+    }
+    return child;
+  }
+
+  public static void addTextTag(Document doc, Element element, String name, String namespace, String text, int indent) {
+    Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+    element.appendChild(node);
+    Element child = doc.createElementNS(namespace, name);
+    element.appendChild(child);
+    child.setAttribute("value", text);    
+  }
+
+  public static void saveToFile(Element root, OutputStream stream) throws TransformerException {
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    Result output = new StreamResult(stream);
+    Source input = new DOMSource(root);
+
+    transformer.transform(input, output);
+  }
+
+  public static void spacer(Document doc, Element element, int indent) {
+    Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
+    element.appendChild(node);
+   
   }
 
  	

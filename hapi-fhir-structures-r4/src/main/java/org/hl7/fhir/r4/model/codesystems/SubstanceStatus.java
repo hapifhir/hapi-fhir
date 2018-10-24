@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum SubstanceStatus {
 
         /**
-         * The substance is considered for use or reference
+         * The substance is considered for use or reference.
          */
         ACTIVE, 
         /**
-         * The substance is considered for reference, but not for use
+         * The substance is considered for reference, but not for use.
          */
         INACTIVE, 
         /**
-         * The substance was entered in error
+         * The substance was entered in error.
          */
         ENTEREDINERROR, 
         /**
@@ -76,9 +76,9 @@ public enum SubstanceStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The substance is considered for use or reference";
-            case INACTIVE: return "The substance is considered for reference, but not for use";
-            case ENTEREDINERROR: return "The substance was entered in error";
+            case ACTIVE: return "The substance is considered for use or reference.";
+            case INACTIVE: return "The substance is considered for reference, but not for use.";
+            case ENTEREDINERROR: return "The substance was entered in error.";
             default: return "?";
           }
         }

@@ -261,7 +261,7 @@
 				"subject": {
 					"reference": "urn:uuid:09a8d22c-1e23-4e5f-b3bf-505772f123d1"
 				},
-				"context": {
+				"encounter": {
 					"reference": "urn:uuid:29e3a213-0df4-41e0-88f8-e3be83277022"
 				},
 				"effectiveDateTime": "2011-12-01T09:49:00-05:00",
@@ -289,7 +289,7 @@
 				"subject": {
 					"reference": "urn:uuid:09a8d22c-1e23-4e5f-b3bf-505772f123d1"
 				},
-				"context": {
+				"encounter": {
 					"reference": "urn:uuid:29e3a213-0df4-41e0-88f8-e3be83277022"
 				},
 				"effectiveDateTime": "2011-12-01T09:49:00-05:00",
@@ -317,7 +317,7 @@
 				"subject": {
 					"reference": "urn:uuid:09a8d22c-1e23-4e5f-b3bf-505772f123d1"
 				},
-				"context": {
+				"encounter": {
 					"reference": "urn:uuid:29e3a213-0df4-41e0-88f8-e3be83277022"
 				},
 				"effectiveDateTime": "2011-12-01T09:49:00-05:00",
@@ -345,7 +345,7 @@
 				"subject": {
 					"reference": "urn:uuid:09a8d22c-1e23-4e5f-b3bf-505772f123d1"
 				},
-				"context": {
+				"encounter": {
 					"reference": "urn:uuid:29e3a213-0df4-41e0-88f8-e3be83277022"
 				},
 				"effectiveDateTime": "2011-12-01T10:57:00-05:00",

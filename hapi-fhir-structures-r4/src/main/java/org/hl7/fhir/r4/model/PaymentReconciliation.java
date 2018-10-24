@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides payment details and claim references supporting a bulk payment.
  */
-@ResourceDef(name="PaymentReconciliation", profile="http://hl7.org/fhir/Profile/PaymentReconciliation")
+@ResourceDef(name="PaymentReconciliation", profile="http://hl7.org/fhir/StructureDefinition/PaymentReconciliation")
 public class PaymentReconciliation extends DomainResource {
 
     public enum PaymentReconciliationStatus {
@@ -997,10 +997,10 @@ public class PaymentReconciliation extends DomainResource {
     protected Period period;
 
     /**
-     * The date when the enclosed suite of services were performed or completed.
+     * The date when the resource was created.
      */
     @Child(name = "created", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
+    @Description(shortDefinition="Creation date", formalDefinition="The date when the resource was created." )
     protected DateTimeType created;
 
     /**
@@ -1219,7 +1219,7 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @return {@link #created} (The date when the enclosed suite of services were performed or completed.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
+     * @return {@link #created} (The date when the resource was created.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
     public DateTimeType getCreatedElement() { 
       if (this.created == null)
@@ -1239,7 +1239,7 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @param value {@link #created} (The date when the enclosed suite of services were performed or completed.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
+     * @param value {@link #created} (The date when the resource was created.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
     public PaymentReconciliation setCreatedElement(DateTimeType value) { 
       this.created = value;
@@ -1247,14 +1247,14 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @return The date when the enclosed suite of services were performed or completed.
+     * @return The date when the resource was created.
      */
     public Date getCreated() { 
       return this.created == null ? null : this.created.getValue();
     }
 
     /**
-     * @param value The date when the enclosed suite of services were performed or completed.
+     * @param value The date when the resource was created.
      */
     public PaymentReconciliation setCreated(Date value) { 
       if (value == null)
@@ -1651,7 +1651,7 @@ public class PaymentReconciliation extends DomainResource {
         children.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
         children.add(new Property("period", "Period", "The period of time for which payments have been gathered into this bulk payment for settlement.", 0, 1, period));
-        children.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created));
+        children.add(new Property("created", "dateTime", "The date when the resource was created.", 0, 1, created));
         children.add(new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, organization));
         children.add(new Property("request", "Reference(ProcessRequest)", "Original request resource reference.", 0, 1, request));
         children.add(new Property("outcome", "code", "Transaction status: error, complete.", 0, 1, outcome));
@@ -1669,7 +1669,7 @@ public class PaymentReconciliation extends DomainResource {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
         case -991726143: /*period*/  return new Property("period", "Period", "The period of time for which payments have been gathered into this bulk payment for settlement.", 0, 1, period);
-        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created);
+        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the resource was created.", 0, 1, created);
         case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, organization);
         case 1095692943: /*request*/  return new Property("request", "Reference(ProcessRequest)", "Original request resource reference.", 0, 1, request);
         case -1106507950: /*outcome*/  return new Property("outcome", "code", "Transaction status: error, complete.", 0, 1, outcome);
@@ -1961,17 +1961,17 @@ public class PaymentReconciliation extends DomainResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>The business identifier of the Explanation of Benefit</b><br>
+   * Description: <b>The business identifier of the ExplanationOfBenefit</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PaymentReconciliation.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="PaymentReconciliation.identifier", description="The business identifier of the Explanation of Benefit", type="token" )
+  @SearchParamDefinition(name="identifier", path="PaymentReconciliation.identifier", description="The business identifier of the ExplanationOfBenefit", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>The business identifier of the Explanation of Benefit</b><br>
+   * Description: <b>The business identifier of the ExplanationOfBenefit</b><br>
    * Type: <b>token</b><br>
    * Path: <b>PaymentReconciliation.identifier</b><br>
    * </p>
@@ -2047,17 +2047,17 @@ public class PaymentReconciliation extends DomainResource {
  /**
    * Search parameter: <b>organization</b>
    * <p>
-   * Description: <b>The organization who generated this resource</b><br>
+   * Description: <b>The organization which generated this resource</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>PaymentReconciliation.organization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="PaymentReconciliation.organization", description="The organization who generated this resource", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="organization", path="PaymentReconciliation.organization", description="The organization which generated this resource", type="reference", target={Organization.class } )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
    * <p>
-   * Description: <b>The organization who generated this resource</b><br>
+   * Description: <b>The organization which generated this resource</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>PaymentReconciliation.organization</b><br>
    * </p>
@@ -2073,17 +2073,17 @@ public class PaymentReconciliation extends DomainResource {
  /**
    * Search parameter: <b>request-provider</b>
    * <p>
-   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
+   * Description: <b>The reference to the provider who submitted the claim</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>PaymentReconciliation.requestProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request-provider", path="PaymentReconciliation.requestProvider", description="The reference to the provider who sumbitted the claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
+  @SearchParamDefinition(name="request-provider", path="PaymentReconciliation.requestProvider", description="The reference to the provider who submitted the claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_REQUEST_PROVIDER = "request-provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request-provider</b>
    * <p>
-   * Description: <b>The reference to the provider who sumbitted the claim</b><br>
+   * Description: <b>The reference to the provider who submitted the claim</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>PaymentReconciliation.requestProvider</b><br>
    * </p>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -101,9 +101,9 @@ public enum TestscriptOperationCodes {
          */
         CLOSURE, 
         /**
-         * Code Composition based on supplied properties
+         * Finding Codes based on supplied properties
          */
-        COMPOSE, 
+        FINDMATCHES, 
         /**
          * Compare two systems CapabilityStatements
          */
@@ -255,8 +255,8 @@ public enum TestscriptOperationCodes {
           return APPLY;
         if ("closure".equals(codeString))
           return CLOSURE;
-        if ("compose".equals(codeString))
-          return COMPOSE;
+        if ("find-matches".equals(codeString))
+          return FINDMATCHES;
         if ("conforms".equals(codeString))
           return CONFORMS;
         if ("data-requirements".equals(codeString))
@@ -333,7 +333,7 @@ public enum TestscriptOperationCodes {
             case CAPABILITIES: return "capabilities";
             case APPLY: return "apply";
             case CLOSURE: return "closure";
-            case COMPOSE: return "compose";
+            case FINDMATCHES: return "find-matches";
             case CONFORMS: return "conforms";
             case DATAREQUIREMENTS: return "data-requirements";
             case DOCUMENT: return "document";
@@ -366,7 +366,7 @@ public enum TestscriptOperationCodes {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/testscript-operation-codes";
+          return "http://terminology.hl7.org/CodeSystem/testscript-operation-codes";
         }
         public String getDefinition() {
           switch (this) {
@@ -386,7 +386,7 @@ public enum TestscriptOperationCodes {
             case CAPABILITIES: return "Get a capability statement for the system.";
             case APPLY: return "Realizes an ActivityDefinition in a specific context";
             case CLOSURE: return "Closure Table Maintenance";
-            case COMPOSE: return "Code Composition based on supplied properties";
+            case FINDMATCHES: return "Finding Codes based on supplied properties";
             case CONFORMS: return "Compare two systems CapabilityStatements";
             case DATAREQUIREMENTS: return "Aggregates and returns the parameters and data requirements for a resource and all its dependencies as a single module definition";
             case DOCUMENT: return "Generate a Document";
@@ -436,7 +436,7 @@ public enum TestscriptOperationCodes {
             case CAPABILITIES: return "Capabilities";
             case APPLY: return "$apply";
             case CLOSURE: return "$closure";
-            case COMPOSE: return "$compose";
+            case FINDMATCHES: return "$find-matches";
             case CONFORMS: return "$conforms";
             case DATAREQUIREMENTS: return "$data-requirements";
             case DOCUMENT: return "$document";

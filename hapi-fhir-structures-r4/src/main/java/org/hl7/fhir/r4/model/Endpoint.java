@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,24 +46,24 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.
  */
-@ResourceDef(name="Endpoint", profile="http://hl7.org/fhir/Profile/Endpoint")
+@ResourceDef(name="Endpoint", profile="http://hl7.org/fhir/StructureDefinition/Endpoint")
 public class Endpoint extends DomainResource {
 
     public enum EndpointStatus {
         /**
-         * This endpoint is expected to be active and can be used
+         * This endpoint is expected to be active and can be used.
          */
         ACTIVE, 
         /**
-         * This endpoint is temporarily unavailable
+         * This endpoint is temporarily unavailable.
          */
         SUSPENDED, 
         /**
-         * This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken
+         * This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken.
          */
         ERROR, 
         /**
-         * This endpoint is no longer to be used
+         * This endpoint is no longer to be used.
          */
         OFF, 
         /**
@@ -122,10 +122,10 @@ public class Endpoint extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "This endpoint is expected to be active and can be used";
-            case SUSPENDED: return "This endpoint is temporarily unavailable";
-            case ERROR: return "This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken";
-            case OFF: return "This endpoint is no longer to be used";
+            case ACTIVE: return "This endpoint is expected to be active and can be used.";
+            case SUSPENDED: return "This endpoint is temporarily unavailable.";
+            case ERROR: return "This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken.";
+            case OFF: return "This endpoint is no longer to be used.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             case TEST: return "This endpoint is not intended for production usage.";
             default: return "?";
@@ -274,6 +274,7 @@ public class Endpoint extends DomainResource {
      */
     @Child(name = "payloadMimeType", type = {CodeType.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Mimetype to send. If not specified, the content could be anything (including no payload, if the connectionType defined this)", formalDefinition="The mime type to send the payload in - e.g. application/fhir+xml, application/fhir+json. If the mime type is not specified, then the sender could send any content (including no content depending on the connectionType)." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/mimetypes")
     protected List<CodeType> payloadMimeType;
 
     /**
@@ -1156,7 +1157,7 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Endpoint.managingOrganization", description="The organization that is managing the endpoint", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="organization", path="Endpoint.managingOrganization.where(resolve() is Organization)", description="The organization that is managing the endpoint", type="reference", target={Organization.class } )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>

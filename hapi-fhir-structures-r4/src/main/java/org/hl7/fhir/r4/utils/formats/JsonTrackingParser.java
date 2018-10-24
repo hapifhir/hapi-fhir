@@ -1,10 +1,11 @@
 package org.hl7.fhir.r4.utils.formats;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Stack;
 
-import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.utils.formats.JsonTrackingParser.PresentedBigDecimal;
 import org.hl7.fhir.utilities.Utilities;
 
 import com.google.gson.JsonArray;
@@ -22,7 +23,23 @@ import com.google.gson.JsonPrimitive;
  */
 public class JsonTrackingParser {
 
-	public enum TokenType {
+	public class PresentedBigDecimal extends BigDecimal {
+
+	  public String presentation;
+	  
+    public PresentedBigDecimal(String value) {
+      super(value);
+      presentation = value;
+    }
+
+    public String getPresentation() {
+      return presentation;
+    }
+
+    
+  }
+
+  public enum TokenType {
 		Open, Close, String, Number, Colon, Comma, OpenArray, CloseArray, Eof, Null, Boolean;
 	}
 	
@@ -82,7 +99,7 @@ public class JsonTrackingParser {
 		private LocationData location;
 		private StringBuilder b = new StringBuilder();
 		
-    public Lexer(String source) throws FHIRException {
+    public Lexer(String source) throws IOException {
     	this.source = source;
     	cursor = -1;
     	location = new LocationData(1, 1);  
@@ -93,7 +110,7 @@ public class JsonTrackingParser {
     	return peek != null || cursor < source.length(); 
     }
     
-    private String getNext(int length) throws FHIRException {
+    private String getNext(int length) throws IOException {
     	String result = "";
       if (peek != null) {
       	if (peek.length() > length) {
@@ -119,7 +136,7 @@ public class JsonTrackingParser {
       return result;
     }
     
-    private char getNextChar() throws FHIRException {
+    private char getNextChar() throws IOException {
       if (peek != null) {
       	char ch = peek.charAt(0);
       	peek = peek.length() == 1 ? null : peek.substring(1);
@@ -142,15 +159,15 @@ public class JsonTrackingParser {
     	peek = peek == null ? String.valueOf(ch) : String.valueOf(ch)+peek;
     }
     
-    private void parseWord(String word, char ch, TokenType type) throws FHIRException {
+    private void parseWord(String word, char ch, TokenType type) throws IOException {
       this.type = type;
       value = ""+ch+getNext(word.length()-1);
       if (!value.equals(word))
       	throw error("Syntax error in json reading special word "+word);
     }
     
-    private FHIRException error(String msg) {
-      return new FHIRException("Error parsing JSON source: "+msg+" at Line "+Integer.toString(location.line)+" (path=["+path()+"])");
+    private IOException error(String msg) {
+      return new IOException("Error parsing JSON source: "+msg+" at Line "+Integer.toString(location.line)+" (path=["+path()+"])");
     }
     
     private String path() {
@@ -165,7 +182,7 @@ public class JsonTrackingParser {
       }
     }
 
-    public void start() throws FHIRException {
+    public void start() throws IOException {
 //      char ch = getNextChar();
 //      if (ch = '\.uEF')
 //      begin
@@ -195,7 +212,7 @@ public class JsonTrackingParser {
     	return lastLocationAWS;
     }
 
-    public void next() throws FHIRException {
+    public void next() throws IOException {
     	lastLocationBWS = location.copy();
     	char ch;
     	do {
@@ -221,7 +238,8 @@ public class JsonTrackingParser {
     				if (ch == '\\') {
     					ch = getNextChar();
     					switch (ch) {
-    					case '"': b.append('"'); break;
+              case '"': b.append('"'); break;
+              case '\'': b.append('\''); break;
     					case '\\': b.append('\\'); break;
     					case '/': b.append('/'); break;
     					case 'n': b.append('\n'); break;
@@ -264,7 +282,7 @@ public class JsonTrackingParser {
     			if ((ch >= '0' && ch <= '9') || ch == '-') {
     				type = TokenType.Number;
     				b.setLength(0);
-    				while (more() && ((ch >= '0' && ch <= '9') || ch == '-' || ch == '.')) {
+    				while (more() && ((ch >= '0' && ch <= '9') || ch == '-' || ch == '.') || ch == '+' || ch == 'e' || ch == 'E') {
     					b.append(ch);
     					ch = getNextChar();
     				}
@@ -276,7 +294,7 @@ public class JsonTrackingParser {
     	}
     }
 
-    public String consume(TokenType type) throws FHIRException {
+    public String consume(TokenType type) throws IOException {
       if (this.type != type)
         throw error("JSON syntax error - found "+type.toString()+" expecting "+type.toString());
       String result = value;
@@ -295,13 +313,13 @@ public class JsonTrackingParser {
   private String itemName;
   private String itemValue;
 
-	public static JsonObject parse(String source, Map<JsonElement, LocationData> map) throws FHIRException {
+	public static JsonObject parse(String source, Map<JsonElement, LocationData> map) throws IOException {
 		JsonTrackingParser self = new JsonTrackingParser();
 		self.map = map;
     return self.parse(source);
 	}
 
-	private JsonObject parse(String source) throws FHIRException {
+	private JsonObject parse(String source) throws IOException {
 		lexer = new Lexer(source);
 		JsonObject result = new JsonObject();
 		LocationData loc = lexer.location.copy();
@@ -314,12 +332,14 @@ public class JsonTrackingParser {
 
     parseProperty();
     readObject(result, true);
-		map.put(result, loc);
+    if (map != null)
+		  map.put(result, loc);
     return result;
 	}
 
-	private void readObject(JsonObject obj, boolean root) throws FHIRException {
-		map.put(obj, lexer.location.copy());
+	private void readObject(JsonObject obj, boolean root) throws IOException {
+	  if (map != null)
+      map.put(obj, lexer.location.copy());
 
 		while (!(itemType == ItemType.End) || (root && (itemType == ItemType.Eof))) {
 			if (obj.has(itemName))
@@ -332,27 +352,32 @@ public class JsonTrackingParser {
 				obj.add(itemName, child);
 				next();
 				readObject(child, false);
-				map.put(obj, loc);
+				if (map != null)
+		      map.put(obj, loc);
 				break;
 			case Boolean :
 				JsonPrimitive v = new JsonPrimitive(Boolean.valueOf(itemValue));
 				obj.add(itemName, v);
-				map.put(v, lexer.location.copy());
+				if (map != null)
+		      map.put(v, lexer.location.copy());
 				break;
 			case String:
 				v = new JsonPrimitive(itemValue);
 				obj.add(itemName, v);
-				map.put(v, lexer.location.copy());
+				if (map != null)
+		      map.put(v, lexer.location.copy());
 				break;
 			case Number:
-				v = new JsonPrimitive(new BigDecimal(itemValue));
+				v = new JsonPrimitive(new PresentedBigDecimal(itemValue));
 				obj.add(itemName, v);
-				map.put(v, lexer.location.copy());
+				if (map != null)
+		      map.put(v, lexer.location.copy());
 				break;
 			case Null:
 				JsonNull n = new JsonNull();
 				obj.add(itemName, n);
-				map.put(n, lexer.location.copy());
+				if (map != null)
+		      map.put(n, lexer.location.copy());
 				break;
 			case Array:
 				JsonArray arr = new JsonArray(); // (obj.path+'.'+ItemName);
@@ -360,7 +385,8 @@ public class JsonTrackingParser {
 				obj.add(itemName, arr);
 				next();
 				readArray(arr, false);
-				map.put(arr, loc);
+				if (map != null)
+		      map.put(arr, loc);
 				break;
 			case Eof : 
 				throw lexer.error("Unexpected End of File");
@@ -372,7 +398,7 @@ public class JsonTrackingParser {
 		}
 	}
 
-	private void readArray(JsonArray arr, boolean root) throws FHIRException {
+	private void readArray(JsonArray arr, boolean root) throws IOException {
 	  while (!((itemType == ItemType.End) || (root && (itemType == ItemType.Eof)))) {
 	    switch (itemType) {
 	    case Object:
@@ -381,22 +407,26 @@ public class JsonTrackingParser {
 	    	arr.add(obj);
 	      next();
 	      readObject(obj, false);
-				map.put(obj, loc);
+	      if (map != null)
+	        map.put(obj, loc);
 	      break;
 	    case String:
 	    	JsonPrimitive v = new JsonPrimitive(itemValue);
 				arr.add(v);
-				map.put(v, lexer.location.copy());
+				if (map != null)
+		      map.put(v, lexer.location.copy());
 				break;
 	    case Number:
 	    	v = new JsonPrimitive(new BigDecimal(itemValue));
 				arr.add(v);
-				map.put(v, lexer.location.copy());
+				if (map != null)
+		      map.put(v, lexer.location.copy());
 				break;
 	    case Null :
 	    	JsonNull n = new JsonNull();
 				arr.add(n);
-				map.put(n, lexer.location.copy());
+				if (map != null)
+		      map.put(n, lexer.location.copy());
 				break;
 	    case Array:
         JsonArray child = new JsonArray(); // (arr.path+'['+inttostr(i)+']');
@@ -404,7 +434,8 @@ public class JsonTrackingParser {
 				arr.add(child);
         next();
 	      readArray(child, false);
-				map.put(arr, loc);
+	      if (map != null)
+	        map.put(arr, loc);
         break;
 	    case Eof : 
 	    	throw lexer.error("Unexpected End of File");
@@ -417,7 +448,7 @@ public class JsonTrackingParser {
 	  }
 	}
 
-	private void next() throws FHIRException {
+	private void next() throws IOException {
 		switch (itemType) {
 		case Object :
 			lexer.consume(TokenType.Open);
@@ -461,7 +492,7 @@ public class JsonTrackingParser {
 		}
 	}
 
-	private void parseProperty() throws FHIRException {
+	private void parseProperty() throws IOException {
 		if (!lexer.states.peek().isProp) {
 			itemName = lexer.consume(TokenType.String);
 			itemValue = null;

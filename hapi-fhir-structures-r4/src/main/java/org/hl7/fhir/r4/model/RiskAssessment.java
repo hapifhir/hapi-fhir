@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An assessment of the likely outcome(s) for a patient or other subject as well as the likelihood of each outcome.
  */
-@ResourceDef(name="RiskAssessment", profile="http://hl7.org/fhir/Profile/RiskAssessment")
+@ResourceDef(name="RiskAssessment", profile="http://hl7.org/fhir/StructureDefinition/RiskAssessment")
 public class RiskAssessment extends DomainResource {
 
     public enum RiskAssessmentStatus {
@@ -59,7 +59,7 @@ public class RiskAssessment extends DomainResource {
          */
         PRELIMINARY, 
         /**
-         * The observation is complete.
+         * The observation is complete and there are no further actions needed. Additional information such "released", "signed", etc would be represented using [Provenance](provenance.html) which provides not only the act but also the actors and dates and other related data. These act states would be associated with an observation status of `preliminary` until they are all completed and then a status of `final` would be applied.
          */
         FINAL, 
         /**
@@ -75,7 +75,7 @@ public class RiskAssessment extends DomainResource {
          */
         CANCELLED, 
         /**
-         * The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         * The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
@@ -140,11 +140,11 @@ public class RiskAssessment extends DomainResource {
           switch (this) {
             case REGISTERED: return "The existence of the observation is registered, but there is no result yet available.";
             case PRELIMINARY: return "This is an initial or interim observation: data may be incomplete or unverified.";
-            case FINAL: return "The observation is complete.";
+            case FINAL: return "The observation is complete and there are no further actions needed. Additional information such \"released\", \"signed\", etc would be represented using [Provenance](provenance.html) which provides not only the act but also the actors and dates and other related data. These act states would be associated with an observation status of `preliminary` until they are all completed and then a status of `final` would be applied.";
             case AMENDED: return "Subsequent to being Final, the observation has been modified subsequent.  This includes updates/new information and corrections.";
             case CORRECTED: return "Subsequent to being Final, the observation has been modified to correct an error in the test result.";
             case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
-            case ENTEREDINERROR: return "The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case ENTEREDINERROR: return "The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring system does not know which.";
             default: return "?";
           }
@@ -2104,7 +2104,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.occurrenceDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="RiskAssessment.occurrence.as(dateTime)", description="When was assessment made?", type="date" )
+  @SearchParamDefinition(name="date", path="(RiskAssessment.occurrence as dateTime)", description="When was assessment made?", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
@@ -2242,7 +2242,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="RiskAssessment.subject", description="Who/what does assessment apply to?", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="RiskAssessment.subject.where(resolve() is Patient)", description="Who/what does assessment apply to?", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2308,7 +2308,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="RiskAssessment.context", description="Where was assessment performed?", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="encounter", path="RiskAssessment.context.where(resolve() is Encounter)", description="Where was assessment performed?", type="reference", target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>

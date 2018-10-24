@@ -37,7 +37,29 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	 * Constructor
 	 */
 	public HapiFhirJpaMigrationTasks() {
+		init340();
 		init350();
+		init360();
+	}
+
+	private void init360() {
+		Builder version = forVersion(VersionEnum.V3_6_0);
+
+		// Resource Link
+		Builder.BuilderWithTableName resourceLink = version.onTable("HFJ_RES_LINK");
+		version.startSectionWithMessage("Starting work on table: " + resourceLink.getTableName());
+		resourceLink
+			.modifyColumn("SRC_PATH")
+			.nonNullable()
+			.withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, ResourceLink.SRC_PATH_LENGTH);
+
+		// Search
+		Builder.BuilderWithTableName search = version.onTable("HFJ_SEARCH");
+		version.startSectionWithMessage("Starting work on table: " + search.getTableName());
+		search
+			.addColumn("OPTLOCK_VERSION")
+			.nullable()
+			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 	}
 
 	private void init350() {
@@ -163,6 +185,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("HASH_NORM_PREFIX", "SP_VALUE_NORMALIZED");
 		spidxString
+			.addColumn("HASH_EXACT")
+			.nullable()
+			.type(AddColumnTask.ColumnTypeEnum.LONG);
+		spidxString
 			.addIndex("IDX_SP_STRING_HASH_EXCT")
 			.unique(false)
 			.withColumns("HASH_EXACT");
@@ -233,6 +259,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("HASH_IDENTITY", "SP_URI");
 		spidxUri
+			.addColumn("HASH_URI")
+			.nullable()
+			.type(AddColumnTask.ColumnTypeEnum.LONG);
+		spidxUri
 			.addIndex("IDX_SP_URI_HASH_URI")
 			.unique(false)
 			.withColumns("HASH_URI");
@@ -268,7 +298,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			"where HFJ_RES_PARAM_PRESENT.HASH_PRESENCE is null";
 		consolidateSearchParamPresenceIndexesTask.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
 			Long pid = (Long) t.get("PID");
-			Boolean present = (Boolean) t.get("HASH_PRESENCE");
+			Boolean present = (Boolean) t.get("SP_PRESENT");
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
 			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);
@@ -423,6 +453,40 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addSql(DriverTypeEnum.MSSQL_2012, "create table TRM_CONCEPT_MAP_GRP_ELM_TGT (PID bigint not null, TARGET_CODE varchar(500) not null, myConceptMapUrl varchar(255), TARGET_DISPLAY varchar(400), TARGET_EQUIVALENCE varchar(50), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GRP_ELM_PID bigint not null, primary key (PID))")
 			.addSql(DriverTypeEnum.MSSQL_2012, "create index IDX_CNCPT_MP_GRP_ELM_TGT_CD on TRM_CONCEPT_MAP_GRP_ELM_TGT (TARGET_CODE)")
 			.addSql(DriverTypeEnum.MSSQL_2012, "alter table TRM_CONCEPT_MAP_GRP_ELM_TGT add constraint FK_TCMGETARGET_ELEMENT foreign key (CONCEPT_MAP_GRP_ELM_PID) references TRM_CONCEPT_MAP_GRP_ELEMENT");
+	}
+
+	private void init340() {
+		Builder version = forVersion(VersionEnum.V3_4_0);
+
+		// CodeSystem Version
+		Builder.BuilderWithTableName resourceLink = version.onTable("TRM_CODESYSTEM_VER");
+		version.startSectionWithMessage("Starting work on table: " + resourceLink.getTableName());
+		resourceLink
+			.dropIndex("IDX_CSV_RESOURCEPID_AND_VER");
+		resourceLink
+			.dropColumn("RES_VERSION_ID");
+		resourceLink
+			.addColumn("CS_VERSION_ID")
+			.nullable()
+			.type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255);
+		resourceLink
+			.addColumn("CODESYSTEM_PID")
+			.nullable()
+			.type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		resourceLink
+			.addForeignKey("FK_CODESYSVER_CS_ID")
+			.toColumn("CODESYSTEM_PID")
+			.references("TRM_CODESYSTEM", "PID");
+
+		// Concept
+		Builder.BuilderWithTableName concept = version.onTable("TRM_CONCEPT");
+		version.startSectionWithMessage("Starting work on table: " + concept.getTableName());
+		concept
+			.addColumn("CODE_SEQUENCE")
+			.nullable()
+			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+
+
 	}
 
 

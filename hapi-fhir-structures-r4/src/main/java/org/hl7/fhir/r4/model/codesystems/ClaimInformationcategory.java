@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum ClaimInformationcategory {
          */
         ONSET, 
         /**
-         * Nature and date of the related event eg. Last exam, service, Xray etc.
+         * Nature and date of the related event e.g. Last exam, service, X-ray etc.
          */
         RELATED, 
         /**
@@ -57,7 +57,7 @@ public enum ClaimInformationcategory {
          */
         EXCEPTION, 
         /**
-         * Materials being forwarded, eg. Models, molds, images, documents.
+         * Materials being forwarded, e.g. Models, molds, images, documents.
          */
         MATERIAL, 
         /**
@@ -135,16 +135,16 @@ public enum ClaimInformationcategory {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/claiminformationcategory";
+          return "http://terminology.hl7.org/CodeSystem/claiminformationcategory";
         }
         public String getDefinition() {
           switch (this) {
             case INFO: return "Codes conveying additional situation and condition information.";
             case DISCHARGE: return "Discharge status and discharge to locations.";
             case ONSET: return "Period, start or end dates of aspects of the Condition.";
-            case RELATED: return "Nature and date of the related event eg. Last exam, service, Xray etc.";
+            case RELATED: return "Nature and date of the related event e.g. Last exam, service, X-ray etc.";
             case EXCEPTION: return "Insurance policy exceptions.";
-            case MATERIAL: return "Materials being forwarded, eg. Models, molds, images, documents.";
+            case MATERIAL: return "Materials being forwarded, e.g. Models, molds, images, documents.";
             case ATTACHMENT: return "Materials attached such as images, documents and resources.";
             case MISSINGTOOTH: return "Teeth which are missing for any reason, for example: prior extraction, never developed.";
             case PROSTHESIS: return "The type of prosthesis and date of supply if a previously supplied prosthesis.";

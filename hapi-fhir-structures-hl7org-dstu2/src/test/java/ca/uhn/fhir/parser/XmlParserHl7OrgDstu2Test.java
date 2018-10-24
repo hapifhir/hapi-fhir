@@ -19,8 +19,6 @@ import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
 import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.api.*;
-import org.junit.*;
 import org.hl7.fhir.instance.model.Observation;
 import org.hl7.fhir.instance.model.Organization;
 import org.hl7.fhir.instance.model.Patient;
@@ -32,7 +30,6 @@ import org.hl7.fhir.instance.model.Specimen;
 import org.hl7.fhir.instance.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.After;
 import org.junit.Assert;
@@ -49,7 +46,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredAddressExtension;
 import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredExtension;
 import ca.uhn.fhir.rest.api.Constants;
@@ -1050,7 +1046,7 @@ public class XmlParserHl7OrgDstu2Test {
     ourLog.info(encoded);
 
     assertThat(encoded, containsString("<Patient"));
-    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"/>",
+    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
         "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
     assertThat(encoded, not(containsString("text")));
     assertThat(encoded, not(containsString("THE DIV")));
@@ -1169,7 +1165,7 @@ public class XmlParserHl7OrgDstu2Test {
     ourLog.info(encoded);
 
     assertThat(encoded, containsString("<Patient"));
-    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"/>",
+    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
         "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
     assertThat(encoded, not(containsString("THE DIV")));
     assertThat(encoded, containsString("family"));
@@ -1191,7 +1187,7 @@ public class XmlParserHl7OrgDstu2Test {
 
     assertThat(encoded, containsString("<Patient"));
     assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"foo\"/>", "<code value=\"bar\"/>", "</tag>"));
-    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM + "\"/>",
+    assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
         "<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
     assertThat(encoded, not(containsString("THE DIV")));
     assertThat(encoded, containsString("family"));

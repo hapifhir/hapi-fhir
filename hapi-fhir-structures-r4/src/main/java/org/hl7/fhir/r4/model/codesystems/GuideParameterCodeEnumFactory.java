@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -49,8 +49,8 @@ public class GuideParameterCodeEnumFactory implements EnumFactory<GuideParameter
       return GuideParameterCode.PATHPAGES;
     if ("path-tx-cache".equals(codeString))
       return GuideParameterCode.PATHTXCACHE;
-    if ("expansion-profile".equals(codeString))
-      return GuideParameterCode.EXPANSIONPROFILE;
+    if ("expansion-parameter".equals(codeString))
+      return GuideParameterCode.EXPANSIONPARAMETER;
     if ("rule-broken-links".equals(codeString))
       return GuideParameterCode.RULEBROKENLINKS;
     if ("generate-xml".equals(codeString))
@@ -75,8 +75,8 @@ public class GuideParameterCodeEnumFactory implements EnumFactory<GuideParameter
       return "path-pages";
     if (code == GuideParameterCode.PATHTXCACHE)
       return "path-tx-cache";
-    if (code == GuideParameterCode.EXPANSIONPROFILE)
-      return "expansion-profile";
+    if (code == GuideParameterCode.EXPANSIONPARAMETER)
+      return "expansion-parameter";
     if (code == GuideParameterCode.RULEBROKENLINKS)
       return "rule-broken-links";
     if (code == GuideParameterCode.GENERATEXML)

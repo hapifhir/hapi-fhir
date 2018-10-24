@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +18,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.*;
@@ -122,6 +124,22 @@ public class OperationClientR4Test {
 		
 		HttpGet value = (HttpGet) capt.getAllValues().get(0);
 		assertEquals("http://foo/$nonrepeating?valstr=str&valtok=sys2%7Cval2", value.getURI().toASCIIString());
+	}
+
+
+	@Test
+	public void testOperationOnInstanceWithIncompleteInstanceId() throws Exception {
+		try {
+			ourGenClient
+				.operation()
+				.onInstance(new IdType("123"))
+				.named("nonrepeating")
+				.withSearchParameter(Parameters.class, "valstr", new StringParam("str"))
+				.execute();
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("Can not invoke operation \"$nonrepeating\" on instance \"123\" - No resource type specified", e.getMessage());
+		}
 	}
 
 	@Test

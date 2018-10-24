@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,7 @@ public enum Adjudication {
          */
         DEDUCTIBLE, 
         /**
-         * The amount of deductable which could not allocated to other line items.
+         * The amount of deductible which could not allocated to other line items.
          */
         UNALLOCDEDUCT, 
         /**
@@ -107,7 +107,7 @@ public enum Adjudication {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/adjudication";
+          return "http://terminology.hl7.org/CodeSystem/adjudication";
         }
         public String getDefinition() {
           switch (this) {
@@ -115,7 +115,7 @@ public enum Adjudication {
             case COPAY: return "Patient Co-Payment";
             case ELIGIBLE: return "Amount of the change which is considered for adjudication.";
             case DEDUCTIBLE: return "Amount deducted from the eligible amount prior to adjudication.";
-            case UNALLOCDEDUCT: return "The amount of deductable which could not allocated to other line items.";
+            case UNALLOCDEDUCT: return "The amount of deductible which could not allocated to other line items.";
             case ELIGPERCENT: return "Eligible Percentage.";
             case TAX: return "The amount of tax.";
             case BENEFIT: return "Amount payable under the coverage";
@@ -127,8 +127,8 @@ public enum Adjudication {
             case SUBMITTED: return "Submitted Amount";
             case COPAY: return "CoPay";
             case ELIGIBLE: return "Eligible Amount";
-            case DEDUCTIBLE: return "Deductable";
-            case UNALLOCDEDUCT: return "Unallocated Deductable";
+            case DEDUCTIBLE: return "Deductible";
+            case UNALLOCDEDUCT: return "Unallocated Deductible";
             case ELIGPERCENT: return "Eligible %";
             case TAX: return "Tax";
             case BENEFIT: return "Benefit Amount";

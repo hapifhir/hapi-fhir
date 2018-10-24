@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Record details about an anatomical structure.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.
  */
-@ResourceDef(name="BodyStructure", profile="http://hl7.org/fhir/Profile/BodyStructure")
+@ResourceDef(name="BodyStructure", profile="http://hl7.org/fhir/StructureDefinition/BodyStructure")
 public class BodyStructure extends DomainResource {
 
     /**

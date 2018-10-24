@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -65,11 +65,11 @@ public class ContactPoint extends Type implements ICompositeType {
          */
         PAGER, 
         /**
-         * A contact that is not a phone, fax, pager or email address and is expressed as a URL.  This is intended for various personal contacts including blogs, Skype, Twitter, Facebook, etc. Do not use for email addresses.
+         * A contact that is not a phone, fax, pager or email address and is expressed as a URL.  This is intended for various institutional or personal contacts including web sites, blogs, Skype, Twitter, Facebook, etc. Do not use for email addresses.
          */
         URL, 
         /**
-         * A contact that can be used for sending an sms message (e.g. mobile phones, some landlines)
+         * A contact that can be used for sending an sms message (e.g. mobile phones, some landlines).
          */
         SMS, 
         /**
@@ -132,8 +132,8 @@ public class ContactPoint extends Type implements ICompositeType {
             case FAX: return "The value is a fax machine. Use of full international numbers starting with + is recommended to enable automatic dialing support but not required.";
             case EMAIL: return "The value is an email address.";
             case PAGER: return "The value is a pager number. These may be local pager numbers that are only usable on a particular pager system.";
-            case URL: return "A contact that is not a phone, fax, pager or email address and is expressed as a URL.  This is intended for various personal contacts including blogs, Skype, Twitter, Facebook, etc. Do not use for email addresses.";
-            case SMS: return "A contact that can be used for sending an sms message (e.g. mobile phones, some landlines)";
+            case URL: return "A contact that is not a phone, fax, pager or email address and is expressed as a URL.  This is intended for various institutional or personal contacts including web sites, blogs, Skype, Twitter, Facebook, etc. Do not use for email addresses.";
+            case SMS: return "A contact that can be used for sending an sms message (e.g. mobile phones, some landlines).";
             case OTHER: return "A contact that is not a phone, fax, page or email address and is not expressible as a URL.  E.g. Internal mail address.  This SHOULD NOT be used for contacts that are expressible as a URL (e.g. Skype, Twitter, Facebook, etc.)  Extensions may be used to distinguish \"other\" contact types.";
             default: return "?";
           }
@@ -383,10 +383,10 @@ public class ContactPoint extends Type implements ICompositeType {
     protected Enumeration<ContactPointUse> use;
 
     /**
-     * Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.
+     * Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values.
      */
     @Child(name = "rank", type = {PositiveIntType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Specify preferred order of use (1 = highest)", formalDefinition="Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values." )
+    @Description(shortDefinition="Specify preferred order of use (1 = highest)", formalDefinition="Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values." )
     protected PositiveIntType rank;
 
     /**
@@ -553,7 +553,7 @@ public class ContactPoint extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #rank} (Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.). This is the underlying object with id, value and extensions. The accessor "getRank" gives direct access to the value
+     * @return {@link #rank} (Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values.). This is the underlying object with id, value and extensions. The accessor "getRank" gives direct access to the value
      */
     public PositiveIntType getRankElement() { 
       if (this.rank == null)
@@ -573,7 +573,7 @@ public class ContactPoint extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #rank} (Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.). This is the underlying object with id, value and extensions. The accessor "getRank" gives direct access to the value
+     * @param value {@link #rank} (Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values.). This is the underlying object with id, value and extensions. The accessor "getRank" gives direct access to the value
      */
     public ContactPoint setRankElement(PositiveIntType value) { 
       this.rank = value;
@@ -581,14 +581,14 @@ public class ContactPoint extends Type implements ICompositeType {
     }
 
     /**
-     * @return Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.
+     * @return Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values.
      */
     public int getRank() { 
       return this.rank == null || this.rank.isEmpty() ? 0 : this.rank.getValue();
     }
 
     /**
-     * @param value Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.
+     * @param value Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values.
      */
     public ContactPoint setRank(int value) { 
         if (this.rank == null)
@@ -626,7 +626,7 @@ public class ContactPoint extends Type implements ICompositeType {
         children.add(new Property("system", "code", "Telecommunications form for contact point - what communications system is required to make use of the contact.", 0, 1, system));
         children.add(new Property("value", "string", "The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).", 0, 1, value));
         children.add(new Property("use", "code", "Identifies the purpose for the contact point.", 0, 1, use));
-        children.add(new Property("rank", "positiveInt", "Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.", 0, 1, rank));
+        children.add(new Property("rank", "positiveInt", "Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values.", 0, 1, rank));
         children.add(new Property("period", "Period", "Time period when the contact point was/is in use.", 0, 1, period));
       }
 
@@ -636,7 +636,7 @@ public class ContactPoint extends Type implements ICompositeType {
         case -887328209: /*system*/  return new Property("system", "code", "Telecommunications form for contact point - what communications system is required to make use of the contact.", 0, 1, system);
         case 111972721: /*value*/  return new Property("value", "string", "The actual contact point details, in a form that is meaningful to the designated communication system (i.e. phone number or email address).", 0, 1, value);
         case 116103: /*use*/  return new Property("use", "code", "Identifies the purpose for the contact point.", 0, 1, use);
-        case 3492908: /*rank*/  return new Property("rank", "positiveInt", "Specifies a preferred order in which to use a set of contacts. Contacts are ranked with lower values coming before higher values.", 0, 1, rank);
+        case 3492908: /*rank*/  return new Property("rank", "positiveInt", "Specifies a preferred order in which to use a set of contacts. ContactPoints with lower rank values are more preferred than those with higher rank values.", 0, 1, rank);
         case -991726143: /*period*/  return new Property("period", "Period", "Time period when the contact point was/is in use.", 0, 1, period);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }

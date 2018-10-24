@@ -159,6 +159,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	T read(IIdType theId);
 
 	/**
+	 * Read a resource by its internal PID
+	 */
+	IBaseResource readByPid(Long thePid);
+
+	/**
 	 * @param theId
 	 * @param theRequestDetails TODO
 	 * @throws ResourceNotFoundException If the ID is not known to the server
@@ -238,6 +243,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
 
 	RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria);
+
 
 	// /**
 	// * Invoke the everything operation

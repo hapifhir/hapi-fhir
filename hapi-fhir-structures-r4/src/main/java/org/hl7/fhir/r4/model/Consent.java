@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a healthcare consumer’s  choices, which permits or denies identified recipient(s) or recipient role(s) to perform one or more actions within a given policy context, for specific purposes and periods of time.
  */
-@ResourceDef(name="Consent", profile="http://hl7.org/fhir/Profile/Consent")
+@ResourceDef(name="Consent", profile="http://hl7.org/fhir/StructureDefinition/Consent")
 public class Consent extends DomainResource {
 
     public enum ConsentState {
@@ -55,27 +55,27 @@ public class Consent extends DomainResource {
          */
         PREPARATION, 
         /**
-         * The event is currently occurring
+         * The event is currently occurring.
          */
         INPROGRESS, 
         /**
-         * The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)
+         * The event was terminated prior to any activity beyond preparation.  I.e. The 'main' activity has not yet begun.  The boundary between preparatory and the 'main' activity is context-specific.
          */
         NOTDONE, 
         /**
-         * The event has been temporarily stopped but is expected to resume in the future
+         * The event has been temporarily stopped but is expected to resume in the future.
          */
-        SUSPENDED, 
+        ONHOLD, 
         /**
-         * The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.
+         * The event was terminated prior to the full completion of the intended activity but after at least some of the 'main' activity (beyond preparation) has occurred.
          */
-        ABORTED, 
+        STOPPED, 
         /**
-         * The event has now concluded
+         * The event has now concluded.
          */
         COMPLETED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
@@ -95,10 +95,10 @@ public class Consent extends DomainResource {
           return INPROGRESS;
         if ("not-done".equals(codeString))
           return NOTDONE;
-        if ("suspended".equals(codeString))
-          return SUSPENDED;
-        if ("aborted".equals(codeString))
-          return ABORTED;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("stopped".equals(codeString))
+          return STOPPED;
         if ("completed".equals(codeString))
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -115,8 +115,8 @@ public class Consent extends DomainResource {
             case PREPARATION: return "preparation";
             case INPROGRESS: return "in-progress";
             case NOTDONE: return "not-done";
-            case SUSPENDED: return "suspended";
-            case ABORTED: return "aborted";
+            case ONHOLD: return "on-hold";
+            case STOPPED: return "stopped";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             case UNKNOWN: return "unknown";
@@ -128,8 +128,8 @@ public class Consent extends DomainResource {
             case PREPARATION: return "http://hl7.org/fhir/event-status";
             case INPROGRESS: return "http://hl7.org/fhir/event-status";
             case NOTDONE: return "http://hl7.org/fhir/event-status";
-            case SUSPENDED: return "http://hl7.org/fhir/event-status";
-            case ABORTED: return "http://hl7.org/fhir/event-status";
+            case ONHOLD: return "http://hl7.org/fhir/event-status";
+            case STOPPED: return "http://hl7.org/fhir/event-status";
             case COMPLETED: return "http://hl7.org/fhir/event-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/event-status";
             case UNKNOWN: return "http://hl7.org/fhir/event-status";
@@ -139,12 +139,12 @@ public class Consent extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes.";
-            case INPROGRESS: return "The event is currently occurring";
-            case NOTDONE: return "The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)";
-            case SUSPENDED: return "The event has been temporarily stopped but is expected to resume in the future";
-            case ABORTED: return "The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.";
-            case COMPLETED: return "The event has now concluded";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case INPROGRESS: return "The event is currently occurring.";
+            case NOTDONE: return "The event was terminated prior to any activity beyond preparation.  I.e. The 'main' activity has not yet begun.  The boundary between preparatory and the 'main' activity is context-specific.";
+            case ONHOLD: return "The event has been temporarily stopped but is expected to resume in the future.";
+            case STOPPED: return "The event was terminated prior to the full completion of the intended activity but after at least some of the 'main' activity (beyond preparation) has occurred.";
+            case COMPLETED: return "The event has now concluded.";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
@@ -154,8 +154,8 @@ public class Consent extends DomainResource {
             case PREPARATION: return "Preparation";
             case INPROGRESS: return "In Progress";
             case NOTDONE: return "Not Done";
-            case SUSPENDED: return "Suspended";
-            case ABORTED: return "Aborted";
+            case ONHOLD: return "On Hold";
+            case STOPPED: return "Stopped";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
             case UNKNOWN: return "Unknown";
@@ -175,10 +175,10 @@ public class Consent extends DomainResource {
           return ConsentState.INPROGRESS;
         if ("not-done".equals(codeString))
           return ConsentState.NOTDONE;
-        if ("suspended".equals(codeString))
-          return ConsentState.SUSPENDED;
-        if ("aborted".equals(codeString))
-          return ConsentState.ABORTED;
+        if ("on-hold".equals(codeString))
+          return ConsentState.ONHOLD;
+        if ("stopped".equals(codeString))
+          return ConsentState.STOPPED;
         if ("completed".equals(codeString))
           return ConsentState.COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -201,10 +201,10 @@ public class Consent extends DomainResource {
           return new Enumeration<ConsentState>(this, ConsentState.INPROGRESS);
         if ("not-done".equals(codeString))
           return new Enumeration<ConsentState>(this, ConsentState.NOTDONE);
-        if ("suspended".equals(codeString))
-          return new Enumeration<ConsentState>(this, ConsentState.SUSPENDED);
-        if ("aborted".equals(codeString))
-          return new Enumeration<ConsentState>(this, ConsentState.ABORTED);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<ConsentState>(this, ConsentState.ONHOLD);
+        if ("stopped".equals(codeString))
+          return new Enumeration<ConsentState>(this, ConsentState.STOPPED);
         if ("completed".equals(codeString))
           return new Enumeration<ConsentState>(this, ConsentState.COMPLETED);
         if ("entered-in-error".equals(codeString))
@@ -220,10 +220,10 @@ public class Consent extends DomainResource {
         return "in-progress";
       if (code == ConsentState.NOTDONE)
         return "not-done";
-      if (code == ConsentState.SUSPENDED)
-        return "suspended";
-      if (code == ConsentState.ABORTED)
-        return "aborted";
+      if (code == ConsentState.ONHOLD)
+        return "on-hold";
+      if (code == ConsentState.STOPPED)
+        return "stopped";
       if (code == ConsentState.COMPLETED)
         return "completed";
       if (code == ConsentState.ENTEREDINERROR)
@@ -239,11 +239,11 @@ public class Consent extends DomainResource {
 
     public enum ConsentProvisionType {
         /**
-         * Consent is denied for actions meeting these rules
+         * Consent is denied for actions meeting these rules.
          */
         DENY, 
         /**
-         * Consent is provided for actions meeting these rules
+         * Consent is provided for actions meeting these rules.
          */
         PERMIT, 
         /**
@@ -278,8 +278,8 @@ public class Consent extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case DENY: return "Consent is denied for actions meeting these rules";
-            case PERMIT: return "Consent is provided for actions meeting these rules";
+            case DENY: return "Consent is denied for actions meeting these rules.";
+            case PERMIT: return "Consent is provided for actions meeting these rules.";
             default: return "?";
           }
         }
@@ -331,19 +331,19 @@ public class Consent extends DomainResource {
 
     public enum ConsentDataMeaning {
         /**
-         * The consent applies directly to the instance of the resource
+         * The consent applies directly to the instance of the resource.
          */
         INSTANCE, 
         /**
-         * The consent applies directly to the instance of the resource and instances it refers to
+         * The consent applies directly to the instance of the resource and instances it refers to.
          */
         RELATED, 
         /**
-         * The consent applies directly to the instance of the resource and instances that refer to it
+         * The consent applies directly to the instance of the resource and instances that refer to it.
          */
         DEPENDENTS, 
         /**
-         * The consent applies to instances of resources that are authored by
+         * The consent applies to instances of resources that are authored by.
          */
         AUTHOREDBY, 
         /**
@@ -386,10 +386,10 @@ public class Consent extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case INSTANCE: return "The consent applies directly to the instance of the resource";
-            case RELATED: return "The consent applies directly to the instance of the resource and instances it refers to";
-            case DEPENDENTS: return "The consent applies directly to the instance of the resource and instances that refer to it";
-            case AUTHOREDBY: return "The consent applies to instances of resources that are authored by";
+            case INSTANCE: return "The consent applies directly to the instance of the resource.";
+            case RELATED: return "The consent applies directly to the instance of the resource and instances it refers to.";
+            case DEPENDENTS: return "The consent applies directly to the instance of the resource and instances that refer to it.";
+            case AUTHOREDBY: return "The consent applies to instances of resources that are authored by.";
             default: return "?";
           }
         }
@@ -456,10 +456,10 @@ public class Consent extends DomainResource {
     @Block()
     public static class ConsentPolicyComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.
+         * Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.
          */
         @Child(name = "authority", type = {UriType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Enforcement source for policy", formalDefinition="Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives." )
+        @Description(shortDefinition="Enforcement source for policy", formalDefinition="Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives." )
         protected UriType authority;
 
         /**
@@ -479,7 +479,7 @@ public class Consent extends DomainResource {
       }
 
         /**
-         * @return {@link #authority} (Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.). This is the underlying object with id, value and extensions. The accessor "getAuthority" gives direct access to the value
+         * @return {@link #authority} (Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.). This is the underlying object with id, value and extensions. The accessor "getAuthority" gives direct access to the value
          */
         public UriType getAuthorityElement() { 
           if (this.authority == null)
@@ -499,7 +499,7 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @param value {@link #authority} (Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.). This is the underlying object with id, value and extensions. The accessor "getAuthority" gives direct access to the value
+         * @param value {@link #authority} (Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.). This is the underlying object with id, value and extensions. The accessor "getAuthority" gives direct access to the value
          */
         public ConsentPolicyComponent setAuthorityElement(UriType value) { 
           this.authority = value;
@@ -507,14 +507,14 @@ public class Consent extends DomainResource {
         }
 
         /**
-         * @return Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.
+         * @return Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.
          */
         public String getAuthority() { 
           return this.authority == null ? null : this.authority.getValue();
         }
 
         /**
-         * @param value Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.
+         * @param value Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.
          */
         public ConsentPolicyComponent setAuthority(String value) { 
           if (Utilities.noString(value))
@@ -578,14 +578,14 @@ public class Consent extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("authority", "uri", "Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.", 0, 1, authority));
+          children.add(new Property("authority", "uri", "Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.", 0, 1, authority));
           children.add(new Property("uri", "uri", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, 1, uri));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 1475610435: /*authority*/  return new Property("authority", "uri", "Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.", 0, 1, authority);
+          case 1475610435: /*authority*/  return new Property("authority", "uri", "Entity or Organization having regulatory jurisdiction or accountability for  enforcing policies pertaining to Consent Directives.", 0, 1, authority);
           case 116076: /*uri*/  return new Property("uri", "uri", "The references to the policies that are included in this consent scope. Policies may be organizational, but are often defined jurisdictionally, or in law.", 0, 1, uri);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1061,7 +1061,7 @@ public class Consent extends DomainResource {
          */
         @Child(name = "purpose", type = {Coding.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Context of activities covered by this rule", formalDefinition="The context of the activities a user is taking - why the user is accessing the data - that are controlled by this rule." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-PurposeOfUse")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-PurposeOfUse")
         protected List<Coding> purpose;
 
         /**
@@ -3524,26 +3524,6 @@ public class Consent extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>securitylabel</b>
-   * <p>
-   * Description: <b>Security Labels that define affected resources</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Consent.provision.securityLabel</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="securitylabel", path="Consent.provision.securityLabel", description="Security Labels that define affected resources", type="token" )
-  public static final String SP_SECURITYLABEL = "securitylabel";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>securitylabel</b>
-   * <p>
-   * Description: <b>Security Labels that define affected resources</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Consent.provision.securityLabel</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SECURITYLABEL = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SECURITYLABEL);
-
- /**
    * Search parameter: <b>period</b>
    * <p>
    * Description: <b>Timeframe for this rule</b><br>
@@ -3617,7 +3597,7 @@ public class Consent extends DomainResource {
    * Path: <b>Consent.source[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="source-reference", path="Consent.source", description="Search by reference to a Consent, DocumentReference, Contract  or QuestionnaireResponse", type="reference", target={Consent.class, Contract.class, DocumentReference.class, QuestionnaireResponse.class } )
+  @SearchParamDefinition(name="source-reference", path="Consent.source.where(resolve() is Consent or resolve() is Contract or resolve() is QuestionnaireResponse or resolve() is DocumentReference)", description="Search by reference to a Consent, DocumentReference, Contract  or QuestionnaireResponse", type="reference", target={Consent.class, Contract.class, DocumentReference.class, QuestionnaireResponse.class } )
   public static final String SP_SOURCE_REFERENCE = "source-reference";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>source-reference</b>
@@ -3680,6 +3660,26 @@ public class Consent extends DomainResource {
    * the path value of "<b>Consent:actor</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ACTOR = new ca.uhn.fhir.model.api.Include("Consent:actor").toLocked();
+
+ /**
+   * Search parameter: <b>security-label</b>
+   * <p>
+   * Description: <b>Security Labels that define affected resources</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Consent.provision.securityLabel</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="security-label", path="Consent.provision.securityLabel", description="Security Labels that define affected resources", type="token" )
+  public static final String SP_SECURITY_LABEL = "security-label";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>security-label</b>
+   * <p>
+   * Description: <b>Security Labels that define affected resources</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Consent.provision.securityLabel</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SECURITY_LABEL = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SECURITY_LABEL);
 
  /**
    * Search parameter: <b>patient</b>

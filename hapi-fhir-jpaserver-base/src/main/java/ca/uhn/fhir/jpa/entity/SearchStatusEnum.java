@@ -22,8 +22,23 @@ package ca.uhn.fhir.jpa.entity;
 
 public enum SearchStatusEnum {
 
+	/**
+	 * The search is currently actively working
+	 */
 	LOADING,
+	/**
+	 * The search has loaded a set of results and has stopped searching because it
+	 * reached an appropriate threshold
+	 */
+	PASSCMPLET,
+	/**
+	 * The search completed normally and loaded all of the results it as permitted to
+	 * load
+	 */
 	FINISHED,
+	/**
+	 * The search failed and will not continue
+	 */
 	FAILED
-	
+
 }

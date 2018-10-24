@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,44 +45,44 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes the intended objective(s) for a patient, group or organization care, for example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.
  */
-@ResourceDef(name="Goal", profile="http://hl7.org/fhir/Profile/Goal")
+@ResourceDef(name="Goal", profile="http://hl7.org/fhir/StructureDefinition/Goal")
 public class Goal extends DomainResource {
 
     public enum GoalStatus {
         /**
-         * A goal is proposed for this patient
+         * A goal is proposed for this patient.
          */
         PROPOSED, 
         /**
-         * A proposed goal was accepted or acknowledged
+         * A proposed goal was accepted or acknowledged.
          */
         ACCEPTED, 
         /**
-         * A goal is planned for this patient
+         * A goal is planned for this patient.
          */
         PLANNED, 
         /**
-         * The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)
+         * The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again).
          */
         INPROGRESS, 
         /**
-         * The goal is on schedule for the planned timelines
+         * The goal is on schedule for the planned timelines.
          */
         ONTARGET, 
         /**
-         * The goal is ahead of the planned timelines
+         * The goal is ahead of the planned timelines.
          */
         AHEADOFTARGET, 
         /**
-         * The goal is behind the planned timelines
+         * The goal is behind the planned timelines.
          */
         BEHINDTARGET, 
         /**
-         * The goal has been met, but ongoing activity is needed to sustain the goal objective
+         * The goal has been met, but ongoing activity is needed to sustain the goal objective.
          */
         SUSTAINING, 
         /**
-         * The goal has been met and no further action is needed
+         * The goal has been met and no further action is needed.
          */
         ACHIEVED, 
         /**
@@ -90,7 +90,7 @@ public class Goal extends DomainResource {
          */
         ONHOLD, 
         /**
-         * The previously accepted goal is no longer being sought
+         * The previously accepted goal is no longer being sought.
          */
         CANCELLED, 
         /**
@@ -98,7 +98,7 @@ public class Goal extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * A proposed goal was rejected
+         * A proposed goal was rejected.
          */
         REJECTED, 
         /**
@@ -177,19 +177,19 @@ public class Goal extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "A goal is proposed for this patient";
-            case ACCEPTED: return "A proposed goal was accepted or acknowledged";
-            case PLANNED: return "A goal is planned for this patient";
-            case INPROGRESS: return "The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)";
-            case ONTARGET: return "The goal is on schedule for the planned timelines";
-            case AHEADOFTARGET: return "The goal is ahead of the planned timelines";
-            case BEHINDTARGET: return "The goal is behind the planned timelines";
-            case SUSTAINING: return "The goal has been met, but ongoing activity is needed to sustain the goal objective";
-            case ACHIEVED: return "The goal has been met and no further action is needed";
+            case PROPOSED: return "A goal is proposed for this patient.";
+            case ACCEPTED: return "A proposed goal was accepted or acknowledged.";
+            case PLANNED: return "A goal is planned for this patient.";
+            case INPROGRESS: return "The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again).";
+            case ONTARGET: return "The goal is on schedule for the planned timelines.";
+            case AHEADOFTARGET: return "The goal is ahead of the planned timelines.";
+            case BEHINDTARGET: return "The goal is behind the planned timelines.";
+            case SUSTAINING: return "The goal has been met, but ongoing activity is needed to sustain the goal objective.";
+            case ACHIEVED: return "The goal has been met and no further action is needed.";
             case ONHOLD: return "The goal remains a long term objective but is no longer being actively pursued for a temporary period of time.";
-            case CANCELLED: return "The previously accepted goal is no longer being sought";
+            case CANCELLED: return "The previously accepted goal is no longer being sought.";
             case ENTEREDINERROR: return "The goal was entered in error and voided.";
-            case REJECTED: return "A proposed goal was rejected";
+            case REJECTED: return "A proposed goal was rejected.";
             default: return "?";
           }
         }
@@ -1882,7 +1882,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Goal.subject", description="Who this goal is intended for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="Goal.subject.where(resolve() is Patient)", description="Who this goal is intended for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1934,7 +1934,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.startDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="start-date", path="Goal.start.as(date)", description="When goal pursuit begins", type="date" )
+  @SearchParamDefinition(name="start-date", path="(Goal.start as date)", description="When goal pursuit begins", type="date" )
   public static final String SP_START_DATE = "start-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>start-date</b>
@@ -1974,7 +1974,7 @@ public class Goal extends DomainResource {
    * Path: <b>Goal.target.dueDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="target-date", path="Goal.target.due.as(date)", description="Reach goal on or before", type="date" )
+  @SearchParamDefinition(name="target-date", path="(Goal.target.due as date)", description="Reach goal on or before", type="date" )
   public static final String SP_TARGET_DATE = "target-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>target-date</b>

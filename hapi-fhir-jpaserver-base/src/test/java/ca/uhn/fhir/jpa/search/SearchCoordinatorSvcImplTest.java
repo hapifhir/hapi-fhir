@@ -1,10 +1,7 @@
 package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IDao;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
@@ -42,10 +39,10 @@ import javax.persistence.EntityManager;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"unchecked"})
@@ -140,7 +137,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		Iterator<Long> iter = new FailAfterNIterator<Long>(new SlowIterator<Long>(pids.iterator(), 2), 300);
+		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
 		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
@@ -161,7 +158,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		Iterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 1);
+		IResultIterator iter = new SlowIterator(pids.iterator(), 1);
 		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
@@ -197,7 +194,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		SlowIterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 2);
+		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
@@ -225,7 +222,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		Iterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 2);
+		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
@@ -249,7 +246,7 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals("19", resources.get(9).getIdElement().getValueAsString());
 
 		when(mySearchDao.findByUuid(eq(result.getUuid()))).thenReturn(search);
-		
+
 		/*
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
@@ -275,7 +272,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 100);
-		SlowIterator<Long> iter = new SlowIterator<Long>(pids.iterator(), 2);
+		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
@@ -338,7 +335,7 @@ public class SearchCoordinatorSvcImplTest {
 				search.setStatus(SearchStatusEnum.FINISHED);
 			}
 		}.start();
-		
+
 		/*
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
@@ -365,7 +362,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(pids.iterator());
+		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(new ResultIterator(pids.iterator()));
 
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
 
@@ -386,7 +383,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(pids.iterator());
+		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(new ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(10, 110);
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
@@ -401,17 +398,12 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	public static class FailAfterNIterator<T> extends BaseIterator<T> implements Iterator<T> {
+	public static class FailAfterNIterator extends BaseIterator<Long> implements IResultIterator {
 
 		private int myCount;
-		private Iterator<T> myWrap;
+		private IResultIterator myWrap;
 
-		public FailAfterNIterator(Iterator<T> theWrap, int theCount) {
+		public FailAfterNIterator(IResultIterator theWrap, int theCount) {
 			myWrap = theWrap;
 			myCount = theCount;
 		}
@@ -422,7 +414,7 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 		@Override
-		public T next() {
+		public Long next() {
 			myCount--;
 			if (myCount == 0) {
 				throw new NullPointerException("FAILED");
@@ -430,16 +422,51 @@ public class SearchCoordinatorSvcImplTest {
 			return myWrap.next();
 		}
 
+		@Override
+		public int getSkippedCount() {
+			return myWrap.getSkippedCount();
+		}
 	}
 
+	public static class ResultIterator extends BaseIterator<Long> implements IResultIterator {
 
-	public static class SlowIterator<T> extends BaseIterator<T> implements Iterator<T> {
+		private final Iterator<Long> myWrap;
 
-		private int myDelay;
-		private Iterator<T> myWrap;
-
-		public SlowIterator(Iterator<T> theWrap, int theDelay) {
+		public ResultIterator(Iterator<Long> theWrap) {
 			myWrap = theWrap;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return myWrap.hasNext();
+		}
+
+		@Override
+		public Long next() {
+			return myWrap.next();
+		}
+
+		@Override
+		public int getSkippedCount() {
+			return 0;
+		}
+	}
+
+	public static class SlowIterator extends BaseIterator<Long> implements IResultIterator {
+
+		private final IResultIterator myResultIteratorWrap;
+		private int myDelay;
+		private Iterator<Long> myWrap;
+
+		public SlowIterator(Iterator<Long> theWrap, int theDelay) {
+			myWrap = theWrap;
+			myDelay = theDelay;
+			myResultIteratorWrap = null;
+		}
+
+		public SlowIterator(IResultIterator theWrap, int theDelay) {
+			myWrap = theWrap;
+			myResultIteratorWrap = theWrap;
 			myDelay = theDelay;
 		}
 
@@ -449,7 +476,7 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 		@Override
-		public T next() {
+		public Long next() {
 			try {
 				Thread.sleep(myDelay);
 			} catch (InterruptedException e) {
@@ -458,6 +485,20 @@ public class SearchCoordinatorSvcImplTest {
 			return myWrap.next();
 		}
 
+		@Override
+		public int getSkippedCount() {
+			if (myResultIteratorWrap == null) {
+				return 0;
+			} else {
+				return myResultIteratorWrap.getSkippedCount();
+			}
+		}
+
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

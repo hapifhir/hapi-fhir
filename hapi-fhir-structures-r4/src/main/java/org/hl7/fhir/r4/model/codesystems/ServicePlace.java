@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -89,7 +89,7 @@ public enum ServicePlace {
          */
         _15, 
         /**
-         * portion of an off-campus hospital provider based department which provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services to sick or injured persons who do not require hospitalization or institutionalization.
+         * portion of an off-campus hospital provider-based department which provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services to sick or injured persons who do not require hospitalization or institutionalization.
          */
         _19, 
         /**
@@ -170,7 +170,7 @@ public enum ServicePlace {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/ex-serviceplace";
+          return "http://terminology.hl7.org/CodeSystem/ex-serviceplace";
         }
         public String getDefinition() {
           switch (this) {
@@ -187,7 +187,7 @@ public enum ServicePlace {
             case _13: return "Congregate residential facility with self-contained living units providing assessment of each resident's needs and on-site support 24 hours a day, 7 days a week, with the capacity to deliver or arrange for services including some health care and other services.";
             case _14: return "A residence, with shared living areas, where clients receive supervision and other services such as social and/or behavioral services, custodial service, and minimal services (e.g., medication administration).";
             case _15: return "A facility/unit that moves from place-to-place equipped to provide preventive, screening, diagnostic, and/or treatment services.";
-            case _19: return "portion of an off-campus hospital provider based department which provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services to sick or injured persons who do not require hospitalization or institutionalization.";
+            case _19: return "portion of an off-campus hospital provider-based department which provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services to sick or injured persons who do not require hospitalization or institutionalization.";
             case _20: return "Location, distinct from a hospital emergency room, an office, or a clinic, whose purpose is to diagnose and treat illness or injury for unscheduled, ambulatory patients seeking immediate medical attention.";
             case _21: return "A facility, other than psychiatric, which primarily provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services by, or under, the supervision of physicians to patients admitted for a variety of medical conditions.";
             case _41: return "A land vehicle specifically designed, equipped and staffed for lifesaving and transporting the sick or injured.";

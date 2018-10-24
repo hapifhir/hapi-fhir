@@ -23,6 +23,7 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.util.*;
@@ -69,6 +70,8 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       vso = getExpander().expand(theSource, theProfile);
     } catch (InvalidRequestException e) {
       throw e;
+    } catch (TerminologyServiceException e) {
+      throw new InvalidRequestException(e.getMessage(), e);
     } catch (Exception e) {
       throw new InternalErrorException(e);
     }
@@ -87,6 +90,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHeiarchical) {
     return myValidationSupport.expandValueSet(myCtx, theInc);
+  }
+
+  @Override
+  public StructureDefinition fetchTypeDefinition(String theCode) {
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -243,7 +251,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       }
     }
 
-    return new ValidationResult(null, null);
+    return new ValidationResult(IssueSeverity.ERROR, null);
   }
 
   @Override

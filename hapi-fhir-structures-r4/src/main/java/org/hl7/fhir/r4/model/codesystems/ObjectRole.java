@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -61,7 +61,7 @@ public enum ObjectRole {
          */
         _6, 
         /**
-         * (deprecated)
+         * (deprecated).
          */
         _7, 
         /**
@@ -121,7 +121,7 @@ public enum ObjectRole {
          */
         _21, 
         /**
-         * (Deprecated)
+         * (Deprecated).
          */
         _22, 
         /**
@@ -219,7 +219,7 @@ public enum ObjectRole {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/object-role";
+          return "http://terminology.hl7.org/CodeSystem/object-role";
         }
         public String getDefinition() {
           switch (this) {
@@ -229,7 +229,7 @@ public enum ObjectRole {
             case _4: return "A logical object related to a health record event.  This is any healthcare  specific resource (object) not restricted to FHIR defined Resources.";
             case _5: return "This is any configurable file used to control creation of documents.  Examples include the objects maintained by the HL7 Master File transactions, Value Sets, etc.";
             case _6: return "A human participant not otherwise identified by some other category.";
-            case _7: return "(deprecated)";
+            case _7: return "(deprecated).";
             case _8: return "Typically, a licensed person who is providing or performing care related to the event, generally a physician.   The key distinction between doctor and practitioner is with regards to their role, not the licensing.  The doctor is the human who actually performed the work.  The practitioner is the human or organization that is responsible for the work.";
             case _9: return "A person or system that is being notified as part of the event.  This is relevant in situations where automated systems provide notifications to other parties when an event took place.";
             case _10: return "Insurance company, or any other organization who accepts responsibility for paying for the healthcare event.";
@@ -244,7 +244,7 @@ public enum ObjectRole {
             case _19: return "An organization or person that is the recipient of services.  This could be an organization that is buying services for a patient, or a person that is buying services for an animal.";
             case _20: return "An order, task, work item, procedure step, or other description of work to be performed; e.g. a particular instance of an MPPS.";
             case _21: return "A list of jobs or a system that provides lists of jobs; e.g. an MWL SCP.";
-            case _22: return "(Deprecated)";
+            case _22: return "(Deprecated).";
             case _23: return "An object that specifies or controls the routing or delivery of items.  For example, a distribution list is the routing criteria for mail.  The items delivered may be documents, jobs, or other objects.";
             case _24: return "The contents of a query.  This is used to capture the contents of any kind of query.  For security surveillance purposes knowing the queries being made is very important.";
             default: return "?";

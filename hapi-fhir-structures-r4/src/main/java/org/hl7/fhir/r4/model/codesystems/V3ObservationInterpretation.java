@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -579,7 +579,7 @@ Members of the OO WG have recently attempted to contact members of RCRIM regardi
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/v3/ObservationInterpretation";
+          return "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation";
         }
         public String getDefinition() {
           switch (this) {

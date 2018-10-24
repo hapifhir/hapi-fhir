@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The Care Team includes all the people and organizations who plan to participate in the coordination and delivery of care for a patient.
  */
-@ResourceDef(name="CareTeam", profile="http://hl7.org/fhir/Profile/CareTeam")
+@ResourceDef(name="CareTeam", profile="http://hl7.org/fhir/StructureDefinition/CareTeam")
 public class CareTeam extends DomainResource {
 
     public enum CareTeamStatus {
@@ -193,15 +193,15 @@ public class CareTeam extends DomainResource {
         /**
          * Indicates specific responsibility of an individual within the care team, such as "Primary care physician", "Trained social worker counselor", "Caregiver", etc.
          */
-        @Child(name = "role", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "role", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Type of involvement", formalDefinition="Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participant-role")
-        protected CodeableConcept role;
+        protected List<CodeableConcept> role;
 
         /**
          * The specific person or organization who is participating/expected to participate in the care team.
          */
-        @Child(name = "member", type = {Practitioner.class, RelatedPerson.class, Patient.class, Organization.class, CareTeam.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "member", type = {Practitioner.class, PractitionerRole.class, RelatedPerson.class, Patient.class, Organization.class, CareTeam.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Who is involved", formalDefinition="The specific person or organization who is participating/expected to participate in the care team." )
         protected Reference member;
 
@@ -229,7 +229,7 @@ public class CareTeam extends DomainResource {
         @Description(shortDefinition="Time period of participant", formalDefinition="Indicates when the specific member or organization did (or is intended to) come into effect and end." )
         protected Period period;
 
-        private static final long serialVersionUID = -1363308804L;
+        private static final long serialVersionUID = -575634410L;
 
     /**
      * Constructor
@@ -241,25 +241,54 @@ public class CareTeam extends DomainResource {
         /**
          * @return {@link #role} (Indicates specific responsibility of an individual within the care team, such as "Primary care physician", "Trained social worker counselor", "Caregiver", etc.)
          */
-        public CodeableConcept getRole() { 
+        public List<CodeableConcept> getRole() { 
           if (this.role == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CareTeamParticipantComponent.role");
-            else if (Configuration.doAutoCreate())
-              this.role = new CodeableConcept(); // cc
+            this.role = new ArrayList<CodeableConcept>();
           return this.role;
         }
 
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public CareTeamParticipantComponent setRole(List<CodeableConcept> theRole) { 
+          this.role = theRole;
+          return this;
+        }
+
         public boolean hasRole() { 
-          return this.role != null && !this.role.isEmpty();
+          if (this.role == null)
+            return false;
+          for (CodeableConcept item : this.role)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addRole() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.role == null)
+            this.role = new ArrayList<CodeableConcept>();
+          this.role.add(t);
+          return t;
+        }
+
+        public CareTeamParticipantComponent addRole(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.role == null)
+            this.role = new ArrayList<CodeableConcept>();
+          this.role.add(t);
+          return this;
         }
 
         /**
-         * @param value {@link #role} (Indicates specific responsibility of an individual within the care team, such as "Primary care physician", "Trained social worker counselor", "Caregiver", etc.)
+         * @return The first repetition of repeating field {@link #role}, creating it if it does not already exist
          */
-        public CareTeamParticipantComponent setRole(CodeableConcept value) { 
-          this.role = value;
-          return this;
+        public CodeableConcept getRoleFirstRep() { 
+          if (getRole().isEmpty()) {
+            addRole();
+          }
+          return getRole().get(0);
         }
 
         /**
@@ -371,8 +400,8 @@ public class CareTeam extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc.", 0, 1, role));
-          children.add(new Property("member", "Reference(Practitioner|RelatedPerson|Patient|Organization|CareTeam)", "The specific person or organization who is participating/expected to participate in the care team.", 0, 1, member));
+          children.add(new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc.", 0, java.lang.Integer.MAX_VALUE, role));
+          children.add(new Property("member", "Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Organization|CareTeam)", "The specific person or organization who is participating/expected to participate in the care team.", 0, 1, member));
           children.add(new Property("onBehalfOf", "Reference(Organization)", "The organization of the practitioner.", 0, 1, onBehalfOf));
           children.add(new Property("period", "Period", "Indicates when the specific member or organization did (or is intended to) come into effect and end.", 0, 1, period));
         }
@@ -380,8 +409,8 @@ public class CareTeam extends DomainResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc.", 0, 1, role);
-          case -1077769574: /*member*/  return new Property("member", "Reference(Practitioner|RelatedPerson|Patient|Organization|CareTeam)", "The specific person or organization who is participating/expected to participate in the care team.", 0, 1, member);
+          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Indicates specific responsibility of an individual within the care team, such as \"Primary care physician\", \"Trained social worker counselor\", \"Caregiver\", etc.", 0, java.lang.Integer.MAX_VALUE, role);
+          case -1077769574: /*member*/  return new Property("member", "Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Organization|CareTeam)", "The specific person or organization who is participating/expected to participate in the care team.", 0, 1, member);
           case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf", "Reference(Organization)", "The organization of the practitioner.", 0, 1, onBehalfOf);
           case -991726143: /*period*/  return new Property("period", "Period", "Indicates when the specific member or organization did (or is intended to) come into effect and end.", 0, 1, period);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -392,7 +421,7 @@ public class CareTeam extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // CodeableConcept
+        case 3506294: /*role*/ return this.role == null ? new Base[0] : this.role.toArray(new Base[this.role.size()]); // CodeableConcept
         case -1077769574: /*member*/ return this.member == null ? new Base[0] : new Base[] {this.member}; // Reference
         case -14402964: /*onBehalfOf*/ return this.onBehalfOf == null ? new Base[0] : new Base[] {this.onBehalfOf}; // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
@@ -405,7 +434,7 @@ public class CareTeam extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3506294: // role
-          this.role = castToCodeableConcept(value); // CodeableConcept
+          this.getRole().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1077769574: // member
           this.member = castToReference(value); // Reference
@@ -424,7 +453,7 @@ public class CareTeam extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("role")) {
-          this.role = castToCodeableConcept(value); // CodeableConcept
+          this.getRole().add(castToCodeableConcept(value));
         } else if (name.equals("member")) {
           this.member = castToReference(value); // Reference
         } else if (name.equals("onBehalfOf")) {
@@ -439,7 +468,7 @@ public class CareTeam extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3506294:  return getRole(); 
+        case 3506294:  return addRole(); 
         case -1077769574:  return getMember(); 
         case -14402964:  return getOnBehalfOf(); 
         case -991726143:  return getPeriod(); 
@@ -463,8 +492,7 @@ public class CareTeam extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("role")) {
-          this.role = new CodeableConcept();
-          return this.role;
+          return addRole();
         }
         else if (name.equals("member")) {
           this.member = new Reference();
@@ -485,7 +513,11 @@ public class CareTeam extends DomainResource {
       public CareTeamParticipantComponent copy() {
         CareTeamParticipantComponent dst = new CareTeamParticipantComponent();
         copyValues(dst);
-        dst.role = role == null ? null : role.copy();
+        if (role != null) {
+          dst.role = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : role)
+            dst.role.add(i.copy());
+        };
         dst.member = member == null ? null : member.copy();
         dst.onBehalfOf = onBehalfOf == null ? null : onBehalfOf.copy();
         dst.period = period == null ? null : period.copy();
@@ -1690,7 +1722,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="CareTeam.subject", description="Who care team is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="CareTeam.subject.where(resolve() is Patient)", description="Who care team is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1768,7 +1800,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="CareTeam.context", description="Encounter or episode associated with CareTeam", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="encounter", path="CareTeam.context.where(resolve() is Encounter)", description="Encounter or episode associated with CareTeam", type="reference", target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -1814,7 +1846,7 @@ public class CareTeam extends DomainResource {
    * Path: <b>CareTeam.participant.member</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="participant", path="CareTeam.participant.member", description="Who is involved", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={CareTeam.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="participant", path="CareTeam.participant.member", description="Who is involved", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={CareTeam.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_PARTICIPANT = "participant";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>participant</b>

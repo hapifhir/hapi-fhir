@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A physical, countable instance of an item, for example one box or one unit.
  */
-@ResourceDef(name="ItemInstance", profile="http://hl7.org/fhir/Profile/ItemInstance")
+@ResourceDef(name="ItemInstance", profile="http://hl7.org/fhir/StructureDefinition/ItemInstance")
 public class ItemInstance extends DomainResource {
 
     /**

@@ -87,7 +87,7 @@ public class ParametersUtil {
 				addClientParameter(theContext, next, theTargetResource, paramChild, paramChildElem, theName);
 			}
 		} else {
-			throw new IllegalArgumentException("Don't know how to handle value of type " + theValue.getClass() + " for paramater " + theName);
+			throw new IllegalArgumentException("Don't know how to handle value of type " + theValue.getClass() + " for parameter " + theName);
 		}
 	}
 

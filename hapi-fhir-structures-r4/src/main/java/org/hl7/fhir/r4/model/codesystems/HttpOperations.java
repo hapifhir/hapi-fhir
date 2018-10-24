@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,27 +37,27 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum HttpOperations {
 
         /**
-         * HTTP DELETE operation
+         * HTTP DELETE operation.
          */
         DELETE, 
         /**
-         * HTTP GET operation
+         * HTTP GET operation.
          */
         GET, 
         /**
-         * HTTP OPTIONS operation
+         * HTTP OPTIONS operation.
          */
         OPTIONS, 
         /**
-         * HTTP PATCH operation
+         * HTTP PATCH operation.
          */
         PATCH, 
         /**
-         * HTTP POST operation
+         * HTTP POST operation.
          */
         POST, 
         /**
-         * HTTP PUT operation
+         * HTTP PUT operation.
          */
         PUT, 
         /**
@@ -97,12 +97,12 @@ public enum HttpOperations {
         }
         public String getDefinition() {
           switch (this) {
-            case DELETE: return "HTTP DELETE operation";
-            case GET: return "HTTP GET operation";
-            case OPTIONS: return "HTTP OPTIONS operation";
-            case PATCH: return "HTTP PATCH operation";
-            case POST: return "HTTP POST operation";
-            case PUT: return "HTTP PUT operation";
+            case DELETE: return "HTTP DELETE operation.";
+            case GET: return "HTTP GET operation.";
+            case OPTIONS: return "HTTP OPTIONS operation.";
+            case PATCH: return "HTTP PATCH operation.";
+            case POST: return "HTTP POST operation.";
+            case PUT: return "HTTP PUT operation.";
             default: return "?";
           }
         }

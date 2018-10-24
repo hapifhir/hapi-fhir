@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A compartment definition that defines how resources are accessed on a server.
  */
-@ResourceDef(name="CompartmentDefinition", profile="http://hl7.org/fhir/Profile/CompartmentDefinition")
+@ResourceDef(name="CompartmentDefinition", profile="http://hl7.org/fhir/StructureDefinition/CompartmentDefinition")
 @ChildOrder(names={"url", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "purpose", "useContext", "jurisdiction", "code", "search", "resource"})
 public class CompartmentDefinition extends MetadataResource {
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum IssueType {
          */
         REQUIRED, 
         /**
-         * An element value is invalid.
+         * An element or header value is invalid.
          */
         VALUE, 
         /**
@@ -85,7 +85,7 @@ public enum IssueType {
          */
         PROCESSING, 
         /**
-         * The resource or profile is not supported.
+         * The interaction, operation, resource or profile is not supported.
          */
         NOTSUPPORTED, 
         /**
@@ -93,9 +93,17 @@ public enum IssueType {
          */
         DUPLICATE, 
         /**
+         * Multiple matching records were found when the operation required only one match.
+         */
+        MULTIPLEMATCHES, 
+        /**
          * The reference provided was not found. In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the content is not found further into the application architecture.
          */
         NOTFOUND, 
+        /**
+         * The reference pointed to content (usually a resource) that has been deleted.
+         */
+        DELETED, 
         /**
          * Provided content is too long (typically, this is a denial of service protection type of error).
          */
@@ -113,17 +121,13 @@ public enum IssueType {
          */
         TOOCOSTLY, 
         /**
-         * The content/operation failed to pass some business rule, and so could not proceed.
+         * The content/operation failed to pass some business rule and so could not proceed.
          */
         BUSINESSRULE, 
         /**
-         * Content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture.)
+         * Content could not be accepted because of an edit conflict (i.e. version aware updates). (In a pure RESTful environment, this would be an HTTP 409 error, but this code may be used where the conflict is discovered further into the application architecture.).
          */
         CONFLICT, 
-        /**
-         * Not all data sources typically accessed could be reached, or responded in time, so the returned information might not be complete.
-         */
-        INCOMPLETE, 
         /**
          * Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.
          */
@@ -133,17 +137,21 @@ public enum IssueType {
          */
         LOCKERROR, 
         /**
-         * The persistent store is unavailable; e.g. the database is down for maintenance or similar action.
+         * The persistent store is unavailable; e.g. the database is down for maintenance or similar action, and the interaction or operation cannot be processed.
          */
         NOSTORE, 
         /**
-         * An unexpected internal error has occurred.
+         * y.
          */
         EXCEPTION, 
         /**
          * An internal timeout has occurred.
          */
         TIMEOUT, 
+        /**
+         * Not all data sources typically accessed could be reached or responded in time, so the returned information might not be complete (applies to search interactions and some operations).
+         */
+        INCOMPLETE, 
         /**
          * The system is not prepared to handle this request due to load management.
          */
@@ -187,8 +195,12 @@ public enum IssueType {
           return NOTSUPPORTED;
         if ("duplicate".equals(codeString))
           return DUPLICATE;
+        if ("multiple-matches".equals(codeString))
+          return MULTIPLEMATCHES;
         if ("not-found".equals(codeString))
           return NOTFOUND;
+        if ("deleted".equals(codeString))
+          return DELETED;
         if ("too-long".equals(codeString))
           return TOOLONG;
         if ("code-invalid".equals(codeString))
@@ -201,8 +213,6 @@ public enum IssueType {
           return BUSINESSRULE;
         if ("conflict".equals(codeString))
           return CONFLICT;
-        if ("incomplete".equals(codeString))
-          return INCOMPLETE;
         if ("transient".equals(codeString))
           return TRANSIENT;
         if ("lock-error".equals(codeString))
@@ -213,6 +223,8 @@ public enum IssueType {
           return EXCEPTION;
         if ("timeout".equals(codeString))
           return TIMEOUT;
+        if ("incomplete".equals(codeString))
+          return INCOMPLETE;
         if ("throttled".equals(codeString))
           return THROTTLED;
         if ("informational".equals(codeString))
@@ -235,19 +247,21 @@ public enum IssueType {
             case PROCESSING: return "processing";
             case NOTSUPPORTED: return "not-supported";
             case DUPLICATE: return "duplicate";
+            case MULTIPLEMATCHES: return "multiple-matches";
             case NOTFOUND: return "not-found";
+            case DELETED: return "deleted";
             case TOOLONG: return "too-long";
             case CODEINVALID: return "code-invalid";
             case EXTENSION: return "extension";
             case TOOCOSTLY: return "too-costly";
             case BUSINESSRULE: return "business-rule";
             case CONFLICT: return "conflict";
-            case INCOMPLETE: return "incomplete";
             case TRANSIENT: return "transient";
             case LOCKERROR: return "lock-error";
             case NOSTORE: return "no-store";
             case EXCEPTION: return "exception";
             case TIMEOUT: return "timeout";
+            case INCOMPLETE: return "incomplete";
             case THROTTLED: return "throttled";
             case INFORMATIONAL: return "informational";
             default: return "?";
@@ -261,7 +275,7 @@ public enum IssueType {
             case INVALID: return "Content invalid against the specification or a profile.";
             case STRUCTURE: return "A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax.";
             case REQUIRED: return "A required element is missing.";
-            case VALUE: return "An element value is invalid.";
+            case VALUE: return "An element or header value is invalid.";
             case INVARIANT: return "A content validation rule failed - e.g. a schematron rule.";
             case SECURITY: return "An authentication/authorization/permissions issue of some kind.";
             case LOGIN: return "The client needs to initiate an authentication process.";
@@ -270,21 +284,23 @@ public enum IssueType {
             case FORBIDDEN: return "The user does not have the rights to perform this action.";
             case SUPPRESSED: return "Some information was not or might not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.";
             case PROCESSING: return "Processing issues. These are expected to be final e.g. there is no point resubmitting the same content unchanged.";
-            case NOTSUPPORTED: return "The resource or profile is not supported.";
+            case NOTSUPPORTED: return "The interaction, operation, resource or profile is not supported.";
             case DUPLICATE: return "An attempt was made to create a duplicate record.";
+            case MULTIPLEMATCHES: return "Multiple matching records were found when the operation required only one match.";
             case NOTFOUND: return "The reference provided was not found. In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the content is not found further into the application architecture.";
+            case DELETED: return "The reference pointed to content (usually a resource) that has been deleted.";
             case TOOLONG: return "Provided content is too long (typically, this is a denial of service protection type of error).";
             case CODEINVALID: return "The code or system could not be understood, or it was not valid in the context of a particular ValueSet.code.";
             case EXTENSION: return "An extension was found that was not acceptable, could not be resolved, or a modifierExtension was not recognized.";
             case TOOCOSTLY: return "The operation was stopped to protect server resources; e.g. a request for a value set expansion on all of SNOMED CT.";
-            case BUSINESSRULE: return "The content/operation failed to pass some business rule, and so could not proceed.";
-            case CONFLICT: return "Content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture.)";
-            case INCOMPLETE: return "Not all data sources typically accessed could be reached, or responded in time, so the returned information might not be complete.";
+            case BUSINESSRULE: return "The content/operation failed to pass some business rule and so could not proceed.";
+            case CONFLICT: return "Content could not be accepted because of an edit conflict (i.e. version aware updates). (In a pure RESTful environment, this would be an HTTP 409 error, but this code may be used where the conflict is discovered further into the application architecture.).";
             case TRANSIENT: return "Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.";
             case LOCKERROR: return "A resource/record locking failure (usually in an underlying database).";
-            case NOSTORE: return "The persistent store is unavailable; e.g. the database is down for maintenance or similar action.";
-            case EXCEPTION: return "An unexpected internal error has occurred.";
+            case NOSTORE: return "The persistent store is unavailable; e.g. the database is down for maintenance or similar action, and the interaction or operation cannot be processed.";
+            case EXCEPTION: return "y.";
             case TIMEOUT: return "An internal timeout has occurred.";
+            case INCOMPLETE: return "Not all data sources typically accessed could be reached or responded in time, so the returned information might not be complete (applies to search interactions and some operations).";
             case THROTTLED: return "The system is not prepared to handle this request due to load management.";
             case INFORMATIONAL: return "A message unrelated to the processing success of the completed operation (examples of the latter include things like reminders of password expiry, system maintenance times, etc.).";
             default: return "?";
@@ -306,19 +322,21 @@ public enum IssueType {
             case PROCESSING: return "Processing Failure";
             case NOTSUPPORTED: return "Content not supported";
             case DUPLICATE: return "Duplicate";
+            case MULTIPLEMATCHES: return "Multiple Matches";
             case NOTFOUND: return "Not Found";
+            case DELETED: return "Deleted";
             case TOOLONG: return "Content Too Long";
             case CODEINVALID: return "Invalid Code";
             case EXTENSION: return "Unacceptable Extension";
             case TOOCOSTLY: return "Operation Too Costly";
             case BUSINESSRULE: return "Business Rule Violation";
             case CONFLICT: return "Edit Version Conflict";
-            case INCOMPLETE: return "Incomplete Results";
             case TRANSIENT: return "Transient Issue";
             case LOCKERROR: return "Lock Error";
             case NOSTORE: return "No Store Available";
             case EXCEPTION: return "Exception";
             case TIMEOUT: return "Timeout";
+            case INCOMPLETE: return "Incomplete Results";
             case THROTTLED: return "Throttled";
             case INFORMATIONAL: return "Informational Note";
             default: return "?";

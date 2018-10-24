@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,11 +41,11 @@ public enum ExtensionContextType {
          */
         FHIRPATH, 
         /**
-         * The context is any element that has an ElementDefinition.id that matches that found in the expression. This includes ElementDefinition Ids that have slicing identifiers. The full path for the element is [url]#[elementid]. If there is no #, the Element id is one defined in the base specification
+         * The context is any element that has an ElementDefinition.id that matches that found in the expression. This includes ElementDefinition Ids that have slicing identifiers. The full path for the element is [url]#[elementid]. If there is no #, the Element id is one defined in the base specification.
          */
         ELEMENT, 
         /**
-         * The context is a particular extension from a particular profile, and the expression is just a uri that identifies the extension
+         * The context is a particular extension from a particular StructureDefinition, and the expression is just a uri that identifies the extension.
          */
         EXTENSION, 
         /**
@@ -77,8 +77,8 @@ public enum ExtensionContextType {
         public String getDefinition() {
           switch (this) {
             case FHIRPATH: return "The context is all elements that match the FHIRPath query found in the expression.";
-            case ELEMENT: return "The context is any element that has an ElementDefinition.id that matches that found in the expression. This includes ElementDefinition Ids that have slicing identifiers. The full path for the element is [url]#[elementid]. If there is no #, the Element id is one defined in the base specification";
-            case EXTENSION: return "The context is a particular extension from a particular profile, and the expression is just a uri that identifies the extension";
+            case ELEMENT: return "The context is any element that has an ElementDefinition.id that matches that found in the expression. This includes ElementDefinition Ids that have slicing identifiers. The full path for the element is [url]#[elementid]. If there is no #, the Element id is one defined in the base specification.";
+            case EXTENSION: return "The context is a particular extension from a particular StructureDefinition, and the expression is just a uri that identifies the extension.";
             default: return "?";
           }
         }

@@ -41,6 +41,8 @@ import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriber.class);
 
@@ -64,7 +66,9 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		switch (msg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
+			case MANUALLY_TRIGGERED:
 				break;
+			case DELETE:
 			default:
 				ourLog.trace("Not processing modified message for {}", msg.getOperationType());
 				// ignore anything else
@@ -83,6 +87,13 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 			String nextSubscriptionId = nextSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue();
 			String nextCriteriaString = nextSubscription.getCriteriaString();
+
+			if (isNotBlank(msg.getSubscriptionId())) {
+				if (!msg.getSubscriptionId().equals(nextSubscriptionId)) {
+					ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, msg.getSubscriptionId());
+					continue;
+				}
+			}
 
 			if (StringUtils.isBlank(nextCriteriaString)) {
 				continue;

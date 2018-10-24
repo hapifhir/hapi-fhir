@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -50,11 +50,11 @@ public class DataRequirement extends Type implements ICompositeType {
 
     public enum SortDirection {
         /**
-         * Sort by the value ascending, so that lower values appear first
+         * Sort by the value ascending, so that lower values appear first.
          */
         ASCENDING, 
         /**
-         * Sort by the value descending, so that lower values appear last
+         * Sort by the value descending, so that lower values appear last.
          */
         DESCENDING, 
         /**
@@ -89,8 +89,8 @@ public class DataRequirement extends Type implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case ASCENDING: return "Sort by the value ascending, so that lower values appear first";
-            case DESCENDING: return "Sort by the value descending, so that lower values appear last";
+            case ASCENDING: return "Sort by the value ascending, so that lower values appear first.";
+            case DESCENDING: return "Sort by the value descending, so that lower values appear last.";
             default: return "?";
           }
         }
@@ -143,27 +143,34 @@ public class DataRequirement extends Type implements ICompositeType {
     @Block()
     public static class DataRequirementCodeFilterComponent extends Element implements IBaseDatatypeElement {
         /**
-         * The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.
+         * The code-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.
          */
-        @Child(name = "path", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The code-valued attribute of the filter", formalDefinition="The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept." )
+        @Child(name = "path", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="A code-valued attribute to filter on", formalDefinition="The code-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept." )
         protected StringType path;
+
+        /**
+         * A token parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type code, Coding, or CodeableConcept.
+         */
+        @Child(name = "searchParam", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="A coded (token) parameter to search on", formalDefinition="A token parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type code, Coding, or CodeableConcept." )
+        protected StringType searchParam;
 
         /**
          * The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.
          */
-        @Child(name = "valueSet", type = {UriType.class, CanonicalType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "valueSet", type = {CanonicalType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Valueset for the filter", formalDefinition="The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset." )
-        protected Type valueSet;
+        protected CanonicalType valueSet;
 
         /**
          * The codes for the code filter. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes. If codes are specified in addition to a value set, the filter returns items matching a code in the value set or one of the specified codes.
          */
-        @Child(name = "code", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "code", type = {Coding.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="What code is expected", formalDefinition="The codes for the code filter. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes. If codes are specified in addition to a value set, the filter returns items matching a code in the value set or one of the specified codes." )
         protected List<Coding> code;
 
-        private static final long serialVersionUID = -1836756746L;
+        private static final long serialVersionUID = -1286212752L;
 
     /**
      * Constructor
@@ -172,16 +179,8 @@ public class DataRequirement extends Type implements ICompositeType {
         super();
       }
 
-    /**
-     * Constructor
-     */
-      public DataRequirementCodeFilterComponent(StringType path) {
-        super();
-        this.path = path;
-      }
-
         /**
-         * @return {@link #path} (The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @return {@link #path} (The code-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public StringType getPathElement() { 
           if (this.path == null)
@@ -201,7 +200,7 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #path} (The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @param value {@link #path} (The code-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public DataRequirementCodeFilterComponent setPathElement(StringType value) { 
           this.path = value;
@@ -209,57 +208,89 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @return The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.
+         * @return The code-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.
          */
         public String getPath() { 
           return this.path == null ? null : this.path.getValue();
         }
 
         /**
-         * @param value The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.
+         * @param value The code-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.
          */
         public DataRequirementCodeFilterComponent setPath(String value) { 
+          if (Utilities.noString(value))
+            this.path = null;
+          else {
             if (this.path == null)
               this.path = new StringType();
             this.path.setValue(value);
+          }
           return this;
         }
 
         /**
-         * @return {@link #valueSet} (The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
+         * @return {@link #searchParam} (A token parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type code, Coding, or CodeableConcept.). This is the underlying object with id, value and extensions. The accessor "getSearchParam" gives direct access to the value
          */
-        public Type getValueSet() { 
+        public StringType getSearchParamElement() { 
+          if (this.searchParam == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DataRequirementCodeFilterComponent.searchParam");
+            else if (Configuration.doAutoCreate())
+              this.searchParam = new StringType(); // bb
+          return this.searchParam;
+        }
+
+        public boolean hasSearchParamElement() { 
+          return this.searchParam != null && !this.searchParam.isEmpty();
+        }
+
+        public boolean hasSearchParam() { 
+          return this.searchParam != null && !this.searchParam.isEmpty();
+        }
+
+        /**
+         * @param value {@link #searchParam} (A token parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type code, Coding, or CodeableConcept.). This is the underlying object with id, value and extensions. The accessor "getSearchParam" gives direct access to the value
+         */
+        public DataRequirementCodeFilterComponent setSearchParamElement(StringType value) { 
+          this.searchParam = value;
+          return this;
+        }
+
+        /**
+         * @return A token parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type code, Coding, or CodeableConcept.
+         */
+        public String getSearchParam() { 
+          return this.searchParam == null ? null : this.searchParam.getValue();
+        }
+
+        /**
+         * @param value A token parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type code, Coding, or CodeableConcept.
+         */
+        public DataRequirementCodeFilterComponent setSearchParam(String value) { 
+          if (Utilities.noString(value))
+            this.searchParam = null;
+          else {
+            if (this.searchParam == null)
+              this.searchParam = new StringType();
+            this.searchParam.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #valueSet} (The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.). This is the underlying object with id, value and extensions. The accessor "getValueSet" gives direct access to the value
+         */
+        public CanonicalType getValueSetElement() { 
+          if (this.valueSet == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DataRequirementCodeFilterComponent.valueSet");
+            else if (Configuration.doAutoCreate())
+              this.valueSet = new CanonicalType(); // bb
           return this.valueSet;
         }
 
-        /**
-         * @return {@link #valueSet} (The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
-         */
-        public UriType getValueSetUriType() throws FHIRException { 
-          if (this.valueSet == null)
-            return null;
-          if (!(this.valueSet instanceof UriType))
-            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
-          return (UriType) this.valueSet;
-        }
-
-        public boolean hasValueSetUriType() { 
-          return this != null && this.valueSet instanceof UriType;
-        }
-
-        /**
-         * @return {@link #valueSet} (The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
-         */
-        public CanonicalType getValueSetCanonicalType() throws FHIRException { 
-          if (this.valueSet == null)
-            return null;
-          if (!(this.valueSet instanceof CanonicalType))
-            throw new FHIRException("Type mismatch: the type CanonicalType was expected, but "+this.valueSet.getClass().getName()+" was encountered");
-          return (CanonicalType) this.valueSet;
-        }
-
-        public boolean hasValueSetCanonicalType() { 
-          return this != null && this.valueSet instanceof CanonicalType;
+        public boolean hasValueSetElement() { 
+          return this.valueSet != null && !this.valueSet.isEmpty();
         }
 
         public boolean hasValueSet() { 
@@ -267,12 +298,31 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #valueSet} (The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.)
+         * @param value {@link #valueSet} (The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.). This is the underlying object with id, value and extensions. The accessor "getValueSet" gives direct access to the value
          */
-        public DataRequirementCodeFilterComponent setValueSet(Type value) { 
-          if (value != null && !(value instanceof UriType || value instanceof CanonicalType))
-            throw new Error("Not the right type for DataRequirement.codeFilter.valueSet[x]: "+value.fhirType());
+        public DataRequirementCodeFilterComponent setValueSetElement(CanonicalType value) { 
           this.valueSet = value;
+          return this;
+        }
+
+        /**
+         * @return The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.
+         */
+        public String getValueSet() { 
+          return this.valueSet == null ? null : this.valueSet.getValue();
+        }
+
+        /**
+         * @param value The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.
+         */
+        public DataRequirementCodeFilterComponent setValueSet(String value) { 
+          if (Utilities.noString(value))
+            this.valueSet = null;
+          else {
+            if (this.valueSet == null)
+              this.valueSet = new CanonicalType();
+            this.valueSet.setValue(value);
+          }
           return this;
         }
 
@@ -331,19 +381,18 @@ public class DataRequirement extends Type implements ICompositeType {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("path", "string", "The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, 1, path));
-          children.add(new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet));
+          children.add(new Property("path", "string", "The code-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, 1, path));
+          children.add(new Property("searchParam", "string", "A token parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type code, Coding, or CodeableConcept.", 0, 1, searchParam));
+          children.add(new Property("valueSet", "canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet));
           children.add(new Property("code", "Coding", "The codes for the code filter. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes. If codes are specified in addition to a value set, the filter returns items matching a code in the value set or one of the specified codes.", 0, java.lang.Integer.MAX_VALUE, code));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3433509: /*path*/  return new Property("path", "string", "The code-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, 1, path);
-          case -1438410321: /*valueSet[x]*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
-          case -1410174671: /*valueSet*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
-          case -1438416261: /*valueSetUri*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
-          case 2048727747: /*valueSetCanonical*/  return new Property("valueSet[x]", "uri|canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
+          case 3433509: /*path*/  return new Property("path", "string", "The code-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type code, Coding, or CodeableConcept.", 0, 1, path);
+          case -553645115: /*searchParam*/  return new Property("searchParam", "string", "A token parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type code, Coding, or CodeableConcept.", 0, 1, searchParam);
+          case -1410174671: /*valueSet*/  return new Property("valueSet", "canonical(ValueSet)", "The valueset for the code filter. The valueSet and code elements are additive. If valueSet is specified, the filter will return only those data items for which the value of the code-valued element specified in the path is a member of the specified valueset.", 0, 1, valueSet);
           case 3059181: /*code*/  return new Property("code", "Coding", "The codes for the code filter. If values are given, the filter will return only those data items for which the code-valued attribute specified by the path has a value that is one of the specified codes. If codes are specified in addition to a value set, the filter returns items matching a code in the value set or one of the specified codes.", 0, java.lang.Integer.MAX_VALUE, code);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -354,7 +403,8 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
-        case -1410174671: /*valueSet*/ return this.valueSet == null ? new Base[0] : new Base[] {this.valueSet}; // Type
+        case -553645115: /*searchParam*/ return this.searchParam == null ? new Base[0] : new Base[] {this.searchParam}; // StringType
+        case -1410174671: /*valueSet*/ return this.valueSet == null ? new Base[0] : new Base[] {this.valueSet}; // CanonicalType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // Coding
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -367,8 +417,11 @@ public class DataRequirement extends Type implements ICompositeType {
         case 3433509: // path
           this.path = castToString(value); // StringType
           return value;
+        case -553645115: // searchParam
+          this.searchParam = castToString(value); // StringType
+          return value;
         case -1410174671: // valueSet
-          this.valueSet = castToType(value); // Type
+          this.valueSet = castToCanonical(value); // CanonicalType
           return value;
         case 3059181: // code
           this.getCode().add(castToCoding(value)); // Coding
@@ -382,8 +435,10 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("path")) {
           this.path = castToString(value); // StringType
-        } else if (name.equals("valueSet[x]")) {
-          this.valueSet = castToType(value); // Type
+        } else if (name.equals("searchParam")) {
+          this.searchParam = castToString(value); // StringType
+        } else if (name.equals("valueSet")) {
+          this.valueSet = castToCanonical(value); // CanonicalType
         } else if (name.equals("code")) {
           this.getCode().add(castToCoding(value));
         } else
@@ -395,8 +450,8 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3433509:  return getPathElement();
-        case -1438410321:  return getValueSet(); 
-        case -1410174671:  return getValueSet(); 
+        case -553645115:  return getSearchParamElement();
+        case -1410174671:  return getValueSetElement();
         case 3059181:  return addCode(); 
         default: return super.makeProperty(hash, name);
         }
@@ -407,7 +462,8 @@ public class DataRequirement extends Type implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3433509: /*path*/ return new String[] {"string"};
-        case -1410174671: /*valueSet*/ return new String[] {"uri", "canonical"};
+        case -553645115: /*searchParam*/ return new String[] {"string"};
+        case -1410174671: /*valueSet*/ return new String[] {"canonical"};
         case 3059181: /*code*/ return new String[] {"Coding"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -419,13 +475,11 @@ public class DataRequirement extends Type implements ICompositeType {
         if (name.equals("path")) {
           throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.path");
         }
-        else if (name.equals("valueSetUri")) {
-          this.valueSet = new UriType();
-          return this.valueSet;
+        else if (name.equals("searchParam")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.searchParam");
         }
-        else if (name.equals("valueSetCanonical")) {
-          this.valueSet = new CanonicalType();
-          return this.valueSet;
+        else if (name.equals("valueSet")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.valueSet");
         }
         else if (name.equals("code")) {
           return addCode();
@@ -438,6 +492,7 @@ public class DataRequirement extends Type implements ICompositeType {
         DataRequirementCodeFilterComponent dst = new DataRequirementCodeFilterComponent();
         copyValues(dst);
         dst.path = path == null ? null : path.copy();
+        dst.searchParam = searchParam == null ? null : searchParam.copy();
         dst.valueSet = valueSet == null ? null : valueSet.copy();
         if (code != null) {
           dst.code = new ArrayList<Coding>();
@@ -454,8 +509,8 @@ public class DataRequirement extends Type implements ICompositeType {
         if (!(other_ instanceof DataRequirementCodeFilterComponent))
           return false;
         DataRequirementCodeFilterComponent o = (DataRequirementCodeFilterComponent) other_;
-        return compareDeep(path, o.path, true) && compareDeep(valueSet, o.valueSet, true) && compareDeep(code, o.code, true)
-          ;
+        return compareDeep(path, o.path, true) && compareDeep(searchParam, o.searchParam, true) && compareDeep(valueSet, o.valueSet, true)
+           && compareDeep(code, o.code, true);
       }
 
       @Override
@@ -465,11 +520,12 @@ public class DataRequirement extends Type implements ICompositeType {
         if (!(other_ instanceof DataRequirementCodeFilterComponent))
           return false;
         DataRequirementCodeFilterComponent o = (DataRequirementCodeFilterComponent) other_;
-        return compareValues(path, o.path, true);
+        return compareValues(path, o.path, true) && compareValues(searchParam, o.searchParam, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, valueSet, code);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, searchParam, valueSet
+          , code);
       }
 
   public String fhirType() {
@@ -482,20 +538,27 @@ public class DataRequirement extends Type implements ICompositeType {
     @Block()
     public static class DataRequirementDateFilterComponent extends Element implements IBaseDatatypeElement {
         /**
-         * The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.
+         * The date-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type date, dateTime, Period, Schedule, or Timing.
          */
-        @Child(name = "path", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The date-valued attribute of the filter", formalDefinition="The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing." )
+        @Child(name = "path", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="A date-valued attribute to filter on", formalDefinition="The date-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type date, dateTime, Period, Schedule, or Timing." )
         protected StringType path;
+
+        /**
+         * A date parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type date, dateTime, Period, Schedule, or Timing.
+         */
+        @Child(name = "searchParam", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="A date valued parameter to search on", formalDefinition="A date parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type date, dateTime, Period, Schedule, or Timing." )
+        protected StringType searchParam;
 
         /**
          * The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now.
          */
-        @Child(name = "value", type = {DateTimeType.class, Period.class, Duration.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "value", type = {DateTimeType.class, Period.class, Duration.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The value of the filter, as a Period, DateTime, or Duration value", formalDefinition="The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now." )
         protected Type value;
 
-        private static final long serialVersionUID = 1791957163L;
+        private static final long serialVersionUID = 1151620053L;
 
     /**
      * Constructor
@@ -504,16 +567,8 @@ public class DataRequirement extends Type implements ICompositeType {
         super();
       }
 
-    /**
-     * Constructor
-     */
-      public DataRequirementDateFilterComponent(StringType path) {
-        super();
-        this.path = path;
-      }
-
         /**
-         * @return {@link #path} (The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @return {@link #path} (The date-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type date, dateTime, Period, Schedule, or Timing.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public StringType getPathElement() { 
           if (this.path == null)
@@ -533,7 +588,7 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @param value {@link #path} (The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @param value {@link #path} (The date-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type date, dateTime, Period, Schedule, or Timing.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public DataRequirementDateFilterComponent setPathElement(StringType value) { 
           this.path = value;
@@ -541,19 +596,72 @@ public class DataRequirement extends Type implements ICompositeType {
         }
 
         /**
-         * @return The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.
+         * @return The date-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type date, dateTime, Period, Schedule, or Timing.
          */
         public String getPath() { 
           return this.path == null ? null : this.path.getValue();
         }
 
         /**
-         * @param value The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.
+         * @param value The date-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type date, dateTime, Period, Schedule, or Timing.
          */
         public DataRequirementDateFilterComponent setPath(String value) { 
+          if (Utilities.noString(value))
+            this.path = null;
+          else {
             if (this.path == null)
               this.path = new StringType();
             this.path.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #searchParam} (A date parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type date, dateTime, Period, Schedule, or Timing.). This is the underlying object with id, value and extensions. The accessor "getSearchParam" gives direct access to the value
+         */
+        public StringType getSearchParamElement() { 
+          if (this.searchParam == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DataRequirementDateFilterComponent.searchParam");
+            else if (Configuration.doAutoCreate())
+              this.searchParam = new StringType(); // bb
+          return this.searchParam;
+        }
+
+        public boolean hasSearchParamElement() { 
+          return this.searchParam != null && !this.searchParam.isEmpty();
+        }
+
+        public boolean hasSearchParam() { 
+          return this.searchParam != null && !this.searchParam.isEmpty();
+        }
+
+        /**
+         * @param value {@link #searchParam} (A date parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type date, dateTime, Period, Schedule, or Timing.). This is the underlying object with id, value and extensions. The accessor "getSearchParam" gives direct access to the value
+         */
+        public DataRequirementDateFilterComponent setSearchParamElement(StringType value) { 
+          this.searchParam = value;
+          return this;
+        }
+
+        /**
+         * @return A date parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type date, dateTime, Period, Schedule, or Timing.
+         */
+        public String getSearchParam() { 
+          return this.searchParam == null ? null : this.searchParam.getValue();
+        }
+
+        /**
+         * @param value A date parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type date, dateTime, Period, Schedule, or Timing.
+         */
+        public DataRequirementDateFilterComponent setSearchParam(String value) { 
+          if (Utilities.noString(value))
+            this.searchParam = null;
+          else {
+            if (this.searchParam == null)
+              this.searchParam = new StringType();
+            this.searchParam.setValue(value);
+          }
           return this;
         }
 
@@ -625,14 +733,16 @@ public class DataRequirement extends Type implements ICompositeType {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("path", "string", "The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.", 0, 1, path));
+          children.add(new Property("path", "string", "The date-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type date, dateTime, Period, Schedule, or Timing.", 0, 1, path));
+          children.add(new Property("searchParam", "string", "A date parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type date, dateTime, Period, Schedule, or Timing.", 0, 1, searchParam));
           children.add(new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now.", 0, 1, value));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3433509: /*path*/  return new Property("path", "string", "The date-valued attribute of the filter. The specified path must be resolvable from the type of the required data. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements. Note that the index must be an integer constant. The path must resolve to an element of type dateTime, Period, Schedule, or Timing.", 0, 1, path);
+          case 3433509: /*path*/  return new Property("path", "string", "The date-valued attribute of the filter. The specified path SHALL be a FHIRPath resolveable on the specified type of the DataRequirement, and SHALL consist only of identifiers, constant indexers, and .resolve(). The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details). Note that the index must be an integer constant. The path must resolve to an element of type date, dateTime, Period, Schedule, or Timing.", 0, 1, path);
+          case -553645115: /*searchParam*/  return new Property("searchParam", "string", "A date parameter that refers to a search parameter defined on the specified type of the DataRequirement, and which searches on elements of type date, dateTime, Period, Schedule, or Timing.", 0, 1, searchParam);
           case -1410166417: /*value[x]*/  return new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now.", 0, 1, value);
           case 111972721: /*value*/  return new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now.", 0, 1, value);
           case 1047929900: /*valueDateTime*/  return new Property("value[x]", "dateTime|Period|Duration", "The value of the filter. If period is specified, the filter will return only those data items that fall within the bounds determined by the Period, inclusive of the period boundaries. If dateTime is specified, the filter will return only those data items that are equal to the specified dateTime. If a Duration is specified, the filter will return only those data items that fall within Duration before now.", 0, 1, value);
@@ -647,6 +757,7 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3433509: /*path*/ return this.path == null ? new Base[0] : new Base[] {this.path}; // StringType
+        case -553645115: /*searchParam*/ return this.searchParam == null ? new Base[0] : new Base[] {this.searchParam}; // StringType
         case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -658,6 +769,9 @@ public class DataRequirement extends Type implements ICompositeType {
         switch (hash) {
         case 3433509: // path
           this.path = castToString(value); // StringType
+          return value;
+        case -553645115: // searchParam
+          this.searchParam = castToString(value); // StringType
           return value;
         case 111972721: // value
           this.value = castToType(value); // Type
@@ -671,6 +785,8 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("path")) {
           this.path = castToString(value); // StringType
+        } else if (name.equals("searchParam")) {
+          this.searchParam = castToString(value); // StringType
         } else if (name.equals("value[x]")) {
           this.value = castToType(value); // Type
         } else
@@ -682,6 +798,7 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3433509:  return getPathElement();
+        case -553645115:  return getSearchParamElement();
         case -1410166417:  return getValue(); 
         case 111972721:  return getValue(); 
         default: return super.makeProperty(hash, name);
@@ -693,6 +810,7 @@ public class DataRequirement extends Type implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3433509: /*path*/ return new String[] {"string"};
+        case -553645115: /*searchParam*/ return new String[] {"string"};
         case 111972721: /*value*/ return new String[] {"dateTime", "Period", "Duration"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -703,6 +821,9 @@ public class DataRequirement extends Type implements ICompositeType {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("path")) {
           throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.path");
+        }
+        else if (name.equals("searchParam")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DataRequirement.searchParam");
         }
         else if (name.equals("valueDateTime")) {
           this.value = new DateTimeType();
@@ -724,6 +845,7 @@ public class DataRequirement extends Type implements ICompositeType {
         DataRequirementDateFilterComponent dst = new DataRequirementDateFilterComponent();
         copyValues(dst);
         dst.path = path == null ? null : path.copy();
+        dst.searchParam = searchParam == null ? null : searchParam.copy();
         dst.value = value == null ? null : value.copy();
         return dst;
       }
@@ -735,7 +857,8 @@ public class DataRequirement extends Type implements ICompositeType {
         if (!(other_ instanceof DataRequirementDateFilterComponent))
           return false;
         DataRequirementDateFilterComponent o = (DataRequirementDateFilterComponent) other_;
-        return compareDeep(path, o.path, true) && compareDeep(value, o.value, true);
+        return compareDeep(path, o.path, true) && compareDeep(searchParam, o.searchParam, true) && compareDeep(value, o.value, true)
+          ;
       }
 
       @Override
@@ -745,11 +868,12 @@ public class DataRequirement extends Type implements ICompositeType {
         if (!(other_ instanceof DataRequirementDateFilterComponent))
           return false;
         DataRequirementDateFilterComponent o = (DataRequirementDateFilterComponent) other_;
-        return compareValues(path, o.path, true);
+        return compareValues(path, o.path, true) && compareValues(searchParam, o.searchParam, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, value);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(path, searchParam, value
+          );
       }
 
   public String fhirType() {
@@ -1032,10 +1156,12 @@ public class DataRequirement extends Type implements ICompositeType {
     protected Type subject;
 
     /**
-     * Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.
+     * Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. 
+
+The value of mustSupport SHALL be a FHIRPath resolveable on the type of the DataRequirement. The path SHALL consist only of identifiers, constant indexers, and .resolve() (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).
      */
     @Child(name = "mustSupport", type = {StringType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Indicates that specific structure elements are referenced by the knowledge module", formalDefinition="Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported." )
+    @Description(shortDefinition="Indicates specific structure elements that are referenced by the knowledge module", formalDefinition="Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. \n\nThe value of mustSupport SHALL be a FHIRPath resolveable on the type of the DataRequirement. The path SHALL consist only of identifiers, constant indexers, and .resolve() (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details)." )
     protected List<StringType> mustSupport;
 
     /**
@@ -1053,10 +1179,10 @@ public class DataRequirement extends Type implements ICompositeType {
     protected List<DataRequirementDateFilterComponent> dateFilter;
 
     /**
-     * Specifies a maximum number of results that are required.
+     * Specifies a maximum number of results that are required (uses the _count search parameter).
      */
     @Child(name = "limit", type = {PositiveIntType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Number of results", formalDefinition="Specifies a maximum number of results that are required." )
+    @Description(shortDefinition="Number of results", formalDefinition="Specifies a maximum number of results that are required (uses the _count search parameter)." )
     protected PositiveIntType limit;
 
     /**
@@ -1241,7 +1367,9 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.)
+     * @return {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. 
+
+The value of mustSupport SHALL be a FHIRPath resolveable on the type of the DataRequirement. The path SHALL consist only of identifiers, constant indexers, and .resolve() (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).)
      */
     public List<StringType> getMustSupport() { 
       if (this.mustSupport == null)
@@ -1267,7 +1395,9 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.)
+     * @return {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. 
+
+The value of mustSupport SHALL be a FHIRPath resolveable on the type of the DataRequirement. The path SHALL consist only of identifiers, constant indexers, and .resolve() (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).)
      */
     public StringType addMustSupportElement() {//2 
       StringType t = new StringType();
@@ -1278,7 +1408,9 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.)
+     * @param value {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. 
+
+The value of mustSupport SHALL be a FHIRPath resolveable on the type of the DataRequirement. The path SHALL consist only of identifiers, constant indexers, and .resolve() (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).)
      */
     public DataRequirement addMustSupport(String value) { //1
       StringType t = new StringType();
@@ -1290,7 +1422,9 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.)
+     * @param value {@link #mustSupport} (Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. 
+
+The value of mustSupport SHALL be a FHIRPath resolveable on the type of the DataRequirement. The path SHALL consist only of identifiers, constant indexers, and .resolve() (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).)
      */
     public boolean hasMustSupport(String value) { 
       if (this.mustSupport == null)
@@ -1408,7 +1542,7 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #limit} (Specifies a maximum number of results that are required.). This is the underlying object with id, value and extensions. The accessor "getLimit" gives direct access to the value
+     * @return {@link #limit} (Specifies a maximum number of results that are required (uses the _count search parameter).). This is the underlying object with id, value and extensions. The accessor "getLimit" gives direct access to the value
      */
     public PositiveIntType getLimitElement() { 
       if (this.limit == null)
@@ -1428,7 +1562,7 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #limit} (Specifies a maximum number of results that are required.). This is the underlying object with id, value and extensions. The accessor "getLimit" gives direct access to the value
+     * @param value {@link #limit} (Specifies a maximum number of results that are required (uses the _count search parameter).). This is the underlying object with id, value and extensions. The accessor "getLimit" gives direct access to the value
      */
     public DataRequirement setLimitElement(PositiveIntType value) { 
       this.limit = value;
@@ -1436,14 +1570,14 @@ public class DataRequirement extends Type implements ICompositeType {
     }
 
     /**
-     * @return Specifies a maximum number of results that are required.
+     * @return Specifies a maximum number of results that are required (uses the _count search parameter).
      */
     public int getLimit() { 
       return this.limit == null || this.limit.isEmpty() ? 0 : this.limit.getValue();
     }
 
     /**
-     * @param value Specifies a maximum number of results that are required.
+     * @param value Specifies a maximum number of results that are required (uses the _count search parameter).
      */
     public DataRequirement setLimit(int value) { 
         if (this.limit == null)
@@ -1510,10 +1644,10 @@ public class DataRequirement extends Type implements ICompositeType {
         children.add(new Property("type", "code", "The type of the required data, specified as the type name of a resource. For profiles, this value is set to the type of the base resource of the profile.", 0, 1, type));
         children.add(new Property("profile", "canonical(StructureDefinition)", "The profile of the required data, specified as the uri of the profile definition.", 0, java.lang.Integer.MAX_VALUE, profile));
         children.add(new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.", 0, 1, subject));
-        children.add(new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.", 0, java.lang.Integer.MAX_VALUE, mustSupport));
+        children.add(new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. \n\nThe value of mustSupport SHALL be a FHIRPath resolveable on the type of the DataRequirement. The path SHALL consist only of identifiers, constant indexers, and .resolve() (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).", 0, java.lang.Integer.MAX_VALUE, mustSupport));
         children.add(new Property("codeFilter", "", "Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data. Each code filter defines an additional constraint on the data, i.e. code filters are AND'ed, not OR'ed.", 0, java.lang.Integer.MAX_VALUE, codeFilter));
         children.add(new Property("dateFilter", "", "Date filters specify additional constraints on the data in terms of the applicable date range for specific elements. Each date filter specifies an additional constraint on the data, i.e. date filters are AND'ed, not OR'ed.", 0, java.lang.Integer.MAX_VALUE, dateFilter));
-        children.add(new Property("limit", "positiveInt", "Specifies a maximum number of results that are required.", 0, 1, limit));
+        children.add(new Property("limit", "positiveInt", "Specifies a maximum number of results that are required (uses the _count search parameter).", 0, 1, limit));
         children.add(new Property("sort", "", "Specifies the order of the results to be returned.", 0, java.lang.Integer.MAX_VALUE, sort));
       }
 
@@ -1526,10 +1660,10 @@ public class DataRequirement extends Type implements ICompositeType {
         case -1867885268: /*subject*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.", 0, 1, subject);
         case -1257122603: /*subjectCodeableConcept*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.", 0, 1, subject);
         case 772938623: /*subjectReference*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "The intended subjects of the data requirement. If this element is not provided, a Patient subject is assumed.", 0, 1, subject);
-        case -1402857082: /*mustSupport*/  return new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. Note that the value for this element can be a path to allow references to nested elements. In that case, all the elements along the path must be supported.", 0, java.lang.Integer.MAX_VALUE, mustSupport);
+        case -1402857082: /*mustSupport*/  return new Property("mustSupport", "string", "Indicates that specific elements of the type are referenced by the knowledge module and must be supported by the consumer in order to obtain an effective evaluation. This does not mean that a value is required for this element, only that the consuming system must understand the element and be able to provide values for it if they are available. \n\nThe value of mustSupport SHALL be a FHIRPath resolveable on the type of the DataRequirement. The path SHALL consist only of identifiers, constant indexers, and .resolve() (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).", 0, java.lang.Integer.MAX_VALUE, mustSupport);
         case -1303674939: /*codeFilter*/  return new Property("codeFilter", "", "Code filters specify additional constraints on the data, specifying the value set of interest for a particular element of the data. Each code filter defines an additional constraint on the data, i.e. code filters are AND'ed, not OR'ed.", 0, java.lang.Integer.MAX_VALUE, codeFilter);
         case 149531846: /*dateFilter*/  return new Property("dateFilter", "", "Date filters specify additional constraints on the data in terms of the applicable date range for specific elements. Each date filter specifies an additional constraint on the data, i.e. date filters are AND'ed, not OR'ed.", 0, java.lang.Integer.MAX_VALUE, dateFilter);
-        case 102976443: /*limit*/  return new Property("limit", "positiveInt", "Specifies a maximum number of results that are required.", 0, 1, limit);
+        case 102976443: /*limit*/  return new Property("limit", "positiveInt", "Specifies a maximum number of results that are required (uses the _count search parameter).", 0, 1, limit);
         case 3536286: /*sort*/  return new Property("sort", "", "Specifies the order of the results to be returned.", 0, java.lang.Integer.MAX_VALUE, sort);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }

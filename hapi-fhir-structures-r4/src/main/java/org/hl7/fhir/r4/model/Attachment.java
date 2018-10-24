@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -53,6 +53,7 @@ public class Attachment extends Type implements ICompositeType {
      */
     @Child(name = "contentType", type = {CodeType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Mime type of the content, with charset etc.", formalDefinition="Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/mimetypes")
     protected CodeType contentType;
 
     /**
@@ -64,17 +65,17 @@ public class Attachment extends Type implements ICompositeType {
     protected CodeType language;
 
     /**
-     * The actual data of the attachment - a sequence of bytes. In XML, represented using base64.
+     * The actual data of the attachment - a sequence of bytes, base64 encoded.
      */
     @Child(name = "data", type = {Base64BinaryType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Data inline, base64ed", formalDefinition="The actual data of the attachment - a sequence of bytes. In XML, represented using base64." )
+    @Description(shortDefinition="Data inline, base64ed", formalDefinition="The actual data of the attachment - a sequence of bytes, base64 encoded." )
     protected Base64BinaryType data;
 
     /**
-     * An alternative location where the data can be accessed.
+     * A location where the data can be accessed.
      */
     @Child(name = "url", type = {UrlType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Uri where the data can be found", formalDefinition="An alternative location where the data can be accessed." )
+    @Description(shortDefinition="Uri where the data can be found", formalDefinition="A location where the data can be accessed." )
     protected UrlType url;
 
     /**
@@ -213,7 +214,7 @@ public class Attachment extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #data} (The actual data of the attachment - a sequence of bytes. In XML, represented using base64.). This is the underlying object with id, value and extensions. The accessor "getData" gives direct access to the value
+     * @return {@link #data} (The actual data of the attachment - a sequence of bytes, base64 encoded.). This is the underlying object with id, value and extensions. The accessor "getData" gives direct access to the value
      */
     public Base64BinaryType getDataElement() { 
       if (this.data == null)
@@ -233,7 +234,7 @@ public class Attachment extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #data} (The actual data of the attachment - a sequence of bytes. In XML, represented using base64.). This is the underlying object with id, value and extensions. The accessor "getData" gives direct access to the value
+     * @param value {@link #data} (The actual data of the attachment - a sequence of bytes, base64 encoded.). This is the underlying object with id, value and extensions. The accessor "getData" gives direct access to the value
      */
     public Attachment setDataElement(Base64BinaryType value) { 
       this.data = value;
@@ -241,14 +242,14 @@ public class Attachment extends Type implements ICompositeType {
     }
 
     /**
-     * @return The actual data of the attachment - a sequence of bytes. In XML, represented using base64.
+     * @return The actual data of the attachment - a sequence of bytes, base64 encoded.
      */
     public byte[] getData() { 
       return this.data == null ? null : this.data.getValue();
     }
 
     /**
-     * @param value The actual data of the attachment - a sequence of bytes. In XML, represented using base64.
+     * @param value The actual data of the attachment - a sequence of bytes, base64 encoded.
      */
     public Attachment setData(byte[] value) { 
       if (value == null)
@@ -262,7 +263,7 @@ public class Attachment extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #url} (An alternative location where the data can be accessed.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (A location where the data can be accessed.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UrlType getUrlElement() { 
       if (this.url == null)
@@ -282,7 +283,7 @@ public class Attachment extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #url} (An alternative location where the data can be accessed.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (A location where the data can be accessed.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public Attachment setUrlElement(UrlType value) { 
       this.url = value;
@@ -290,14 +291,14 @@ public class Attachment extends Type implements ICompositeType {
     }
 
     /**
-     * @return An alternative location where the data can be accessed.
+     * @return A location where the data can be accessed.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An alternative location where the data can be accessed.
+     * @param value A location where the data can be accessed.
      */
     public Attachment setUrl(String value) { 
       if (Utilities.noString(value))
@@ -506,8 +507,8 @@ public class Attachment extends Type implements ICompositeType {
         super.listChildren(children);
         children.add(new Property("contentType", "code", "Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.", 0, 1, contentType));
         children.add(new Property("language", "code", "The human language of the content. The value can be any valid value according to BCP 47.", 0, 1, language));
-        children.add(new Property("data", "base64Binary", "The actual data of the attachment - a sequence of bytes. In XML, represented using base64.", 0, 1, data));
-        children.add(new Property("url", "url", "An alternative location where the data can be accessed.", 0, 1, url));
+        children.add(new Property("data", "base64Binary", "The actual data of the attachment - a sequence of bytes, base64 encoded.", 0, 1, data));
+        children.add(new Property("url", "url", "A location where the data can be accessed.", 0, 1, url));
         children.add(new Property("size", "unsignedInt", "The number of bytes of data that make up this attachment (before base64 encoding, if that is done).", 0, 1, size));
         children.add(new Property("hash", "base64Binary", "The calculated hash of the data using SHA-1. Represented using base64.", 0, 1, hash));
         children.add(new Property("title", "string", "A label or set of text to display in place of the data.", 0, 1, title));
@@ -519,8 +520,8 @@ public class Attachment extends Type implements ICompositeType {
         switch (_hash) {
         case -389131437: /*contentType*/  return new Property("contentType", "code", "Identifies the type of the data in the attachment and allows a method to be chosen to interpret or render the data. Includes mime type parameters such as charset where appropriate.", 0, 1, contentType);
         case -1613589672: /*language*/  return new Property("language", "code", "The human language of the content. The value can be any valid value according to BCP 47.", 0, 1, language);
-        case 3076010: /*data*/  return new Property("data", "base64Binary", "The actual data of the attachment - a sequence of bytes. In XML, represented using base64.", 0, 1, data);
-        case 116079: /*url*/  return new Property("url", "url", "An alternative location where the data can be accessed.", 0, 1, url);
+        case 3076010: /*data*/  return new Property("data", "base64Binary", "The actual data of the attachment - a sequence of bytes, base64 encoded.", 0, 1, data);
+        case 116079: /*url*/  return new Property("url", "url", "A location where the data can be accessed.", 0, 1, url);
         case 3530753: /*size*/  return new Property("size", "unsignedInt", "The number of bytes of data that make up this attachment (before base64 encoding, if that is done).", 0, 1, size);
         case 3195150: /*hash*/  return new Property("hash", "base64Binary", "The calculated hash of the data using SHA-1. Represented using base64.", 0, 1, hash);
         case 110371416: /*title*/  return new Property("title", "string", "A label or set of text to display in place of the data.", 0, 1, title);

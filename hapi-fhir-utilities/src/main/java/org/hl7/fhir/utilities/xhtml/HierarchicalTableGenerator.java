@@ -384,6 +384,7 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
 
 
   private String dest;
+  private boolean makeTargets;
   
   /**
    * There are circumstances where the table has to present in the absence of a stable supporting infrastructure.
@@ -402,6 +403,14 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
     super();
     this.dest = dest;
     this.inLineGraphics = inlineGraphics;
+    this.makeTargets = true;
+  }
+
+  public HierarchicalTableGenerator(String dest, boolean inlineGraphics, boolean makeTargets) {
+    super();
+    this.dest = dest;
+    this.inLineGraphics = inlineGraphics;
+    this.makeTargets = makeTargets;
   }
 
   public TableModel initNormalTable(String prefix, boolean isLogical) {
@@ -579,7 +588,7 @@ public class HierarchicalTableGenerator extends TranslatingUtilities {
           tc.addText(p.getText());
       }
     }
-    if (!Utilities.noString(anchor))
+    if (makeTargets && !Utilities.noString(anchor))
       tc.addTag("a").setAttribute("name", nmTokenize(anchor)).addText(" ");
     return tc;
   }

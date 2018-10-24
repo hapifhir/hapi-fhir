@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A record of a request for diagnostic investigations, treatments, or operations to be performed.
  */
-@ResourceDef(name="ProcedureRequest", profile="http://hl7.org/fhir/Profile/ProcedureRequest")
+@ResourceDef(name="ProcedureRequest", profile="http://hl7.org/fhir/StructureDefinition/ProcedureRequest")
 public class ProcedureRequest extends DomainResource {
 
     public enum ProcedureRequestStatus {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,140 +45,32 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes validation requirements, source(s), status and dates for one or more elements.
  */
-@ResourceDef(name="VerificationResult", profile="http://hl7.org/fhir/Profile/VerificationResult")
+@ResourceDef(name="VerificationResult", profile="http://hl7.org/fhir/StructureDefinition/VerificationResult")
 public class VerificationResult extends DomainResource {
-
-    public enum Need {
-        /**
-         * null
-         */
-        NONE, 
-        /**
-         * null
-         */
-        INITIAL, 
-        /**
-         * null
-         */
-        PERIODIC, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static Need fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("none".equals(codeString))
-          return NONE;
-        if ("initial".equals(codeString))
-          return INITIAL;
-        if ("periodic".equals(codeString))
-          return PERIODIC;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown Need code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case NONE: return "none";
-            case INITIAL: return "initial";
-            case PERIODIC: return "periodic";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case NONE: return "http://hl7.org/fhir/need";
-            case INITIAL: return "http://hl7.org/fhir/need";
-            case PERIODIC: return "http://hl7.org/fhir/need";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case NONE: return "";
-            case INITIAL: return "";
-            case PERIODIC: return "";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case NONE: return "None";
-            case INITIAL: return "Initial";
-            case PERIODIC: return "Periodic";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class NeedEnumFactory implements EnumFactory<Need> {
-    public Need fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("none".equals(codeString))
-          return Need.NONE;
-        if ("initial".equals(codeString))
-          return Need.INITIAL;
-        if ("periodic".equals(codeString))
-          return Need.PERIODIC;
-        throw new IllegalArgumentException("Unknown Need code '"+codeString+"'");
-        }
-        public Enumeration<Need> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<Need>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("none".equals(codeString))
-          return new Enumeration<Need>(this, Need.NONE);
-        if ("initial".equals(codeString))
-          return new Enumeration<Need>(this, Need.INITIAL);
-        if ("periodic".equals(codeString))
-          return new Enumeration<Need>(this, Need.PERIODIC);
-        throw new FHIRException("Unknown Need code '"+codeString+"'");
-        }
-    public String toCode(Need code) {
-      if (code == Need.NONE)
-        return "none";
-      if (code == Need.INITIAL)
-        return "initial";
-      if (code == Need.PERIODIC)
-        return "periodic";
-      return "?";
-      }
-    public String toSystem(Need code) {
-      return code.getSystem();
-      }
-    }
 
     public enum Status {
         /**
-         * null
+         * ***TODO***
          */
         ATTESTED, 
         /**
-         * null
+         * ***TODO***
          */
         VALIDATED, 
         /**
-         * null
+         * ***TODO***
          */
         INPROCESS, 
         /**
-         * null
+         * ***TODO***
          */
         REQREVALID, 
         /**
-         * null
+         * ***TODO***
          */
         VALFAIL, 
         /**
-         * null
+         * ***TODO***
          */
         REVALFAIL, 
         /**
@@ -218,23 +110,23 @@ public class VerificationResult extends DomainResource {
         }
         public String getSystem() {
           switch (this) {
-            case ATTESTED: return "http://hl7.org/fhir/status";
-            case VALIDATED: return "http://hl7.org/fhir/status";
-            case INPROCESS: return "http://hl7.org/fhir/status";
-            case REQREVALID: return "http://hl7.org/fhir/status";
-            case VALFAIL: return "http://hl7.org/fhir/status";
-            case REVALFAIL: return "http://hl7.org/fhir/status";
+            case ATTESTED: return "http://hl7.org/fhir/CodeSystem/status";
+            case VALIDATED: return "http://hl7.org/fhir/CodeSystem/status";
+            case INPROCESS: return "http://hl7.org/fhir/CodeSystem/status";
+            case REQREVALID: return "http://hl7.org/fhir/CodeSystem/status";
+            case VALFAIL: return "http://hl7.org/fhir/CodeSystem/status";
+            case REVALFAIL: return "http://hl7.org/fhir/CodeSystem/status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case ATTESTED: return "";
-            case VALIDATED: return "";
-            case INPROCESS: return "";
-            case REQREVALID: return "";
-            case VALFAIL: return "";
-            case REVALFAIL: return "";
+            case ATTESTED: return "***TODO***";
+            case VALIDATED: return "***TODO***";
+            case INPROCESS: return "***TODO***";
+            case REQREVALID: return "***TODO***";
+            case VALFAIL: return "***TODO***";
+            case REVALFAIL: return "***TODO***";
             default: return "?";
           }
         }
@@ -312,575 +204,12 @@ public class VerificationResult extends DomainResource {
       }
     }
 
-    public enum ValidationType {
-        /**
-         * null
-         */
-        NOTHING, 
-        /**
-         * null
-         */
-        PRIMARY, 
-        /**
-         * null
-         */
-        MULTIPLE, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static ValidationType fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("nothing".equals(codeString))
-          return NOTHING;
-        if ("primary".equals(codeString))
-          return PRIMARY;
-        if ("multiple".equals(codeString))
-          return MULTIPLE;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown ValidationType code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case NOTHING: return "nothing";
-            case PRIMARY: return "primary";
-            case MULTIPLE: return "multiple";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case NOTHING: return "http://hl7.org/fhir/validation-type";
-            case PRIMARY: return "http://hl7.org/fhir/validation-type";
-            case MULTIPLE: return "http://hl7.org/fhir/validation-type";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case NOTHING: return "";
-            case PRIMARY: return "";
-            case MULTIPLE: return "";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case NOTHING: return "Nothing";
-            case PRIMARY: return "Primary Source";
-            case MULTIPLE: return "Multiple Sources";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ValidationTypeEnumFactory implements EnumFactory<ValidationType> {
-    public ValidationType fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("nothing".equals(codeString))
-          return ValidationType.NOTHING;
-        if ("primary".equals(codeString))
-          return ValidationType.PRIMARY;
-        if ("multiple".equals(codeString))
-          return ValidationType.MULTIPLE;
-        throw new IllegalArgumentException("Unknown ValidationType code '"+codeString+"'");
-        }
-        public Enumeration<ValidationType> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<ValidationType>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("nothing".equals(codeString))
-          return new Enumeration<ValidationType>(this, ValidationType.NOTHING);
-        if ("primary".equals(codeString))
-          return new Enumeration<ValidationType>(this, ValidationType.PRIMARY);
-        if ("multiple".equals(codeString))
-          return new Enumeration<ValidationType>(this, ValidationType.MULTIPLE);
-        throw new FHIRException("Unknown ValidationType code '"+codeString+"'");
-        }
-    public String toCode(ValidationType code) {
-      if (code == ValidationType.NOTHING)
-        return "nothing";
-      if (code == ValidationType.PRIMARY)
-        return "primary";
-      if (code == ValidationType.MULTIPLE)
-        return "multiple";
-      return "?";
-      }
-    public String toSystem(ValidationType code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum FailureAction {
-        /**
-         * null
-         */
-        FATAL, 
-        /**
-         * null
-         */
-        WARN, 
-        /**
-         * null
-         */
-        RECONLY, 
-        /**
-         * null
-         */
-        NONE, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static FailureAction fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("fatal".equals(codeString))
-          return FATAL;
-        if ("warn".equals(codeString))
-          return WARN;
-        if ("rec-only".equals(codeString))
-          return RECONLY;
-        if ("none".equals(codeString))
-          return NONE;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown FailureAction code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case FATAL: return "fatal";
-            case WARN: return "warn";
-            case RECONLY: return "rec-only";
-            case NONE: return "none";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case FATAL: return "http://hl7.org/fhir/failure-action";
-            case WARN: return "http://hl7.org/fhir/failure-action";
-            case RECONLY: return "http://hl7.org/fhir/failure-action";
-            case NONE: return "http://hl7.org/fhir/failure-action";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case FATAL: return "";
-            case WARN: return "";
-            case RECONLY: return "";
-            case NONE: return "";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case FATAL: return "Fatal";
-            case WARN: return "Warning";
-            case RECONLY: return "Record only";
-            case NONE: return "None";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class FailureActionEnumFactory implements EnumFactory<FailureAction> {
-    public FailureAction fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("fatal".equals(codeString))
-          return FailureAction.FATAL;
-        if ("warn".equals(codeString))
-          return FailureAction.WARN;
-        if ("rec-only".equals(codeString))
-          return FailureAction.RECONLY;
-        if ("none".equals(codeString))
-          return FailureAction.NONE;
-        throw new IllegalArgumentException("Unknown FailureAction code '"+codeString+"'");
-        }
-        public Enumeration<FailureAction> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<FailureAction>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("fatal".equals(codeString))
-          return new Enumeration<FailureAction>(this, FailureAction.FATAL);
-        if ("warn".equals(codeString))
-          return new Enumeration<FailureAction>(this, FailureAction.WARN);
-        if ("rec-only".equals(codeString))
-          return new Enumeration<FailureAction>(this, FailureAction.RECONLY);
-        if ("none".equals(codeString))
-          return new Enumeration<FailureAction>(this, FailureAction.NONE);
-        throw new FHIRException("Unknown FailureAction code '"+codeString+"'");
-        }
-    public String toCode(FailureAction code) {
-      if (code == FailureAction.FATAL)
-        return "fatal";
-      if (code == FailureAction.WARN)
-        return "warn";
-      if (code == FailureAction.RECONLY)
-        return "rec-only";
-      if (code == FailureAction.NONE)
-        return "none";
-      return "?";
-      }
-    public String toSystem(FailureAction code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum ValidationStatus {
-        /**
-         * null
-         */
-        SUCCESSFUL, 
-        /**
-         * null
-         */
-        FAILED, 
-        /**
-         * The validations status has not been determined yet
-         */
-        UNKNOWN, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static ValidationStatus fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("successful".equals(codeString))
-          return SUCCESSFUL;
-        if ("failed".equals(codeString))
-          return FAILED;
-        if ("unknown".equals(codeString))
-          return UNKNOWN;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown ValidationStatus code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case SUCCESSFUL: return "successful";
-            case FAILED: return "failed";
-            case UNKNOWN: return "unknown";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case SUCCESSFUL: return "http://hl7.org/fhir/validation-status";
-            case FAILED: return "http://hl7.org/fhir/validation-status";
-            case UNKNOWN: return "http://hl7.org/fhir/validation-status";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case SUCCESSFUL: return "";
-            case FAILED: return "";
-            case UNKNOWN: return "The validations status has not been determined yet";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case SUCCESSFUL: return "Successful";
-            case FAILED: return "Failed";
-            case UNKNOWN: return "Unknown";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class ValidationStatusEnumFactory implements EnumFactory<ValidationStatus> {
-    public ValidationStatus fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("successful".equals(codeString))
-          return ValidationStatus.SUCCESSFUL;
-        if ("failed".equals(codeString))
-          return ValidationStatus.FAILED;
-        if ("unknown".equals(codeString))
-          return ValidationStatus.UNKNOWN;
-        throw new IllegalArgumentException("Unknown ValidationStatus code '"+codeString+"'");
-        }
-        public Enumeration<ValidationStatus> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<ValidationStatus>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("successful".equals(codeString))
-          return new Enumeration<ValidationStatus>(this, ValidationStatus.SUCCESSFUL);
-        if ("failed".equals(codeString))
-          return new Enumeration<ValidationStatus>(this, ValidationStatus.FAILED);
-        if ("unknown".equals(codeString))
-          return new Enumeration<ValidationStatus>(this, ValidationStatus.UNKNOWN);
-        throw new FHIRException("Unknown ValidationStatus code '"+codeString+"'");
-        }
-    public String toCode(ValidationStatus code) {
-      if (code == ValidationStatus.SUCCESSFUL)
-        return "successful";
-      if (code == ValidationStatus.FAILED)
-        return "failed";
-      if (code == ValidationStatus.UNKNOWN)
-        return "unknown";
-      return "?";
-      }
-    public String toSystem(ValidationStatus code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum CanPushUpdates {
-        /**
-         * null
-         */
-        YES, 
-        /**
-         * null
-         */
-        NO, 
-        /**
-         * null
-         */
-        UNDETERMINED, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static CanPushUpdates fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("yes".equals(codeString))
-          return YES;
-        if ("no".equals(codeString))
-          return NO;
-        if ("undetermined".equals(codeString))
-          return UNDETERMINED;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown CanPushUpdates code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case YES: return "yes";
-            case NO: return "no";
-            case UNDETERMINED: return "undetermined";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case YES: return "http://hl7.org/fhir/can-push-updates";
-            case NO: return "http://hl7.org/fhir/can-push-updates";
-            case UNDETERMINED: return "http://hl7.org/fhir/can-push-updates";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case YES: return "";
-            case NO: return "";
-            case UNDETERMINED: return "";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case YES: return "Yes";
-            case NO: return "No";
-            case UNDETERMINED: return "Undetermined";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class CanPushUpdatesEnumFactory implements EnumFactory<CanPushUpdates> {
-    public CanPushUpdates fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("yes".equals(codeString))
-          return CanPushUpdates.YES;
-        if ("no".equals(codeString))
-          return CanPushUpdates.NO;
-        if ("undetermined".equals(codeString))
-          return CanPushUpdates.UNDETERMINED;
-        throw new IllegalArgumentException("Unknown CanPushUpdates code '"+codeString+"'");
-        }
-        public Enumeration<CanPushUpdates> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<CanPushUpdates>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("yes".equals(codeString))
-          return new Enumeration<CanPushUpdates>(this, CanPushUpdates.YES);
-        if ("no".equals(codeString))
-          return new Enumeration<CanPushUpdates>(this, CanPushUpdates.NO);
-        if ("undetermined".equals(codeString))
-          return new Enumeration<CanPushUpdates>(this, CanPushUpdates.UNDETERMINED);
-        throw new FHIRException("Unknown CanPushUpdates code '"+codeString+"'");
-        }
-    public String toCode(CanPushUpdates code) {
-      if (code == CanPushUpdates.YES)
-        return "yes";
-      if (code == CanPushUpdates.NO)
-        return "no";
-      if (code == CanPushUpdates.UNDETERMINED)
-        return "undetermined";
-      return "?";
-      }
-    public String toSystem(CanPushUpdates code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum PushTypeAvailable {
-        /**
-         * null
-         */
-        SPECIFIC, 
-        /**
-         * null
-         */
-        ANY, 
-        /**
-         * null
-         */
-        SOURCE, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static PushTypeAvailable fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("specific".equals(codeString))
-          return SPECIFIC;
-        if ("any".equals(codeString))
-          return ANY;
-        if ("source".equals(codeString))
-          return SOURCE;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown PushTypeAvailable code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case SPECIFIC: return "specific";
-            case ANY: return "any";
-            case SOURCE: return "source";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case SPECIFIC: return "http://hl7.org/fhir/push-type-available";
-            case ANY: return "http://hl7.org/fhir/push-type-available";
-            case SOURCE: return "http://hl7.org/fhir/push-type-available";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case SPECIFIC: return "";
-            case ANY: return "";
-            case SOURCE: return "";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case SPECIFIC: return "Specific requested changes";
-            case ANY: return "Any changes";
-            case SOURCE: return "As defined by source";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class PushTypeAvailableEnumFactory implements EnumFactory<PushTypeAvailable> {
-    public PushTypeAvailable fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("specific".equals(codeString))
-          return PushTypeAvailable.SPECIFIC;
-        if ("any".equals(codeString))
-          return PushTypeAvailable.ANY;
-        if ("source".equals(codeString))
-          return PushTypeAvailable.SOURCE;
-        throw new IllegalArgumentException("Unknown PushTypeAvailable code '"+codeString+"'");
-        }
-        public Enumeration<PushTypeAvailable> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<PushTypeAvailable>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("specific".equals(codeString))
-          return new Enumeration<PushTypeAvailable>(this, PushTypeAvailable.SPECIFIC);
-        if ("any".equals(codeString))
-          return new Enumeration<PushTypeAvailable>(this, PushTypeAvailable.ANY);
-        if ("source".equals(codeString))
-          return new Enumeration<PushTypeAvailable>(this, PushTypeAvailable.SOURCE);
-        throw new FHIRException("Unknown PushTypeAvailable code '"+codeString+"'");
-        }
-    public String toCode(PushTypeAvailable code) {
-      if (code == PushTypeAvailable.SPECIFIC)
-        return "specific";
-      if (code == PushTypeAvailable.ANY)
-        return "any";
-      if (code == PushTypeAvailable.SOURCE)
-        return "source";
-      return "?";
-      }
-    public String toSystem(PushTypeAvailable code) {
-      return code.getSystem();
-      }
-    }
-
     @Block()
     public static class VerificationResultPrimarySourceComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * URI of the primary source for validation.
-         */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="URI of the primary source for validation", formalDefinition="URI of the primary source for validation." )
-        protected Identifier identifier;
-
-        /**
          * Reference to the primary source.
          */
-        @Child(name = "organization", type = {Organization.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "organization", type = {Organization.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reference to the primary source", formalDefinition="Reference to the primary source." )
         protected Reference organization;
 
@@ -892,50 +221,50 @@ public class VerificationResult extends DomainResource {
         /**
          * Type of primary source (License Board; Primary Education; Continuing Education; Postal Service; Relationship owner; Registration Authority; legal source; issuing source; authoritative source).
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=3, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Type of primary source (License Board; Primary Education; Continuing Education; Postal Service; Relationship owner; Registration Authority; legal source; issuing source; authoritative source)", formalDefinition="Type of primary source (License Board; Primary Education; Continuing Education; Postal Service; Relationship owner; Registration Authority; legal source; issuing source; authoritative source)." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/primary-source-type")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-primary-source-type")
         protected List<CodeableConcept> type;
 
         /**
          * Method for communicating with the primary source (manual; API; Push).
          */
-        @Child(name = "validationProcess", type = {CodeableConcept.class}, order=4, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Method for communicating with the primary source (manual; API; Push)", formalDefinition="Method for communicating with the primary source (manual; API; Push)." )
+        @Child(name = "validationProcess", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="The process(es) by which the target is validated", formalDefinition="Method for communicating with the primary source (manual; API; Push)." )
         protected List<CodeableConcept> validationProcess;
 
         /**
          * Status of the validation of the target against the primary source (successful; failed; unknown).
          */
-        @Child(name = "validationStatus", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "validationStatus", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="successful | failed | unknown", formalDefinition="Status of the validation of the target against the primary source (successful; failed; unknown)." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/validation-status")
-        protected Enumeration<ValidationStatus> validationStatus;
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-validation-status")
+        protected CodeableConcept validationStatus;
 
         /**
          * When the target was validated against the primary source.
          */
-        @Child(name = "validationDate", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "validationDate", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When the target was validated against the primary source", formalDefinition="When the target was validated against the primary source." )
         protected DateTimeType validationDate;
 
         /**
          * Ability of the primary source to push updates/alerts (yes; no; undetermined).
          */
-        @Child(name = "canPushUpdates", type = {CodeType.class}, order=7, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "canPushUpdates", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="yes | no | undetermined", formalDefinition="Ability of the primary source to push updates/alerts (yes; no; undetermined)." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/can-push-updates")
-        protected Enumeration<CanPushUpdates> canPushUpdates;
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-can-push-updates")
+        protected CodeableConcept canPushUpdates;
 
         /**
          * Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source).
          */
-        @Child(name = "pushTypeAvailable", type = {CodeType.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "pushTypeAvailable", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="specific | any | source", formalDefinition="Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source)." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/push-type-available")
-        protected List<Enumeration<PushTypeAvailable>> pushTypeAvailable;
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-push-type-available")
+        protected List<CodeableConcept> pushTypeAvailable;
 
-        private static final long serialVersionUID = -2122527170L;
+        private static final long serialVersionUID = 1288479702L;
 
     /**
      * Constructor
@@ -943,38 +272,6 @@ public class VerificationResult extends DomainResource {
       public VerificationResultPrimarySourceComponent() {
         super();
       }
-
-    /**
-     * Constructor
-     */
-      public VerificationResultPrimarySourceComponent(Enumeration<CanPushUpdates> canPushUpdates) {
-        super();
-        this.canPushUpdates = canPushUpdates;
-      }
-
-        /**
-         * @return {@link #identifier} (URI of the primary source for validation.)
-         */
-        public Identifier getIdentifier() { 
-          if (this.identifier == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultPrimarySourceComponent.identifier");
-            else if (Configuration.doAutoCreate())
-              this.identifier = new Identifier(); // cc
-          return this.identifier;
-        }
-
-        public boolean hasIdentifier() { 
-          return this.identifier != null && !this.identifier.isEmpty();
-        }
-
-        /**
-         * @param value {@link #identifier} (URI of the primary source for validation.)
-         */
-        public VerificationResultPrimarySourceComponent setIdentifier(Identifier value) { 
-          this.identifier = value;
-          return this;
-        }
 
         /**
          * @return {@link #organization} (Reference to the primary source.)
@@ -1127,19 +424,15 @@ public class VerificationResult extends DomainResource {
         }
 
         /**
-         * @return {@link #validationStatus} (Status of the validation of the target against the primary source (successful; failed; unknown).). This is the underlying object with id, value and extensions. The accessor "getValidationStatus" gives direct access to the value
+         * @return {@link #validationStatus} (Status of the validation of the target against the primary source (successful; failed; unknown).)
          */
-        public Enumeration<ValidationStatus> getValidationStatusElement() { 
+        public CodeableConcept getValidationStatus() { 
           if (this.validationStatus == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create VerificationResultPrimarySourceComponent.validationStatus");
             else if (Configuration.doAutoCreate())
-              this.validationStatus = new Enumeration<ValidationStatus>(new ValidationStatusEnumFactory()); // bb
+              this.validationStatus = new CodeableConcept(); // cc
           return this.validationStatus;
-        }
-
-        public boolean hasValidationStatusElement() { 
-          return this.validationStatus != null && !this.validationStatus.isEmpty();
         }
 
         public boolean hasValidationStatus() { 
@@ -1147,31 +440,10 @@ public class VerificationResult extends DomainResource {
         }
 
         /**
-         * @param value {@link #validationStatus} (Status of the validation of the target against the primary source (successful; failed; unknown).). This is the underlying object with id, value and extensions. The accessor "getValidationStatus" gives direct access to the value
+         * @param value {@link #validationStatus} (Status of the validation of the target against the primary source (successful; failed; unknown).)
          */
-        public VerificationResultPrimarySourceComponent setValidationStatusElement(Enumeration<ValidationStatus> value) { 
+        public VerificationResultPrimarySourceComponent setValidationStatus(CodeableConcept value) { 
           this.validationStatus = value;
-          return this;
-        }
-
-        /**
-         * @return Status of the validation of the target against the primary source (successful; failed; unknown).
-         */
-        public ValidationStatus getValidationStatus() { 
-          return this.validationStatus == null ? null : this.validationStatus.getValue();
-        }
-
-        /**
-         * @param value Status of the validation of the target against the primary source (successful; failed; unknown).
-         */
-        public VerificationResultPrimarySourceComponent setValidationStatus(ValidationStatus value) { 
-          if (value == null)
-            this.validationStatus = null;
-          else {
-            if (this.validationStatus == null)
-              this.validationStatus = new Enumeration<ValidationStatus>(new ValidationStatusEnumFactory());
-            this.validationStatus.setValue(value);
-          }
           return this;
         }
 
@@ -1225,19 +497,15 @@ public class VerificationResult extends DomainResource {
         }
 
         /**
-         * @return {@link #canPushUpdates} (Ability of the primary source to push updates/alerts (yes; no; undetermined).). This is the underlying object with id, value and extensions. The accessor "getCanPushUpdates" gives direct access to the value
+         * @return {@link #canPushUpdates} (Ability of the primary source to push updates/alerts (yes; no; undetermined).)
          */
-        public Enumeration<CanPushUpdates> getCanPushUpdatesElement() { 
+        public CodeableConcept getCanPushUpdates() { 
           if (this.canPushUpdates == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create VerificationResultPrimarySourceComponent.canPushUpdates");
             else if (Configuration.doAutoCreate())
-              this.canPushUpdates = new Enumeration<CanPushUpdates>(new CanPushUpdatesEnumFactory()); // bb
+              this.canPushUpdates = new CodeableConcept(); // cc
           return this.canPushUpdates;
-        }
-
-        public boolean hasCanPushUpdatesElement() { 
-          return this.canPushUpdates != null && !this.canPushUpdates.isEmpty();
         }
 
         public boolean hasCanPushUpdates() { 
@@ -1245,43 +513,26 @@ public class VerificationResult extends DomainResource {
         }
 
         /**
-         * @param value {@link #canPushUpdates} (Ability of the primary source to push updates/alerts (yes; no; undetermined).). This is the underlying object with id, value and extensions. The accessor "getCanPushUpdates" gives direct access to the value
+         * @param value {@link #canPushUpdates} (Ability of the primary source to push updates/alerts (yes; no; undetermined).)
          */
-        public VerificationResultPrimarySourceComponent setCanPushUpdatesElement(Enumeration<CanPushUpdates> value) { 
+        public VerificationResultPrimarySourceComponent setCanPushUpdates(CodeableConcept value) { 
           this.canPushUpdates = value;
-          return this;
-        }
-
-        /**
-         * @return Ability of the primary source to push updates/alerts (yes; no; undetermined).
-         */
-        public CanPushUpdates getCanPushUpdates() { 
-          return this.canPushUpdates == null ? null : this.canPushUpdates.getValue();
-        }
-
-        /**
-         * @param value Ability of the primary source to push updates/alerts (yes; no; undetermined).
-         */
-        public VerificationResultPrimarySourceComponent setCanPushUpdates(CanPushUpdates value) { 
-            if (this.canPushUpdates == null)
-              this.canPushUpdates = new Enumeration<CanPushUpdates>(new CanPushUpdatesEnumFactory());
-            this.canPushUpdates.setValue(value);
           return this;
         }
 
         /**
          * @return {@link #pushTypeAvailable} (Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source).)
          */
-        public List<Enumeration<PushTypeAvailable>> getPushTypeAvailable() { 
+        public List<CodeableConcept> getPushTypeAvailable() { 
           if (this.pushTypeAvailable == null)
-            this.pushTypeAvailable = new ArrayList<Enumeration<PushTypeAvailable>>();
+            this.pushTypeAvailable = new ArrayList<CodeableConcept>();
           return this.pushTypeAvailable;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public VerificationResultPrimarySourceComponent setPushTypeAvailable(List<Enumeration<PushTypeAvailable>> thePushTypeAvailable) { 
+        public VerificationResultPrimarySourceComponent setPushTypeAvailable(List<CodeableConcept> thePushTypeAvailable) { 
           this.pushTypeAvailable = thePushTypeAvailable;
           return this;
         }
@@ -1289,70 +540,60 @@ public class VerificationResult extends DomainResource {
         public boolean hasPushTypeAvailable() { 
           if (this.pushTypeAvailable == null)
             return false;
-          for (Enumeration<PushTypeAvailable> item : this.pushTypeAvailable)
+          for (CodeableConcept item : this.pushTypeAvailable)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        /**
-         * @return {@link #pushTypeAvailable} (Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source).)
-         */
-        public Enumeration<PushTypeAvailable> addPushTypeAvailableElement() {//2 
-          Enumeration<PushTypeAvailable> t = new Enumeration<PushTypeAvailable>(new PushTypeAvailableEnumFactory());
+        public CodeableConcept addPushTypeAvailable() { //3
+          CodeableConcept t = new CodeableConcept();
           if (this.pushTypeAvailable == null)
-            this.pushTypeAvailable = new ArrayList<Enumeration<PushTypeAvailable>>();
+            this.pushTypeAvailable = new ArrayList<CodeableConcept>();
           this.pushTypeAvailable.add(t);
           return t;
         }
 
-        /**
-         * @param value {@link #pushTypeAvailable} (Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source).)
-         */
-        public VerificationResultPrimarySourceComponent addPushTypeAvailable(PushTypeAvailable value) { //1
-          Enumeration<PushTypeAvailable> t = new Enumeration<PushTypeAvailable>(new PushTypeAvailableEnumFactory());
-          t.setValue(value);
+        public VerificationResultPrimarySourceComponent addPushTypeAvailable(CodeableConcept t) { //3
+          if (t == null)
+            return this;
           if (this.pushTypeAvailable == null)
-            this.pushTypeAvailable = new ArrayList<Enumeration<PushTypeAvailable>>();
+            this.pushTypeAvailable = new ArrayList<CodeableConcept>();
           this.pushTypeAvailable.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #pushTypeAvailable} (Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source).)
+         * @return The first repetition of repeating field {@link #pushTypeAvailable}, creating it if it does not already exist
          */
-        public boolean hasPushTypeAvailable(PushTypeAvailable value) { 
-          if (this.pushTypeAvailable == null)
-            return false;
-          for (Enumeration<PushTypeAvailable> v : this.pushTypeAvailable)
-            if (v.getValue().equals(value)) // code
-              return true;
-          return false;
+        public CodeableConcept getPushTypeAvailableFirstRep() { 
+          if (getPushTypeAvailable().isEmpty()) {
+            addPushTypeAvailable();
+          }
+          return getPushTypeAvailable().get(0);
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("identifier", "Identifier", "URI of the primary source for validation.", 0, 1, identifier));
           children.add(new Property("organization", "Reference(Organization)", "Reference to the primary source.", 0, 1, organization));
           children.add(new Property("type", "CodeableConcept", "Type of primary source (License Board; Primary Education; Continuing Education; Postal Service; Relationship owner; Registration Authority; legal source; issuing source; authoritative source).", 0, java.lang.Integer.MAX_VALUE, type));
           children.add(new Property("validationProcess", "CodeableConcept", "Method for communicating with the primary source (manual; API; Push).", 0, java.lang.Integer.MAX_VALUE, validationProcess));
-          children.add(new Property("validationStatus", "code", "Status of the validation of the target against the primary source (successful; failed; unknown).", 0, 1, validationStatus));
+          children.add(new Property("validationStatus", "CodeableConcept", "Status of the validation of the target against the primary source (successful; failed; unknown).", 0, 1, validationStatus));
           children.add(new Property("validationDate", "dateTime", "When the target was validated against the primary source.", 0, 1, validationDate));
-          children.add(new Property("canPushUpdates", "code", "Ability of the primary source to push updates/alerts (yes; no; undetermined).", 0, 1, canPushUpdates));
-          children.add(new Property("pushTypeAvailable", "code", "Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source).", 0, java.lang.Integer.MAX_VALUE, pushTypeAvailable));
+          children.add(new Property("canPushUpdates", "CodeableConcept", "Ability of the primary source to push updates/alerts (yes; no; undetermined).", 0, 1, canPushUpdates));
+          children.add(new Property("pushTypeAvailable", "CodeableConcept", "Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source).", 0, java.lang.Integer.MAX_VALUE, pushTypeAvailable));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "URI of the primary source for validation.", 0, 1, identifier);
           case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "Reference to the primary source.", 0, 1, organization);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of primary source (License Board; Primary Education; Continuing Education; Postal Service; Relationship owner; Registration Authority; legal source; issuing source; authoritative source).", 0, java.lang.Integer.MAX_VALUE, type);
           case 797680566: /*validationProcess*/  return new Property("validationProcess", "CodeableConcept", "Method for communicating with the primary source (manual; API; Push).", 0, java.lang.Integer.MAX_VALUE, validationProcess);
-          case 1775633867: /*validationStatus*/  return new Property("validationStatus", "code", "Status of the validation of the target against the primary source (successful; failed; unknown).", 0, 1, validationStatus);
+          case 1775633867: /*validationStatus*/  return new Property("validationStatus", "CodeableConcept", "Status of the validation of the target against the primary source (successful; failed; unknown).", 0, 1, validationStatus);
           case -280180793: /*validationDate*/  return new Property("validationDate", "dateTime", "When the target was validated against the primary source.", 0, 1, validationDate);
-          case 1463787104: /*canPushUpdates*/  return new Property("canPushUpdates", "code", "Ability of the primary source to push updates/alerts (yes; no; undetermined).", 0, 1, canPushUpdates);
-          case 945223605: /*pushTypeAvailable*/  return new Property("pushTypeAvailable", "code", "Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source).", 0, java.lang.Integer.MAX_VALUE, pushTypeAvailable);
+          case 1463787104: /*canPushUpdates*/  return new Property("canPushUpdates", "CodeableConcept", "Ability of the primary source to push updates/alerts (yes; no; undetermined).", 0, 1, canPushUpdates);
+          case 945223605: /*pushTypeAvailable*/  return new Property("pushTypeAvailable", "CodeableConcept", "Type of alerts/updates the primary source can send (specific requested changes; any changes; as defined by source).", 0, java.lang.Integer.MAX_VALUE, pushTypeAvailable);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1361,14 +602,13 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
         case 797680566: /*validationProcess*/ return this.validationProcess == null ? new Base[0] : this.validationProcess.toArray(new Base[this.validationProcess.size()]); // CodeableConcept
-        case 1775633867: /*validationStatus*/ return this.validationStatus == null ? new Base[0] : new Base[] {this.validationStatus}; // Enumeration<ValidationStatus>
+        case 1775633867: /*validationStatus*/ return this.validationStatus == null ? new Base[0] : new Base[] {this.validationStatus}; // CodeableConcept
         case -280180793: /*validationDate*/ return this.validationDate == null ? new Base[0] : new Base[] {this.validationDate}; // DateTimeType
-        case 1463787104: /*canPushUpdates*/ return this.canPushUpdates == null ? new Base[0] : new Base[] {this.canPushUpdates}; // Enumeration<CanPushUpdates>
-        case 945223605: /*pushTypeAvailable*/ return this.pushTypeAvailable == null ? new Base[0] : this.pushTypeAvailable.toArray(new Base[this.pushTypeAvailable.size()]); // Enumeration<PushTypeAvailable>
+        case 1463787104: /*canPushUpdates*/ return this.canPushUpdates == null ? new Base[0] : new Base[] {this.canPushUpdates}; // CodeableConcept
+        case 945223605: /*pushTypeAvailable*/ return this.pushTypeAvailable == null ? new Base[0] : this.pushTypeAvailable.toArray(new Base[this.pushTypeAvailable.size()]); // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1377,9 +617,6 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
-          return value;
         case 1178922291: // organization
           this.organization = castToReference(value); // Reference
           return value;
@@ -1390,19 +627,16 @@ public class VerificationResult extends DomainResource {
           this.getValidationProcess().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 1775633867: // validationStatus
-          value = new ValidationStatusEnumFactory().fromType(castToCode(value));
-          this.validationStatus = (Enumeration) value; // Enumeration<ValidationStatus>
+          this.validationStatus = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -280180793: // validationDate
           this.validationDate = castToDateTime(value); // DateTimeType
           return value;
         case 1463787104: // canPushUpdates
-          value = new CanPushUpdatesEnumFactory().fromType(castToCode(value));
-          this.canPushUpdates = (Enumeration) value; // Enumeration<CanPushUpdates>
+          this.canPushUpdates = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 945223605: // pushTypeAvailable
-          value = new PushTypeAvailableEnumFactory().fromType(castToCode(value));
-          this.getPushTypeAvailable().add((Enumeration) value); // Enumeration<PushTypeAvailable>
+          this.getPushTypeAvailable().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1411,25 +645,20 @@ public class VerificationResult extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
-        } else if (name.equals("organization")) {
+        if (name.equals("organization")) {
           this.organization = castToReference(value); // Reference
         } else if (name.equals("type")) {
           this.getType().add(castToCodeableConcept(value));
         } else if (name.equals("validationProcess")) {
           this.getValidationProcess().add(castToCodeableConcept(value));
         } else if (name.equals("validationStatus")) {
-          value = new ValidationStatusEnumFactory().fromType(castToCode(value));
-          this.validationStatus = (Enumeration) value; // Enumeration<ValidationStatus>
+          this.validationStatus = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("validationDate")) {
           this.validationDate = castToDateTime(value); // DateTimeType
         } else if (name.equals("canPushUpdates")) {
-          value = new CanPushUpdatesEnumFactory().fromType(castToCode(value));
-          this.canPushUpdates = (Enumeration) value; // Enumeration<CanPushUpdates>
+          this.canPushUpdates = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("pushTypeAvailable")) {
-          value = new PushTypeAvailableEnumFactory().fromType(castToCode(value));
-          this.getPushTypeAvailable().add((Enumeration) value);
+          this.getPushTypeAvailable().add(castToCodeableConcept(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -1438,14 +667,13 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
         case 1178922291:  return getOrganization(); 
         case 3575610:  return addType(); 
         case 797680566:  return addValidationProcess(); 
-        case 1775633867:  return getValidationStatusElement();
+        case 1775633867:  return getValidationStatus(); 
         case -280180793:  return getValidationDateElement();
-        case 1463787104:  return getCanPushUpdatesElement();
-        case 945223605:  return addPushTypeAvailableElement();
+        case 1463787104:  return getCanPushUpdates(); 
+        case 945223605:  return addPushTypeAvailable(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1454,14 +682,13 @@ public class VerificationResult extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case 1178922291: /*organization*/ return new String[] {"Reference"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case 797680566: /*validationProcess*/ return new String[] {"CodeableConcept"};
-        case 1775633867: /*validationStatus*/ return new String[] {"code"};
+        case 1775633867: /*validationStatus*/ return new String[] {"CodeableConcept"};
         case -280180793: /*validationDate*/ return new String[] {"dateTime"};
-        case 1463787104: /*canPushUpdates*/ return new String[] {"code"};
-        case 945223605: /*pushTypeAvailable*/ return new String[] {"code"};
+        case 1463787104: /*canPushUpdates*/ return new String[] {"CodeableConcept"};
+        case 945223605: /*pushTypeAvailable*/ return new String[] {"CodeableConcept"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1469,11 +696,7 @@ public class VerificationResult extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
-        }
-        else if (name.equals("organization")) {
+        if (name.equals("organization")) {
           this.organization = new Reference();
           return this.organization;
         }
@@ -1484,16 +707,18 @@ public class VerificationResult extends DomainResource {
           return addValidationProcess();
         }
         else if (name.equals("validationStatus")) {
-          throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.validationStatus");
+          this.validationStatus = new CodeableConcept();
+          return this.validationStatus;
         }
         else if (name.equals("validationDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.validationDate");
         }
         else if (name.equals("canPushUpdates")) {
-          throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.canPushUpdates");
+          this.canPushUpdates = new CodeableConcept();
+          return this.canPushUpdates;
         }
         else if (name.equals("pushTypeAvailable")) {
-          throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.pushTypeAvailable");
+          return addPushTypeAvailable();
         }
         else
           return super.addChild(name);
@@ -1502,7 +727,6 @@ public class VerificationResult extends DomainResource {
       public VerificationResultPrimarySourceComponent copy() {
         VerificationResultPrimarySourceComponent dst = new VerificationResultPrimarySourceComponent();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
         dst.organization = organization == null ? null : organization.copy();
         if (type != null) {
           dst.type = new ArrayList<CodeableConcept>();
@@ -1518,8 +742,8 @@ public class VerificationResult extends DomainResource {
         dst.validationDate = validationDate == null ? null : validationDate.copy();
         dst.canPushUpdates = canPushUpdates == null ? null : canPushUpdates.copy();
         if (pushTypeAvailable != null) {
-          dst.pushTypeAvailable = new ArrayList<Enumeration<PushTypeAvailable>>();
-          for (Enumeration<PushTypeAvailable> i : pushTypeAvailable)
+          dst.pushTypeAvailable = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : pushTypeAvailable)
             dst.pushTypeAvailable.add(i.copy());
         };
         return dst;
@@ -1532,8 +756,7 @@ public class VerificationResult extends DomainResource {
         if (!(other_ instanceof VerificationResultPrimarySourceComponent))
           return false;
         VerificationResultPrimarySourceComponent o = (VerificationResultPrimarySourceComponent) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(organization, o.organization, true)
-           && compareDeep(type, o.type, true) && compareDeep(validationProcess, o.validationProcess, true)
+        return compareDeep(organization, o.organization, true) && compareDeep(type, o.type, true) && compareDeep(validationProcess, o.validationProcess, true)
            && compareDeep(validationStatus, o.validationStatus, true) && compareDeep(validationDate, o.validationDate, true)
            && compareDeep(canPushUpdates, o.canPushUpdates, true) && compareDeep(pushTypeAvailable, o.pushTypeAvailable, true)
           ;
@@ -1546,15 +769,12 @@ public class VerificationResult extends DomainResource {
         if (!(other_ instanceof VerificationResultPrimarySourceComponent))
           return false;
         VerificationResultPrimarySourceComponent o = (VerificationResultPrimarySourceComponent) other_;
-        return compareValues(validationStatus, o.validationStatus, true) && compareValues(validationDate, o.validationDate, true)
-           && compareValues(canPushUpdates, o.canPushUpdates, true) && compareValues(pushTypeAvailable, o.pushTypeAvailable, true)
-          ;
+        return compareValues(validationDate, o.validationDate, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, organization, type
-          , validationProcess, validationStatus, validationDate, canPushUpdates, pushTypeAvailable
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, type, validationProcess
+          , validationStatus, validationDate, canPushUpdates, pushTypeAvailable);
       }
 
   public String fhirType() {
@@ -1569,7 +789,7 @@ public class VerificationResult extends DomainResource {
         /**
          * The individual attesting to information.
          */
-        @Child(name = "source", type = {Practitioner.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "source", type = {Practitioner.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The individual attesting to information", formalDefinition="The individual attesting to information." )
         protected Reference source;
 
@@ -1581,7 +801,7 @@ public class VerificationResult extends DomainResource {
         /**
          * The organization attesting to information.
          */
-        @Child(name = "organization", type = {Organization.class}, order=2, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "organization", type = {Organization.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The organization attesting to information", formalDefinition="The organization attesting to information." )
         protected Reference organization;
 
@@ -1593,14 +813,14 @@ public class VerificationResult extends DomainResource {
         /**
          * Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source).
          */
-        @Child(name = "method", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "method", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source)", formalDefinition="Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source)." )
         protected CodeableConcept method;
 
         /**
          * The date the information was attested to.
          */
-        @Child(name = "date", type = {DateType.class}, order=4, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "date", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The date the information was attested to", formalDefinition="The date the information was attested to." )
         protected DateType date;
 
@@ -1618,24 +838,27 @@ public class VerificationResult extends DomainResource {
         @Description(shortDefinition="A digital identity certificate associated with the proxy entity submitting attested information on behalf of the attestation source", formalDefinition="A digital identity certificate associated with the proxy entity submitting attested information on behalf of the attestation source." )
         protected StringType proxyIdentityCertificate;
 
-        private static final long serialVersionUID = -1210910682L;
+        /**
+         * Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.
+         */
+        @Child(name = "signedProxyRight", type = {StringType.class, UriType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Proxy signature", formalDefinition="Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source." )
+        protected Type signedProxyRight;
+
+        /**
+         * Signed assertion by the attestation source that they have attested to the information.
+         */
+        @Child(name = "signedSourceAttestation", type = {StringType.class, UriType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Attester signature", formalDefinition="Signed assertion by the attestation source that they have attested to the information." )
+        protected Type signedSourceAttestation;
+
+        private static final long serialVersionUID = 1956485939L;
 
     /**
      * Constructor
      */
       public VerificationResultAttestationComponent() {
         super();
-      }
-
-    /**
-     * Constructor
-     */
-      public VerificationResultAttestationComponent(Reference source, Reference organization, CodeableConcept method, DateType date) {
-        super();
-        this.source = source;
-        this.organization = organization;
-        this.method = method;
-        this.date = date;
       }
 
         /**
@@ -1789,9 +1012,13 @@ public class VerificationResult extends DomainResource {
          * @param value The date the information was attested to.
          */
         public VerificationResultAttestationComponent setDate(Date value) { 
+          if (value == null)
+            this.date = null;
+          else {
             if (this.date == null)
               this.date = new DateType();
             this.date.setValue(value);
+          }
           return this;
         }
 
@@ -1893,6 +1120,108 @@ public class VerificationResult extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #signedProxyRight} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
+         */
+        public Type getSignedProxyRight() { 
+          return this.signedProxyRight;
+        }
+
+        /**
+         * @return {@link #signedProxyRight} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
+         */
+        public StringType getSignedProxyRightStringType() throws FHIRException { 
+          if (this.signedProxyRight == null)
+            return null;
+          if (!(this.signedProxyRight instanceof StringType))
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.signedProxyRight.getClass().getName()+" was encountered");
+          return (StringType) this.signedProxyRight;
+        }
+
+        public boolean hasSignedProxyRightStringType() { 
+          return this != null && this.signedProxyRight instanceof StringType;
+        }
+
+        /**
+         * @return {@link #signedProxyRight} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
+         */
+        public UriType getSignedProxyRightUriType() throws FHIRException { 
+          if (this.signedProxyRight == null)
+            return null;
+          if (!(this.signedProxyRight instanceof UriType))
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.signedProxyRight.getClass().getName()+" was encountered");
+          return (UriType) this.signedProxyRight;
+        }
+
+        public boolean hasSignedProxyRightUriType() { 
+          return this != null && this.signedProxyRight instanceof UriType;
+        }
+
+        public boolean hasSignedProxyRight() { 
+          return this.signedProxyRight != null && !this.signedProxyRight.isEmpty();
+        }
+
+        /**
+         * @param value {@link #signedProxyRight} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
+         */
+        public VerificationResultAttestationComponent setSignedProxyRight(Type value) { 
+          if (value != null && !(value instanceof StringType || value instanceof UriType))
+            throw new Error("Not the right type for VerificationResult.attestation.signedProxyRight[x]: "+value.fhirType());
+          this.signedProxyRight = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #signedSourceAttestation} (Signed assertion by the attestation source that they have attested to the information.)
+         */
+        public Type getSignedSourceAttestation() { 
+          return this.signedSourceAttestation;
+        }
+
+        /**
+         * @return {@link #signedSourceAttestation} (Signed assertion by the attestation source that they have attested to the information.)
+         */
+        public StringType getSignedSourceAttestationStringType() throws FHIRException { 
+          if (this.signedSourceAttestation == null)
+            return null;
+          if (!(this.signedSourceAttestation instanceof StringType))
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.signedSourceAttestation.getClass().getName()+" was encountered");
+          return (StringType) this.signedSourceAttestation;
+        }
+
+        public boolean hasSignedSourceAttestationStringType() { 
+          return this != null && this.signedSourceAttestation instanceof StringType;
+        }
+
+        /**
+         * @return {@link #signedSourceAttestation} (Signed assertion by the attestation source that they have attested to the information.)
+         */
+        public UriType getSignedSourceAttestationUriType() throws FHIRException { 
+          if (this.signedSourceAttestation == null)
+            return null;
+          if (!(this.signedSourceAttestation instanceof UriType))
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.signedSourceAttestation.getClass().getName()+" was encountered");
+          return (UriType) this.signedSourceAttestation;
+        }
+
+        public boolean hasSignedSourceAttestationUriType() { 
+          return this != null && this.signedSourceAttestation instanceof UriType;
+        }
+
+        public boolean hasSignedSourceAttestation() { 
+          return this.signedSourceAttestation != null && !this.signedSourceAttestation.isEmpty();
+        }
+
+        /**
+         * @param value {@link #signedSourceAttestation} (Signed assertion by the attestation source that they have attested to the information.)
+         */
+        public VerificationResultAttestationComponent setSignedSourceAttestation(Type value) { 
+          if (value != null && !(value instanceof StringType || value instanceof UriType))
+            throw new Error("Not the right type for VerificationResult.attestation.signedSourceAttestation[x]: "+value.fhirType());
+          this.signedSourceAttestation = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("source", "Reference(Practitioner)", "The individual attesting to information.", 0, 1, source));
@@ -1901,6 +1230,8 @@ public class VerificationResult extends DomainResource {
           children.add(new Property("date", "date", "The date the information was attested to.", 0, 1, date));
           children.add(new Property("sourceIdentityCertificate", "string", "A digital identity certificate associated with the attestation source.", 0, 1, sourceIdentityCertificate));
           children.add(new Property("proxyIdentityCertificate", "string", "A digital identity certificate associated with the proxy entity submitting attested information on behalf of the attestation source.", 0, 1, proxyIdentityCertificate));
+          children.add(new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight));
+          children.add(new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation));
         }
 
         @Override
@@ -1912,6 +1243,14 @@ public class VerificationResult extends DomainResource {
           case 3076014: /*date*/  return new Property("date", "date", "The date the information was attested to.", 0, 1, date);
           case -799067682: /*sourceIdentityCertificate*/  return new Property("sourceIdentityCertificate", "string", "A digital identity certificate associated with the attestation source.", 0, 1, sourceIdentityCertificate);
           case 431558827: /*proxyIdentityCertificate*/  return new Property("proxyIdentityCertificate", "string", "A digital identity certificate associated with the proxy entity submitting attested information on behalf of the attestation source.", 0, 1, proxyIdentityCertificate);
+          case -589878346: /*signedProxyRight[x]*/  return new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight);
+          case -979078006: /*signedProxyRight*/  return new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight);
+          case 1708372283: /*signedProxyRightString*/  return new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight);
+          case -589884286: /*signedProxyRightUri*/  return new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight);
+          case -1441752601: /*signedSourceAttestation[x]*/  return new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation);
+          case 564665337: /*signedSourceAttestation*/  return new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation);
+          case -1810773654: /*signedSourceAttestationString*/  return new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation);
+          case -1441758541: /*signedSourceAttestationUri*/  return new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1926,6 +1265,8 @@ public class VerificationResult extends DomainResource {
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateType
         case -799067682: /*sourceIdentityCertificate*/ return this.sourceIdentityCertificate == null ? new Base[0] : new Base[] {this.sourceIdentityCertificate}; // StringType
         case 431558827: /*proxyIdentityCertificate*/ return this.proxyIdentityCertificate == null ? new Base[0] : new Base[] {this.proxyIdentityCertificate}; // StringType
+        case -979078006: /*signedProxyRight*/ return this.signedProxyRight == null ? new Base[0] : new Base[] {this.signedProxyRight}; // Type
+        case 564665337: /*signedSourceAttestation*/ return this.signedSourceAttestation == null ? new Base[0] : new Base[] {this.signedSourceAttestation}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1952,6 +1293,12 @@ public class VerificationResult extends DomainResource {
         case 431558827: // proxyIdentityCertificate
           this.proxyIdentityCertificate = castToString(value); // StringType
           return value;
+        case -979078006: // signedProxyRight
+          this.signedProxyRight = castToType(value); // Type
+          return value;
+        case 564665337: // signedSourceAttestation
+          this.signedSourceAttestation = castToType(value); // Type
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -1971,6 +1318,10 @@ public class VerificationResult extends DomainResource {
           this.sourceIdentityCertificate = castToString(value); // StringType
         } else if (name.equals("proxyIdentityCertificate")) {
           this.proxyIdentityCertificate = castToString(value); // StringType
+        } else if (name.equals("signedProxyRight[x]")) {
+          this.signedProxyRight = castToType(value); // Type
+        } else if (name.equals("signedSourceAttestation[x]")) {
+          this.signedSourceAttestation = castToType(value); // Type
         } else
           return super.setProperty(name, value);
         return value;
@@ -1985,6 +1336,10 @@ public class VerificationResult extends DomainResource {
         case 3076014:  return getDateElement();
         case -799067682:  return getSourceIdentityCertificateElement();
         case 431558827:  return getProxyIdentityCertificateElement();
+        case -589878346:  return getSignedProxyRight(); 
+        case -979078006:  return getSignedProxyRight(); 
+        case -1441752601:  return getSignedSourceAttestation(); 
+        case 564665337:  return getSignedSourceAttestation(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1999,6 +1354,8 @@ public class VerificationResult extends DomainResource {
         case 3076014: /*date*/ return new String[] {"date"};
         case -799067682: /*sourceIdentityCertificate*/ return new String[] {"string"};
         case 431558827: /*proxyIdentityCertificate*/ return new String[] {"string"};
+        case -979078006: /*signedProxyRight*/ return new String[] {"string", "uri"};
+        case 564665337: /*signedSourceAttestation*/ return new String[] {"string", "uri"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2027,6 +1384,22 @@ public class VerificationResult extends DomainResource {
         else if (name.equals("proxyIdentityCertificate")) {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.proxyIdentityCertificate");
         }
+        else if (name.equals("signedProxyRightString")) {
+          this.signedProxyRight = new StringType();
+          return this.signedProxyRight;
+        }
+        else if (name.equals("signedProxyRightUri")) {
+          this.signedProxyRight = new UriType();
+          return this.signedProxyRight;
+        }
+        else if (name.equals("signedSourceAttestationString")) {
+          this.signedSourceAttestation = new StringType();
+          return this.signedSourceAttestation;
+        }
+        else if (name.equals("signedSourceAttestationUri")) {
+          this.signedSourceAttestation = new UriType();
+          return this.signedSourceAttestation;
+        }
         else
           return super.addChild(name);
       }
@@ -2040,6 +1413,8 @@ public class VerificationResult extends DomainResource {
         dst.date = date == null ? null : date.copy();
         dst.sourceIdentityCertificate = sourceIdentityCertificate == null ? null : sourceIdentityCertificate.copy();
         dst.proxyIdentityCertificate = proxyIdentityCertificate == null ? null : proxyIdentityCertificate.copy();
+        dst.signedProxyRight = signedProxyRight == null ? null : signedProxyRight.copy();
+        dst.signedSourceAttestation = signedSourceAttestation == null ? null : signedSourceAttestation.copy();
         return dst;
       }
 
@@ -2052,7 +1427,8 @@ public class VerificationResult extends DomainResource {
         VerificationResultAttestationComponent o = (VerificationResultAttestationComponent) other_;
         return compareDeep(source, o.source, true) && compareDeep(organization, o.organization, true) && compareDeep(method, o.method, true)
            && compareDeep(date, o.date, true) && compareDeep(sourceIdentityCertificate, o.sourceIdentityCertificate, true)
-           && compareDeep(proxyIdentityCertificate, o.proxyIdentityCertificate, true);
+           && compareDeep(proxyIdentityCertificate, o.proxyIdentityCertificate, true) && compareDeep(signedProxyRight, o.signedProxyRight, true)
+           && compareDeep(signedSourceAttestation, o.signedSourceAttestation, true);
       }
 
       @Override
@@ -2068,7 +1444,8 @@ public class VerificationResult extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(source, organization, method
-          , date, sourceIdentityCertificate, proxyIdentityCertificate);
+          , date, sourceIdentityCertificate, proxyIdentityCertificate, signedProxyRight, signedSourceAttestation
+          );
       }
 
   public String fhirType() {
@@ -2081,16 +1458,9 @@ public class VerificationResult extends DomainResource {
     @Block()
     public static class VerificationResultValidatorComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * URI of the validator.
-         */
-        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="URI of the validator", formalDefinition="URI of the validator." )
-        protected Identifier identifier;
-
-        /**
          * Reference to the organization validating information.
          */
-        @Child(name = "organization", type = {Organization.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "organization", type = {Organization.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reference to the organization validating information", formalDefinition="Reference to the organization validating information." )
         protected Reference organization;
 
@@ -2102,18 +1472,18 @@ public class VerificationResult extends DomainResource {
         /**
          * A digital identity certificate associated with the validator.
          */
-        @Child(name = "identityCertificate", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "identityCertificate", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="A digital identity certificate associated with the validator", formalDefinition="A digital identity certificate associated with the validator." )
         protected StringType identityCertificate;
 
         /**
-         * Date on which the validator last validated the information.
+         * Signed assertion by the validator that they have validated the information.
          */
-        @Child(name = "dateValidated", type = {DateType.class}, order=4, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Date on which the validator last validated the information", formalDefinition="Date on which the validator last validated the information." )
-        protected DateType dateValidated;
+        @Child(name = "signedValidatorAttestation", type = {StringType.class, UriType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Validator signature", formalDefinition="Signed assertion by the validator that they have validated the information." )
+        protected Type signedValidatorAttestation;
 
-        private static final long serialVersionUID = -1763162519L;
+        private static final long serialVersionUID = 394395029L;
 
     /**
      * Constructor
@@ -2125,35 +1495,10 @@ public class VerificationResult extends DomainResource {
     /**
      * Constructor
      */
-      public VerificationResultValidatorComponent(Reference organization, DateType dateValidated) {
+      public VerificationResultValidatorComponent(Reference organization) {
         super();
         this.organization = organization;
-        this.dateValidated = dateValidated;
       }
-
-        /**
-         * @return {@link #identifier} (URI of the validator.)
-         */
-        public Identifier getIdentifier() { 
-          if (this.identifier == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultValidatorComponent.identifier");
-            else if (Configuration.doAutoCreate())
-              this.identifier = new Identifier(); // cc
-          return this.identifier;
-        }
-
-        public boolean hasIdentifier() { 
-          return this.identifier != null && !this.identifier.isEmpty();
-        }
-
-        /**
-         * @param value {@link #identifier} (URI of the validator.)
-         */
-        public VerificationResultValidatorComponent setIdentifier(Identifier value) { 
-          this.identifier = value;
-          return this;
-        }
 
         /**
          * @return {@link #organization} (Reference to the organization validating information.)
@@ -2249,65 +1594,72 @@ public class VerificationResult extends DomainResource {
         }
 
         /**
-         * @return {@link #dateValidated} (Date on which the validator last validated the information.). This is the underlying object with id, value and extensions. The accessor "getDateValidated" gives direct access to the value
+         * @return {@link #signedValidatorAttestation} (Signed assertion by the validator that they have validated the information.)
          */
-        public DateType getDateValidatedElement() { 
-          if (this.dateValidated == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultValidatorComponent.dateValidated");
-            else if (Configuration.doAutoCreate())
-              this.dateValidated = new DateType(); // bb
-          return this.dateValidated;
-        }
-
-        public boolean hasDateValidatedElement() { 
-          return this.dateValidated != null && !this.dateValidated.isEmpty();
-        }
-
-        public boolean hasDateValidated() { 
-          return this.dateValidated != null && !this.dateValidated.isEmpty();
+        public Type getSignedValidatorAttestation() { 
+          return this.signedValidatorAttestation;
         }
 
         /**
-         * @param value {@link #dateValidated} (Date on which the validator last validated the information.). This is the underlying object with id, value and extensions. The accessor "getDateValidated" gives direct access to the value
+         * @return {@link #signedValidatorAttestation} (Signed assertion by the validator that they have validated the information.)
          */
-        public VerificationResultValidatorComponent setDateValidatedElement(DateType value) { 
-          this.dateValidated = value;
-          return this;
+        public StringType getSignedValidatorAttestationStringType() throws FHIRException { 
+          if (this.signedValidatorAttestation == null)
+            return null;
+          if (!(this.signedValidatorAttestation instanceof StringType))
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.signedValidatorAttestation.getClass().getName()+" was encountered");
+          return (StringType) this.signedValidatorAttestation;
+        }
+
+        public boolean hasSignedValidatorAttestationStringType() { 
+          return this != null && this.signedValidatorAttestation instanceof StringType;
         }
 
         /**
-         * @return Date on which the validator last validated the information.
+         * @return {@link #signedValidatorAttestation} (Signed assertion by the validator that they have validated the information.)
          */
-        public Date getDateValidated() { 
-          return this.dateValidated == null ? null : this.dateValidated.getValue();
+        public UriType getSignedValidatorAttestationUriType() throws FHIRException { 
+          if (this.signedValidatorAttestation == null)
+            return null;
+          if (!(this.signedValidatorAttestation instanceof UriType))
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.signedValidatorAttestation.getClass().getName()+" was encountered");
+          return (UriType) this.signedValidatorAttestation;
+        }
+
+        public boolean hasSignedValidatorAttestationUriType() { 
+          return this != null && this.signedValidatorAttestation instanceof UriType;
+        }
+
+        public boolean hasSignedValidatorAttestation() { 
+          return this.signedValidatorAttestation != null && !this.signedValidatorAttestation.isEmpty();
         }
 
         /**
-         * @param value Date on which the validator last validated the information.
+         * @param value {@link #signedValidatorAttestation} (Signed assertion by the validator that they have validated the information.)
          */
-        public VerificationResultValidatorComponent setDateValidated(Date value) { 
-            if (this.dateValidated == null)
-              this.dateValidated = new DateType();
-            this.dateValidated.setValue(value);
+        public VerificationResultValidatorComponent setSignedValidatorAttestation(Type value) { 
+          if (value != null && !(value instanceof StringType || value instanceof UriType))
+            throw new Error("Not the right type for VerificationResult.validator.signedValidatorAttestation[x]: "+value.fhirType());
+          this.signedValidatorAttestation = value;
           return this;
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("identifier", "Identifier", "URI of the validator.", 0, 1, identifier));
           children.add(new Property("organization", "Reference(Organization)", "Reference to the organization validating information.", 0, 1, organization));
           children.add(new Property("identityCertificate", "string", "A digital identity certificate associated with the validator.", 0, 1, identityCertificate));
-          children.add(new Property("dateValidated", "date", "Date on which the validator last validated the information.", 0, 1, dateValidated));
+          children.add(new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "URI of the validator.", 0, 1, identifier);
           case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "Reference to the organization validating information.", 0, 1, organization);
           case -854379015: /*identityCertificate*/  return new Property("identityCertificate", "string", "A digital identity certificate associated with the validator.", 0, 1, identityCertificate);
-          case 593821184: /*dateValidated*/  return new Property("dateValidated", "date", "Date on which the validator last validated the information.", 0, 1, dateValidated);
+          case -791479066: /*signedValidatorAttestation[x]*/  return new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation);
+          case -1532120742: /*signedValidatorAttestation*/  return new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation);
+          case 185602571: /*signedValidatorAttestationString*/  return new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation);
+          case -791485006: /*signedValidatorAttestationUri*/  return new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2316,10 +1668,9 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case -854379015: /*identityCertificate*/ return this.identityCertificate == null ? new Base[0] : new Base[] {this.identityCertificate}; // StringType
-        case 593821184: /*dateValidated*/ return this.dateValidated == null ? new Base[0] : new Base[] {this.dateValidated}; // DateType
+        case -1532120742: /*signedValidatorAttestation*/ return this.signedValidatorAttestation == null ? new Base[0] : new Base[] {this.signedValidatorAttestation}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2328,17 +1679,14 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
-          return value;
         case 1178922291: // organization
           this.organization = castToReference(value); // Reference
           return value;
         case -854379015: // identityCertificate
           this.identityCertificate = castToString(value); // StringType
           return value;
-        case 593821184: // dateValidated
-          this.dateValidated = castToDate(value); // DateType
+        case -1532120742: // signedValidatorAttestation
+          this.signedValidatorAttestation = castToType(value); // Type
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2347,14 +1695,12 @@ public class VerificationResult extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
-        } else if (name.equals("organization")) {
+        if (name.equals("organization")) {
           this.organization = castToReference(value); // Reference
         } else if (name.equals("identityCertificate")) {
           this.identityCertificate = castToString(value); // StringType
-        } else if (name.equals("dateValidated")) {
-          this.dateValidated = castToDate(value); // DateType
+        } else if (name.equals("signedValidatorAttestation[x]")) {
+          this.signedValidatorAttestation = castToType(value); // Type
         } else
           return super.setProperty(name, value);
         return value;
@@ -2363,10 +1709,10 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
         case 1178922291:  return getOrganization(); 
         case -854379015:  return getIdentityCertificateElement();
-        case 593821184:  return getDateValidatedElement();
+        case -791479066:  return getSignedValidatorAttestation(); 
+        case -1532120742:  return getSignedValidatorAttestation(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -2375,10 +1721,9 @@ public class VerificationResult extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case 1178922291: /*organization*/ return new String[] {"Reference"};
         case -854379015: /*identityCertificate*/ return new String[] {"string"};
-        case 593821184: /*dateValidated*/ return new String[] {"date"};
+        case -1532120742: /*signedValidatorAttestation*/ return new String[] {"string", "uri"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2386,19 +1731,20 @@ public class VerificationResult extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
-        }
-        else if (name.equals("organization")) {
+        if (name.equals("organization")) {
           this.organization = new Reference();
           return this.organization;
         }
         else if (name.equals("identityCertificate")) {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.identityCertificate");
         }
-        else if (name.equals("dateValidated")) {
-          throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.dateValidated");
+        else if (name.equals("signedValidatorAttestationString")) {
+          this.signedValidatorAttestation = new StringType();
+          return this.signedValidatorAttestation;
+        }
+        else if (name.equals("signedValidatorAttestationUri")) {
+          this.signedValidatorAttestation = new UriType();
+          return this.signedValidatorAttestation;
         }
         else
           return super.addChild(name);
@@ -2407,10 +1753,9 @@ public class VerificationResult extends DomainResource {
       public VerificationResultValidatorComponent copy() {
         VerificationResultValidatorComponent dst = new VerificationResultValidatorComponent();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
         dst.organization = organization == null ? null : organization.copy();
         dst.identityCertificate = identityCertificate == null ? null : identityCertificate.copy();
-        dst.dateValidated = dateValidated == null ? null : dateValidated.copy();
+        dst.signedValidatorAttestation = signedValidatorAttestation == null ? null : signedValidatorAttestation.copy();
         return dst;
       }
 
@@ -2421,9 +1766,8 @@ public class VerificationResult extends DomainResource {
         if (!(other_ instanceof VerificationResultValidatorComponent))
           return false;
         VerificationResultValidatorComponent o = (VerificationResultValidatorComponent) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(organization, o.organization, true)
-           && compareDeep(identityCertificate, o.identityCertificate, true) && compareDeep(dateValidated, o.dateValidated, true)
-          ;
+        return compareDeep(organization, o.organization, true) && compareDeep(identityCertificate, o.identityCertificate, true)
+           && compareDeep(signedValidatorAttestation, o.signedValidatorAttestation, true);
       }
 
       @Override
@@ -2433,13 +1777,12 @@ public class VerificationResult extends DomainResource {
         if (!(other_ instanceof VerificationResultValidatorComponent))
           return false;
         VerificationResultValidatorComponent o = (VerificationResultValidatorComponent) other_;
-        return compareValues(identityCertificate, o.identityCertificate, true) && compareValues(dateValidated, o.dateValidated, true)
-          ;
+        return compareValues(identityCertificate, o.identityCertificate, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, organization, identityCertificate
-          , dateValidated);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, identityCertificate
+          , signedValidatorAttestation);
       }
 
   public String fhirType() {
@@ -2471,40 +1814,40 @@ public class VerificationResult extends DomainResource {
     /**
      * The frequency with which the target must be validated (none; initial; periodic).
      */
-    @Child(name = "need", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "need", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="none | initial | periodic", formalDefinition="The frequency with which the target must be validated (none; initial; periodic)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/need")
-    protected Enumeration<Need> need;
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-need")
+    protected CodeableConcept need;
 
     /**
      * The validation status of the target (attested; validated; in process; requires revalidation; validation failed; revalidation failed).
      */
     @Child(name = "status", type = {CodeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="attested | validated | in-process | req-revalid | val-fail | reval-fail", formalDefinition="The validation status of the target (attested; validated; in process; requires revalidation; validation failed; revalidation failed)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/status")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-status")
     protected Enumeration<Status> status;
 
     /**
      * When the validation status was updated.
      */
-    @Child(name = "statusDate", type = {DateTimeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "statusDate", type = {DateTimeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When the validation status was updated", formalDefinition="When the validation status was updated." )
     protected DateTimeType statusDate;
 
     /**
      * What the target is validated against (nothing; primary source; multiple sources).
      */
-    @Child(name = "validationType", type = {CodeType.class}, order=5, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "validationType", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="nothing | primary | multiple", formalDefinition="What the target is validated against (nothing; primary source; multiple sources)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/validation-type")
-    protected Enumeration<ValidationType> validationType;
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-validation-type")
+    protected CodeableConcept validationType;
 
     /**
      * The primary process by which the target is validated (edit check; value set; primary source; multiple sources; standalone; in context).
      */
-    @Child(name = "validationProcess", type = {CodeableConcept.class}, order=6, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "validationProcess", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The primary process by which the target is validated (edit check; value set; primary source; multiple sources; standalone; in context)", formalDefinition="The primary process by which the target is validated (edit check; value set; primary source; multiple sources; standalone; in context)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/validation-process")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-validation-process")
     protected List<CodeableConcept> validationProcess;
 
     /**
@@ -2531,10 +1874,10 @@ public class VerificationResult extends DomainResource {
     /**
      * The result if validation fails (fatal; warning; record only; none).
      */
-    @Child(name = "failureAction", type = {CodeType.class}, order=10, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "failureAction", type = {CodeableConcept.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="fatal | warn | rec-only | none", formalDefinition="The result if validation fails (fatal; warning; record only; none)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/failure-action")
-    protected Enumeration<FailureAction> failureAction;
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-failure-action")
+    protected CodeableConcept failureAction;
 
     /**
      * Information about the primary source(s) involved in validation.
@@ -2557,7 +1900,7 @@ public class VerificationResult extends DomainResource {
     @Description(shortDefinition="Information about the entity validating information", formalDefinition="Information about the entity validating information." )
     protected List<VerificationResultValidatorComponent> validator;
 
-    private static final long serialVersionUID = -1525388753L;
+    private static final long serialVersionUID = -284059204L;
 
   /**
    * Constructor
@@ -2569,13 +1912,9 @@ public class VerificationResult extends DomainResource {
   /**
    * Constructor
    */
-    public VerificationResult(Enumeration<Need> need, Enumeration<Status> status, DateTimeType statusDate, Enumeration<ValidationType> validationType, Enumeration<FailureAction> failureAction) {
+    public VerificationResult(Enumeration<Status> status) {
       super();
-      this.need = need;
       this.status = status;
-      this.statusDate = statusDate;
-      this.validationType = validationType;
-      this.failureAction = failureAction;
     }
 
     /**
@@ -2703,19 +2042,15 @@ public class VerificationResult extends DomainResource {
     }
 
     /**
-     * @return {@link #need} (The frequency with which the target must be validated (none; initial; periodic).). This is the underlying object with id, value and extensions. The accessor "getNeed" gives direct access to the value
+     * @return {@link #need} (The frequency with which the target must be validated (none; initial; periodic).)
      */
-    public Enumeration<Need> getNeedElement() { 
+    public CodeableConcept getNeed() { 
       if (this.need == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create VerificationResult.need");
         else if (Configuration.doAutoCreate())
-          this.need = new Enumeration<Need>(new NeedEnumFactory()); // bb
+          this.need = new CodeableConcept(); // cc
       return this.need;
-    }
-
-    public boolean hasNeedElement() { 
-      return this.need != null && !this.need.isEmpty();
     }
 
     public boolean hasNeed() { 
@@ -2723,27 +2058,10 @@ public class VerificationResult extends DomainResource {
     }
 
     /**
-     * @param value {@link #need} (The frequency with which the target must be validated (none; initial; periodic).). This is the underlying object with id, value and extensions. The accessor "getNeed" gives direct access to the value
+     * @param value {@link #need} (The frequency with which the target must be validated (none; initial; periodic).)
      */
-    public VerificationResult setNeedElement(Enumeration<Need> value) { 
+    public VerificationResult setNeed(CodeableConcept value) { 
       this.need = value;
-      return this;
-    }
-
-    /**
-     * @return The frequency with which the target must be validated (none; initial; periodic).
-     */
-    public Need getNeed() { 
-      return this.need == null ? null : this.need.getValue();
-    }
-
-    /**
-     * @param value The frequency with which the target must be validated (none; initial; periodic).
-     */
-    public VerificationResult setNeed(Need value) { 
-        if (this.need == null)
-          this.need = new Enumeration<Need>(new NeedEnumFactory());
-        this.need.setValue(value);
       return this;
     }
 
@@ -2831,26 +2149,26 @@ public class VerificationResult extends DomainResource {
      * @param value When the validation status was updated.
      */
     public VerificationResult setStatusDate(Date value) { 
+      if (value == null)
+        this.statusDate = null;
+      else {
         if (this.statusDate == null)
           this.statusDate = new DateTimeType();
         this.statusDate.setValue(value);
+      }
       return this;
     }
 
     /**
-     * @return {@link #validationType} (What the target is validated against (nothing; primary source; multiple sources).). This is the underlying object with id, value and extensions. The accessor "getValidationType" gives direct access to the value
+     * @return {@link #validationType} (What the target is validated against (nothing; primary source; multiple sources).)
      */
-    public Enumeration<ValidationType> getValidationTypeElement() { 
+    public CodeableConcept getValidationType() { 
       if (this.validationType == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create VerificationResult.validationType");
         else if (Configuration.doAutoCreate())
-          this.validationType = new Enumeration<ValidationType>(new ValidationTypeEnumFactory()); // bb
+          this.validationType = new CodeableConcept(); // cc
       return this.validationType;
-    }
-
-    public boolean hasValidationTypeElement() { 
-      return this.validationType != null && !this.validationType.isEmpty();
     }
 
     public boolean hasValidationType() { 
@@ -2858,27 +2176,10 @@ public class VerificationResult extends DomainResource {
     }
 
     /**
-     * @param value {@link #validationType} (What the target is validated against (nothing; primary source; multiple sources).). This is the underlying object with id, value and extensions. The accessor "getValidationType" gives direct access to the value
+     * @param value {@link #validationType} (What the target is validated against (nothing; primary source; multiple sources).)
      */
-    public VerificationResult setValidationTypeElement(Enumeration<ValidationType> value) { 
+    public VerificationResult setValidationType(CodeableConcept value) { 
       this.validationType = value;
-      return this;
-    }
-
-    /**
-     * @return What the target is validated against (nothing; primary source; multiple sources).
-     */
-    public ValidationType getValidationType() { 
-      return this.validationType == null ? null : this.validationType.getValue();
-    }
-
-    /**
-     * @param value What the target is validated against (nothing; primary source; multiple sources).
-     */
-    public VerificationResult setValidationType(ValidationType value) { 
-        if (this.validationType == null)
-          this.validationType = new Enumeration<ValidationType>(new ValidationTypeEnumFactory());
-        this.validationType.setValue(value);
       return this;
     }
 
@@ -3058,19 +2359,15 @@ public class VerificationResult extends DomainResource {
     }
 
     /**
-     * @return {@link #failureAction} (The result if validation fails (fatal; warning; record only; none).). This is the underlying object with id, value and extensions. The accessor "getFailureAction" gives direct access to the value
+     * @return {@link #failureAction} (The result if validation fails (fatal; warning; record only; none).)
      */
-    public Enumeration<FailureAction> getFailureActionElement() { 
+    public CodeableConcept getFailureAction() { 
       if (this.failureAction == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create VerificationResult.failureAction");
         else if (Configuration.doAutoCreate())
-          this.failureAction = new Enumeration<FailureAction>(new FailureActionEnumFactory()); // bb
+          this.failureAction = new CodeableConcept(); // cc
       return this.failureAction;
-    }
-
-    public boolean hasFailureActionElement() { 
-      return this.failureAction != null && !this.failureAction.isEmpty();
     }
 
     public boolean hasFailureAction() { 
@@ -3078,27 +2375,10 @@ public class VerificationResult extends DomainResource {
     }
 
     /**
-     * @param value {@link #failureAction} (The result if validation fails (fatal; warning; record only; none).). This is the underlying object with id, value and extensions. The accessor "getFailureAction" gives direct access to the value
+     * @param value {@link #failureAction} (The result if validation fails (fatal; warning; record only; none).)
      */
-    public VerificationResult setFailureActionElement(Enumeration<FailureAction> value) { 
+    public VerificationResult setFailureAction(CodeableConcept value) { 
       this.failureAction = value;
-      return this;
-    }
-
-    /**
-     * @return The result if validation fails (fatal; warning; record only; none).
-     */
-    public FailureAction getFailureAction() { 
-      return this.failureAction == null ? null : this.failureAction.getValue();
-    }
-
-    /**
-     * @param value The result if validation fails (fatal; warning; record only; none).
-     */
-    public VerificationResult setFailureAction(FailureAction value) { 
-        if (this.failureAction == null)
-          this.failureAction = new Enumeration<FailureAction>(new FailureActionEnumFactory());
-        this.failureAction.setValue(value);
       return this;
     }
 
@@ -3236,15 +2516,15 @@ public class VerificationResult extends DomainResource {
         super.listChildren(children);
         children.add(new Property("target", "Reference(Any)", "A resource that was validated.", 0, java.lang.Integer.MAX_VALUE, target));
         children.add(new Property("targetLocation", "string", "The fhirpath location(s) within the resource that was validated.", 0, java.lang.Integer.MAX_VALUE, targetLocation));
-        children.add(new Property("need", "code", "The frequency with which the target must be validated (none; initial; periodic).", 0, 1, need));
+        children.add(new Property("need", "CodeableConcept", "The frequency with which the target must be validated (none; initial; periodic).", 0, 1, need));
         children.add(new Property("status", "code", "The validation status of the target (attested; validated; in process; requires revalidation; validation failed; revalidation failed).", 0, 1, status));
         children.add(new Property("statusDate", "dateTime", "When the validation status was updated.", 0, 1, statusDate));
-        children.add(new Property("validationType", "code", "What the target is validated against (nothing; primary source; multiple sources).", 0, 1, validationType));
+        children.add(new Property("validationType", "CodeableConcept", "What the target is validated against (nothing; primary source; multiple sources).", 0, 1, validationType));
         children.add(new Property("validationProcess", "CodeableConcept", "The primary process by which the target is validated (edit check; value set; primary source; multiple sources; standalone; in context).", 0, java.lang.Integer.MAX_VALUE, validationProcess));
         children.add(new Property("frequency", "Timing", "Frequency of revalidation.", 0, 1, frequency));
         children.add(new Property("lastPerformed", "dateTime", "The date/time validation was last completed (incl. failed validations).", 0, 1, lastPerformed));
         children.add(new Property("nextScheduled", "date", "The date when target is next validated, if appropriate.", 0, 1, nextScheduled));
-        children.add(new Property("failureAction", "code", "The result if validation fails (fatal; warning; record only; none).", 0, 1, failureAction));
+        children.add(new Property("failureAction", "CodeableConcept", "The result if validation fails (fatal; warning; record only; none).", 0, 1, failureAction));
         children.add(new Property("primarySource", "", "Information about the primary source(s) involved in validation.", 0, java.lang.Integer.MAX_VALUE, primarySource));
         children.add(new Property("attestation", "", "Information about the entity attesting to information.", 0, 1, attestation));
         children.add(new Property("validator", "", "Information about the entity validating information.", 0, java.lang.Integer.MAX_VALUE, validator));
@@ -3255,15 +2535,15 @@ public class VerificationResult extends DomainResource {
         switch (_hash) {
         case -880905839: /*target*/  return new Property("target", "Reference(Any)", "A resource that was validated.", 0, java.lang.Integer.MAX_VALUE, target);
         case 308958310: /*targetLocation*/  return new Property("targetLocation", "string", "The fhirpath location(s) within the resource that was validated.", 0, java.lang.Integer.MAX_VALUE, targetLocation);
-        case 3377302: /*need*/  return new Property("need", "code", "The frequency with which the target must be validated (none; initial; periodic).", 0, 1, need);
+        case 3377302: /*need*/  return new Property("need", "CodeableConcept", "The frequency with which the target must be validated (none; initial; periodic).", 0, 1, need);
         case -892481550: /*status*/  return new Property("status", "code", "The validation status of the target (attested; validated; in process; requires revalidation; validation failed; revalidation failed).", 0, 1, status);
         case 247524032: /*statusDate*/  return new Property("statusDate", "dateTime", "When the validation status was updated.", 0, 1, statusDate);
-        case -279681197: /*validationType*/  return new Property("validationType", "code", "What the target is validated against (nothing; primary source; multiple sources).", 0, 1, validationType);
+        case -279681197: /*validationType*/  return new Property("validationType", "CodeableConcept", "What the target is validated against (nothing; primary source; multiple sources).", 0, 1, validationType);
         case 797680566: /*validationProcess*/  return new Property("validationProcess", "CodeableConcept", "The primary process by which the target is validated (edit check; value set; primary source; multiple sources; standalone; in context).", 0, java.lang.Integer.MAX_VALUE, validationProcess);
         case -70023844: /*frequency*/  return new Property("frequency", "Timing", "Frequency of revalidation.", 0, 1, frequency);
         case -1313229366: /*lastPerformed*/  return new Property("lastPerformed", "dateTime", "The date/time validation was last completed (incl. failed validations).", 0, 1, lastPerformed);
         case 1874589434: /*nextScheduled*/  return new Property("nextScheduled", "date", "The date when target is next validated, if appropriate.", 0, 1, nextScheduled);
-        case 1816382560: /*failureAction*/  return new Property("failureAction", "code", "The result if validation fails (fatal; warning; record only; none).", 0, 1, failureAction);
+        case 1816382560: /*failureAction*/  return new Property("failureAction", "CodeableConcept", "The result if validation fails (fatal; warning; record only; none).", 0, 1, failureAction);
         case -528721731: /*primarySource*/  return new Property("primarySource", "", "Information about the primary source(s) involved in validation.", 0, java.lang.Integer.MAX_VALUE, primarySource);
         case -709624112: /*attestation*/  return new Property("attestation", "", "Information about the entity attesting to information.", 0, 1, attestation);
         case -1109783726: /*validator*/  return new Property("validator", "", "Information about the entity validating information.", 0, java.lang.Integer.MAX_VALUE, validator);
@@ -3277,15 +2557,15 @@ public class VerificationResult extends DomainResource {
         switch (hash) {
         case -880905839: /*target*/ return this.target == null ? new Base[0] : this.target.toArray(new Base[this.target.size()]); // Reference
         case 308958310: /*targetLocation*/ return this.targetLocation == null ? new Base[0] : this.targetLocation.toArray(new Base[this.targetLocation.size()]); // StringType
-        case 3377302: /*need*/ return this.need == null ? new Base[0] : new Base[] {this.need}; // Enumeration<Need>
+        case 3377302: /*need*/ return this.need == null ? new Base[0] : new Base[] {this.need}; // CodeableConcept
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<Status>
         case 247524032: /*statusDate*/ return this.statusDate == null ? new Base[0] : new Base[] {this.statusDate}; // DateTimeType
-        case -279681197: /*validationType*/ return this.validationType == null ? new Base[0] : new Base[] {this.validationType}; // Enumeration<ValidationType>
+        case -279681197: /*validationType*/ return this.validationType == null ? new Base[0] : new Base[] {this.validationType}; // CodeableConcept
         case 797680566: /*validationProcess*/ return this.validationProcess == null ? new Base[0] : this.validationProcess.toArray(new Base[this.validationProcess.size()]); // CodeableConcept
         case -70023844: /*frequency*/ return this.frequency == null ? new Base[0] : new Base[] {this.frequency}; // Timing
         case -1313229366: /*lastPerformed*/ return this.lastPerformed == null ? new Base[0] : new Base[] {this.lastPerformed}; // DateTimeType
         case 1874589434: /*nextScheduled*/ return this.nextScheduled == null ? new Base[0] : new Base[] {this.nextScheduled}; // DateType
-        case 1816382560: /*failureAction*/ return this.failureAction == null ? new Base[0] : new Base[] {this.failureAction}; // Enumeration<FailureAction>
+        case 1816382560: /*failureAction*/ return this.failureAction == null ? new Base[0] : new Base[] {this.failureAction}; // CodeableConcept
         case -528721731: /*primarySource*/ return this.primarySource == null ? new Base[0] : this.primarySource.toArray(new Base[this.primarySource.size()]); // VerificationResultPrimarySourceComponent
         case -709624112: /*attestation*/ return this.attestation == null ? new Base[0] : new Base[] {this.attestation}; // VerificationResultAttestationComponent
         case -1109783726: /*validator*/ return this.validator == null ? new Base[0] : this.validator.toArray(new Base[this.validator.size()]); // VerificationResultValidatorComponent
@@ -3304,8 +2584,7 @@ public class VerificationResult extends DomainResource {
           this.getTargetLocation().add(castToString(value)); // StringType
           return value;
         case 3377302: // need
-          value = new NeedEnumFactory().fromType(castToCode(value));
-          this.need = (Enumeration) value; // Enumeration<Need>
+          this.need = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -892481550: // status
           value = new StatusEnumFactory().fromType(castToCode(value));
@@ -3315,8 +2594,7 @@ public class VerificationResult extends DomainResource {
           this.statusDate = castToDateTime(value); // DateTimeType
           return value;
         case -279681197: // validationType
-          value = new ValidationTypeEnumFactory().fromType(castToCode(value));
-          this.validationType = (Enumeration) value; // Enumeration<ValidationType>
+          this.validationType = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 797680566: // validationProcess
           this.getValidationProcess().add(castToCodeableConcept(value)); // CodeableConcept
@@ -3331,8 +2609,7 @@ public class VerificationResult extends DomainResource {
           this.nextScheduled = castToDate(value); // DateType
           return value;
         case 1816382560: // failureAction
-          value = new FailureActionEnumFactory().fromType(castToCode(value));
-          this.failureAction = (Enumeration) value; // Enumeration<FailureAction>
+          this.failureAction = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -528721731: // primarySource
           this.getPrimarySource().add((VerificationResultPrimarySourceComponent) value); // VerificationResultPrimarySourceComponent
@@ -3355,16 +2632,14 @@ public class VerificationResult extends DomainResource {
         } else if (name.equals("targetLocation")) {
           this.getTargetLocation().add(castToString(value));
         } else if (name.equals("need")) {
-          value = new NeedEnumFactory().fromType(castToCode(value));
-          this.need = (Enumeration) value; // Enumeration<Need>
+          this.need = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("status")) {
           value = new StatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<Status>
         } else if (name.equals("statusDate")) {
           this.statusDate = castToDateTime(value); // DateTimeType
         } else if (name.equals("validationType")) {
-          value = new ValidationTypeEnumFactory().fromType(castToCode(value));
-          this.validationType = (Enumeration) value; // Enumeration<ValidationType>
+          this.validationType = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("validationProcess")) {
           this.getValidationProcess().add(castToCodeableConcept(value));
         } else if (name.equals("frequency")) {
@@ -3374,8 +2649,7 @@ public class VerificationResult extends DomainResource {
         } else if (name.equals("nextScheduled")) {
           this.nextScheduled = castToDate(value); // DateType
         } else if (name.equals("failureAction")) {
-          value = new FailureActionEnumFactory().fromType(castToCode(value));
-          this.failureAction = (Enumeration) value; // Enumeration<FailureAction>
+          this.failureAction = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("primarySource")) {
           this.getPrimarySource().add((VerificationResultPrimarySourceComponent) value);
         } else if (name.equals("attestation")) {
@@ -3392,15 +2666,15 @@ public class VerificationResult extends DomainResource {
         switch (hash) {
         case -880905839:  return addTarget(); 
         case 308958310:  return addTargetLocationElement();
-        case 3377302:  return getNeedElement();
+        case 3377302:  return getNeed(); 
         case -892481550:  return getStatusElement();
         case 247524032:  return getStatusDateElement();
-        case -279681197:  return getValidationTypeElement();
+        case -279681197:  return getValidationType(); 
         case 797680566:  return addValidationProcess(); 
         case -70023844:  return getFrequency(); 
         case -1313229366:  return getLastPerformedElement();
         case 1874589434:  return getNextScheduledElement();
-        case 1816382560:  return getFailureActionElement();
+        case 1816382560:  return getFailureAction(); 
         case -528721731:  return addPrimarySource(); 
         case -709624112:  return getAttestation(); 
         case -1109783726:  return addValidator(); 
@@ -3414,15 +2688,15 @@ public class VerificationResult extends DomainResource {
         switch (hash) {
         case -880905839: /*target*/ return new String[] {"Reference"};
         case 308958310: /*targetLocation*/ return new String[] {"string"};
-        case 3377302: /*need*/ return new String[] {"code"};
+        case 3377302: /*need*/ return new String[] {"CodeableConcept"};
         case -892481550: /*status*/ return new String[] {"code"};
         case 247524032: /*statusDate*/ return new String[] {"dateTime"};
-        case -279681197: /*validationType*/ return new String[] {"code"};
+        case -279681197: /*validationType*/ return new String[] {"CodeableConcept"};
         case 797680566: /*validationProcess*/ return new String[] {"CodeableConcept"};
         case -70023844: /*frequency*/ return new String[] {"Timing"};
         case -1313229366: /*lastPerformed*/ return new String[] {"dateTime"};
         case 1874589434: /*nextScheduled*/ return new String[] {"date"};
-        case 1816382560: /*failureAction*/ return new String[] {"code"};
+        case 1816382560: /*failureAction*/ return new String[] {"CodeableConcept"};
         case -528721731: /*primarySource*/ return new String[] {};
         case -709624112: /*attestation*/ return new String[] {};
         case -1109783726: /*validator*/ return new String[] {};
@@ -3440,7 +2714,8 @@ public class VerificationResult extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.targetLocation");
         }
         else if (name.equals("need")) {
-          throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.need");
+          this.need = new CodeableConcept();
+          return this.need;
         }
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.status");
@@ -3449,7 +2724,8 @@ public class VerificationResult extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.statusDate");
         }
         else if (name.equals("validationType")) {
-          throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.validationType");
+          this.validationType = new CodeableConcept();
+          return this.validationType;
         }
         else if (name.equals("validationProcess")) {
           return addValidationProcess();
@@ -3465,7 +2741,8 @@ public class VerificationResult extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.nextScheduled");
         }
         else if (name.equals("failureAction")) {
-          throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.failureAction");
+          this.failureAction = new CodeableConcept();
+          return this.failureAction;
         }
         else if (name.equals("primarySource")) {
           return addPrimarySource();
@@ -3553,10 +2830,9 @@ public class VerificationResult extends DomainResource {
         if (!(other_ instanceof VerificationResult))
           return false;
         VerificationResult o = (VerificationResult) other_;
-        return compareValues(targetLocation, o.targetLocation, true) && compareValues(need, o.need, true) && compareValues(status, o.status, true)
-           && compareValues(statusDate, o.statusDate, true) && compareValues(validationType, o.validationType, true)
-           && compareValues(lastPerformed, o.lastPerformed, true) && compareValues(nextScheduled, o.nextScheduled, true)
-           && compareValues(failureAction, o.failureAction, true);
+        return compareValues(targetLocation, o.targetLocation, true) && compareValues(status, o.status, true)
+           && compareValues(statusDate, o.statusDate, true) && compareValues(lastPerformed, o.lastPerformed, true)
+           && compareValues(nextScheduled, o.nextScheduled, true);
       }
 
       public boolean isEmpty() {

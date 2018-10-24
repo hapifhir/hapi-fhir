@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+@SuppressWarnings("Duplicates")
 public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -204,10 +205,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		validator.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = validator.validateWithResult(theResult);
 
-		if (!result.isSuccessful()) {
-			ourLog.info(parser.encodeResourceToString(result.toOperationOutcome()));
-			fail(parser.encodeResourceToString(result.toOperationOutcome()));
-		}
+		assertEquals(1, result.getMessages().size());
+		assertThat(result.getMessages().get(0).getMessage(), containsString("dom-6: A resource should have narrative for robust management"));
+
 	}
 
 	@Test
@@ -1150,7 +1150,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		IIdType idIn1 = myAuditEventDao.create(aeIn1, mySrd).getId().toUnqualifiedVersionless();
 
 		AuditEvent aeIn2 = new AuditEvent();
-		aeIn2.getType().setSystem("http://hl7.org/fhir/audit-event-type").setCode("rest");
+		aeIn2.getType().setSystem("http://terminology.hl7.org/CodeSystem/audit-event-type").setCode("rest");
 		IIdType idIn2 = myAuditEventDao.create(aeIn2, mySrd).getId().toUnqualifiedVersionless();
 
 		AuditEvent aeOut1 = new AuditEvent();
@@ -1223,7 +1223,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		// Now let's update 
 		valueSet = new ValueSet();
 		valueSet.setId(vsid);
-		valueSet.getCompose().addInclude().setSystem("http://hl7.org/fhir/v3/MaritalStatus").addConcept().setCode("A");
+		valueSet.getCompose().addInclude().setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus").addConcept().setCode("A");
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		myValueSetDao.update(valueSet, mySrd).getId().toUnqualifiedVersionless();
 

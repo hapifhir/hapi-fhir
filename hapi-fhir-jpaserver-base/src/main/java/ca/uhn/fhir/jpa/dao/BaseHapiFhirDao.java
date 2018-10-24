@@ -228,6 +228,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	protected ExpungeOutcome doExpunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId, theVersion, theExpungeOptions);
 
 		if (!getConfig().isExpungeEnabled()) {
 			throw new MethodNotAllowedException("$expunge is not enabled on this server");
@@ -249,19 +250,30 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			Pageable page = PageRequest.of(0, remainingCount.get());
 			Slice<Long> resourceIds = txTemplate.execute(t -> {
 				if (theResourceId != null) {
-					return myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, theResourceName);
+					Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, theResourceName);
+					ourLog.info("Expunging {} deleted resources of type[{}] and ID[{}]", ids.getNumberOfElements(), theResourceName, theResourceId);
+					return ids;
 				} else {
 					if (theResourceName != null) {
-						return myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
+						Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
+						ourLog.info("Expunging {} deleted resources of type[{}]", ids.getNumberOfElements(), theResourceName);
+						return ids;
 					} else {
-						return myResourceTableDao.findIdsOfDeletedResources(page);
+						Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResources(page);
+						ourLog.info("Expunging {} deleted resources (all types)", ids.getNumberOfElements(), theResourceName);
+						return ids;
 					}
 				}
 			});
+
+			/*
+			 * Delete historical versions
+			 */
 			for (Long next : resourceIds) {
 				txTemplate.execute(t -> {
 					expungeHistoricalVersionsOfId(next, remainingCount);
 					if (remainingCount.get() <= 0) {
+						ourLog.debug("Expunge limit has been hit - Stopping operation");
 						return toExpungeOutcome(theExpungeOptions, remainingCount);
 					}
 					return null;
@@ -273,10 +285,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			 */
 			for (Long next : resourceIds) {
 				txTemplate.execute(t -> {
-					expungeCurrentVersionOfResource(next);
-					if (remainingCount.get() <= 0) {
-						return toExpungeOutcome(theExpungeOptions, remainingCount);
-					}
+					expungeCurrentVersionOfResource(next, remainingCount);
 					return null;
 				});
 			}
@@ -384,13 +393,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		ourLog.info("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
 	}
 
-	private void expungeCurrentVersionOfResource(Long theResourceId) {
+	private void expungeCurrentVersionOfResource(Long theResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
-		expungeHistoricalVersion(currentVersion.getId());
+		if (currentVersion != null) {
+			expungeHistoricalVersion(currentVersion.getId());
+		}
 
-		ourLog.info("Deleting current version of resource {}", resource.getIdDt().getValue());
+		ourLog.info("Expunging current version of resource {}", resource.getIdDt().getValue());
 
 		myResourceIndexedSearchParamUriDao.deleteAll(resource.getParamsUri());
 		myResourceIndexedSearchParamCoordsDao.deleteAll(resource.getParamsCoords());
@@ -412,6 +423,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		myResourceTableDao.delete(resource);
 
+		theRemainingCount.decrementAndGet();
 	}
 
 	protected void expungeHistoricalVersion(Long theNextVersionId) {
@@ -425,9 +437,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected void expungeHistoricalVersionsOfId(Long theResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalArgumentException::new);
 
-		Pageable page = new PageRequest(0, theRemainingCount.get());
+		Pageable page = PageRequest.of(0, theRemainingCount.get());
 
 		Slice<Long> versionIds = myResourceHistoryTableDao.findForResourceId(page, resource.getId(), resource.getVersion());
+		ourLog.debug("Found {} versions of resource {} to expunge", versionIds.getNumberOfElements(), resource.getIdDt().getValue());
 		for (Long nextVersionId : versionIds) {
 			expungeHistoricalVersion(nextVersionId);
 			if (theRemainingCount.decrementAndGet() <= 0) {
@@ -1079,6 +1092,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		String resourceName = defaultIfBlank(theResourceName, null);
 
 		Search search = new Search();
+		search.setDeleted(false);
 		search.setCreated(new Date());
 		search.setSearchLastReturned(new Date());
 		search.setLastUpdated(theSince, theUntil);
@@ -1747,10 +1761,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		Validate.notNull(theEntity);
-		Validate.isTrue(theDeletedTimestampOrNull != null || theResource != null, "Must have either a resource[{}] or a deleted timestamp[{}] for resource PID[{}]", theDeletedTimestampOrNull != null, theResource != null, theEntity.getId());
+		Validate.isTrue(theDeletedTimestampOrNull != null || theResource != null, "Must have either a resource[%s] or a deleted timestamp[%s] for resource PID[%s]", theDeletedTimestampOrNull != null, theResource != null, theEntity.getId());
 
 		ourLog.debug("Starting entity update");
-
 
 		/*
 		 * This should be the very first thing..
@@ -2337,7 +2350,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			IResource res = (IResource) theResource;
 			TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(res);
 			if (tagList != null) {
-				tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+				tag = tagList.getTag(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
 				totalMetaCount += tagList.size();
 			}
 			List<IdDt> profileList = ResourceMetadataKeyEnum.PROFILES.get(res);
@@ -2346,7 +2359,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 		} else {
 			IAnyResource res = (IAnyResource) theResource;
-			tag = res.getMeta().getTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+			tag = res.getMeta().getTag(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
 			totalMetaCount += res.getMeta().getTag().size();
 			totalMetaCount += res.getMeta().getProfile().size();
 			totalMetaCount += res.getMeta().getSecurity().size();

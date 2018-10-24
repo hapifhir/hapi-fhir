@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -43,6 +43,8 @@ public class ExpressionLanguageEnumFactory implements EnumFactory<ExpressionLang
       return ExpressionLanguage.TEXT_CQL;
     if ("text/fhirpath".equals(codeString))
       return ExpressionLanguage.TEXT_FHIRPATH;
+    if ("application/x-fhir-query".equals(codeString))
+      return ExpressionLanguage.APPLICATION_XFHIRQUERY;
     throw new IllegalArgumentException("Unknown ExpressionLanguage code '"+codeString+"'");
   }
 
@@ -51,6 +53,8 @@ public class ExpressionLanguageEnumFactory implements EnumFactory<ExpressionLang
       return "text/cql";
     if (code == ExpressionLanguage.TEXT_FHIRPATH)
       return "text/fhirpath";
+    if (code == ExpressionLanguage.APPLICATION_XFHIRQUERY)
+      return "application/x-fhir-query";
     return "?";
   }
 

@@ -67,20 +67,23 @@ public class ValueSetUtilities {
     
     if (wg != null) {
       if (!ToolingExtensions.hasExtension(vs, ToolingExtensions.EXT_WORKGROUP) || 
-          (Utilities.existsInList(ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_WORKGROUP), "fhir", "vocab") && !Utilities.existsInList(wg, "fhir", "vocab"))) {
+          (!Utilities.existsInList(ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_WORKGROUP), "fhir", "vocab") && Utilities.existsInList(wg, "fhir", "vocab"))) {
         ToolingExtensions.setCodeExtension(vs, ToolingExtensions.EXT_WORKGROUP, wg);
       }
     }
     if (status != null) {
-      StandardsStatus ss = StandardsStatus.fromCode(ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_BALLOT_STATUS));
+      StandardsStatus ss = ToolingExtensions.getStandardsStatus(vs);
       if (ss == null || ss.isLowerThan(status)) 
-        ToolingExtensions.setStringExtension(vs, ToolingExtensions.EXT_BALLOT_STATUS, status.toDisplay());
+        ToolingExtensions.setStandardsStatus(vs, status);
       if (pckage != null) {
         if (!vs.hasUserData("ballot.package"))        
           vs.setUserData("ballot.package", pckage);
         else if (!pckage.equals(vs.getUserString("ballot.package")))
-          System.out.println("Code System "+vs.getUrl()+": ownership clash "+pckage+" vs "+vs.getUserString("ballot.package"));
+          if (!"infrastructure".equals(vs.getUserString("ballot.package")))
+          System.out.println("Value Set "+vs.getUrl()+": ownership clash "+pckage+" vs "+vs.getUserString("ballot.package"));
       }
+      if (ss == StandardsStatus.NORMATIVE)
+        vs.setExperimental(false);
     }
     if (fmm != null) {
       String sfmm = ToolingExtensions.readStringExtension(vs, ToolingExtensions.EXT_FMM_LEVEL);

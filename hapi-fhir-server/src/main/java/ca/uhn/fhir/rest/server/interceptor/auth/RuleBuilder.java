@@ -223,7 +223,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleTransaction transaction() {
-			myRuleOp = RuleOpEnum.TRANSACTION;
 			return new RuleBuilderRuleTransaction();
 		}
 
@@ -520,9 +519,10 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 				@Override
 				public IAuthRuleBuilderRuleOpClassifierFinished andApplyNormalRules() {
+					// Allow transaction
 					RuleImplOp rule = new RuleImplOp(myRuleName);
 					rule.setMode(myRuleMode);
-					rule.setOp(myRuleOp);
+					rule.setOp(RuleOpEnum.TRANSACTION);
 					rule.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
 					myRules.add(rule);
 					return new RuleBuilderFinished(rule);

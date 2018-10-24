@@ -166,7 +166,6 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
       return value;
     default: return super.setProperty(hash, name, value);
     }
-
   }
 
   @Override
@@ -196,4 +195,11 @@ public abstract class PrimitiveType<T> extends Type implements IPrimitiveType<T>
 
   }
 
+  /*
+   * this is a work around for representation issues with Bigdecimal. So comments in DecimaType. 
+   * Yes, you can cut yourself with this method... 
+   */
+  protected void forceStringValue(String value) {
+    myStringValue = value;
+  }
 }

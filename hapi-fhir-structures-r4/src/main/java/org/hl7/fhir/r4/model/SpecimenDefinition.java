@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,16 +45,16 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A kind of specimen with associated set of requirements.
  */
-@ResourceDef(name="SpecimenDefinition", profile="http://hl7.org/fhir/Profile/SpecimenDefinition")
+@ResourceDef(name="SpecimenDefinition", profile="http://hl7.org/fhir/StructureDefinition/SpecimenDefinition")
 public class SpecimenDefinition extends DomainResource {
 
     public enum SpecimenContainedPreference {
         /**
-         * This type of contained specimen is preferred to collect this kind of specimen
+         * This type of contained specimen is preferred to collect this kind of specimen.
          */
         PREFERRED, 
         /**
-         * This type of conditioned specimen is an alternate
+         * This type of conditioned specimen is an alternate.
          */
         ALTERNATE, 
         /**
@@ -89,8 +89,8 @@ public class SpecimenDefinition extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PREFERRED: return "This type of contained specimen is preferred to collect this kind of specimen";
-            case ALTERNATE: return "This type of conditioned specimen is an alternate";
+            case PREFERRED: return "This type of contained specimen is preferred to collect this kind of specimen.";
+            case ALTERNATE: return "This type of conditioned specimen is an alternate.";
             default: return "?";
           }
         }
@@ -141,7 +141,7 @@ public class SpecimenDefinition extends DomainResource {
     }
 
     @Block()
-    public static class SpecimenDefinitionSpecimenToLabComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SpecimenDefinitionTypeTestedComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Primary of secondary specimen.
          */
@@ -154,7 +154,7 @@ public class SpecimenDefinition extends DomainResource {
          */
         @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Type of intended specimen", formalDefinition="The kind of specimen conditioned for testing expected by lab." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0487")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v2-0487")
         protected CodeableConcept type;
 
         /**
@@ -166,105 +166,54 @@ public class SpecimenDefinition extends DomainResource {
         protected Enumeration<SpecimenContainedPreference> preference;
 
         /**
-         * The type of material of the container.
+         * The specimen's container.
          */
-        @Child(name = "containerMaterial", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Container material", formalDefinition="The type of material of the container." )
-        protected CodeableConcept containerMaterial;
-
-        /**
-         * The type of container used to contain this kind of specimen.
-         */
-        @Child(name = "containerType", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Kind of container associated with the kind of specimen", formalDefinition="The type of container used to contain this kind of specimen." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/specimen-container-type")
-        protected CodeableConcept containerType;
-
-        /**
-         * Color of container cap.
-         */
-        @Child(name = "containerCap", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Color of container cap", formalDefinition="Color of container cap." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/container-cap")
-        protected CodeableConcept containerCap;
-
-        /**
-         * The textual description of the kind of container.
-         */
-        @Child(name = "containerDescription", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Container description", formalDefinition="The textual description of the kind of container." )
-        protected StringType containerDescription;
-
-        /**
-         * The capacity (volume or other measure) of this kind of container.
-         */
-        @Child(name = "containerCapacity", type = {SimpleQuantity.class}, order=8, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Container capacity", formalDefinition="The capacity (volume or other measure) of this kind of container." )
-        protected SimpleQuantity containerCapacity;
-
-        /**
-         * The minimum volume to be conditioned in the container.
-         */
-        @Child(name = "containerMinimumVolume", type = {SimpleQuantity.class}, order=9, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Minimum volume", formalDefinition="The minimum volume to be conditioned in the container." )
-        protected SimpleQuantity containerMinimumVolume;
-
-        /**
-         * Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.
-         */
-        @Child(name = "containerAdditive", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Additive associated with container", formalDefinition="Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA." )
-        protected List<SpecimenDefinitionSpecimenToLabContainerAdditiveComponent> containerAdditive;
-
-        /**
-         * Special processing that should be applied to the container for this kind of specimen.
-         */
-        @Child(name = "containerPreparation", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Specimen container preparation", formalDefinition="Special processing that should be applied to the container for this kind of specimen." )
-        protected StringType containerPreparation;
+        @Child(name = "container", type = {}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The specimen's container", formalDefinition="The specimen's container." )
+        protected SpecimenDefinitionTypeTestedContainerComponent container;
 
         /**
          * Requirements for delivery and special handling of this kind of conditioned specimen.
          */
-        @Child(name = "requirement", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "requirement", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Specimen requirements", formalDefinition="Requirements for delivery and special handling of this kind of conditioned specimen." )
         protected StringType requirement;
 
         /**
          * The usual time that a specimen of this kind is retained after the ordered tests are completed, for the purpose of additional testing.
          */
-        @Child(name = "retentionTime", type = {Duration.class}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "retentionTime", type = {Duration.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Specimen retention time", formalDefinition="The usual time that a specimen of this kind is retained after the ordered tests are completed, for the purpose of additional testing." )
         protected Duration retentionTime;
 
         /**
          * Criterion for rejection of the specimen in its container by the laboratory.
          */
-        @Child(name = "rejectionCriterion", type = {CodeableConcept.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "rejectionCriterion", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Rejection criterion", formalDefinition="Criterion for rejection of the specimen in its container by the laboratory." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/rejection-criteria")
         protected List<CodeableConcept> rejectionCriterion;
 
         /**
-         * Set of instructions for conservation/transport of the specimen at a defined temperature interval, prior the testing process.
+         * Set of instructions for preservation/transport of the specimen at a defined temperature interval, prior the testing process.
          */
-        @Child(name = "handling", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Specimen handling before testing", formalDefinition="Set of instructions for conservation/transport of the specimen at a defined temperature interval, prior the testing process." )
-        protected List<SpecimenDefinitionSpecimenToLabHandlingComponent> handling;
+        @Child(name = "handling", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Specimen handling before testing", formalDefinition="Set of instructions for preservation/transport of the specimen at a defined temperature interval, prior the testing process." )
+        protected List<SpecimenDefinitionTypeTestedHandlingComponent> handling;
 
-        private static final long serialVersionUID = -239351274L;
+        private static final long serialVersionUID = 308313920L;
 
     /**
      * Constructor
      */
-      public SpecimenDefinitionSpecimenToLabComponent() {
+      public SpecimenDefinitionTypeTestedComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public SpecimenDefinitionSpecimenToLabComponent(BooleanType isDerived, Enumeration<SpecimenContainedPreference> preference) {
+      public SpecimenDefinitionTypeTestedComponent(BooleanType isDerived, Enumeration<SpecimenContainedPreference> preference) {
         super();
         this.isDerived = isDerived;
         this.preference = preference;
@@ -276,7 +225,7 @@ public class SpecimenDefinition extends DomainResource {
         public BooleanType getIsDerivedElement() { 
           if (this.isDerived == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.isDerived");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedComponent.isDerived");
             else if (Configuration.doAutoCreate())
               this.isDerived = new BooleanType(); // bb
           return this.isDerived;
@@ -293,7 +242,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value {@link #isDerived} (Primary of secondary specimen.). This is the underlying object with id, value and extensions. The accessor "getIsDerived" gives direct access to the value
          */
-        public SpecimenDefinitionSpecimenToLabComponent setIsDerivedElement(BooleanType value) { 
+        public SpecimenDefinitionTypeTestedComponent setIsDerivedElement(BooleanType value) { 
           this.isDerived = value;
           return this;
         }
@@ -308,7 +257,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value Primary of secondary specimen.
          */
-        public SpecimenDefinitionSpecimenToLabComponent setIsDerived(boolean value) { 
+        public SpecimenDefinitionTypeTestedComponent setIsDerived(boolean value) { 
             if (this.isDerived == null)
               this.isDerived = new BooleanType();
             this.isDerived.setValue(value);
@@ -321,7 +270,7 @@ public class SpecimenDefinition extends DomainResource {
         public CodeableConcept getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.type");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new CodeableConcept(); // cc
           return this.type;
@@ -334,7 +283,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value {@link #type} (The kind of specimen conditioned for testing expected by lab.)
          */
-        public SpecimenDefinitionSpecimenToLabComponent setType(CodeableConcept value) { 
+        public SpecimenDefinitionTypeTestedComponent setType(CodeableConcept value) { 
           this.type = value;
           return this;
         }
@@ -345,7 +294,7 @@ public class SpecimenDefinition extends DomainResource {
         public Enumeration<SpecimenContainedPreference> getPreferenceElement() { 
           if (this.preference == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.preference");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedComponent.preference");
             else if (Configuration.doAutoCreate())
               this.preference = new Enumeration<SpecimenContainedPreference>(new SpecimenContainedPreferenceEnumFactory()); // bb
           return this.preference;
@@ -362,7 +311,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value {@link #preference} (The preference for this type of conditioned specimen.). This is the underlying object with id, value and extensions. The accessor "getPreference" gives direct access to the value
          */
-        public SpecimenDefinitionSpecimenToLabComponent setPreferenceElement(Enumeration<SpecimenContainedPreference> value) { 
+        public SpecimenDefinitionTypeTestedComponent setPreferenceElement(Enumeration<SpecimenContainedPreference> value) { 
           this.preference = value;
           return this;
         }
@@ -377,7 +326,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value The preference for this type of conditioned specimen.
          */
-        public SpecimenDefinitionSpecimenToLabComponent setPreference(SpecimenContainedPreference value) { 
+        public SpecimenDefinitionTypeTestedComponent setPreference(SpecimenContainedPreference value) { 
             if (this.preference == null)
               this.preference = new Enumeration<SpecimenContainedPreference>(new SpecimenContainedPreferenceEnumFactory());
             this.preference.setValue(value);
@@ -385,273 +334,26 @@ public class SpecimenDefinition extends DomainResource {
         }
 
         /**
-         * @return {@link #containerMaterial} (The type of material of the container.)
+         * @return {@link #container} (The specimen's container.)
          */
-        public CodeableConcept getContainerMaterial() { 
-          if (this.containerMaterial == null)
+        public SpecimenDefinitionTypeTestedContainerComponent getContainer() { 
+          if (this.container == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.containerMaterial");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedComponent.container");
             else if (Configuration.doAutoCreate())
-              this.containerMaterial = new CodeableConcept(); // cc
-          return this.containerMaterial;
+              this.container = new SpecimenDefinitionTypeTestedContainerComponent(); // cc
+          return this.container;
         }
 
-        public boolean hasContainerMaterial() { 
-          return this.containerMaterial != null && !this.containerMaterial.isEmpty();
-        }
-
-        /**
-         * @param value {@link #containerMaterial} (The type of material of the container.)
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerMaterial(CodeableConcept value) { 
-          this.containerMaterial = value;
-          return this;
+        public boolean hasContainer() { 
+          return this.container != null && !this.container.isEmpty();
         }
 
         /**
-         * @return {@link #containerType} (The type of container used to contain this kind of specimen.)
+         * @param value {@link #container} (The specimen's container.)
          */
-        public CodeableConcept getContainerType() { 
-          if (this.containerType == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.containerType");
-            else if (Configuration.doAutoCreate())
-              this.containerType = new CodeableConcept(); // cc
-          return this.containerType;
-        }
-
-        public boolean hasContainerType() { 
-          return this.containerType != null && !this.containerType.isEmpty();
-        }
-
-        /**
-         * @param value {@link #containerType} (The type of container used to contain this kind of specimen.)
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerType(CodeableConcept value) { 
-          this.containerType = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #containerCap} (Color of container cap.)
-         */
-        public CodeableConcept getContainerCap() { 
-          if (this.containerCap == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.containerCap");
-            else if (Configuration.doAutoCreate())
-              this.containerCap = new CodeableConcept(); // cc
-          return this.containerCap;
-        }
-
-        public boolean hasContainerCap() { 
-          return this.containerCap != null && !this.containerCap.isEmpty();
-        }
-
-        /**
-         * @param value {@link #containerCap} (Color of container cap.)
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerCap(CodeableConcept value) { 
-          this.containerCap = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #containerDescription} (The textual description of the kind of container.). This is the underlying object with id, value and extensions. The accessor "getContainerDescription" gives direct access to the value
-         */
-        public StringType getContainerDescriptionElement() { 
-          if (this.containerDescription == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.containerDescription");
-            else if (Configuration.doAutoCreate())
-              this.containerDescription = new StringType(); // bb
-          return this.containerDescription;
-        }
-
-        public boolean hasContainerDescriptionElement() { 
-          return this.containerDescription != null && !this.containerDescription.isEmpty();
-        }
-
-        public boolean hasContainerDescription() { 
-          return this.containerDescription != null && !this.containerDescription.isEmpty();
-        }
-
-        /**
-         * @param value {@link #containerDescription} (The textual description of the kind of container.). This is the underlying object with id, value and extensions. The accessor "getContainerDescription" gives direct access to the value
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerDescriptionElement(StringType value) { 
-          this.containerDescription = value;
-          return this;
-        }
-
-        /**
-         * @return The textual description of the kind of container.
-         */
-        public String getContainerDescription() { 
-          return this.containerDescription == null ? null : this.containerDescription.getValue();
-        }
-
-        /**
-         * @param value The textual description of the kind of container.
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerDescription(String value) { 
-          if (Utilities.noString(value))
-            this.containerDescription = null;
-          else {
-            if (this.containerDescription == null)
-              this.containerDescription = new StringType();
-            this.containerDescription.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #containerCapacity} (The capacity (volume or other measure) of this kind of container.)
-         */
-        public SimpleQuantity getContainerCapacity() { 
-          if (this.containerCapacity == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.containerCapacity");
-            else if (Configuration.doAutoCreate())
-              this.containerCapacity = new SimpleQuantity(); // cc
-          return this.containerCapacity;
-        }
-
-        public boolean hasContainerCapacity() { 
-          return this.containerCapacity != null && !this.containerCapacity.isEmpty();
-        }
-
-        /**
-         * @param value {@link #containerCapacity} (The capacity (volume or other measure) of this kind of container.)
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerCapacity(SimpleQuantity value) { 
-          this.containerCapacity = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #containerMinimumVolume} (The minimum volume to be conditioned in the container.)
-         */
-        public SimpleQuantity getContainerMinimumVolume() { 
-          if (this.containerMinimumVolume == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.containerMinimumVolume");
-            else if (Configuration.doAutoCreate())
-              this.containerMinimumVolume = new SimpleQuantity(); // cc
-          return this.containerMinimumVolume;
-        }
-
-        public boolean hasContainerMinimumVolume() { 
-          return this.containerMinimumVolume != null && !this.containerMinimumVolume.isEmpty();
-        }
-
-        /**
-         * @param value {@link #containerMinimumVolume} (The minimum volume to be conditioned in the container.)
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerMinimumVolume(SimpleQuantity value) { 
-          this.containerMinimumVolume = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #containerAdditive} (Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
-         */
-        public List<SpecimenDefinitionSpecimenToLabContainerAdditiveComponent> getContainerAdditive() { 
-          if (this.containerAdditive == null)
-            this.containerAdditive = new ArrayList<SpecimenDefinitionSpecimenToLabContainerAdditiveComponent>();
-          return this.containerAdditive;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerAdditive(List<SpecimenDefinitionSpecimenToLabContainerAdditiveComponent> theContainerAdditive) { 
-          this.containerAdditive = theContainerAdditive;
-          return this;
-        }
-
-        public boolean hasContainerAdditive() { 
-          if (this.containerAdditive == null)
-            return false;
-          for (SpecimenDefinitionSpecimenToLabContainerAdditiveComponent item : this.containerAdditive)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public SpecimenDefinitionSpecimenToLabContainerAdditiveComponent addContainerAdditive() { //3
-          SpecimenDefinitionSpecimenToLabContainerAdditiveComponent t = new SpecimenDefinitionSpecimenToLabContainerAdditiveComponent();
-          if (this.containerAdditive == null)
-            this.containerAdditive = new ArrayList<SpecimenDefinitionSpecimenToLabContainerAdditiveComponent>();
-          this.containerAdditive.add(t);
-          return t;
-        }
-
-        public SpecimenDefinitionSpecimenToLabComponent addContainerAdditive(SpecimenDefinitionSpecimenToLabContainerAdditiveComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.containerAdditive == null)
-            this.containerAdditive = new ArrayList<SpecimenDefinitionSpecimenToLabContainerAdditiveComponent>();
-          this.containerAdditive.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #containerAdditive}, creating it if it does not already exist
-         */
-        public SpecimenDefinitionSpecimenToLabContainerAdditiveComponent getContainerAdditiveFirstRep() { 
-          if (getContainerAdditive().isEmpty()) {
-            addContainerAdditive();
-          }
-          return getContainerAdditive().get(0);
-        }
-
-        /**
-         * @return {@link #containerPreparation} (Special processing that should be applied to the container for this kind of specimen.). This is the underlying object with id, value and extensions. The accessor "getContainerPreparation" gives direct access to the value
-         */
-        public StringType getContainerPreparationElement() { 
-          if (this.containerPreparation == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.containerPreparation");
-            else if (Configuration.doAutoCreate())
-              this.containerPreparation = new StringType(); // bb
-          return this.containerPreparation;
-        }
-
-        public boolean hasContainerPreparationElement() { 
-          return this.containerPreparation != null && !this.containerPreparation.isEmpty();
-        }
-
-        public boolean hasContainerPreparation() { 
-          return this.containerPreparation != null && !this.containerPreparation.isEmpty();
-        }
-
-        /**
-         * @param value {@link #containerPreparation} (Special processing that should be applied to the container for this kind of specimen.). This is the underlying object with id, value and extensions. The accessor "getContainerPreparation" gives direct access to the value
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerPreparationElement(StringType value) { 
-          this.containerPreparation = value;
-          return this;
-        }
-
-        /**
-         * @return Special processing that should be applied to the container for this kind of specimen.
-         */
-        public String getContainerPreparation() { 
-          return this.containerPreparation == null ? null : this.containerPreparation.getValue();
-        }
-
-        /**
-         * @param value Special processing that should be applied to the container for this kind of specimen.
-         */
-        public SpecimenDefinitionSpecimenToLabComponent setContainerPreparation(String value) { 
-          if (Utilities.noString(value))
-            this.containerPreparation = null;
-          else {
-            if (this.containerPreparation == null)
-              this.containerPreparation = new StringType();
-            this.containerPreparation.setValue(value);
-          }
+        public SpecimenDefinitionTypeTestedComponent setContainer(SpecimenDefinitionTypeTestedContainerComponent value) { 
+          this.container = value;
           return this;
         }
 
@@ -661,7 +363,7 @@ public class SpecimenDefinition extends DomainResource {
         public StringType getRequirementElement() { 
           if (this.requirement == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.requirement");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedComponent.requirement");
             else if (Configuration.doAutoCreate())
               this.requirement = new StringType(); // bb
           return this.requirement;
@@ -678,7 +380,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value {@link #requirement} (Requirements for delivery and special handling of this kind of conditioned specimen.). This is the underlying object with id, value and extensions. The accessor "getRequirement" gives direct access to the value
          */
-        public SpecimenDefinitionSpecimenToLabComponent setRequirementElement(StringType value) { 
+        public SpecimenDefinitionTypeTestedComponent setRequirementElement(StringType value) { 
           this.requirement = value;
           return this;
         }
@@ -693,7 +395,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value Requirements for delivery and special handling of this kind of conditioned specimen.
          */
-        public SpecimenDefinitionSpecimenToLabComponent setRequirement(String value) { 
+        public SpecimenDefinitionTypeTestedComponent setRequirement(String value) { 
           if (Utilities.noString(value))
             this.requirement = null;
           else {
@@ -710,7 +412,7 @@ public class SpecimenDefinition extends DomainResource {
         public Duration getRetentionTime() { 
           if (this.retentionTime == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabComponent.retentionTime");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedComponent.retentionTime");
             else if (Configuration.doAutoCreate())
               this.retentionTime = new Duration(); // cc
           return this.retentionTime;
@@ -723,7 +425,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value {@link #retentionTime} (The usual time that a specimen of this kind is retained after the ordered tests are completed, for the purpose of additional testing.)
          */
-        public SpecimenDefinitionSpecimenToLabComponent setRetentionTime(Duration value) { 
+        public SpecimenDefinitionTypeTestedComponent setRetentionTime(Duration value) { 
           this.retentionTime = value;
           return this;
         }
@@ -740,7 +442,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SpecimenDefinitionSpecimenToLabComponent setRejectionCriterion(List<CodeableConcept> theRejectionCriterion) { 
+        public SpecimenDefinitionTypeTestedComponent setRejectionCriterion(List<CodeableConcept> theRejectionCriterion) { 
           this.rejectionCriterion = theRejectionCriterion;
           return this;
         }
@@ -762,7 +464,7 @@ public class SpecimenDefinition extends DomainResource {
           return t;
         }
 
-        public SpecimenDefinitionSpecimenToLabComponent addRejectionCriterion(CodeableConcept t) { //3
+        public SpecimenDefinitionTypeTestedComponent addRejectionCriterion(CodeableConcept t) { //3
           if (t == null)
             return this;
           if (this.rejectionCriterion == null)
@@ -782,18 +484,18 @@ public class SpecimenDefinition extends DomainResource {
         }
 
         /**
-         * @return {@link #handling} (Set of instructions for conservation/transport of the specimen at a defined temperature interval, prior the testing process.)
+         * @return {@link #handling} (Set of instructions for preservation/transport of the specimen at a defined temperature interval, prior the testing process.)
          */
-        public List<SpecimenDefinitionSpecimenToLabHandlingComponent> getHandling() { 
+        public List<SpecimenDefinitionTypeTestedHandlingComponent> getHandling() { 
           if (this.handling == null)
-            this.handling = new ArrayList<SpecimenDefinitionSpecimenToLabHandlingComponent>();
+            this.handling = new ArrayList<SpecimenDefinitionTypeTestedHandlingComponent>();
           return this.handling;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SpecimenDefinitionSpecimenToLabComponent setHandling(List<SpecimenDefinitionSpecimenToLabHandlingComponent> theHandling) { 
+        public SpecimenDefinitionTypeTestedComponent setHandling(List<SpecimenDefinitionTypeTestedHandlingComponent> theHandling) { 
           this.handling = theHandling;
           return this;
         }
@@ -801,25 +503,25 @@ public class SpecimenDefinition extends DomainResource {
         public boolean hasHandling() { 
           if (this.handling == null)
             return false;
-          for (SpecimenDefinitionSpecimenToLabHandlingComponent item : this.handling)
+          for (SpecimenDefinitionTypeTestedHandlingComponent item : this.handling)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public SpecimenDefinitionSpecimenToLabHandlingComponent addHandling() { //3
-          SpecimenDefinitionSpecimenToLabHandlingComponent t = new SpecimenDefinitionSpecimenToLabHandlingComponent();
+        public SpecimenDefinitionTypeTestedHandlingComponent addHandling() { //3
+          SpecimenDefinitionTypeTestedHandlingComponent t = new SpecimenDefinitionTypeTestedHandlingComponent();
           if (this.handling == null)
-            this.handling = new ArrayList<SpecimenDefinitionSpecimenToLabHandlingComponent>();
+            this.handling = new ArrayList<SpecimenDefinitionTypeTestedHandlingComponent>();
           this.handling.add(t);
           return t;
         }
 
-        public SpecimenDefinitionSpecimenToLabComponent addHandling(SpecimenDefinitionSpecimenToLabHandlingComponent t) { //3
+        public SpecimenDefinitionTypeTestedComponent addHandling(SpecimenDefinitionTypeTestedHandlingComponent t) { //3
           if (t == null)
             return this;
           if (this.handling == null)
-            this.handling = new ArrayList<SpecimenDefinitionSpecimenToLabHandlingComponent>();
+            this.handling = new ArrayList<SpecimenDefinitionTypeTestedHandlingComponent>();
           this.handling.add(t);
           return this;
         }
@@ -827,7 +529,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @return The first repetition of repeating field {@link #handling}, creating it if it does not already exist
          */
-        public SpecimenDefinitionSpecimenToLabHandlingComponent getHandlingFirstRep() { 
+        public SpecimenDefinitionTypeTestedHandlingComponent getHandlingFirstRep() { 
           if (getHandling().isEmpty()) {
             addHandling();
           }
@@ -839,18 +541,11 @@ public class SpecimenDefinition extends DomainResource {
           children.add(new Property("isDerived", "boolean", "Primary of secondary specimen.", 0, 1, isDerived));
           children.add(new Property("type", "CodeableConcept", "The kind of specimen conditioned for testing expected by lab.", 0, 1, type));
           children.add(new Property("preference", "code", "The preference for this type of conditioned specimen.", 0, 1, preference));
-          children.add(new Property("containerMaterial", "CodeableConcept", "The type of material of the container.", 0, 1, containerMaterial));
-          children.add(new Property("containerType", "CodeableConcept", "The type of container used to contain this kind of specimen.", 0, 1, containerType));
-          children.add(new Property("containerCap", "CodeableConcept", "Color of container cap.", 0, 1, containerCap));
-          children.add(new Property("containerDescription", "string", "The textual description of the kind of container.", 0, 1, containerDescription));
-          children.add(new Property("containerCapacity", "SimpleQuantity", "The capacity (volume or other measure) of this kind of container.", 0, 1, containerCapacity));
-          children.add(new Property("containerMinimumVolume", "SimpleQuantity", "The minimum volume to be conditioned in the container.", 0, 1, containerMinimumVolume));
-          children.add(new Property("containerAdditive", "", "Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, containerAdditive));
-          children.add(new Property("containerPreparation", "string", "Special processing that should be applied to the container for this kind of specimen.", 0, 1, containerPreparation));
+          children.add(new Property("container", "", "The specimen's container.", 0, 1, container));
           children.add(new Property("requirement", "string", "Requirements for delivery and special handling of this kind of conditioned specimen.", 0, 1, requirement));
           children.add(new Property("retentionTime", "Duration", "The usual time that a specimen of this kind is retained after the ordered tests are completed, for the purpose of additional testing.", 0, 1, retentionTime));
           children.add(new Property("rejectionCriterion", "CodeableConcept", "Criterion for rejection of the specimen in its container by the laboratory.", 0, java.lang.Integer.MAX_VALUE, rejectionCriterion));
-          children.add(new Property("handling", "", "Set of instructions for conservation/transport of the specimen at a defined temperature interval, prior the testing process.", 0, java.lang.Integer.MAX_VALUE, handling));
+          children.add(new Property("handling", "", "Set of instructions for preservation/transport of the specimen at a defined temperature interval, prior the testing process.", 0, java.lang.Integer.MAX_VALUE, handling));
         }
 
         @Override
@@ -859,18 +554,11 @@ public class SpecimenDefinition extends DomainResource {
           case 976346515: /*isDerived*/  return new Property("isDerived", "boolean", "Primary of secondary specimen.", 0, 1, isDerived);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The kind of specimen conditioned for testing expected by lab.", 0, 1, type);
           case -1459831589: /*preference*/  return new Property("preference", "code", "The preference for this type of conditioned specimen.", 0, 1, preference);
-          case -207682360: /*containerMaterial*/  return new Property("containerMaterial", "CodeableConcept", "The type of material of the container.", 0, 1, containerMaterial);
-          case 1966942043: /*containerType*/  return new Property("containerType", "CodeableConcept", "The type of container used to contain this kind of specimen.", 0, 1, containerType);
-          case 2141642641: /*containerCap*/  return new Property("containerCap", "CodeableConcept", "Color of container cap.", 0, 1, containerCap);
-          case -1474644805: /*containerDescription*/  return new Property("containerDescription", "string", "The textual description of the kind of container.", 0, 1, containerDescription);
-          case -574573477: /*containerCapacity*/  return new Property("containerCapacity", "SimpleQuantity", "The capacity (volume or other measure) of this kind of container.", 0, 1, containerCapacity);
-          case -2037735993: /*containerMinimumVolume*/  return new Property("containerMinimumVolume", "SimpleQuantity", "The minimum volume to be conditioned in the container.", 0, 1, containerMinimumVolume);
-          case -1733338259: /*containerAdditive*/  return new Property("containerAdditive", "", "Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, containerAdditive);
-          case -1065527466: /*containerPreparation*/  return new Property("containerPreparation", "string", "Special processing that should be applied to the container for this kind of specimen.", 0, 1, containerPreparation);
+          case -410956671: /*container*/  return new Property("container", "", "The specimen's container.", 0, 1, container);
           case 363387971: /*requirement*/  return new Property("requirement", "string", "Requirements for delivery and special handling of this kind of conditioned specimen.", 0, 1, requirement);
           case 1434969867: /*retentionTime*/  return new Property("retentionTime", "Duration", "The usual time that a specimen of this kind is retained after the ordered tests are completed, for the purpose of additional testing.", 0, 1, retentionTime);
           case -553706344: /*rejectionCriterion*/  return new Property("rejectionCriterion", "CodeableConcept", "Criterion for rejection of the specimen in its container by the laboratory.", 0, java.lang.Integer.MAX_VALUE, rejectionCriterion);
-          case 2072805: /*handling*/  return new Property("handling", "", "Set of instructions for conservation/transport of the specimen at a defined temperature interval, prior the testing process.", 0, java.lang.Integer.MAX_VALUE, handling);
+          case 2072805: /*handling*/  return new Property("handling", "", "Set of instructions for preservation/transport of the specimen at a defined temperature interval, prior the testing process.", 0, java.lang.Integer.MAX_VALUE, handling);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -882,18 +570,11 @@ public class SpecimenDefinition extends DomainResource {
         case 976346515: /*isDerived*/ return this.isDerived == null ? new Base[0] : new Base[] {this.isDerived}; // BooleanType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -1459831589: /*preference*/ return this.preference == null ? new Base[0] : new Base[] {this.preference}; // Enumeration<SpecimenContainedPreference>
-        case -207682360: /*containerMaterial*/ return this.containerMaterial == null ? new Base[0] : new Base[] {this.containerMaterial}; // CodeableConcept
-        case 1966942043: /*containerType*/ return this.containerType == null ? new Base[0] : new Base[] {this.containerType}; // CodeableConcept
-        case 2141642641: /*containerCap*/ return this.containerCap == null ? new Base[0] : new Base[] {this.containerCap}; // CodeableConcept
-        case -1474644805: /*containerDescription*/ return this.containerDescription == null ? new Base[0] : new Base[] {this.containerDescription}; // StringType
-        case -574573477: /*containerCapacity*/ return this.containerCapacity == null ? new Base[0] : new Base[] {this.containerCapacity}; // SimpleQuantity
-        case -2037735993: /*containerMinimumVolume*/ return this.containerMinimumVolume == null ? new Base[0] : new Base[] {this.containerMinimumVolume}; // SimpleQuantity
-        case -1733338259: /*containerAdditive*/ return this.containerAdditive == null ? new Base[0] : this.containerAdditive.toArray(new Base[this.containerAdditive.size()]); // SpecimenDefinitionSpecimenToLabContainerAdditiveComponent
-        case -1065527466: /*containerPreparation*/ return this.containerPreparation == null ? new Base[0] : new Base[] {this.containerPreparation}; // StringType
+        case -410956671: /*container*/ return this.container == null ? new Base[0] : new Base[] {this.container}; // SpecimenDefinitionTypeTestedContainerComponent
         case 363387971: /*requirement*/ return this.requirement == null ? new Base[0] : new Base[] {this.requirement}; // StringType
         case 1434969867: /*retentionTime*/ return this.retentionTime == null ? new Base[0] : new Base[] {this.retentionTime}; // Duration
         case -553706344: /*rejectionCriterion*/ return this.rejectionCriterion == null ? new Base[0] : this.rejectionCriterion.toArray(new Base[this.rejectionCriterion.size()]); // CodeableConcept
-        case 2072805: /*handling*/ return this.handling == null ? new Base[0] : this.handling.toArray(new Base[this.handling.size()]); // SpecimenDefinitionSpecimenToLabHandlingComponent
+        case 2072805: /*handling*/ return this.handling == null ? new Base[0] : this.handling.toArray(new Base[this.handling.size()]); // SpecimenDefinitionTypeTestedHandlingComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -912,29 +593,8 @@ public class SpecimenDefinition extends DomainResource {
           value = new SpecimenContainedPreferenceEnumFactory().fromType(castToCode(value));
           this.preference = (Enumeration) value; // Enumeration<SpecimenContainedPreference>
           return value;
-        case -207682360: // containerMaterial
-          this.containerMaterial = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 1966942043: // containerType
-          this.containerType = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 2141642641: // containerCap
-          this.containerCap = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case -1474644805: // containerDescription
-          this.containerDescription = castToString(value); // StringType
-          return value;
-        case -574573477: // containerCapacity
-          this.containerCapacity = castToSimpleQuantity(value); // SimpleQuantity
-          return value;
-        case -2037735993: // containerMinimumVolume
-          this.containerMinimumVolume = castToSimpleQuantity(value); // SimpleQuantity
-          return value;
-        case -1733338259: // containerAdditive
-          this.getContainerAdditive().add((SpecimenDefinitionSpecimenToLabContainerAdditiveComponent) value); // SpecimenDefinitionSpecimenToLabContainerAdditiveComponent
-          return value;
-        case -1065527466: // containerPreparation
-          this.containerPreparation = castToString(value); // StringType
+        case -410956671: // container
+          this.container = (SpecimenDefinitionTypeTestedContainerComponent) value; // SpecimenDefinitionTypeTestedContainerComponent
           return value;
         case 363387971: // requirement
           this.requirement = castToString(value); // StringType
@@ -946,7 +606,7 @@ public class SpecimenDefinition extends DomainResource {
           this.getRejectionCriterion().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 2072805: // handling
-          this.getHandling().add((SpecimenDefinitionSpecimenToLabHandlingComponent) value); // SpecimenDefinitionSpecimenToLabHandlingComponent
+          this.getHandling().add((SpecimenDefinitionTypeTestedHandlingComponent) value); // SpecimenDefinitionTypeTestedHandlingComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -962,22 +622,8 @@ public class SpecimenDefinition extends DomainResource {
         } else if (name.equals("preference")) {
           value = new SpecimenContainedPreferenceEnumFactory().fromType(castToCode(value));
           this.preference = (Enumeration) value; // Enumeration<SpecimenContainedPreference>
-        } else if (name.equals("containerMaterial")) {
-          this.containerMaterial = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("containerType")) {
-          this.containerType = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("containerCap")) {
-          this.containerCap = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("containerDescription")) {
-          this.containerDescription = castToString(value); // StringType
-        } else if (name.equals("containerCapacity")) {
-          this.containerCapacity = castToSimpleQuantity(value); // SimpleQuantity
-        } else if (name.equals("containerMinimumVolume")) {
-          this.containerMinimumVolume = castToSimpleQuantity(value); // SimpleQuantity
-        } else if (name.equals("containerAdditive")) {
-          this.getContainerAdditive().add((SpecimenDefinitionSpecimenToLabContainerAdditiveComponent) value);
-        } else if (name.equals("containerPreparation")) {
-          this.containerPreparation = castToString(value); // StringType
+        } else if (name.equals("container")) {
+          this.container = (SpecimenDefinitionTypeTestedContainerComponent) value; // SpecimenDefinitionTypeTestedContainerComponent
         } else if (name.equals("requirement")) {
           this.requirement = castToString(value); // StringType
         } else if (name.equals("retentionTime")) {
@@ -985,7 +631,7 @@ public class SpecimenDefinition extends DomainResource {
         } else if (name.equals("rejectionCriterion")) {
           this.getRejectionCriterion().add(castToCodeableConcept(value));
         } else if (name.equals("handling")) {
-          this.getHandling().add((SpecimenDefinitionSpecimenToLabHandlingComponent) value);
+          this.getHandling().add((SpecimenDefinitionTypeTestedHandlingComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -997,14 +643,7 @@ public class SpecimenDefinition extends DomainResource {
         case 976346515:  return getIsDerivedElement();
         case 3575610:  return getType(); 
         case -1459831589:  return getPreferenceElement();
-        case -207682360:  return getContainerMaterial(); 
-        case 1966942043:  return getContainerType(); 
-        case 2141642641:  return getContainerCap(); 
-        case -1474644805:  return getContainerDescriptionElement();
-        case -574573477:  return getContainerCapacity(); 
-        case -2037735993:  return getContainerMinimumVolume(); 
-        case -1733338259:  return addContainerAdditive(); 
-        case -1065527466:  return getContainerPreparationElement();
+        case -410956671:  return getContainer(); 
         case 363387971:  return getRequirementElement();
         case 1434969867:  return getRetentionTime(); 
         case -553706344:  return addRejectionCriterion(); 
@@ -1020,14 +659,7 @@ public class SpecimenDefinition extends DomainResource {
         case 976346515: /*isDerived*/ return new String[] {"boolean"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case -1459831589: /*preference*/ return new String[] {"code"};
-        case -207682360: /*containerMaterial*/ return new String[] {"CodeableConcept"};
-        case 1966942043: /*containerType*/ return new String[] {"CodeableConcept"};
-        case 2141642641: /*containerCap*/ return new String[] {"CodeableConcept"};
-        case -1474644805: /*containerDescription*/ return new String[] {"string"};
-        case -574573477: /*containerCapacity*/ return new String[] {"SimpleQuantity"};
-        case -2037735993: /*containerMinimumVolume*/ return new String[] {"SimpleQuantity"};
-        case -1733338259: /*containerAdditive*/ return new String[] {};
-        case -1065527466: /*containerPreparation*/ return new String[] {"string"};
+        case -410956671: /*container*/ return new String[] {};
         case 363387971: /*requirement*/ return new String[] {"string"};
         case 1434969867: /*retentionTime*/ return new String[] {"Duration"};
         case -553706344: /*rejectionCriterion*/ return new String[] {"CodeableConcept"};
@@ -1049,34 +681,9 @@ public class SpecimenDefinition extends DomainResource {
         else if (name.equals("preference")) {
           throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.preference");
         }
-        else if (name.equals("containerMaterial")) {
-          this.containerMaterial = new CodeableConcept();
-          return this.containerMaterial;
-        }
-        else if (name.equals("containerType")) {
-          this.containerType = new CodeableConcept();
-          return this.containerType;
-        }
-        else if (name.equals("containerCap")) {
-          this.containerCap = new CodeableConcept();
-          return this.containerCap;
-        }
-        else if (name.equals("containerDescription")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.containerDescription");
-        }
-        else if (name.equals("containerCapacity")) {
-          this.containerCapacity = new SimpleQuantity();
-          return this.containerCapacity;
-        }
-        else if (name.equals("containerMinimumVolume")) {
-          this.containerMinimumVolume = new SimpleQuantity();
-          return this.containerMinimumVolume;
-        }
-        else if (name.equals("containerAdditive")) {
-          return addContainerAdditive();
-        }
-        else if (name.equals("containerPreparation")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.containerPreparation");
+        else if (name.equals("container")) {
+          this.container = new SpecimenDefinitionTypeTestedContainerComponent();
+          return this.container;
         }
         else if (name.equals("requirement")) {
           throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.requirement");
@@ -1095,24 +702,13 @@ public class SpecimenDefinition extends DomainResource {
           return super.addChild(name);
       }
 
-      public SpecimenDefinitionSpecimenToLabComponent copy() {
-        SpecimenDefinitionSpecimenToLabComponent dst = new SpecimenDefinitionSpecimenToLabComponent();
+      public SpecimenDefinitionTypeTestedComponent copy() {
+        SpecimenDefinitionTypeTestedComponent dst = new SpecimenDefinitionTypeTestedComponent();
         copyValues(dst);
         dst.isDerived = isDerived == null ? null : isDerived.copy();
         dst.type = type == null ? null : type.copy();
         dst.preference = preference == null ? null : preference.copy();
-        dst.containerMaterial = containerMaterial == null ? null : containerMaterial.copy();
-        dst.containerType = containerType == null ? null : containerType.copy();
-        dst.containerCap = containerCap == null ? null : containerCap.copy();
-        dst.containerDescription = containerDescription == null ? null : containerDescription.copy();
-        dst.containerCapacity = containerCapacity == null ? null : containerCapacity.copy();
-        dst.containerMinimumVolume = containerMinimumVolume == null ? null : containerMinimumVolume.copy();
-        if (containerAdditive != null) {
-          dst.containerAdditive = new ArrayList<SpecimenDefinitionSpecimenToLabContainerAdditiveComponent>();
-          for (SpecimenDefinitionSpecimenToLabContainerAdditiveComponent i : containerAdditive)
-            dst.containerAdditive.add(i.copy());
-        };
-        dst.containerPreparation = containerPreparation == null ? null : containerPreparation.copy();
+        dst.container = container == null ? null : container.copy();
         dst.requirement = requirement == null ? null : requirement.copy();
         dst.retentionTime = retentionTime == null ? null : retentionTime.copy();
         if (rejectionCriterion != null) {
@@ -1121,8 +717,8 @@ public class SpecimenDefinition extends DomainResource {
             dst.rejectionCriterion.add(i.copy());
         };
         if (handling != null) {
-          dst.handling = new ArrayList<SpecimenDefinitionSpecimenToLabHandlingComponent>();
-          for (SpecimenDefinitionSpecimenToLabHandlingComponent i : handling)
+          dst.handling = new ArrayList<SpecimenDefinitionTypeTestedHandlingComponent>();
+          for (SpecimenDefinitionTypeTestedHandlingComponent i : handling)
             dst.handling.add(i.copy());
         };
         return dst;
@@ -1132,15 +728,11 @@ public class SpecimenDefinition extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof SpecimenDefinitionSpecimenToLabComponent))
+        if (!(other_ instanceof SpecimenDefinitionTypeTestedComponent))
           return false;
-        SpecimenDefinitionSpecimenToLabComponent o = (SpecimenDefinitionSpecimenToLabComponent) other_;
+        SpecimenDefinitionTypeTestedComponent o = (SpecimenDefinitionTypeTestedComponent) other_;
         return compareDeep(isDerived, o.isDerived, true) && compareDeep(type, o.type, true) && compareDeep(preference, o.preference, true)
-           && compareDeep(containerMaterial, o.containerMaterial, true) && compareDeep(containerType, o.containerType, true)
-           && compareDeep(containerCap, o.containerCap, true) && compareDeep(containerDescription, o.containerDescription, true)
-           && compareDeep(containerCapacity, o.containerCapacity, true) && compareDeep(containerMinimumVolume, o.containerMinimumVolume, true)
-           && compareDeep(containerAdditive, o.containerAdditive, true) && compareDeep(containerPreparation, o.containerPreparation, true)
-           && compareDeep(requirement, o.requirement, true) && compareDeep(retentionTime, o.retentionTime, true)
+           && compareDeep(container, o.container, true) && compareDeep(requirement, o.requirement, true) && compareDeep(retentionTime, o.retentionTime, true)
            && compareDeep(rejectionCriterion, o.rejectionCriterion, true) && compareDeep(handling, o.handling, true)
           ;
       }
@@ -1149,36 +741,592 @@ public class SpecimenDefinition extends DomainResource {
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof SpecimenDefinitionSpecimenToLabComponent))
+        if (!(other_ instanceof SpecimenDefinitionTypeTestedComponent))
           return false;
-        SpecimenDefinitionSpecimenToLabComponent o = (SpecimenDefinitionSpecimenToLabComponent) other_;
+        SpecimenDefinitionTypeTestedComponent o = (SpecimenDefinitionTypeTestedComponent) other_;
         return compareValues(isDerived, o.isDerived, true) && compareValues(preference, o.preference, true)
-           && compareValues(containerDescription, o.containerDescription, true) && compareValues(containerPreparation, o.containerPreparation, true)
            && compareValues(requirement, o.requirement, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(isDerived, type, preference
-          , containerMaterial, containerType, containerCap, containerDescription, containerCapacity
-          , containerMinimumVolume, containerAdditive, containerPreparation, requirement, retentionTime
-          , rejectionCriterion, handling);
+          , container, requirement, retentionTime, rejectionCriterion, handling);
       }
 
   public String fhirType() {
-    return "SpecimenDefinition.specimenToLab";
+    return "SpecimenDefinition.typeTested";
 
   }
 
   }
 
     @Block()
-    public static class SpecimenDefinitionSpecimenToLabContainerAdditiveComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SpecimenDefinitionTypeTestedContainerComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The type of material of the container.
+         */
+        @Child(name = "material", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Container material", formalDefinition="The type of material of the container." )
+        protected CodeableConcept material;
+
+        /**
+         * The type of container used to contain this kind of specimen.
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Kind of container associated with the kind of specimen", formalDefinition="The type of container used to contain this kind of specimen." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/specimen-container-type")
+        protected CodeableConcept type;
+
+        /**
+         * Color of container cap.
+         */
+        @Child(name = "cap", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Color of container cap", formalDefinition="Color of container cap." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/container-cap")
+        protected CodeableConcept cap;
+
+        /**
+         * The textual description of the kind of container.
+         */
+        @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Container description", formalDefinition="The textual description of the kind of container." )
+        protected StringType description;
+
+        /**
+         * The capacity (volume or other measure) of this kind of container.
+         */
+        @Child(name = "capacity", type = {Quantity.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Container capacity", formalDefinition="The capacity (volume or other measure) of this kind of container." )
+        protected Quantity capacity;
+
+        /**
+         * The minimum volume to be conditioned in the container.
+         */
+        @Child(name = "minimumVolume", type = {Quantity.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Minimum volume", formalDefinition="The minimum volume to be conditioned in the container." )
+        protected Quantity minimumVolume;
+
+        /**
+         * Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.
+         */
+        @Child(name = "additive", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Additive associated with container", formalDefinition="Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA." )
+        protected List<SpecimenDefinitionTypeTestedContainerAdditiveComponent> additive;
+
+        /**
+         * Special processing that should be applied to the container for this kind of specimen.
+         */
+        @Child(name = "preparation", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Specimen container preparation", formalDefinition="Special processing that should be applied to the container for this kind of specimen." )
+        protected StringType preparation;
+
+        private static final long serialVersionUID = -539552481L;
+
+    /**
+     * Constructor
+     */
+      public SpecimenDefinitionTypeTestedContainerComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #material} (The type of material of the container.)
+         */
+        public CodeableConcept getMaterial() { 
+          if (this.material == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedContainerComponent.material");
+            else if (Configuration.doAutoCreate())
+              this.material = new CodeableConcept(); // cc
+          return this.material;
+        }
+
+        public boolean hasMaterial() { 
+          return this.material != null && !this.material.isEmpty();
+        }
+
+        /**
+         * @param value {@link #material} (The type of material of the container.)
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setMaterial(CodeableConcept value) { 
+          this.material = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #type} (The type of container used to contain this kind of specimen.)
+         */
+        public CodeableConcept getType() { 
+          if (this.type == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedContainerComponent.type");
+            else if (Configuration.doAutoCreate())
+              this.type = new CodeableConcept(); // cc
+          return this.type;
+        }
+
+        public boolean hasType() { 
+          return this.type != null && !this.type.isEmpty();
+        }
+
+        /**
+         * @param value {@link #type} (The type of container used to contain this kind of specimen.)
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setType(CodeableConcept value) { 
+          this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #cap} (Color of container cap.)
+         */
+        public CodeableConcept getCap() { 
+          if (this.cap == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedContainerComponent.cap");
+            else if (Configuration.doAutoCreate())
+              this.cap = new CodeableConcept(); // cc
+          return this.cap;
+        }
+
+        public boolean hasCap() { 
+          return this.cap != null && !this.cap.isEmpty();
+        }
+
+        /**
+         * @param value {@link #cap} (Color of container cap.)
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setCap(CodeableConcept value) { 
+          this.cap = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #description} (The textual description of the kind of container.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public StringType getDescriptionElement() { 
+          if (this.description == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedContainerComponent.description");
+            else if (Configuration.doAutoCreate())
+              this.description = new StringType(); // bb
+          return this.description;
+        }
+
+        public boolean hasDescriptionElement() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        public boolean hasDescription() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        /**
+         * @param value {@link #description} (The textual description of the kind of container.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setDescriptionElement(StringType value) { 
+          this.description = value;
+          return this;
+        }
+
+        /**
+         * @return The textual description of the kind of container.
+         */
+        public String getDescription() { 
+          return this.description == null ? null : this.description.getValue();
+        }
+
+        /**
+         * @param value The textual description of the kind of container.
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setDescription(String value) { 
+          if (Utilities.noString(value))
+            this.description = null;
+          else {
+            if (this.description == null)
+              this.description = new StringType();
+            this.description.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #capacity} (The capacity (volume or other measure) of this kind of container.)
+         */
+        public Quantity getCapacity() { 
+          if (this.capacity == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedContainerComponent.capacity");
+            else if (Configuration.doAutoCreate())
+              this.capacity = new Quantity(); // cc
+          return this.capacity;
+        }
+
+        public boolean hasCapacity() { 
+          return this.capacity != null && !this.capacity.isEmpty();
+        }
+
+        /**
+         * @param value {@link #capacity} (The capacity (volume or other measure) of this kind of container.)
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setCapacity(Quantity value) { 
+          this.capacity = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #minimumVolume} (The minimum volume to be conditioned in the container.)
+         */
+        public Quantity getMinimumVolume() { 
+          if (this.minimumVolume == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedContainerComponent.minimumVolume");
+            else if (Configuration.doAutoCreate())
+              this.minimumVolume = new Quantity(); // cc
+          return this.minimumVolume;
+        }
+
+        public boolean hasMinimumVolume() { 
+          return this.minimumVolume != null && !this.minimumVolume.isEmpty();
+        }
+
+        /**
+         * @param value {@link #minimumVolume} (The minimum volume to be conditioned in the container.)
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setMinimumVolume(Quantity value) { 
+          this.minimumVolume = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #additive} (Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
+         */
+        public List<SpecimenDefinitionTypeTestedContainerAdditiveComponent> getAdditive() { 
+          if (this.additive == null)
+            this.additive = new ArrayList<SpecimenDefinitionTypeTestedContainerAdditiveComponent>();
+          return this.additive;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setAdditive(List<SpecimenDefinitionTypeTestedContainerAdditiveComponent> theAdditive) { 
+          this.additive = theAdditive;
+          return this;
+        }
+
+        public boolean hasAdditive() { 
+          if (this.additive == null)
+            return false;
+          for (SpecimenDefinitionTypeTestedContainerAdditiveComponent item : this.additive)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public SpecimenDefinitionTypeTestedContainerAdditiveComponent addAdditive() { //3
+          SpecimenDefinitionTypeTestedContainerAdditiveComponent t = new SpecimenDefinitionTypeTestedContainerAdditiveComponent();
+          if (this.additive == null)
+            this.additive = new ArrayList<SpecimenDefinitionTypeTestedContainerAdditiveComponent>();
+          this.additive.add(t);
+          return t;
+        }
+
+        public SpecimenDefinitionTypeTestedContainerComponent addAdditive(SpecimenDefinitionTypeTestedContainerAdditiveComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.additive == null)
+            this.additive = new ArrayList<SpecimenDefinitionTypeTestedContainerAdditiveComponent>();
+          this.additive.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #additive}, creating it if it does not already exist
+         */
+        public SpecimenDefinitionTypeTestedContainerAdditiveComponent getAdditiveFirstRep() { 
+          if (getAdditive().isEmpty()) {
+            addAdditive();
+          }
+          return getAdditive().get(0);
+        }
+
+        /**
+         * @return {@link #preparation} (Special processing that should be applied to the container for this kind of specimen.). This is the underlying object with id, value and extensions. The accessor "getPreparation" gives direct access to the value
+         */
+        public StringType getPreparationElement() { 
+          if (this.preparation == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedContainerComponent.preparation");
+            else if (Configuration.doAutoCreate())
+              this.preparation = new StringType(); // bb
+          return this.preparation;
+        }
+
+        public boolean hasPreparationElement() { 
+          return this.preparation != null && !this.preparation.isEmpty();
+        }
+
+        public boolean hasPreparation() { 
+          return this.preparation != null && !this.preparation.isEmpty();
+        }
+
+        /**
+         * @param value {@link #preparation} (Special processing that should be applied to the container for this kind of specimen.). This is the underlying object with id, value and extensions. The accessor "getPreparation" gives direct access to the value
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setPreparationElement(StringType value) { 
+          this.preparation = value;
+          return this;
+        }
+
+        /**
+         * @return Special processing that should be applied to the container for this kind of specimen.
+         */
+        public String getPreparation() { 
+          return this.preparation == null ? null : this.preparation.getValue();
+        }
+
+        /**
+         * @param value Special processing that should be applied to the container for this kind of specimen.
+         */
+        public SpecimenDefinitionTypeTestedContainerComponent setPreparation(String value) { 
+          if (Utilities.noString(value))
+            this.preparation = null;
+          else {
+            if (this.preparation == null)
+              this.preparation = new StringType();
+            this.preparation.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("material", "CodeableConcept", "The type of material of the container.", 0, 1, material));
+          children.add(new Property("type", "CodeableConcept", "The type of container used to contain this kind of specimen.", 0, 1, type));
+          children.add(new Property("cap", "CodeableConcept", "Color of container cap.", 0, 1, cap));
+          children.add(new Property("description", "string", "The textual description of the kind of container.", 0, 1, description));
+          children.add(new Property("capacity", "SimpleQuantity", "The capacity (volume or other measure) of this kind of container.", 0, 1, capacity));
+          children.add(new Property("minimumVolume", "SimpleQuantity", "The minimum volume to be conditioned in the container.", 0, 1, minimumVolume));
+          children.add(new Property("additive", "", "Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, additive));
+          children.add(new Property("preparation", "string", "Special processing that should be applied to the container for this kind of specimen.", 0, 1, preparation));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 299066663: /*material*/  return new Property("material", "CodeableConcept", "The type of material of the container.", 0, 1, material);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of container used to contain this kind of specimen.", 0, 1, type);
+          case 98258: /*cap*/  return new Property("cap", "CodeableConcept", "Color of container cap.", 0, 1, cap);
+          case -1724546052: /*description*/  return new Property("description", "string", "The textual description of the kind of container.", 0, 1, description);
+          case -67824454: /*capacity*/  return new Property("capacity", "SimpleQuantity", "The capacity (volume or other measure) of this kind of container.", 0, 1, capacity);
+          case -1674665784: /*minimumVolume*/  return new Property("minimumVolume", "SimpleQuantity", "The minimum volume to be conditioned in the container.", 0, 1, minimumVolume);
+          case -1226589236: /*additive*/  return new Property("additive", "", "Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, additive);
+          case -1315428713: /*preparation*/  return new Property("preparation", "string", "Special processing that should be applied to the container for this kind of specimen.", 0, 1, preparation);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 299066663: /*material*/ return this.material == null ? new Base[0] : new Base[] {this.material}; // CodeableConcept
+        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case 98258: /*cap*/ return this.cap == null ? new Base[0] : new Base[] {this.cap}; // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -67824454: /*capacity*/ return this.capacity == null ? new Base[0] : new Base[] {this.capacity}; // Quantity
+        case -1674665784: /*minimumVolume*/ return this.minimumVolume == null ? new Base[0] : new Base[] {this.minimumVolume}; // Quantity
+        case -1226589236: /*additive*/ return this.additive == null ? new Base[0] : this.additive.toArray(new Base[this.additive.size()]); // SpecimenDefinitionTypeTestedContainerAdditiveComponent
+        case -1315428713: /*preparation*/ return this.preparation == null ? new Base[0] : new Base[] {this.preparation}; // StringType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 299066663: // material
+          this.material = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 3575610: // type
+          this.type = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 98258: // cap
+          this.cap = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          return value;
+        case -67824454: // capacity
+          this.capacity = castToQuantity(value); // Quantity
+          return value;
+        case -1674665784: // minimumVolume
+          this.minimumVolume = castToQuantity(value); // Quantity
+          return value;
+        case -1226589236: // additive
+          this.getAdditive().add((SpecimenDefinitionTypeTestedContainerAdditiveComponent) value); // SpecimenDefinitionTypeTestedContainerAdditiveComponent
+          return value;
+        case -1315428713: // preparation
+          this.preparation = castToString(value); // StringType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("material")) {
+          this.material = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("type")) {
+          this.type = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("cap")) {
+          this.cap = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("description")) {
+          this.description = castToString(value); // StringType
+        } else if (name.equals("capacity")) {
+          this.capacity = castToQuantity(value); // Quantity
+        } else if (name.equals("minimumVolume")) {
+          this.minimumVolume = castToQuantity(value); // Quantity
+        } else if (name.equals("additive")) {
+          this.getAdditive().add((SpecimenDefinitionTypeTestedContainerAdditiveComponent) value);
+        } else if (name.equals("preparation")) {
+          this.preparation = castToString(value); // StringType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 299066663:  return getMaterial(); 
+        case 3575610:  return getType(); 
+        case 98258:  return getCap(); 
+        case -1724546052:  return getDescriptionElement();
+        case -67824454:  return getCapacity(); 
+        case -1674665784:  return getMinimumVolume(); 
+        case -1226589236:  return addAdditive(); 
+        case -1315428713:  return getPreparationElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 299066663: /*material*/ return new String[] {"CodeableConcept"};
+        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case 98258: /*cap*/ return new String[] {"CodeableConcept"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -67824454: /*capacity*/ return new String[] {"SimpleQuantity"};
+        case -1674665784: /*minimumVolume*/ return new String[] {"SimpleQuantity"};
+        case -1226589236: /*additive*/ return new String[] {};
+        case -1315428713: /*preparation*/ return new String[] {"string"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("material")) {
+          this.material = new CodeableConcept();
+          return this.material;
+        }
+        else if (name.equals("type")) {
+          this.type = new CodeableConcept();
+          return this.type;
+        }
+        else if (name.equals("cap")) {
+          this.cap = new CodeableConcept();
+          return this.cap;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.description");
+        }
+        else if (name.equals("capacity")) {
+          this.capacity = new Quantity();
+          return this.capacity;
+        }
+        else if (name.equals("minimumVolume")) {
+          this.minimumVolume = new Quantity();
+          return this.minimumVolume;
+        }
+        else if (name.equals("additive")) {
+          return addAdditive();
+        }
+        else if (name.equals("preparation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.preparation");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SpecimenDefinitionTypeTestedContainerComponent copy() {
+        SpecimenDefinitionTypeTestedContainerComponent dst = new SpecimenDefinitionTypeTestedContainerComponent();
+        copyValues(dst);
+        dst.material = material == null ? null : material.copy();
+        dst.type = type == null ? null : type.copy();
+        dst.cap = cap == null ? null : cap.copy();
+        dst.description = description == null ? null : description.copy();
+        dst.capacity = capacity == null ? null : capacity.copy();
+        dst.minimumVolume = minimumVolume == null ? null : minimumVolume.copy();
+        if (additive != null) {
+          dst.additive = new ArrayList<SpecimenDefinitionTypeTestedContainerAdditiveComponent>();
+          for (SpecimenDefinitionTypeTestedContainerAdditiveComponent i : additive)
+            dst.additive.add(i.copy());
+        };
+        dst.preparation = preparation == null ? null : preparation.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof SpecimenDefinitionTypeTestedContainerComponent))
+          return false;
+        SpecimenDefinitionTypeTestedContainerComponent o = (SpecimenDefinitionTypeTestedContainerComponent) other_;
+        return compareDeep(material, o.material, true) && compareDeep(type, o.type, true) && compareDeep(cap, o.cap, true)
+           && compareDeep(description, o.description, true) && compareDeep(capacity, o.capacity, true) && compareDeep(minimumVolume, o.minimumVolume, true)
+           && compareDeep(additive, o.additive, true) && compareDeep(preparation, o.preparation, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof SpecimenDefinitionTypeTestedContainerComponent))
+          return false;
+        SpecimenDefinitionTypeTestedContainerComponent o = (SpecimenDefinitionTypeTestedContainerComponent) other_;
+        return compareValues(description, o.description, true) && compareValues(preparation, o.preparation, true)
+          ;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(material, type, cap, description
+          , capacity, minimumVolume, additive, preparation);
+      }
+
+  public String fhirType() {
+    return "SpecimenDefinition.typeTested.container";
+
+  }
+
+  }
+
+    @Block()
+    public static class SpecimenDefinitionTypeTestedContainerAdditiveComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.
          */
         @Child(name = "additive", type = {CodeableConcept.class, Substance.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Additive associated with container", formalDefinition="Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0371")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v2-0371")
         protected Type additive;
 
         private static final long serialVersionUID = 1819209272L;
@@ -1186,14 +1334,14 @@ public class SpecimenDefinition extends DomainResource {
     /**
      * Constructor
      */
-      public SpecimenDefinitionSpecimenToLabContainerAdditiveComponent() {
+      public SpecimenDefinitionTypeTestedContainerAdditiveComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public SpecimenDefinitionSpecimenToLabContainerAdditiveComponent(Type additive) {
+      public SpecimenDefinitionTypeTestedContainerAdditiveComponent(Type additive) {
         super();
         this.additive = additive;
       }
@@ -1242,9 +1390,9 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value {@link #additive} (Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.)
          */
-        public SpecimenDefinitionSpecimenToLabContainerAdditiveComponent setAdditive(Type value) { 
+        public SpecimenDefinitionTypeTestedContainerAdditiveComponent setAdditive(Type value) { 
           if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
-            throw new Error("Not the right type for SpecimenDefinition.specimenToLab.containerAdditive.additive[x]: "+value.fhirType());
+            throw new Error("Not the right type for SpecimenDefinition.typeTested.container.additive.additive[x]: "+value.fhirType());
           this.additive = value;
           return this;
         }
@@ -1328,8 +1476,8 @@ public class SpecimenDefinition extends DomainResource {
           return super.addChild(name);
       }
 
-      public SpecimenDefinitionSpecimenToLabContainerAdditiveComponent copy() {
-        SpecimenDefinitionSpecimenToLabContainerAdditiveComponent dst = new SpecimenDefinitionSpecimenToLabContainerAdditiveComponent();
+      public SpecimenDefinitionTypeTestedContainerAdditiveComponent copy() {
+        SpecimenDefinitionTypeTestedContainerAdditiveComponent dst = new SpecimenDefinitionTypeTestedContainerAdditiveComponent();
         copyValues(dst);
         dst.additive = additive == null ? null : additive.copy();
         return dst;
@@ -1339,9 +1487,9 @@ public class SpecimenDefinition extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof SpecimenDefinitionSpecimenToLabContainerAdditiveComponent))
+        if (!(other_ instanceof SpecimenDefinitionTypeTestedContainerAdditiveComponent))
           return false;
-        SpecimenDefinitionSpecimenToLabContainerAdditiveComponent o = (SpecimenDefinitionSpecimenToLabContainerAdditiveComponent) other_;
+        SpecimenDefinitionTypeTestedContainerAdditiveComponent o = (SpecimenDefinitionTypeTestedContainerAdditiveComponent) other_;
         return compareDeep(additive, o.additive, true);
       }
 
@@ -1349,9 +1497,9 @@ public class SpecimenDefinition extends DomainResource {
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof SpecimenDefinitionSpecimenToLabContainerAdditiveComponent))
+        if (!(other_ instanceof SpecimenDefinitionTypeTestedContainerAdditiveComponent))
           return false;
-        SpecimenDefinitionSpecimenToLabContainerAdditiveComponent o = (SpecimenDefinitionSpecimenToLabContainerAdditiveComponent) other_;
+        SpecimenDefinitionTypeTestedContainerAdditiveComponent o = (SpecimenDefinitionTypeTestedContainerAdditiveComponent) other_;
         return true;
       }
 
@@ -1360,114 +1508,107 @@ public class SpecimenDefinition extends DomainResource {
       }
 
   public String fhirType() {
-    return "SpecimenDefinition.specimenToLab.containerAdditive";
+    return "SpecimenDefinition.typeTested.container.additive";
 
   }
 
   }
 
     @Block()
-    public static class SpecimenDefinitionSpecimenToLabHandlingComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SpecimenDefinitionTypeTestedHandlingComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Code representing the set of handling instructions.
+         * It qualifies the interval of temperature, which characterizes an occurrence of handling. Conditions that are not related to temperature may be handled in the instruction element.
          */
-        @Child(name = "conditionSet", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Conservation condition set", formalDefinition="Code representing the set of handling instructions." )
+        @Child(name = "temperatureQualifier", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Temperature qualifier", formalDefinition="It qualifies the interval of temperature, which characterizes an occurrence of handling. Conditions that are not related to temperature may be handled in the instruction element." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/handling-condition")
-        protected CodeableConcept conditionSet;
+        protected CodeableConcept temperatureQualifier;
 
         /**
          * The temperature interval for this set of handling instructions.
          */
-        @Child(name = "tempRange", type = {Range.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "temperatureRange", type = {Range.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Temperature range", formalDefinition="The temperature interval for this set of handling instructions." )
-        protected Range tempRange;
+        protected Range temperatureRange;
 
         /**
-         * The maximum time interval of conservation of the specimen with these conditions.
+         * The maximum time interval of preservation of the specimen with these conditions.
          */
         @Child(name = "maxDuration", type = {Duration.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Maximum conservation time", formalDefinition="The maximum time interval of conservation of the specimen with these conditions." )
+        @Description(shortDefinition="Maximum preservation time", formalDefinition="The maximum time interval of preservation of the specimen with these conditions." )
         protected Duration maxDuration;
 
         /**
-         * Textual instructions regarding the light exposure of the specimen prior testing.
+         * Additional textual instructions for the preservation or transport of the specimen. For instance, 'Protect from light exposure'.
          */
-        @Child(name = "lightExposure", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Light exposure", formalDefinition="Textual instructions regarding the light exposure of the specimen prior testing." )
-        protected StringType lightExposure;
-
-        /**
-         * Additional textual instructions for the conservation or transport of the specimen.
-         */
-        @Child(name = "instruction", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Conservation instruction", formalDefinition="Additional textual instructions for the conservation or transport of the specimen." )
+        @Child(name = "instruction", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Preservation instruction", formalDefinition="Additional textual instructions for the preservation or transport of the specimen. For instance, 'Protect from light exposure'." )
         protected StringType instruction;
 
-        private static final long serialVersionUID = 1577777957L;
+        private static final long serialVersionUID = 2130906844L;
 
     /**
      * Constructor
      */
-      public SpecimenDefinitionSpecimenToLabHandlingComponent() {
+      public SpecimenDefinitionTypeTestedHandlingComponent() {
         super();
       }
 
         /**
-         * @return {@link #conditionSet} (Code representing the set of handling instructions.)
+         * @return {@link #temperatureQualifier} (It qualifies the interval of temperature, which characterizes an occurrence of handling. Conditions that are not related to temperature may be handled in the instruction element.)
          */
-        public CodeableConcept getConditionSet() { 
-          if (this.conditionSet == null)
+        public CodeableConcept getTemperatureQualifier() { 
+          if (this.temperatureQualifier == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabHandlingComponent.conditionSet");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedHandlingComponent.temperatureQualifier");
             else if (Configuration.doAutoCreate())
-              this.conditionSet = new CodeableConcept(); // cc
-          return this.conditionSet;
+              this.temperatureQualifier = new CodeableConcept(); // cc
+          return this.temperatureQualifier;
         }
 
-        public boolean hasConditionSet() { 
-          return this.conditionSet != null && !this.conditionSet.isEmpty();
+        public boolean hasTemperatureQualifier() { 
+          return this.temperatureQualifier != null && !this.temperatureQualifier.isEmpty();
         }
 
         /**
-         * @param value {@link #conditionSet} (Code representing the set of handling instructions.)
+         * @param value {@link #temperatureQualifier} (It qualifies the interval of temperature, which characterizes an occurrence of handling. Conditions that are not related to temperature may be handled in the instruction element.)
          */
-        public SpecimenDefinitionSpecimenToLabHandlingComponent setConditionSet(CodeableConcept value) { 
-          this.conditionSet = value;
+        public SpecimenDefinitionTypeTestedHandlingComponent setTemperatureQualifier(CodeableConcept value) { 
+          this.temperatureQualifier = value;
           return this;
         }
 
         /**
-         * @return {@link #tempRange} (The temperature interval for this set of handling instructions.)
+         * @return {@link #temperatureRange} (The temperature interval for this set of handling instructions.)
          */
-        public Range getTempRange() { 
-          if (this.tempRange == null)
+        public Range getTemperatureRange() { 
+          if (this.temperatureRange == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabHandlingComponent.tempRange");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedHandlingComponent.temperatureRange");
             else if (Configuration.doAutoCreate())
-              this.tempRange = new Range(); // cc
-          return this.tempRange;
+              this.temperatureRange = new Range(); // cc
+          return this.temperatureRange;
         }
 
-        public boolean hasTempRange() { 
-          return this.tempRange != null && !this.tempRange.isEmpty();
+        public boolean hasTemperatureRange() { 
+          return this.temperatureRange != null && !this.temperatureRange.isEmpty();
         }
 
         /**
-         * @param value {@link #tempRange} (The temperature interval for this set of handling instructions.)
+         * @param value {@link #temperatureRange} (The temperature interval for this set of handling instructions.)
          */
-        public SpecimenDefinitionSpecimenToLabHandlingComponent setTempRange(Range value) { 
-          this.tempRange = value;
+        public SpecimenDefinitionTypeTestedHandlingComponent setTemperatureRange(Range value) { 
+          this.temperatureRange = value;
           return this;
         }
 
         /**
-         * @return {@link #maxDuration} (The maximum time interval of conservation of the specimen with these conditions.)
+         * @return {@link #maxDuration} (The maximum time interval of preservation of the specimen with these conditions.)
          */
         public Duration getMaxDuration() { 
           if (this.maxDuration == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabHandlingComponent.maxDuration");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedHandlingComponent.maxDuration");
             else if (Configuration.doAutoCreate())
               this.maxDuration = new Duration(); // cc
           return this.maxDuration;
@@ -1478,69 +1619,20 @@ public class SpecimenDefinition extends DomainResource {
         }
 
         /**
-         * @param value {@link #maxDuration} (The maximum time interval of conservation of the specimen with these conditions.)
+         * @param value {@link #maxDuration} (The maximum time interval of preservation of the specimen with these conditions.)
          */
-        public SpecimenDefinitionSpecimenToLabHandlingComponent setMaxDuration(Duration value) { 
+        public SpecimenDefinitionTypeTestedHandlingComponent setMaxDuration(Duration value) { 
           this.maxDuration = value;
           return this;
         }
 
         /**
-         * @return {@link #lightExposure} (Textual instructions regarding the light exposure of the specimen prior testing.). This is the underlying object with id, value and extensions. The accessor "getLightExposure" gives direct access to the value
-         */
-        public StringType getLightExposureElement() { 
-          if (this.lightExposure == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabHandlingComponent.lightExposure");
-            else if (Configuration.doAutoCreate())
-              this.lightExposure = new StringType(); // bb
-          return this.lightExposure;
-        }
-
-        public boolean hasLightExposureElement() { 
-          return this.lightExposure != null && !this.lightExposure.isEmpty();
-        }
-
-        public boolean hasLightExposure() { 
-          return this.lightExposure != null && !this.lightExposure.isEmpty();
-        }
-
-        /**
-         * @param value {@link #lightExposure} (Textual instructions regarding the light exposure of the specimen prior testing.). This is the underlying object with id, value and extensions. The accessor "getLightExposure" gives direct access to the value
-         */
-        public SpecimenDefinitionSpecimenToLabHandlingComponent setLightExposureElement(StringType value) { 
-          this.lightExposure = value;
-          return this;
-        }
-
-        /**
-         * @return Textual instructions regarding the light exposure of the specimen prior testing.
-         */
-        public String getLightExposure() { 
-          return this.lightExposure == null ? null : this.lightExposure.getValue();
-        }
-
-        /**
-         * @param value Textual instructions regarding the light exposure of the specimen prior testing.
-         */
-        public SpecimenDefinitionSpecimenToLabHandlingComponent setLightExposure(String value) { 
-          if (Utilities.noString(value))
-            this.lightExposure = null;
-          else {
-            if (this.lightExposure == null)
-              this.lightExposure = new StringType();
-            this.lightExposure.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #instruction} (Additional textual instructions for the conservation or transport of the specimen.). This is the underlying object with id, value and extensions. The accessor "getInstruction" gives direct access to the value
+         * @return {@link #instruction} (Additional textual instructions for the preservation or transport of the specimen. For instance, 'Protect from light exposure'.). This is the underlying object with id, value and extensions. The accessor "getInstruction" gives direct access to the value
          */
         public StringType getInstructionElement() { 
           if (this.instruction == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionSpecimenToLabHandlingComponent.instruction");
+              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedHandlingComponent.instruction");
             else if (Configuration.doAutoCreate())
               this.instruction = new StringType(); // bb
           return this.instruction;
@@ -1555,24 +1647,24 @@ public class SpecimenDefinition extends DomainResource {
         }
 
         /**
-         * @param value {@link #instruction} (Additional textual instructions for the conservation or transport of the specimen.). This is the underlying object with id, value and extensions. The accessor "getInstruction" gives direct access to the value
+         * @param value {@link #instruction} (Additional textual instructions for the preservation or transport of the specimen. For instance, 'Protect from light exposure'.). This is the underlying object with id, value and extensions. The accessor "getInstruction" gives direct access to the value
          */
-        public SpecimenDefinitionSpecimenToLabHandlingComponent setInstructionElement(StringType value) { 
+        public SpecimenDefinitionTypeTestedHandlingComponent setInstructionElement(StringType value) { 
           this.instruction = value;
           return this;
         }
 
         /**
-         * @return Additional textual instructions for the conservation or transport of the specimen.
+         * @return Additional textual instructions for the preservation or transport of the specimen. For instance, 'Protect from light exposure'.
          */
         public String getInstruction() { 
           return this.instruction == null ? null : this.instruction.getValue();
         }
 
         /**
-         * @param value Additional textual instructions for the conservation or transport of the specimen.
+         * @param value Additional textual instructions for the preservation or transport of the specimen. For instance, 'Protect from light exposure'.
          */
-        public SpecimenDefinitionSpecimenToLabHandlingComponent setInstruction(String value) { 
+        public SpecimenDefinitionTypeTestedHandlingComponent setInstruction(String value) { 
           if (Utilities.noString(value))
             this.instruction = null;
           else {
@@ -1585,21 +1677,19 @@ public class SpecimenDefinition extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("conditionSet", "CodeableConcept", "Code representing the set of handling instructions.", 0, 1, conditionSet));
-          children.add(new Property("tempRange", "Range", "The temperature interval for this set of handling instructions.", 0, 1, tempRange));
-          children.add(new Property("maxDuration", "Duration", "The maximum time interval of conservation of the specimen with these conditions.", 0, 1, maxDuration));
-          children.add(new Property("lightExposure", "string", "Textual instructions regarding the light exposure of the specimen prior testing.", 0, 1, lightExposure));
-          children.add(new Property("instruction", "string", "Additional textual instructions for the conservation or transport of the specimen.", 0, 1, instruction));
+          children.add(new Property("temperatureQualifier", "CodeableConcept", "It qualifies the interval of temperature, which characterizes an occurrence of handling. Conditions that are not related to temperature may be handled in the instruction element.", 0, 1, temperatureQualifier));
+          children.add(new Property("temperatureRange", "Range", "The temperature interval for this set of handling instructions.", 0, 1, temperatureRange));
+          children.add(new Property("maxDuration", "Duration", "The maximum time interval of preservation of the specimen with these conditions.", 0, 1, maxDuration));
+          children.add(new Property("instruction", "string", "Additional textual instructions for the preservation or transport of the specimen. For instance, 'Protect from light exposure'.", 0, 1, instruction));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1202651833: /*conditionSet*/  return new Property("conditionSet", "CodeableConcept", "Code representing the set of handling instructions.", 0, 1, conditionSet);
-          case 1957710281: /*tempRange*/  return new Property("tempRange", "Range", "The temperature interval for this set of handling instructions.", 0, 1, tempRange);
-          case 40284952: /*maxDuration*/  return new Property("maxDuration", "Duration", "The maximum time interval of conservation of the specimen with these conditions.", 0, 1, maxDuration);
-          case -1391615939: /*lightExposure*/  return new Property("lightExposure", "string", "Textual instructions regarding the light exposure of the specimen prior testing.", 0, 1, lightExposure);
-          case 301526158: /*instruction*/  return new Property("instruction", "string", "Additional textual instructions for the conservation or transport of the specimen.", 0, 1, instruction);
+          case 548941206: /*temperatureQualifier*/  return new Property("temperatureQualifier", "CodeableConcept", "It qualifies the interval of temperature, which characterizes an occurrence of handling. Conditions that are not related to temperature may be handled in the instruction element.", 0, 1, temperatureQualifier);
+          case -39203799: /*temperatureRange*/  return new Property("temperatureRange", "Range", "The temperature interval for this set of handling instructions.", 0, 1, temperatureRange);
+          case 40284952: /*maxDuration*/  return new Property("maxDuration", "Duration", "The maximum time interval of preservation of the specimen with these conditions.", 0, 1, maxDuration);
+          case 301526158: /*instruction*/  return new Property("instruction", "string", "Additional textual instructions for the preservation or transport of the specimen. For instance, 'Protect from light exposure'.", 0, 1, instruction);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1608,10 +1698,9 @@ public class SpecimenDefinition extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1202651833: /*conditionSet*/ return this.conditionSet == null ? new Base[0] : new Base[] {this.conditionSet}; // CodeableConcept
-        case 1957710281: /*tempRange*/ return this.tempRange == null ? new Base[0] : new Base[] {this.tempRange}; // Range
+        case 548941206: /*temperatureQualifier*/ return this.temperatureQualifier == null ? new Base[0] : new Base[] {this.temperatureQualifier}; // CodeableConcept
+        case -39203799: /*temperatureRange*/ return this.temperatureRange == null ? new Base[0] : new Base[] {this.temperatureRange}; // Range
         case 40284952: /*maxDuration*/ return this.maxDuration == null ? new Base[0] : new Base[] {this.maxDuration}; // Duration
-        case -1391615939: /*lightExposure*/ return this.lightExposure == null ? new Base[0] : new Base[] {this.lightExposure}; // StringType
         case 301526158: /*instruction*/ return this.instruction == null ? new Base[0] : new Base[] {this.instruction}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1621,17 +1710,14 @@ public class SpecimenDefinition extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1202651833: // conditionSet
-          this.conditionSet = castToCodeableConcept(value); // CodeableConcept
+        case 548941206: // temperatureQualifier
+          this.temperatureQualifier = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case 1957710281: // tempRange
-          this.tempRange = castToRange(value); // Range
+        case -39203799: // temperatureRange
+          this.temperatureRange = castToRange(value); // Range
           return value;
         case 40284952: // maxDuration
           this.maxDuration = castToDuration(value); // Duration
-          return value;
-        case -1391615939: // lightExposure
-          this.lightExposure = castToString(value); // StringType
           return value;
         case 301526158: // instruction
           this.instruction = castToString(value); // StringType
@@ -1643,14 +1729,12 @@ public class SpecimenDefinition extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("conditionSet")) {
-          this.conditionSet = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("tempRange")) {
-          this.tempRange = castToRange(value); // Range
+        if (name.equals("temperatureQualifier")) {
+          this.temperatureQualifier = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("temperatureRange")) {
+          this.temperatureRange = castToRange(value); // Range
         } else if (name.equals("maxDuration")) {
           this.maxDuration = castToDuration(value); // Duration
-        } else if (name.equals("lightExposure")) {
-          this.lightExposure = castToString(value); // StringType
         } else if (name.equals("instruction")) {
           this.instruction = castToString(value); // StringType
         } else
@@ -1661,10 +1745,9 @@ public class SpecimenDefinition extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1202651833:  return getConditionSet(); 
-        case 1957710281:  return getTempRange(); 
+        case 548941206:  return getTemperatureQualifier(); 
+        case -39203799:  return getTemperatureRange(); 
         case 40284952:  return getMaxDuration(); 
-        case -1391615939:  return getLightExposureElement();
         case 301526158:  return getInstructionElement();
         default: return super.makeProperty(hash, name);
         }
@@ -1674,10 +1757,9 @@ public class SpecimenDefinition extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1202651833: /*conditionSet*/ return new String[] {"CodeableConcept"};
-        case 1957710281: /*tempRange*/ return new String[] {"Range"};
+        case 548941206: /*temperatureQualifier*/ return new String[] {"CodeableConcept"};
+        case -39203799: /*temperatureRange*/ return new String[] {"Range"};
         case 40284952: /*maxDuration*/ return new String[] {"Duration"};
-        case -1391615939: /*lightExposure*/ return new String[] {"string"};
         case 301526158: /*instruction*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1686,20 +1768,17 @@ public class SpecimenDefinition extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("conditionSet")) {
-          this.conditionSet = new CodeableConcept();
-          return this.conditionSet;
+        if (name.equals("temperatureQualifier")) {
+          this.temperatureQualifier = new CodeableConcept();
+          return this.temperatureQualifier;
         }
-        else if (name.equals("tempRange")) {
-          this.tempRange = new Range();
-          return this.tempRange;
+        else if (name.equals("temperatureRange")) {
+          this.temperatureRange = new Range();
+          return this.temperatureRange;
         }
         else if (name.equals("maxDuration")) {
           this.maxDuration = new Duration();
           return this.maxDuration;
-        }
-        else if (name.equals("lightExposure")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.lightExposure");
         }
         else if (name.equals("instruction")) {
           throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.instruction");
@@ -1708,13 +1787,12 @@ public class SpecimenDefinition extends DomainResource {
           return super.addChild(name);
       }
 
-      public SpecimenDefinitionSpecimenToLabHandlingComponent copy() {
-        SpecimenDefinitionSpecimenToLabHandlingComponent dst = new SpecimenDefinitionSpecimenToLabHandlingComponent();
+      public SpecimenDefinitionTypeTestedHandlingComponent copy() {
+        SpecimenDefinitionTypeTestedHandlingComponent dst = new SpecimenDefinitionTypeTestedHandlingComponent();
         copyValues(dst);
-        dst.conditionSet = conditionSet == null ? null : conditionSet.copy();
-        dst.tempRange = tempRange == null ? null : tempRange.copy();
+        dst.temperatureQualifier = temperatureQualifier == null ? null : temperatureQualifier.copy();
+        dst.temperatureRange = temperatureRange == null ? null : temperatureRange.copy();
         dst.maxDuration = maxDuration == null ? null : maxDuration.copy();
-        dst.lightExposure = lightExposure == null ? null : lightExposure.copy();
         dst.instruction = instruction == null ? null : instruction.copy();
         return dst;
       }
@@ -1723,32 +1801,31 @@ public class SpecimenDefinition extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof SpecimenDefinitionSpecimenToLabHandlingComponent))
+        if (!(other_ instanceof SpecimenDefinitionTypeTestedHandlingComponent))
           return false;
-        SpecimenDefinitionSpecimenToLabHandlingComponent o = (SpecimenDefinitionSpecimenToLabHandlingComponent) other_;
-        return compareDeep(conditionSet, o.conditionSet, true) && compareDeep(tempRange, o.tempRange, true)
-           && compareDeep(maxDuration, o.maxDuration, true) && compareDeep(lightExposure, o.lightExposure, true)
-           && compareDeep(instruction, o.instruction, true);
+        SpecimenDefinitionTypeTestedHandlingComponent o = (SpecimenDefinitionTypeTestedHandlingComponent) other_;
+        return compareDeep(temperatureQualifier, o.temperatureQualifier, true) && compareDeep(temperatureRange, o.temperatureRange, true)
+           && compareDeep(maxDuration, o.maxDuration, true) && compareDeep(instruction, o.instruction, true)
+          ;
       }
 
       @Override
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof SpecimenDefinitionSpecimenToLabHandlingComponent))
+        if (!(other_ instanceof SpecimenDefinitionTypeTestedHandlingComponent))
           return false;
-        SpecimenDefinitionSpecimenToLabHandlingComponent o = (SpecimenDefinitionSpecimenToLabHandlingComponent) other_;
-        return compareValues(lightExposure, o.lightExposure, true) && compareValues(instruction, o.instruction, true)
-          ;
+        SpecimenDefinitionTypeTestedHandlingComponent o = (SpecimenDefinitionTypeTestedHandlingComponent) other_;
+        return compareValues(instruction, o.instruction, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(conditionSet, tempRange, maxDuration
-          , lightExposure, instruction);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(temperatureQualifier, temperatureRange
+          , maxDuration, instruction);
       }
 
   public String fhirType() {
-    return "SpecimenDefinition.specimenToLab.handling";
+    return "SpecimenDefinition.typeTested.handling";
 
   }
 
@@ -1766,7 +1843,7 @@ public class SpecimenDefinition extends DomainResource {
      */
     @Child(name = "typeCollected", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Kind of material to collect", formalDefinition="The kind of material to be collected." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0487")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v2-0487")
     protected CodeableConcept typeCollected;
 
     /**
@@ -1793,11 +1870,11 @@ public class SpecimenDefinition extends DomainResource {
     /**
      * Specimen conditioned in a container as expected by the testing laboratory.
      */
-    @Child(name = "specimenToLab", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "typeTested", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Specimen in container intended for testing by lab", formalDefinition="Specimen conditioned in a container as expected by the testing laboratory." )
-    protected List<SpecimenDefinitionSpecimenToLabComponent> specimenToLab;
+    protected List<SpecimenDefinitionTypeTestedComponent> typeTested;
 
-    private static final long serialVersionUID = -2007444482L;
+    private static final long serialVersionUID = -563604076L;
 
   /**
    * Constructor
@@ -2006,56 +2083,56 @@ public class SpecimenDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #specimenToLab} (Specimen conditioned in a container as expected by the testing laboratory.)
+     * @return {@link #typeTested} (Specimen conditioned in a container as expected by the testing laboratory.)
      */
-    public List<SpecimenDefinitionSpecimenToLabComponent> getSpecimenToLab() { 
-      if (this.specimenToLab == null)
-        this.specimenToLab = new ArrayList<SpecimenDefinitionSpecimenToLabComponent>();
-      return this.specimenToLab;
+    public List<SpecimenDefinitionTypeTestedComponent> getTypeTested() { 
+      if (this.typeTested == null)
+        this.typeTested = new ArrayList<SpecimenDefinitionTypeTestedComponent>();
+      return this.typeTested;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public SpecimenDefinition setSpecimenToLab(List<SpecimenDefinitionSpecimenToLabComponent> theSpecimenToLab) { 
-      this.specimenToLab = theSpecimenToLab;
+    public SpecimenDefinition setTypeTested(List<SpecimenDefinitionTypeTestedComponent> theTypeTested) { 
+      this.typeTested = theTypeTested;
       return this;
     }
 
-    public boolean hasSpecimenToLab() { 
-      if (this.specimenToLab == null)
+    public boolean hasTypeTested() { 
+      if (this.typeTested == null)
         return false;
-      for (SpecimenDefinitionSpecimenToLabComponent item : this.specimenToLab)
+      for (SpecimenDefinitionTypeTestedComponent item : this.typeTested)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public SpecimenDefinitionSpecimenToLabComponent addSpecimenToLab() { //3
-      SpecimenDefinitionSpecimenToLabComponent t = new SpecimenDefinitionSpecimenToLabComponent();
-      if (this.specimenToLab == null)
-        this.specimenToLab = new ArrayList<SpecimenDefinitionSpecimenToLabComponent>();
-      this.specimenToLab.add(t);
+    public SpecimenDefinitionTypeTestedComponent addTypeTested() { //3
+      SpecimenDefinitionTypeTestedComponent t = new SpecimenDefinitionTypeTestedComponent();
+      if (this.typeTested == null)
+        this.typeTested = new ArrayList<SpecimenDefinitionTypeTestedComponent>();
+      this.typeTested.add(t);
       return t;
     }
 
-    public SpecimenDefinition addSpecimenToLab(SpecimenDefinitionSpecimenToLabComponent t) { //3
+    public SpecimenDefinition addTypeTested(SpecimenDefinitionTypeTestedComponent t) { //3
       if (t == null)
         return this;
-      if (this.specimenToLab == null)
-        this.specimenToLab = new ArrayList<SpecimenDefinitionSpecimenToLabComponent>();
-      this.specimenToLab.add(t);
+      if (this.typeTested == null)
+        this.typeTested = new ArrayList<SpecimenDefinitionTypeTestedComponent>();
+      this.typeTested.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #specimenToLab}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #typeTested}, creating it if it does not already exist
      */
-    public SpecimenDefinitionSpecimenToLabComponent getSpecimenToLabFirstRep() { 
-      if (getSpecimenToLab().isEmpty()) {
-        addSpecimenToLab();
+    public SpecimenDefinitionTypeTestedComponent getTypeTestedFirstRep() { 
+      if (getTypeTested().isEmpty()) {
+        addTypeTested();
       }
-      return getSpecimenToLab().get(0);
+      return getTypeTested().get(0);
     }
 
       protected void listChildren(List<Property> children) {
@@ -2065,7 +2142,7 @@ public class SpecimenDefinition extends DomainResource {
         children.add(new Property("patientPreparation", "string", "Preparation of the patient for specimen collection.", 0, 1, patientPreparation));
         children.add(new Property("timeAspect", "string", "Time aspect of specimen collection (duration or offset).", 0, 1, timeAspect));
         children.add(new Property("collection", "CodeableConcept", "The action to be performed for collecting the specimen.", 0, java.lang.Integer.MAX_VALUE, collection));
-        children.add(new Property("specimenToLab", "", "Specimen conditioned in a container as expected by the testing laboratory.", 0, java.lang.Integer.MAX_VALUE, specimenToLab));
+        children.add(new Property("typeTested", "", "Specimen conditioned in a container as expected by the testing laboratory.", 0, java.lang.Integer.MAX_VALUE, typeTested));
       }
 
       @Override
@@ -2076,7 +2153,7 @@ public class SpecimenDefinition extends DomainResource {
         case -879411630: /*patientPreparation*/  return new Property("patientPreparation", "string", "Preparation of the patient for specimen collection.", 0, 1, patientPreparation);
         case 276972933: /*timeAspect*/  return new Property("timeAspect", "string", "Time aspect of specimen collection (duration or offset).", 0, 1, timeAspect);
         case -1741312354: /*collection*/  return new Property("collection", "CodeableConcept", "The action to be performed for collecting the specimen.", 0, java.lang.Integer.MAX_VALUE, collection);
-        case 1669658346: /*specimenToLab*/  return new Property("specimenToLab", "", "Specimen conditioned in a container as expected by the testing laboratory.", 0, java.lang.Integer.MAX_VALUE, specimenToLab);
+        case -1407902581: /*typeTested*/  return new Property("typeTested", "", "Specimen conditioned in a container as expected by the testing laboratory.", 0, java.lang.Integer.MAX_VALUE, typeTested);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -2090,7 +2167,7 @@ public class SpecimenDefinition extends DomainResource {
         case -879411630: /*patientPreparation*/ return this.patientPreparation == null ? new Base[0] : new Base[] {this.patientPreparation}; // StringType
         case 276972933: /*timeAspect*/ return this.timeAspect == null ? new Base[0] : new Base[] {this.timeAspect}; // StringType
         case -1741312354: /*collection*/ return this.collection == null ? new Base[0] : this.collection.toArray(new Base[this.collection.size()]); // CodeableConcept
-        case 1669658346: /*specimenToLab*/ return this.specimenToLab == null ? new Base[0] : this.specimenToLab.toArray(new Base[this.specimenToLab.size()]); // SpecimenDefinitionSpecimenToLabComponent
+        case -1407902581: /*typeTested*/ return this.typeTested == null ? new Base[0] : this.typeTested.toArray(new Base[this.typeTested.size()]); // SpecimenDefinitionTypeTestedComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2114,8 +2191,8 @@ public class SpecimenDefinition extends DomainResource {
         case -1741312354: // collection
           this.getCollection().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case 1669658346: // specimenToLab
-          this.getSpecimenToLab().add((SpecimenDefinitionSpecimenToLabComponent) value); // SpecimenDefinitionSpecimenToLabComponent
+        case -1407902581: // typeTested
+          this.getTypeTested().add((SpecimenDefinitionTypeTestedComponent) value); // SpecimenDefinitionTypeTestedComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2134,8 +2211,8 @@ public class SpecimenDefinition extends DomainResource {
           this.timeAspect = castToString(value); // StringType
         } else if (name.equals("collection")) {
           this.getCollection().add(castToCodeableConcept(value));
-        } else if (name.equals("specimenToLab")) {
-          this.getSpecimenToLab().add((SpecimenDefinitionSpecimenToLabComponent) value);
+        } else if (name.equals("typeTested")) {
+          this.getTypeTested().add((SpecimenDefinitionTypeTestedComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -2149,7 +2226,7 @@ public class SpecimenDefinition extends DomainResource {
         case -879411630:  return getPatientPreparationElement();
         case 276972933:  return getTimeAspectElement();
         case -1741312354:  return addCollection(); 
-        case 1669658346:  return addSpecimenToLab(); 
+        case -1407902581:  return addTypeTested(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -2163,7 +2240,7 @@ public class SpecimenDefinition extends DomainResource {
         case -879411630: /*patientPreparation*/ return new String[] {"string"};
         case 276972933: /*timeAspect*/ return new String[] {"string"};
         case -1741312354: /*collection*/ return new String[] {"CodeableConcept"};
-        case 1669658346: /*specimenToLab*/ return new String[] {};
+        case -1407902581: /*typeTested*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2188,8 +2265,8 @@ public class SpecimenDefinition extends DomainResource {
         else if (name.equals("collection")) {
           return addCollection();
         }
-        else if (name.equals("specimenToLab")) {
-          return addSpecimenToLab();
+        else if (name.equals("typeTested")) {
+          return addTypeTested();
         }
         else
           return super.addChild(name);
@@ -2212,10 +2289,10 @@ public class SpecimenDefinition extends DomainResource {
           for (CodeableConcept i : collection)
             dst.collection.add(i.copy());
         };
-        if (specimenToLab != null) {
-          dst.specimenToLab = new ArrayList<SpecimenDefinitionSpecimenToLabComponent>();
-          for (SpecimenDefinitionSpecimenToLabComponent i : specimenToLab)
-            dst.specimenToLab.add(i.copy());
+        if (typeTested != null) {
+          dst.typeTested = new ArrayList<SpecimenDefinitionTypeTestedComponent>();
+          for (SpecimenDefinitionTypeTestedComponent i : typeTested)
+            dst.typeTested.add(i.copy());
         };
         return dst;
       }
@@ -2233,8 +2310,7 @@ public class SpecimenDefinition extends DomainResource {
         SpecimenDefinition o = (SpecimenDefinition) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(typeCollected, o.typeCollected, true)
            && compareDeep(patientPreparation, o.patientPreparation, true) && compareDeep(timeAspect, o.timeAspect, true)
-           && compareDeep(collection, o.collection, true) && compareDeep(specimenToLab, o.specimenToLab, true)
-          ;
+           && compareDeep(collection, o.collection, true) && compareDeep(typeTested, o.typeTested, true);
       }
 
       @Override
@@ -2250,7 +2326,7 @@ public class SpecimenDefinition extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, typeCollected
-          , patientPreparation, timeAspect, collection, specimenToLab);
+          , patientPreparation, timeAspect, collection, typeTested);
       }
 
   @Override
@@ -2263,17 +2339,17 @@ public class SpecimenDefinition extends DomainResource {
    * <p>
    * Description: <b>The type of specimen conditioned in container expected by the lab</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>SpecimenDefinition.specimenToLab.containerType</b><br>
+   * Path: <b>SpecimenDefinition.typeTested.container.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="container", path="SpecimenDefinition.specimenToLab.containerType", description="The type of specimen conditioned in container expected by the lab", type="token" )
+  @SearchParamDefinition(name="container", path="SpecimenDefinition.typeTested.container.type", description="The type of specimen conditioned in container expected by the lab", type="token" )
   public static final String SP_CONTAINER = "container";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>container</b>
    * <p>
    * Description: <b>The type of specimen conditioned in container expected by the lab</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>SpecimenDefinition.specimenToLab.containerType</b><br>
+   * Path: <b>SpecimenDefinition.typeTested.container.type</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTAINER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTAINER);

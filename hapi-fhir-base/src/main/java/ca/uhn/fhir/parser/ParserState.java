@@ -1286,9 +1286,7 @@ class ParserState<T> {
 				} else {
 					try {
 						myInstance.setValueAsString(theValue);
-					} catch (DataFormatException e) {
-						myErrorHandler.invalidValue(null, theValue, e.getMessage());
-					} catch (IllegalArgumentException e) {
+					} catch (DataFormatException | IllegalArgumentException e) {
 						myErrorHandler.invalidValue(null, theValue, e.getMessage());
 					}
 				}

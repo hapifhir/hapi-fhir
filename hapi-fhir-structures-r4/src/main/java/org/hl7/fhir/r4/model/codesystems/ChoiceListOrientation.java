@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ChoiceListOrientation {
 
         /**
-         * List choices along the horizontal axis
+         * List choices along the horizontal axis.
          */
         HORIZONTAL, 
         /**
-         * List choices down the vertical axis
+         * List choices down the vertical axis.
          */
         VERTICAL, 
         /**
@@ -65,12 +65,12 @@ public enum ChoiceListOrientation {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/choice-list-orientation";
+          return "http://terminology.hl7.org/CodeSystem/choice-list-orientation";
         }
         public String getDefinition() {
           switch (this) {
-            case HORIZONTAL: return "List choices along the horizontal axis";
-            case VERTICAL: return "List choices down the vertical axis";
+            case HORIZONTAL: return "List choices along the horizontal axis.";
+            case VERTICAL: return "List choices down the vertical axis.";
             default: return "?";
           }
         }

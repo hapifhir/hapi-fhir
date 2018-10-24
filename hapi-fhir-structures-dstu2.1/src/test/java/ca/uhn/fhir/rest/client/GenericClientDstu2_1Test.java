@@ -478,7 +478,7 @@ public class GenericClientDstu2_1Test {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail();
 		} catch (FhirClientConnectionException e) {
-			assertEquals("java.lang.IllegalStateException", e.getMessage());
+			assertEquals(null, e.getMessage());
 		}
 
 		try {

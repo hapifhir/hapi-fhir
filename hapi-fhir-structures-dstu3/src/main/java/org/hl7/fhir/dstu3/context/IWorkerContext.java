@@ -195,7 +195,9 @@ public interface IWorkerContext {
    * @throws FHIRException 
    */
   public ValueSetExpansionComponent expandVS(ConceptSetComponent inc, boolean heiarchical) throws TerminologyServiceException;
-  
+
+  StructureDefinition fetchTypeDefinition(String theCode);
+
   public class ValidationResult {
     private ConceptDefinitionComponent definition;
     private IssueSeverity severity;

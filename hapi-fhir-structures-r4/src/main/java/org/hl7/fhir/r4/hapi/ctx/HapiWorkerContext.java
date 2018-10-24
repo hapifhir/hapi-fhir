@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderFactory;
@@ -40,7 +39,8 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
   private IValidationSupport myValidationSupport;
-  private ExpansionProfile myExpansionProfile;
+  private Parameters myExpansionProfile;
+  private String myOverrideVersionNs;
 
   public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
     Validate.notNull(theCtx, "theCtx must not be null");
@@ -82,7 +82,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValueSetExpander getExpander() {
-    ValueSetExpanderSimple retVal = new ValueSetExpanderSimple(this, this);
+    ValueSetExpanderSimple retVal = new ValueSetExpanderSimple(this);
     retVal.setMaxExpansionSize(Integer.MAX_VALUE);
     return retVal;
   }
@@ -104,7 +104,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public List<String> getResourceNames() {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
     for (ResourceType next : ResourceType.values()) {
       result.add(next.name());
     }
@@ -143,7 +143,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public Set<String> typeTails() {
-    return new HashSet<String>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
+    return new HashSet<>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
       "Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity", "SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint",
       "Timing", "Reference", "Annotation", "Signature", "Meta"));
   }
@@ -157,7 +157,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       }
     }
 
-    return new ValidationResult(null, null);
+    return new ValidationResult(IssueSeverity.ERROR, null);
   }
 
   @Override
@@ -230,6 +230,15 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       expandedValueSet = new ValueSetExpansionOutcome(expansion);
     }
 
+    /*
+     * The following valueset is a special case, since the mime types codesystem is very difficult to expand
+     */
+    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getId())) {
+      ValueSet expansion = new ValueSet();
+      expansion.getExpansion().addContains().setCode(theCode).setSystem(theSystem).setDisplay(theDisplay);
+      expandedValueSet = new ValueSetExpansionOutcome(expansion);
+    }
+
     if (expandedValueSet == null) {
       expandedValueSet = expand(theVs, null);
     }
@@ -255,9 +264,24 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
+  public ValidationResult validateCode(String code, ValueSet vs) {
+    return validateCode(null, code, null, vs);
+  }
+
+  @Override
   @CoverageIgnore
   public List<MetadataResource> allConformanceResources() {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Parameters getExpansionParameters() {
+    return myExpansionProfile;
+  }
+
+  @Override
+  public void setExpansionProfile(Parameters theExpParameters) {
+    myExpansionProfile = theExpParameters;
   }
 
   @Override
@@ -267,7 +291,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValueSetExpansionOutcome expand(ValueSet theSource, ExpansionProfile theProfile) {
+  public ValueSetExpansionOutcome expand(ValueSet theSource, Parameters theProfile) {
     ValueSetExpansionOutcome vso;
     try {
       vso = getExpander().expand(theSource, theProfile);
@@ -284,27 +308,22 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ExpansionProfile getExpansionProfile() {
-    return myExpansionProfile;
-  }
-
-  @Override
-  public void setExpansionProfile(ExpansionProfile theExpProfile) {
-    myExpansionProfile = theExpProfile;
-  }
-
-  @Override
   public ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHeiarchical) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHeiarchical) throws TerminologyServiceException {
+  public ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHeiarchical) throws TerminologyServiceException {
     return myValidationSupport.expandValueSet(myCtx, theInc);
   }
 
   @Override
   public void setLogger(ILoggingService theLogger) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ILoggingService getLogger() {
     throw new UnsupportedOperationException();
   }
 
@@ -336,6 +355,21 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public StructureMap getTransform(String url) {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String getOverrideVersionNs() {
+    return myOverrideVersionNs;
+  }
+
+  @Override
+  public void setOverrideVersionNs(String value) {
+    myOverrideVersionNs = value;
+  }
+
+  @Override
+  public StructureDefinition fetchTypeDefinition(String typeName) {
+    return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
   }
 
   @Override

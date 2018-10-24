@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes a comparison of an immunization event against published recommendations to determine if the administration is "valid" in relation to those  recommendations.
  */
-@ResourceDef(name="ImmunizationEvaluation", profile="http://hl7.org/fhir/Profile/ImmunizationEvaluation")
+@ResourceDef(name="ImmunizationEvaluation", profile="http://hl7.org/fhir/StructureDefinition/ImmunizationEvaluation")
 public class ImmunizationEvaluation extends DomainResource {
 
     public enum ImmunizationEvaluationStatus {
@@ -189,10 +189,10 @@ public class ImmunizationEvaluation extends DomainResource {
     /**
      * The vaccine preventable disease the dose is being evaluated against.
      */
-    @Child(name = "targetDisease", type = {CodeableConcept.class}, order=5, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "targetDisease", type = {CodeableConcept.class}, order=5, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Evaluation target disease", formalDefinition="The vaccine preventable disease the dose is being evaluated against." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/immunization-evaluation-target-disease")
-    protected List<CodeableConcept> targetDisease;
+    protected CodeableConcept targetDisease;
 
     /**
      * The vaccine administration event being evaluated.
@@ -250,7 +250,7 @@ public class ImmunizationEvaluation extends DomainResource {
     @Description(shortDefinition="Recommended number of doses for immunity", formalDefinition="The recommended number of doses to achieve immunity." )
     protected Type seriesDoses;
 
-    private static final long serialVersionUID = -429669628L;
+    private static final long serialVersionUID = 1248741226L;
 
   /**
    * Constructor
@@ -262,10 +262,11 @@ public class ImmunizationEvaluation extends DomainResource {
   /**
    * Constructor
    */
-    public ImmunizationEvaluation(Enumeration<ImmunizationEvaluationStatus> status, Reference patient, Reference immunizationEvent, CodeableConcept doseStatus) {
+    public ImmunizationEvaluation(Enumeration<ImmunizationEvaluationStatus> status, Reference patient, CodeableConcept targetDisease, Reference immunizationEvent, CodeableConcept doseStatus) {
       super();
       this.status = status;
       this.patient = patient;
+      this.targetDisease = targetDisease;
       this.immunizationEvent = immunizationEvent;
       this.doseStatus = doseStatus;
     }
@@ -508,54 +509,25 @@ public class ImmunizationEvaluation extends DomainResource {
     /**
      * @return {@link #targetDisease} (The vaccine preventable disease the dose is being evaluated against.)
      */
-    public List<CodeableConcept> getTargetDisease() { 
+    public CodeableConcept getTargetDisease() { 
       if (this.targetDisease == null)
-        this.targetDisease = new ArrayList<CodeableConcept>();
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ImmunizationEvaluation.targetDisease");
+        else if (Configuration.doAutoCreate())
+          this.targetDisease = new CodeableConcept(); // cc
       return this.targetDisease;
     }
 
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public ImmunizationEvaluation setTargetDisease(List<CodeableConcept> theTargetDisease) { 
-      this.targetDisease = theTargetDisease;
-      return this;
-    }
-
     public boolean hasTargetDisease() { 
-      if (this.targetDisease == null)
-        return false;
-      for (CodeableConcept item : this.targetDisease)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public CodeableConcept addTargetDisease() { //3
-      CodeableConcept t = new CodeableConcept();
-      if (this.targetDisease == null)
-        this.targetDisease = new ArrayList<CodeableConcept>();
-      this.targetDisease.add(t);
-      return t;
-    }
-
-    public ImmunizationEvaluation addTargetDisease(CodeableConcept t) { //3
-      if (t == null)
-        return this;
-      if (this.targetDisease == null)
-        this.targetDisease = new ArrayList<CodeableConcept>();
-      this.targetDisease.add(t);
-      return this;
+      return this.targetDisease != null && !this.targetDisease.isEmpty();
     }
 
     /**
-     * @return The first repetition of repeating field {@link #targetDisease}, creating it if it does not already exist
+     * @param value {@link #targetDisease} (The vaccine preventable disease the dose is being evaluated against.)
      */
-    public CodeableConcept getTargetDiseaseFirstRep() { 
-      if (getTargetDisease().isEmpty()) {
-        addTargetDisease();
-      }
-      return getTargetDisease().get(0);
+    public ImmunizationEvaluation setTargetDisease(CodeableConcept value) { 
+      this.targetDisease = value;
+      return this;
     }
 
     /**
@@ -886,7 +858,7 @@ public class ImmunizationEvaluation extends DomainResource {
         children.add(new Property("patient", "Reference(Patient)", "The individual for whom the evaluation is being done.", 0, 1, patient));
         children.add(new Property("date", "dateTime", "The date the evaluation of the vaccine administration event was performed.", 0, 1, date));
         children.add(new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol (e.g. ACIP).", 0, 1, authority));
-        children.add(new Property("targetDisease", "CodeableConcept", "The vaccine preventable disease the dose is being evaluated against.", 0, java.lang.Integer.MAX_VALUE, targetDisease));
+        children.add(new Property("targetDisease", "CodeableConcept", "The vaccine preventable disease the dose is being evaluated against.", 0, 1, targetDisease));
         children.add(new Property("immunizationEvent", "Reference(Immunization)", "The vaccine administration event being evaluated.", 0, 1, immunizationEvent));
         children.add(new Property("doseStatus", "CodeableConcept", "Indicates if the dose is valid or not valid with respect to the published recommendations.", 0, 1, doseStatus));
         children.add(new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why the vaccine administration event is valid or not relative to the published recommendations.", 0, java.lang.Integer.MAX_VALUE, doseStatusReason));
@@ -904,7 +876,7 @@ public class ImmunizationEvaluation extends DomainResource {
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The individual for whom the evaluation is being done.", 0, 1, patient);
         case 3076014: /*date*/  return new Property("date", "dateTime", "The date the evaluation of the vaccine administration event was performed.", 0, 1, date);
         case 1475610435: /*authority*/  return new Property("authority", "Reference(Organization)", "Indicates the authority who published the protocol (e.g. ACIP).", 0, 1, authority);
-        case -319593813: /*targetDisease*/  return new Property("targetDisease", "CodeableConcept", "The vaccine preventable disease the dose is being evaluated against.", 0, java.lang.Integer.MAX_VALUE, targetDisease);
+        case -319593813: /*targetDisease*/  return new Property("targetDisease", "CodeableConcept", "The vaccine preventable disease the dose is being evaluated against.", 0, 1, targetDisease);
         case 1081446840: /*immunizationEvent*/  return new Property("immunizationEvent", "Reference(Immunization)", "The vaccine administration event being evaluated.", 0, 1, immunizationEvent);
         case -745826705: /*doseStatus*/  return new Property("doseStatus", "CodeableConcept", "Indicates if the dose is valid or not valid with respect to the published recommendations.", 0, 1, doseStatus);
         case 662783379: /*doseStatusReason*/  return new Property("doseStatusReason", "CodeableConcept", "Provides an explanation as to why the vaccine administration event is valid or not relative to the published recommendations.", 0, java.lang.Integer.MAX_VALUE, doseStatusReason);
@@ -931,7 +903,7 @@ public class ImmunizationEvaluation extends DomainResource {
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 1475610435: /*authority*/ return this.authority == null ? new Base[0] : new Base[] {this.authority}; // Reference
-        case -319593813: /*targetDisease*/ return this.targetDisease == null ? new Base[0] : this.targetDisease.toArray(new Base[this.targetDisease.size()]); // CodeableConcept
+        case -319593813: /*targetDisease*/ return this.targetDisease == null ? new Base[0] : new Base[] {this.targetDisease}; // CodeableConcept
         case 1081446840: /*immunizationEvent*/ return this.immunizationEvent == null ? new Base[0] : new Base[] {this.immunizationEvent}; // Reference
         case -745826705: /*doseStatus*/ return this.doseStatus == null ? new Base[0] : new Base[] {this.doseStatus}; // CodeableConcept
         case 662783379: /*doseStatusReason*/ return this.doseStatusReason == null ? new Base[0] : this.doseStatusReason.toArray(new Base[this.doseStatusReason.size()]); // CodeableConcept
@@ -964,7 +936,7 @@ public class ImmunizationEvaluation extends DomainResource {
           this.authority = castToReference(value); // Reference
           return value;
         case -319593813: // targetDisease
-          this.getTargetDisease().add(castToCodeableConcept(value)); // CodeableConcept
+          this.targetDisease = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 1081446840: // immunizationEvent
           this.immunizationEvent = castToReference(value); // Reference
@@ -1006,7 +978,7 @@ public class ImmunizationEvaluation extends DomainResource {
         } else if (name.equals("authority")) {
           this.authority = castToReference(value); // Reference
         } else if (name.equals("targetDisease")) {
-          this.getTargetDisease().add(castToCodeableConcept(value));
+          this.targetDisease = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("immunizationEvent")) {
           this.immunizationEvent = castToReference(value); // Reference
         } else if (name.equals("doseStatus")) {
@@ -1034,7 +1006,7 @@ public class ImmunizationEvaluation extends DomainResource {
         case -791418107:  return getPatient(); 
         case 3076014:  return getDateElement();
         case 1475610435:  return getAuthority(); 
-        case -319593813:  return addTargetDisease(); 
+        case -319593813:  return getTargetDisease(); 
         case 1081446840:  return getImmunizationEvent(); 
         case -745826705:  return getDoseStatus(); 
         case 662783379:  return addDoseStatusReason(); 
@@ -1090,7 +1062,8 @@ public class ImmunizationEvaluation extends DomainResource {
           return this.authority;
         }
         else if (name.equals("targetDisease")) {
-          return addTargetDisease();
+          this.targetDisease = new CodeableConcept();
+          return this.targetDisease;
         }
         else if (name.equals("immunizationEvent")) {
           this.immunizationEvent = new Reference();
@@ -1146,11 +1119,7 @@ public class ImmunizationEvaluation extends DomainResource {
         dst.patient = patient == null ? null : patient.copy();
         dst.date = date == null ? null : date.copy();
         dst.authority = authority == null ? null : authority.copy();
-        if (targetDisease != null) {
-          dst.targetDisease = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : targetDisease)
-            dst.targetDisease.add(i.copy());
-        };
+        dst.targetDisease = targetDisease == null ? null : targetDisease.copy();
         dst.immunizationEvent = immunizationEvent == null ? null : immunizationEvent.copy();
         dst.doseStatus = doseStatus == null ? null : doseStatus.copy();
         if (doseStatusReason != null) {

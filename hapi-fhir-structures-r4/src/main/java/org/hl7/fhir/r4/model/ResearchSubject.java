@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A physical entity which is the primary unit of operational and/or administrative interest in a study.
  */
-@ResourceDef(name="ResearchSubject", profile="http://hl7.org/fhir/Profile/ResearchSubject")
+@ResourceDef(name="ResearchSubject", profile="http://hl7.org/fhir/StructureDefinition/ResearchSubject")
 public class ResearchSubject extends DomainResource {
 
     public enum ResearchSubjectStatus {
@@ -67,7 +67,7 @@ is ineligible for the study.
          */
         INELIGIBLE, 
         /**
-         * A person for whom registration was not completed
+         * A person for whom registration was not completed.
          */
         NOTREGISTERED, 
         /**
@@ -183,7 +183,7 @@ responding, withdrawal, non-compliance and/or adverse event.
             case ELIGIBLE: return "A person that has met the eligibility criteria for inclusion in a study.";
             case FOLLOWUP: return "A person is no longer receiving study intervention and/or being evaluated with tests and procedures according to the protocol, but they are being monitored on a protocol-prescribed schedule.";
             case INELIGIBLE: return "A person who did not meet one or more criteria required for participation in a study is considered to have failed screening or\nis ineligible for the study.";
-            case NOTREGISTERED: return "A person for whom registration was not completed";
+            case NOTREGISTERED: return "A person for whom registration was not completed.";
             case OFFSTUDY: return "A person that has ended their participation on a study either because their treatment/observation is complete or through not\nresponding, withdrawal, non-compliance and/or adverse event.";
             case ONSTUDY: return "A person that is enrolled or registered on a study.";
             case ONSTUDYINTERVENTION: return "The person is receiving the treatment or participating in an activity (e.g. yoga, diet, etc.) that the study is evaluating.";

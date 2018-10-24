@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,17 +37,21 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActionParticipantType {
 
         /**
-         * The participant is the patient under evaluation
+         * The participant is the patient under evaluation.
          */
         PATIENT, 
         /**
-         * The participant is a practitioner involved in the patient's care
+         * The participant is a practitioner involved in the patient's care.
          */
         PRACTITIONER, 
         /**
-         * The participant is a person related to the patient
+         * The participant is a person related to the patient.
          */
         RELATEDPERSON, 
+        /**
+         * The participant is a system or device used in the care of the patient.
+         */
+        DEVICE, 
         /**
          * added to help the parsers
          */
@@ -61,6 +65,8 @@ public enum ActionParticipantType {
           return PRACTITIONER;
         if ("related-person".equals(codeString))
           return RELATEDPERSON;
+        if ("device".equals(codeString))
+          return DEVICE;
         throw new FHIRException("Unknown ActionParticipantType code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,6 +74,7 @@ public enum ActionParticipantType {
             case PATIENT: return "patient";
             case PRACTITIONER: return "practitioner";
             case RELATEDPERSON: return "related-person";
+            case DEVICE: return "device";
             default: return "?";
           }
         }
@@ -76,9 +83,10 @@ public enum ActionParticipantType {
         }
         public String getDefinition() {
           switch (this) {
-            case PATIENT: return "The participant is the patient under evaluation";
-            case PRACTITIONER: return "The participant is a practitioner involved in the patient's care";
-            case RELATEDPERSON: return "The participant is a person related to the patient";
+            case PATIENT: return "The participant is the patient under evaluation.";
+            case PRACTITIONER: return "The participant is a practitioner involved in the patient's care.";
+            case RELATEDPERSON: return "The participant is a person related to the patient.";
+            case DEVICE: return "The participant is a system or device used in the care of the patient.";
             default: return "?";
           }
         }
@@ -87,6 +95,7 @@ public enum ActionParticipantType {
             case PATIENT: return "Patient";
             case PRACTITIONER: return "Practitioner";
             case RELATEDPERSON: return "Related Person";
+            case DEVICE: return "Device";
             default: return "?";
           }
     }

@@ -215,9 +215,11 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 		} else if (searchId != null) {
+			int offset = theOffset + resourceList.size();
+
 			// We're doing offset pages
-			if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
-				linkNext = (RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
+			if (numTotalResults == null || offset < numTotalResults) {
+				linkNext = (RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, offset, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
 			}
 			if (theOffset > 0) {
 				int start = Math.max(0, theOffset - theLimit);

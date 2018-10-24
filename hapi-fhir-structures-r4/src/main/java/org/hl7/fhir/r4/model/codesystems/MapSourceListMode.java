@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MapSourceListMode {
 
         /**
-         * Only process this rule for the first in the list
+         * Only process this rule for the first in the list.
          */
         FIRST, 
         /**
-         * Process this rule for all but the first
+         * Process this rule for all but the first.
          */
         NOTFIRST, 
         /**
-         * Only process this rule for the last in the list
+         * Only process this rule for the last in the list.
          */
         LAST, 
         /**
-         * Process this rule for all but the last
+         * Process this rule for all but the last.
          */
         NOTLAST, 
         /**
-         * Only process this rule is there is only item
+         * Only process this rule is there is only item.
          */
         ONLYONE, 
         /**
@@ -90,11 +90,11 @@ public enum MapSourceListMode {
         }
         public String getDefinition() {
           switch (this) {
-            case FIRST: return "Only process this rule for the first in the list";
-            case NOTFIRST: return "Process this rule for all but the first";
-            case LAST: return "Only process this rule for the last in the list";
-            case NOTLAST: return "Process this rule for all but the last";
-            case ONLYONE: return "Only process this rule is there is only item";
+            case FIRST: return "Only process this rule for the first in the list.";
+            case NOTFIRST: return "Process this rule for all but the first.";
+            case LAST: return "Only process this rule for the last in the list.";
+            case NOTLAST: return "Process this rule for all but the last.";
+            case ONLYONE: return "Only process this rule is there is only item.";
             default: return "?";
           }
         }

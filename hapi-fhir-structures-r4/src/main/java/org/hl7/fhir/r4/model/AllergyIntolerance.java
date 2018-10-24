@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Risk of harmful or undesirable, physiological response which is unique to an individual and associated with exposure to a substance.
  */
-@ResourceDef(name="AllergyIntolerance", profile="http://hl7.org/fhir/Profile/AllergyIntolerance")
+@ResourceDef(name="AllergyIntolerance", profile="http://hl7.org/fhir/StructureDefinition/AllergyIntolerance")
 public class AllergyIntolerance extends DomainResource {
 
     public enum AllergyIntoleranceClinicalStatus {
@@ -58,7 +58,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         INACTIVE, 
         /**
-         * A reaction to the identified substance has been clinically reassessed by testing or re-exposure and considered to be resolved.
+         * A reaction to the identified substance has been clinically reassessed by testing or re-exposure and considered to be resolved. Re-exposure could be accidental, unplanned, or outside of any clinical setting.
          */
         RESOLVED, 
         /**
@@ -99,7 +99,7 @@ public class AllergyIntolerance extends DomainResource {
           switch (this) {
             case ACTIVE: return "An active record of a risk of a reaction to the identified substance.";
             case INACTIVE: return "An inactivated record of a risk of a reaction to the identified substance.";
-            case RESOLVED: return "A reaction to the identified substance has been clinically reassessed by testing or re-exposure and considered to be resolved.";
+            case RESOLVED: return "A reaction to the identified substance has been clinically reassessed by testing or re-exposure and considered to be resolved. Re-exposure could be accidental, unplanned, or outside of any clinical setting.";
             default: return "?";
           }
         }
@@ -166,7 +166,7 @@ public class AllergyIntolerance extends DomainResource {
          */
         CONFIRMED, 
         /**
-         * A propensity for a reaction to the identified substance has been disproven with a high level of clinical certainty, which may include testing or rechallenge, and is refuted.
+         * A propensity for a reaction to the identified substance has been disputed or disproven with a sufficient level of clinical certainty to justify invalidating the assertion.  This might or might not include testing or rechallenge.
          */
         REFUTED, 
         /**
@@ -215,7 +215,7 @@ public class AllergyIntolerance extends DomainResource {
           switch (this) {
             case UNCONFIRMED: return "A low level of certainty about the propensity for a reaction to the identified substance.";
             case CONFIRMED: return "A high level of certainty about the propensity for a reaction to the identified substance, which may include clinical evidence by testing or rechallenge.";
-            case REFUTED: return "A propensity for a reaction to the identified substance has been disproven with a high level of clinical certainty, which may include testing or rechallenge, and is refuted.";
+            case REFUTED: return "A propensity for a reaction to the identified substance has been disputed or disproven with a sufficient level of clinical certainty to justify invalidating the assertion.  This might or might not include testing or rechallenge.";
             case ENTEREDINERROR: return "The statement was entered in error and is not valid.";
             default: return "?";
           }
@@ -1372,11 +1372,11 @@ public class AllergyIntolerance extends DomainResource {
     protected Type onset;
 
     /**
-     * The date on which the existence of the AllergyIntolerance was first asserted or acknowledged.
+     * The recordedDate represents when this particular AllergyIntolerance record was created in the system, which is often a system-generated date.
      */
-    @Child(name = "assertedDate", type = {DateTimeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Date record was believed accurate", formalDefinition="The date on which the existence of the AllergyIntolerance was first asserted or acknowledged." )
-    protected DateTimeType assertedDate;
+    @Child(name = "recordedDate", type = {DateTimeType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Date record was first recorded", formalDefinition="The recordedDate represents when this particular AllergyIntolerance record was created in the system, which is often a system-generated date." )
+    protected DateTimeType recordedDate;
 
     /**
      * Individual who recorded the record and takes responsibility for its content.
@@ -1423,7 +1423,7 @@ public class AllergyIntolerance extends DomainResource {
     @Description(shortDefinition="Adverse Reaction Events linked to exposure to substance", formalDefinition="Details about each adverse reaction event linked to exposure to the identified substance." )
     protected List<AllergyIntoleranceReactionComponent> reaction;
 
-    private static final long serialVersionUID = 325449518L;
+    private static final long serialVersionUID = 2122297529L;
 
   /**
    * Constructor
@@ -1959,50 +1959,50 @@ public class AllergyIntolerance extends DomainResource {
     }
 
     /**
-     * @return {@link #assertedDate} (The date on which the existence of the AllergyIntolerance was first asserted or acknowledged.). This is the underlying object with id, value and extensions. The accessor "getAssertedDate" gives direct access to the value
+     * @return {@link #recordedDate} (The recordedDate represents when this particular AllergyIntolerance record was created in the system, which is often a system-generated date.). This is the underlying object with id, value and extensions. The accessor "getRecordedDate" gives direct access to the value
      */
-    public DateTimeType getAssertedDateElement() { 
-      if (this.assertedDate == null)
+    public DateTimeType getRecordedDateElement() { 
+      if (this.recordedDate == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create AllergyIntolerance.assertedDate");
+          throw new Error("Attempt to auto-create AllergyIntolerance.recordedDate");
         else if (Configuration.doAutoCreate())
-          this.assertedDate = new DateTimeType(); // bb
-      return this.assertedDate;
+          this.recordedDate = new DateTimeType(); // bb
+      return this.recordedDate;
     }
 
-    public boolean hasAssertedDateElement() { 
-      return this.assertedDate != null && !this.assertedDate.isEmpty();
+    public boolean hasRecordedDateElement() { 
+      return this.recordedDate != null && !this.recordedDate.isEmpty();
     }
 
-    public boolean hasAssertedDate() { 
-      return this.assertedDate != null && !this.assertedDate.isEmpty();
+    public boolean hasRecordedDate() { 
+      return this.recordedDate != null && !this.recordedDate.isEmpty();
     }
 
     /**
-     * @param value {@link #assertedDate} (The date on which the existence of the AllergyIntolerance was first asserted or acknowledged.). This is the underlying object with id, value and extensions. The accessor "getAssertedDate" gives direct access to the value
+     * @param value {@link #recordedDate} (The recordedDate represents when this particular AllergyIntolerance record was created in the system, which is often a system-generated date.). This is the underlying object with id, value and extensions. The accessor "getRecordedDate" gives direct access to the value
      */
-    public AllergyIntolerance setAssertedDateElement(DateTimeType value) { 
-      this.assertedDate = value;
+    public AllergyIntolerance setRecordedDateElement(DateTimeType value) { 
+      this.recordedDate = value;
       return this;
     }
 
     /**
-     * @return The date on which the existence of the AllergyIntolerance was first asserted or acknowledged.
+     * @return The recordedDate represents when this particular AllergyIntolerance record was created in the system, which is often a system-generated date.
      */
-    public Date getAssertedDate() { 
-      return this.assertedDate == null ? null : this.assertedDate.getValue();
+    public Date getRecordedDate() { 
+      return this.recordedDate == null ? null : this.recordedDate.getValue();
     }
 
     /**
-     * @param value The date on which the existence of the AllergyIntolerance was first asserted or acknowledged.
+     * @param value The recordedDate represents when this particular AllergyIntolerance record was created in the system, which is often a system-generated date.
      */
-    public AllergyIntolerance setAssertedDate(Date value) { 
+    public AllergyIntolerance setRecordedDate(Date value) { 
       if (value == null)
-        this.assertedDate = null;
+        this.recordedDate = null;
       else {
-        if (this.assertedDate == null)
-          this.assertedDate = new DateTimeType();
-        this.assertedDate.setValue(value);
+        if (this.recordedDate == null)
+          this.recordedDate = new DateTimeType();
+        this.recordedDate.setValue(value);
       }
       return this;
     }
@@ -2252,7 +2252,7 @@ public class AllergyIntolerance extends DomainResource {
         children.add(new Property("patient", "Reference(Patient)", "The patient who has the allergy or intolerance.", 0, 1, patient));
         children.add(new Property("encounter", "Reference(Encounter)", "The encounter when the allergy or intolerance was asserted.", 0, 1, encounter));
         children.add(new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset));
-        children.add(new Property("assertedDate", "dateTime", "The date on which the existence of the AllergyIntolerance was first asserted or acknowledged.", 0, 1, assertedDate));
+        children.add(new Property("recordedDate", "dateTime", "The recordedDate represents when this particular AllergyIntolerance record was created in the system, which is often a system-generated date.", 0, 1, recordedDate));
         children.add(new Property("recorder", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who recorded the record and takes responsibility for its content.", 0, 1, recorder));
         children.add(new Property("asserter", "Reference(Patient|RelatedPerson|Practitioner)", "The source of the information about the allergy that is recorded.", 0, 1, asserter));
         children.add(new Property("lastOccurrence", "dateTime", "Represents the date and/or time of the last known occurrence of a reaction event.", 0, 1, lastOccurrence));
@@ -2279,7 +2279,7 @@ public class AllergyIntolerance extends DomainResource {
         case -1545082428: /*onsetPeriod*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
         case -186664742: /*onsetRange*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
         case -1445342188: /*onsetString*/  return new Property("onset[x]", "dateTime|Age|Period|Range|string", "Estimated or actual date,  date-time, or age when allergy or intolerance was identified.", 0, 1, onset);
-        case -174231629: /*assertedDate*/  return new Property("assertedDate", "dateTime", "The date on which the existence of the AllergyIntolerance was first asserted or acknowledged.", 0, 1, assertedDate);
+        case -1952893826: /*recordedDate*/  return new Property("recordedDate", "dateTime", "The recordedDate represents when this particular AllergyIntolerance record was created in the system, which is often a system-generated date.", 0, 1, recordedDate);
         case -799233858: /*recorder*/  return new Property("recorder", "Reference(Practitioner|Patient|RelatedPerson)", "Individual who recorded the record and takes responsibility for its content.", 0, 1, recorder);
         case -373242253: /*asserter*/  return new Property("asserter", "Reference(Patient|RelatedPerson|Practitioner)", "The source of the information about the allergy that is recorded.", 0, 1, asserter);
         case 1896977671: /*lastOccurrence*/  return new Property("lastOccurrence", "dateTime", "Represents the date and/or time of the last known occurrence of a reaction event.", 0, 1, lastOccurrence);
@@ -2303,7 +2303,7 @@ public class AllergyIntolerance extends DomainResource {
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case 105901603: /*onset*/ return this.onset == null ? new Base[0] : new Base[] {this.onset}; // Type
-        case -174231629: /*assertedDate*/ return this.assertedDate == null ? new Base[0] : new Base[] {this.assertedDate}; // DateTimeType
+        case -1952893826: /*recordedDate*/ return this.recordedDate == null ? new Base[0] : new Base[] {this.recordedDate}; // DateTimeType
         case -799233858: /*recorder*/ return this.recorder == null ? new Base[0] : new Base[] {this.recorder}; // Reference
         case -373242253: /*asserter*/ return this.asserter == null ? new Base[0] : new Base[] {this.asserter}; // Reference
         case 1896977671: /*lastOccurrence*/ return this.lastOccurrence == null ? new Base[0] : new Base[] {this.lastOccurrence}; // DateTimeType
@@ -2352,8 +2352,8 @@ public class AllergyIntolerance extends DomainResource {
         case 105901603: // onset
           this.onset = castToType(value); // Type
           return value;
-        case -174231629: // assertedDate
-          this.assertedDate = castToDateTime(value); // DateTimeType
+        case -1952893826: // recordedDate
+          this.recordedDate = castToDateTime(value); // DateTimeType
           return value;
         case -799233858: // recorder
           this.recorder = castToReference(value); // Reference
@@ -2402,8 +2402,8 @@ public class AllergyIntolerance extends DomainResource {
           this.encounter = castToReference(value); // Reference
         } else if (name.equals("onset[x]")) {
           this.onset = castToType(value); // Type
-        } else if (name.equals("assertedDate")) {
-          this.assertedDate = castToDateTime(value); // DateTimeType
+        } else if (name.equals("recordedDate")) {
+          this.recordedDate = castToDateTime(value); // DateTimeType
         } else if (name.equals("recorder")) {
           this.recorder = castToReference(value); // Reference
         } else if (name.equals("asserter")) {
@@ -2433,7 +2433,7 @@ public class AllergyIntolerance extends DomainResource {
         case 1524132147:  return getEncounter(); 
         case -1886216323:  return getOnset(); 
         case 105901603:  return getOnset(); 
-        case -174231629:  return getAssertedDateElement();
+        case -1952893826:  return getRecordedDateElement();
         case -799233858:  return getRecorder(); 
         case -373242253:  return getAsserter(); 
         case 1896977671:  return getLastOccurrenceElement();
@@ -2457,7 +2457,7 @@ public class AllergyIntolerance extends DomainResource {
         case -791418107: /*patient*/ return new String[] {"Reference"};
         case 1524132147: /*encounter*/ return new String[] {"Reference"};
         case 105901603: /*onset*/ return new String[] {"dateTime", "Age", "Period", "Range", "string"};
-        case -174231629: /*assertedDate*/ return new String[] {"dateTime"};
+        case -1952893826: /*recordedDate*/ return new String[] {"dateTime"};
         case -799233858: /*recorder*/ return new String[] {"Reference"};
         case -373242253: /*asserter*/ return new String[] {"Reference"};
         case 1896977671: /*lastOccurrence*/ return new String[] {"dateTime"};
@@ -2520,8 +2520,8 @@ public class AllergyIntolerance extends DomainResource {
           this.onset = new StringType();
           return this.onset;
         }
-        else if (name.equals("assertedDate")) {
-          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.assertedDate");
+        else if (name.equals("recordedDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type AllergyIntolerance.recordedDate");
         }
         else if (name.equals("recorder")) {
           this.recorder = new Reference();
@@ -2570,7 +2570,7 @@ public class AllergyIntolerance extends DomainResource {
         dst.patient = patient == null ? null : patient.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
         dst.onset = onset == null ? null : onset.copy();
-        dst.assertedDate = assertedDate == null ? null : assertedDate.copy();
+        dst.recordedDate = recordedDate == null ? null : recordedDate.copy();
         dst.recorder = recorder == null ? null : recorder.copy();
         dst.asserter = asserter == null ? null : asserter.copy();
         dst.lastOccurrence = lastOccurrence == null ? null : lastOccurrence.copy();
@@ -2602,7 +2602,7 @@ public class AllergyIntolerance extends DomainResource {
            && compareDeep(verificationStatus, o.verificationStatus, true) && compareDeep(type, o.type, true)
            && compareDeep(category, o.category, true) && compareDeep(criticality, o.criticality, true) && compareDeep(code, o.code, true)
            && compareDeep(patient, o.patient, true) && compareDeep(encounter, o.encounter, true) && compareDeep(onset, o.onset, true)
-           && compareDeep(assertedDate, o.assertedDate, true) && compareDeep(recorder, o.recorder, true) && compareDeep(asserter, o.asserter, true)
+           && compareDeep(recordedDate, o.recordedDate, true) && compareDeep(recorder, o.recorder, true) && compareDeep(asserter, o.asserter, true)
            && compareDeep(lastOccurrence, o.lastOccurrence, true) && compareDeep(note, o.note, true) && compareDeep(reaction, o.reaction, true)
           ;
       }
@@ -2616,14 +2616,14 @@ public class AllergyIntolerance extends DomainResource {
         AllergyIntolerance o = (AllergyIntolerance) other_;
         return compareValues(clinicalStatus, o.clinicalStatus, true) && compareValues(verificationStatus, o.verificationStatus, true)
            && compareValues(type, o.type, true) && compareValues(category, o.category, true) && compareValues(criticality, o.criticality, true)
-           && compareValues(assertedDate, o.assertedDate, true) && compareValues(lastOccurrence, o.lastOccurrence, true)
+           && compareValues(recordedDate, o.recordedDate, true) && compareValues(lastOccurrence, o.lastOccurrence, true)
           ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, clinicalStatus
           , verificationStatus, type, category, criticality, code, patient, encounter, onset
-          , assertedDate, recorder, asserter, lastOccurrence, note, reaction);
+          , recordedDate, recorder, asserter, lastOccurrence, note, reaction);
       }
 
   @Override
@@ -2654,19 +2654,19 @@ public class AllergyIntolerance extends DomainResource {
  /**
    * Search parameter: <b>date</b>
    * <p>
-   * Description: <b>Date record was believed accurate</b><br>
+   * Description: <b>Date record was first recorded</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>AllergyIntolerance.assertedDate</b><br>
+   * Path: <b>AllergyIntolerance.recordedDate</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="date", path="AllergyIntolerance.assertedDate", description="Date record was believed accurate", type="date" )
+  @SearchParamDefinition(name="date", path="AllergyIntolerance.recordedDate", description="Date record was first recorded", type="date" )
   public static final String SP_DATE = "date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>date</b>
    * <p>
-   * Description: <b>Date record was believed accurate</b><br>
+   * Description: <b>Date record was first recorded</b><br>
    * Type: <b>date</b><br>
-   * Path: <b>AllergyIntolerance.assertedDate</b><br>
+   * Path: <b>AllergyIntolerance.recordedDate</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);

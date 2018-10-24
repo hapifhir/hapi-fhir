@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A search parameter that defines a named search item that can be used to search/filter on a resource.
  */
-@ResourceDef(name="SearchParameter", profile="http://hl7.org/fhir/Profile/SearchParameter")
+@ResourceDef(name="SearchParameter", profile="http://hl7.org/fhir/StructureDefinition/SearchParameter")
 @ChildOrder(names={"url", "version", "name", "derivedFrom", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "code", "base", "type", "expression", "xpath", "xpathUsage", "target", "multipleOr", "multipleAnd", "comparator", "modifier", "chain", "component"})
 public class SearchParameter extends MetadataResource {
 
@@ -192,35 +192,35 @@ public class SearchParameter extends MetadataResource {
 
     public enum SearchComparator {
         /**
-         * the value for the parameter in the resource is equal to the provided value
+         * the value for the parameter in the resource is equal to the provided value.
          */
         EQ, 
         /**
-         * the value for the parameter in the resource is not equal to the provided value
+         * the value for the parameter in the resource is not equal to the provided value.
          */
         NE, 
         /**
-         * the value for the parameter in the resource is greater than the provided value
+         * the value for the parameter in the resource is greater than the provided value.
          */
         GT, 
         /**
-         * the value for the parameter in the resource is less than the provided value
+         * the value for the parameter in the resource is less than the provided value.
          */
         LT, 
         /**
-         * the value for the parameter in the resource is greater or equal to the provided value
+         * the value for the parameter in the resource is greater or equal to the provided value.
          */
         GE, 
         /**
-         * the value for the parameter in the resource is less or equal to the provided value
+         * the value for the parameter in the resource is less or equal to the provided value.
          */
         LE, 
         /**
-         * the value for the parameter in the resource starts after the provided value
+         * the value for the parameter in the resource starts after the provided value.
          */
         SA, 
         /**
-         * the value for the parameter in the resource ends before the provided value
+         * the value for the parameter in the resource ends before the provided value.
          */
         EB, 
         /**
@@ -287,14 +287,14 @@ public class SearchParameter extends MetadataResource {
         }
         public String getDefinition() {
           switch (this) {
-            case EQ: return "the value for the parameter in the resource is equal to the provided value";
-            case NE: return "the value for the parameter in the resource is not equal to the provided value";
-            case GT: return "the value for the parameter in the resource is greater than the provided value";
-            case LT: return "the value for the parameter in the resource is less than the provided value";
-            case GE: return "the value for the parameter in the resource is greater or equal to the provided value";
-            case LE: return "the value for the parameter in the resource is less or equal to the provided value";
-            case SA: return "the value for the parameter in the resource starts after the provided value";
-            case EB: return "the value for the parameter in the resource ends before the provided value";
+            case EQ: return "the value for the parameter in the resource is equal to the provided value.";
+            case NE: return "the value for the parameter in the resource is not equal to the provided value.";
+            case GT: return "the value for the parameter in the resource is greater than the provided value.";
+            case LT: return "the value for the parameter in the resource is less than the provided value.";
+            case GE: return "the value for the parameter in the resource is greater or equal to the provided value.";
+            case LE: return "the value for the parameter in the resource is less or equal to the provided value.";
+            case SA: return "the value for the parameter in the resource starts after the provided value.";
+            case EB: return "the value for the parameter in the resource ends before the provided value.";
             case AP: return "the value for the parameter in the resource is approximately the same to the provided value.";
             default: return "?";
           }
@@ -304,7 +304,7 @@ public class SearchParameter extends MetadataResource {
             case EQ: return "Equals";
             case NE: return "Not Equals";
             case GT: return "Greater Than";
-            case LT: return "Less Then";
+            case LT: return "Less Than";
             case GE: return "Greater or Equals";
             case LE: return "Less of Equal";
             case SA: return "Starts After";
@@ -436,6 +436,14 @@ public class SearchParameter extends MetadataResource {
          */
         TYPE, 
         /**
+         * The search parameter applies to the identifier on the resource, not the reference.
+         */
+        IDENTIFIER, 
+        /**
+         * The search parameter has the format system|code|value, where the system and code refer to a Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present.
+         */
+        OFTYPE, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -462,6 +470,10 @@ public class SearchParameter extends MetadataResource {
           return ABOVE;
         if ("type".equals(codeString))
           return TYPE;
+        if ("identifier".equals(codeString))
+          return IDENTIFIER;
+        if ("ofType".equals(codeString))
+          return OFTYPE;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -479,6 +491,8 @@ public class SearchParameter extends MetadataResource {
             case BELOW: return "below";
             case ABOVE: return "above";
             case TYPE: return "type";
+            case IDENTIFIER: return "identifier";
+            case OFTYPE: return "ofType";
             default: return "?";
           }
         }
@@ -494,6 +508,8 @@ public class SearchParameter extends MetadataResource {
             case BELOW: return "http://hl7.org/fhir/search-modifier-code";
             case ABOVE: return "http://hl7.org/fhir/search-modifier-code";
             case TYPE: return "http://hl7.org/fhir/search-modifier-code";
+            case IDENTIFIER: return "http://hl7.org/fhir/search-modifier-code";
+            case OFTYPE: return "http://hl7.org/fhir/search-modifier-code";
             default: return "?";
           }
         }
@@ -509,6 +525,8 @@ public class SearchParameter extends MetadataResource {
             case BELOW: return "The search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or hierarchical relationships).";
             case ABOVE: return "The search parameter tests whether the value in a resource subsumes the specified value (is-a, or hierarchical relationships).";
             case TYPE: return "The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc.).";
+            case IDENTIFIER: return "The search parameter applies to the identifier on the resource, not the reference.";
+            case OFTYPE: return "The search parameter has the format system|code|value, where the system and code refer to a Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present.";
             default: return "?";
           }
         }
@@ -524,6 +542,8 @@ public class SearchParameter extends MetadataResource {
             case BELOW: return "Below";
             case ABOVE: return "Above";
             case TYPE: return "Type";
+            case IDENTIFIER: return "Identifier";
+            case OFTYPE: return "Of Type";
             default: return "?";
           }
         }
@@ -554,6 +574,10 @@ public class SearchParameter extends MetadataResource {
           return SearchModifierCode.ABOVE;
         if ("type".equals(codeString))
           return SearchModifierCode.TYPE;
+        if ("identifier".equals(codeString))
+          return SearchModifierCode.IDENTIFIER;
+        if ("ofType".equals(codeString))
+          return SearchModifierCode.OFTYPE;
         throw new IllegalArgumentException("Unknown SearchModifierCode code '"+codeString+"'");
         }
         public Enumeration<SearchModifierCode> fromType(Base code) throws FHIRException {
@@ -584,6 +608,10 @@ public class SearchParameter extends MetadataResource {
           return new Enumeration<SearchModifierCode>(this, SearchModifierCode.ABOVE);
         if ("type".equals(codeString))
           return new Enumeration<SearchModifierCode>(this, SearchModifierCode.TYPE);
+        if ("identifier".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.IDENTIFIER);
+        if ("ofType".equals(codeString))
+          return new Enumeration<SearchModifierCode>(this, SearchModifierCode.OFTYPE);
         throw new FHIRException("Unknown SearchModifierCode code '"+codeString+"'");
         }
     public String toCode(SearchModifierCode code) {
@@ -607,6 +635,10 @@ public class SearchParameter extends MetadataResource {
         return "above";
       if (code == SearchModifierCode.TYPE)
         return "type";
+      if (code == SearchModifierCode.IDENTIFIER)
+        return "identifier";
+      if (code == SearchModifierCode.OFTYPE)
+        return "ofType";
       return "?";
       }
     public String toSystem(SearchModifierCode code) {
@@ -891,10 +923,10 @@ public class SearchParameter extends MetadataResource {
     protected List<CodeType> base;
 
     /**
-     * The type of value a search parameter refers to, and how the content is interpreted.
+     * The type of value that a search parameter may contain, and how the content is interpreted.
      */
     @Child(name = "type", type = {CodeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="number | date | string | token | reference | composite | quantity | uri", formalDefinition="The type of value a search parameter refers to, and how the content is interpreted." )
+    @Description(shortDefinition="number | date | string | token | reference | composite | quantity | uri | special", formalDefinition="The type of value that a search parameter may contain, and how the content is interpreted." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-param-type")
     protected Enumeration<SearchParamType> type;
 
@@ -954,7 +986,7 @@ public class SearchParameter extends MetadataResource {
      * A modifier supported for the search parameter.
      */
     @Child(name = "modifier", type = {CodeType.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="missing | exact | contains | not | text | in | not-in | below | above | type", formalDefinition="A modifier supported for the search parameter." )
+    @Description(shortDefinition="missing | exact | contains | not | text | in | not-in | below | above | type | identifier | ofType", formalDefinition="A modifier supported for the search parameter." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-modifier-code")
     protected List<Enumeration<SearchModifierCode>> modifier;
 
@@ -995,7 +1027,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this search parameter is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the search parameter is stored on different servers.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1015,7 +1047,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this search parameter is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the search parameter is stored on different servers.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public SearchParameter setUrlElement(UriType value) { 
       this.url = value;
@@ -1023,14 +1055,14 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.
+     * @return An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this search parameter is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the search parameter is stored on different servers.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.
+     * @param value An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this search parameter is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the search parameter is stored on different servers.
      */
     public SearchParameter setUrl(String value) { 
         if (this.url == null)
@@ -1730,7 +1762,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #type} (The type of value a search parameter refers to, and how the content is interpreted.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @return {@link #type} (The type of value that a search parameter may contain, and how the content is interpreted.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public Enumeration<SearchParamType> getTypeElement() { 
       if (this.type == null)
@@ -1750,7 +1782,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #type} (The type of value a search parameter refers to, and how the content is interpreted.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @param value {@link #type} (The type of value that a search parameter may contain, and how the content is interpreted.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public SearchParameter setTypeElement(Enumeration<SearchParamType> value) { 
       this.type = value;
@@ -1758,14 +1790,14 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return The type of value a search parameter refers to, and how the content is interpreted.
+     * @return The type of value that a search parameter may contain, and how the content is interpreted.
      */
     public SearchParamType getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
-     * @param value The type of value a search parameter refers to, and how the content is interpreted.
+     * @param value The type of value that a search parameter may contain, and how the content is interpreted.
      */
     public SearchParameter setType(SearchParamType value) { 
         if (this.type == null)
@@ -2310,7 +2342,7 @@ public class SearchParameter extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.", 0, 1, url));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this search parameter is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the search parameter is stored on different servers.", 0, 1, url));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("derivedFrom", "canonical(SearchParameter)", "Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.", 0, 1, derivedFrom));
@@ -2325,7 +2357,7 @@ public class SearchParameter extends MetadataResource {
         children.add(new Property("purpose", "markdown", "Explanation of why this search parameter is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("code", "code", "The code used in the URL or the parameter name in a parameters resource for this search parameter.", 0, 1, code));
         children.add(new Property("base", "code", "The base resource type(s) that this search parameter can be used against.", 0, java.lang.Integer.MAX_VALUE, base));
-        children.add(new Property("type", "code", "The type of value a search parameter refers to, and how the content is interpreted.", 0, 1, type));
+        children.add(new Property("type", "code", "The type of value that a search parameter may contain, and how the content is interpreted.", 0, 1, type));
         children.add(new Property("expression", "string", "A FHIRPath expression that returns a set of elements for the search parameter.", 0, 1, expression));
         children.add(new Property("xpath", "string", "An XPath expression that returns a set of elements for the search parameter.", 0, 1, xpath));
         children.add(new Property("xpathUsage", "code", "How the search parameter relates to the set of elements returned by evaluating the xpath query.", 0, 1, xpathUsage));
@@ -2341,7 +2373,7 @@ public class SearchParameter extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this search parameter is (or will be) published.", 0, 1, url);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this search parameter when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this search parameter is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the search parameter is stored on different servers.", 0, 1, url);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the search parameter when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the search parameter author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the search parameter. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 1077922663: /*derivedFrom*/  return new Property("derivedFrom", "canonical(SearchParameter)", "Where this search parameter is originally defined. If a derivedFrom is provided, then the details in the search parameter must be consistent with the definition from which it is defined. i.e. the parameter should have the same meaning, and (usually) the functionality should be a proper subset of the underlying search parameter.", 0, 1, derivedFrom);
@@ -2356,7 +2388,7 @@ public class SearchParameter extends MetadataResource {
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this search parameter is needed and why it has been designed as it has.", 0, 1, purpose);
         case 3059181: /*code*/  return new Property("code", "code", "The code used in the URL or the parameter name in a parameters resource for this search parameter.", 0, 1, code);
         case 3016401: /*base*/  return new Property("base", "code", "The base resource type(s) that this search parameter can be used against.", 0, java.lang.Integer.MAX_VALUE, base);
-        case 3575610: /*type*/  return new Property("type", "code", "The type of value a search parameter refers to, and how the content is interpreted.", 0, 1, type);
+        case 3575610: /*type*/  return new Property("type", "code", "The type of value that a search parameter may contain, and how the content is interpreted.", 0, 1, type);
         case -1795452264: /*expression*/  return new Property("expression", "string", "A FHIRPath expression that returns a set of elements for the search parameter.", 0, 1, expression);
         case 114256029: /*xpath*/  return new Property("xpath", "string", "An XPath expression that returns a set of elements for the search parameter.", 0, 1, xpath);
         case 1801322244: /*xpathUsage*/  return new Property("xpathUsage", "code", "How the search parameter relates to the set of elements returned by evaluating the xpath query.", 0, 1, xpathUsage);
@@ -2871,6 +2903,26 @@ public class SearchParameter extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
 
  /**
+   * Search parameter: <b>context-type-value</b>
+   * <p>
+   * Description: <b>A use context type and value assigned to the search parameter</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type-value", path="SearchParameter.useContext", description="A use context type and value assigned to the search parameter", type="composite", compositeOf={"context-type", "context"} )
+  public static final String SP_CONTEXT_TYPE_VALUE = "context-type-value";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type-value</b>
+   * <p>
+   * Description: <b>A use context type and value assigned to the search parameter</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam> CONTEXT_TYPE_VALUE = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam>(SP_CONTEXT_TYPE_VALUE);
+
+ /**
    * Search parameter: <b>jurisdiction</b>
    * <p>
    * Description: <b>Intended jurisdiction for the search parameter</b><br>
@@ -2959,17 +3011,17 @@ public class SearchParameter extends MetadataResource {
  /**
    * Search parameter: <b>type</b>
    * <p>
-   * Description: <b>number | date | string | token | reference | composite | quantity | uri</b><br>
+   * Description: <b>number | date | string | token | reference | composite | quantity | uri | special</b><br>
    * Type: <b>token</b><br>
    * Path: <b>SearchParameter.type</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri", type="token" )
+  @SearchParamDefinition(name="type", path="SearchParameter.type", description="number | date | string | token | reference | composite | quantity | uri | special", type="token" )
   public static final String SP_TYPE = "type";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>type</b>
    * <p>
-   * Description: <b>number | date | string | token | reference | composite | quantity | uri</b><br>
+   * Description: <b>number | date | string | token | reference | composite | quantity | uri | special</b><br>
    * Type: <b>token</b><br>
    * Path: <b>SearchParameter.type</b><br>
    * </p>
@@ -3037,6 +3089,26 @@ public class SearchParameter extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam TARGET = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TARGET);
 
  /**
+   * Search parameter: <b>context-quantity</b>
+   * <p>
+   * Description: <b>A quantity- or range-valued use context assigned to the search parameter</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>SearchParameter.useContext.valueQuantity, SearchParameter.useContext.valueRange</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-quantity", path="(SearchParameter.useContext.value as Quantity) | (SearchParameter.useContext.value as Range)", description="A quantity- or range-valued use context assigned to the search parameter", type="quantity" )
+  public static final String SP_CONTEXT_QUANTITY = "context-quantity";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-quantity</b>
+   * <p>
+   * Description: <b>A quantity- or range-valued use context assigned to the search parameter</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>SearchParameter.useContext.valueQuantity, SearchParameter.useContext.valueRange</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam CONTEXT_QUANTITY = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_CONTEXT_QUANTITY);
+
+ /**
    * Search parameter: <b>component</b>
    * <p>
    * Description: <b>Defines how the part works</b><br>
@@ -3083,6 +3155,26 @@ public class SearchParameter extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
 
  /**
+   * Search parameter: <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the search parameter</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.useContext.valueCodeableConcept</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context", path="(SearchParameter.useContext.value as CodeableConcept)", description="A use context assigned to the search parameter", type="token" )
+  public static final String SP_CONTEXT = "context";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the search parameter</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SearchParameter.useContext.valueCodeableConcept</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
+
+ /**
    * Search parameter: <b>publisher</b>
    * <p>
    * Description: <b>Name of the publisher of the search parameter</b><br>
@@ -3101,6 +3193,26 @@ public class SearchParameter extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>context-type-quantity</b>
+   * <p>
+   * Description: <b>A use context type and quantity- or range-based value assigned to the search parameter</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type-quantity", path="SearchParameter.useContext", description="A use context type and quantity- or range-based value assigned to the search parameter", type="composite", compositeOf={"context-type", "context-quantity"} )
+  public static final String SP_CONTEXT_TYPE_QUANTITY = "context-type-quantity";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type-quantity</b>
+   * <p>
+   * Description: <b>A use context type and quantity- or range-based value assigned to the search parameter</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.QuantityClientParam> CONTEXT_TYPE_QUANTITY = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.QuantityClientParam>(SP_CONTEXT_TYPE_QUANTITY);
 
  /**
    * Search parameter: <b>status</b>

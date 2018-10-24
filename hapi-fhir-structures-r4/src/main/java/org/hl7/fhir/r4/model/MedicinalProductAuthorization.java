@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -44,31 +44,31 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The regulatory authorization of a medicinal product.
  */
-@ResourceDef(name="MedicinalProductAuthorization", profile="http://hl7.org/fhir/Profile/MedicinalProductAuthorization")
+@ResourceDef(name="MedicinalProductAuthorization", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductAuthorization")
 public class MedicinalProductAuthorization extends DomainResource {
 
     @Block()
     public static class MedicinalProductAuthorizationJurisdictionalAuthorizationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * The assigned number for the marketing authorization.
+         */
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="The assigned number for the marketing authorization", formalDefinition="The assigned number for the marketing authorization." )
+        protected List<Identifier> identifier;
+
+        /**
          * Country of authorization.
          */
-        @Child(name = "country", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "country", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Country of authorization", formalDefinition="Country of authorization." )
         protected CodeableConcept country;
 
         /**
          * Jurisdiction within a country.
          */
-        @Child(name = "jurisdiction", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "jurisdiction", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Jurisdiction within a country", formalDefinition="Jurisdiction within a country." )
-        protected CodeableConcept jurisdiction;
-
-        /**
-         * The assigned number for the marketing authorization.
-         */
-        @Child(name = "number", type = {Identifier.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The assigned number for the marketing authorization", formalDefinition="The assigned number for the marketing authorization." )
-        protected Identifier number;
+        protected List<CodeableConcept> jurisdiction;
 
         /**
          * The legal status of supply in a jurisdiction or region.
@@ -77,7 +77,14 @@ public class MedicinalProductAuthorization extends DomainResource {
         @Description(shortDefinition="The legal status of supply in a jurisdiction or region", formalDefinition="The legal status of supply in a jurisdiction or region." )
         protected CodeableConcept legalStatusOfSupply;
 
-        private static final long serialVersionUID = 271408949L;
+        /**
+         * The start and expected end date of the authorization.
+         */
+        @Child(name = "validityPeriod", type = {Period.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The start and expected end date of the authorization", formalDefinition="The start and expected end date of the authorization." )
+        protected Period validityPeriod;
+
+        private static final long serialVersionUID = -1893307291L;
 
     /**
      * Constructor
@@ -86,13 +93,58 @@ public class MedicinalProductAuthorization extends DomainResource {
         super();
       }
 
-    /**
-     * Constructor
-     */
-      public MedicinalProductAuthorizationJurisdictionalAuthorizationComponent(CodeableConcept country) {
-        super();
-        this.country = country;
-      }
+        /**
+         * @return {@link #identifier} (The assigned number for the marketing authorization.)
+         */
+        public List<Identifier> getIdentifier() { 
+          if (this.identifier == null)
+            this.identifier = new ArrayList<Identifier>();
+          return this.identifier;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public MedicinalProductAuthorizationJurisdictionalAuthorizationComponent setIdentifier(List<Identifier> theIdentifier) { 
+          this.identifier = theIdentifier;
+          return this;
+        }
+
+        public boolean hasIdentifier() { 
+          if (this.identifier == null)
+            return false;
+          for (Identifier item : this.identifier)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Identifier addIdentifier() { //3
+          Identifier t = new Identifier();
+          if (this.identifier == null)
+            this.identifier = new ArrayList<Identifier>();
+          this.identifier.add(t);
+          return t;
+        }
+
+        public MedicinalProductAuthorizationJurisdictionalAuthorizationComponent addIdentifier(Identifier t) { //3
+          if (t == null)
+            return this;
+          if (this.identifier == null)
+            this.identifier = new ArrayList<Identifier>();
+          this.identifier.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+         */
+        public Identifier getIdentifierFirstRep() { 
+          if (getIdentifier().isEmpty()) {
+            addIdentifier();
+          }
+          return getIdentifier().get(0);
+        }
 
         /**
          * @return {@link #country} (Country of authorization.)
@@ -121,49 +173,54 @@ public class MedicinalProductAuthorization extends DomainResource {
         /**
          * @return {@link #jurisdiction} (Jurisdiction within a country.)
          */
-        public CodeableConcept getJurisdiction() { 
+        public List<CodeableConcept> getJurisdiction() { 
           if (this.jurisdiction == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductAuthorizationJurisdictionalAuthorizationComponent.jurisdiction");
-            else if (Configuration.doAutoCreate())
-              this.jurisdiction = new CodeableConcept(); // cc
+            this.jurisdiction = new ArrayList<CodeableConcept>();
           return this.jurisdiction;
         }
 
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public MedicinalProductAuthorizationJurisdictionalAuthorizationComponent setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+          this.jurisdiction = theJurisdiction;
+          return this;
+        }
+
         public boolean hasJurisdiction() { 
-          return this.jurisdiction != null && !this.jurisdiction.isEmpty();
+          if (this.jurisdiction == null)
+            return false;
+          for (CodeableConcept item : this.jurisdiction)
+            if (!item.isEmpty())
+              return true;
+          return false;
         }
 
-        /**
-         * @param value {@link #jurisdiction} (Jurisdiction within a country.)
-         */
-        public MedicinalProductAuthorizationJurisdictionalAuthorizationComponent setJurisdiction(CodeableConcept value) { 
-          this.jurisdiction = value;
+        public CodeableConcept addJurisdiction() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.jurisdiction == null)
+            this.jurisdiction = new ArrayList<CodeableConcept>();
+          this.jurisdiction.add(t);
+          return t;
+        }
+
+        public MedicinalProductAuthorizationJurisdictionalAuthorizationComponent addJurisdiction(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.jurisdiction == null)
+            this.jurisdiction = new ArrayList<CodeableConcept>();
+          this.jurisdiction.add(t);
           return this;
         }
 
         /**
-         * @return {@link #number} (The assigned number for the marketing authorization.)
+         * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
          */
-        public Identifier getNumber() { 
-          if (this.number == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductAuthorizationJurisdictionalAuthorizationComponent.number");
-            else if (Configuration.doAutoCreate())
-              this.number = new Identifier(); // cc
-          return this.number;
-        }
-
-        public boolean hasNumber() { 
-          return this.number != null && !this.number.isEmpty();
-        }
-
-        /**
-         * @param value {@link #number} (The assigned number for the marketing authorization.)
-         */
-        public MedicinalProductAuthorizationJurisdictionalAuthorizationComponent setNumber(Identifier value) { 
-          this.number = value;
-          return this;
+        public CodeableConcept getJurisdictionFirstRep() { 
+          if (getJurisdiction().isEmpty()) {
+            addJurisdiction();
+          }
+          return getJurisdiction().get(0);
         }
 
         /**
@@ -190,21 +247,47 @@ public class MedicinalProductAuthorization extends DomainResource {
           return this;
         }
 
+        /**
+         * @return {@link #validityPeriod} (The start and expected end date of the authorization.)
+         */
+        public Period getValidityPeriod() { 
+          if (this.validityPeriod == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MedicinalProductAuthorizationJurisdictionalAuthorizationComponent.validityPeriod");
+            else if (Configuration.doAutoCreate())
+              this.validityPeriod = new Period(); // cc
+          return this.validityPeriod;
+        }
+
+        public boolean hasValidityPeriod() { 
+          return this.validityPeriod != null && !this.validityPeriod.isEmpty();
+        }
+
+        /**
+         * @param value {@link #validityPeriod} (The start and expected end date of the authorization.)
+         */
+        public MedicinalProductAuthorizationJurisdictionalAuthorizationComponent setValidityPeriod(Period value) { 
+          this.validityPeriod = value;
+          return this;
+        }
+
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
+          children.add(new Property("identifier", "Identifier", "The assigned number for the marketing authorization.", 0, java.lang.Integer.MAX_VALUE, identifier));
           children.add(new Property("country", "CodeableConcept", "Country of authorization.", 0, 1, country));
-          children.add(new Property("jurisdiction", "CodeableConcept", "Jurisdiction within a country.", 0, 1, jurisdiction));
-          children.add(new Property("number", "Identifier", "The assigned number for the marketing authorization.", 0, 1, number));
+          children.add(new Property("jurisdiction", "CodeableConcept", "Jurisdiction within a country.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
           children.add(new Property("legalStatusOfSupply", "CodeableConcept", "The legal status of supply in a jurisdiction or region.", 0, 1, legalStatusOfSupply));
+          children.add(new Property("validityPeriod", "Period", "The start and expected end date of the authorization.", 0, 1, validityPeriod));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The assigned number for the marketing authorization.", 0, java.lang.Integer.MAX_VALUE, identifier);
           case 957831062: /*country*/  return new Property("country", "CodeableConcept", "Country of authorization.", 0, 1, country);
-          case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "Jurisdiction within a country.", 0, 1, jurisdiction);
-          case -1034364087: /*number*/  return new Property("number", "Identifier", "The assigned number for the marketing authorization.", 0, 1, number);
+          case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "Jurisdiction within a country.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
           case -844874031: /*legalStatusOfSupply*/  return new Property("legalStatusOfSupply", "CodeableConcept", "The legal status of supply in a jurisdiction or region.", 0, 1, legalStatusOfSupply);
+          case -1434195053: /*validityPeriod*/  return new Property("validityPeriod", "Period", "The start and expected end date of the authorization.", 0, 1, validityPeriod);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -213,10 +296,11 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case 957831062: /*country*/ return this.country == null ? new Base[0] : new Base[] {this.country}; // CodeableConcept
-        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : new Base[] {this.jurisdiction}; // CodeableConcept
-        case -1034364087: /*number*/ return this.number == null ? new Base[0] : new Base[] {this.number}; // Identifier
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case -844874031: /*legalStatusOfSupply*/ return this.legalStatusOfSupply == null ? new Base[0] : new Base[] {this.legalStatusOfSupply}; // CodeableConcept
+        case -1434195053: /*validityPeriod*/ return this.validityPeriod == null ? new Base[0] : new Base[] {this.validityPeriod}; // Period
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -225,17 +309,20 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          return value;
         case 957831062: // country
           this.country = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -507075711: // jurisdiction
-          this.jurisdiction = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case -1034364087: // number
-          this.number = castToIdentifier(value); // Identifier
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -844874031: // legalStatusOfSupply
           this.legalStatusOfSupply = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1434195053: // validityPeriod
+          this.validityPeriod = castToPeriod(value); // Period
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -244,14 +331,16 @@ public class MedicinalProductAuthorization extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("country")) {
+        if (name.equals("identifier")) {
+          this.getIdentifier().add(castToIdentifier(value));
+        } else if (name.equals("country")) {
           this.country = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("jurisdiction")) {
-          this.jurisdiction = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("number")) {
-          this.number = castToIdentifier(value); // Identifier
+          this.getJurisdiction().add(castToCodeableConcept(value));
         } else if (name.equals("legalStatusOfSupply")) {
           this.legalStatusOfSupply = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("validityPeriod")) {
+          this.validityPeriod = castToPeriod(value); // Period
         } else
           return super.setProperty(name, value);
         return value;
@@ -260,10 +349,11 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case -1618432855:  return addIdentifier(); 
         case 957831062:  return getCountry(); 
-        case -507075711:  return getJurisdiction(); 
-        case -1034364087:  return getNumber(); 
+        case -507075711:  return addJurisdiction(); 
         case -844874031:  return getLegalStatusOfSupply(); 
+        case -1434195053:  return getValidityPeriod(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -272,10 +362,11 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case 957831062: /*country*/ return new String[] {"CodeableConcept"};
         case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
-        case -1034364087: /*number*/ return new String[] {"Identifier"};
         case -844874031: /*legalStatusOfSupply*/ return new String[] {"CodeableConcept"};
+        case -1434195053: /*validityPeriod*/ return new String[] {"Period"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -283,21 +374,23 @@ public class MedicinalProductAuthorization extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("country")) {
+        if (name.equals("identifier")) {
+          return addIdentifier();
+        }
+        else if (name.equals("country")) {
           this.country = new CodeableConcept();
           return this.country;
         }
         else if (name.equals("jurisdiction")) {
-          this.jurisdiction = new CodeableConcept();
-          return this.jurisdiction;
-        }
-        else if (name.equals("number")) {
-          this.number = new Identifier();
-          return this.number;
+          return addJurisdiction();
         }
         else if (name.equals("legalStatusOfSupply")) {
           this.legalStatusOfSupply = new CodeableConcept();
           return this.legalStatusOfSupply;
+        }
+        else if (name.equals("validityPeriod")) {
+          this.validityPeriod = new Period();
+          return this.validityPeriod;
         }
         else
           return super.addChild(name);
@@ -306,10 +399,19 @@ public class MedicinalProductAuthorization extends DomainResource {
       public MedicinalProductAuthorizationJurisdictionalAuthorizationComponent copy() {
         MedicinalProductAuthorizationJurisdictionalAuthorizationComponent dst = new MedicinalProductAuthorizationJurisdictionalAuthorizationComponent();
         copyValues(dst);
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.country = country == null ? null : country.copy();
-        dst.jurisdiction = jurisdiction == null ? null : jurisdiction.copy();
-        dst.number = number == null ? null : number.copy();
+        if (jurisdiction != null) {
+          dst.jurisdiction = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : jurisdiction)
+            dst.jurisdiction.add(i.copy());
+        };
         dst.legalStatusOfSupply = legalStatusOfSupply == null ? null : legalStatusOfSupply.copy();
+        dst.validityPeriod = validityPeriod == null ? null : validityPeriod.copy();
         return dst;
       }
 
@@ -320,8 +422,8 @@ public class MedicinalProductAuthorization extends DomainResource {
         if (!(other_ instanceof MedicinalProductAuthorizationJurisdictionalAuthorizationComponent))
           return false;
         MedicinalProductAuthorizationJurisdictionalAuthorizationComponent o = (MedicinalProductAuthorizationJurisdictionalAuthorizationComponent) other_;
-        return compareDeep(country, o.country, true) && compareDeep(jurisdiction, o.jurisdiction, true)
-           && compareDeep(number, o.number, true) && compareDeep(legalStatusOfSupply, o.legalStatusOfSupply, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(country, o.country, true) && compareDeep(jurisdiction, o.jurisdiction, true)
+           && compareDeep(legalStatusOfSupply, o.legalStatusOfSupply, true) && compareDeep(validityPeriod, o.validityPeriod, true)
           ;
       }
 
@@ -336,8 +438,8 @@ public class MedicinalProductAuthorization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(country, jurisdiction, number
-          , legalStatusOfSupply);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, country, jurisdiction
+          , legalStatusOfSupply, validityPeriod);
       }
 
   public String fhirType() {
@@ -352,9 +454,9 @@ public class MedicinalProductAuthorization extends DomainResource {
         /**
          * Identifier for this procedure.
          */
-        @Child(name = "number", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Identifier for this procedure", formalDefinition="Identifier for this procedure." )
-        protected Identifier number;
+        protected Identifier identifier;
 
         /**
          * Type of procedure.
@@ -366,18 +468,18 @@ public class MedicinalProductAuthorization extends DomainResource {
         /**
          * Date of procedure.
          */
-        @Child(name = "date", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "date", type = {Period.class, DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Date of procedure", formalDefinition="Date of procedure." )
-        protected Period date;
+        protected Type date;
 
         /**
          * Applcations submitted to obtain a marketing authorization.
          */
-        @Child(name = "application", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "application", type = {MedicinalProductAuthorizationProcedureComponent.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Applcations submitted to obtain a marketing authorization", formalDefinition="Applcations submitted to obtain a marketing authorization." )
-        protected List<MedicinalProductAuthorizationProcedureApplicationComponent> application;
+        protected List<MedicinalProductAuthorizationProcedureComponent> application;
 
-        private static final long serialVersionUID = 1087335734L;
+        private static final long serialVersionUID = 930236001L;
 
     /**
      * Constructor
@@ -395,26 +497,26 @@ public class MedicinalProductAuthorization extends DomainResource {
       }
 
         /**
-         * @return {@link #number} (Identifier for this procedure.)
+         * @return {@link #identifier} (Identifier for this procedure.)
          */
-        public Identifier getNumber() { 
-          if (this.number == null)
+        public Identifier getIdentifier() { 
+          if (this.identifier == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductAuthorizationProcedureComponent.number");
+              throw new Error("Attempt to auto-create MedicinalProductAuthorizationProcedureComponent.identifier");
             else if (Configuration.doAutoCreate())
-              this.number = new Identifier(); // cc
-          return this.number;
+              this.identifier = new Identifier(); // cc
+          return this.identifier;
         }
 
-        public boolean hasNumber() { 
-          return this.number != null && !this.number.isEmpty();
+        public boolean hasIdentifier() { 
+          return this.identifier != null && !this.identifier.isEmpty();
         }
 
         /**
-         * @param value {@link #number} (Identifier for this procedure.)
+         * @param value {@link #identifier} (Identifier for this procedure.)
          */
-        public MedicinalProductAuthorizationProcedureComponent setNumber(Identifier value) { 
-          this.number = value;
+        public MedicinalProductAuthorizationProcedureComponent setIdentifier(Identifier value) { 
+          this.identifier = value;
           return this;
         }
 
@@ -445,13 +547,38 @@ public class MedicinalProductAuthorization extends DomainResource {
         /**
          * @return {@link #date} (Date of procedure.)
          */
-        public Period getDate() { 
-          if (this.date == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductAuthorizationProcedureComponent.date");
-            else if (Configuration.doAutoCreate())
-              this.date = new Period(); // cc
+        public Type getDate() { 
           return this.date;
+        }
+
+        /**
+         * @return {@link #date} (Date of procedure.)
+         */
+        public Period getDatePeriod() throws FHIRException { 
+          if (this.date == null)
+            return null;
+          if (!(this.date instanceof Period))
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.date.getClass().getName()+" was encountered");
+          return (Period) this.date;
+        }
+
+        public boolean hasDatePeriod() { 
+          return this != null && this.date instanceof Period;
+        }
+
+        /**
+         * @return {@link #date} (Date of procedure.)
+         */
+        public DateTimeType getDateDateTimeType() throws FHIRException { 
+          if (this.date == null)
+            return null;
+          if (!(this.date instanceof DateTimeType))
+            throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.date.getClass().getName()+" was encountered");
+          return (DateTimeType) this.date;
+        }
+
+        public boolean hasDateDateTimeType() { 
+          return this != null && this.date instanceof DateTimeType;
         }
 
         public boolean hasDate() { 
@@ -461,7 +588,9 @@ public class MedicinalProductAuthorization extends DomainResource {
         /**
          * @param value {@link #date} (Date of procedure.)
          */
-        public MedicinalProductAuthorizationProcedureComponent setDate(Period value) { 
+        public MedicinalProductAuthorizationProcedureComponent setDate(Type value) { 
+          if (value != null && !(value instanceof Period || value instanceof DateTimeType))
+            throw new Error("Not the right type for MedicinalProductAuthorization.procedure.date[x]: "+value.fhirType());
           this.date = value;
           return this;
         }
@@ -469,16 +598,16 @@ public class MedicinalProductAuthorization extends DomainResource {
         /**
          * @return {@link #application} (Applcations submitted to obtain a marketing authorization.)
          */
-        public List<MedicinalProductAuthorizationProcedureApplicationComponent> getApplication() { 
+        public List<MedicinalProductAuthorizationProcedureComponent> getApplication() { 
           if (this.application == null)
-            this.application = new ArrayList<MedicinalProductAuthorizationProcedureApplicationComponent>();
+            this.application = new ArrayList<MedicinalProductAuthorizationProcedureComponent>();
           return this.application;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public MedicinalProductAuthorizationProcedureComponent setApplication(List<MedicinalProductAuthorizationProcedureApplicationComponent> theApplication) { 
+        public MedicinalProductAuthorizationProcedureComponent setApplication(List<MedicinalProductAuthorizationProcedureComponent> theApplication) { 
           this.application = theApplication;
           return this;
         }
@@ -486,25 +615,25 @@ public class MedicinalProductAuthorization extends DomainResource {
         public boolean hasApplication() { 
           if (this.application == null)
             return false;
-          for (MedicinalProductAuthorizationProcedureApplicationComponent item : this.application)
+          for (MedicinalProductAuthorizationProcedureComponent item : this.application)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public MedicinalProductAuthorizationProcedureApplicationComponent addApplication() { //3
-          MedicinalProductAuthorizationProcedureApplicationComponent t = new MedicinalProductAuthorizationProcedureApplicationComponent();
+        public MedicinalProductAuthorizationProcedureComponent addApplication() { //3
+          MedicinalProductAuthorizationProcedureComponent t = new MedicinalProductAuthorizationProcedureComponent();
           if (this.application == null)
-            this.application = new ArrayList<MedicinalProductAuthorizationProcedureApplicationComponent>();
+            this.application = new ArrayList<MedicinalProductAuthorizationProcedureComponent>();
           this.application.add(t);
           return t;
         }
 
-        public MedicinalProductAuthorizationProcedureComponent addApplication(MedicinalProductAuthorizationProcedureApplicationComponent t) { //3
+        public MedicinalProductAuthorizationProcedureComponent addApplication(MedicinalProductAuthorizationProcedureComponent t) { //3
           if (t == null)
             return this;
           if (this.application == null)
-            this.application = new ArrayList<MedicinalProductAuthorizationProcedureApplicationComponent>();
+            this.application = new ArrayList<MedicinalProductAuthorizationProcedureComponent>();
           this.application.add(t);
           return this;
         }
@@ -512,7 +641,7 @@ public class MedicinalProductAuthorization extends DomainResource {
         /**
          * @return The first repetition of repeating field {@link #application}, creating it if it does not already exist
          */
-        public MedicinalProductAuthorizationProcedureApplicationComponent getApplicationFirstRep() { 
+        public MedicinalProductAuthorizationProcedureComponent getApplicationFirstRep() { 
           if (getApplication().isEmpty()) {
             addApplication();
           }
@@ -521,19 +650,22 @@ public class MedicinalProductAuthorization extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("number", "Identifier", "Identifier for this procedure.", 0, 1, number));
+          children.add(new Property("identifier", "Identifier", "Identifier for this procedure.", 0, 1, identifier));
           children.add(new Property("type", "CodeableConcept", "Type of procedure.", 0, 1, type));
-          children.add(new Property("date", "Period", "Date of procedure.", 0, 1, date));
-          children.add(new Property("application", "", "Applcations submitted to obtain a marketing authorization.", 0, java.lang.Integer.MAX_VALUE, application));
+          children.add(new Property("date[x]", "Period|dateTime", "Date of procedure.", 0, 1, date));
+          children.add(new Property("application", "@MedicinalProductAuthorization.procedure", "Applcations submitted to obtain a marketing authorization.", 0, java.lang.Integer.MAX_VALUE, application));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1034364087: /*number*/  return new Property("number", "Identifier", "Identifier for this procedure.", 0, 1, number);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier for this procedure.", 0, 1, identifier);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of procedure.", 0, 1, type);
-          case 3076014: /*date*/  return new Property("date", "Period", "Date of procedure.", 0, 1, date);
-          case 1554253136: /*application*/  return new Property("application", "", "Applcations submitted to obtain a marketing authorization.", 0, java.lang.Integer.MAX_VALUE, application);
+          case 1443311122: /*date[x]*/  return new Property("date[x]", "Period|dateTime", "Date of procedure.", 0, 1, date);
+          case 3076014: /*date*/  return new Property("date[x]", "Period|dateTime", "Date of procedure.", 0, 1, date);
+          case 432297743: /*datePeriod*/  return new Property("date[x]", "Period|dateTime", "Date of procedure.", 0, 1, date);
+          case 185136489: /*dateDateTime*/  return new Property("date[x]", "Period|dateTime", "Date of procedure.", 0, 1, date);
+          case 1554253136: /*application*/  return new Property("application", "@MedicinalProductAuthorization.procedure", "Applcations submitted to obtain a marketing authorization.", 0, java.lang.Integer.MAX_VALUE, application);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -542,10 +674,10 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1034364087: /*number*/ return this.number == null ? new Base[0] : new Base[] {this.number}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // Period
-        case 1554253136: /*application*/ return this.application == null ? new Base[0] : this.application.toArray(new Base[this.application.size()]); // MedicinalProductAuthorizationProcedureApplicationComponent
+        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // Type
+        case 1554253136: /*application*/ return this.application == null ? new Base[0] : this.application.toArray(new Base[this.application.size()]); // MedicinalProductAuthorizationProcedureComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -554,17 +686,17 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -1034364087: // number
-          this.number = castToIdentifier(value); // Identifier
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
           return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 3076014: // date
-          this.date = castToPeriod(value); // Period
+          this.date = castToType(value); // Type
           return value;
         case 1554253136: // application
-          this.getApplication().add((MedicinalProductAuthorizationProcedureApplicationComponent) value); // MedicinalProductAuthorizationProcedureApplicationComponent
+          this.getApplication().add((MedicinalProductAuthorizationProcedureComponent) value); // MedicinalProductAuthorizationProcedureComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -573,14 +705,14 @@ public class MedicinalProductAuthorization extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("number")) {
-          this.number = castToIdentifier(value); // Identifier
+        if (name.equals("identifier")) {
+          this.identifier = castToIdentifier(value); // Identifier
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("date")) {
-          this.date = castToPeriod(value); // Period
+        } else if (name.equals("date[x]")) {
+          this.date = castToType(value); // Type
         } else if (name.equals("application")) {
-          this.getApplication().add((MedicinalProductAuthorizationProcedureApplicationComponent) value);
+          this.getApplication().add((MedicinalProductAuthorizationProcedureComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -589,8 +721,9 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1034364087:  return getNumber(); 
+        case -1618432855:  return getIdentifier(); 
         case 3575610:  return getType(); 
+        case 1443311122:  return getDate(); 
         case 3076014:  return getDate(); 
         case 1554253136:  return addApplication(); 
         default: return super.makeProperty(hash, name);
@@ -601,10 +734,10 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1034364087: /*number*/ return new String[] {"Identifier"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 3076014: /*date*/ return new String[] {"Period"};
-        case 1554253136: /*application*/ return new String[] {};
+        case 3076014: /*date*/ return new String[] {"Period", "dateTime"};
+        case 1554253136: /*application*/ return new String[] {"@MedicinalProductAuthorization.procedure"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -612,16 +745,20 @@ public class MedicinalProductAuthorization extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("number")) {
-          this.number = new Identifier();
-          return this.number;
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
         }
         else if (name.equals("type")) {
           this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("date")) {
+        else if (name.equals("datePeriod")) {
           this.date = new Period();
+          return this.date;
+        }
+        else if (name.equals("dateDateTime")) {
+          this.date = new DateTimeType();
           return this.date;
         }
         else if (name.equals("application")) {
@@ -634,12 +771,12 @@ public class MedicinalProductAuthorization extends DomainResource {
       public MedicinalProductAuthorizationProcedureComponent copy() {
         MedicinalProductAuthorizationProcedureComponent dst = new MedicinalProductAuthorizationProcedureComponent();
         copyValues(dst);
-        dst.number = number == null ? null : number.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
         dst.type = type == null ? null : type.copy();
         dst.date = date == null ? null : date.copy();
         if (application != null) {
-          dst.application = new ArrayList<MedicinalProductAuthorizationProcedureApplicationComponent>();
-          for (MedicinalProductAuthorizationProcedureApplicationComponent i : application)
+          dst.application = new ArrayList<MedicinalProductAuthorizationProcedureComponent>();
+          for (MedicinalProductAuthorizationProcedureComponent i : application)
             dst.application.add(i.copy());
         };
         return dst;
@@ -652,7 +789,7 @@ public class MedicinalProductAuthorization extends DomainResource {
         if (!(other_ instanceof MedicinalProductAuthorizationProcedureComponent))
           return false;
         MedicinalProductAuthorizationProcedureComponent o = (MedicinalProductAuthorizationProcedureComponent) other_;
-        return compareDeep(number, o.number, true) && compareDeep(type, o.type, true) && compareDeep(date, o.date, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(date, o.date, true)
            && compareDeep(application, o.application, true);
       }
 
@@ -667,7 +804,7 @@ public class MedicinalProductAuthorization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(number, type, date, application
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, date, application
           );
       }
 
@@ -678,361 +815,113 @@ public class MedicinalProductAuthorization extends DomainResource {
 
   }
 
-    @Block()
-    public static class MedicinalProductAuthorizationProcedureApplicationComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * A unique identifier for the specific instance of an application shall be provided in text. The application identifier/number is usually assigned by a Medicines Regulatory Agency.
-         */
-        @Child(name = "number", type = {Identifier.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="A unique identifier for the specific instance of an application shall be provided in text. The application identifier/number is usually assigned by a Medicines Regulatory Agency", formalDefinition="A unique identifier for the specific instance of an application shall be provided in text. The application identifier/number is usually assigned by a Medicines Regulatory Agency." )
-        protected Identifier number;
-
-        /**
-         * The type of the application.
-         */
-        @Child(name = "type", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The type of the application", formalDefinition="The type of the application." )
-        protected CodeableConcept type;
-
-        /**
-         * Date that the application was made.
-         */
-        @Child(name = "date", type = {DateTimeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Date that the application was made", formalDefinition="Date that the application was made." )
-        protected DateTimeType date;
-
-        private static final long serialVersionUID = -1806825708L;
-
-    /**
-     * Constructor
-     */
-      public MedicinalProductAuthorizationProcedureApplicationComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public MedicinalProductAuthorizationProcedureApplicationComponent(Identifier number, CodeableConcept type, DateTimeType date) {
-        super();
-        this.number = number;
-        this.type = type;
-        this.date = date;
-      }
-
-        /**
-         * @return {@link #number} (A unique identifier for the specific instance of an application shall be provided in text. The application identifier/number is usually assigned by a Medicines Regulatory Agency.)
-         */
-        public Identifier getNumber() { 
-          if (this.number == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductAuthorizationProcedureApplicationComponent.number");
-            else if (Configuration.doAutoCreate())
-              this.number = new Identifier(); // cc
-          return this.number;
-        }
-
-        public boolean hasNumber() { 
-          return this.number != null && !this.number.isEmpty();
-        }
-
-        /**
-         * @param value {@link #number} (A unique identifier for the specific instance of an application shall be provided in text. The application identifier/number is usually assigned by a Medicines Regulatory Agency.)
-         */
-        public MedicinalProductAuthorizationProcedureApplicationComponent setNumber(Identifier value) { 
-          this.number = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #type} (The type of the application.)
-         */
-        public CodeableConcept getType() { 
-          if (this.type == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductAuthorizationProcedureApplicationComponent.type");
-            else if (Configuration.doAutoCreate())
-              this.type = new CodeableConcept(); // cc
-          return this.type;
-        }
-
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
-        }
-
-        /**
-         * @param value {@link #type} (The type of the application.)
-         */
-        public MedicinalProductAuthorizationProcedureApplicationComponent setType(CodeableConcept value) { 
-          this.type = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #date} (Date that the application was made.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-         */
-        public DateTimeType getDateElement() { 
-          if (this.date == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductAuthorizationProcedureApplicationComponent.date");
-            else if (Configuration.doAutoCreate())
-              this.date = new DateTimeType(); // bb
-          return this.date;
-        }
-
-        public boolean hasDateElement() { 
-          return this.date != null && !this.date.isEmpty();
-        }
-
-        public boolean hasDate() { 
-          return this.date != null && !this.date.isEmpty();
-        }
-
-        /**
-         * @param value {@link #date} (Date that the application was made.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
-         */
-        public MedicinalProductAuthorizationProcedureApplicationComponent setDateElement(DateTimeType value) { 
-          this.date = value;
-          return this;
-        }
-
-        /**
-         * @return Date that the application was made.
-         */
-        public Date getDate() { 
-          return this.date == null ? null : this.date.getValue();
-        }
-
-        /**
-         * @param value Date that the application was made.
-         */
-        public MedicinalProductAuthorizationProcedureApplicationComponent setDate(Date value) { 
-            if (this.date == null)
-              this.date = new DateTimeType();
-            this.date.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("number", "Identifier", "A unique identifier for the specific instance of an application shall be provided in text. The application identifier/number is usually assigned by a Medicines Regulatory Agency.", 0, 1, number));
-          children.add(new Property("type", "CodeableConcept", "The type of the application.", 0, 1, type));
-          children.add(new Property("date", "dateTime", "Date that the application was made.", 0, 1, date));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -1034364087: /*number*/  return new Property("number", "Identifier", "A unique identifier for the specific instance of an application shall be provided in text. The application identifier/number is usually assigned by a Medicines Regulatory Agency.", 0, 1, number);
-          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of the application.", 0, 1, type);
-          case 3076014: /*date*/  return new Property("date", "dateTime", "Date that the application was made.", 0, 1, date);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -1034364087: /*number*/ return this.number == null ? new Base[0] : new Base[] {this.number}; // Identifier
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -1034364087: // number
-          this.number = castToIdentifier(value); // Identifier
-          return value;
-        case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 3076014: // date
-          this.date = castToDateTime(value); // DateTimeType
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("number")) {
-          this.number = castToIdentifier(value); // Identifier
-        } else if (name.equals("type")) {
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("date")) {
-          this.date = castToDateTime(value); // DateTimeType
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -1034364087:  return getNumber(); 
-        case 3575610:  return getType(); 
-        case 3076014:  return getDateElement();
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -1034364087: /*number*/ return new String[] {"Identifier"};
-        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 3076014: /*date*/ return new String[] {"dateTime"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("number")) {
-          this.number = new Identifier();
-          return this.number;
-        }
-        else if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
-        }
-        else if (name.equals("date")) {
-          throw new FHIRException("Cannot call addChild on a primitive type MedicinalProductAuthorization.date");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public MedicinalProductAuthorizationProcedureApplicationComponent copy() {
-        MedicinalProductAuthorizationProcedureApplicationComponent dst = new MedicinalProductAuthorizationProcedureApplicationComponent();
-        copyValues(dst);
-        dst.number = number == null ? null : number.copy();
-        dst.type = type == null ? null : type.copy();
-        dst.date = date == null ? null : date.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof MedicinalProductAuthorizationProcedureApplicationComponent))
-          return false;
-        MedicinalProductAuthorizationProcedureApplicationComponent o = (MedicinalProductAuthorizationProcedureApplicationComponent) other_;
-        return compareDeep(number, o.number, true) && compareDeep(type, o.type, true) && compareDeep(date, o.date, true)
-          ;
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof MedicinalProductAuthorizationProcedureApplicationComponent))
-          return false;
-        MedicinalProductAuthorizationProcedureApplicationComponent o = (MedicinalProductAuthorizationProcedureApplicationComponent) other_;
-        return compareValues(date, o.date, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(number, type, date);
-      }
-
-  public String fhirType() {
-    return "MedicinalProductAuthorization.procedure.application";
-
-  }
-
-  }
-
     /**
      * Business identifier for the marketing authorization, as assigned by a regulator.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Business identifier for the marketing authorization, as assigned by a regulator", formalDefinition="Business identifier for the marketing authorization, as assigned by a regulator." )
-    protected Identifier identifier;
+    protected List<Identifier> identifier;
+
+    /**
+     * The medicinal product that is being authorized.
+     */
+    @Child(name = "subject", type = {MedicinalProduct.class, MedicinalProductPackaged.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The medicinal product that is being authorized", formalDefinition="The medicinal product that is being authorized." )
+    protected Reference subject;
+
+    /**
+     * The actual object that is the target of the reference (The medicinal product that is being authorized.)
+     */
+    protected Resource subjectTarget;
 
     /**
      * The country in which the marketing authorization has been granted.
      */
-    @Child(name = "country", type = {CodeableConcept.class}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "country", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The country in which the marketing authorization has been granted", formalDefinition="The country in which the marketing authorization has been granted." )
     protected List<CodeableConcept> country;
 
     /**
+     * Jurisdiction within a country.
+     */
+    @Child(name = "jurisdiction", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Jurisdiction within a country", formalDefinition="Jurisdiction within a country." )
+    protected List<CodeableConcept> jurisdiction;
+
+    /**
      * The legal status of supply of the medicinal product as classified by the regulator.
      */
-    @Child(name = "legalStatusOfSupply", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "legalStatusOfSupply", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The legal status of supply of the medicinal product as classified by the regulator", formalDefinition="The legal status of supply of the medicinal product as classified by the regulator." )
     protected CodeableConcept legalStatusOfSupply;
 
     /**
      * The status of the marketing authorization.
      */
-    @Child(name = "status", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "status", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The status of the marketing authorization", formalDefinition="The status of the marketing authorization." )
     protected CodeableConcept status;
 
     /**
      * The date at which the given status has become applicable.
      */
-    @Child(name = "statusDate", type = {DateTimeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "statusDate", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The date at which the given status has become applicable", formalDefinition="The date at which the given status has become applicable." )
     protected DateTimeType statusDate;
 
     /**
      * The date when a suspended the marketing or the marketing authorization of the product is anticipated to be restored.
      */
-    @Child(name = "restoreDate", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "restoreDate", type = {DateTimeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The date when a suspended the marketing or the marketing authorization of the product is anticipated to be restored", formalDefinition="The date when a suspended the marketing or the marketing authorization of the product is anticipated to be restored." )
     protected DateTimeType restoreDate;
 
     /**
      * The beginning of the time period in which the marketing authorization is in the specific status shall be specified A complete date consisting of day, month and year shall be specified using the ISO 8601 date format.
      */
-    @Child(name = "validityPeriod", type = {Period.class}, order=6, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "validityPeriod", type = {Period.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The beginning of the time period in which the marketing authorization is in the specific status shall be specified A complete date consisting of day, month and year shall be specified using the ISO 8601 date format", formalDefinition="The beginning of the time period in which the marketing authorization is in the specific status shall be specified A complete date consisting of day, month and year shall be specified using the ISO 8601 date format." )
     protected Period validityPeriod;
 
     /**
      * A period of time after authorization before generic product applicatiosn can be submitted.
      */
-    @Child(name = "dataExclusivityPeriod", type = {Period.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "dataExclusivityPeriod", type = {Period.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="A period of time after authorization before generic product applicatiosn can be submitted", formalDefinition="A period of time after authorization before generic product applicatiosn can be submitted." )
     protected Period dataExclusivityPeriod;
 
     /**
      * The date when the first authorization was granted by a Medicines Regulatory Agency.
      */
-    @Child(name = "dateOfFirstAuthorization", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "dateOfFirstAuthorization", type = {DateTimeType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The date when the first authorization was granted by a Medicines Regulatory Agency", formalDefinition="The date when the first authorization was granted by a Medicines Regulatory Agency." )
     protected DateTimeType dateOfFirstAuthorization;
 
     /**
      * Date of first marketing authorization for a company's new medicinal product in any country in the World.
      */
-    @Child(name = "internationalBirthDate", type = {DateTimeType.class}, order=9, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "internationalBirthDate", type = {DateTimeType.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date of first marketing authorization for a company's new medicinal product in any country in the World", formalDefinition="Date of first marketing authorization for a company's new medicinal product in any country in the World." )
     protected DateTimeType internationalBirthDate;
 
     /**
+     * The legal framework against which this authorization is granted.
+     */
+    @Child(name = "legalBasis", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The legal framework against which this authorization is granted", formalDefinition="The legal framework against which this authorization is granted." )
+    protected CodeableConcept legalBasis;
+
+    /**
      * Authorization in areas within a country.
      */
-    @Child(name = "jurisdictionalAuthorization", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "jurisdictionalAuthorization", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Authorization in areas within a country", formalDefinition="Authorization in areas within a country." )
     protected List<MedicinalProductAuthorizationJurisdictionalAuthorizationComponent> jurisdictionalAuthorization;
 
     /**
      * Marketing Authorization Holder.
      */
-    @Child(name = "holder", type = {Organization.class}, order=11, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "holder", type = {Organization.class}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Marketing Authorization Holder", formalDefinition="Marketing Authorization Holder." )
     protected Reference holder;
 
@@ -1044,7 +933,7 @@ public class MedicinalProductAuthorization extends DomainResource {
     /**
      * Medicines Regulatory Agency.
      */
-    @Child(name = "regulator", type = {Organization.class}, order=12, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "regulator", type = {Organization.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Medicines Regulatory Agency", formalDefinition="Medicines Regulatory Agency." )
     protected Reference regulator;
 
@@ -1056,18 +945,11 @@ public class MedicinalProductAuthorization extends DomainResource {
     /**
      * The regulatory procedure for granting or amending a marketing authorization.
      */
-    @Child(name = "procedure", type = {}, order=13, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "procedure", type = {}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The regulatory procedure for granting or amending a marketing authorization", formalDefinition="The regulatory procedure for granting or amending a marketing authorization." )
     protected MedicinalProductAuthorizationProcedureComponent procedure;
 
-    /**
-     * Marketing status of the medicinal product, in contrast to marketing authorizaton.
-     */
-    @Child(name = "marketingStatus", type = {MarketingStatus.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Marketing status of the medicinal product, in contrast to marketing authorizaton", formalDefinition="Marketing status of the medicinal product, in contrast to marketing authorizaton." )
-    protected List<MarketingStatus> marketingStatus;
-
-    private static final long serialVersionUID = 593868878L;
+    private static final long serialVersionUID = -739568562L;
 
   /**
    * Constructor
@@ -1076,42 +958,95 @@ public class MedicinalProductAuthorization extends DomainResource {
       super();
     }
 
-  /**
-   * Constructor
-   */
-    public MedicinalProductAuthorization(CodeableConcept legalStatusOfSupply, CodeableConcept status, DateTimeType statusDate, Period validityPeriod, DateTimeType internationalBirthDate, Reference holder, Reference regulator, MedicinalProductAuthorizationProcedureComponent procedure) {
-      super();
-      this.legalStatusOfSupply = legalStatusOfSupply;
-      this.status = status;
-      this.statusDate = statusDate;
-      this.validityPeriod = validityPeriod;
-      this.internationalBirthDate = internationalBirthDate;
-      this.holder = holder;
-      this.regulator = regulator;
-      this.procedure = procedure;
-    }
-
     /**
      * @return {@link #identifier} (Business identifier for the marketing authorization, as assigned by a regulator.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicinalProductAuthorization.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicinalProductAuthorization setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public MedicinalProductAuthorization addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (Business identifier for the marketing authorization, as assigned by a regulator.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public MedicinalProductAuthorization setIdentifier(Identifier value) { 
-      this.identifier = value;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
+    }
+
+    /**
+     * @return {@link #subject} (The medicinal product that is being authorized.)
+     */
+    public Reference getSubject() { 
+      if (this.subject == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MedicinalProductAuthorization.subject");
+        else if (Configuration.doAutoCreate())
+          this.subject = new Reference(); // cc
+      return this.subject;
+    }
+
+    public boolean hasSubject() { 
+      return this.subject != null && !this.subject.isEmpty();
+    }
+
+    /**
+     * @param value {@link #subject} (The medicinal product that is being authorized.)
+     */
+    public MedicinalProductAuthorization setSubject(Reference value) { 
+      this.subject = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The medicinal product that is being authorized.)
+     */
+    public Resource getSubjectTarget() { 
+      return this.subjectTarget;
+    }
+
+    /**
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The medicinal product that is being authorized.)
+     */
+    public MedicinalProductAuthorization setSubjectTarget(Resource value) { 
+      this.subjectTarget = value;
       return this;
     }
 
@@ -1166,6 +1101,59 @@ public class MedicinalProductAuthorization extends DomainResource {
         addCountry();
       }
       return getCountry().get(0);
+    }
+
+    /**
+     * @return {@link #jurisdiction} (Jurisdiction within a country.)
+     */
+    public List<CodeableConcept> getJurisdiction() { 
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      return this.jurisdiction;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MedicinalProductAuthorization setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+      this.jurisdiction = theJurisdiction;
+      return this;
+    }
+
+    public boolean hasJurisdiction() { 
+      if (this.jurisdiction == null)
+        return false;
+      for (CodeableConcept item : this.jurisdiction)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addJurisdiction() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return t;
+    }
+
+    public MedicinalProductAuthorization addJurisdiction(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.jurisdiction == null)
+        this.jurisdiction = new ArrayList<CodeableConcept>();
+      this.jurisdiction.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #jurisdiction}, creating it if it does not already exist
+     */
+    public CodeableConcept getJurisdictionFirstRep() { 
+      if (getJurisdiction().isEmpty()) {
+        addJurisdiction();
+      }
+      return getJurisdiction().get(0);
     }
 
     /**
@@ -1255,9 +1243,13 @@ public class MedicinalProductAuthorization extends DomainResource {
      * @param value The date at which the given status has become applicable.
      */
     public MedicinalProductAuthorization setStatusDate(Date value) { 
+      if (value == null)
+        this.statusDate = null;
+      else {
         if (this.statusDate == null)
           this.statusDate = new DateTimeType();
         this.statusDate.setValue(value);
+      }
       return this;
     }
 
@@ -1446,9 +1438,37 @@ public class MedicinalProductAuthorization extends DomainResource {
      * @param value Date of first marketing authorization for a company's new medicinal product in any country in the World.
      */
     public MedicinalProductAuthorization setInternationalBirthDate(Date value) { 
+      if (value == null)
+        this.internationalBirthDate = null;
+      else {
         if (this.internationalBirthDate == null)
           this.internationalBirthDate = new DateTimeType();
         this.internationalBirthDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #legalBasis} (The legal framework against which this authorization is granted.)
+     */
+    public CodeableConcept getLegalBasis() { 
+      if (this.legalBasis == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MedicinalProductAuthorization.legalBasis");
+        else if (Configuration.doAutoCreate())
+          this.legalBasis = new CodeableConcept(); // cc
+      return this.legalBasis;
+    }
+
+    public boolean hasLegalBasis() { 
+      return this.legalBasis != null && !this.legalBasis.isEmpty();
+    }
+
+    /**
+     * @param value {@link #legalBasis} (The legal framework against which this authorization is granted.)
+     */
+    public MedicinalProductAuthorization setLegalBasis(CodeableConcept value) { 
+      this.legalBasis = value;
       return this;
     }
 
@@ -1617,63 +1637,12 @@ public class MedicinalProductAuthorization extends DomainResource {
       return this;
     }
 
-    /**
-     * @return {@link #marketingStatus} (Marketing status of the medicinal product, in contrast to marketing authorizaton.)
-     */
-    public List<MarketingStatus> getMarketingStatus() { 
-      if (this.marketingStatus == null)
-        this.marketingStatus = new ArrayList<MarketingStatus>();
-      return this.marketingStatus;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public MedicinalProductAuthorization setMarketingStatus(List<MarketingStatus> theMarketingStatus) { 
-      this.marketingStatus = theMarketingStatus;
-      return this;
-    }
-
-    public boolean hasMarketingStatus() { 
-      if (this.marketingStatus == null)
-        return false;
-      for (MarketingStatus item : this.marketingStatus)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public MarketingStatus addMarketingStatus() { //3
-      MarketingStatus t = new MarketingStatus();
-      if (this.marketingStatus == null)
-        this.marketingStatus = new ArrayList<MarketingStatus>();
-      this.marketingStatus.add(t);
-      return t;
-    }
-
-    public MedicinalProductAuthorization addMarketingStatus(MarketingStatus t) { //3
-      if (t == null)
-        return this;
-      if (this.marketingStatus == null)
-        this.marketingStatus = new ArrayList<MarketingStatus>();
-      this.marketingStatus.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #marketingStatus}, creating it if it does not already exist
-     */
-    public MarketingStatus getMarketingStatusFirstRep() { 
-      if (getMarketingStatus().isEmpty()) {
-        addMarketingStatus();
-      }
-      return getMarketingStatus().get(0);
-    }
-
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "Business identifier for the marketing authorization, as assigned by a regulator.", 0, 1, identifier));
+        children.add(new Property("identifier", "Identifier", "Business identifier for the marketing authorization, as assigned by a regulator.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("subject", "Reference(MedicinalProduct|MedicinalProductPackaged)", "The medicinal product that is being authorized.", 0, 1, subject));
         children.add(new Property("country", "CodeableConcept", "The country in which the marketing authorization has been granted.", 0, java.lang.Integer.MAX_VALUE, country));
+        children.add(new Property("jurisdiction", "CodeableConcept", "Jurisdiction within a country.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("legalStatusOfSupply", "CodeableConcept", "The legal status of supply of the medicinal product as classified by the regulator.", 0, 1, legalStatusOfSupply));
         children.add(new Property("status", "CodeableConcept", "The status of the marketing authorization.", 0, 1, status));
         children.add(new Property("statusDate", "dateTime", "The date at which the given status has become applicable.", 0, 1, statusDate));
@@ -1682,18 +1651,20 @@ public class MedicinalProductAuthorization extends DomainResource {
         children.add(new Property("dataExclusivityPeriod", "Period", "A period of time after authorization before generic product applicatiosn can be submitted.", 0, 1, dataExclusivityPeriod));
         children.add(new Property("dateOfFirstAuthorization", "dateTime", "The date when the first authorization was granted by a Medicines Regulatory Agency.", 0, 1, dateOfFirstAuthorization));
         children.add(new Property("internationalBirthDate", "dateTime", "Date of first marketing authorization for a company's new medicinal product in any country in the World.", 0, 1, internationalBirthDate));
+        children.add(new Property("legalBasis", "CodeableConcept", "The legal framework against which this authorization is granted.", 0, 1, legalBasis));
         children.add(new Property("jurisdictionalAuthorization", "", "Authorization in areas within a country.", 0, java.lang.Integer.MAX_VALUE, jurisdictionalAuthorization));
         children.add(new Property("holder", "Reference(Organization)", "Marketing Authorization Holder.", 0, 1, holder));
         children.add(new Property("regulator", "Reference(Organization)", "Medicines Regulatory Agency.", 0, 1, regulator));
         children.add(new Property("procedure", "", "The regulatory procedure for granting or amending a marketing authorization.", 0, 1, procedure));
-        children.add(new Property("marketingStatus", "MarketingStatus", "Marketing status of the medicinal product, in contrast to marketing authorizaton.", 0, java.lang.Integer.MAX_VALUE, marketingStatus));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifier for the marketing authorization, as assigned by a regulator.", 0, 1, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifier for the marketing authorization, as assigned by a regulator.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(MedicinalProduct|MedicinalProductPackaged)", "The medicinal product that is being authorized.", 0, 1, subject);
         case 957831062: /*country*/  return new Property("country", "CodeableConcept", "The country in which the marketing authorization has been granted.", 0, java.lang.Integer.MAX_VALUE, country);
+        case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "Jurisdiction within a country.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -844874031: /*legalStatusOfSupply*/  return new Property("legalStatusOfSupply", "CodeableConcept", "The legal status of supply of the medicinal product as classified by the regulator.", 0, 1, legalStatusOfSupply);
         case -892481550: /*status*/  return new Property("status", "CodeableConcept", "The status of the marketing authorization.", 0, 1, status);
         case 247524032: /*statusDate*/  return new Property("statusDate", "dateTime", "The date at which the given status has become applicable.", 0, 1, statusDate);
@@ -1702,11 +1673,11 @@ public class MedicinalProductAuthorization extends DomainResource {
         case 1940655806: /*dataExclusivityPeriod*/  return new Property("dataExclusivityPeriod", "Period", "A period of time after authorization before generic product applicatiosn can be submitted.", 0, 1, dataExclusivityPeriod);
         case -1026933074: /*dateOfFirstAuthorization*/  return new Property("dateOfFirstAuthorization", "dateTime", "The date when the first authorization was granted by a Medicines Regulatory Agency.", 0, 1, dateOfFirstAuthorization);
         case 400069151: /*internationalBirthDate*/  return new Property("internationalBirthDate", "dateTime", "Date of first marketing authorization for a company's new medicinal product in any country in the World.", 0, 1, internationalBirthDate);
+        case 552357125: /*legalBasis*/  return new Property("legalBasis", "CodeableConcept", "The legal framework against which this authorization is granted.", 0, 1, legalBasis);
         case 1459432557: /*jurisdictionalAuthorization*/  return new Property("jurisdictionalAuthorization", "", "Authorization in areas within a country.", 0, java.lang.Integer.MAX_VALUE, jurisdictionalAuthorization);
         case -1211707988: /*holder*/  return new Property("holder", "Reference(Organization)", "Marketing Authorization Holder.", 0, 1, holder);
         case 414760449: /*regulator*/  return new Property("regulator", "Reference(Organization)", "Medicines Regulatory Agency.", 0, 1, regulator);
         case -1095204141: /*procedure*/  return new Property("procedure", "", "The regulatory procedure for granting or amending a marketing authorization.", 0, 1, procedure);
-        case 70767032: /*marketingStatus*/  return new Property("marketingStatus", "MarketingStatus", "Marketing status of the medicinal product, in contrast to marketing authorizaton.", 0, java.lang.Integer.MAX_VALUE, marketingStatus);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1715,8 +1686,10 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 957831062: /*country*/ return this.country == null ? new Base[0] : this.country.toArray(new Base[this.country.size()]); // CodeableConcept
+        case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
         case -844874031: /*legalStatusOfSupply*/ return this.legalStatusOfSupply == null ? new Base[0] : new Base[] {this.legalStatusOfSupply}; // CodeableConcept
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // CodeableConcept
         case 247524032: /*statusDate*/ return this.statusDate == null ? new Base[0] : new Base[] {this.statusDate}; // DateTimeType
@@ -1725,11 +1698,11 @@ public class MedicinalProductAuthorization extends DomainResource {
         case 1940655806: /*dataExclusivityPeriod*/ return this.dataExclusivityPeriod == null ? new Base[0] : new Base[] {this.dataExclusivityPeriod}; // Period
         case -1026933074: /*dateOfFirstAuthorization*/ return this.dateOfFirstAuthorization == null ? new Base[0] : new Base[] {this.dateOfFirstAuthorization}; // DateTimeType
         case 400069151: /*internationalBirthDate*/ return this.internationalBirthDate == null ? new Base[0] : new Base[] {this.internationalBirthDate}; // DateTimeType
+        case 552357125: /*legalBasis*/ return this.legalBasis == null ? new Base[0] : new Base[] {this.legalBasis}; // CodeableConcept
         case 1459432557: /*jurisdictionalAuthorization*/ return this.jurisdictionalAuthorization == null ? new Base[0] : this.jurisdictionalAuthorization.toArray(new Base[this.jurisdictionalAuthorization.size()]); // MedicinalProductAuthorizationJurisdictionalAuthorizationComponent
         case -1211707988: /*holder*/ return this.holder == null ? new Base[0] : new Base[] {this.holder}; // Reference
         case 414760449: /*regulator*/ return this.regulator == null ? new Base[0] : new Base[] {this.regulator}; // Reference
         case -1095204141: /*procedure*/ return this.procedure == null ? new Base[0] : new Base[] {this.procedure}; // MedicinalProductAuthorizationProcedureComponent
-        case 70767032: /*marketingStatus*/ return this.marketingStatus == null ? new Base[0] : this.marketingStatus.toArray(new Base[this.marketingStatus.size()]); // MarketingStatus
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1739,10 +1712,16 @@ public class MedicinalProductAuthorization extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
+          return value;
+        case -1867885268: // subject
+          this.subject = castToReference(value); // Reference
           return value;
         case 957831062: // country
           this.getCountry().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -507075711: // jurisdiction
+          this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -844874031: // legalStatusOfSupply
           this.legalStatusOfSupply = castToCodeableConcept(value); // CodeableConcept
@@ -1768,6 +1747,9 @@ public class MedicinalProductAuthorization extends DomainResource {
         case 400069151: // internationalBirthDate
           this.internationalBirthDate = castToDateTime(value); // DateTimeType
           return value;
+        case 552357125: // legalBasis
+          this.legalBasis = castToCodeableConcept(value); // CodeableConcept
+          return value;
         case 1459432557: // jurisdictionalAuthorization
           this.getJurisdictionalAuthorization().add((MedicinalProductAuthorizationJurisdictionalAuthorizationComponent) value); // MedicinalProductAuthorizationJurisdictionalAuthorizationComponent
           return value;
@@ -1780,9 +1762,6 @@ public class MedicinalProductAuthorization extends DomainResource {
         case -1095204141: // procedure
           this.procedure = (MedicinalProductAuthorizationProcedureComponent) value; // MedicinalProductAuthorizationProcedureComponent
           return value;
-        case 70767032: // marketingStatus
-          this.getMarketingStatus().add(castToMarketingStatus(value)); // MarketingStatus
-          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -1791,9 +1770,13 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
+        } else if (name.equals("subject")) {
+          this.subject = castToReference(value); // Reference
         } else if (name.equals("country")) {
           this.getCountry().add(castToCodeableConcept(value));
+        } else if (name.equals("jurisdiction")) {
+          this.getJurisdiction().add(castToCodeableConcept(value));
         } else if (name.equals("legalStatusOfSupply")) {
           this.legalStatusOfSupply = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("status")) {
@@ -1810,6 +1793,8 @@ public class MedicinalProductAuthorization extends DomainResource {
           this.dateOfFirstAuthorization = castToDateTime(value); // DateTimeType
         } else if (name.equals("internationalBirthDate")) {
           this.internationalBirthDate = castToDateTime(value); // DateTimeType
+        } else if (name.equals("legalBasis")) {
+          this.legalBasis = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("jurisdictionalAuthorization")) {
           this.getJurisdictionalAuthorization().add((MedicinalProductAuthorizationJurisdictionalAuthorizationComponent) value);
         } else if (name.equals("holder")) {
@@ -1818,8 +1803,6 @@ public class MedicinalProductAuthorization extends DomainResource {
           this.regulator = castToReference(value); // Reference
         } else if (name.equals("procedure")) {
           this.procedure = (MedicinalProductAuthorizationProcedureComponent) value; // MedicinalProductAuthorizationProcedureComponent
-        } else if (name.equals("marketingStatus")) {
-          this.getMarketingStatus().add(castToMarketingStatus(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -1828,8 +1811,10 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
+        case -1867885268:  return getSubject(); 
         case 957831062:  return addCountry(); 
+        case -507075711:  return addJurisdiction(); 
         case -844874031:  return getLegalStatusOfSupply(); 
         case -892481550:  return getStatus(); 
         case 247524032:  return getStatusDateElement();
@@ -1838,11 +1823,11 @@ public class MedicinalProductAuthorization extends DomainResource {
         case 1940655806:  return getDataExclusivityPeriod(); 
         case -1026933074:  return getDateOfFirstAuthorizationElement();
         case 400069151:  return getInternationalBirthDateElement();
+        case 552357125:  return getLegalBasis(); 
         case 1459432557:  return addJurisdictionalAuthorization(); 
         case -1211707988:  return getHolder(); 
         case 414760449:  return getRegulator(); 
         case -1095204141:  return getProcedure(); 
-        case 70767032:  return addMarketingStatus(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1852,7 +1837,9 @@ public class MedicinalProductAuthorization extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 957831062: /*country*/ return new String[] {"CodeableConcept"};
+        case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
         case -844874031: /*legalStatusOfSupply*/ return new String[] {"CodeableConcept"};
         case -892481550: /*status*/ return new String[] {"CodeableConcept"};
         case 247524032: /*statusDate*/ return new String[] {"dateTime"};
@@ -1861,11 +1848,11 @@ public class MedicinalProductAuthorization extends DomainResource {
         case 1940655806: /*dataExclusivityPeriod*/ return new String[] {"Period"};
         case -1026933074: /*dateOfFirstAuthorization*/ return new String[] {"dateTime"};
         case 400069151: /*internationalBirthDate*/ return new String[] {"dateTime"};
+        case 552357125: /*legalBasis*/ return new String[] {"CodeableConcept"};
         case 1459432557: /*jurisdictionalAuthorization*/ return new String[] {};
         case -1211707988: /*holder*/ return new String[] {"Reference"};
         case 414760449: /*regulator*/ return new String[] {"Reference"};
         case -1095204141: /*procedure*/ return new String[] {};
-        case 70767032: /*marketingStatus*/ return new String[] {"MarketingStatus"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1874,11 +1861,17 @@ public class MedicinalProductAuthorization extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
+        }
+        else if (name.equals("subject")) {
+          this.subject = new Reference();
+          return this.subject;
         }
         else if (name.equals("country")) {
           return addCountry();
+        }
+        else if (name.equals("jurisdiction")) {
+          return addJurisdiction();
         }
         else if (name.equals("legalStatusOfSupply")) {
           this.legalStatusOfSupply = new CodeableConcept();
@@ -1908,6 +1901,10 @@ public class MedicinalProductAuthorization extends DomainResource {
         else if (name.equals("internationalBirthDate")) {
           throw new FHIRException("Cannot call addChild on a primitive type MedicinalProductAuthorization.internationalBirthDate");
         }
+        else if (name.equals("legalBasis")) {
+          this.legalBasis = new CodeableConcept();
+          return this.legalBasis;
+        }
         else if (name.equals("jurisdictionalAuthorization")) {
           return addJurisdictionalAuthorization();
         }
@@ -1923,9 +1920,6 @@ public class MedicinalProductAuthorization extends DomainResource {
           this.procedure = new MedicinalProductAuthorizationProcedureComponent();
           return this.procedure;
         }
-        else if (name.equals("marketingStatus")) {
-          return addMarketingStatus();
-        }
         else
           return super.addChild(name);
       }
@@ -1938,11 +1932,21 @@ public class MedicinalProductAuthorization extends DomainResource {
       public MedicinalProductAuthorization copy() {
         MedicinalProductAuthorization dst = new MedicinalProductAuthorization();
         copyValues(dst);
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
+        dst.subject = subject == null ? null : subject.copy();
         if (country != null) {
           dst.country = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : country)
             dst.country.add(i.copy());
+        };
+        if (jurisdiction != null) {
+          dst.jurisdiction = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : jurisdiction)
+            dst.jurisdiction.add(i.copy());
         };
         dst.legalStatusOfSupply = legalStatusOfSupply == null ? null : legalStatusOfSupply.copy();
         dst.status = status == null ? null : status.copy();
@@ -1952,6 +1956,7 @@ public class MedicinalProductAuthorization extends DomainResource {
         dst.dataExclusivityPeriod = dataExclusivityPeriod == null ? null : dataExclusivityPeriod.copy();
         dst.dateOfFirstAuthorization = dateOfFirstAuthorization == null ? null : dateOfFirstAuthorization.copy();
         dst.internationalBirthDate = internationalBirthDate == null ? null : internationalBirthDate.copy();
+        dst.legalBasis = legalBasis == null ? null : legalBasis.copy();
         if (jurisdictionalAuthorization != null) {
           dst.jurisdictionalAuthorization = new ArrayList<MedicinalProductAuthorizationJurisdictionalAuthorizationComponent>();
           for (MedicinalProductAuthorizationJurisdictionalAuthorizationComponent i : jurisdictionalAuthorization)
@@ -1960,11 +1965,6 @@ public class MedicinalProductAuthorization extends DomainResource {
         dst.holder = holder == null ? null : holder.copy();
         dst.regulator = regulator == null ? null : regulator.copy();
         dst.procedure = procedure == null ? null : procedure.copy();
-        if (marketingStatus != null) {
-          dst.marketingStatus = new ArrayList<MarketingStatus>();
-          for (MarketingStatus i : marketingStatus)
-            dst.marketingStatus.add(i.copy());
-        };
         return dst;
       }
 
@@ -1979,12 +1979,13 @@ public class MedicinalProductAuthorization extends DomainResource {
         if (!(other_ instanceof MedicinalProductAuthorization))
           return false;
         MedicinalProductAuthorization o = (MedicinalProductAuthorization) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(country, o.country, true) && compareDeep(legalStatusOfSupply, o.legalStatusOfSupply, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(subject, o.subject, true) && compareDeep(country, o.country, true)
+           && compareDeep(jurisdiction, o.jurisdiction, true) && compareDeep(legalStatusOfSupply, o.legalStatusOfSupply, true)
            && compareDeep(status, o.status, true) && compareDeep(statusDate, o.statusDate, true) && compareDeep(restoreDate, o.restoreDate, true)
            && compareDeep(validityPeriod, o.validityPeriod, true) && compareDeep(dataExclusivityPeriod, o.dataExclusivityPeriod, true)
            && compareDeep(dateOfFirstAuthorization, o.dateOfFirstAuthorization, true) && compareDeep(internationalBirthDate, o.internationalBirthDate, true)
-           && compareDeep(jurisdictionalAuthorization, o.jurisdictionalAuthorization, true) && compareDeep(holder, o.holder, true)
-           && compareDeep(regulator, o.regulator, true) && compareDeep(procedure, o.procedure, true) && compareDeep(marketingStatus, o.marketingStatus, true)
+           && compareDeep(legalBasis, o.legalBasis, true) && compareDeep(jurisdictionalAuthorization, o.jurisdictionalAuthorization, true)
+           && compareDeep(holder, o.holder, true) && compareDeep(regulator, o.regulator, true) && compareDeep(procedure, o.procedure, true)
           ;
       }
 
@@ -2001,16 +2002,42 @@ public class MedicinalProductAuthorization extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, country, legalStatusOfSupply
-          , status, statusDate, restoreDate, validityPeriod, dataExclusivityPeriod, dateOfFirstAuthorization
-          , internationalBirthDate, jurisdictionalAuthorization, holder, regulator, procedure
-          , marketingStatus);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, subject, country
+          , jurisdiction, legalStatusOfSupply, status, statusDate, restoreDate, validityPeriod
+          , dataExclusivityPeriod, dateOfFirstAuthorization, internationalBirthDate, legalBasis
+          , jurisdictionalAuthorization, holder, regulator, procedure);
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.MedicinalProductAuthorization;
    }
+
+ /**
+   * Search parameter: <b>subject</b>
+   * <p>
+   * Description: <b>The item that is being authorized</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicinalProductAuthorization.subject</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="subject", path="MedicinalProductAuthorization.subject", description="The item that is being authorized", type="reference", target={MedicinalProduct.class, MedicinalProductPackaged.class } )
+  public static final String SP_SUBJECT = "subject";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>subject</b>
+   * <p>
+   * Description: <b>The item that is being authorized</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MedicinalProductAuthorization.subject</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam SUBJECT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_SUBJECT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MedicinalProductAuthorization:subject</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("MedicinalProductAuthorization:subject").toLocked();
 
 
 }

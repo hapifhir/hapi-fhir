@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MeasureDataUsage {
 
         /**
-         * The data is intended to be provided as additional information alongside the measure results
+         * The data is intended to be provided as additional information alongside the measure results.
          */
         SUPPLEMENTALDATA, 
         /**
-         * The data is intended to be used to calculate and apply a risk adjustment model for the measure
+         * The data is intended to be used to calculate and apply a risk adjustment model for the measure.
          */
         RISKADJUSTMENTFACTOR, 
         /**
@@ -65,12 +65,12 @@ public enum MeasureDataUsage {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/measure-data-usage";
+          return "http://terminology.hl7.org/CodeSystem/measure-data-usage";
         }
         public String getDefinition() {
           switch (this) {
-            case SUPPLEMENTALDATA: return "The data is intended to be provided as additional information alongside the measure results";
-            case RISKADJUSTMENTFACTOR: return "The data is intended to be used to calculate and apply a risk adjustment model for the measure";
+            case SUPPLEMENTALDATA: return "The data is intended to be provided as additional information alongside the measure results.";
+            case RISKADJUSTMENTFACTOR: return "The data is intended to be used to calculate and apply a risk adjustment model for the measure.";
             default: return "?";
           }
         }

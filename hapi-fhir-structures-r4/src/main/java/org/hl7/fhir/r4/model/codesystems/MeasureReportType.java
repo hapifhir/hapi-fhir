@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,17 +37,21 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MeasureReportType {
 
         /**
-         * An individual report that provides information on the performance for a given measure with respect to a single subject
+         * An individual report that provides information on the performance for a given measure with respect to a single subject.
          */
         INDIVIDUAL, 
         /**
-         * A subject list report that includes a listing of subjects that satisfied each population criteria in the measure
+         * A subject list report that includes a listing of subjects that satisfied each population criteria in the measure.
          */
         SUBJECTLIST, 
         /**
-         * A summary report that returns the number of members in each population criteria for the measure
+         * A summary report that returns the number of members in each population criteria for the measure.
          */
         SUMMARY, 
+        /**
+         * A data collection report that contains data-of-interest for the measure.
+         */
+        DATACOLLECTION, 
         /**
          * added to help the parsers
          */
@@ -61,6 +65,8 @@ public enum MeasureReportType {
           return SUBJECTLIST;
         if ("summary".equals(codeString))
           return SUMMARY;
+        if ("data-collection".equals(codeString))
+          return DATACOLLECTION;
         throw new FHIRException("Unknown MeasureReportType code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,6 +74,7 @@ public enum MeasureReportType {
             case INDIVIDUAL: return "individual";
             case SUBJECTLIST: return "subject-list";
             case SUMMARY: return "summary";
+            case DATACOLLECTION: return "data-collection";
             default: return "?";
           }
         }
@@ -76,9 +83,10 @@ public enum MeasureReportType {
         }
         public String getDefinition() {
           switch (this) {
-            case INDIVIDUAL: return "An individual report that provides information on the performance for a given measure with respect to a single subject";
-            case SUBJECTLIST: return "A subject list report that includes a listing of subjects that satisfied each population criteria in the measure";
-            case SUMMARY: return "A summary report that returns the number of members in each population criteria for the measure";
+            case INDIVIDUAL: return "An individual report that provides information on the performance for a given measure with respect to a single subject.";
+            case SUBJECTLIST: return "A subject list report that includes a listing of subjects that satisfied each population criteria in the measure.";
+            case SUMMARY: return "A summary report that returns the number of members in each population criteria for the measure.";
+            case DATACOLLECTION: return "A data collection report that contains data-of-interest for the measure.";
             default: return "?";
           }
         }
@@ -87,6 +95,7 @@ public enum MeasureReportType {
             case INDIVIDUAL: return "Individual";
             case SUBJECTLIST: return "Subject List";
             case SUMMARY: return "Summary";
+            case DATACOLLECTION: return "Data Collection";
             default: return "?";
           }
     }

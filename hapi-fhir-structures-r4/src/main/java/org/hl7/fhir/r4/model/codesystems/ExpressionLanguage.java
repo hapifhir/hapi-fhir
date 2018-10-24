@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,13 +37,17 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ExpressionLanguage {
 
         /**
-         * Clinical Quality Language
+         * Clinical Quality Language.
          */
         TEXT_CQL, 
         /**
-         * FHIRPath
+         * FHIRPath.
          */
         TEXT_FHIRPATH, 
+        /**
+         * FHIR's RESTful query syntax - typically independent of base URL.
+         */
+        APPLICATION_XFHIRQUERY, 
         /**
          * added to help the parsers
          */
@@ -55,12 +59,15 @@ public enum ExpressionLanguage {
           return TEXT_CQL;
         if ("text/fhirpath".equals(codeString))
           return TEXT_FHIRPATH;
+        if ("application/x-fhir-query".equals(codeString))
+          return APPLICATION_XFHIRQUERY;
         throw new FHIRException("Unknown ExpressionLanguage code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
             case TEXT_CQL: return "text/cql";
             case TEXT_FHIRPATH: return "text/fhirpath";
+            case APPLICATION_XFHIRQUERY: return "application/x-fhir-query";
             default: return "?";
           }
         }
@@ -69,8 +76,9 @@ public enum ExpressionLanguage {
         }
         public String getDefinition() {
           switch (this) {
-            case TEXT_CQL: return "Clinical Quality Language";
-            case TEXT_FHIRPATH: return "FHIRPath";
+            case TEXT_CQL: return "Clinical Quality Language.";
+            case TEXT_FHIRPATH: return "FHIRPath.";
+            case APPLICATION_XFHIRQUERY: return "FHIR's RESTful query syntax - typically independent of base URL.";
             default: return "?";
           }
         }
@@ -78,6 +86,7 @@ public enum ExpressionLanguage {
           switch (this) {
             case TEXT_CQL: return "CQL";
             case TEXT_FHIRPATH: return "FHIRPath";
+            case APPLICATION_XFHIRQUERY: return "FHIR Query";
             default: return "?";
           }
     }

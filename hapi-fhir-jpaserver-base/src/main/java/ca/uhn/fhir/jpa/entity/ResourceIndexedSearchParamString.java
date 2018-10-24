@@ -44,6 +44,10 @@ import static org.apache.commons.lang3.StringUtils.left;
 	 * do not reuse these names:
 	 * IDX_SP_STRING
 	 */
+
+	// This one us used only for sorting
+	@Index(name = "IDX_SP_STRING_HASH_IDENT", columnList = "HASH_IDENTITY"),
+
 	@Index(name = "IDX_SP_STRING_HASH_NRM", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED"),
 	@Index(name = "IDX_SP_STRING_HASH_EXCT", columnList = "HASH_EXACT"),
 
@@ -131,23 +135,30 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Column(name = "HASH_NORM_PREFIX", nullable = true)
 	private Long myHashNormalizedPrefix;
 	/**
+	 * @since 3.6.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_IDENTITY", nullable = true)
+	private Long myHashIdentity;
+	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_EXACT", nullable = true)
 	private Long myHashExact;
 	@Transient
 	private transient DaoConfig myDaoConfig;
-
 	public ResourceIndexedSearchParamString() {
 		super();
 	}
-
 
 	public ResourceIndexedSearchParamString(DaoConfig theDaoConfig, String theName, String theValueNormalized, String theValueExact) {
 		setDaoConfig(theDaoConfig);
 		setParamName(theName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
+	}
+
+	public void setHashIdentity(Long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
 	}
 
 	@PrePersist
@@ -159,6 +170,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			String valueExact = getValueExact();
 			setHashNormalizedPrefix(calculateHashNormalized(myDaoConfig, resourceType, paramName, valueNormalized));
 			setHashExact(calculateHashExact(resourceType, paramName, valueExact));
+			setHashIdentity(calculateHashIdentity(resourceType, paramName));
 		}
 	}
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Record of delivery of what is supplied.
  */
-@ResourceDef(name="SupplyDelivery", profile="http://hl7.org/fhir/Profile/SupplyDelivery")
+@ResourceDef(name="SupplyDelivery", profile="http://hl7.org/fhir/StructureDefinition/SupplyDelivery")
 public class SupplyDelivery extends DomainResource {
 
     public enum SupplyDeliveryStatus {
@@ -62,7 +62,7 @@ public class SupplyDelivery extends DomainResource {
          */
         ABANDONED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
@@ -108,7 +108,7 @@ public class SupplyDelivery extends DomainResource {
             case INPROGRESS: return "Supply has been requested, but not delivered.";
             case COMPLETED: return "Supply has been delivered (\"completed\").";
             case ABANDONED: return "Delivery was not completed.";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
             default: return "?";
           }
         }
@@ -177,9 +177,9 @@ public class SupplyDelivery extends DomainResource {
         /**
          * The amount of supply that has been dispensed. Includes unit of measure.
          */
-        @Child(name = "quantity", type = {SimpleQuantity.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "quantity", type = {Quantity.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Amount dispensed", formalDefinition="The amount of supply that has been dispensed. Includes unit of measure." )
-        protected SimpleQuantity quantity;
+        protected Quantity quantity;
 
         /**
          * Identifies the medication, substance or device being dispensed. This is either a link to a resource representing the details of the item or a code that identifies the item from a known list.
@@ -189,7 +189,7 @@ public class SupplyDelivery extends DomainResource {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/supply-item")
         protected Type item;
 
-        private static final long serialVersionUID = 80196045L;
+        private static final long serialVersionUID = 1628109307L;
 
     /**
      * Constructor
@@ -201,12 +201,12 @@ public class SupplyDelivery extends DomainResource {
         /**
          * @return {@link #quantity} (The amount of supply that has been dispensed. Includes unit of measure.)
          */
-        public SimpleQuantity getQuantity() { 
+        public Quantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SupplyDeliverySuppliedItemComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new SimpleQuantity(); // cc
+              this.quantity = new Quantity(); // cc
           return this.quantity;
         }
 
@@ -217,7 +217,7 @@ public class SupplyDelivery extends DomainResource {
         /**
          * @param value {@link #quantity} (The amount of supply that has been dispensed. Includes unit of measure.)
          */
-        public SupplyDeliverySuppliedItemComponent setQuantity(SimpleQuantity value) { 
+        public SupplyDeliverySuppliedItemComponent setQuantity(Quantity value) { 
           this.quantity = value;
           return this;
         }
@@ -295,7 +295,7 @@ public class SupplyDelivery extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Quantity
         case 3242771: /*item*/ return this.item == null ? new Base[0] : new Base[] {this.item}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -306,7 +306,7 @@ public class SupplyDelivery extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case -1285004149: // quantity
-          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          this.quantity = castToQuantity(value); // Quantity
           return value;
         case 3242771: // item
           this.item = castToType(value); // Type
@@ -319,7 +319,7 @@ public class SupplyDelivery extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("quantity")) {
-          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          this.quantity = castToQuantity(value); // Quantity
         } else if (name.equals("item[x]")) {
           this.item = castToType(value); // Type
         } else
@@ -351,7 +351,7 @@ public class SupplyDelivery extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("quantity")) {
-          this.quantity = new SimpleQuantity();
+          this.quantity = new Quantity();
           return this.quantity;
         }
         else if (name.equals("itemCodeableConcept")) {

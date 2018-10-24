@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An occurrence of information being transmitted; e.g. an alert that was sent to a responsible provider, a public health agency was notified about a reportable condition.
  */
-@ResourceDef(name="Communication", profile="http://hl7.org/fhir/Profile/Communication")
+@ResourceDef(name="Communication", profile="http://hl7.org/fhir/StructureDefinition/Communication")
 public class Communication extends DomainResource {
 
     public enum CommunicationStatus {

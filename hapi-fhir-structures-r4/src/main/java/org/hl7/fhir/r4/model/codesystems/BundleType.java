@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,7 @@ public enum BundleType {
          */
         TRANSACTIONRESPONSE, 
         /**
-         * The bundle is a transaction - intended to be processed by a server as a group of actions.
+         * The bundle is a set of actions - intended to be processed by a server as a group of independent actions.
          */
         BATCH, 
         /**
@@ -69,7 +69,7 @@ public enum BundleType {
          */
         SEARCHSET, 
         /**
-         * The bundle is a set of resources collected into a single package for ease of distribution.
+         * The bundle is a set of resources collected into a single package for ease of distribution that imposes no processing obligations or behavioral rules beyond persistence.
          */
         COLLECTION, 
         /**
@@ -122,11 +122,11 @@ public enum BundleType {
             case MESSAGE: return "The bundle is a message. The first resource is a MessageHeader.";
             case TRANSACTION: return "The bundle is a transaction - intended to be processed by a server as an atomic commit.";
             case TRANSACTIONRESPONSE: return "The bundle is a transaction response. Because the response is a transaction response, the transaction has succeeded, and all responses are error free.";
-            case BATCH: return "The bundle is a transaction - intended to be processed by a server as a group of actions.";
+            case BATCH: return "The bundle is a set of actions - intended to be processed by a server as a group of independent actions.";
             case BATCHRESPONSE: return "The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success.";
             case HISTORY: return "The bundle is a list of resources from a history interaction on a server.";
             case SEARCHSET: return "The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.";
-            case COLLECTION: return "The bundle is a set of resources collected into a single package for ease of distribution.";
+            case COLLECTION: return "The bundle is a set of resources collected into a single package for ease of distribution that imposes no processing obligations or behavioral rules beyond persistence.";
             default: return "?";
           }
         }

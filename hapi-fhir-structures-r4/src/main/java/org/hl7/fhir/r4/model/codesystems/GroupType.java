@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,27 +37,27 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum GroupType {
 
         /**
-         * Group contains "person" Patient resources
+         * Group contains "person" Patient resources.
          */
         PERSON, 
         /**
-         * Group contains "animal" Patient resources
+         * Group contains "animal" Patient resources.
          */
         ANIMAL, 
         /**
-         * Group contains healthcare practitioner resources (Practitioner or PractitionerRole)
+         * Group contains healthcare practitioner resources (Practitioner or PractitionerRole).
          */
         PRACTITIONER, 
         /**
-         * Group contains Device resources
+         * Group contains Device resources.
          */
         DEVICE, 
         /**
-         * Group contains Medication resources
+         * Group contains Medication resources.
          */
         MEDICATION, 
         /**
-         * Group contains Substance resources
+         * Group contains Substance resources.
          */
         SUBSTANCE, 
         /**
@@ -97,12 +97,12 @@ public enum GroupType {
         }
         public String getDefinition() {
           switch (this) {
-            case PERSON: return "Group contains \"person\" Patient resources";
-            case ANIMAL: return "Group contains \"animal\" Patient resources";
-            case PRACTITIONER: return "Group contains healthcare practitioner resources (Practitioner or PractitionerRole)";
-            case DEVICE: return "Group contains Device resources";
-            case MEDICATION: return "Group contains Medication resources";
-            case SUBSTANCE: return "Group contains Substance resources";
+            case PERSON: return "Group contains \"person\" Patient resources.";
+            case ANIMAL: return "Group contains \"animal\" Patient resources.";
+            case PRACTITIONER: return "Group contains healthcare practitioner resources (Practitioner or PractitionerRole).";
+            case DEVICE: return "Group contains Device resources.";
+            case MEDICATION: return "Group contains Medication resources.";
+            case SUBSTANCE: return "Group contains Substance resources.";
             default: return "?";
           }
         }

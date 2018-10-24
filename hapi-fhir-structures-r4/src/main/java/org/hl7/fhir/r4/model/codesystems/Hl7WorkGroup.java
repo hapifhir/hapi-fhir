@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,95 +37,99 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum Hl7WorkGroup {
 
         /**
-         * Community Based Collaborative Care (http://www.hl7.org/Special/committees/cbcc/index.cfm)
+         * Community Based Collaborative Care (http://www.hl7.org/Special/committees/cbcc/index.cfm).
          */
         CBCC, 
         /**
-         * Clinical Decision Support (http://www.hl7.org/Special/committees/dss/index.cfm)
+         * Clinical Decision Support (http://www.hl7.org/Special/committees/dss/index.cfm).
          */
         CDS, 
         /**
-         * Clinical Quality Information (http://www.hl7.org/Special/committees/cqi/index.cfm)
+         * Clinical Quality Information (http://www.hl7.org/Special/committees/cqi/index.cfm).
          */
         CQI, 
         /**
-         * Clinical Genomics (http://www.hl7.org/Special/committees/clingenomics/index.cfm)
+         * Clinical Genomics (http://www.hl7.org/Special/committees/clingenomics/index.cfm).
          */
         CG, 
         /**
-         * Health Care Devices (http://www.hl7.org/Special/committees/healthcaredevices/index.cfm)
+         * Health Care Devices (http://www.hl7.org/Special/committees/healthcaredevices/index.cfm).
          */
         DEV, 
         /**
-         * Electronic Health Records (http://www.hl7.org/special/committees/ehr/index.cfm)
+         * Electronic Health Records (http://www.hl7.org/special/committees/ehr/index.cfm).
          */
         EHR, 
         /**
-         * FHIR Infrastructure (http://www.hl7.org/Special/committees/fiwg/index.cfm)
+         * FHIR Infrastructure (http://www.hl7.org/Special/committees/fiwg/index.cfm).
          */
         FHIR, 
         /**
-         * Financial Management (http://www.hl7.org/Special/committees/fm/index.cfm)
+         * Financial Management (http://www.hl7.org/Special/committees/fm/index.cfm).
          */
         FM, 
         /**
-         * Health Standards Integration (http://www.hl7.org/Special/committees/hsi/index.cfm)
+         * Health Standards Integration (http://www.hl7.org/Special/committees/hsi/index.cfm).
          */
         HSI, 
         /**
-         * Imaging Integration (http://www.hl7.org/Special/committees/imagemgt/index.cfm)
+         * Imaging Integration (http://www.hl7.org/Special/committees/imagemgt/index.cfm).
          */
         II, 
         /**
-         * Infrastructure And Messaging (http://www.hl7.org/special/committees/inm/index.cfm)
+         * Infrastructure And Messaging (http://www.hl7.org/special/committees/inm/index.cfm).
          */
         INM, 
         /**
-         * Implementable Technology Specifications (http://www.hl7.org/special/committees/xml/index.cfm)
+         * Implementable Technology Specifications (http://www.hl7.org/special/committees/xml/index.cfm).
          */
         ITS, 
         /**
-         * Orders and Observations (http://www.hl7.org/Special/committees/orders/index.cfm)
+         * Modeling and Methodology (http://www.hl7.org/Special/committees/mnm/index.cfm).
+         */
+        MNM, 
+        /**
+         * Orders and Observations (http://www.hl7.org/Special/committees/orders/index.cfm).
          */
         OO, 
         /**
-         * Patient Administration (http://www.hl7.org/Special/committees/pafm/index.cfm)
+         * Patient Administration (http://www.hl7.org/Special/committees/pafm/index.cfm).
          */
         PA, 
         /**
-         * Patient Care (http://www.hl7.org/Special/committees/patientcare/index.cfm)
+         * Patient Care (http://www.hl7.org/Special/committees/patientcare/index.cfm).
          */
         PC, 
         /**
-         * Public Health and Emergency Response (http://www.hl7.org/Special/committees/pher/index.cfm)
+         * Public Health and Emergency Response (http://www.hl7.org/Special/committees/pher/index.cfm).
          */
         PHER, 
         /**
-         * Pharmacy (http://www.hl7.org/Special/committees/medication/index.cfm)
+         * Pharmacy (http://www.hl7.org/Special/committees/medication/index.cfm).
          */
         PHX, 
         /**
-         * Regulated Clinical Research Information Management (http://www.hl7.org/Special/committees/rcrim/index.cfm)
+         * Biomedical Research and Regulation (http://www.hl7.org/Special/committees/rcrim/index.cfm).
          */
-        RCRIM, 
+        BRR, 
         /**
-         * Structured Documents (http://www.hl7.org/Special/committees/structure/index.cfm)
+         * Structured Documents (http://www.hl7.org/Special/committees/structure/index.cfm).
          */
         SD, 
         /**
-         * Security (http://www.hl7.org/Special/committees/secure/index.cfm)
+         * Security (http://www.hl7.org/Special/committees/secure/index.cfm).
          */
         SEC, 
         /**
-         * US Realm Taskforce (http://wiki.hl7.org/index.php?title=US_Realm_Task_Force)
+         * US Realm Taskforce (http://wiki.hl7.org/index.php?title=US_Realm_Task_Force).
          */
         US, 
         /**
-         * Vocabulary (http://www.hl7.org/Special/committees/Vocab/index.cfm)
+         * Vocabulary (http://www.hl7.org/Special/committees/Vocab/index.cfm).
          */
         VOCAB, 
         /**
-         * Application Implementation and Design (http://www.hl7.org/Special/committees/java/index.cfm)
+         * Application Implementation and Design (http://www.hl7.org/Special/committees/java/index.cfm).
          */
         AID, 
         /**
@@ -159,6 +163,8 @@ public enum Hl7WorkGroup {
           return INM;
         if ("its".equals(codeString))
           return ITS;
+        if ("mnm".equals(codeString))
+          return MNM;
         if ("oo".equals(codeString))
           return OO;
         if ("pa".equals(codeString))
@@ -169,8 +175,8 @@ public enum Hl7WorkGroup {
           return PHER;
         if ("phx".equals(codeString))
           return PHX;
-        if ("rcrim".equals(codeString))
-          return RCRIM;
+        if ("brr".equals(codeString))
+          return BRR;
         if ("sd".equals(codeString))
           return SD;
         if ("sec".equals(codeString))
@@ -197,12 +203,13 @@ public enum Hl7WorkGroup {
             case II: return "ii";
             case INM: return "inm";
             case ITS: return "its";
+            case MNM: return "mnm";
             case OO: return "oo";
             case PA: return "pa";
             case PC: return "pc";
             case PHER: return "pher";
             case PHX: return "phx";
-            case RCRIM: return "rcrim";
+            case BRR: return "brr";
             case SD: return "sd";
             case SEC: return "sec";
             case US: return "us";
@@ -212,33 +219,34 @@ public enum Hl7WorkGroup {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/hl7-work-group";
+          return "http://terminology.hl7.org/CodeSystem/hl7-work-group";
         }
         public String getDefinition() {
           switch (this) {
-            case CBCC: return "Community Based Collaborative Care (http://www.hl7.org/Special/committees/cbcc/index.cfm)";
-            case CDS: return "Clinical Decision Support (http://www.hl7.org/Special/committees/dss/index.cfm)";
-            case CQI: return "Clinical Quality Information (http://www.hl7.org/Special/committees/cqi/index.cfm)";
-            case CG: return "Clinical Genomics (http://www.hl7.org/Special/committees/clingenomics/index.cfm)";
-            case DEV: return "Health Care Devices (http://www.hl7.org/Special/committees/healthcaredevices/index.cfm)";
-            case EHR: return "Electronic Health Records (http://www.hl7.org/special/committees/ehr/index.cfm)";
-            case FHIR: return "FHIR Infrastructure (http://www.hl7.org/Special/committees/fiwg/index.cfm)";
-            case FM: return "Financial Management (http://www.hl7.org/Special/committees/fm/index.cfm)";
-            case HSI: return "Health Standards Integration (http://www.hl7.org/Special/committees/hsi/index.cfm)";
-            case II: return "Imaging Integration (http://www.hl7.org/Special/committees/imagemgt/index.cfm)";
-            case INM: return "Infrastructure And Messaging (http://www.hl7.org/special/committees/inm/index.cfm)";
-            case ITS: return "Implementable Technology Specifications (http://www.hl7.org/special/committees/xml/index.cfm)";
-            case OO: return "Orders and Observations (http://www.hl7.org/Special/committees/orders/index.cfm)";
-            case PA: return "Patient Administration (http://www.hl7.org/Special/committees/pafm/index.cfm)";
-            case PC: return "Patient Care (http://www.hl7.org/Special/committees/patientcare/index.cfm)";
-            case PHER: return "Public Health and Emergency Response (http://www.hl7.org/Special/committees/pher/index.cfm)";
-            case PHX: return "Pharmacy (http://www.hl7.org/Special/committees/medication/index.cfm)";
-            case RCRIM: return "Regulated Clinical Research Information Management (http://www.hl7.org/Special/committees/rcrim/index.cfm)";
-            case SD: return "Structured Documents (http://www.hl7.org/Special/committees/structure/index.cfm)";
-            case SEC: return "Security (http://www.hl7.org/Special/committees/secure/index.cfm)";
-            case US: return "US Realm Taskforce (http://wiki.hl7.org/index.php?title=US_Realm_Task_Force)";
-            case VOCAB: return "Vocabulary (http://www.hl7.org/Special/committees/Vocab/index.cfm)";
-            case AID: return "Application Implementation and Design (http://www.hl7.org/Special/committees/java/index.cfm)";
+            case CBCC: return "Community Based Collaborative Care (http://www.hl7.org/Special/committees/cbcc/index.cfm).";
+            case CDS: return "Clinical Decision Support (http://www.hl7.org/Special/committees/dss/index.cfm).";
+            case CQI: return "Clinical Quality Information (http://www.hl7.org/Special/committees/cqi/index.cfm).";
+            case CG: return "Clinical Genomics (http://www.hl7.org/Special/committees/clingenomics/index.cfm).";
+            case DEV: return "Health Care Devices (http://www.hl7.org/Special/committees/healthcaredevices/index.cfm).";
+            case EHR: return "Electronic Health Records (http://www.hl7.org/special/committees/ehr/index.cfm).";
+            case FHIR: return "FHIR Infrastructure (http://www.hl7.org/Special/committees/fiwg/index.cfm).";
+            case FM: return "Financial Management (http://www.hl7.org/Special/committees/fm/index.cfm).";
+            case HSI: return "Health Standards Integration (http://www.hl7.org/Special/committees/hsi/index.cfm).";
+            case II: return "Imaging Integration (http://www.hl7.org/Special/committees/imagemgt/index.cfm).";
+            case INM: return "Infrastructure And Messaging (http://www.hl7.org/special/committees/inm/index.cfm).";
+            case ITS: return "Implementable Technology Specifications (http://www.hl7.org/special/committees/xml/index.cfm).";
+            case MNM: return "Modeling and Methodology (http://www.hl7.org/Special/committees/mnm/index.cfm).";
+            case OO: return "Orders and Observations (http://www.hl7.org/Special/committees/orders/index.cfm).";
+            case PA: return "Patient Administration (http://www.hl7.org/Special/committees/pafm/index.cfm).";
+            case PC: return "Patient Care (http://www.hl7.org/Special/committees/patientcare/index.cfm).";
+            case PHER: return "Public Health and Emergency Response (http://www.hl7.org/Special/committees/pher/index.cfm).";
+            case PHX: return "Pharmacy (http://www.hl7.org/Special/committees/medication/index.cfm).";
+            case BRR: return "Biomedical Research and Regulation (http://www.hl7.org/Special/committees/rcrim/index.cfm).";
+            case SD: return "Structured Documents (http://www.hl7.org/Special/committees/structure/index.cfm).";
+            case SEC: return "Security (http://www.hl7.org/Special/committees/secure/index.cfm).";
+            case US: return "US Realm Taskforce (http://wiki.hl7.org/index.php?title=US_Realm_Task_Force).";
+            case VOCAB: return "Vocabulary (http://www.hl7.org/Special/committees/Vocab/index.cfm).";
+            case AID: return "Application Implementation and Design (http://www.hl7.org/Special/committees/java/index.cfm).";
             default: return "?";
           }
         }
@@ -256,12 +264,13 @@ public enum Hl7WorkGroup {
             case II: return "Imaging Integration";
             case INM: return "Infrastructure And Messaging";
             case ITS: return "Implementable Technology Specifications";
+            case MNM: return "Modeling and Methodology";
             case OO: return "Orders and Observations";
             case PA: return "Patient Administration";
             case PC: return "Patient Care";
             case PHER: return "Public Health and Emergency Response";
             case PHX: return "Pharmacy";
-            case RCRIM: return "Regulated Clinical Research Information Management";
+            case BRR: return "Biomedical Research and Regulation";
             case SD: return "Structured Documents";
             case SEC: return "Security";
             case US: return "US Realm Taskforce";

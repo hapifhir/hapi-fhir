@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A collection of error, warning or information messages that result from a system action.
  */
-@ResourceDef(name="OperationOutcome", profile="http://hl7.org/fhir/Profile/OperationOutcome")
+@ResourceDef(name="OperationOutcome", profile="http://hl7.org/fhir/StructureDefinition/OperationOutcome")
 public class OperationOutcome extends DomainResource implements IBaseOperationOutcome {
 
     public enum IssueSeverity {
@@ -186,7 +186,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         REQUIRED, 
         /**
-         * An element value is invalid.
+         * An element or header value is invalid.
          */
         VALUE, 
         /**
@@ -222,7 +222,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         PROCESSING, 
         /**
-         * The resource or profile is not supported.
+         * The interaction, operation, resource or profile is not supported.
          */
         NOTSUPPORTED, 
         /**
@@ -230,9 +230,17 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         DUPLICATE, 
         /**
+         * Multiple matching records were found when the operation required only one match.
+         */
+        MULTIPLEMATCHES, 
+        /**
          * The reference provided was not found. In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the content is not found further into the application architecture.
          */
         NOTFOUND, 
+        /**
+         * The reference pointed to content (usually a resource) that has been deleted.
+         */
+        DELETED, 
         /**
          * Provided content is too long (typically, this is a denial of service protection type of error).
          */
@@ -250,17 +258,13 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         TOOCOSTLY, 
         /**
-         * The content/operation failed to pass some business rule, and so could not proceed.
+         * The content/operation failed to pass some business rule and so could not proceed.
          */
         BUSINESSRULE, 
         /**
-         * Content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture.)
+         * Content could not be accepted because of an edit conflict (i.e. version aware updates). (In a pure RESTful environment, this would be an HTTP 409 error, but this code may be used where the conflict is discovered further into the application architecture.).
          */
         CONFLICT, 
-        /**
-         * Not all data sources typically accessed could be reached, or responded in time, so the returned information might not be complete.
-         */
-        INCOMPLETE, 
         /**
          * Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.
          */
@@ -270,17 +274,21 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         LOCKERROR, 
         /**
-         * The persistent store is unavailable; e.g. the database is down for maintenance or similar action.
+         * The persistent store is unavailable; e.g. the database is down for maintenance or similar action, and the interaction or operation cannot be processed.
          */
         NOSTORE, 
         /**
-         * An unexpected internal error has occurred.
+         * y.
          */
         EXCEPTION, 
         /**
          * An internal timeout has occurred.
          */
         TIMEOUT, 
+        /**
+         * Not all data sources typically accessed could be reached or responded in time, so the returned information might not be complete (applies to search interactions and some operations).
+         */
+        INCOMPLETE, 
         /**
          * The system is not prepared to handle this request due to load management.
          */
@@ -324,8 +332,12 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return NOTSUPPORTED;
         if ("duplicate".equals(codeString))
           return DUPLICATE;
+        if ("multiple-matches".equals(codeString))
+          return MULTIPLEMATCHES;
         if ("not-found".equals(codeString))
           return NOTFOUND;
+        if ("deleted".equals(codeString))
+          return DELETED;
         if ("too-long".equals(codeString))
           return TOOLONG;
         if ("code-invalid".equals(codeString))
@@ -338,8 +350,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return BUSINESSRULE;
         if ("conflict".equals(codeString))
           return CONFLICT;
-        if ("incomplete".equals(codeString))
-          return INCOMPLETE;
         if ("transient".equals(codeString))
           return TRANSIENT;
         if ("lock-error".equals(codeString))
@@ -350,6 +360,8 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return EXCEPTION;
         if ("timeout".equals(codeString))
           return TIMEOUT;
+        if ("incomplete".equals(codeString))
+          return INCOMPLETE;
         if ("throttled".equals(codeString))
           return THROTTLED;
         if ("informational".equals(codeString))
@@ -375,19 +387,21 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
             case PROCESSING: return "processing";
             case NOTSUPPORTED: return "not-supported";
             case DUPLICATE: return "duplicate";
+            case MULTIPLEMATCHES: return "multiple-matches";
             case NOTFOUND: return "not-found";
+            case DELETED: return "deleted";
             case TOOLONG: return "too-long";
             case CODEINVALID: return "code-invalid";
             case EXTENSION: return "extension";
             case TOOCOSTLY: return "too-costly";
             case BUSINESSRULE: return "business-rule";
             case CONFLICT: return "conflict";
-            case INCOMPLETE: return "incomplete";
             case TRANSIENT: return "transient";
             case LOCKERROR: return "lock-error";
             case NOSTORE: return "no-store";
             case EXCEPTION: return "exception";
             case TIMEOUT: return "timeout";
+            case INCOMPLETE: return "incomplete";
             case THROTTLED: return "throttled";
             case INFORMATIONAL: return "informational";
             default: return "?";
@@ -409,19 +423,21 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
             case PROCESSING: return "http://hl7.org/fhir/issue-type";
             case NOTSUPPORTED: return "http://hl7.org/fhir/issue-type";
             case DUPLICATE: return "http://hl7.org/fhir/issue-type";
+            case MULTIPLEMATCHES: return "http://hl7.org/fhir/issue-type";
             case NOTFOUND: return "http://hl7.org/fhir/issue-type";
+            case DELETED: return "http://hl7.org/fhir/issue-type";
             case TOOLONG: return "http://hl7.org/fhir/issue-type";
             case CODEINVALID: return "http://hl7.org/fhir/issue-type";
             case EXTENSION: return "http://hl7.org/fhir/issue-type";
             case TOOCOSTLY: return "http://hl7.org/fhir/issue-type";
             case BUSINESSRULE: return "http://hl7.org/fhir/issue-type";
             case CONFLICT: return "http://hl7.org/fhir/issue-type";
-            case INCOMPLETE: return "http://hl7.org/fhir/issue-type";
             case TRANSIENT: return "http://hl7.org/fhir/issue-type";
             case LOCKERROR: return "http://hl7.org/fhir/issue-type";
             case NOSTORE: return "http://hl7.org/fhir/issue-type";
             case EXCEPTION: return "http://hl7.org/fhir/issue-type";
             case TIMEOUT: return "http://hl7.org/fhir/issue-type";
+            case INCOMPLETE: return "http://hl7.org/fhir/issue-type";
             case THROTTLED: return "http://hl7.org/fhir/issue-type";
             case INFORMATIONAL: return "http://hl7.org/fhir/issue-type";
             default: return "?";
@@ -432,7 +448,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
             case INVALID: return "Content invalid against the specification or a profile.";
             case STRUCTURE: return "A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax.";
             case REQUIRED: return "A required element is missing.";
-            case VALUE: return "An element value is invalid.";
+            case VALUE: return "An element or header value is invalid.";
             case INVARIANT: return "A content validation rule failed - e.g. a schematron rule.";
             case SECURITY: return "An authentication/authorization/permissions issue of some kind.";
             case LOGIN: return "The client needs to initiate an authentication process.";
@@ -441,21 +457,23 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
             case FORBIDDEN: return "The user does not have the rights to perform this action.";
             case SUPPRESSED: return "Some information was not or might not have been returned due to business rules, consent or privacy rules, or access permission constraints.  This information may be accessible through alternate processes.";
             case PROCESSING: return "Processing issues. These are expected to be final e.g. there is no point resubmitting the same content unchanged.";
-            case NOTSUPPORTED: return "The resource or profile is not supported.";
+            case NOTSUPPORTED: return "The interaction, operation, resource or profile is not supported.";
             case DUPLICATE: return "An attempt was made to create a duplicate record.";
+            case MULTIPLEMATCHES: return "Multiple matching records were found when the operation required only one match.";
             case NOTFOUND: return "The reference provided was not found. In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the content is not found further into the application architecture.";
+            case DELETED: return "The reference pointed to content (usually a resource) that has been deleted.";
             case TOOLONG: return "Provided content is too long (typically, this is a denial of service protection type of error).";
             case CODEINVALID: return "The code or system could not be understood, or it was not valid in the context of a particular ValueSet.code.";
             case EXTENSION: return "An extension was found that was not acceptable, could not be resolved, or a modifierExtension was not recognized.";
             case TOOCOSTLY: return "The operation was stopped to protect server resources; e.g. a request for a value set expansion on all of SNOMED CT.";
-            case BUSINESSRULE: return "The content/operation failed to pass some business rule, and so could not proceed.";
-            case CONFLICT: return "Content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture.)";
-            case INCOMPLETE: return "Not all data sources typically accessed could be reached, or responded in time, so the returned information might not be complete.";
+            case BUSINESSRULE: return "The content/operation failed to pass some business rule and so could not proceed.";
+            case CONFLICT: return "Content could not be accepted because of an edit conflict (i.e. version aware updates). (In a pure RESTful environment, this would be an HTTP 409 error, but this code may be used where the conflict is discovered further into the application architecture.).";
             case TRANSIENT: return "Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.";
             case LOCKERROR: return "A resource/record locking failure (usually in an underlying database).";
-            case NOSTORE: return "The persistent store is unavailable; e.g. the database is down for maintenance or similar action.";
-            case EXCEPTION: return "An unexpected internal error has occurred.";
+            case NOSTORE: return "The persistent store is unavailable; e.g. the database is down for maintenance or similar action, and the interaction or operation cannot be processed.";
+            case EXCEPTION: return "y.";
             case TIMEOUT: return "An internal timeout has occurred.";
+            case INCOMPLETE: return "Not all data sources typically accessed could be reached or responded in time, so the returned information might not be complete (applies to search interactions and some operations).";
             case THROTTLED: return "The system is not prepared to handle this request due to load management.";
             case INFORMATIONAL: return "A message unrelated to the processing success of the completed operation (examples of the latter include things like reminders of password expiry, system maintenance times, etc.).";
             default: return "?";
@@ -477,19 +495,21 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
             case PROCESSING: return "Processing Failure";
             case NOTSUPPORTED: return "Content not supported";
             case DUPLICATE: return "Duplicate";
+            case MULTIPLEMATCHES: return "Multiple Matches";
             case NOTFOUND: return "Not Found";
+            case DELETED: return "Deleted";
             case TOOLONG: return "Content Too Long";
             case CODEINVALID: return "Invalid Code";
             case EXTENSION: return "Unacceptable Extension";
             case TOOCOSTLY: return "Operation Too Costly";
             case BUSINESSRULE: return "Business Rule Violation";
             case CONFLICT: return "Edit Version Conflict";
-            case INCOMPLETE: return "Incomplete Results";
             case TRANSIENT: return "Transient Issue";
             case LOCKERROR: return "Lock Error";
             case NOSTORE: return "No Store Available";
             case EXCEPTION: return "Exception";
             case TIMEOUT: return "Timeout";
+            case INCOMPLETE: return "Incomplete Results";
             case THROTTLED: return "Throttled";
             case INFORMATIONAL: return "Informational Note";
             default: return "?";
@@ -530,8 +550,12 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return IssueType.NOTSUPPORTED;
         if ("duplicate".equals(codeString))
           return IssueType.DUPLICATE;
+        if ("multiple-matches".equals(codeString))
+          return IssueType.MULTIPLEMATCHES;
         if ("not-found".equals(codeString))
           return IssueType.NOTFOUND;
+        if ("deleted".equals(codeString))
+          return IssueType.DELETED;
         if ("too-long".equals(codeString))
           return IssueType.TOOLONG;
         if ("code-invalid".equals(codeString))
@@ -544,8 +568,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return IssueType.BUSINESSRULE;
         if ("conflict".equals(codeString))
           return IssueType.CONFLICT;
-        if ("incomplete".equals(codeString))
-          return IssueType.INCOMPLETE;
         if ("transient".equals(codeString))
           return IssueType.TRANSIENT;
         if ("lock-error".equals(codeString))
@@ -556,6 +578,8 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return IssueType.EXCEPTION;
         if ("timeout".equals(codeString))
           return IssueType.TIMEOUT;
+        if ("incomplete".equals(codeString))
+          return IssueType.INCOMPLETE;
         if ("throttled".equals(codeString))
           return IssueType.THROTTLED;
         if ("informational".equals(codeString))
@@ -598,8 +622,12 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return new Enumeration<IssueType>(this, IssueType.NOTSUPPORTED);
         if ("duplicate".equals(codeString))
           return new Enumeration<IssueType>(this, IssueType.DUPLICATE);
+        if ("multiple-matches".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.MULTIPLEMATCHES);
         if ("not-found".equals(codeString))
           return new Enumeration<IssueType>(this, IssueType.NOTFOUND);
+        if ("deleted".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.DELETED);
         if ("too-long".equals(codeString))
           return new Enumeration<IssueType>(this, IssueType.TOOLONG);
         if ("code-invalid".equals(codeString))
@@ -612,8 +640,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return new Enumeration<IssueType>(this, IssueType.BUSINESSRULE);
         if ("conflict".equals(codeString))
           return new Enumeration<IssueType>(this, IssueType.CONFLICT);
-        if ("incomplete".equals(codeString))
-          return new Enumeration<IssueType>(this, IssueType.INCOMPLETE);
         if ("transient".equals(codeString))
           return new Enumeration<IssueType>(this, IssueType.TRANSIENT);
         if ("lock-error".equals(codeString))
@@ -624,6 +650,8 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           return new Enumeration<IssueType>(this, IssueType.EXCEPTION);
         if ("timeout".equals(codeString))
           return new Enumeration<IssueType>(this, IssueType.TIMEOUT);
+        if ("incomplete".equals(codeString))
+          return new Enumeration<IssueType>(this, IssueType.INCOMPLETE);
         if ("throttled".equals(codeString))
           return new Enumeration<IssueType>(this, IssueType.THROTTLED);
         if ("informational".equals(codeString))
@@ -659,8 +687,12 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         return "not-supported";
       if (code == IssueType.DUPLICATE)
         return "duplicate";
+      if (code == IssueType.MULTIPLEMATCHES)
+        return "multiple-matches";
       if (code == IssueType.NOTFOUND)
         return "not-found";
+      if (code == IssueType.DELETED)
+        return "deleted";
       if (code == IssueType.TOOLONG)
         return "too-long";
       if (code == IssueType.CODEINVALID)
@@ -673,8 +705,6 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         return "business-rule";
       if (code == IssueType.CONFLICT)
         return "conflict";
-      if (code == IssueType.INCOMPLETE)
-        return "incomplete";
       if (code == IssueType.TRANSIENT)
         return "transient";
       if (code == IssueType.LOCKERROR)
@@ -685,6 +715,8 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         return "exception";
       if (code == IssueType.TIMEOUT)
         return "timeout";
+      if (code == IssueType.INCOMPLETE)
+        return "incomplete";
       if (code == IssueType.THROTTLED)
         return "throttled";
       if (code == IssueType.INFORMATIONAL)
@@ -701,7 +733,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         /**
          * Indicates whether the issue indicates a variation from successful processing.
          */
-        @Child(name = "severity", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
+        @Child(name = "severity", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="fatal | error | warning | information", formalDefinition="Indicates whether the issue indicates a variation from successful processing." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/issue-severity")
         protected Enumeration<IssueSeverity> severity;
@@ -730,10 +762,12 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         protected StringType diagnostics;
 
         /**
-         * For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.
+         * This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.
          */
         @Child(name = "location", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Path of element(s) related to issue", formalDefinition="For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name." )
+        @Description(shortDefinition="Deprecated: Path of element(s) related to issue", formalDefinition="This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name." )
         protected List<StringType> location;
 
         /**
@@ -925,7 +959,9 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return {@link #location} (For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
+         * @return {@link #location} (This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public List<StringType> getLocation() { 
           if (this.location == null)
@@ -951,7 +987,9 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @return {@link #location} (For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
+         * @return {@link #location} (This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public StringType addLocationElement() {//2 
           StringType t = new StringType();
@@ -962,7 +1000,9 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @param value {@link #location} (For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
+         * @param value {@link #location} (This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public OperationOutcomeIssueComponent addLocation(String value) { //1
           StringType t = new StringType();
@@ -974,7 +1014,9 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
 
         /**
-         * @param value {@link #location} (For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
+         * @param value {@link #location} (This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public boolean hasLocation(String value) { 
           if (this.location == null)
@@ -1052,7 +1094,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           children.add(new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.", 0, 1, code));
           children.add(new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error, or a system code that identifies the error.", 0, 1, details));
           children.add(new Property("diagnostics", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.", 0, 1, diagnostics));
-          children.add(new Property("location", "string", "For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location));
+          children.add(new Property("location", "string", "This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location));
           children.add(new Property("expression", "string", "A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression));
         }
 
@@ -1063,7 +1105,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
           case 3059181: /*code*/  return new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.", 0, 1, code);
           case 1557721666: /*details*/  return new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error, or a system code that identifies the error.", 0, 1, details);
           case -740386388: /*diagnostics*/  return new Property("diagnostics", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.", 0, 1, diagnostics);
-          case 1901043637: /*location*/  return new Property("location", "string", "For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location);
+          case 1901043637: /*location*/  return new Property("location", "string", "This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location);
           case -1795452264: /*expression*/  return new Property("expression", "string", "A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }

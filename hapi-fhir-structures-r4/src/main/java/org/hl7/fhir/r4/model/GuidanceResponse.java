@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,32 +45,32 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A guidance response is the formal response to a guidance request, including any output parameters returned by the evaluation, as well as the description of any proposed actions to be taken.
  */
-@ResourceDef(name="GuidanceResponse", profile="http://hl7.org/fhir/Profile/GuidanceResponse")
+@ResourceDef(name="GuidanceResponse", profile="http://hl7.org/fhir/StructureDefinition/GuidanceResponse")
 public class GuidanceResponse extends DomainResource {
 
     public enum GuidanceResponseStatus {
         /**
-         * The request was processed successfully
+         * The request was processed successfully.
          */
         SUCCESS, 
         /**
-         * The request was processed successfully, but more data may result in a more complete evaluation
+         * The request was processed successfully, but more data may result in a more complete evaluation.
          */
         DATAREQUESTED, 
         /**
-         * The request was processed, but more data is required to complete the evaluation
+         * The request was processed, but more data is required to complete the evaluation.
          */
         DATAREQUIRED, 
         /**
-         * The request is currently being processed
+         * The request is currently being processed.
          */
         INPROGRESS, 
         /**
-         * The request was not processed successfully
+         * The request was not processed successfully.
          */
         FAILURE, 
         /**
-         * The response was entered in error
+         * The response was entered in error.
          */
         ENTEREDINERROR, 
         /**
@@ -121,12 +121,12 @@ public class GuidanceResponse extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case SUCCESS: return "The request was processed successfully";
-            case DATAREQUESTED: return "The request was processed successfully, but more data may result in a more complete evaluation";
-            case DATAREQUIRED: return "The request was processed, but more data is required to complete the evaluation";
-            case INPROGRESS: return "The request is currently being processed";
-            case FAILURE: return "The request was not processed successfully";
-            case ENTEREDINERROR: return "The response was entered in error";
+            case SUCCESS: return "The request was processed successfully.";
+            case DATAREQUESTED: return "The request was processed successfully, but more data may result in a more complete evaluation.";
+            case DATAREQUIRED: return "The request was processed, but more data is required to complete the evaluation.";
+            case INPROGRESS: return "The request is currently being processed.";
+            case FAILURE: return "The request was not processed successfully.";
+            case ENTEREDINERROR: return "The response was entered in error.";
             default: return "?";
           }
         }
@@ -205,11 +205,11 @@ public class GuidanceResponse extends DomainResource {
     }
 
     /**
-     * The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.
+     * The identifier of the request associated with this response. If an identifier was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.
      */
-    @Child(name = "requestId", type = {IdType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The id of the request associated with this response, if any", formalDefinition="The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario." )
-    protected IdType requestId;
+    @Child(name = "requestIdentifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The identifier of the request associated with this response, if any", formalDefinition="The identifier of the request associated with this response. If an identifier was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario." )
+    protected Identifier requestIdentifier;
 
     /**
      * Allows a service to provide  unique, business identifiers for the response.
@@ -345,7 +345,7 @@ public class GuidanceResponse extends DomainResource {
     @Description(shortDefinition="Additional required data", formalDefinition="If the evaluation could not be completed due to lack of information, or additional information would potentially result in a more accurate response, this element will a description of the data required in order to proceed with the evaluation. A subsequent request to the service should include this data." )
     protected List<DataRequirement> dataRequirement;
 
-    private static final long serialVersionUID = -1809604960L;
+    private static final long serialVersionUID = 879877474L;
 
   /**
    * Constructor
@@ -364,51 +364,26 @@ public class GuidanceResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #requestId} (The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.). This is the underlying object with id, value and extensions. The accessor "getRequestId" gives direct access to the value
+     * @return {@link #requestIdentifier} (The identifier of the request associated with this response. If an identifier was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.)
      */
-    public IdType getRequestIdElement() { 
-      if (this.requestId == null)
+    public Identifier getRequestIdentifier() { 
+      if (this.requestIdentifier == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create GuidanceResponse.requestId");
+          throw new Error("Attempt to auto-create GuidanceResponse.requestIdentifier");
         else if (Configuration.doAutoCreate())
-          this.requestId = new IdType(); // bb
-      return this.requestId;
+          this.requestIdentifier = new Identifier(); // cc
+      return this.requestIdentifier;
     }
 
-    public boolean hasRequestIdElement() { 
-      return this.requestId != null && !this.requestId.isEmpty();
-    }
-
-    public boolean hasRequestId() { 
-      return this.requestId != null && !this.requestId.isEmpty();
+    public boolean hasRequestIdentifier() { 
+      return this.requestIdentifier != null && !this.requestIdentifier.isEmpty();
     }
 
     /**
-     * @param value {@link #requestId} (The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.). This is the underlying object with id, value and extensions. The accessor "getRequestId" gives direct access to the value
+     * @param value {@link #requestIdentifier} (The identifier of the request associated with this response. If an identifier was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.)
      */
-    public GuidanceResponse setRequestIdElement(IdType value) { 
-      this.requestId = value;
-      return this;
-    }
-
-    /**
-     * @return The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.
-     */
-    public String getRequestId() { 
-      return this.requestId == null ? null : this.requestId.getValue();
-    }
-
-    /**
-     * @param value The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.
-     */
-    public GuidanceResponse setRequestId(String value) { 
-      if (Utilities.noString(value))
-        this.requestId = null;
-      else {
-        if (this.requestId == null)
-          this.requestId = new IdType();
-        this.requestId.setValue(value);
-      }
+    public GuidanceResponse setRequestIdentifier(Identifier value) { 
+      this.requestIdentifier = value;
       return this;
     }
 
@@ -1129,7 +1104,7 @@ public class GuidanceResponse extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("requestId", "id", "The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, 1, requestId));
+        children.add(new Property("requestIdentifier", "Identifier", "The identifier of the request associated with this response. If an identifier was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, 1, requestIdentifier));
         children.add(new Property("identifier", "Identifier", "Allows a service to provide  unique, business identifiers for the response.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("module[x]", "uri|canonical|CodeableConcept", "An identifier, CodeableConcept or canonical reference to the guidance that was requested.", 0, 1, module));
         children.add(new Property("status", "code", "The status of the response. If the evaluation is completed successfully, the status will indicate success. However, in order to complete the evaluation, the engine may require more information. In this case, the status will be data-required, and the response will contain a description of the additional required information. If the evaluation completed successfully, but the engine determines that a potentially more accurate response could be provided if more data was available, the status will be data-requested, and the response will contain a description of the additional requested information.", 0, 1, status));
@@ -1149,7 +1124,7 @@ public class GuidanceResponse extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 693933066: /*requestId*/  return new Property("requestId", "id", "The id of the request associated with this response. If an id was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, 1, requestId);
+        case -354233192: /*requestIdentifier*/  return new Property("requestIdentifier", "Identifier", "The identifier of the request associated with this response. If an identifier was given as part of the request, it will be reproduced here to enable the requester to more easily identify the response in a multi-request scenario.", 0, 1, requestIdentifier);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Allows a service to provide  unique, business identifiers for the response.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -1552083308: /*module[x]*/  return new Property("module[x]", "uri|canonical|CodeableConcept", "An identifier, CodeableConcept or canonical reference to the guidance that was requested.", 0, 1, module);
         case -1068784020: /*module*/  return new Property("module[x]", "uri|canonical|CodeableConcept", "An identifier, CodeableConcept or canonical reference to the guidance that was requested.", 0, 1, module);
@@ -1176,7 +1151,7 @@ public class GuidanceResponse extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 693933066: /*requestId*/ return this.requestId == null ? new Base[0] : new Base[] {this.requestId}; // IdType
+        case -354233192: /*requestIdentifier*/ return this.requestIdentifier == null ? new Base[0] : new Base[] {this.requestIdentifier}; // Identifier
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -1068784020: /*module*/ return this.module == null ? new Base[0] : new Base[] {this.module}; // Type
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<GuidanceResponseStatus>
@@ -1199,8 +1174,8 @@ public class GuidanceResponse extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 693933066: // requestId
-          this.requestId = castToId(value); // IdType
+        case -354233192: // requestIdentifier
+          this.requestIdentifier = castToIdentifier(value); // Identifier
           return value;
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
@@ -1252,8 +1227,8 @@ public class GuidanceResponse extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("requestId")) {
-          this.requestId = castToId(value); // IdType
+        if (name.equals("requestIdentifier")) {
+          this.requestIdentifier = castToIdentifier(value); // Identifier
         } else if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("module[x]")) {
@@ -1291,7 +1266,7 @@ public class GuidanceResponse extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 693933066:  return getRequestIdElement();
+        case -354233192:  return getRequestIdentifier(); 
         case -1618432855:  return addIdentifier(); 
         case -1552083308:  return getModule(); 
         case -1068784020:  return getModule(); 
@@ -1315,7 +1290,7 @@ public class GuidanceResponse extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 693933066: /*requestId*/ return new String[] {"id"};
+        case -354233192: /*requestIdentifier*/ return new String[] {"Identifier"};
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case -1068784020: /*module*/ return new String[] {"uri", "canonical", "CodeableConcept"};
         case -892481550: /*status*/ return new String[] {"code"};
@@ -1337,8 +1312,9 @@ public class GuidanceResponse extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("requestId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type GuidanceResponse.requestId");
+        if (name.equals("requestIdentifier")) {
+          this.requestIdentifier = new Identifier();
+          return this.requestIdentifier;
         }
         else if (name.equals("identifier")) {
           return addIdentifier();
@@ -1408,7 +1384,7 @@ public class GuidanceResponse extends DomainResource {
       public GuidanceResponse copy() {
         GuidanceResponse dst = new GuidanceResponse();
         copyValues(dst);
-        dst.requestId = requestId == null ? null : requestId.copy();
+        dst.requestIdentifier = requestIdentifier == null ? null : requestIdentifier.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
@@ -1461,7 +1437,7 @@ public class GuidanceResponse extends DomainResource {
         if (!(other_ instanceof GuidanceResponse))
           return false;
         GuidanceResponse o = (GuidanceResponse) other_;
-        return compareDeep(requestId, o.requestId, true) && compareDeep(identifier, o.identifier, true)
+        return compareDeep(requestIdentifier, o.requestIdentifier, true) && compareDeep(identifier, o.identifier, true)
            && compareDeep(module, o.module, true) && compareDeep(status, o.status, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(occurrenceDateTime, o.occurrenceDateTime, true)
            && compareDeep(performer, o.performer, true) && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
@@ -1477,14 +1453,15 @@ public class GuidanceResponse extends DomainResource {
         if (!(other_ instanceof GuidanceResponse))
           return false;
         GuidanceResponse o = (GuidanceResponse) other_;
-        return compareValues(requestId, o.requestId, true) && compareValues(status, o.status, true) && compareValues(occurrenceDateTime, o.occurrenceDateTime, true)
+        return compareValues(status, o.status, true) && compareValues(occurrenceDateTime, o.occurrenceDateTime, true)
           ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(requestId, identifier, module
-          , status, subject, context, occurrenceDateTime, performer, reasonCode, reasonReference
-          , note, evaluationMessage, outputParameters, result, dataRequirement);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(requestIdentifier, identifier
+          , module, status, subject, context, occurrenceDateTime, performer, reasonCode
+          , reasonReference, note, evaluationMessage, outputParameters, result, dataRequirement
+          );
       }
 
   @Override
@@ -1497,17 +1474,17 @@ public class GuidanceResponse extends DomainResource {
    * <p>
    * Description: <b>The identifier of the request associated with the response</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>GuidanceResponse.requestId</b><br>
+   * Path: <b></b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request", path="GuidanceResponse.requestId", description="The identifier of the request associated with the response", type="token" )
+  @SearchParamDefinition(name="request", path="", description="The identifier of the request associated with the response", type="token" )
   public static final String SP_REQUEST = "request";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request</b>
    * <p>
    * Description: <b>The identifier of the request associated with the response</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>GuidanceResponse.requestId</b><br>
+   * Path: <b></b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam REQUEST = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REQUEST);
@@ -1540,7 +1517,7 @@ public class GuidanceResponse extends DomainResource {
    * Path: <b>GuidanceResponse.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="GuidanceResponse.subject", description="The identity of a patient to search for guidance response results", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="GuidanceResponse.subject.where(resolve() is Patient)", description="The identity of a patient to search for guidance response results", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

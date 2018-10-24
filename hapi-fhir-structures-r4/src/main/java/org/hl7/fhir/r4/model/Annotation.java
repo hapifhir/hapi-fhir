@@ -29,11 +29,10 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
-import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ChildOrder;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -50,7 +49,7 @@ public class Annotation extends Type implements ICompositeType {
     /**
      * The individual responsible for making the annotation.
      */
-    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class, StringType.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class, Organization.class, StringType.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Individual responsible for the annotation", formalDefinition="The individual responsible for making the annotation." )
     protected Type author;
 
@@ -62,13 +61,13 @@ public class Annotation extends Type implements ICompositeType {
     protected DateTimeType time;
 
     /**
-     * The text of the annotation.
+     * The text of the annotation in markdown format.
      */
-    @Child(name = "text", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The annotation  - text content", formalDefinition="The text of the annotation." )
-    protected StringType text;
+    @Child(name = "text", type = {MarkdownType.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="The annotation  - text content (as markdown)", formalDefinition="The text of the annotation in markdown format." )
+    protected MarkdownType text;
 
-    private static final long serialVersionUID = -575590381L;
+    private static final long serialVersionUID = 1324090545L;
 
   /**
    * Constructor
@@ -80,7 +79,7 @@ public class Annotation extends Type implements ICompositeType {
   /**
    * Constructor
    */
-    public Annotation(StringType text) {
+    public Annotation(MarkdownType text) {
       super();
       this.text = text;
     }
@@ -186,14 +185,14 @@ public class Annotation extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #text} (The text of the annotation.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+     * @return {@link #text} (The text of the annotation in markdown format.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
      */
-    public StringType getTextElement() { 
+    public MarkdownType getTextElement() { 
       if (this.text == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Annotation.text");
         else if (Configuration.doAutoCreate())
-          this.text = new StringType(); // bb
+          this.text = new MarkdownType(); // bb
       return this.text;
     }
 
@@ -206,46 +205,46 @@ public class Annotation extends Type implements ICompositeType {
     }
 
     /**
-     * @param value {@link #text} (The text of the annotation.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+     * @param value {@link #text} (The text of the annotation in markdown format.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
      */
-    public Annotation setTextElement(StringType value) { 
+    public Annotation setTextElement(MarkdownType value) { 
       this.text = value;
       return this;
     }
 
     /**
-     * @return The text of the annotation.
+     * @return The text of the annotation in markdown format.
      */
     public String getText() { 
       return this.text == null ? null : this.text.getValue();
     }
 
     /**
-     * @param value The text of the annotation.
+     * @param value The text of the annotation in markdown format.
      */
     public Annotation setText(String value) { 
         if (this.text == null)
-          this.text = new StringType();
+          this.text = new MarkdownType();
         this.text.setValue(value);
       return this;
     }
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author));
+        children.add(new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson|Organization)|string", "The individual responsible for making the annotation.", 0, 1, author));
         children.add(new Property("time", "dateTime", "Indicates when this particular annotation was made.", 0, 1, time));
-        children.add(new Property("text", "string", "The text of the annotation.", 0, 1, text));
+        children.add(new Property("text", "markdown", "The text of the annotation in markdown format.", 0, 1, text));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 1475597077: /*author[x]*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author);
-        case -1406328437: /*author*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author);
-        case 305515008: /*authorReference*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author);
-        case 290249084: /*authorString*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson)|string", "The individual responsible for making the annotation.", 0, 1, author);
+        case 1475597077: /*author[x]*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson|Organization)|string", "The individual responsible for making the annotation.", 0, 1, author);
+        case -1406328437: /*author*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson|Organization)|string", "The individual responsible for making the annotation.", 0, 1, author);
+        case 305515008: /*authorReference*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson|Organization)|string", "The individual responsible for making the annotation.", 0, 1, author);
+        case 290249084: /*authorString*/  return new Property("author[x]", "Reference(Practitioner|Patient|RelatedPerson|Organization)|string", "The individual responsible for making the annotation.", 0, 1, author);
         case 3560141: /*time*/  return new Property("time", "dateTime", "Indicates when this particular annotation was made.", 0, 1, time);
-        case 3556653: /*text*/  return new Property("text", "string", "The text of the annotation.", 0, 1, text);
+        case 3556653: /*text*/  return new Property("text", "markdown", "The text of the annotation in markdown format.", 0, 1, text);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -256,7 +255,7 @@ public class Annotation extends Type implements ICompositeType {
         switch (hash) {
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Type
         case 3560141: /*time*/ return this.time == null ? new Base[0] : new Base[] {this.time}; // DateTimeType
-        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
+        case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // MarkdownType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -272,7 +271,7 @@ public class Annotation extends Type implements ICompositeType {
           this.time = castToDateTime(value); // DateTimeType
           return value;
         case 3556653: // text
-          this.text = castToString(value); // StringType
+          this.text = castToMarkdown(value); // MarkdownType
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -286,7 +285,7 @@ public class Annotation extends Type implements ICompositeType {
         } else if (name.equals("time")) {
           this.time = castToDateTime(value); // DateTimeType
         } else if (name.equals("text")) {
-          this.text = castToString(value); // StringType
+          this.text = castToMarkdown(value); // MarkdownType
         } else
           return super.setProperty(name, value);
         return value;
@@ -309,7 +308,7 @@ public class Annotation extends Type implements ICompositeType {
         switch (hash) {
         case -1406328437: /*author*/ return new String[] {"Reference", "string"};
         case 3560141: /*time*/ return new String[] {"dateTime"};
-        case 3556653: /*text*/ return new String[] {"string"};
+        case 3556653: /*text*/ return new String[] {"markdown"};
         default: return super.getTypesForProperty(hash, name);
         }
 

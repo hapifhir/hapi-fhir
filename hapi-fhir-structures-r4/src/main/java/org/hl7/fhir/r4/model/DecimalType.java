@@ -82,6 +82,7 @@ public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable
 	 */
 	public DecimalType(String theValue) {
 		setValue(new BigDecimal(theValue));
+		setRepresentation(theValue);
 	}
 
 	@Override
@@ -100,7 +101,7 @@ public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable
 
 	@Override
 	protected String encode(BigDecimal theValue) {
-		return getValue().toPlainString();
+		return getValue().toString();
 	}
 
 	/**
@@ -174,4 +175,18 @@ public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable
 		return "decimal";		
 	}
 
+	/**
+	 * A parser can provide a literal representation for the decimal value that preserves
+	 * the presented form.
+	 * 
+	 * All sorts of bad things can happen if this method is used to set the string representation
+	 * to anything other than what was parsed into the actual value. Don't do that
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public DecimalType setRepresentation(String value) {
+	  forceStringValue(value);
+	  return this;
+	}
 }

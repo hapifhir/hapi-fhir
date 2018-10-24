@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CodesystemContentMode {
 
         /**
-         * None of the concepts defined by the code system are included in the code system resource
+         * None of the concepts defined by the code system are included in the code system resource.
          */
         NOTPRESENT, 
         /**
-         * A few representative concepts are included in the code system resource
+         * A few representative concepts are included in the code system resource. There is no useful intent in the subset choice and there's no process to make it workable: it's not intended to be workable.
          */
         EXAMPLE, 
         /**
-         * A subset of the code system concepts are included in the code system resource
+         * A subset of the code system concepts are included in the code system resource. This is a curated subset released for a specific purpose under the governanceo of the code system steward, and that the intent, bounds and consequences of the fragmentation are clearly defined in the fragment or the code system documentation.
          */
         FRAGMENT, 
         /**
-         * All the concepts defined by the code system are included in the code system resource
+         * All the concepts defined by the code system are included in the code system resource.
          */
         COMPLETE, 
         /**
-         * The resource doesn't define any new concepts; it just provides additional designations and properties to another code system
+         * The resource doesn't define any new concepts; it just provides additional designations and properties to another code system.
          */
         SUPPLEMENT, 
         /**
@@ -90,11 +90,11 @@ public enum CodesystemContentMode {
         }
         public String getDefinition() {
           switch (this) {
-            case NOTPRESENT: return "None of the concepts defined by the code system are included in the code system resource";
-            case EXAMPLE: return "A few representative concepts are included in the code system resource";
-            case FRAGMENT: return "A subset of the code system concepts are included in the code system resource";
-            case COMPLETE: return "All the concepts defined by the code system are included in the code system resource";
-            case SUPPLEMENT: return "The resource doesn't define any new concepts; it just provides additional designations and properties to another code system";
+            case NOTPRESENT: return "None of the concepts defined by the code system are included in the code system resource.";
+            case EXAMPLE: return "A few representative concepts are included in the code system resource. There is no useful intent in the subset choice and there's no process to make it workable: it's not intended to be workable.";
+            case FRAGMENT: return "A subset of the code system concepts are included in the code system resource. This is a curated subset released for a specific purpose under the governanceo of the code system steward, and that the intent, bounds and consequences of the fragmentation are clearly defined in the fragment or the code system documentation.";
+            case COMPLETE: return "All the concepts defined by the code system are included in the code system resource.";
+            case SUPPLEMENT: return "The resource doesn't define any new concepts; it just provides additional designations and properties to another code system.";
             default: return "?";
           }
         }

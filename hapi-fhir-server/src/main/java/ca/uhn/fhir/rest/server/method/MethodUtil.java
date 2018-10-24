@@ -128,6 +128,8 @@ public class MethodUtil {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(PatchTypeEnum.class)) {
 				param = new PatchTypeParameter();
+			} else if (parameterType.equals(SearchTotalModeEnum.class)) {
+				param = new SearchTotalModeParameter();
 			} else {
 				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];

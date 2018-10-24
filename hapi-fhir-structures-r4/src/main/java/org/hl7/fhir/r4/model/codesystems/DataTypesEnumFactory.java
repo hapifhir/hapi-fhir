@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -73,6 +73,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.ELEMENT;
     if ("ElementDefinition".equals(codeString))
       return DataTypes.ELEMENTDEFINITION;
+    if ("Expression".equals(codeString))
+      return DataTypes.EXPRESSION;
     if ("Extension".equals(codeString))
       return DataTypes.EXTENSION;
     if ("HumanName".equals(codeString))
@@ -85,6 +87,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.META;
     if ("Money".equals(codeString))
       return DataTypes.MONEY;
+    if ("MoneyQuantity".equals(codeString))
+      return DataTypes.MONEYQUANTITY;
     if ("Narrative".equals(codeString))
       return DataTypes.NARRATIVE;
     if ("ParameterDefinition".equals(codeString))
@@ -199,6 +203,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "Element";
     if (code == DataTypes.ELEMENTDEFINITION)
       return "ElementDefinition";
+    if (code == DataTypes.EXPRESSION)
+      return "Expression";
     if (code == DataTypes.EXTENSION)
       return "Extension";
     if (code == DataTypes.HUMANNAME)
@@ -211,6 +217,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "Meta";
     if (code == DataTypes.MONEY)
       return "Money";
+    if (code == DataTypes.MONEYQUANTITY)
+      return "MoneyQuantity";
     if (code == DataTypes.NARRATIVE)
       return "Narrative";
     if (code == DataTypes.PARAMETERDEFINITION)

@@ -67,7 +67,7 @@ public class BaseR4Config extends BaseConfig {
 
 		// Don't strip versions in some places
 		ParserOptions parserOptions = retVal.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
+		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
 
 		return retVal;
 	}

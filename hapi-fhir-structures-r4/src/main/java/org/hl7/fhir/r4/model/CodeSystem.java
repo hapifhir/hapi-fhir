@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,25 +46,25 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The CodeSystem resource is used to declare the existence of and describe a code system or code system supplement and its key properties, and optionally define a part or all of its content.
  */
-@ResourceDef(name="CodeSystem", profile="http://hl7.org/fhir/Profile/CodeSystem")
+@ResourceDef(name="CodeSystem", profile="http://hl7.org/fhir/StructureDefinition/CodeSystem")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "caseSensitive", "valueSet", "hierarchyMeaning", "compositional", "versionNeeded", "content", "supplements", "count", "filter", "property", "concept"})
 public class CodeSystem extends MetadataResource {
 
     public enum CodeSystemHierarchyMeaning {
         /**
-         * No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the hierarchy have different meanings)
+         * No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the hierarchy have different meanings).
          */
         GROUPEDBY, 
         /**
-         * A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for its child concepts
+         * A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for its child concepts. Not that is-a is a property of the concepts, so additional subsumption relationships may be defined using properties or the [subumes](extension-codesystem-subsumes.html) extension.
          */
         ISA, 
         /**
-         * Child elements list the individual parts of a composite whole (e.g. body site)
+         * Child elements list the individual parts of a composite whole (e.g. body site).
          */
         PARTOF, 
         /**
-         * Child concepts in the hierarchy may have only one parent, and there is a presumption that the code system is a "closed world" meaning all things must be in the hierarchy. This results in concepts such as "not otherwise classified."
+         * Child concepts in the hierarchy may have only one parent, and there is a presumption that the code system is a "closed world" meaning all things must be in the hierarchy. This results in concepts such as "not otherwise classified.".
          */
         CLASSIFIEDWITH, 
         /**
@@ -107,10 +107,10 @@ public class CodeSystem extends MetadataResource {
         }
         public String getDefinition() {
           switch (this) {
-            case GROUPEDBY: return "No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the hierarchy have different meanings)";
-            case ISA: return "A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for its child concepts";
-            case PARTOF: return "Child elements list the individual parts of a composite whole (e.g. body site)";
-            case CLASSIFIEDWITH: return "Child concepts in the hierarchy may have only one parent, and there is a presumption that the code system is a \"closed world\" meaning all things must be in the hierarchy. This results in concepts such as \"not otherwise classified.\"";
+            case GROUPEDBY: return "No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the hierarchy have different meanings).";
+            case ISA: return "A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for its child concepts. Not that is-a is a property of the concepts, so additional subsumption relationships may be defined using properties or the [subumes](extension-codesystem-subsumes.html) extension.";
+            case PARTOF: return "Child elements list the individual parts of a composite whole (e.g. body site).";
+            case CLASSIFIEDWITH: return "Child concepts in the hierarchy may have only one parent, and there is a presumption that the code system is a \"closed world\" meaning all things must be in the hierarchy. This results in concepts such as \"not otherwise classified.\".";
             default: return "?";
           }
         }
@@ -176,23 +176,23 @@ public class CodeSystem extends MetadataResource {
 
     public enum CodeSystemContentMode {
         /**
-         * None of the concepts defined by the code system are included in the code system resource
+         * None of the concepts defined by the code system are included in the code system resource.
          */
         NOTPRESENT, 
         /**
-         * A few representative concepts are included in the code system resource
+         * A few representative concepts are included in the code system resource. There is no useful intent in the subset choice and there's no process to make it workable: it's not intended to be workable.
          */
         EXAMPLE, 
         /**
-         * A subset of the code system concepts are included in the code system resource
+         * A subset of the code system concepts are included in the code system resource. This is a curated subset released for a specific purpose under the governanceo of the code system steward, and that the intent, bounds and consequences of the fragmentation are clearly defined in the fragment or the code system documentation.
          */
         FRAGMENT, 
         /**
-         * All the concepts defined by the code system are included in the code system resource
+         * All the concepts defined by the code system are included in the code system resource.
          */
         COMPLETE, 
         /**
-         * The resource doesn't define any new concepts; it just provides additional designations and properties to another code system
+         * The resource doesn't define any new concepts; it just provides additional designations and properties to another code system.
          */
         SUPPLEMENT, 
         /**
@@ -239,11 +239,11 @@ public class CodeSystem extends MetadataResource {
         }
         public String getDefinition() {
           switch (this) {
-            case NOTPRESENT: return "None of the concepts defined by the code system are included in the code system resource";
-            case EXAMPLE: return "A few representative concepts are included in the code system resource";
-            case FRAGMENT: return "A subset of the code system concepts are included in the code system resource";
-            case COMPLETE: return "All the concepts defined by the code system are included in the code system resource";
-            case SUPPLEMENT: return "The resource doesn't define any new concepts; it just provides additional designations and properties to another code system";
+            case NOTPRESENT: return "None of the concepts defined by the code system are included in the code system resource.";
+            case EXAMPLE: return "A few representative concepts are included in the code system resource. There is no useful intent in the subset choice and there's no process to make it workable: it's not intended to be workable.";
+            case FRAGMENT: return "A subset of the code system concepts are included in the code system resource. This is a curated subset released for a specific purpose under the governanceo of the code system steward, and that the intent, bounds and consequences of the fragmentation are clearly defined in the fragment or the code system documentation.";
+            case COMPLETE: return "All the concepts defined by the code system are included in the code system resource.";
+            case SUPPLEMENT: return "The resource doesn't define any new concepts; it just provides additional designations and properties to another code system.";
             default: return "?";
           }
         }
@@ -320,11 +320,11 @@ public class CodeSystem extends MetadataResource {
          */
         EQUAL, 
         /**
-         * Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (i.e. include child codes)
+         * Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (include descendant codes and self).
          */
         ISA, 
         /**
-         * Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself (i.e. include child codes)
+         * Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself i.e. include descendant codes only).
          */
         DESCENDENTOF, 
         /**
@@ -344,11 +344,11 @@ public class CodeSystem extends MetadataResource {
          */
         NOTIN, 
         /**
-         * Includes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (e.g. include parent codes)
+         * Includes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (i.e. include ancestor codes and self).
          */
         GENERALIZES, 
         /**
-         * The specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values)
+         * The specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values).
          */
         EXISTS, 
         /**
@@ -412,14 +412,14 @@ public class CodeSystem extends MetadataResource {
         public String getDefinition() {
           switch (this) {
             case EQUAL: return "The specified property of the code equals the provided value.";
-            case ISA: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (i.e. include child codes)";
-            case DESCENDENTOF: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself (i.e. include child codes)";
+            case ISA: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (include descendant codes and self).";
+            case DESCENDENTOF: return "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself i.e. include descendant codes only).";
             case ISNOTA: return "The specified property of the code does not have an is-a relationship with the provided value.";
             case REGEX: return "The specified property of the code  matches the regex specified in the provided value.";
             case IN: return "The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).";
             case NOTIN: return "The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).";
-            case GENERALIZES: return "Includes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (e.g. include parent codes)";
-            case EXISTS: return "The specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values)";
+            case GENERALIZES: return "Includes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (i.e. include ancestor codes and self).";
+            case EXISTS: return "The specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values).";
             default: return "?";
           }
         }
@@ -520,31 +520,31 @@ public class CodeSystem extends MetadataResource {
 
     public enum PropertyType {
         /**
-         * The property value is a code that identifies a concept defined in the code system
+         * The property value is a code that identifies a concept defined in the code system.
          */
         CODE, 
         /**
-         * The property  value is a code defined in an external code system. This may be used for translations, but is not the intent
+         * The property  value is a code defined in an external code system. This may be used for translations, but is not the intent.
          */
         CODING, 
         /**
-         * The property value is a string
+         * The property value is a string.
          */
         STRING, 
         /**
-         * The property value is a string (often used to assign ranking values to concepts for supporting score assessments)
+         * The property value is a string (often used to assign ranking values to concepts for supporting score assessments).
          */
         INTEGER, 
         /**
-         * The property value is a boolean true | false
+         * The property value is a boolean true | false.
          */
         BOOLEAN, 
         /**
-         * The property is a date or a date + time
+         * The property is a date or a date + time.
          */
         DATETIME, 
         /**
-         * The property value is a decimal number
+         * The property value is a decimal number.
          */
         DECIMAL, 
         /**
@@ -599,13 +599,13 @@ public class CodeSystem extends MetadataResource {
         }
         public String getDefinition() {
           switch (this) {
-            case CODE: return "The property value is a code that identifies a concept defined in the code system";
-            case CODING: return "The property  value is a code defined in an external code system. This may be used for translations, but is not the intent";
-            case STRING: return "The property value is a string";
-            case INTEGER: return "The property value is a string (often used to assign ranking values to concepts for supporting score assessments)";
-            case BOOLEAN: return "The property value is a boolean true | false";
-            case DATETIME: return "The property is a date or a date + time";
-            case DECIMAL: return "The property value is a decimal number";
+            case CODE: return "The property value is a code that identifies a concept defined in the code system.";
+            case CODING: return "The property  value is a code defined in an external code system. This may be used for translations, but is not the intent.";
+            case STRING: return "The property value is a string.";
+            case INTEGER: return "The property value is a string (often used to assign ranking values to concepts for supporting score assessments).";
+            case BOOLEAN: return "The property value is a boolean true | false.";
+            case DATETIME: return "The property is a date or a date + time.";
+            case DECIMAL: return "The property value is a decimal number.";
             default: return "?";
           }
         }
@@ -693,10 +693,10 @@ public class CodeSystem extends MetadataResource {
     @Block()
     public static class CodeSystemFilterComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The code that identifies this filter when it is used in the instance.
+         * The code that identifies this filter when it is used as a filter in [[[ValueSet]]].compose.include.filter.
          */
         @Child(name = "code", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Code that identifies the filter", formalDefinition="The code that identifies this filter when it is used in the instance." )
+        @Description(shortDefinition="Code that identifies the filter", formalDefinition="The code that identifies this filter when it is used as a filter in [[[ValueSet]]].compose.include.filter." )
         protected CodeType code;
 
         /**
@@ -740,7 +740,7 @@ public class CodeSystem extends MetadataResource {
       }
 
         /**
-         * @return {@link #code} (The code that identifies this filter when it is used in the instance.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         * @return {@link #code} (The code that identifies this filter when it is used as a filter in [[[ValueSet]]].compose.include.filter.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
         public CodeType getCodeElement() { 
           if (this.code == null)
@@ -760,7 +760,7 @@ public class CodeSystem extends MetadataResource {
         }
 
         /**
-         * @param value {@link #code} (The code that identifies this filter when it is used in the instance.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
+         * @param value {@link #code} (The code that identifies this filter when it is used as a filter in [[[ValueSet]]].compose.include.filter.). This is the underlying object with id, value and extensions. The accessor "getCode" gives direct access to the value
          */
         public CodeSystemFilterComponent setCodeElement(CodeType value) { 
           this.code = value;
@@ -768,14 +768,14 @@ public class CodeSystem extends MetadataResource {
         }
 
         /**
-         * @return The code that identifies this filter when it is used in the instance.
+         * @return The code that identifies this filter when it is used as a filter in [[[ValueSet]]].compose.include.filter.
          */
         public String getCode() { 
           return this.code == null ? null : this.code.getValue();
         }
 
         /**
-         * @param value The code that identifies this filter when it is used in the instance.
+         * @param value The code that identifies this filter when it is used as a filter in [[[ValueSet]]].compose.include.filter.
          */
         public CodeSystemFilterComponent setCode(String value) { 
             if (this.code == null)
@@ -941,7 +941,7 @@ public class CodeSystem extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("code", "code", "The code that identifies this filter when it is used in the instance.", 0, 1, code));
+          children.add(new Property("code", "code", "The code that identifies this filter when it is used as a filter in [[[ValueSet]]].compose.include.filter.", 0, 1, code));
           children.add(new Property("description", "string", "A description of how or why the filter is used.", 0, 1, description));
           children.add(new Property("operator", "code", "A list of operators that can be used with the filter.", 0, java.lang.Integer.MAX_VALUE, operator));
           children.add(new Property("value", "string", "A description of what the value for the filter should be.", 0, 1, value));
@@ -950,7 +950,7 @@ public class CodeSystem extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3059181: /*code*/  return new Property("code", "code", "The code that identifies this filter when it is used in the instance.", 0, 1, code);
+          case 3059181: /*code*/  return new Property("code", "code", "The code that identifies this filter when it is used as a filter in [[[ValueSet]]].compose.include.filter.", 0, 1, code);
           case -1724546052: /*description*/  return new Property("description", "string", "A description of how or why the filter is used.", 0, 1, description);
           case -500553564: /*operator*/  return new Property("operator", "code", "A list of operators that can be used with the filter.", 0, java.lang.Integer.MAX_VALUE, operator);
           case 111972721: /*value*/  return new Property("value", "string", "A description of what the value for the filter should be.", 0, 1, value);
@@ -2707,11 +2707,11 @@ public class CodeSystem extends MetadataResource {
   }
 
     /**
-     * A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.
+     * A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance. (business identifier).
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Additional identifier for the code system", formalDefinition="A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance." )
-    protected Identifier identifier;
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Additional identifier for the code system", formalDefinition="A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance. (business identifier)." )
+    protected List<Identifier> identifier;
 
     /**
      * Explanation of why this code system is needed and why it has been designed as it has.
@@ -2742,32 +2742,32 @@ public class CodeSystem extends MetadataResource {
     protected CanonicalType valueSet;
 
     /**
-     * The meaning of the hierarchy of concepts.
+     * The meaning of the hierarchy of concepts as represnted in this resource.
      */
     @Child(name = "hierarchyMeaning", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="grouped-by | is-a | part-of | classified-with", formalDefinition="The meaning of the hierarchy of concepts." )
+    @Description(shortDefinition="grouped-by | is-a | part-of | classified-with", formalDefinition="The meaning of the hierarchy of concepts as represnted in this resource." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/codesystem-hierarchy-meaning")
     protected Enumeration<CodeSystemHierarchyMeaning> hierarchyMeaning;
 
     /**
-     * True If code system defines a post-composition grammar.
+     * The code system defines a compositional (post-coordination) grammar.
      */
     @Child(name = "compositional", type = {BooleanType.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="If code system defines a post-composition grammar", formalDefinition="True If code system defines a post-composition grammar." )
+    @Description(shortDefinition="If code system defines a compositional grammar", formalDefinition="The code system defines a compositional (post-coordination) grammar." )
     protected BooleanType compositional;
 
     /**
-     * This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.
+     * This flag is used to signify that the code system does not commit to concept permanence across versions. If true, a version must be specified when referencing this code system.
      */
     @Child(name = "versionNeeded", type = {BooleanType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="If definitions are not stable", formalDefinition="This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system." )
+    @Description(shortDefinition="If definitions are not stable", formalDefinition="This flag is used to signify that the code system does not commit to concept permanence across versions. If true, a version must be specified when referencing this code system." )
     protected BooleanType versionNeeded;
 
     /**
-     * How much of the content of the code system - the concepts and codes it defines - are represented in this resource.
+     * The extent of the content of the code system (the concepts and codes it defines) are represented in this resource instance.
      */
     @Child(name = "content", type = {CodeType.class}, order=8, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="not-present | example | fragment | complete | supplement", formalDefinition="How much of the content of the code system - the concepts and codes it defines - are represented in this resource." )
+    @Description(shortDefinition="not-present | example | fragment | complete | supplement", formalDefinition="The extent of the content of the code system (the concepts and codes it defines) are represented in this resource instance." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/codesystem-content-mode")
     protected Enumeration<CodeSystemContentMode> content;
 
@@ -2779,10 +2779,10 @@ public class CodeSystem extends MetadataResource {
     protected CanonicalType supplements;
 
     /**
-     * The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.
+     * The total number of concepts defined by the code system. Where the code system has a compositional grammar, the basis of this count is defined by the system steward.
      */
     @Child(name = "count", type = {UnsignedIntType.class}, order=10, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Total concepts in the code system", formalDefinition="The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts." )
+    @Description(shortDefinition="Total concepts in the code system", formalDefinition="The total number of concepts defined by the code system. Where the code system has a compositional grammar, the basis of this count is defined by the system steward." )
     protected UnsignedIntType count;
 
     /**
@@ -2806,7 +2806,7 @@ public class CodeSystem extends MetadataResource {
     @Description(shortDefinition="Concepts in the code system", formalDefinition="Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are." )
     protected List<ConceptDefinitionComponent> concept;
 
-    private static final long serialVersionUID = 533217354L;
+    private static final long serialVersionUID = -1735124584L;
 
   /**
    * Constructor
@@ -2825,7 +2825,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this code system is (or will be) published. This is used in [Coding](datatypes.html#Coding).system.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this code system is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the code system is stored on different servers. This is used in [Coding](datatypes.html#Coding).system.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -2845,7 +2845,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this code system is (or will be) published. This is used in [Coding](datatypes.html#Coding).system.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this code system is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the code system is stored on different servers. This is used in [Coding](datatypes.html#Coding).system.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public CodeSystem setUrlElement(UriType value) { 
       this.url = value;
@@ -2853,14 +2853,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this code system is (or will be) published. This is used in [Coding](datatypes.html#Coding).system.
+     * @return An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this code system is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the code system is stored on different servers. This is used in [Coding](datatypes.html#Coding).system.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this code system is (or will be) published. This is used in [Coding](datatypes.html#Coding).system.
+     * @param value An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this code system is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the code system is stored on different servers. This is used in [Coding](datatypes.html#Coding).system.
      */
     public CodeSystem setUrl(String value) { 
       if (Utilities.noString(value))
@@ -2874,27 +2874,56 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #identifier} (A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.)
+     * @return {@link #identifier} (A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance. (business identifier).)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CodeSystem.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public CodeSystem setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public CodeSystem addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public CodeSystem setIdentifier(Identifier value) { 
-      this.identifier = value;
-      return this;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -3633,7 +3662,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #hierarchyMeaning} (The meaning of the hierarchy of concepts.). This is the underlying object with id, value and extensions. The accessor "getHierarchyMeaning" gives direct access to the value
+     * @return {@link #hierarchyMeaning} (The meaning of the hierarchy of concepts as represnted in this resource.). This is the underlying object with id, value and extensions. The accessor "getHierarchyMeaning" gives direct access to the value
      */
     public Enumeration<CodeSystemHierarchyMeaning> getHierarchyMeaningElement() { 
       if (this.hierarchyMeaning == null)
@@ -3653,7 +3682,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #hierarchyMeaning} (The meaning of the hierarchy of concepts.). This is the underlying object with id, value and extensions. The accessor "getHierarchyMeaning" gives direct access to the value
+     * @param value {@link #hierarchyMeaning} (The meaning of the hierarchy of concepts as represnted in this resource.). This is the underlying object with id, value and extensions. The accessor "getHierarchyMeaning" gives direct access to the value
      */
     public CodeSystem setHierarchyMeaningElement(Enumeration<CodeSystemHierarchyMeaning> value) { 
       this.hierarchyMeaning = value;
@@ -3661,14 +3690,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return The meaning of the hierarchy of concepts.
+     * @return The meaning of the hierarchy of concepts as represnted in this resource.
      */
     public CodeSystemHierarchyMeaning getHierarchyMeaning() { 
       return this.hierarchyMeaning == null ? null : this.hierarchyMeaning.getValue();
     }
 
     /**
-     * @param value The meaning of the hierarchy of concepts.
+     * @param value The meaning of the hierarchy of concepts as represnted in this resource.
      */
     public CodeSystem setHierarchyMeaning(CodeSystemHierarchyMeaning value) { 
       if (value == null)
@@ -3682,7 +3711,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #compositional} (True If code system defines a post-composition grammar.). This is the underlying object with id, value and extensions. The accessor "getCompositional" gives direct access to the value
+     * @return {@link #compositional} (The code system defines a compositional (post-coordination) grammar.). This is the underlying object with id, value and extensions. The accessor "getCompositional" gives direct access to the value
      */
     public BooleanType getCompositionalElement() { 
       if (this.compositional == null)
@@ -3702,7 +3731,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #compositional} (True If code system defines a post-composition grammar.). This is the underlying object with id, value and extensions. The accessor "getCompositional" gives direct access to the value
+     * @param value {@link #compositional} (The code system defines a compositional (post-coordination) grammar.). This is the underlying object with id, value and extensions. The accessor "getCompositional" gives direct access to the value
      */
     public CodeSystem setCompositionalElement(BooleanType value) { 
       this.compositional = value;
@@ -3710,14 +3739,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return True If code system defines a post-composition grammar.
+     * @return The code system defines a compositional (post-coordination) grammar.
      */
     public boolean getCompositional() { 
       return this.compositional == null || this.compositional.isEmpty() ? false : this.compositional.getValue();
     }
 
     /**
-     * @param value True If code system defines a post-composition grammar.
+     * @param value The code system defines a compositional (post-coordination) grammar.
      */
     public CodeSystem setCompositional(boolean value) { 
         if (this.compositional == null)
@@ -3727,7 +3756,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #versionNeeded} (This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.). This is the underlying object with id, value and extensions. The accessor "getVersionNeeded" gives direct access to the value
+     * @return {@link #versionNeeded} (This flag is used to signify that the code system does not commit to concept permanence across versions. If true, a version must be specified when referencing this code system.). This is the underlying object with id, value and extensions. The accessor "getVersionNeeded" gives direct access to the value
      */
     public BooleanType getVersionNeededElement() { 
       if (this.versionNeeded == null)
@@ -3747,7 +3776,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #versionNeeded} (This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.). This is the underlying object with id, value and extensions. The accessor "getVersionNeeded" gives direct access to the value
+     * @param value {@link #versionNeeded} (This flag is used to signify that the code system does not commit to concept permanence across versions. If true, a version must be specified when referencing this code system.). This is the underlying object with id, value and extensions. The accessor "getVersionNeeded" gives direct access to the value
      */
     public CodeSystem setVersionNeededElement(BooleanType value) { 
       this.versionNeeded = value;
@@ -3755,14 +3784,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.
+     * @return This flag is used to signify that the code system does not commit to concept permanence across versions. If true, a version must be specified when referencing this code system.
      */
     public boolean getVersionNeeded() { 
       return this.versionNeeded == null || this.versionNeeded.isEmpty() ? false : this.versionNeeded.getValue();
     }
 
     /**
-     * @param value This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.
+     * @param value This flag is used to signify that the code system does not commit to concept permanence across versions. If true, a version must be specified when referencing this code system.
      */
     public CodeSystem setVersionNeeded(boolean value) { 
         if (this.versionNeeded == null)
@@ -3772,7 +3801,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #content} (How much of the content of the code system - the concepts and codes it defines - are represented in this resource.). This is the underlying object with id, value and extensions. The accessor "getContent" gives direct access to the value
+     * @return {@link #content} (The extent of the content of the code system (the concepts and codes it defines) are represented in this resource instance.). This is the underlying object with id, value and extensions. The accessor "getContent" gives direct access to the value
      */
     public Enumeration<CodeSystemContentMode> getContentElement() { 
       if (this.content == null)
@@ -3792,7 +3821,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #content} (How much of the content of the code system - the concepts and codes it defines - are represented in this resource.). This is the underlying object with id, value and extensions. The accessor "getContent" gives direct access to the value
+     * @param value {@link #content} (The extent of the content of the code system (the concepts and codes it defines) are represented in this resource instance.). This is the underlying object with id, value and extensions. The accessor "getContent" gives direct access to the value
      */
     public CodeSystem setContentElement(Enumeration<CodeSystemContentMode> value) { 
       this.content = value;
@@ -3800,14 +3829,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return How much of the content of the code system - the concepts and codes it defines - are represented in this resource.
+     * @return The extent of the content of the code system (the concepts and codes it defines) are represented in this resource instance.
      */
     public CodeSystemContentMode getContent() { 
       return this.content == null ? null : this.content.getValue();
     }
 
     /**
-     * @param value How much of the content of the code system - the concepts and codes it defines - are represented in this resource.
+     * @param value The extent of the content of the code system (the concepts and codes it defines) are represented in this resource instance.
      */
     public CodeSystem setContent(CodeSystemContentMode value) { 
         if (this.content == null)
@@ -3866,7 +3895,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return {@link #count} (The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+     * @return {@link #count} (The total number of concepts defined by the code system. Where the code system has a compositional grammar, the basis of this count is defined by the system steward.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
      */
     public UnsignedIntType getCountElement() { 
       if (this.count == null)
@@ -3886,7 +3915,7 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @param value {@link #count} (The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+     * @param value {@link #count} (The total number of concepts defined by the code system. Where the code system has a compositional grammar, the basis of this count is defined by the system steward.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
      */
     public CodeSystem setCountElement(UnsignedIntType value) { 
       this.count = value;
@@ -3894,14 +3923,14 @@ public class CodeSystem extends MetadataResource {
     }
 
     /**
-     * @return The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.
+     * @return The total number of concepts defined by the code system. Where the code system has a compositional grammar, the basis of this count is defined by the system steward.
      */
     public int getCount() { 
       return this.count == null || this.count.isEmpty() ? 0 : this.count.getValue();
     }
 
     /**
-     * @param value The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.
+     * @param value The total number of concepts defined by the code system. Where the code system has a compositional grammar, the basis of this count is defined by the system steward.
      */
     public CodeSystem setCount(int value) { 
         if (this.count == null)
@@ -4071,8 +4100,8 @@ public class CodeSystem extends MetadataResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this code system is (or will be) published. This is used in [Coding](datatypes.html#Coding).system.", 0, 1, url));
-        children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
+        children.add(new Property("url", "uri", "An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this code system is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the code system is stored on different servers. This is used in [Coding](datatypes.html#Coding).system.", 0, 1, url));
+        children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance. (business identifier).", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding](datatypes.html#Coding).version.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the code system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the code system.", 0, 1, title));
@@ -4088,12 +4117,12 @@ public class CodeSystem extends MetadataResource {
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.", 0, 1, copyright));
         children.add(new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, 1, caseSensitive));
         children.add(new Property("valueSet", "canonical(ValueSet)", "Canonical URL of value set that contains the entire code system.", 0, 1, valueSet));
-        children.add(new Property("hierarchyMeaning", "code", "The meaning of the hierarchy of concepts.", 0, 1, hierarchyMeaning));
-        children.add(new Property("compositional", "boolean", "True If code system defines a post-composition grammar.", 0, 1, compositional));
-        children.add(new Property("versionNeeded", "boolean", "This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.", 0, 1, versionNeeded));
-        children.add(new Property("content", "code", "How much of the content of the code system - the concepts and codes it defines - are represented in this resource.", 0, 1, content));
+        children.add(new Property("hierarchyMeaning", "code", "The meaning of the hierarchy of concepts as represnted in this resource.", 0, 1, hierarchyMeaning));
+        children.add(new Property("compositional", "boolean", "The code system defines a compositional (post-coordination) grammar.", 0, 1, compositional));
+        children.add(new Property("versionNeeded", "boolean", "This flag is used to signify that the code system does not commit to concept permanence across versions. If true, a version must be specified when referencing this code system.", 0, 1, versionNeeded));
+        children.add(new Property("content", "code", "The extent of the content of the code system (the concepts and codes it defines) are represented in this resource instance.", 0, 1, content));
         children.add(new Property("supplements", "canonical(CodeSystem)", "References the code system that this code system supplement is adding designations and properties to.", 0, 1, supplements));
-        children.add(new Property("count", "unsignedInt", "The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.", 0, 1, count));
+        children.add(new Property("count", "unsignedInt", "The total number of concepts defined by the code system. Where the code system has a compositional grammar, the basis of this count is defined by the system steward.", 0, 1, count));
         children.add(new Property("filter", "", "A filter that can be used in a value set compose statement when selecting concepts using a filter.", 0, java.lang.Integer.MAX_VALUE, filter));
         children.add(new Property("property", "", "A property defines an additional slot through which additional information can be provided about a concept.", 0, java.lang.Integer.MAX_VALUE, property));
         children.add(new Property("concept", "", "Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.", 0, java.lang.Integer.MAX_VALUE, concept));
@@ -4102,8 +4131,8 @@ public class CodeSystem extends MetadataResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this code system is (or will be) published. This is used in [Coding](datatypes.html#Coding).system.", 0, 1, url);
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
+        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this code system when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which at which an authoritative instance of this code system is (or will be) published. This URL can be the target of a canonical reference. It SHALL remain the same when the code system is stored on different servers. This is used in [Coding](datatypes.html#Coding).system.", 0, 1, url);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this code system when it is represented in other formats, or referenced in a specification, model, design or an instance. (business identifier).", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the code system when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the code system author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence. This is used in [Coding](datatypes.html#Coding).version.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the code system. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the code system.", 0, 1, title);
@@ -4119,12 +4148,12 @@ public class CodeSystem extends MetadataResource {
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the code system and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the code system.", 0, 1, copyright);
         case -35616442: /*caseSensitive*/  return new Property("caseSensitive", "boolean", "If code comparison is case sensitive when codes within this system are compared to each other.", 0, 1, caseSensitive);
         case -1410174671: /*valueSet*/  return new Property("valueSet", "canonical(ValueSet)", "Canonical URL of value set that contains the entire code system.", 0, 1, valueSet);
-        case 1913078280: /*hierarchyMeaning*/  return new Property("hierarchyMeaning", "code", "The meaning of the hierarchy of concepts.", 0, 1, hierarchyMeaning);
-        case 1248023381: /*compositional*/  return new Property("compositional", "boolean", "True If code system defines a post-composition grammar.", 0, 1, compositional);
-        case 617270957: /*versionNeeded*/  return new Property("versionNeeded", "boolean", "This flag is used to signify that the code system has not (or does not) maintain the definitions, and a version must be specified when referencing this code system.", 0, 1, versionNeeded);
-        case 951530617: /*content*/  return new Property("content", "code", "How much of the content of the code system - the concepts and codes it defines - are represented in this resource.", 0, 1, content);
+        case 1913078280: /*hierarchyMeaning*/  return new Property("hierarchyMeaning", "code", "The meaning of the hierarchy of concepts as represnted in this resource.", 0, 1, hierarchyMeaning);
+        case 1248023381: /*compositional*/  return new Property("compositional", "boolean", "The code system defines a compositional (post-coordination) grammar.", 0, 1, compositional);
+        case 617270957: /*versionNeeded*/  return new Property("versionNeeded", "boolean", "This flag is used to signify that the code system does not commit to concept permanence across versions. If true, a version must be specified when referencing this code system.", 0, 1, versionNeeded);
+        case 951530617: /*content*/  return new Property("content", "code", "The extent of the content of the code system (the concepts and codes it defines) are represented in this resource instance.", 0, 1, content);
         case -596951334: /*supplements*/  return new Property("supplements", "canonical(CodeSystem)", "References the code system that this code system supplement is adding designations and properties to.", 0, 1, supplements);
-        case 94851343: /*count*/  return new Property("count", "unsignedInt", "The total number of concepts defined by the code system. Where the code system has a compositional grammar, the count refers to the number of base (primitive) concepts.", 0, 1, count);
+        case 94851343: /*count*/  return new Property("count", "unsignedInt", "The total number of concepts defined by the code system. Where the code system has a compositional grammar, the basis of this count is defined by the system steward.", 0, 1, count);
         case -1274492040: /*filter*/  return new Property("filter", "", "A filter that can be used in a value set compose statement when selecting concepts using a filter.", 0, java.lang.Integer.MAX_VALUE, filter);
         case -993141291: /*property*/  return new Property("property", "", "A property defines an additional slot through which additional information can be provided about a concept.", 0, java.lang.Integer.MAX_VALUE, property);
         case 951024232: /*concept*/  return new Property("concept", "", "Concepts that are in the code system. The concept definitions are inherently hierarchical, but the definitions must be consulted to determine what the meaning of the hierarchical relationships are.", 0, java.lang.Integer.MAX_VALUE, concept);
@@ -4137,7 +4166,7 @@ public class CodeSystem extends MetadataResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
@@ -4174,7 +4203,7 @@ public class CodeSystem extends MetadataResource {
           this.url = castToUri(value); // UriType
           return value;
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
@@ -4261,7 +4290,7 @@ public class CodeSystem extends MetadataResource {
         if (name.equals("url")) {
           this.url = castToUri(value); // UriType
         } else if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
         } else if (name.equals("name")) {
@@ -4322,7 +4351,7 @@ public class CodeSystem extends MetadataResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 116079:  return getUrlElement();
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
         case 351608024:  return getVersionElement();
         case 3373707:  return getNameElement();
         case 110371416:  return getTitleElement();
@@ -4392,8 +4421,7 @@ public class CodeSystem extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.url");
         }
         else if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
         }
         else if (name.equals("version")) {
           throw new FHIRException("Cannot call addChild on a primitive type CodeSystem.version");
@@ -4480,7 +4508,11 @@ public class CodeSystem extends MetadataResource {
         CodeSystem dst = new CodeSystem();
         copyValues(dst);
         dst.url = url == null ? null : url.copy();
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
@@ -4636,6 +4668,26 @@ public class CodeSystem extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
 
  /**
+   * Search parameter: <b>context-type-value</b>
+   * <p>
+   * Description: <b>A use context type and value assigned to the code system</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type-value", path="CodeSystem.useContext", description="A use context type and value assigned to the code system", type="composite", compositeOf={"context-type", "context"} )
+  public static final String SP_CONTEXT_TYPE_VALUE = "context-type-value";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type-value</b>
+   * <p>
+   * Description: <b>A use context type and value assigned to the code system</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam> CONTEXT_TYPE_VALUE = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam>(SP_CONTEXT_TYPE_VALUE);
+
+ /**
    * Search parameter: <b>content-mode</b>
    * <p>
    * Description: <b>not-present | example | fragment | complete | supplement</b><br>
@@ -4694,6 +4746,26 @@ public class CodeSystem extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DESCRIPTION = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DESCRIPTION);
+
+ /**
+   * Search parameter: <b>context-type</b>
+   * <p>
+   * Description: <b>A type of use context assigned to the code system</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CodeSystem.useContext.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type", path="CodeSystem.useContext.code", description="A type of use context assigned to the code system", type="token" )
+  public static final String SP_CONTEXT_TYPE = "context-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type</b>
+   * <p>
+   * Description: <b>A type of use context assigned to the code system</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CodeSystem.useContext.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT_TYPE);
 
  /**
    * Search parameter: <b>language</b>
@@ -4776,19 +4848,39 @@ public class CodeSystem extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
 
  /**
+   * Search parameter: <b>context-quantity</b>
+   * <p>
+   * Description: <b>A quantity- or range-valued use context assigned to the code system</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>CodeSystem.useContext.valueQuantity, CodeSystem.useContext.valueRange</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-quantity", path="(CodeSystem.useContext.value as Quantity) | (CodeSystem.useContext.value as Range)", description="A quantity- or range-valued use context assigned to the code system", type="quantity" )
+  public static final String SP_CONTEXT_QUANTITY = "context-quantity";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-quantity</b>
+   * <p>
+   * Description: <b>A quantity- or range-valued use context assigned to the code system</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>CodeSystem.useContext.valueQuantity, CodeSystem.useContext.valueRange</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam CONTEXT_QUANTITY = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_CONTEXT_QUANTITY);
+
+ /**
    * Search parameter: <b>supplements</b>
    * <p>
-   * Description: <b>Code System this adds designations and properties to</b><br>
+   * Description: <b>Find code system supplements for the referenced code system</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>CodeSystem.supplements</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="supplements", path="CodeSystem.supplements", description="Code System this adds designations and properties to", type="reference", target={CodeSystem.class } )
+  @SearchParamDefinition(name="supplements", path="CodeSystem.supplements", description="Find code system supplements for the referenced code system", type="reference", target={CodeSystem.class } )
   public static final String SP_SUPPLEMENTS = "supplements";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>supplements</b>
    * <p>
-   * Description: <b>Code System this adds designations and properties to</b><br>
+   * Description: <b>Find code system supplements for the referenced code system</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>CodeSystem.supplements</b><br>
    * </p>
@@ -4842,6 +4934,26 @@ public class CodeSystem extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
 
  /**
+   * Search parameter: <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the code system</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CodeSystem.useContext.valueCodeableConcept</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context", path="(CodeSystem.useContext.value as CodeableConcept)", description="A use context assigned to the code system", type="token" )
+  public static final String SP_CONTEXT = "context";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the code system</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>CodeSystem.useContext.valueCodeableConcept</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
+
+ /**
    * Search parameter: <b>publisher</b>
    * <p>
    * Description: <b>Name of the publisher of the code system</b><br>
@@ -4860,6 +4972,26 @@ public class CodeSystem extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam PUBLISHER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PUBLISHER);
+
+ /**
+   * Search parameter: <b>context-type-quantity</b>
+   * <p>
+   * Description: <b>A use context type and quantity- or range-based value assigned to the code system</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type-quantity", path="CodeSystem.useContext", description="A use context type and quantity- or range-based value assigned to the code system", type="composite", compositeOf={"context-type", "context-quantity"} )
+  public static final String SP_CONTEXT_TYPE_QUANTITY = "context-type-quantity";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type-quantity</b>
+   * <p>
+   * Description: <b>A use context type and quantity- or range-based value assigned to the code system</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.QuantityClientParam> CONTEXT_TYPE_QUANTITY = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.QuantityClientParam>(SP_CONTEXT_TYPE_QUANTITY);
 
  /**
    * Search parameter: <b>status</b>

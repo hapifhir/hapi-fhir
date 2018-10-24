@@ -49,7 +49,7 @@ public class OperationServerR4Test {
 	private static StringType ourLastParam1;
 	private static Patient ourLastParam2;
 	private static List<StringType> ourLastParam3;
-	private static Money ourLastParamMoney1;
+	private static MoneyQuantity ourLastParamMoney1;
 	private static UnsignedIntType ourLastParamUnsignedInt1;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationServerR4Test.class);
 	private static int ourPort;
@@ -489,7 +489,7 @@ public class OperationServerR4Test {
 		HttpResponse status = ourClient.execute(httpPost);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.getEntity().getContent().close();
 
 		assertEquals("$OP_PROFILE_DT", ourLastMethod);
 		assertEquals("123", ourLastParamUnsignedInt1.getValueAsString());
@@ -498,7 +498,7 @@ public class OperationServerR4Test {
 	@Test
 	public void testOperationWithProfileDatatypeParams2() throws Exception {
 		Parameters p = new Parameters();
-		Money money = new Money();
+		MoneyQuantity money = new MoneyQuantity();
 		money.setCode("CODE");
 		money.setSystem("SYSTEM");
 		money.setValue(123L);
@@ -652,7 +652,7 @@ public class OperationServerR4Test {
 		//@formatter:off
 		@Operation(name="$OP_PROFILE_DT2", idempotent=true)
 		public Bundle opProfileType(
-				@OperationParam(name="PARAM1") Money theParam1
+				@OperationParam(name="PARAM1") MoneyQuantity theParam1
 				) {
 			//@formatter:on
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,20 +45,20 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The MeasureReport resource contains the results of the calculation of a measure; and optionally a reference to the resources involved in that calculation.
  */
-@ResourceDef(name="MeasureReport", profile="http://hl7.org/fhir/Profile/MeasureReport")
+@ResourceDef(name="MeasureReport", profile="http://hl7.org/fhir/StructureDefinition/MeasureReport")
 public class MeasureReport extends DomainResource {
 
     public enum MeasureReportStatus {
         /**
-         * The report is complete and ready for use
+         * The report is complete and ready for use.
          */
         COMPLETE, 
         /**
-         * The report is currently being generated
+         * The report is currently being generated.
          */
         PENDING, 
         /**
-         * An error occurred attempting to generate the report
+         * An error occurred attempting to generate the report.
          */
         ERROR, 
         /**
@@ -97,9 +97,9 @@ public class MeasureReport extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLETE: return "The report is complete and ready for use";
-            case PENDING: return "The report is currently being generated";
-            case ERROR: return "An error occurred attempting to generate the report";
+            case COMPLETE: return "The report is complete and ready for use.";
+            case PENDING: return "The report is currently being generated.";
+            case ERROR: return "An error occurred attempting to generate the report.";
             default: return "?";
           }
         }
@@ -158,17 +158,21 @@ public class MeasureReport extends DomainResource {
 
     public enum MeasureReportType {
         /**
-         * An individual report that provides information on the performance for a given measure with respect to a single subject
+         * An individual report that provides information on the performance for a given measure with respect to a single subject.
          */
         INDIVIDUAL, 
         /**
-         * A subject list report that includes a listing of subjects that satisfied each population criteria in the measure
+         * A subject list report that includes a listing of subjects that satisfied each population criteria in the measure.
          */
         SUBJECTLIST, 
         /**
-         * A summary report that returns the number of members in each population criteria for the measure
+         * A summary report that returns the number of members in each population criteria for the measure.
          */
         SUMMARY, 
+        /**
+         * A data collection report that contains data-of-interest for the measure.
+         */
+        DATACOLLECTION, 
         /**
          * added to help the parsers with the generic types
          */
@@ -182,6 +186,8 @@ public class MeasureReport extends DomainResource {
           return SUBJECTLIST;
         if ("summary".equals(codeString))
           return SUMMARY;
+        if ("data-collection".equals(codeString))
+          return DATACOLLECTION;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -192,6 +198,7 @@ public class MeasureReport extends DomainResource {
             case INDIVIDUAL: return "individual";
             case SUBJECTLIST: return "subject-list";
             case SUMMARY: return "summary";
+            case DATACOLLECTION: return "data-collection";
             default: return "?";
           }
         }
@@ -200,14 +207,16 @@ public class MeasureReport extends DomainResource {
             case INDIVIDUAL: return "http://hl7.org/fhir/measure-report-type";
             case SUBJECTLIST: return "http://hl7.org/fhir/measure-report-type";
             case SUMMARY: return "http://hl7.org/fhir/measure-report-type";
+            case DATACOLLECTION: return "http://hl7.org/fhir/measure-report-type";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case INDIVIDUAL: return "An individual report that provides information on the performance for a given measure with respect to a single subject";
-            case SUBJECTLIST: return "A subject list report that includes a listing of subjects that satisfied each population criteria in the measure";
-            case SUMMARY: return "A summary report that returns the number of members in each population criteria for the measure";
+            case INDIVIDUAL: return "An individual report that provides information on the performance for a given measure with respect to a single subject.";
+            case SUBJECTLIST: return "A subject list report that includes a listing of subjects that satisfied each population criteria in the measure.";
+            case SUMMARY: return "A summary report that returns the number of members in each population criteria for the measure.";
+            case DATACOLLECTION: return "A data collection report that contains data-of-interest for the measure.";
             default: return "?";
           }
         }
@@ -216,6 +225,7 @@ public class MeasureReport extends DomainResource {
             case INDIVIDUAL: return "Individual";
             case SUBJECTLIST: return "Subject List";
             case SUMMARY: return "Summary";
+            case DATACOLLECTION: return "Data Collection";
             default: return "?";
           }
         }
@@ -232,6 +242,8 @@ public class MeasureReport extends DomainResource {
           return MeasureReportType.SUBJECTLIST;
         if ("summary".equals(codeString))
           return MeasureReportType.SUMMARY;
+        if ("data-collection".equals(codeString))
+          return MeasureReportType.DATACOLLECTION;
         throw new IllegalArgumentException("Unknown MeasureReportType code '"+codeString+"'");
         }
         public Enumeration<MeasureReportType> fromType(Base code) throws FHIRException {
@@ -248,6 +260,8 @@ public class MeasureReport extends DomainResource {
           return new Enumeration<MeasureReportType>(this, MeasureReportType.SUBJECTLIST);
         if ("summary".equals(codeString))
           return new Enumeration<MeasureReportType>(this, MeasureReportType.SUMMARY);
+        if ("data-collection".equals(codeString))
+          return new Enumeration<MeasureReportType>(this, MeasureReportType.DATACOLLECTION);
         throw new FHIRException("Unknown MeasureReportType code '"+codeString+"'");
         }
     public String toCode(MeasureReportType code) {
@@ -257,9 +271,103 @@ public class MeasureReport extends DomainResource {
         return "subject-list";
       if (code == MeasureReportType.SUMMARY)
         return "summary";
+      if (code == MeasureReportType.DATACOLLECTION)
+        return "data-collection";
       return "?";
       }
     public String toSystem(MeasureReportType code) {
+      return code.getSystem();
+      }
+    }
+
+    public enum MeasureImprovementNotation {
+        /**
+         * Improvement in the measure is noted as an increase in the measure score.
+         */
+        INCREASE, 
+        /**
+         * Improvement in the measure is noted as a decrease in the measure score.
+         */
+        DECREASE, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static MeasureImprovementNotation fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("increase".equals(codeString))
+          return INCREASE;
+        if ("decrease".equals(codeString))
+          return DECREASE;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown MeasureImprovementNotation code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case INCREASE: return "increase";
+            case DECREASE: return "decrease";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case INCREASE: return "http://hl7.org/fhir/measure-improvement-notation";
+            case DECREASE: return "http://hl7.org/fhir/measure-improvement-notation";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case INCREASE: return "Improvement in the measure is noted as an increase in the measure score.";
+            case DECREASE: return "Improvement in the measure is noted as a decrease in the measure score.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case INCREASE: return "Increase";
+            case DECREASE: return "Decrease";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class MeasureImprovementNotationEnumFactory implements EnumFactory<MeasureImprovementNotation> {
+    public MeasureImprovementNotation fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("increase".equals(codeString))
+          return MeasureImprovementNotation.INCREASE;
+        if ("decrease".equals(codeString))
+          return MeasureImprovementNotation.DECREASE;
+        throw new IllegalArgumentException("Unknown MeasureImprovementNotation code '"+codeString+"'");
+        }
+        public Enumeration<MeasureImprovementNotation> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<MeasureImprovementNotation>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("increase".equals(codeString))
+          return new Enumeration<MeasureImprovementNotation>(this, MeasureImprovementNotation.INCREASE);
+        if ("decrease".equals(codeString))
+          return new Enumeration<MeasureImprovementNotation>(this, MeasureImprovementNotation.DECREASE);
+        throw new FHIRException("Unknown MeasureImprovementNotation code '"+codeString+"'");
+        }
+    public String toCode(MeasureImprovementNotation code) {
+      if (code == MeasureImprovementNotation.INCREASE)
+        return "increase";
+      if (code == MeasureImprovementNotation.DECREASE)
+        return "decrease";
+      return "?";
+      }
+    public String toSystem(MeasureImprovementNotation code) {
       return code.getSystem();
       }
     }
@@ -639,16 +747,16 @@ public class MeasureReport extends DomainResource {
         /**
          * This element refers to a List of subject level MeasureReport resources, one for each subject in this population.
          */
-        @Child(name = "subjects", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="For subject-list reports, the subjects in this population", formalDefinition="This element refers to a List of subject level MeasureReport resources, one for each subject in this population." )
-        protected Reference subjects;
+        @Child(name = "subjectResults", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="For subject-list reports, the subject results in this population", formalDefinition="This element refers to a List of subject level MeasureReport resources, one for each subject in this population." )
+        protected Reference subjectResults;
 
         /**
          * The actual object that is the target of the reference (This element refers to a List of subject level MeasureReport resources, one for each subject in this population.)
          */
-        protected ListResource subjectsTarget;
+        protected ListResource subjectResultsTarget;
 
-        private static final long serialVersionUID = 874931275L;
+        private static final long serialVersionUID = 210461445L;
 
     /**
      * Constructor
@@ -727,46 +835,46 @@ public class MeasureReport extends DomainResource {
         }
 
         /**
-         * @return {@link #subjects} (This element refers to a List of subject level MeasureReport resources, one for each subject in this population.)
+         * @return {@link #subjectResults} (This element refers to a List of subject level MeasureReport resources, one for each subject in this population.)
          */
-        public Reference getSubjects() { 
-          if (this.subjects == null)
+        public Reference getSubjectResults() { 
+          if (this.subjectResults == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureReportGroupPopulationComponent.subjects");
+              throw new Error("Attempt to auto-create MeasureReportGroupPopulationComponent.subjectResults");
             else if (Configuration.doAutoCreate())
-              this.subjects = new Reference(); // cc
-          return this.subjects;
+              this.subjectResults = new Reference(); // cc
+          return this.subjectResults;
         }
 
-        public boolean hasSubjects() { 
-          return this.subjects != null && !this.subjects.isEmpty();
+        public boolean hasSubjectResults() { 
+          return this.subjectResults != null && !this.subjectResults.isEmpty();
         }
 
         /**
-         * @param value {@link #subjects} (This element refers to a List of subject level MeasureReport resources, one for each subject in this population.)
+         * @param value {@link #subjectResults} (This element refers to a List of subject level MeasureReport resources, one for each subject in this population.)
          */
-        public MeasureReportGroupPopulationComponent setSubjects(Reference value) { 
-          this.subjects = value;
+        public MeasureReportGroupPopulationComponent setSubjectResults(Reference value) { 
+          this.subjectResults = value;
           return this;
         }
 
         /**
-         * @return {@link #subjects} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (This element refers to a List of subject level MeasureReport resources, one for each subject in this population.)
+         * @return {@link #subjectResults} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (This element refers to a List of subject level MeasureReport resources, one for each subject in this population.)
          */
-        public ListResource getSubjectsTarget() { 
-          if (this.subjectsTarget == null)
+        public ListResource getSubjectResultsTarget() { 
+          if (this.subjectResultsTarget == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureReportGroupPopulationComponent.subjects");
+              throw new Error("Attempt to auto-create MeasureReportGroupPopulationComponent.subjectResults");
             else if (Configuration.doAutoCreate())
-              this.subjectsTarget = new ListResource(); // aa
-          return this.subjectsTarget;
+              this.subjectResultsTarget = new ListResource(); // aa
+          return this.subjectResultsTarget;
         }
 
         /**
-         * @param value {@link #subjects} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (This element refers to a List of subject level MeasureReport resources, one for each subject in this population.)
+         * @param value {@link #subjectResults} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (This element refers to a List of subject level MeasureReport resources, one for each subject in this population.)
          */
-        public MeasureReportGroupPopulationComponent setSubjectsTarget(ListResource value) { 
-          this.subjectsTarget = value;
+        public MeasureReportGroupPopulationComponent setSubjectResultsTarget(ListResource value) { 
+          this.subjectResultsTarget = value;
           return this;
         }
 
@@ -774,7 +882,7 @@ public class MeasureReport extends DomainResource {
           super.listChildren(children);
           children.add(new Property("code", "CodeableConcept", "The type of the population.", 0, 1, code));
           children.add(new Property("count", "integer", "The number of members of the population.", 0, 1, count));
-          children.add(new Property("subjects", "Reference(List)", "This element refers to a List of subject level MeasureReport resources, one for each subject in this population.", 0, 1, subjects));
+          children.add(new Property("subjectResults", "Reference(List)", "This element refers to a List of subject level MeasureReport resources, one for each subject in this population.", 0, 1, subjectResults));
         }
 
         @Override
@@ -782,7 +890,7 @@ public class MeasureReport extends DomainResource {
           switch (_hash) {
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The type of the population.", 0, 1, code);
           case 94851343: /*count*/  return new Property("count", "integer", "The number of members of the population.", 0, 1, count);
-          case -2069868345: /*subjects*/  return new Property("subjects", "Reference(List)", "This element refers to a List of subject level MeasureReport resources, one for each subject in this population.", 0, 1, subjects);
+          case 2136184106: /*subjectResults*/  return new Property("subjectResults", "Reference(List)", "This element refers to a List of subject level MeasureReport resources, one for each subject in this population.", 0, 1, subjectResults);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -793,7 +901,7 @@ public class MeasureReport extends DomainResource {
         switch (hash) {
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 94851343: /*count*/ return this.count == null ? new Base[0] : new Base[] {this.count}; // IntegerType
-        case -2069868345: /*subjects*/ return this.subjects == null ? new Base[0] : new Base[] {this.subjects}; // Reference
+        case 2136184106: /*subjectResults*/ return this.subjectResults == null ? new Base[0] : new Base[] {this.subjectResults}; // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -808,8 +916,8 @@ public class MeasureReport extends DomainResource {
         case 94851343: // count
           this.count = castToInteger(value); // IntegerType
           return value;
-        case -2069868345: // subjects
-          this.subjects = castToReference(value); // Reference
+        case 2136184106: // subjectResults
+          this.subjectResults = castToReference(value); // Reference
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -822,8 +930,8 @@ public class MeasureReport extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("count")) {
           this.count = castToInteger(value); // IntegerType
-        } else if (name.equals("subjects")) {
-          this.subjects = castToReference(value); // Reference
+        } else if (name.equals("subjectResults")) {
+          this.subjectResults = castToReference(value); // Reference
         } else
           return super.setProperty(name, value);
         return value;
@@ -834,7 +942,7 @@ public class MeasureReport extends DomainResource {
         switch (hash) {
         case 3059181:  return getCode(); 
         case 94851343:  return getCountElement();
-        case -2069868345:  return getSubjects(); 
+        case 2136184106:  return getSubjectResults(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -845,7 +953,7 @@ public class MeasureReport extends DomainResource {
         switch (hash) {
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case 94851343: /*count*/ return new String[] {"integer"};
-        case -2069868345: /*subjects*/ return new String[] {"Reference"};
+        case 2136184106: /*subjectResults*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -860,9 +968,9 @@ public class MeasureReport extends DomainResource {
         else if (name.equals("count")) {
           throw new FHIRException("Cannot call addChild on a primitive type MeasureReport.count");
         }
-        else if (name.equals("subjects")) {
-          this.subjects = new Reference();
-          return this.subjects;
+        else if (name.equals("subjectResults")) {
+          this.subjectResults = new Reference();
+          return this.subjectResults;
         }
         else
           return super.addChild(name);
@@ -873,7 +981,7 @@ public class MeasureReport extends DomainResource {
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
         dst.count = count == null ? null : count.copy();
-        dst.subjects = subjects == null ? null : subjects.copy();
+        dst.subjectResults = subjectResults == null ? null : subjectResults.copy();
         return dst;
       }
 
@@ -884,7 +992,7 @@ public class MeasureReport extends DomainResource {
         if (!(other_ instanceof MeasureReportGroupPopulationComponent))
           return false;
         MeasureReportGroupPopulationComponent o = (MeasureReportGroupPopulationComponent) other_;
-        return compareDeep(code, o.code, true) && compareDeep(count, o.count, true) && compareDeep(subjects, o.subjects, true)
+        return compareDeep(code, o.code, true) && compareDeep(count, o.count, true) && compareDeep(subjectResults, o.subjectResults, true)
           ;
       }
 
@@ -899,7 +1007,8 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, count, subjects);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, count, subjectResults
+          );
       }
 
   public String fhirType() {
@@ -1443,16 +1552,16 @@ public class MeasureReport extends DomainResource {
         /**
          * This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.
          */
-        @Child(name = "subjects", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="For subject-list reports, the subjects in this population", formalDefinition="This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum." )
-        protected Reference subjects;
+        @Child(name = "subjectResults", type = {ListResource.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="For subject-list reports, the subject results in this population", formalDefinition="This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum." )
+        protected Reference subjectResults;
 
         /**
          * The actual object that is the target of the reference (This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.)
          */
-        protected ListResource subjectsTarget;
+        protected ListResource subjectResultsTarget;
 
-        private static final long serialVersionUID = 874931275L;
+        private static final long serialVersionUID = 210461445L;
 
     /**
      * Constructor
@@ -1531,46 +1640,46 @@ public class MeasureReport extends DomainResource {
         }
 
         /**
-         * @return {@link #subjects} (This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.)
+         * @return {@link #subjectResults} (This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.)
          */
-        public Reference getSubjects() { 
-          if (this.subjects == null)
+        public Reference getSubjectResults() { 
+          if (this.subjectResults == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create StratifierGroupPopulationComponent.subjects");
+              throw new Error("Attempt to auto-create StratifierGroupPopulationComponent.subjectResults");
             else if (Configuration.doAutoCreate())
-              this.subjects = new Reference(); // cc
-          return this.subjects;
+              this.subjectResults = new Reference(); // cc
+          return this.subjectResults;
         }
 
-        public boolean hasSubjects() { 
-          return this.subjects != null && !this.subjects.isEmpty();
+        public boolean hasSubjectResults() { 
+          return this.subjectResults != null && !this.subjectResults.isEmpty();
         }
 
         /**
-         * @param value {@link #subjects} (This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.)
+         * @param value {@link #subjectResults} (This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.)
          */
-        public StratifierGroupPopulationComponent setSubjects(Reference value) { 
-          this.subjects = value;
+        public StratifierGroupPopulationComponent setSubjectResults(Reference value) { 
+          this.subjectResults = value;
           return this;
         }
 
         /**
-         * @return {@link #subjects} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.)
+         * @return {@link #subjectResults} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.)
          */
-        public ListResource getSubjectsTarget() { 
-          if (this.subjectsTarget == null)
+        public ListResource getSubjectResultsTarget() { 
+          if (this.subjectResultsTarget == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create StratifierGroupPopulationComponent.subjects");
+              throw new Error("Attempt to auto-create StratifierGroupPopulationComponent.subjectResults");
             else if (Configuration.doAutoCreate())
-              this.subjectsTarget = new ListResource(); // aa
-          return this.subjectsTarget;
+              this.subjectResultsTarget = new ListResource(); // aa
+          return this.subjectResultsTarget;
         }
 
         /**
-         * @param value {@link #subjects} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.)
+         * @param value {@link #subjectResults} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.)
          */
-        public StratifierGroupPopulationComponent setSubjectsTarget(ListResource value) { 
-          this.subjectsTarget = value;
+        public StratifierGroupPopulationComponent setSubjectResultsTarget(ListResource value) { 
+          this.subjectResultsTarget = value;
           return this;
         }
 
@@ -1578,7 +1687,7 @@ public class MeasureReport extends DomainResource {
           super.listChildren(children);
           children.add(new Property("code", "CodeableConcept", "The type of the population.", 0, 1, code));
           children.add(new Property("count", "integer", "The number of members of the population in this stratum.", 0, 1, count));
-          children.add(new Property("subjects", "Reference(List)", "This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.", 0, 1, subjects));
+          children.add(new Property("subjectResults", "Reference(List)", "This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.", 0, 1, subjectResults));
         }
 
         @Override
@@ -1586,7 +1695,7 @@ public class MeasureReport extends DomainResource {
           switch (_hash) {
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The type of the population.", 0, 1, code);
           case 94851343: /*count*/  return new Property("count", "integer", "The number of members of the population in this stratum.", 0, 1, count);
-          case -2069868345: /*subjects*/  return new Property("subjects", "Reference(List)", "This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.", 0, 1, subjects);
+          case 2136184106: /*subjectResults*/  return new Property("subjectResults", "Reference(List)", "This element refers to a List of subject level MeasureReport resources, one for each subject in this population in this stratum.", 0, 1, subjectResults);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1597,7 +1706,7 @@ public class MeasureReport extends DomainResource {
         switch (hash) {
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 94851343: /*count*/ return this.count == null ? new Base[0] : new Base[] {this.count}; // IntegerType
-        case -2069868345: /*subjects*/ return this.subjects == null ? new Base[0] : new Base[] {this.subjects}; // Reference
+        case 2136184106: /*subjectResults*/ return this.subjectResults == null ? new Base[0] : new Base[] {this.subjectResults}; // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1612,8 +1721,8 @@ public class MeasureReport extends DomainResource {
         case 94851343: // count
           this.count = castToInteger(value); // IntegerType
           return value;
-        case -2069868345: // subjects
-          this.subjects = castToReference(value); // Reference
+        case 2136184106: // subjectResults
+          this.subjectResults = castToReference(value); // Reference
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1626,8 +1735,8 @@ public class MeasureReport extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("count")) {
           this.count = castToInteger(value); // IntegerType
-        } else if (name.equals("subjects")) {
-          this.subjects = castToReference(value); // Reference
+        } else if (name.equals("subjectResults")) {
+          this.subjectResults = castToReference(value); // Reference
         } else
           return super.setProperty(name, value);
         return value;
@@ -1638,7 +1747,7 @@ public class MeasureReport extends DomainResource {
         switch (hash) {
         case 3059181:  return getCode(); 
         case 94851343:  return getCountElement();
-        case -2069868345:  return getSubjects(); 
+        case 2136184106:  return getSubjectResults(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1649,7 +1758,7 @@ public class MeasureReport extends DomainResource {
         switch (hash) {
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case 94851343: /*count*/ return new String[] {"integer"};
-        case -2069868345: /*subjects*/ return new String[] {"Reference"};
+        case 2136184106: /*subjectResults*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1664,9 +1773,9 @@ public class MeasureReport extends DomainResource {
         else if (name.equals("count")) {
           throw new FHIRException("Cannot call addChild on a primitive type MeasureReport.count");
         }
-        else if (name.equals("subjects")) {
-          this.subjects = new Reference();
-          return this.subjects;
+        else if (name.equals("subjectResults")) {
+          this.subjectResults = new Reference();
+          return this.subjectResults;
         }
         else
           return super.addChild(name);
@@ -1677,7 +1786,7 @@ public class MeasureReport extends DomainResource {
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
         dst.count = count == null ? null : count.copy();
-        dst.subjects = subjects == null ? null : subjects.copy();
+        dst.subjectResults = subjectResults == null ? null : subjectResults.copy();
         return dst;
       }
 
@@ -1688,7 +1797,7 @@ public class MeasureReport extends DomainResource {
         if (!(other_ instanceof StratifierGroupPopulationComponent))
           return false;
         StratifierGroupPopulationComponent o = (StratifierGroupPopulationComponent) other_;
-        return compareDeep(code, o.code, true) && compareDeep(count, o.count, true) && compareDeep(subjects, o.subjects, true)
+        return compareDeep(code, o.code, true) && compareDeep(count, o.count, true) && compareDeep(subjectResults, o.subjectResults, true)
           ;
       }
 
@@ -1703,7 +1812,8 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, count, subjects);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, count, subjectResults
+          );
       }
 
   public String fhirType() {
@@ -1729,10 +1839,10 @@ public class MeasureReport extends DomainResource {
     protected Enumeration<MeasureReportStatus> status;
 
     /**
-     * The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.
+     * The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; a summary report, which returns a population count for each of the criteria in the measure; or a data-collection, which enables the MeasureReport to be used to exchange the data-of-interest for a quality measure.
      */
     @Child(name = "type", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="individual | subject-list | summary", formalDefinition="The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure." )
+    @Description(shortDefinition="individual | subject-list | summary | data-collection", formalDefinition="The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; a summary report, which returns a population count for each of the criteria in the measure; or a data-collection, which enables the MeasureReport to be used to exchange the data-of-interest for a quality measure." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-report-type")
     protected Enumeration<MeasureReportType> type;
 
@@ -1746,7 +1856,7 @@ public class MeasureReport extends DomainResource {
     /**
      * Optional subject identifying the individual or individuals the report is for.
      */
-    @Child(name = "subject", type = {Patient.class, Practitioner.class, Location.class, Device.class, RelatedPerson.class, Group.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Practitioner.class, PractitionerRole.class, Location.class, Device.class, RelatedPerson.class, Group.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What individual(s) the report is for", formalDefinition="Optional subject identifying the individual or individuals the report is for." )
     protected Reference subject;
 
@@ -1763,14 +1873,14 @@ public class MeasureReport extends DomainResource {
     protected DateTimeType date;
 
     /**
-     * The individual, location, group, or organization that is reporting the data.
+     * The individual, location, or organization that is reporting the data.
      */
-    @Child(name = "reporter", type = {Practitioner.class, PractitionerRole.class, Location.class, Organization.class, Group.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who is reporting the data", formalDefinition="The individual, location, group, or organization that is reporting the data." )
+    @Child(name = "reporter", type = {Practitioner.class, PractitionerRole.class, Location.class, Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who is reporting the data", formalDefinition="The individual, location, or organization that is reporting the data." )
     protected Reference reporter;
 
     /**
-     * The actual object that is the target of the reference (The individual, location, group, or organization that is reporting the data.)
+     * The actual object that is the target of the reference (The individual, location, or organization that is reporting the data.)
      */
     protected Resource reporterTarget;
 
@@ -1782,25 +1892,33 @@ public class MeasureReport extends DomainResource {
     protected Period period;
 
     /**
+     * Whether improvement in the measure is noted by an increase or decrease in the measure score.
+     */
+    @Child(name = "improvementNotation", type = {CodeType.class}, order=8, min=0, max=1, modifier=true, summary=true)
+    @Description(shortDefinition="increase | decrease", formalDefinition="Whether improvement in the measure is noted by an increase or decrease in the measure score." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-improvement-notation")
+    protected Enumeration<MeasureImprovementNotation> improvementNotation;
+
+    /**
      * The results of the calculation, one for each population group in the measure.
      */
-    @Child(name = "group", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "group", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Measure results for each group", formalDefinition="The results of the calculation, one for each population group in the measure." )
     protected List<MeasureReportGroupComponent> group;
 
     /**
      * A reference to a Bundle containing the Resources that were used in the calculation of this measure.
      */
-    @Child(name = "evaluatedResources", type = {Bundle.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "evaluatedResource", type = {Reference.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="What data was used to calculate the measure score", formalDefinition="A reference to a Bundle containing the Resources that were used in the calculation of this measure." )
-    protected Reference evaluatedResources;
-
+    protected List<Reference> evaluatedResource;
     /**
-     * The actual object that is the target of the reference (A reference to a Bundle containing the Resources that were used in the calculation of this measure.)
+     * The actual objects that are the target of the reference (A reference to a Bundle containing the Resources that were used in the calculation of this measure.)
      */
-    protected Bundle evaluatedResourcesTarget;
+    protected List<Resource> evaluatedResourceTarget;
 
-    private static final long serialVersionUID = -439606594L;
+
+    private static final long serialVersionUID = -1690162707L;
 
   /**
    * Constructor
@@ -1919,7 +2037,7 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @return {@link #type} (The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; a summary report, which returns a population count for each of the criteria in the measure; or a data-collection, which enables the MeasureReport to be used to exchange the data-of-interest for a quality measure.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public Enumeration<MeasureReportType> getTypeElement() { 
       if (this.type == null)
@@ -1939,7 +2057,7 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @param value {@link #type} (The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; a summary report, which returns a population count for each of the criteria in the measure; or a data-collection, which enables the MeasureReport to be used to exchange the data-of-interest for a quality measure.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public MeasureReport setTypeElement(Enumeration<MeasureReportType> value) { 
       this.type = value;
@@ -1947,14 +2065,14 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @return The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.
+     * @return The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; a summary report, which returns a population count for each of the criteria in the measure; or a data-collection, which enables the MeasureReport to be used to exchange the data-of-interest for a quality measure.
      */
     public MeasureReportType getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
-     * @param value The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.
+     * @param value The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; a summary report, which returns a population count for each of the criteria in the measure; or a data-collection, which enables the MeasureReport to be used to exchange the data-of-interest for a quality measure.
      */
     public MeasureReport setType(MeasureReportType value) { 
         if (this.type == null)
@@ -2097,7 +2215,7 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @return {@link #reporter} (The individual, location, group, or organization that is reporting the data.)
+     * @return {@link #reporter} (The individual, location, or organization that is reporting the data.)
      */
     public Reference getReporter() { 
       if (this.reporter == null)
@@ -2113,7 +2231,7 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @param value {@link #reporter} (The individual, location, group, or organization that is reporting the data.)
+     * @param value {@link #reporter} (The individual, location, or organization that is reporting the data.)
      */
     public MeasureReport setReporter(Reference value) { 
       this.reporter = value;
@@ -2121,14 +2239,14 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @return {@link #reporter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The individual, location, group, or organization that is reporting the data.)
+     * @return {@link #reporter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The individual, location, or organization that is reporting the data.)
      */
     public Resource getReporterTarget() { 
       return this.reporterTarget;
     }
 
     /**
-     * @param value {@link #reporter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The individual, location, group, or organization that is reporting the data.)
+     * @param value {@link #reporter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The individual, location, or organization that is reporting the data.)
      */
     public MeasureReport setReporterTarget(Resource value) { 
       this.reporterTarget = value;
@@ -2156,6 +2274,55 @@ public class MeasureReport extends DomainResource {
      */
     public MeasureReport setPeriod(Period value) { 
       this.period = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #improvementNotation} (Whether improvement in the measure is noted by an increase or decrease in the measure score.). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     */
+    public Enumeration<MeasureImprovementNotation> getImprovementNotationElement() { 
+      if (this.improvementNotation == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create MeasureReport.improvementNotation");
+        else if (Configuration.doAutoCreate())
+          this.improvementNotation = new Enumeration<MeasureImprovementNotation>(new MeasureImprovementNotationEnumFactory()); // bb
+      return this.improvementNotation;
+    }
+
+    public boolean hasImprovementNotationElement() { 
+      return this.improvementNotation != null && !this.improvementNotation.isEmpty();
+    }
+
+    public boolean hasImprovementNotation() { 
+      return this.improvementNotation != null && !this.improvementNotation.isEmpty();
+    }
+
+    /**
+     * @param value {@link #improvementNotation} (Whether improvement in the measure is noted by an increase or decrease in the measure score.). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     */
+    public MeasureReport setImprovementNotationElement(Enumeration<MeasureImprovementNotation> value) { 
+      this.improvementNotation = value;
+      return this;
+    }
+
+    /**
+     * @return Whether improvement in the measure is noted by an increase or decrease in the measure score.
+     */
+    public MeasureImprovementNotation getImprovementNotation() { 
+      return this.improvementNotation == null ? null : this.improvementNotation.getValue();
+    }
+
+    /**
+     * @param value Whether improvement in the measure is noted by an increase or decrease in the measure score.
+     */
+    public MeasureReport setImprovementNotation(MeasureImprovementNotation value) { 
+      if (value == null)
+        this.improvementNotation = null;
+      else {
+        if (this.improvementNotation == null)
+          this.improvementNotation = new Enumeration<MeasureImprovementNotation>(new MeasureImprovementNotationEnumFactory());
+        this.improvementNotation.setValue(value);
+      }
       return this;
     }
 
@@ -2213,61 +2380,81 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @return {@link #evaluatedResources} (A reference to a Bundle containing the Resources that were used in the calculation of this measure.)
+     * @return {@link #evaluatedResource} (A reference to a Bundle containing the Resources that were used in the calculation of this measure.)
      */
-    public Reference getEvaluatedResources() { 
-      if (this.evaluatedResources == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MeasureReport.evaluatedResources");
-        else if (Configuration.doAutoCreate())
-          this.evaluatedResources = new Reference(); // cc
-      return this.evaluatedResources;
-    }
-
-    public boolean hasEvaluatedResources() { 
-      return this.evaluatedResources != null && !this.evaluatedResources.isEmpty();
+    public List<Reference> getEvaluatedResource() { 
+      if (this.evaluatedResource == null)
+        this.evaluatedResource = new ArrayList<Reference>();
+      return this.evaluatedResource;
     }
 
     /**
-     * @param value {@link #evaluatedResources} (A reference to a Bundle containing the Resources that were used in the calculation of this measure.)
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public MeasureReport setEvaluatedResources(Reference value) { 
-      this.evaluatedResources = value;
+    public MeasureReport setEvaluatedResource(List<Reference> theEvaluatedResource) { 
+      this.evaluatedResource = theEvaluatedResource;
+      return this;
+    }
+
+    public boolean hasEvaluatedResource() { 
+      if (this.evaluatedResource == null)
+        return false;
+      for (Reference item : this.evaluatedResource)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addEvaluatedResource() { //3
+      Reference t = new Reference();
+      if (this.evaluatedResource == null)
+        this.evaluatedResource = new ArrayList<Reference>();
+      this.evaluatedResource.add(t);
+      return t;
+    }
+
+    public MeasureReport addEvaluatedResource(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.evaluatedResource == null)
+        this.evaluatedResource = new ArrayList<Reference>();
+      this.evaluatedResource.add(t);
       return this;
     }
 
     /**
-     * @return {@link #evaluatedResources} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to a Bundle containing the Resources that were used in the calculation of this measure.)
+     * @return The first repetition of repeating field {@link #evaluatedResource}, creating it if it does not already exist
      */
-    public Bundle getEvaluatedResourcesTarget() { 
-      if (this.evaluatedResourcesTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MeasureReport.evaluatedResources");
-        else if (Configuration.doAutoCreate())
-          this.evaluatedResourcesTarget = new Bundle(); // aa
-      return this.evaluatedResourcesTarget;
+    public Reference getEvaluatedResourceFirstRep() { 
+      if (getEvaluatedResource().isEmpty()) {
+        addEvaluatedResource();
+      }
+      return getEvaluatedResource().get(0);
     }
 
     /**
-     * @param value {@link #evaluatedResources} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to a Bundle containing the Resources that were used in the calculation of this measure.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
-    public MeasureReport setEvaluatedResourcesTarget(Bundle value) { 
-      this.evaluatedResourcesTarget = value;
-      return this;
+    @Deprecated
+    public List<Resource> getEvaluatedResourceTarget() { 
+      if (this.evaluatedResourceTarget == null)
+        this.evaluatedResourceTarget = new ArrayList<Resource>();
+      return this.evaluatedResourceTarget;
     }
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this MeasureReport when it is represented in other formats or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The MeasureReport status. No data will be available until the MeasureReport status is complete.", 0, 1, status));
-        children.add(new Property("type", "code", "The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.", 0, 1, type));
+        children.add(new Property("type", "code", "The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; a summary report, which returns a population count for each of the criteria in the measure; or a data-collection, which enables the MeasureReport to be used to exchange the data-of-interest for a quality measure.", 0, 1, type));
         children.add(new Property("measure", "canonical(Measure)", "A reference to the Measure that was calculated to produce this report.", 0, 1, measure));
-        children.add(new Property("subject", "Reference(Patient|Practitioner|Location|Device|RelatedPerson|Group)", "Optional subject identifying the individual or individuals the report is for.", 0, 1, subject));
+        children.add(new Property("subject", "Reference(Patient|Practitioner|PractitionerRole|Location|Device|RelatedPerson|Group)", "Optional subject identifying the individual or individuals the report is for.", 0, 1, subject));
         children.add(new Property("date", "dateTime", "The date this measure report was generated.", 0, 1, date));
-        children.add(new Property("reporter", "Reference(Practitioner|PractitionerRole|Location|Organization|Group)", "The individual, location, group, or organization that is reporting the data.", 0, 1, reporter));
+        children.add(new Property("reporter", "Reference(Practitioner|PractitionerRole|Location|Organization)", "The individual, location, or organization that is reporting the data.", 0, 1, reporter));
         children.add(new Property("period", "Period", "The reporting period for which the report was calculated.", 0, 1, period));
+        children.add(new Property("improvementNotation", "code", "Whether improvement in the measure is noted by an increase or decrease in the measure score.", 0, 1, improvementNotation));
         children.add(new Property("group", "", "The results of the calculation, one for each population group in the measure.", 0, java.lang.Integer.MAX_VALUE, group));
-        children.add(new Property("evaluatedResources", "Reference(Bundle)", "A reference to a Bundle containing the Resources that were used in the calculation of this measure.", 0, 1, evaluatedResources));
+        children.add(new Property("evaluatedResource", "Reference(Any)", "A reference to a Bundle containing the Resources that were used in the calculation of this measure.", 0, java.lang.Integer.MAX_VALUE, evaluatedResource));
       }
 
       @Override
@@ -2275,14 +2462,15 @@ public class MeasureReport extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this MeasureReport when it is represented in other formats or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The MeasureReport status. No data will be available until the MeasureReport status is complete.", 0, 1, status);
-        case 3575610: /*type*/  return new Property("type", "code", "The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; or a summary report, which returns a population count for each of the criteria in the measure.", 0, 1, type);
+        case 3575610: /*type*/  return new Property("type", "code", "The type of measure report. This may be an individual report, which provides the score for the measure for an individual member of the population; a subject-listing, which returns the list of members that meet the various criteria in the measure; a summary report, which returns a population count for each of the criteria in the measure; or a data-collection, which enables the MeasureReport to be used to exchange the data-of-interest for a quality measure.", 0, 1, type);
         case 938321246: /*measure*/  return new Property("measure", "canonical(Measure)", "A reference to the Measure that was calculated to produce this report.", 0, 1, measure);
-        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Practitioner|Location|Device|RelatedPerson|Group)", "Optional subject identifying the individual or individuals the report is for.", 0, 1, subject);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Practitioner|PractitionerRole|Location|Device|RelatedPerson|Group)", "Optional subject identifying the individual or individuals the report is for.", 0, 1, subject);
         case 3076014: /*date*/  return new Property("date", "dateTime", "The date this measure report was generated.", 0, 1, date);
-        case -427039519: /*reporter*/  return new Property("reporter", "Reference(Practitioner|PractitionerRole|Location|Organization|Group)", "The individual, location, group, or organization that is reporting the data.", 0, 1, reporter);
+        case -427039519: /*reporter*/  return new Property("reporter", "Reference(Practitioner|PractitionerRole|Location|Organization)", "The individual, location, or organization that is reporting the data.", 0, 1, reporter);
         case -991726143: /*period*/  return new Property("period", "Period", "The reporting period for which the report was calculated.", 0, 1, period);
+        case -2085456136: /*improvementNotation*/  return new Property("improvementNotation", "code", "Whether improvement in the measure is noted by an increase or decrease in the measure score.", 0, 1, improvementNotation);
         case 98629247: /*group*/  return new Property("group", "", "The results of the calculation, one for each population group in the measure.", 0, java.lang.Integer.MAX_VALUE, group);
-        case 1599836026: /*evaluatedResources*/  return new Property("evaluatedResources", "Reference(Bundle)", "A reference to a Bundle containing the Resources that were used in the calculation of this measure.", 0, 1, evaluatedResources);
+        case -1056771047: /*evaluatedResource*/  return new Property("evaluatedResource", "Reference(Any)", "A reference to a Bundle containing the Resources that were used in the calculation of this measure.", 0, java.lang.Integer.MAX_VALUE, evaluatedResource);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -2299,8 +2487,9 @@ public class MeasureReport extends DomainResource {
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -427039519: /*reporter*/ return this.reporter == null ? new Base[0] : new Base[] {this.reporter}; // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
+        case -2085456136: /*improvementNotation*/ return this.improvementNotation == null ? new Base[0] : new Base[] {this.improvementNotation}; // Enumeration<MeasureImprovementNotation>
         case 98629247: /*group*/ return this.group == null ? new Base[0] : this.group.toArray(new Base[this.group.size()]); // MeasureReportGroupComponent
-        case 1599836026: /*evaluatedResources*/ return this.evaluatedResources == null ? new Base[0] : new Base[] {this.evaluatedResources}; // Reference
+        case -1056771047: /*evaluatedResource*/ return this.evaluatedResource == null ? new Base[0] : this.evaluatedResource.toArray(new Base[this.evaluatedResource.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2335,11 +2524,15 @@ public class MeasureReport extends DomainResource {
         case -991726143: // period
           this.period = castToPeriod(value); // Period
           return value;
+        case -2085456136: // improvementNotation
+          value = new MeasureImprovementNotationEnumFactory().fromType(castToCode(value));
+          this.improvementNotation = (Enumeration) value; // Enumeration<MeasureImprovementNotation>
+          return value;
         case 98629247: // group
           this.getGroup().add((MeasureReportGroupComponent) value); // MeasureReportGroupComponent
           return value;
-        case 1599836026: // evaluatedResources
-          this.evaluatedResources = castToReference(value); // Reference
+        case -1056771047: // evaluatedResource
+          this.getEvaluatedResource().add(castToReference(value)); // Reference
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2366,10 +2559,13 @@ public class MeasureReport extends DomainResource {
           this.reporter = castToReference(value); // Reference
         } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
+        } else if (name.equals("improvementNotation")) {
+          value = new MeasureImprovementNotationEnumFactory().fromType(castToCode(value));
+          this.improvementNotation = (Enumeration) value; // Enumeration<MeasureImprovementNotation>
         } else if (name.equals("group")) {
           this.getGroup().add((MeasureReportGroupComponent) value);
-        } else if (name.equals("evaluatedResources")) {
-          this.evaluatedResources = castToReference(value); // Reference
+        } else if (name.equals("evaluatedResource")) {
+          this.getEvaluatedResource().add(castToReference(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -2386,8 +2582,9 @@ public class MeasureReport extends DomainResource {
         case 3076014:  return getDateElement();
         case -427039519:  return getReporter(); 
         case -991726143:  return getPeriod(); 
+        case -2085456136:  return getImprovementNotationElement();
         case 98629247:  return addGroup(); 
-        case 1599836026:  return getEvaluatedResources(); 
+        case -1056771047:  return addEvaluatedResource(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -2404,8 +2601,9 @@ public class MeasureReport extends DomainResource {
         case 3076014: /*date*/ return new String[] {"dateTime"};
         case -427039519: /*reporter*/ return new String[] {"Reference"};
         case -991726143: /*period*/ return new String[] {"Period"};
+        case -2085456136: /*improvementNotation*/ return new String[] {"code"};
         case 98629247: /*group*/ return new String[] {};
-        case 1599836026: /*evaluatedResources*/ return new String[] {"Reference"};
+        case -1056771047: /*evaluatedResource*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2440,12 +2638,14 @@ public class MeasureReport extends DomainResource {
           this.period = new Period();
           return this.period;
         }
+        else if (name.equals("improvementNotation")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MeasureReport.improvementNotation");
+        }
         else if (name.equals("group")) {
           return addGroup();
         }
-        else if (name.equals("evaluatedResources")) {
-          this.evaluatedResources = new Reference();
-          return this.evaluatedResources;
+        else if (name.equals("evaluatedResource")) {
+          return addEvaluatedResource();
         }
         else
           return super.addChild(name);
@@ -2471,12 +2671,17 @@ public class MeasureReport extends DomainResource {
         dst.date = date == null ? null : date.copy();
         dst.reporter = reporter == null ? null : reporter.copy();
         dst.period = period == null ? null : period.copy();
+        dst.improvementNotation = improvementNotation == null ? null : improvementNotation.copy();
         if (group != null) {
           dst.group = new ArrayList<MeasureReportGroupComponent>();
           for (MeasureReportGroupComponent i : group)
             dst.group.add(i.copy());
         };
-        dst.evaluatedResources = evaluatedResources == null ? null : evaluatedResources.copy();
+        if (evaluatedResource != null) {
+          dst.evaluatedResource = new ArrayList<Reference>();
+          for (Reference i : evaluatedResource)
+            dst.evaluatedResource.add(i.copy());
+        };
         return dst;
       }
 
@@ -2493,8 +2698,9 @@ public class MeasureReport extends DomainResource {
         MeasureReport o = (MeasureReport) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(type, o.type, true)
            && compareDeep(measure, o.measure, true) && compareDeep(subject, o.subject, true) && compareDeep(date, o.date, true)
-           && compareDeep(reporter, o.reporter, true) && compareDeep(period, o.period, true) && compareDeep(group, o.group, true)
-           && compareDeep(evaluatedResources, o.evaluatedResources, true);
+           && compareDeep(reporter, o.reporter, true) && compareDeep(period, o.period, true) && compareDeep(improvementNotation, o.improvementNotation, true)
+           && compareDeep(group, o.group, true) && compareDeep(evaluatedResource, o.evaluatedResource, true)
+          ;
       }
 
       @Override
@@ -2505,18 +2711,39 @@ public class MeasureReport extends DomainResource {
           return false;
         MeasureReport o = (MeasureReport) other_;
         return compareValues(status, o.status, true) && compareValues(type, o.type, true) && compareValues(date, o.date, true)
-          ;
+           && compareValues(improvementNotation, o.improvementNotation, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
-          , measure, subject, date, reporter, period, group, evaluatedResources);
+          , measure, subject, date, reporter, period, improvementNotation, group, evaluatedResource
+          );
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.MeasureReport;
    }
+
+ /**
+   * Search parameter: <b>date</b>
+   * <p>
+   * Description: <b>The date of the measure report</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MeasureReport.date</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="date", path="MeasureReport.date", description="The date of the measure report", type="date" )
+  public static final String SP_DATE = "date";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>date</b>
+   * <p>
+   * Description: <b>The date of the measure report</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MeasureReport.date</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_DATE);
 
  /**
    * Search parameter: <b>identifier</b>
@@ -2539,6 +2766,52 @@ public class MeasureReport extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
+   * Search parameter: <b>period</b>
+   * <p>
+   * Description: <b>The period of the measure report</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MeasureReport.period</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="period", path="MeasureReport.period", description="The period of the measure report", type="date" )
+  public static final String SP_PERIOD = "period";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>period</b>
+   * <p>
+   * Description: <b>The period of the measure report</b><br>
+   * Type: <b>date</b><br>
+   * Path: <b>MeasureReport.period</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.DateClientParam PERIOD = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_PERIOD);
+
+ /**
+   * Search parameter: <b>measure</b>
+   * <p>
+   * Description: <b>The measure to return measure report results for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MeasureReport.measure</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="measure", path="MeasureReport.measure", description="The measure to return measure report results for", type="reference", target={Measure.class } )
+  public static final String SP_MEASURE = "measure";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>measure</b>
+   * <p>
+   * Description: <b>The measure to return measure report results for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MeasureReport.measure</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam MEASURE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_MEASURE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MeasureReport:measure</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_MEASURE = new ca.uhn.fhir.model.api.Include("MeasureReport:measure").toLocked();
+
+ /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>The identity of a patient to search for individual measure report results for</b><br>
@@ -2546,7 +2819,7 @@ public class MeasureReport extends DomainResource {
    * Path: <b>MeasureReport.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MeasureReport.subject", description="The identity of a patient to search for individual measure report results for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="MeasureReport.subject.where(resolve() is Patient)", description="The identity of a patient to search for individual measure report results for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2572,7 +2845,7 @@ public class MeasureReport extends DomainResource {
    * Path: <b>MeasureReport.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="MeasureReport.subject", description="The identity of a subject to search for individual measure report results for", type="reference", target={Device.class, Group.class, Location.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="subject", path="MeasureReport.subject", description="The identity of a subject to search for individual measure report results for", type="reference", target={Device.class, Group.class, Location.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>
@@ -2589,6 +2862,32 @@ public class MeasureReport extends DomainResource {
    * the path value of "<b>MeasureReport:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("MeasureReport:subject").toLocked();
+
+ /**
+   * Search parameter: <b>reporter</b>
+   * <p>
+   * Description: <b>The reporter to return measure report results for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MeasureReport.reporter</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="reporter", path="MeasureReport.reporter", description="The reporter to return measure report results for", type="reference", target={Location.class, Organization.class, Practitioner.class, PractitionerRole.class } )
+  public static final String SP_REPORTER = "reporter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>reporter</b>
+   * <p>
+   * Description: <b>The reporter to return measure report results for</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MeasureReport.reporter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REPORTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REPORTER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MeasureReport:reporter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REPORTER = new ca.uhn.fhir.model.api.Include("MeasureReport:reporter").toLocked();
 
  /**
    * Search parameter: <b>status</b>
@@ -2609,6 +2908,32 @@ public class MeasureReport extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
+ /**
+   * Search parameter: <b>evaluated-resource</b>
+   * <p>
+   * Description: <b>An evaluated resource referenced by the measure report</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MeasureReport.evaluatedResource</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="evaluated-resource", path="MeasureReport.evaluatedResource", description="An evaluated resource referenced by the measure report", type="reference" )
+  public static final String SP_EVALUATED_RESOURCE = "evaluated-resource";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>evaluated-resource</b>
+   * <p>
+   * Description: <b>An evaluated resource referenced by the measure report</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MeasureReport.evaluatedResource</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam EVALUATED_RESOURCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_EVALUATED_RESOURCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MeasureReport:evaluated-resource</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_EVALUATED_RESOURCE = new ca.uhn.fhir.model.api.Include("MeasureReport:evaluated-resource").toLocked();
 
 
 }

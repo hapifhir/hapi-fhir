@@ -22,15 +22,19 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.messaging.MessageHandler;
 
 import java.util.Optional;
 
 public class SubscriptionRestHookInterceptor extends BaseSubscriptionInterceptor {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRestHookInterceptor.class);
 
 	@Override
 	protected Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
-		return Optional.of(new SubscriptionDeliveringRestHookSubscriber(getSubscriptionDao(), getChannelType(), this));
+		SubscriptionDeliveringRestHookSubscriber value = new SubscriptionDeliveringRestHookSubscriber(getSubscriptionDao(), getChannelType(), this);
+		return Optional.of(value);
 	}
 
 	@Override
