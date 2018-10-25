@@ -669,33 +669,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testUpdateReusesIndexes() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-
-		QueryCountHolder.clear();
-
-		Patient pt = new Patient();
-		pt.setActive(true);
-		pt.addName().setFamily("FAMILY1").addGiven("GIVEN1A").addGiven("GIVEN1B");
-		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
-
-		ourLog.info("Now have {} deleted", QueryCountHolder.getGrandTotal().getDelete());
-		ourLog.info("Now have {} inserts", QueryCountHolder.getGrandTotal().getInsert());
-		QueryCountHolder.clear();
-
-		ourLog.info("** About to update");
-
-		pt.setId(id);
-		pt.getNameFirstRep().addGiven("GIVEN1C");
-		myPatientDao.update(pt);
-
-		ourLog.info("Now have {} deleted", QueryCountHolder.getGrandTotal().getDelete());
-		ourLog.info("Now have {} inserts", QueryCountHolder.getGrandTotal().getInsert());
-		assertEquals(0, QueryCountHolder.getGrandTotal().getDelete());
-		assertEquals(4, QueryCountHolder.getGrandTotal().getInsert());
-	}
-
-	@Test
 	public void testUpdateUnknownNumericIdFails() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateNumericIdFails");

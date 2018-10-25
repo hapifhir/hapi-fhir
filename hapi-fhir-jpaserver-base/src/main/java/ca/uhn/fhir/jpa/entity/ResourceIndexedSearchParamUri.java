@@ -82,6 +82,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		setUri(theUri);
 	}
 
+	@Override
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashUri == null) {

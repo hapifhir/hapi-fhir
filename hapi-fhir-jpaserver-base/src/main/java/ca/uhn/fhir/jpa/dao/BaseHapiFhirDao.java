@@ -1643,6 +1643,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 */
 		if (thePerformIndexing) {
 			newParams.removeCommon(theEntity, existingParams);
+
 		} // if thePerformIndexing
 
 		if (theResource != null) {

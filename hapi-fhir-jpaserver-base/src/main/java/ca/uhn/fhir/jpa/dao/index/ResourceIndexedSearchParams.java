@@ -725,6 +725,8 @@ public class ResourceIndexedSearchParams {
 
 	public void removeCommon(ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
 		EntityManager myEntityManager = myIndexingService.getEntityManager();
+		
+		calculateHashes(stringParams);
 		for (ResourceIndexedSearchParamString next : removeCommon(existingParams.stringParams, stringParams)) {
 			next.setDaoConfig(myIndexingService.getConfig());
 			myEntityManager .remove(next);
@@ -734,6 +736,7 @@ public class ResourceIndexedSearchParams {
 			myEntityManager.persist(next);
 		}
 
+		calculateHashes(tokenParams);
 		for (ResourceIndexedSearchParamToken next : removeCommon(existingParams.tokenParams, tokenParams)) {
 			myEntityManager.remove(next);
 			theEntity.getParamsToken().remove(next);
@@ -742,6 +745,7 @@ public class ResourceIndexedSearchParams {
 			myEntityManager.persist(next);
 		}
 
+		calculateHashes(numberParams);
 		for (ResourceIndexedSearchParamNumber next : removeCommon(existingParams.numberParams, numberParams)) {
 			myEntityManager.remove(next);
 			theEntity.getParamsNumber().remove(next);
@@ -750,6 +754,7 @@ public class ResourceIndexedSearchParams {
 			myEntityManager.persist(next);
 		}
 
+		calculateHashes(quantityParams);
 		for (ResourceIndexedSearchParamQuantity next : removeCommon(existingParams.quantityParams, quantityParams)) {
 			myEntityManager.remove(next);
 			theEntity.getParamsQuantity().remove(next);
@@ -759,6 +764,7 @@ public class ResourceIndexedSearchParams {
 		}
 
 		// Store date SP's
+		calculateHashes(dateParams);
 		for (ResourceIndexedSearchParamDate next : removeCommon(existingParams.dateParams, dateParams)) {
 			myEntityManager.remove(next);
 			theEntity.getParamsDate().remove(next);
@@ -768,6 +774,7 @@ public class ResourceIndexedSearchParams {
 		}
 
 		// Store URI SP's
+		calculateHashes(uriParams);
 		for (ResourceIndexedSearchParamUri next : removeCommon(existingParams.uriParams, uriParams)) {
 			myEntityManager.remove(next);
 			theEntity.getParamsUri().remove(next);
@@ -777,6 +784,7 @@ public class ResourceIndexedSearchParams {
 		}
 
 		// Store Coords SP's
+		calculateHashes(coordsParams);
 		for (ResourceIndexedSearchParamCoords next : removeCommon(existingParams.coordsParams, coordsParams)) {
 			myEntityManager.remove(next);
 			theEntity.getParamsCoords().remove(next);
@@ -815,6 +823,12 @@ public class ResourceIndexedSearchParams {
 				ourLog.debug("Persisting unique index: {}", next);
 				myEntityManager.persist(next);
 			}
+		}
+	}
+	
+	private void calculateHashes(Collection<? extends BaseResourceIndexedSearchParam> theStringParams) {
+		for (BaseResourceIndexedSearchParam next : theStringParams) {
+			next.calculateHashes();
 		}
 	}
 	

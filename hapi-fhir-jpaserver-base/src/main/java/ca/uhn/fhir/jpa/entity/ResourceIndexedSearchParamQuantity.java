@@ -95,6 +95,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		setUnits(theUnits);
 	}
 
+	@Override
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashIdentity == null) {

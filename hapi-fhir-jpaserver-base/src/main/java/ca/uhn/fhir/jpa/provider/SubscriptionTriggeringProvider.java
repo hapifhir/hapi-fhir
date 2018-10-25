@@ -39,6 +39,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -307,7 +308,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 			ourLog.info("Triggering job[{}] search {} requesting resources {} - {}", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
 			List<Long> resourceIds = mySearchCoordinatorSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
 
-			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex);
+			ourLog.info("Triggering job[{}] delivering {} resources", theJobDetails.getJobId(), resourceIds.size());
 			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
 
 			for (Long next : resourceIds) {
@@ -374,9 +375,22 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 		msg.setNewPayload(myFhirContext, theResourceToTrigger);
 
 		return myExecutorService.submit(()->{
-			for (BaseSubscriptionInterceptor<?> next : mySubscriptionInterceptorList) {
-				next.submitResourceModified(msg);
+			for (int i = 0; ; i++) {
+				try {
+					for (BaseSubscriptionInterceptor<?> next : mySubscriptionInterceptorList) {
+						next.submitResourceModified(msg);
+					}
+					break;
+				} catch (Exception e) {
+					if (i >= 3) {
+						throw new InternalErrorException(e);
+					}
+
+					ourLog.warn("Exception while retriggering subscriptions (going to sleep and retry): {}", e.toString());
+					Thread.sleep(1000);
+				}
 			}
+
 			return null;
 		});
 

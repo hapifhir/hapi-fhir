@@ -161,6 +161,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		myHashIdentity = theHashIdentity;
 	}
 
+	@Override
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashNormalizedPrefix == null && myDaoConfig != null) {

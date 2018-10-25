@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -107,10 +108,16 @@ public class TestR4Config extends BaseJavaConfigR4 {
 			.create(retVal)
 			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
-			.countQuery(new ThreadQueryCountHolder())
+//			.countQuery(new ThreadQueryCountHolder())
+			.countQuery(singleQueryCountHolder())
 			.build();
 
 		return dataSource;
+	}
+
+	@Bean
+	public SingleQueryCountHolder singleQueryCountHolder() {
+		return new SingleQueryCountHolder();
 	}
 
 	@Override
