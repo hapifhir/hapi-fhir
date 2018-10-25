@@ -13,12 +13,11 @@ import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.SubscriptionCheckingSubscriber;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriber.class);
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherDatabase.class);
 
 	private final IFhirResourceDao<?> mySubscriptionDao;
 	

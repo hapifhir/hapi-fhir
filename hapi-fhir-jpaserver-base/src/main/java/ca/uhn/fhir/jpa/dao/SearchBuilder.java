@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -1496,7 +1497,7 @@ public class SearchBuilder implements ISearchBuilder {
 										}
 									}
 
-									Set<String> uniqueQueryStrings = BaseHapiFhirDao.extractCompositeStringUniquesValueChains(myResourceName, params);
+									Set<String> uniqueQueryStrings = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(myResourceName, params);
 									if (ourTrackHandlersForUnitTest) {
 										ourLastHandlerParamsForUnitTest = theParams;
 										ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.UNIQUE_INDEX;
