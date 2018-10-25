@@ -176,7 +176,6 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -1643,7 +1642,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 */
 		if (thePerformIndexing) {
 			newParams.removeCommon(theEntity, existingParams);
-
 		} // if thePerformIndexing
 
 		if (theResource != null) {

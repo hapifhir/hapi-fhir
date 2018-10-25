@@ -825,13 +825,13 @@ public class ResourceIndexedSearchParams {
 			}
 		}
 	}
-	
+
 	private void calculateHashes(Collection<? extends BaseResourceIndexedSearchParam> theStringParams) {
 		for (BaseResourceIndexedSearchParam next : theStringParams) {
 			next.calculateHashes();
 		}
 	}
-	
+
 	private <T> Collection<T> removeCommon(Collection<T> theInput, Collection<T> theToRemove) {
 		assert theInput != theToRemove;
 
