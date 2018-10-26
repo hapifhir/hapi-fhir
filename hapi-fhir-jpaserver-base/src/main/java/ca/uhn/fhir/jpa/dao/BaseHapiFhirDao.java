@@ -1653,12 +1653,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return theEntity;
 	}
 
-	private void calculateHashes(Collection<? extends BaseResourceIndexedSearchParam> theStringParams) {
-		for (BaseResourceIndexedSearchParam next : theStringParams) {
-			next.calculateHashes();
-		}
-	}
-
 	protected ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable
 		entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
 		return updateEntity(theRequest, theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);
