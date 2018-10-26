@@ -1622,7 +1622,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 */
 		if (thePerformIndexing) {
 			Map<String, Boolean> presentSearchParams = new HashMap<>();
-			// TODO KHS null check?
 			for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
 				presentSearchParams.put(nextKey, Boolean.TRUE);
 			}
