@@ -1,5 +1,56 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseReference;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Subscription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -30,7 +81,6 @@ import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -39,39 +89,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.util.StopWatch;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Subscription;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.util.*;
-import java.util.concurrent.*;
 
 public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> extends ServerOperationInterceptorAdapter {
 
@@ -91,9 +108,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
 	private ThreadPoolExecutor myDeliveryExecutor;
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
-	private IFhirResourceDao<?> mySubscriptionDao;
-	@Autowired
-	private List<IFhirResourceDao<?>> myResourceDaos;
+
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired(required = false)
@@ -104,7 +119,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired
 	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
-	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
+	@Autowired
+	private SubscriptionMatcherDatabase mySubscriptionMatcherDatabase;
+	@Autowired
+	private DaoProvider myDaoProvider;
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
 	/**
@@ -286,26 +304,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	public abstract Subscription.SubscriptionChannelType getChannelType();
 
-	// TODO KHS move out
-	@SuppressWarnings("unchecked")
-	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
-		if (myResourceTypeToDao == null) {
-			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> theResourceTypeToDao = new HashMap<>();
-			for (IFhirResourceDao<?> next : myResourceDaos) {
-				theResourceTypeToDao.put(next.getResourceType(), next);
-			}
-
-			if (this instanceof IFhirResourceDao<?>) {
-				IFhirResourceDao<?> thiz = (IFhirResourceDao<?>) this;
-				theResourceTypeToDao.put(thiz.getResourceType(), thiz);
-			}
-
-			myResourceTypeToDao = theResourceTypeToDao;
-		}
-
-		return (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
-	}
-
 	protected MessageChannel getDeliveryChannel(CanonicalSubscription theSubscription) {
 		return mySubscribableChannel.get(theSubscription.getIdElement(myCtx).getIdPart());
 	}
@@ -335,9 +333,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		myProcessingChannel = theProcessingChannel;
 	}
 
-	protected IFhirResourceDao<?> getSubscriptionDao() {
-		return mySubscriptionDao;
-	}
 
 	public List<CanonicalSubscription> getRegisteredSubscriptions() {
 		return new ArrayList<>(myIdToSubscription.values());
@@ -378,7 +373,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			RequestDetails req = new ServletSubRequestDetails();
 			req.setSubRequest(true);
 
-			IBundleProvider subscriptionBundleList = getSubscriptionDao().search(map, req);
+			IBundleProvider subscriptionBundleList = myDaoProvider.getSubscriptionDao().search(map, req);
 			if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
 				ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
 			}
@@ -436,8 +431,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected void registerSubscriptionCheckingSubscriber() {
 		if (mySubscriptionCheckingSubscriber == null) {
-			ISubscriptionMatcher subscriptionMatcher = new SubscriptionMatcherDatabase(getSubscriptionDao(), this);
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this, subscriptionMatcher );
+			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(myDaoProvider.getSubscriptionDao(), getChannelType(), this, mySubscriptionMatcherDatabase );
 		}
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}
@@ -503,9 +497,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		myCtx = theCtx;
 	}
 
-	public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
-		myResourceDaos = theResourceDaos;
-	}
 
 	@VisibleForTesting
 	public void setTxManager(PlatformTransactionManager theTxManager) {
@@ -514,15 +505,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	@PostConstruct
 	public void start() {
-		for (IFhirResourceDao<?> next : myResourceDaos) {
-			if (next.getResourceType() != null) {
-				if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
-					mySubscriptionDao = next;
-				}
-			}
-		}
-		Validate.notNull(mySubscriptionDao);
-
 		if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4) {
 			Validate.notNull(myEventDefinitionDaoR4);
 		}
@@ -557,7 +539,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager, myAsyncTaskExecutor);
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(myDaoProvider.getSubscriptionDao(), getChannelType(), this, myTxManager, myAsyncTaskExecutor);
 		}
 
 		registerSubscriptionCheckingSubscriber();
@@ -622,4 +604,15 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 
+	public IFhirResourceDao<?> getSubscriptionDao() {
+		return myDaoProvider.getSubscriptionDao();
+	}
+
+	public IFhirResourceDao getDao(Class type) {
+		return myDaoProvider.getDao(type);
+	}
+	
+	public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
+		myDaoProvider.setResourceDaos(theResourceDaos);
+	}
 }

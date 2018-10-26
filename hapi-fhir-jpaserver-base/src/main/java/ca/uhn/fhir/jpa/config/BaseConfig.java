@@ -1,5 +1,35 @@
 package ca.uhn.fhir.jpa.config;
 
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+
+import javax.annotation.Nonnull;
+
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.query.criteria.LiteralHandlingMode;
+import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.env.Environment;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.hibernate5.HibernateExceptionTranslator;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
+import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -24,7 +54,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
-import ca.uhn.fhir.jpa.search.*;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -34,35 +68,14 @@ import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
 import ca.uhn.fhir.jpa.util.IReindexController;
 import ca.uhn.fhir.jpa.util.ReindexController;
-import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.hibernate.query.criteria.LiteralHandlingMode;
-import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.hibernate5.HibernateExceptionTranslator;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
-import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
-import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-
-import javax.annotation.Nonnull;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 @Configuration
 @EnableScheduling
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
+@ComponentScan(basePackages = "ca.uhn.fhir.jpa", excludeFilters={
+		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=BaseConfig.class),
+		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=WebSocketConfigurer.class)})
+
 public abstract class BaseConfig implements SchedulingConfigurer {
 
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
@@ -178,7 +191,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	public ISearchParamPresenceSvc searchParamPresenceSvc() {
 		return new SearchParamPresenceSvcImpl();
 	}
-
+	
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
 		return new StaleSearchDeletingSvcImpl();

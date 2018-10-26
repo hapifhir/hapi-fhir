@@ -220,7 +220,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
 	public static final String UCUM_NS = "http://unitsofmeasure.org";
-	static final Set<String> EXCLUDE_ELEMENTS_IN_ENCODED;
+	public static final Set<String> EXCLUDE_ELEMENTS_IN_ENCODED;
 	/**
 	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(SearchParameterMap)}
 	 */
