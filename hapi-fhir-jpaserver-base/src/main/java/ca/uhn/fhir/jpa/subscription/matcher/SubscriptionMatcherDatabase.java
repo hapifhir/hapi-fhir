@@ -5,6 +5,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 @Service
+@Lazy
 public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherDatabase.class);
 

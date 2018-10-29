@@ -16,7 +16,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.service.IdHelperService;
+import ca.uhn.fhir.jpa.service.MatchUrlService;
+import ca.uhn.fhir.jpa.subscription.DaoProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -30,12 +38,7 @@ import org.hl7.fhir.r4.model.Reference;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.PathAndRef;
 import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamDate;
@@ -56,93 +59,90 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope("prototype")
 public class ResourceIndexedSearchParams {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceIndexedSearchParams.class);
 
-	private final IndexingSupport myIndexingSupport;
-	
-	private final Collection<ResourceIndexedSearchParamString> stringParams;
-	private final Collection<ResourceIndexedSearchParamToken> tokenParams;
-	private final Collection<ResourceIndexedSearchParamNumber> numberParams;
-	private final Collection<ResourceIndexedSearchParamQuantity> quantityParams;
-	private final Collection<ResourceIndexedSearchParamDate> dateParams;
-	private final Collection<ResourceIndexedSearchParamUri> uriParams;
-	private final Collection<ResourceIndexedSearchParamCoords> coordsParams;
-	private final Collection<ResourceIndexedCompositeStringUnique> compositeStringUniques;
-	private final Collection<ResourceLink> links;
-	
-	private Set<String> populatedResourceLinkParameters = Collections.emptySet();
-	
-	public ResourceIndexedSearchParams(IndexingSupport indexingService, ResourceTable theEntity) {
-		this.myIndexingSupport = indexingService;
+	private final Collection<ResourceIndexedSearchParamString> stringParams = new ArrayList<>();
+	private final Collection<ResourceIndexedSearchParamToken> tokenParams = new HashSet<>();
+	private final Collection<ResourceIndexedSearchParamNumber> numberParams = new ArrayList<>();
+	private final Collection<ResourceIndexedSearchParamQuantity> quantityParams = new ArrayList<>();
+	private final Collection<ResourceIndexedSearchParamDate> dateParams = new ArrayList<>();
+	private final Collection<ResourceIndexedSearchParamUri> uriParams = new ArrayList<>();
+	private final Collection<ResourceIndexedSearchParamCoords> coordsParams = new ArrayList<>();
 
-		stringParams = new ArrayList<>();
+	private final Collection<ResourceIndexedCompositeStringUnique> compositeStringUniques = new HashSet<>();
+	private final Collection<ResourceLink> links = new HashSet<>();
+	private final Set<String> populatedResourceLinkParameters = new HashSet<>();
+
+	@Autowired
+	private DaoConfig myConfig;
+	@Autowired
+	private FhirContext myContext;
+	@Autowired
+	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private IdHelperService myIdHelperService;
+	@Autowired
+	private DaoProvider myDaoProvider;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
+
+	public ResourceIndexedSearchParams() {}
+
+	public ResourceIndexedSearchParams(ResourceTable theEntity) {
 		if (theEntity.isParamsStringPopulated()) {
 			stringParams.addAll(theEntity.getParamsString());
 		}
-		tokenParams = new ArrayList<>();
 		if (theEntity.isParamsTokenPopulated()) {
 			tokenParams.addAll(theEntity.getParamsToken());
 		}
-		numberParams = new ArrayList<>();
 		if (theEntity.isParamsNumberPopulated()) {
 			numberParams.addAll(theEntity.getParamsNumber());
 		}
-		quantityParams = new ArrayList<>();
 		if (theEntity.isParamsQuantityPopulated()) {
 			quantityParams.addAll(theEntity.getParamsQuantity());
 		}
-		dateParams = new ArrayList<>();
 		if (theEntity.isParamsDatePopulated()) {
 			dateParams.addAll(theEntity.getParamsDate());
 		}
-		uriParams = new ArrayList<>();
 		if (theEntity.isParamsUriPopulated()) {
 			uriParams.addAll(theEntity.getParamsUri());
 		}
-		coordsParams = new ArrayList<>();
 		if (theEntity.isParamsCoordsPopulated()) {
 			coordsParams.addAll(theEntity.getParamsCoords());
 		}
-		links = new ArrayList<>();
 		if (theEntity.isHasLinks()) {
 			links.addAll(theEntity.getResourceLinks());
 		}
 
-		compositeStringUniques = new ArrayList<>();
 		if (theEntity.isParamsCompositeStringUniquePresent()) {
 			compositeStringUniques.addAll(theEntity.getParamsCompositeStringUnique());
 		}
 	}
 
-	public ResourceIndexedSearchParams(IndexingSupport indexingService) {
-		this.myIndexingSupport = indexingService;
-
-		stringParams = Collections.emptySet();
-		tokenParams = Collections.emptySet();
-		numberParams = Collections.emptySet();
-		quantityParams = Collections.emptySet();
-		dateParams = Collections.emptySet();
-		uriParams = Collections.emptySet();
-		coordsParams = Collections.emptySet();
-		links = Collections.emptySet();
-		compositeStringUniques = Collections.emptySet();
-	}
-
-	public ResourceIndexedSearchParams(IndexingSupport indexingService, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams existingParams) {
-		this.myIndexingSupport = indexingService;
-
-		stringParams = extractSearchParamStrings(theEntity, theResource);
-		numberParams = extractSearchParamNumber(theEntity, theResource);
-		quantityParams = extractSearchParamQuantity(theEntity, theResource);
-		dateParams = extractSearchParamDates(theEntity, theResource);
-		uriParams = extractSearchParamUri(theEntity, theResource);
-		coordsParams = extractSearchParamCoords(theEntity, theResource);
+	public void populateFromEntity(IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams existingParams) {
+		stringParams.addAll(extractSearchParamStrings(theEntity, theResource));
+		numberParams.addAll(extractSearchParamNumber(theEntity, theResource));
+		quantityParams.addAll(extractSearchParamQuantity(theEntity, theResource));
+		dateParams.addAll(extractSearchParamDates(theEntity, theResource));
+		uriParams.addAll(extractSearchParamUri(theEntity, theResource));
+		coordsParams.addAll(extractSearchParamCoords(theEntity, theResource));
 
 		ourLog.trace("Storing date indexes: {}", dateParams);
 
-		tokenParams = new HashSet<>();
 		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {
 			if (next instanceof ResourceIndexedSearchParamToken) {
 				tokenParams.add((ResourceIndexedSearchParamToken) next);
@@ -151,8 +151,7 @@ public class ResourceIndexedSearchParams {
 			}
 		}
 
-		Set<Entry<String, RuntimeSearchParam>> activeSearchParams = myIndexingSupport.getSearchParamRegistry().getActiveSearchParams(theEntity.getResourceType()).entrySet();
-		DaoConfig myConfig = indexingService.getConfig();
+		Set<Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myConfig .getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
 			findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.STRING, stringParams);
 			findMissingSearchParams(theEntity, activeSearchParams, RestSearchParameterTypeEnum.NUMBER, numberParams);
@@ -175,7 +174,7 @@ public class ResourceIndexedSearchParams {
 		 * matching resource.
 		 */
 		if (myConfig.isAllowInlineMatchUrlReferences()) {
-			FhirTerser terser = myIndexingSupport.getContext().newTerser();
+			FhirTerser terser = myContext.newTerser();
 			List<IBaseReference> allRefs = terser.getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
 			for (IBaseReference nextRef : allRefs) {
 				IIdType nextId = nextRef.getReferenceElement();
@@ -196,31 +195,30 @@ public class ResourceIndexedSearchParams {
 						}
 					}
 					String resourceTypeString = nextIdText.substring(0, nextIdText.indexOf('?')).replace("/", "");
-					RuntimeResourceDefinition matchResourceDef = myIndexingSupport.getContext().getResourceDefinition(resourceTypeString);
+					RuntimeResourceDefinition matchResourceDef = myContext.getResourceDefinition(resourceTypeString);
 					if (matchResourceDef == null) {
-						String msg = myIndexingSupport.getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlInvalidResourceType", nextId.getValue(), resourceTypeString);
+						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlInvalidResourceType", nextId.getValue(), resourceTypeString);
 						throw new InvalidRequestException(msg);
 					}
 					Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
-					Set<Long> matches = myIndexingSupport.processMatchUrl(nextIdText, matchResourceType);
+					Set<Long> matches = myMatchUrlService.processMatchUrl(theCallingDao, nextIdText, matchResourceType);
 					if (matches.isEmpty()) {
-						String msg = indexingService.getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
+						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(msg);
 					}
 					if (matches.size() > 1) {
-						String msg = indexingService.getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
+						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
 						throw new PreconditionFailedException(msg);
 					}
 					Long next = matches.iterator().next();
-					String newId = translatePidIdToForcedId(resourceTypeString, next);
+					String newId = myIdHelperService.translatePidIdToForcedId(resourceTypeString, next);
 					ourLog.debug("Replacing inline match URL[{}] with ID[{}}", nextId.getValue(), newId);
 					nextRef.setReference(newId);
 				}
 			}
 		}
 
-		links = new HashSet<>();
-		populatedResourceLinkParameters = extractResourceLinks(theEntity, theResource, links, theUpdateTime);
+		extractResourceLinks(theEntity, theResource, links, theUpdateTime);
 
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
@@ -236,9 +234,7 @@ public class ResourceIndexedSearchParams {
 		/*
 		 * Handle composites
 		 */
-		compositeStringUniques = extractCompositeStringUniques(theEntity, stringParams, tokenParams, numberParams, quantityParams, dateParams, uriParams, links);
-
-
+		extractCompositeStringUniques(theEntity, stringParams, tokenParams, numberParams, quantityParams, dateParams, uriParams, links);
 	}
 
 	public Collection<ResourceLink> getResourceLinks() {
@@ -248,31 +244,31 @@ public class ResourceIndexedSearchParams {
 	
 
 	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
-		return myIndexingSupport.getSearchParamExtractor().extractSearchParamCoords(theEntity, theResource);
+		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
 	}
 
 	protected Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
-		return myIndexingSupport.getSearchParamExtractor().extractSearchParamDates(theEntity, theResource);
+		return mySearchParamExtractor.extractSearchParamDates(theEntity, theResource);
 	}
 
 	protected Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IBaseResource theResource) {
-		return myIndexingSupport.getSearchParamExtractor().extractSearchParamNumber(theEntity, theResource);
+		return mySearchParamExtractor.extractSearchParamNumber(theEntity, theResource);
 	}
 
 	protected Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IBaseResource theResource) {
-		return myIndexingSupport.getSearchParamExtractor().extractSearchParamQuantity(theEntity, theResource);
+		return mySearchParamExtractor.extractSearchParamQuantity(theEntity, theResource);
 	}
 
 	protected Set<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IBaseResource theResource) {
-		return myIndexingSupport.getSearchParamExtractor().extractSearchParamStrings(theEntity, theResource);
+		return mySearchParamExtractor.extractSearchParamStrings(theEntity, theResource);
 	}
 
 	protected Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IBaseResource theResource) {
-		return myIndexingSupport.getSearchParamExtractor().extractSearchParamTokens(theEntity, theResource);
+		return mySearchParamExtractor.extractSearchParamTokens(theEntity, theResource);
 	}
 
 	protected Set<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IBaseResource theResource) {
-		return myIndexingSupport.getSearchParamExtractor().extractSearchParamUri(theEntity, theResource);
+		return mySearchParamExtractor.extractSearchParamUri(theEntity, theResource);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -303,7 +299,7 @@ public class ResourceIndexedSearchParams {
 							break;
 						case STRING:
 							param = new ResourceIndexedSearchParamString()
-								.setDaoConfig(myIndexingSupport.getConfig());
+								.setDaoConfig(myConfig);
 							break;
 						case TOKEN:
 							param = new ResourceIndexedSearchParamToken();
@@ -347,10 +343,8 @@ public class ResourceIndexedSearchParams {
 	}
 
 
-	private Set<ResourceIndexedCompositeStringUnique> extractCompositeStringUniques(ResourceTable theEntity, Collection<ResourceIndexedSearchParamString> theStringParams, Collection<ResourceIndexedSearchParamToken> theTokenParams, Collection<ResourceIndexedSearchParamNumber> theNumberParams, Collection<ResourceIndexedSearchParamQuantity> theQuantityParams, Collection<ResourceIndexedSearchParamDate> theDateParams, Collection<ResourceIndexedSearchParamUri> theUriParams, Collection<ResourceLink> theLinks) {
-		Set<ResourceIndexedCompositeStringUnique> compositeStringUniques;
-		compositeStringUniques = new HashSet<>();
-		List<JpaRuntimeSearchParam> uniqueSearchParams = myIndexingSupport.getSearchParamRegistry().getActiveUniqueSearchParams(theEntity.getResourceType());
+	private void extractCompositeStringUniques(ResourceTable theEntity, Collection<ResourceIndexedSearchParamString> theStringParams, Collection<ResourceIndexedSearchParamToken> theTokenParams, Collection<ResourceIndexedSearchParamNumber> theNumberParams, Collection<ResourceIndexedSearchParamQuantity> theQuantityParams, Collection<ResourceIndexedSearchParamDate> theDateParams, Collection<ResourceIndexedSearchParamUri> theUriParams, Collection<ResourceLink> theLinks) {
+		List<JpaRuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(theEntity.getResourceType());
 		for (JpaRuntimeSearchParam next : uniqueSearchParams) {
 
 			List<List<String>> partsChoices = new ArrayList<>();
@@ -396,7 +390,7 @@ public class ResourceIndexedSearchParams {
 					for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
 						if (nextParam.getParamName().equals(nextCompositeOf.getName())) {
 							IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
-							String value = nextParamAsClientParam.getValueAsQueryToken(myIndexingSupport.getContext());
+							String value = nextParamAsClientParam.getValueAsQueryToken(myContext);
 							if (isNotBlank(value)) {
 								value = UrlUtil.escapeUrlParam(value);
 								nextChoicesList.add(key + "=" + value);
@@ -425,8 +419,6 @@ public class ResourceIndexedSearchParams {
 				}
 			}
 		}
-
-		return compositeStringUniques;
 	}
 	
 	/**
@@ -515,18 +507,17 @@ public class ResourceIndexedSearchParams {
 	 * were found to have a value
 	 */
 	@SuppressWarnings("unchecked")
-	protected Set<String> extractResourceLinks(ResourceTable theEntity, IBaseResource theResource, Collection<ResourceLink> theLinks, Date theUpdateTime) {
-		HashSet<String> retVal = new HashSet<>();
+	protected void extractResourceLinks(ResourceTable theEntity, IBaseResource theResource, Collection<ResourceLink> theLinks, Date theUpdateTime) {
 		String resourceType = theEntity.getResourceType();
 
 		/*
 		 * For now we don't try to load any of the links in a bundle if it's the actual bundle we're storing..
 		 */
 		if (theResource instanceof IBaseBundle) {
-			return Collections.emptySet();
+			return;
 		}
 
-		Map<String, RuntimeSearchParam> searchParams = myIndexingSupport.getSearchParamRegistry().getActiveSearchParams(myIndexingSupport.toResourceName(theResource.getClass()));
+		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(toResourceName(theResource.getClass()));
 		for (RuntimeSearchParam nextSpDef : searchParams.values()) {
 
 			if (nextSpDef.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
@@ -543,7 +534,7 @@ public class ResourceIndexedSearchParams {
 				multiType = true;
 			}
 
-			List<PathAndRef> refs = myIndexingSupport.getSearchParamExtractor().extractResourceLinks(theResource, nextSpDef);
+			List<PathAndRef> refs = mySearchParamExtractor.extractResourceLinks(theResource, nextSpDef);
 			for (PathAndRef nextPathAndRef : refs) {
 				Object nextObject = nextPathAndRef.getRef();
 
@@ -585,7 +576,7 @@ public class ResourceIndexedSearchParams {
 					if (nextId == null || nextId.hasIdPart() == false) {
 						continue;
 					}
-				} else if (myIndexingSupport.getContext().getElementDefinition((Class<? extends IBase>) nextObject.getClass()).getName().equals("uri")) {
+				} else if (myContext.getElementDefinition((Class<? extends IBase>) nextObject.getClass()).getName().equals("uri")) {
 					continue;
 				} else if (resourceType.equals("Consent") && nextPathAndRef.getPath().equals("Consent.source")) {
 					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
@@ -601,9 +592,9 @@ public class ResourceIndexedSearchParams {
 					}
 				}
 
-				retVal.add(nextSpDef.getName());
+				populatedResourceLinkParameters.add(nextSpDef.getName());
 
-				if (myIndexingSupport.isLogicalReference(nextId)) {
+				if (LogicalReferenceHelper.isLogicalReference(myConfig, nextId)) {
 					ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
 					if (theLinks.add(resourceLink)) {
 						ourLog.debug("Indexing remote resource reference URL: {}", nextId);
@@ -618,15 +609,15 @@ public class ResourceIndexedSearchParams {
 				}
 				RuntimeResourceDefinition resourceDefinition;
 				try {
-					resourceDefinition = myIndexingSupport.getContext().getResourceDefinition(typeString);
+					resourceDefinition = myContext.getResourceDefinition(typeString);
 				} catch (DataFormatException e) {
 					throw new InvalidRequestException(
 						"Invalid resource reference found at path[" + nextPathsUnsplit + "] - Resource type is unknown or not supported on this server - " + nextId.getValue());
 				}
 
 				if (isNotBlank(baseUrl)) {
-					if (!myIndexingSupport.getConfig().getTreatBaseUrlsAsLocal().contains(baseUrl) && !myIndexingSupport.getConfig().isAllowExternalReferences()) {
-						String msg = myIndexingSupport.getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "externalReferenceNotAllowed", nextId.getValue());
+					if (!myConfig.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myConfig.isAllowExternalReferences()) {
+						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalReferenceNotAllowed", nextId.getValue());
 						throw new InvalidRequestException(msg);
 					} else {
 						ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
@@ -643,40 +634,40 @@ public class ResourceIndexedSearchParams {
 					throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource ID - " + nextId.getValue());
 				}
 
-				IFhirResourceDao<?> dao = myIndexingSupport.getDao(type);
+				IFhirResourceDao<?> dao = myDaoProvider.getDao(type);
 				if (dao == null) {
 					StringBuilder b = new StringBuilder();
 					b.append("This server (version ");
-					b.append(myIndexingSupport.getContext().getVersion().getVersion());
+					b.append(myContext.getVersion().getVersion());
 					b.append(") is not able to handle resources of type[");
 					b.append(nextId.getResourceType());
 					b.append("] - Valid resource types for this server: ");
-					b.append(myIndexingSupport.getResourceTypeToDao().keySet().toString());
+					b.append(myDaoProvider.getDaoNameList());
 
 					throw new InvalidRequestException(b.toString());
 				}
 				Long valueOf;
 				try {
-					valueOf = myIndexingSupport.translateForcedIdToPid(typeString, id);
+					valueOf = myIdHelperService.translateForcedIdToPid(typeString, id);
 				} catch (ResourceNotFoundException e) {
-					if (myIndexingSupport.getConfig().isEnforceReferentialIntegrityOnWrite() == false) {
+					if (myConfig.isEnforceReferentialIntegrityOnWrite() == false) {
 						continue;
 					}
-					RuntimeResourceDefinition missingResourceDef = myIndexingSupport.getContext().getResourceDefinition(type);
+					RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(type);
 					String resName = missingResourceDef.getName();
 
-					if (myIndexingSupport.getConfig().isAutoCreatePlaceholderReferenceTargets()) {
+					if (myConfig.isAutoCreatePlaceholderReferenceTargets()) {
 						IBaseResource newResource = missingResourceDef.newInstance();
 						newResource.setId(resName + "/" + id);
-						IFhirResourceDao<IBaseResource> placeholderResourceDao = (IFhirResourceDao<IBaseResource>) myIndexingSupport.getDao(newResource.getClass());
+						IFhirResourceDao<IBaseResource> placeholderResourceDao = (IFhirResourceDao<IBaseResource>) myDaoProvider.getDao(newResource.getClass());
 						ourLog.debug("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
 						valueOf = placeholderResourceDao.update(newResource).getEntity().getId();
 					} else {
 						throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
 					}
 				}
-				ResourceTable target = myIndexingSupport.getEntityManager().find(ResourceTable.class, valueOf);
-				RuntimeResourceDefinition targetResourceDef = myIndexingSupport.getContext().getResourceDefinition(type);
+				ResourceTable target = myEntityManager.find(ResourceTable.class, valueOf);
+				RuntimeResourceDefinition targetResourceDef = myContext.getResourceDefinition(type);
 				if (target == null) {
 					String resName = targetResourceDef.getName();
 					throw new InvalidRequestException("Resource " + resName + "/" + id + " not found, specified in path: " + nextPathsUnsplit);
@@ -703,8 +694,10 @@ public class ResourceIndexedSearchParams {
 		}
 
 		theEntity.setHasLinks(theLinks.size() > 0);
+	}
 
-		return retVal;
+	public String toResourceName(Class<? extends IBaseResource> theResourceType) {
+		return myContext.getResourceDefinition(theResourceType).getName();
 	}
 
 	private void setUpdatedTime(Collection<? extends BaseResourceIndexedSearchParam> theParams, Date theUpdateTime) {
@@ -712,22 +705,12 @@ public class ResourceIndexedSearchParams {
 			nextSearchParam.setUpdated(theUpdateTime);
 		}
 	}
-	
-	private String translatePidIdToForcedId(String theResourceType, Long theId) {
-		ForcedId forcedId = myIndexingSupport.getForcedIdDao().findByResourcePid(theId);
-		if (forcedId != null) {
-			return forcedId.getResourceType() + '/' + forcedId.getForcedId();
-		} else {
-			return theResourceType + '/' + theId.toString();
-		}
-	}
+
 
 	public void removeCommon(ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
-		EntityManager myEntityManager = myIndexingSupport.getEntityManager();
-		
 		calculateHashes(stringParams);
 		for (ResourceIndexedSearchParamString next : removeCommon(existingParams.stringParams, stringParams)) {
-			next.setDaoConfig(myIndexingSupport.getConfig());
+			next.setDaoConfig(myConfig);
 			myEntityManager .remove(next);
 			theEntity.getParamsString().remove(next);
 		}
@@ -805,17 +788,17 @@ public class ResourceIndexedSearchParams {
 		theEntity.setResourceLinks(links);
 
 		// Store composite string uniques
-		if (myIndexingSupport.getConfig().isUniqueIndexesEnabled()) {
+		if (myConfig.isUniqueIndexesEnabled()) {
 			for (ResourceIndexedCompositeStringUnique next : removeCommon(existingParams.compositeStringUniques, compositeStringUniques)) {
 				ourLog.debug("Removing unique index: {}", next);
 				myEntityManager.remove(next);
 				theEntity.getParamsCompositeStringUnique().remove(next);
 			}
 			for (ResourceIndexedCompositeStringUnique next : removeCommon(compositeStringUniques, existingParams.compositeStringUniques)) {
-				if (myIndexingSupport.getConfig().isUniqueIndexesCheckedBeforeSave()) {
-					ResourceIndexedCompositeStringUnique existing = myIndexingSupport.getResourceIndexedCompositeStringUniqueDao().findByQueryString(next.getIndexString());
+				if (myConfig.isUniqueIndexesCheckedBeforeSave()) {
+					ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 					if (existing != null) {
-						String msg = myIndexingSupport.getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 						throw new PreconditionFailedException(msg);
 					}
 				}
