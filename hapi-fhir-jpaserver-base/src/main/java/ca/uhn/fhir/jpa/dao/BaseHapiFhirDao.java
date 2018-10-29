@@ -1458,7 +1458,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			if (thePerformIndexing) {
 
 				newParams = beanFactory.getBean(ResourceIndexedSearchParams.class);
-				newParams.populateFromEntity(this, theUpdateTime, theEntity, theResource, existingParams);
+				newParams.populateFromResource(this, theUpdateTime, theEntity, theResource, existingParams);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 

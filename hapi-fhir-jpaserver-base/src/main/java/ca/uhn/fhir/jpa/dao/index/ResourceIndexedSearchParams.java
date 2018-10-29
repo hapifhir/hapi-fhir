@@ -133,7 +133,7 @@ public class ResourceIndexedSearchParams {
 		}
 	}
 
-	public void populateFromEntity(IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams existingParams) {
+	public void populateFromResource(IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams existingParams) {
 		stringParams.addAll(extractSearchParamStrings(theEntity, theResource));
 		numberParams.addAll(extractSearchParamNumber(theEntity, theResource));
 		quantityParams.addAll(extractSearchParamQuantity(theEntity, theResource));

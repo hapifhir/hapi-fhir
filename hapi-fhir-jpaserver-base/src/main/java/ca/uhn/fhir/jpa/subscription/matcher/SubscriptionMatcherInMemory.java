@@ -4,12 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -20,6 +15,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.subscription.DaoProvider;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -69,6 +66,9 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 	
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
+
+	@Autowired
+	private DaoProvider myDaoProvider;
 	
 	@Autowired
 	private AutowireCapableBeanFactory beanFactory;
@@ -83,7 +83,15 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 		ResourceTable entity = new ResourceTable();
 		populateResourceIntoEntity(null, resource, entity, false);
 		ResourceIndexedSearchParams searchParams = beanFactory.getBean(ResourceIndexedSearchParams.class, entity);
+		ResourceIndexedSearchParams existingParams = beanFactory.getBean(ResourceIndexedSearchParams.class, entity);
+		// FIXME use proper updatetime
+		Date updateTime = new Date();
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoProvider.getDao(resource.getClass());
+		searchParams.populateFromResource(dao, updateTime, entity, resource, existingParams);
 		// FIXME KHS implement
+		// We have our search parameters in criteria
+		// And we have our searchable fields broken out in searchParams
+		// Now just need to apply the criteria to the searchParams
 		return true;
 	}
 	
