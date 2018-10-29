@@ -83,19 +83,9 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Autowired
 	protected Environment myEnv;
 
-	@Bean(name = "myDaoRegistry")
-	public DaoRegistry daoRegistry() {
-		return new DaoRegistry();
-	}
-
 	@Override
 	public void configureTasks(@Nonnull ScheduledTaskRegistrar theTaskRegistrar) {
 		theTaskRegistrar.setTaskScheduler(taskScheduler());
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		return new DatabaseBackedPagingProvider();
 	}
 
 	/**
@@ -148,26 +138,6 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	public abstract FhirContext fhirContext();
 
-	@Bean
-	public ICacheWarmingSvc cacheWarmingSvc() {
-		return new CacheWarmingSvcImpl();
-	}
-
-	@Bean
-	public HibernateExceptionTranslator hibernateExceptionTranslator() {
-		return new HibernateExceptionTranslator();
-	}
-
-	@Bean
-	public HibernateJpaDialect hibernateJpaDialectInstance() {
-		return new HibernateJpaDialect();
-	}
-
-	@Bean
-	public IReindexController reindexController() {
-		return new ReindexController();
-	}
-
 	@Bean()
 	public ScheduledExecutorService scheduledExecutorService() {
 		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
@@ -180,21 +150,6 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Lazy
 	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
 		return new SubscriptionTriggeringProvider();
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE, name = "mySearchCoordinatorSvc")
-	public ISearchCoordinatorSvc searchCoordinatorSvc() {
-		return new SearchCoordinatorSvcImpl();
-	}
-
-	@Bean
-	public ISearchParamPresenceSvc searchParamPresenceSvc() {
-		return new SearchParamPresenceSvcImpl();
-	}
-	
-	@Bean(autowire = Autowire.BY_TYPE)
-	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
-		return new StaleSearchDeletingSvcImpl();
 	}
 
 	/**
@@ -237,13 +192,4 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	private static HibernateJpaDialect hibernateJpaDialect(HapiLocalizer theLocalizer) {
 		return new HapiFhirHibernateJpaDialect(theLocalizer);
 	}
-
-	/**
-	 * This lets the "@Value" fields reference properties from the properties file
-	 */
-	@Bean
-	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
-		return new PropertySourcesPlaceholderConfigurer();
-	}
-
 }
