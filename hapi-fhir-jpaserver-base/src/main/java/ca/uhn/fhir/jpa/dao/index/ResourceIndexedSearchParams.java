@@ -322,7 +322,7 @@ public class ResourceIndexedSearchParams {
 		}
 	}
 
-	public void setParams(ResourceTable theEntity) {
+	public void setParamsOn(ResourceTable theEntity) {
 		theEntity.setParamsString(stringParams);
 		theEntity.setParamsStringPopulated(stringParams.isEmpty() == false);
 		theEntity.setParamsToken(tokenParams);

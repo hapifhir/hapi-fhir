@@ -1469,7 +1469,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					theEntity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
 				}
 				
-				newParams.setParams(theEntity);
+				newParams.setParamsOn(theEntity);
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
 				populateFullTextFields(theResource, theEntity);
 			} else {

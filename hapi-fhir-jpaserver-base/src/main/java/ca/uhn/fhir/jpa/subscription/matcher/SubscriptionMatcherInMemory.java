@@ -81,13 +81,15 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 	public boolean match(String criteria, ResourceModifiedMessage msg) {
 		IBaseResource resource = msg.getNewPayload(myCtx);
 		ResourceTable entity = new ResourceTable();
+		// FIXME KHS do we even need to do this?
 		populateResourceIntoEntity(null, resource, entity, false);
+		ResourceIndexedSearchParams emptyParams = beanFactory.getBean(ResourceIndexedSearchParams.class);
 		ResourceIndexedSearchParams searchParams = beanFactory.getBean(ResourceIndexedSearchParams.class, entity);
-		ResourceIndexedSearchParams existingParams = beanFactory.getBean(ResourceIndexedSearchParams.class, entity);
-		// FIXME use proper updatetime
+		// FIXME KHS use proper updatetime
 		Date updateTime = new Date();
+		// FIXME KHS do we need a DAO?
 		IFhirResourceDao<? extends IBaseResource> dao = myDaoProvider.getDao(resource.getClass());
-		searchParams.populateFromResource(dao, updateTime, entity, resource, existingParams);
+		searchParams.populateFromResource(dao, updateTime, entity, resource, emptyParams);
 		// FIXME KHS implement
 		// We have our search parameters in criteria
 		// And we have our searchable fields broken out in searchParams

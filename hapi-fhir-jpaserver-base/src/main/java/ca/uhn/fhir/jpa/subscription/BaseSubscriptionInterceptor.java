@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -121,6 +122,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private AsyncTaskExecutor myAsyncTaskExecutor;
 	@Autowired
 	private SubscriptionMatcherDatabase mySubscriptionMatcherDatabase;
+	@Autowired
+	private SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
 	@Autowired
 	private DaoProvider myDaoProvider;
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
@@ -432,6 +435,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	protected void registerSubscriptionCheckingSubscriber() {
 		if (mySubscriptionCheckingSubscriber == null) {
 			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(myDaoProvider.getSubscriptionDao(), getChannelType(), this, mySubscriptionMatcherDatabase );
+			// FIXME KHS uncomment and continue working from here
+			//			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(myDaoProvider.getSubscriptionDao(), getChannelType(), this, mySubscriptionMatcherInMemory );
 		}
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}
