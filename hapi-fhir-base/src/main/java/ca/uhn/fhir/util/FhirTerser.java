@@ -1,8 +1,23 @@
 package ca.uhn.fhir.util;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
+import ca.uhn.fhir.model.base.composite.BaseContainedDt;
+import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.*;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 /*
  * #%L
@@ -13,9 +28,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,23 +38,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
-import ca.uhn.fhir.model.base.composite.BaseContainedDt;
-import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.parser.DataFormatException;
 
 public class FhirTerser {
 
@@ -60,7 +58,41 @@ public class FhirTerser {
 		newList.add(theChildDefinition.getElementName());
 		return newList;
 	}
-	
+
+	private ExtensionDt createEmptyExtensionDt(IBaseExtension theBaseExtension, String theUrl) {
+		return createEmptyExtensionDt(theBaseExtension, false, theUrl);
+	}
+
+	@SuppressWarnings("unchecked")
+	private ExtensionDt createEmptyExtensionDt(IBaseExtension theBaseExtension, boolean theIsModifier, String theUrl) {
+		ExtensionDt retVal = new ExtensionDt(theIsModifier, theUrl);
+		theBaseExtension.getExtension().add(retVal);
+		return retVal;
+	}
+
+	private ExtensionDt createEmptyExtensionDt(ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
+		return createEmptyExtensionDt(theSupportsUndeclaredExtensions, false, theUrl);
+	}
+
+	private ExtensionDt createEmptyExtensionDt(ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, boolean theIsModifier, String theUrl) {
+		return theSupportsUndeclaredExtensions.addUndeclaredExtension(theIsModifier, theUrl);
+	}
+
+	private IBaseExtension createEmptyExtension(IBaseHasExtensions theBaseHasExtensions, String theUrl) {
+		return (IBaseExtension) theBaseHasExtensions.addExtension().setUrl(theUrl);
+	}
+
+	private IBaseExtension createEmptyModifierExtension(IBaseHasModifierExtensions theBaseHasModifierExtensions, String theUrl) {
+		return (IBaseExtension) theBaseHasModifierExtensions.addModifierExtension().setUrl(theUrl);
+	}
+
+	private ExtensionDt createEmptyModifierExtensionDt(IBaseExtension theBaseExtension, String theUrl) {
+		return createEmptyExtensionDt(theBaseExtension, true, theUrl);
+	}
+
+	private ExtensionDt createEmptyModifierExtensionDt(ISupportsUndeclaredExtensions theSupportsUndeclaredExtensions, String theUrl) {
+		return createEmptyExtensionDt(theSupportsUndeclaredExtensions, true, theUrl);
+	}
 
 	/**
 	 * Clones all values from a source object into the equivalent fields in a target object
@@ -215,8 +247,12 @@ public class FhirTerser {
 		return retVal.get(0);
 	}
 
-	@SuppressWarnings("unchecked")
 	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
+		return getValues(theCurrentDef, theCurrentObj, theSubList, theWantedClass, false, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
 		String name = theSubList.get(0);
 		List<T> retVal = new ArrayList<>();
 
@@ -227,16 +263,67 @@ public class FhirTerser {
 				extensionUrl = extensionUrl.substring(0, endIndex);
 			}
 
-			List<ExtensionDt> extensions= Collections.emptyList();
-			if (theCurrentObj instanceof ISupportsUndeclaredExtensions) {
-				extensions = ((ISupportsUndeclaredExtensions) theCurrentObj).getUndeclaredExtensionsByUrl(extensionUrl);
-			} else if (theCurrentObj instanceof IBaseExtension) {
-				extensions = ((IBaseExtension)theCurrentObj).getExtension();
-			}
+			if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				// DTSU2
+				final String extensionDtUrlForLambda = extensionUrl;
+				List<ExtensionDt> extensionDts = Collections.emptyList();
+				if (theCurrentObj instanceof ISupportsUndeclaredExtensions) {
+					extensionDts = ((ISupportsUndeclaredExtensions) theCurrentObj).getUndeclaredExtensions()
+						.stream()
+						.filter(t -> t.getUrl().equals(extensionDtUrlForLambda))
+						.collect(Collectors.toList());
 
-			for (ExtensionDt next : extensions) {
-				if (theWantedClass.isAssignableFrom(next.getClass())) {
-					retVal.add((T) next);
+					if (theAddExtension
+						 && (!(theCurrentObj instanceof IBaseExtension) || (extensionDts.isEmpty() && theSubList.size() == 1))) {
+						extensionDts.add(createEmptyExtensionDt((ISupportsUndeclaredExtensions) theCurrentObj, extensionUrl));
+					}
+
+					if (extensionDts.isEmpty() && theCreate) {
+						extensionDts.add(createEmptyExtensionDt((ISupportsUndeclaredExtensions) theCurrentObj, extensionUrl));
+					}
+
+				} else if (theCurrentObj instanceof IBaseExtension) {
+					extensionDts = ((IBaseExtension) theCurrentObj).getExtension();
+
+					if (theAddExtension
+						 && (extensionDts.isEmpty() && theSubList.size() == 1)) {
+						extensionDts.add(createEmptyExtensionDt((IBaseExtension) theCurrentObj, extensionUrl));
+					}
+
+					if (extensionDts.isEmpty() && theCreate) {
+						extensionDts.add(createEmptyExtensionDt((IBaseExtension) theCurrentObj, extensionUrl));
+					}
+				}
+
+				for (ExtensionDt next : extensionDts) {
+					if (theWantedClass.isAssignableFrom(next.getClass())) {
+						retVal.add((T) next);
+					}
+				}
+			} else {
+				// DSTU3+
+				final String extensionUrlForLambda = extensionUrl;
+				List<IBaseExtension> extensions = Collections.emptyList();
+				if (theCurrentObj instanceof IBaseHasExtensions) {
+					extensions = ((IBaseHasExtensions) theCurrentObj).getExtension()
+						.stream()
+						.filter(t -> t.getUrl().equals(extensionUrlForLambda))
+						.collect(Collectors.toList());
+
+					if (theAddExtension
+						 && (!(theCurrentObj instanceof IBaseExtension) || (extensions.isEmpty() && theSubList.size() == 1))) {
+						extensions.add(createEmptyExtension((IBaseHasExtensions) theCurrentObj, extensionUrl));
+					}
+
+					if (extensions.isEmpty() && theCreate) {
+						extensions.add(createEmptyExtension((IBaseHasExtensions) theCurrentObj, extensionUrl));
+					}
+				}
+
+				for (IBaseExtension next : extensions) {
+					if (theWantedClass.isAssignableFrom(next.getClass())) {
+						retVal.add((T) next);
+					}
 				}
 			}
 
@@ -245,7 +332,92 @@ public class FhirTerser {
 				retVal = new ArrayList<>();
 				for (T nextElement : values) {
 					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
-					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass);
+					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate, theAddExtension);
+					retVal.addAll(foundValues);
+				}
+			}
+
+			return retVal;
+		}
+
+		if (name.startsWith("modifierExtension('")) {
+			String extensionUrl = name.substring("modifierExtension('".length());
+			int endIndex = extensionUrl.indexOf('\'');
+			if (endIndex != -1) {
+				extensionUrl = extensionUrl.substring(0, endIndex);
+			}
+
+			if (myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				// DSTU2
+				final String extensionDtUrlForLambda = extensionUrl;
+				List<ExtensionDt> extensionDts = Collections.emptyList();
+				if (theCurrentObj instanceof ISupportsUndeclaredExtensions) {
+					extensionDts = ((ISupportsUndeclaredExtensions) theCurrentObj).getUndeclaredModifierExtensions()
+						.stream()
+						.filter(t -> t.getUrl().equals(extensionDtUrlForLambda))
+						.collect(Collectors.toList());
+
+					if (theAddExtension
+						&& (!(theCurrentObj instanceof IBaseExtension) || (extensionDts.isEmpty() && theSubList.size() == 1))) {
+						extensionDts.add(createEmptyModifierExtensionDt((ISupportsUndeclaredExtensions) theCurrentObj, extensionUrl));
+					}
+
+					if (extensionDts.isEmpty() && theCreate) {
+						extensionDts.add(createEmptyModifierExtensionDt((ISupportsUndeclaredExtensions) theCurrentObj, extensionUrl));
+					}
+
+				} else if (theCurrentObj instanceof IBaseExtension) {
+					extensionDts = ((IBaseExtension) theCurrentObj).getExtension();
+
+					if (theAddExtension
+						&& (extensionDts.isEmpty() && theSubList.size() == 1)) {
+						extensionDts.add(createEmptyExtensionDt((IBaseExtension) theCurrentObj, extensionUrl));
+					}
+
+					if (extensionDts.isEmpty() && theCreate) {
+						extensionDts.add(createEmptyExtensionDt((IBaseExtension) theCurrentObj, extensionUrl));
+					}
+				}
+
+				for (ExtensionDt next : extensionDts) {
+					if (theWantedClass.isAssignableFrom(next.getClass())) {
+						retVal.add((T) next);
+					}
+				}
+			} else {
+				// DSTU3+
+				final String extensionUrlForLambda = extensionUrl;
+				List<IBaseExtension> extensions = Collections.emptyList();
+
+				if (theCurrentObj instanceof IBaseHasModifierExtensions) {
+					extensions = ((IBaseHasModifierExtensions) theCurrentObj).getModifierExtension()
+						.stream()
+						.filter(t -> t.getUrl().equals(extensionUrlForLambda))
+						.collect(Collectors.toList());
+
+					if (theAddExtension
+						 && (!(theCurrentObj instanceof IBaseExtension) || (extensions.isEmpty() && theSubList.size() == 1))) {
+						extensions.add(createEmptyModifierExtension((IBaseHasModifierExtensions) theCurrentObj, extensionUrl));
+					}
+
+					if (extensions.isEmpty() && theCreate) {
+						extensions.add(createEmptyModifierExtension((IBaseHasModifierExtensions) theCurrentObj, extensionUrl));
+					}
+				}
+
+				for (IBaseExtension next : extensions) {
+					if (theWantedClass.isAssignableFrom(next.getClass())) {
+						retVal.add((T) next);
+					}
+				}
+			}
+
+			if (theSubList.size() > 1) {
+				List<T> values = retVal;
+				retVal = new ArrayList<>();
+				for (T nextElement : values) {
+					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
+					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate, theAddExtension);
 					retVal.addAll(foundValues);
 				}
 			}
@@ -255,6 +427,14 @@ public class FhirTerser {
 
 		BaseRuntimeChildDefinition nextDef = theCurrentDef.getChildByNameOrThrowDataFormatException(name);
 		List<? extends IBase> values = nextDef.getAccessor().getValues(theCurrentObj);
+
+		if (values.isEmpty() && theCreate) {
+			IBase value = nextDef.getChildByName(name).newInstance();
+			nextDef.getMutator().addValue(theCurrentObj, value);
+			List<IBase> list = new ArrayList<>();
+			list.add(value);
+			values = list;
+		}
 
 		if (theSubList.size() == 1) {
 			if (nextDef instanceof RuntimeChildChoiceDefinition) {
@@ -286,24 +466,107 @@ public class FhirTerser {
 		} else {
 			for (IBase nextElement : values) {
 				BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
-				List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass);
+				List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate, theAddExtension);
 				retVal.addAll(foundValues);
 			}
 		}
 		return retVal;
 	}
 
+	/**
+	 * Returns values stored in an element identified by its path. The list of values is of
+	 * type {@link Object}.
+	 *
+	 * @param theResource The resource instance to be accessed. Must not be null.
+	 * @param thePath The path for the element to be accessed.
+	 * @return A list of values of type {@link Object}.
+	 */
 	public List<Object> getValues(IBaseResource theResource, String thePath) {
 		Class<Object> wantedClass = Object.class;
 
 		return getValues(theResource, thePath, wantedClass);
-
 	}
 
+	/**
+	 * Returns values stored in an element identified by its path. The list of values is of
+	 * type {@link Object}.
+	 *
+	 * @param theResource The resource instance to be accessed. Must not be null.
+	 * @param thePath The path for the element to be accessed.
+	 * @param theCreate When set to <code>true</code>, the terser will create a null-valued element where none exists.
+	 * @return A list of values of type {@link Object}.
+	 */
+	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
+		Class<Object> wantedClass = Object.class;
+
+		return getValues(theResource, thePath, wantedClass, theCreate);
+	}
+
+	/**
+	 * Returns values stored in an element identified by its path. The list of values is of
+	 * type {@link Object}.
+	 *
+	 * @param theResource The resource instance to be accessed. Must not be null.
+	 * @param thePath The path for the element to be accessed.
+	 * @param theCreate When set to <code>true</code>, the terser will create a null-valued element where none exists.
+	 * @param theAddExtension When set to <code>true</code>, the terser will add a null-valued extension where one or more such extensions already exist.
+	 * @return A list of values of type {@link Object}.
+	 */
+	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate, boolean theAddExtension) {
+		Class<Object> wantedClass = Object.class;
+
+		return getValues(theResource, thePath, wantedClass, theCreate, theAddExtension);
+	}
+
+	/**
+	 * Returns values stored in an element identified by its path. The list of values is of
+	 * type <code>theWantedClass</code>.
+	 *
+	 * @param theResource The resource instance to be accessed. Must not be null.
+	 * @param thePath The path for the element to be accessed.
+	 * @param theWantedClass The desired class to be returned in a list.
+	 * @param <T> Type declared by <code>theWantedClass</code>
+	 * @return A list of values of type <code>theWantedClass</code>.
+	 */
 	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
 		return getValues(def, theResource, parts, theWantedClass);
+	}
+
+	/**
+	 * Returns values stored in an element identified by its path. The list of values is of
+	 * type <code>theWantedClass</code>.
+	 *
+	 * @param theResource The resource instance to be accessed. Must not be null.
+	 * @param thePath The path for the element to be accessed.
+	 * @param theWantedClass The desired class to be returned in a list.
+	 * @param theCreate When set to <code>true</code>, the terser will create a null-valued element where none exists.
+	 * @param <T> Type declared by <code>theWantedClass</code>
+	 * @return A list of values of type <code>theWantedClass</code>.
+	 */
+	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		List<String> parts = parsePath(def, thePath);
+		return getValues(def, theResource, parts, theWantedClass, theCreate, false);
+	}
+
+	/**
+	 * Returns values stored in an element identified by its path. The list of values is of
+	 * type <code>theWantedClass</code>.
+	 *
+	 * @param theResource The resource instance to be accessed. Must not be null.
+	 * @param thePath The path for the element to be accessed.
+	 * @param theWantedClass The desired class to be returned in a list.
+	 * @param theCreate When set to <code>true</code>, the terser will create a null-valued element where none exists.
+	 * @param theAddExtension When set to <code>true</code>, the terser will add a null-valued extension where one or more such extensions already exist.
+	 * @param <T> Type declared by <code>theWantedClass</code>
+	 * @return A list of values of type <code>theWantedClass</code>.
+	 */
+	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
+		List<String> parts = parsePath(def, thePath);
+		return getValues(def, theResource, parts, theWantedClass, theCreate, theAddExtension);
 	}
 
 	private List<String> parsePath(BaseRuntimeElementCompositeDefinition<?> theElementDef, String thePath) {
