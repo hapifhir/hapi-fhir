@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	@Autowired
