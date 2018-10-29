@@ -39,6 +39,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import javax.annotation.Nonnull;
+
 public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	public UpdateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
@@ -98,6 +100,7 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return null;
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.UPDATE;

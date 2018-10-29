@@ -107,7 +107,7 @@ public class TestUtil {
 	 * environment
 	 */
 	public static void randomizeLocale() {
-		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
+ 		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
 		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
 		ourLog.info("Tests are running in locale: " + Locale.getDefault().getDisplayName());
 		if (Math.random() < 0.5) {

@@ -44,6 +44,8 @@ import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.DateUtils;
 
+import javax.annotation.Nonnull;
+
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
 
@@ -91,6 +93,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return isVread() ? RestOperationTypeEnum.VREAD : RestOperationTypeEnum.READ;

@@ -289,7 +289,7 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	protected List<IIdType> toUnqualifiedVersionlessIds(List<IBaseResource> theFound) {
+	protected List<IIdType> toUnqualifiedVersionlessIds(List<? extends IBaseResource> theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (IBaseResource next : theFound) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());

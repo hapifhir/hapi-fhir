@@ -1613,16 +1613,18 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		obs01.setSubject(new Reference(patientId01));
 		IIdType obsId01 = myObservationDao.create(obs01, mySrd).getId().toUnqualifiedVersionless();
 
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
 		Date between = new Date();
-		Thread.sleep(10);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
 
 		Observation obs02 = new Observation();
 		obs02.setEffective(new DateTimeType(new Date()));
 		obs02.setSubject(new Reference(locId01));
 		IIdType obsId02 = myObservationDao.create(obs02, mySrd).getId().toUnqualifiedVersionless();
 
-		Thread.sleep(10);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
 		Date after = new Date();
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
 
 		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]", new Object[] { patientId01, locId01, obsId01, obsId02 });
 

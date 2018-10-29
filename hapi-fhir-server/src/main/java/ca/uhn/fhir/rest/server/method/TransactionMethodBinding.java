@@ -44,6 +44,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.method.TransactionParameter.ParamStyle;
 
+import javax.annotation.Nonnull;
+
 public class TransactionMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private int myTransactionParamIndex;
@@ -73,6 +75,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.TRANSACTION;

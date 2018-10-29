@@ -250,6 +250,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
+		ourLog.info("Have observations: {}", toUnqualifiedVersionlessIds(ourUpdatedObservations));
+
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
 		Assert.assertFalse(observation1.getId().isEmpty());
 		Assert.assertFalse(observation2.getId().isEmpty());
