@@ -21,13 +21,13 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.service.IdHelperService;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
@@ -69,10 +69,15 @@ import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPre
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
@@ -87,6 +92,8 @@ import static org.apache.commons.lang3.StringUtils.*;
  * searches for resources
  */
 @SuppressWarnings("JpaQlInspection")
+@Component
+@Scope("prototype")
 public class SearchBuilder implements ISearchBuilder {
 
 	private static final List<Long> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
@@ -97,26 +104,37 @@ public class SearchBuilder implements ISearchBuilder {
 	private static String ourLastHandlerThreadForUnitTest;
 	private static boolean ourTrackHandlersForUnitTest;
 	private final boolean myDontUseHashesForSearch;
+
+	@Autowired
 	protected IResourceTagDao myResourceTagDao;
+	@Autowired
 	private IResourceSearchViewDao myResourceSearchViewDao;
+	@Autowired
+	private FhirContext myContext;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
+	@Autowired
+	private IdHelperService myIdHelperService;
+	@Autowired(required = false)
+	private IFulltextSearchSvc myFulltextSearchSvc;
+	@Autowired
+	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private IHapiTerminologySvc myTerminologySvc;
+
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
-	private FhirContext myContext;
-	private EntityManager myEntityManager;
-	private IForcedIdDao myForcedIdDao;
-	private IFulltextSearchSvc myFulltextSearchSvc;
 	private Map<JoinKey, Join<?, ?>> myIndexJoins = Maps.newHashMap();
 	private SearchParameterMap myParams;
 	private ArrayList<Predicate> myPredicates;
-	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	private String myResourceName;
 	private AbstractQuery<Long> myResourceTableQuery;
 	private Root<ResourceTable> myResourceTableRoot;
 	private Class<? extends IBaseResource> myResourceType;
-	private ISearchParamRegistry mySearchParamRegistry;
 	private String mySearchUuid;
-	private IHapiTerminologySvc myTerminologySvc;
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<Long> myPidSet;
@@ -124,22 +142,9 @@ public class SearchBuilder implements ISearchBuilder {
 	/**
 	 * Constructor
 	 */
-	SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager,
-					  IFulltextSearchSvc theFulltextSearchSvc, BaseHapiFhirDao<?> theDao,
-					  IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao,
-					  IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry,
-					  IResourceTagDao theResourceTagDao, IResourceSearchViewDao theResourceViewDao) {
-		myContext = theFhirContext;
-		myEntityManager = theEntityManager;
-		myFulltextSearchSvc = theFulltextSearchSvc;
+	SearchBuilder(BaseHapiFhirDao<?> theDao) {
 		myCallingDao = theDao;
 		myDontUseHashesForSearch = theDao.getConfig().getDisableHashBasedSearches();
-		myResourceIndexedSearchParamUriDao = theResourceIndexedSearchParamUriDao;
-		myForcedIdDao = theForcedIdDao;
-		myTerminologySvc = theTerminologySvc;
-		mySearchParamRegistry = theSearchParamRegistry;
-		myResourceTagDao = theResourceTagDao;
-		myResourceSearchViewDao = theResourceViewDao;
 	}
 
 	@Override
@@ -385,7 +390,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 					List<Long> targetPid;
 					try {
-						targetPid = myCallingDao.translateForcedIdToPids(dt);
+						targetPid = myIdHelperService.translateForcedIdToPids(dt);
 					} catch (ResourceNotFoundException e) {
 						// Use a PID that will never exist
 						targetPid = Collections.singletonList(-1L);
@@ -1600,7 +1605,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParm = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myResourceName, idParm.getValue(), myForcedIdDao);
+				Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, idParm.getValue());
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}

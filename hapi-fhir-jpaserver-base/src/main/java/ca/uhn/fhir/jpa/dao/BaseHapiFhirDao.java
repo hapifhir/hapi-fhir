@@ -21,9 +21,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -37,6 +35,9 @@ import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
+import ca.uhn.fhir.jpa.service.IdHelperService;
+import ca.uhn.fhir.jpa.service.MatchUrlService;
+import ca.uhn.fhir.jpa.subscription.DaoProvider;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -55,6 +56,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -81,7 +83,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
@@ -96,10 +97,8 @@ import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.dao.index.IndexingSupport;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.entity.BaseTag;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.IBaseResourceEntity;
@@ -211,7 +210,7 @@ import ca.uhn.fhir.util.XmlUtil;
 
 @SuppressWarnings("WeakerAccess")
 @Repository
-public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, ApplicationContextAware, IndexingSupport {
+public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, ApplicationContextAware {
 
 	public static final long INDEX_STATUS_INDEXED = 1L;
 	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
@@ -260,7 +259,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected IForcedIdDao myForcedIdDao;
+	protected IdHelperService myIdHelperService;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired()
@@ -310,8 +309,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	//private ISearchResultDao mySearchResultDao;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	@Autowired
+	private BeanFactory beanFactory;
+	@Autowired
+	private DaoProvider myDaoProvider;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+
 	private ApplicationContext myApplicationContext;
-	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
 
 	public static void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
@@ -321,7 +326,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	protected void createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId) {
 		if (theId.isEmpty() == false && theId.hasIdPart()) {
-			if (isValidPid(theId)) {
+			if (IdHelperService.isValidPid(theId)) {
 				return;
 			}
 
@@ -525,7 +530,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			ForcedId forcedId = resource.getForcedId();
 			resource.setForcedId(null);
 			myResourceTableDao.saveAndFlush(resource);
-			myForcedIdDao.delete(forcedId);
+			myIdHelperService.delete(forcedId);
 		}
 
 		myResourceTableDao.delete(resource);
@@ -643,7 +648,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			if (theResourceName != null) {
 				Predicate typePredicate = builder.equal(from.get("myResourceType"), theResourceName);
 				if (theResourceId != null) {
-					cq.where(typePredicate, builder.equal(from.get("myResourceId"), translateForcedIdToPid(theResourceName, theResourceId.getIdPart())));
+					cq.where(typePredicate, builder.equal(from.get("myResourceId"), myIdHelperService.translateForcedIdToPid(theResourceName, theResourceId.getIdPart())));
 				} else {
 					cq.where(typePredicate);
 				}
@@ -707,49 +712,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@SuppressWarnings("unchecked")
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
-		Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> resourceTypeToDao = getDaos();
-		IFhirResourceDao<R> dao = (IFhirResourceDao<R>) resourceTypeToDao.get(theType);
-		return dao;
+		return myDaoProvider.getDao(theType);
 	}
 
 	protected IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
-		IFhirResourceDao<? extends IBaseResource> retVal = getDao(theClass);
-		if (retVal == null) {
-			List<String> supportedResourceTypes = getDaos()
-				.keySet()
-				.stream()
-				.map(t -> myContext.getResourceDefinition(t).getName())
-				.sorted()
-				.collect(Collectors.toList());
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName() + " - Can handle: " + supportedResourceTypes);
-		}
-		return retVal;
+		return myDaoProvider.getDaoOrThrowException(theClass);
 	}
 
-	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> getDaos() {
-		if (myResourceTypeToDao == null) {
-			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> resourceTypeToDao = new HashMap<>();
-
-			Map<String, IFhirResourceDao> daos = myApplicationContext.getBeansOfType(IFhirResourceDao.class, false, false);
-
-			String[] beanNames = myApplicationContext.getBeanNamesForType(IFhirResourceDao.class);
-
-			for (IFhirResourceDao<?> next : daos.values()) {
-				resourceTypeToDao.put(next.getResourceType(), next);
-			}
-
-			if (this instanceof IFhirResourceDao<?>) {
-				IFhirResourceDao<?> thiz = (IFhirResourceDao<?>) this;
-				resourceTypeToDao.put(thiz.getResourceType(), thiz);
-			}
-
-			myResourceTypeToDao = resourceTypeToDao;
-		}
-
-		return Collections.unmodifiableMap(myResourceTypeToDao);
-	}
-
-	@Override
 	public IResourceIndexedCompositeStringUniqueDao getResourceIndexedCompositeStringUniqueDao() {
 		return myResourceIndexedCompositeStringUniqueDao;
 	}
@@ -901,23 +870,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	public boolean isLogicalReference(IIdType theId) {
-		Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
-		if (treatReferencesAsLogical != null) {
-			for (String nextLogicalRef : treatReferencesAsLogical) {
-				nextLogicalRef = trim(nextLogicalRef);
-				if (nextLogicalRef.charAt(nextLogicalRef.length() - 1) == '*') {
-					if (theId.getValue().startsWith(nextLogicalRef.substring(0, nextLogicalRef.length() - 1))) {
-						return true;
-					}
-				} else {
-					if (theId.getValue().equals(nextLogicalRef)) {
-						return true;
-					}
-				}
-			}
-
-		}
-		return false;
+		return LogicalReferenceHelper.isLogicalReference(myConfig, theId);
 	}
 
 	public static void markRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
@@ -928,10 +881,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@Override
 	public SearchBuilder newSearchBuilder() {
-		SearchBuilder builder = new SearchBuilder(
-			getContext(), myEntityManager, myFulltextSearchSvc, this, myResourceIndexedSearchParamUriDao,
-			myForcedIdDao, myTerminologySvc, mySerarchParamRegistry, myResourceTagDao, myResourceViewDao);
-		return builder;
+		return beanFactory.getBean(SearchBuilder.class, this);
 	}
 
 	public void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {
@@ -1256,21 +1206,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@Override
 	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
-		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theResourceType);
-
-		SearchParameterMap paramMap = translateMatchUrl(this, myContext, theMatchUrl, resourceDef);
-		paramMap.setLoadSynchronous(true);
-
-		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
-			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
-		}
-
-		IFhirResourceDao<R> dao = getDao(theResourceType);
-		if (dao == null) {
-			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
-		}
-
-		return dao.searchForIds(paramMap);
+		return myMatchUrlService.processMatchUrl(this, theMatchUrl, theResourceType);
 	}
 
 	@CoverageIgnore
@@ -1339,11 +1275,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 
 		return false;
-	}
-
-	@PostConstruct
-	public void startClearCaches() {
-		myResourceTypeToDao = null;
 	}
 
 	private ExpungeOutcome toExpungeOutcome(ExpungeOptions theExpungeOptions, AtomicInteger theRemainingCount) {
@@ -1459,7 +1390,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return retVal;
 	}
 
-	@Override
 	public String toResourceName(Class<? extends IBaseResource> theResourceType) {
 		return myContext.getResourceDefinition(theResourceType).getName();
 	}
@@ -1472,16 +1402,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		Validate.notNull(theVersion);
 		return new SliceImpl<>(Collections.singletonList(theVersion.getId()));
 	}
-
-	@Override
-	public Long translateForcedIdToPid(String theResourceName, String theResourceId) {
-		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
-	}
-
-	protected List<Long> translateForcedIdToPids(IIdType theId) {
-		return translateForcedIdToPids(theId, myForcedIdDao);
-	}
-
 
 	@SuppressWarnings("unchecked")
 	protected ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, ResourceTable
@@ -1514,14 +1434,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			theEntity.setPublished(theUpdateTime);
 		}
 
-		ResourceIndexedSearchParams existingParams = new ResourceIndexedSearchParams(this, theEntity);
+		ResourceIndexedSearchParams existingParams = beanFactory.getBean(ResourceIndexedSearchParams.class, theEntity);
 
 		ResourceIndexedSearchParams newParams = null;
 
 		EncodedResource changed;
 		if (theDeletedTimestampOrNull != null) {
 			
-			newParams = new ResourceIndexedSearchParams(this);
+			newParams = beanFactory.getBean(ResourceIndexedSearchParams.class);
 
 			theEntity.setDeleted(theDeletedTimestampOrNull);
 			theEntity.setUpdated(theDeletedTimestampOrNull);
@@ -1537,7 +1457,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 			if (thePerformIndexing) {
 
-				newParams = new ResourceIndexedSearchParams(this, theUpdateTime, theEntity, theResource, existingParams);
+				newParams = beanFactory.getBean(ResourceIndexedSearchParams.class);
+				newParams.populateFromEntity(this, theUpdateTime, theEntity, theResource, existingParams);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 
@@ -1880,19 +1801,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return bytes;
 	}
 
-	protected static boolean isValidPid(IIdType theId) {
-		if (theId == null || theId.getIdPart() == null) {
-			return false;
-		}
-		String idPart = theId.getIdPart();
-		for (int i = 0; i < idPart.length(); i++) {
-			char nextChar = idPart.charAt(i);
-			if (nextChar < '0' || nextChar > '9') {
-				return false;
-			}
-		}
-		return true;
-	}
 
 	@CoverageIgnore
 	protected static IQueryParameterAnd<?> newInstanceAnd(String chain) {
@@ -2000,36 +1908,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return retVal;
 	}
 
-	protected static Long translateForcedIdToPid(String theResourceName, String theResourceId, IForcedIdDao
-		theForcedIdDao) {
-		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
-	}
-
-	static List<Long> translateForcedIdToPids(IIdType theId, IForcedIdDao theForcedIdDao) {
-		Validate.isTrue(theId.hasIdPart());
-
-		if (isValidPid(theId)) {
-			return Collections.singletonList(theId.getIdPartAsLong());
-		} else {
-			List<ForcedId> forcedId;
-			if (theId.hasResourceType()) {
-				forcedId = theForcedIdDao.findByTypeAndForcedId(theId.getResourceType(), theId.getIdPart());
-			} else {
-				forcedId = theForcedIdDao.findByForcedId(theId.getIdPart());
-			}
-
-			if (forcedId.isEmpty() == false) {
-				List<Long> retVal = new ArrayList<>(forcedId.size());
-				for (ForcedId next : forcedId) {
-					retVal.add(next.getResourcePid());
-				}
-				return retVal;
-			} else {
-				throw new ResourceNotFoundException(theId);
-			}
-		}
-	}
-
 	public static SearchParameterMap translateMatchUrl(IDao theCallingDao, FhirContext theContext, String
 		theMatchUrl, RuntimeResourceDefinition resourceDef) {
 		SearchParameterMap paramMap = new SearchParameterMap();
@@ -2091,11 +1969,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				continue;
 			}
 
-			if (RESOURCE_META_PARAMS.containsKey(nextParamName)) {
+			if (BaseHapiFhirDao.RESOURCE_META_PARAMS.containsKey(nextParamName)) {
 				if (isNotBlank(paramList.get(0).getQualifier()) && paramList.get(0).getQualifier().startsWith(".")) {
 					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
 				}
-				IQueryParameterAnd<?> type = newInstanceAnd(nextParamName);
+				IQueryParameterAnd<?> type = BaseHapiFhirDao.newInstanceAnd(nextParamName);
 				type.setValuesAsQueryTokens(theContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
 			} else if (nextParamName.startsWith("_")) {
@@ -2139,30 +2017,5 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			throw new ResourceNotFoundException(
 				"Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
 		}
-	}
-
-	@Override
-	public ISearchParamExtractor getSearchParamExtractor() {
-		return mySearchParamExtractor;
-	}
-
-	@Override
-	public ISearchParamRegistry getSearchParamRegistry() {
-		return mySearchParamRegistry;
-	}
-
-	@Override
-	public EntityManager getEntityManager() {
-		return myEntityManager;
-	}
-
-	@Override
-	public Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> getResourceTypeToDao() {
-		return myResourceTypeToDao;
-	}
-
-	@Override
-	public IForcedIdDao getForcedIdDao() {
-		return myForcedIdDao;
 	}
 }

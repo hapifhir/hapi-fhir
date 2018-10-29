@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
@@ -57,6 +58,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 @Service
+@Lazy
 public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 
 	@Autowired
@@ -80,9 +82,7 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 		IBaseResource resource = msg.getNewPayload(myCtx);
 		ResourceTable entity = new ResourceTable();
 		populateResourceIntoEntity(null, resource, entity, false);
-		// FIXME need IndexingSupport
-		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams(null, entity);
-		beanFactory.autowireBean(searchParams);
+		ResourceIndexedSearchParams searchParams = beanFactory.getBean(ResourceIndexedSearchParams.class, entity);
 		// FIXME KHS implement
 		return true;
 	}
