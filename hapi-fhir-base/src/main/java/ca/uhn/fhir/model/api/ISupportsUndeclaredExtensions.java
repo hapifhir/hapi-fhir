@@ -20,9 +20,9 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-import java.util.List;
-
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+
+import java.util.List;
 
 public interface ISupportsUndeclaredExtensions extends IElement {
 	
@@ -42,7 +42,8 @@ public interface ISupportsUndeclaredExtensions extends IElement {
 	/**
 	 * Returns an <b>immutable</b> list containing all extensions (modifier and non-modifier).
 	 * 
-	 * @see #getUndeclaredExtensions() To return a mutable list which may be used to remove extensions
+	 * @see #getUndeclaredExtensions() To return a mutable list which may be used to remove undeclared non-modifier extensions
+	 * @see #getUndeclaredModifierExtensions() To return a mutable list which may be used to remove undeclared modifier extensions
 	 */
 	List<ExtensionDt> getAllUndeclaredExtensions();
 
