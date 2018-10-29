@@ -69,6 +69,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		setValue(theValue);
 	}
 
+	@Override
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashIdentity == null) {

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -55,6 +55,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -94,6 +95,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
 	private static String ourLastHandlerThreadForUnitTest;
 	private static boolean ourTrackHandlersForUnitTest;
+	private final boolean myDontUseHashesForSearch;
 	protected IResourceTagDao myResourceTagDao;
 	private IResourceSearchViewDao myResourceSearchViewDao;
 	private List<Long> myAlsoIncludePids;
@@ -130,6 +132,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myEntityManager = theEntityManager;
 		myFulltextSearchSvc = theFulltextSearchSvc;
 		myCallingDao = theDao;
+		myDontUseHashesForSearch = theDao.getConfig().getDisableHashBasedSearches();
 		myResourceIndexedSearchParamUriDao = theResourceIndexedSearchParamUriDao;
 		myForcedIdDao = theForcedIdDao;
 		myTerminologySvc = theTerminologySvc;
@@ -304,6 +307,15 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing) {
+//		if (myDontUseHashesForSearch) {
+//			Join<ResourceTable, SearchParamPresent> paramPresentJoin = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
+//			Join<Object, Object> paramJoin = paramPresentJoin.join("mySearchParam", JoinType.LEFT);
+//
+//			myPredicates.add(myBuilder.equal(paramJoin.get("myResourceName"), theResourceName));
+//			myPredicates.add(myBuilder.equal(paramJoin.get("myParamName"), theParamName));
+//			myPredicates.add(myBuilder.equal(paramPresentJoin.get("myPresent"), !theMissing));
+//		}
+
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
 
 		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
@@ -841,10 +853,18 @@ public class SearchBuilder implements ISearchBuilder {
 
 				} else {
 
-					long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(theResourceName, theParamName, value);
-					Predicate hashPredicate = myBuilder.equal(join.get("myHashUri"), hashUri);
-					codePredicates.add(hashPredicate);
+					if (myDontUseHashesForSearch) {
 
+						Predicate predicate = myBuilder.equal(join.get("myUri").as(String.class), value);
+						codePredicates.add(predicate);
+
+					} else {
+
+						long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(theResourceName, theParamName, value);
+						Predicate hashPredicate = myBuilder.equal(join.get("myHashUri"), hashUri);
+						codePredicates.add(hashPredicate);
+
+					}
 				}
 
 			} else {
@@ -868,6 +888,13 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {
+		if (myDontUseHashesForSearch) {
+			Predicate resourceTypePredicate = myBuilder.equal(theFrom.get("myResourceType"), theResourceName);
+			Predicate paramNamePredicate = myBuilder.equal(theFrom.get("myParamName"), theParamName);
+			Predicate outerPredicate = myBuilder.and(resourceTypePredicate, paramNamePredicate, thePredicate);
+			return outerPredicate;
+		}
+
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName);
 		Predicate hashIdentityPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hashIdentity);
 		return myBuilder.and(hashIdentityPredicate, thePredicate);
@@ -1079,6 +1106,37 @@ public class SearchBuilder implements ISearchBuilder {
 			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
 		}
 
+		if (myDontUseHashesForSearch) {
+			Predicate system = null;
+			if (!isBlank(systemValue)) {
+				system = theBuilder.equal(theFrom.get("mySystem"), systemValue);
+			}
+
+			Predicate code = null;
+			if (!isBlank(unitsValue)) {
+				code = theBuilder.equal(theFrom.get("myUnits"), unitsValue);
+			}
+
+			cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
+			final Expression<BigDecimal> path = theFrom.get("myValue");
+			String invalidMessageName = "invalidQuantityPrefix";
+
+			Predicate num = createPredicateNumeric(theResourceName, null, theFrom, theBuilder, theParam, cmpValue, valueValue, path, invalidMessageName);
+
+			Predicate singleCode;
+			if (system == null && code == null) {
+				singleCode = num;
+			} else if (system == null) {
+				singleCode = theBuilder.and(code, num);
+			} else if (code == null) {
+				singleCode = theBuilder.and(system, num);
+			} else {
+				singleCode = theBuilder.and(system, code, num);
+			}
+
+			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+		}
+
 		Predicate hashPredicate;
 		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
 			long hash = ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(theResourceName, theParamName, systemValue, unitsValue);
@@ -1128,6 +1186,31 @@ public class SearchBuilder implements ISearchBuilder {
 		if (rawSearchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
 			throw new InvalidRequestException("Parameter[" + theParamName + "] has length (" + rawSearchTerm.length() + ") that is longer than maximum allowed ("
 				+ ResourceIndexedSearchParamString.MAX_LENGTH + "): " + rawSearchTerm);
+		}
+
+		if (myDontUseHashesForSearch) {
+			String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
+			if (myCallingDao.getConfig().isAllowContainsSearches()) {
+				if (theParameter instanceof StringParam) {
+					if (((StringParam) theParameter).isContains()) {
+						likeExpression = createLeftAndRightMatchLikeExpression(likeExpression);
+					} else {
+						likeExpression = createLeftMatchLikeExpression(likeExpression);
+					}
+				} else {
+					likeExpression = createLeftMatchLikeExpression(likeExpression);
+				}
+			} else {
+				likeExpression = createLeftMatchLikeExpression(likeExpression);
+			}
+
+			Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+			if (theParameter instanceof StringParam && ((StringParam) theParameter).isExact()) {
+				Predicate exactCode = theBuilder.equal(theFrom.get("myValueExact"), rawSearchTerm);
+				singleCode = theBuilder.and(singleCode, exactCode);
+			}
+
+			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
 		}
 
 		boolean exactMatch = theParameter instanceof StringParam && ((StringParam) theParameter).isExact();
@@ -1233,6 +1316,92 @@ public class SearchBuilder implements ISearchBuilder {
 			// This will never match anything
 			return new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, false);
 		}
+
+		if (myDontUseHashesForSearch) {
+			ArrayList<Predicate> singleCodePredicates = new ArrayList<Predicate>();
+			if (codes != null) {
+
+				List<Predicate> orPredicates = new ArrayList<Predicate>();
+				Map<String, List<VersionIndependentConcept>> map = new HashMap<String, List<VersionIndependentConcept>>();
+				for (VersionIndependentConcept nextCode : codes) {
+					List<VersionIndependentConcept> systemCodes = map.get(nextCode.getSystem());
+					if (null == systemCodes) {
+						systemCodes = new ArrayList<>();
+						map.put(nextCode.getSystem(), systemCodes);
+					}
+					systemCodes.add(nextCode);
+				}
+				// Use "in" in case of large numbers of codes due to param modifiers
+				final Path<String> systemExpression = theFrom.get("mySystem");
+				final Path<String> valueExpression = theFrom.get("myValue");
+				for (Map.Entry<String, List<VersionIndependentConcept>> entry : map.entrySet()) {
+					CriteriaBuilder.In<String> codePredicate = theBuilder.in(valueExpression);
+					boolean haveAtLeastOneCode = false;
+					for (VersionIndependentConcept nextCode : entry.getValue()) {
+						if (isNotBlank(nextCode.getCode())) {
+							codePredicate.value(nextCode.getCode());
+							haveAtLeastOneCode = true;
+						}
+					}
+
+					if (entry.getKey() != null) {
+						Predicate systemPredicate = theBuilder.equal(systemExpression, entry.getKey());
+						if (haveAtLeastOneCode) {
+							orPredicates.add(theBuilder.and(systemPredicate, codePredicate));
+						} else {
+							orPredicates.add(systemPredicate);
+						}
+					} else {
+						orPredicates.add(codePredicate);
+					}
+				}
+
+				Predicate or = theBuilder.or(orPredicates.toArray(new Predicate[0]));
+				if (modifier == TokenParamModifier.NOT) {
+					or = theBuilder.not(or);
+				}
+				singleCodePredicates.add(or);
+
+			} else {
+
+				/*
+				 * Ok, this is a normal query
+				 */
+
+				if (StringUtils.isNotBlank(system)) {
+					if (modifier != null && modifier == TokenParamModifier.NOT) {
+						singleCodePredicates.add(theBuilder.notEqual(theFrom.get("mySystem"), system));
+					} else {
+						singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
+					}
+				} else if (system == null) {
+					// don't check the system
+				} else {
+					// If the system is "", we only match on null systems
+					singleCodePredicates.add(theBuilder.isNull(theFrom.get("mySystem")));
+				}
+
+				if (StringUtils.isNotBlank(code)) {
+					if (modifier != null && modifier == TokenParamModifier.NOT) {
+						singleCodePredicates.add(theBuilder.notEqual(theFrom.get("myValue"), code));
+					} else {
+						singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
+					}
+				} else {
+					/*
+					 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to
+					 * match all tokens with the given value.
+					 *
+					 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was the result :)
+					 */
+					// singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
+				}
+			}
+
+			Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
+			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+		}
+
 
 		/*
 		 * Note: A null system value means "match any system", but
@@ -1607,9 +1776,14 @@ public class SearchBuilder implements ISearchBuilder {
 			if (param.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 				thePredicates.add(join.get("mySourcePath").as(String.class).in(param.getPathsSplit()));
 			} else {
-				Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myResourceName, theSort.getParamName());
-				Predicate joinParam1 = theBuilder.equal(join.get("myHashIdentity"), hashIdentity);
-				thePredicates.add(joinParam1);
+				if (myDontUseHashesForSearch) {
+					Predicate joinParam1 = theBuilder.equal(join.get("myParamName"), theSort.getParamName());
+					thePredicates.add(joinParam1);
+				} else {
+					Long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(myResourceName, theSort.getParamName());
+					Predicate joinParam1 = theBuilder.equal(join.get("myHashIdentity"), hashIdentity);
+					thePredicates.add(joinParam1);
+				}
 			}
 		} else {
 			ourLog.debug("Reusing join for {}", theSort.getParamName());
@@ -1668,7 +1842,7 @@ public class SearchBuilder implements ISearchBuilder {
 		//-- preload all tags with tag definition if any
 		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
 
-		Long resourceId = null;
+		Long resourceId;
 		for (ResourceSearchView next : resourceSearchViewList) {
 
 			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
@@ -1706,7 +1880,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private Map<Long, Collection<ResourceTag>> getResourceTagMap(Collection<ResourceSearchView> theResourceSearchViewList) {
 
-		List<Long> idList = new ArrayList<Long>(theResourceSearchViewList.size());
+		List<Long> idList = new ArrayList<>(theResourceSearchViewList.size());
 
 		//-- find all resource has tags
 		for (ResourceSearchView resource : theResourceSearchViewList) {

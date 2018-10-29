@@ -2086,6 +2086,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 */
 		if (thePerformIndexing) {
 
+			calculateHashes(stringParams);
 			for (ResourceIndexedSearchParamString next : removeCommon(existingStringParams, stringParams)) {
 				next.setDaoConfig(myConfig);
 				myEntityManager.remove(next);
@@ -2095,6 +2096,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				myEntityManager.persist(next);
 			}
 
+			calculateHashes(tokenParams);
 			for (ResourceIndexedSearchParamToken next : removeCommon(existingTokenParams, tokenParams)) {
 				myEntityManager.remove(next);
 				theEntity.getParamsToken().remove(next);
@@ -2103,6 +2105,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				myEntityManager.persist(next);
 			}
 
+			calculateHashes(numberParams);
 			for (ResourceIndexedSearchParamNumber next : removeCommon(existingNumberParams, numberParams)) {
 				myEntityManager.remove(next);
 				theEntity.getParamsNumber().remove(next);
@@ -2111,6 +2114,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				myEntityManager.persist(next);
 			}
 
+			calculateHashes(quantityParams);
 			for (ResourceIndexedSearchParamQuantity next : removeCommon(existingQuantityParams, quantityParams)) {
 				myEntityManager.remove(next);
 				theEntity.getParamsQuantity().remove(next);
@@ -2120,6 +2124,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 
 			// Store date SP's
+			calculateHashes(dateParams);
 			for (ResourceIndexedSearchParamDate next : removeCommon(existingDateParams, dateParams)) {
 				myEntityManager.remove(next);
 				theEntity.getParamsDate().remove(next);
@@ -2129,6 +2134,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 
 			// Store URI SP's
+			calculateHashes(uriParams);
 			for (ResourceIndexedSearchParamUri next : removeCommon(existingUriParams, uriParams)) {
 				myEntityManager.remove(next);
 				theEntity.getParamsUri().remove(next);
@@ -2138,6 +2144,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 
 			// Store Coords SP's
+			calculateHashes(coordsParams);
 			for (ResourceIndexedSearchParamCoords next : removeCommon(existingCoordsParams, coordsParams)) {
 				myEntityManager.remove(next);
 				theEntity.getParamsCoords().remove(next);
@@ -2185,6 +2192,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 
 		return theEntity;
+	}
+
+	private void calculateHashes(Collection<? extends BaseResourceIndexedSearchParam> theStringParams) {
+		for (BaseResourceIndexedSearchParam next : theStringParams) {
+			next.calculateHashes();
+		}
 	}
 
 	protected ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable

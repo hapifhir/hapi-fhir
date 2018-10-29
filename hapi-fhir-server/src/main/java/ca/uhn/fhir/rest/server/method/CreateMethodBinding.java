@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import javax.annotation.Nonnull;
+
 public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	public CreateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
@@ -47,6 +49,7 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return null;
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.CREATE;

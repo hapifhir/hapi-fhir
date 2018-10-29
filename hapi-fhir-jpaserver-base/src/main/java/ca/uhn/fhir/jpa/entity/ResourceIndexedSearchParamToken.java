@@ -108,6 +108,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		setValue(theValue);
 	}
 
+	@Override
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashSystem == null) {

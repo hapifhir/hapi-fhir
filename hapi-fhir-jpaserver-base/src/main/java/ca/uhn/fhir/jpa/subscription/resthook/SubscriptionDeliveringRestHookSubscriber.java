@@ -108,10 +108,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			operation.encoded(thePayloadType);
 		}
 
-		// FIXME: remove
-		ourLog.info("** This " + this + " Processing delivery message " + theMsg);
-
-
 		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), thePayloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue());
 
 		try {

@@ -67,6 +67,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		setLongitude(theLongitude);
 	}
 
+	@Override
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashIdentity == null) {
