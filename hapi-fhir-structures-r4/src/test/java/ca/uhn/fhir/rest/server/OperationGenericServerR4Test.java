@@ -1,10 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -31,6 +28,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -168,6 +166,22 @@ public class OperationGenericServerR4Test {
 		}
 	}
 
+
+	SmartScopeTranslationSvcImplTest	@Test
+	public void testSearchGetsClassifiedAppropriately() throws Exception {
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		try {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			status.getEntity().getContent().close();
+		} finally {
+			status.getEntity().getContent().close();
+		}
+
+		assertEquals("Patient/search", ourLastMethod);
+	}
+
+
 	@SuppressWarnings("unused")
 	public static class PatientProvider implements IResourceProvider {
 
@@ -215,6 +229,12 @@ public class OperationGenericServerR4Test {
 			return retVal;
 		}
 
+		@Search
+		public List<IBaseResource> search() {
+			ourLastMethod = "Patient/search";
+			return new ArrayList<>();
+		}
+
 
 	}
 
@@ -236,6 +256,13 @@ public class OperationGenericServerR4Test {
 			Parameters retVal = new Parameters();
 			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
+		}
+
+
+		@Search
+		public List<IBaseResource> search() {
+			ourLastMethod = "/search";
+			return new ArrayList<>();
 		}
 
 

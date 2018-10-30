@@ -202,6 +202,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
+		if (isBlank(theRequest.getOperation())) {
+			return false;
+		}
+
 		if (!myName.equals(theRequest.getOperation())) {
 			if (!myName.equals(WILDCARD_NAME)) {
 				return false;
