@@ -1520,7 +1520,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		EncodedResource changed;
 		if (theDeletedTimestampOrNull != null) {
-			
+
 			newParams = new ResourceIndexedSearchParams(this);
 
 			theEntity.setDeleted(theDeletedTimestampOrNull);
@@ -1547,7 +1547,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				} else {
 					theEntity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
 				}
-				
+
 				newParams.setParams(theEntity);
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
 				populateFullTextFields(theResource, theEntity);
