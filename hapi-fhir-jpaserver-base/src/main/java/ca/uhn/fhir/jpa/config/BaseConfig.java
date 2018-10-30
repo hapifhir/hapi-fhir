@@ -88,6 +88,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		theTaskRegistrar.setTaskScheduler(taskScheduler());
 	}
 
+	@Bean(autowire = Autowire.BY_TYPE)
+	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
+		return new DatabaseBackedPagingProvider();
+	}
+
 	/**
 	 * This method should be overridden to provide an actual completed
 	 * bean, but it provides a partially completed entity manager
