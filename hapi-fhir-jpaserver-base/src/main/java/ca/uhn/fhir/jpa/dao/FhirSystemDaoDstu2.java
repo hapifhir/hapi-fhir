@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.service.MatchUrlService;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -81,6 +82,8 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	private Bundle batch(final RequestDetails theRequestDetails, Bundle theRequest) {
 		ourLog.info("Beginning batch with {} resources", theRequest.getEntry().size());
@@ -241,7 +244,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			requestDetails.setParameters(new HashMap<String, String[]>());
 			if (qIndex != -1) {
 				String params = url.substring(qIndex);
-				List<NameValuePair> parameters = translateMatchUrl(params);
+				List<NameValuePair> parameters = myMatchUrlService.translateMatchUrl(params);
 				for (NameValuePair next : parameters) {
 					paramValues.put(next.getName(), next.getValue());
 				}

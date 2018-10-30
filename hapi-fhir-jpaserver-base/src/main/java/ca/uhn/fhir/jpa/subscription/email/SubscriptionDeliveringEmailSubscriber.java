@@ -28,19 +28,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
+@Component
+@Scope("prototype")
+
 public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringEmailSubscriber.class);
 
 	private SubscriptionEmailInterceptor mySubscriptionEmailInterceptor;
 
-	public SubscriptionDeliveringEmailSubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, SubscriptionEmailInterceptor theSubscriptionEmailInterceptor) {
-		super(theSubscriptionDao, theChannelType, theSubscriptionEmailInterceptor);
+	public SubscriptionDeliveringEmailSubscriber(Subscription.SubscriptionChannelType theChannelType, SubscriptionEmailInterceptor theSubscriptionEmailInterceptor) {
+		super(theChannelType, theSubscriptionEmailInterceptor);
 
 		mySubscriptionEmailInterceptor = theSubscriptionEmailInterceptor;
 	}

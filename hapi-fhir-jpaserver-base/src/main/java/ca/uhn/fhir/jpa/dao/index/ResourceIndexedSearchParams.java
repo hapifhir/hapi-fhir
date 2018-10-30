@@ -134,22 +134,7 @@ public class ResourceIndexedSearchParams {
 	}
 
 	public void populateFromResource(IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams existingParams) {
-		stringParams.addAll(extractSearchParamStrings(theEntity, theResource));
-		numberParams.addAll(extractSearchParamNumber(theEntity, theResource));
-		quantityParams.addAll(extractSearchParamQuantity(theEntity, theResource));
-		dateParams.addAll(extractSearchParamDates(theEntity, theResource));
-		uriParams.addAll(extractSearchParamUri(theEntity, theResource));
-		coordsParams.addAll(extractSearchParamCoords(theEntity, theResource));
-
-		ourLog.trace("Storing date indexes: {}", dateParams);
-
-		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {
-			if (next instanceof ResourceIndexedSearchParamToken) {
-				tokenParams.add((ResourceIndexedSearchParamToken) next);
-			} else {
-				stringParams.add((ResourceIndexedSearchParamString) next);
-			}
-		}
+		extractFromResource(theEntity, theResource);
 
 		Set<Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myConfig .getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
@@ -235,6 +220,25 @@ public class ResourceIndexedSearchParams {
 		 * Handle composites
 		 */
 		extractCompositeStringUniques(theEntity, stringParams, tokenParams, numberParams, quantityParams, dateParams, uriParams, links);
+	}
+
+	public void extractFromResource(ResourceTable theEntity, IBaseResource theResource) {
+		stringParams.addAll(extractSearchParamStrings(theEntity, theResource));
+		numberParams.addAll(extractSearchParamNumber(theEntity, theResource));
+		quantityParams.addAll(extractSearchParamQuantity(theEntity, theResource));
+		dateParams.addAll(extractSearchParamDates(theEntity, theResource));
+		uriParams.addAll(extractSearchParamUri(theEntity, theResource));
+		coordsParams.addAll(extractSearchParamCoords(theEntity, theResource));
+
+		ourLog.trace("Storing date indexes: {}", dateParams);
+
+		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {
+			if (next instanceof ResourceIndexedSearchParamToken) {
+				tokenParams.add((ResourceIndexedSearchParamToken) next);
+			} else {
+				stringParams.add((ResourceIndexedSearchParamString) next);
+			}
+		}
 	}
 
 	public Collection<ResourceLink> getResourceLinks() {

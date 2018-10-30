@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -126,6 +127,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
 	@Autowired
 	private DaoProvider myDaoProvider;
+	@Autowired
+	private BeanFactory beanFactory;
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
 	/**
@@ -434,9 +437,9 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected void registerSubscriptionCheckingSubscriber() {
 		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(myDaoProvider.getSubscriptionDao(), getChannelType(), this, mySubscriptionMatcherDatabase );
+//			mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherDatabase);
 			// FIXME KHS uncomment and continue working from here
-			//			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(myDaoProvider.getSubscriptionDao(), getChannelType(), this, mySubscriptionMatcherInMemory );
+			mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherInMemory);
 		}
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}

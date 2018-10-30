@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.jpa.service.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.util.JpaConstants;
@@ -86,6 +87,8 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 	private ApplicationContext myAppCtx;
 	private ExecutorService myExecutorService;
 
@@ -283,7 +286,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 			String resourceType = resourceDef.getName();
 
 			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
-			SearchParameterMap params = BaseHapiFhirDao.translateMatchUrl(callingDao, myFhirContext, queryPart, resourceDef);
+			SearchParameterMap params = myMatchUrlService.translateMatchUrl(callingDao, myFhirContext, queryPart, resourceDef);
 
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
 

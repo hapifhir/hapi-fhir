@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.service.IdHelperService;
+import ca.uhn.fhir.jpa.service.MatchUrlService;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
@@ -123,6 +124,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
@@ -496,7 +499,7 @@ public class SearchBuilder implements ISearchBuilder {
 							chain = chain.substring(0, qualifierIndex);
 						}
 
-						boolean isMeta = BaseHapiFhirDao.RESOURCE_META_PARAMS.containsKey(chain);
+						boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
 						RuntimeSearchParam param = null;
 						if (!isMeta) {
 							param = myCallingDao.getSearchParamByName(typeDef, chain);
@@ -517,7 +520,7 @@ public class SearchBuilder implements ISearchBuilder {
 							chainValue.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
 							((ReferenceParam) chainValue).setChain(remainingChain);
 						} else if (isMeta) {
-							IQueryParameterType type = BaseHapiFhirDao.newInstanceType(chain);
+							IQueryParameterType type = myMatchUrlService.newInstanceType(chain);
 							type.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
 							chainValue = type;
 						} else {

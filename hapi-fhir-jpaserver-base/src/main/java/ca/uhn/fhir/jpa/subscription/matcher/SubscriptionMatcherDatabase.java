@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.matcher;
 
+import ca.uhn.fhir.jpa.service.MatchUrlService;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -26,9 +27,10 @@ public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 
 	@Autowired
 	private FhirContext myCtx;
-	
 	@Autowired
 	DaoProvider myDaoProvider;
+	@Autowired
+	MatchUrlService myMatchUrlService;
 	
 	@Override
 	public boolean match(String criteria, ResourceModifiedMessage msg) {
@@ -51,7 +53,7 @@ public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 	 */
 	protected IBundleProvider performSearch(String theCriteria) {
 		RuntimeResourceDefinition responseResourceDef = myDaoProvider.getSubscriptionDao().validateCriteriaAndReturnResourceDefinition(theCriteria);
-		SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(myDaoProvider.getSubscriptionDao(), myCtx, theCriteria, responseResourceDef);
+		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(myDaoProvider.getSubscriptionDao(), myCtx, theCriteria, responseResourceDef);
 
 		RequestDetails req = new ServletSubRequestDetails();
 		req.setSubRequest(true);

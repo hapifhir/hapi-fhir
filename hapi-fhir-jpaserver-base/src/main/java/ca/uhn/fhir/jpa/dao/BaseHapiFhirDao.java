@@ -219,42 +219,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
 	public static final String UCUM_NS = "http://unitsofmeasure.org";
-	public static final Set<String> EXCLUDE_ELEMENTS_IN_ENCODED;
-	/**
-	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(SearchParameterMap)}
-	 */
-	static final Map<String, Class<? extends IQueryParameterAnd<?>>> RESOURCE_META_AND_PARAMS;
-	/**
-	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(SearchParameterMap)}
-	 */
-	static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirDao.class);
 	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<FhirVersionEnum, FhirContext>();
 	private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
-
-	static {
-		Map<String, Class<? extends IQueryParameterType>> resourceMetaParams = new HashMap<String, Class<? extends IQueryParameterType>>();
-		Map<String, Class<? extends IQueryParameterAnd<?>>> resourceMetaAndParams = new HashMap<String, Class<? extends IQueryParameterAnd<?>>>();
-		resourceMetaParams.put(BaseResource.SP_RES_ID, StringParam.class);
-		resourceMetaAndParams.put(BaseResource.SP_RES_ID, StringAndListParam.class);
-		resourceMetaParams.put(BaseResource.SP_RES_LANGUAGE, StringParam.class);
-		resourceMetaAndParams.put(BaseResource.SP_RES_LANGUAGE, StringAndListParam.class);
-		resourceMetaParams.put(Constants.PARAM_TAG, TokenParam.class);
-		resourceMetaAndParams.put(Constants.PARAM_TAG, TokenAndListParam.class);
-		resourceMetaParams.put(Constants.PARAM_PROFILE, UriParam.class);
-		resourceMetaAndParams.put(Constants.PARAM_PROFILE, UriAndListParam.class);
-		resourceMetaParams.put(Constants.PARAM_SECURITY, TokenParam.class);
-		resourceMetaAndParams.put(Constants.PARAM_SECURITY, TokenAndListParam.class);
-		RESOURCE_META_PARAMS = Collections.unmodifiableMap(resourceMetaParams);
-		RESOURCE_META_AND_PARAMS = Collections.unmodifiableMap(resourceMetaAndParams);
-
-		HashSet<String> excludeElementsInEncoded = new HashSet<String>();
-		excludeElementsInEncoded.add("id");
-		excludeElementsInEncoded.add("*.meta");
-		EXCLUDE_ELEMENTS_IN_ENCODED = Collections.unmodifiableSet(excludeElementsInEncoded);
-	}
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -724,7 +693,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	@Override
-	public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
+	public RuntimeSearchParam
+
+	getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
 		Map<String, RuntimeSearchParam> params = mySearchParamRegistry.getActiveSearchParams(theResourceDef.getName());
 		return params.get(theParamName);
 	}
@@ -963,7 +934,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		if (theEntity.getDeleted() == null) {
 
 			encoding = myConfig.getResourceEncoding();
-			Set<String> excludeElements = EXCLUDE_ELEMENTS_IN_ENCODED;
+			Set<String> excludeElements = ResourceMetaParams.EXCLUDE_ELEMENTS_IN_ENCODED;
 			theEntity.setFhirVersion(myContext.getVersion().getVersion());
 
 			bytes = encodeResource(theResource, encoding, excludeElements, myContext);
@@ -1801,31 +1772,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return bytes;
 	}
 
-
-	@CoverageIgnore
-	protected static IQueryParameterAnd<?> newInstanceAnd(String chain) {
-		IQueryParameterAnd<?> type;
-		Class<? extends IQueryParameterAnd<?>> clazz = RESOURCE_META_AND_PARAMS.get(chain);
-		try {
-			type = clazz.newInstance();
-		} catch (Exception e) {
-			throw new InternalErrorException("Failure creating instance of " + clazz, e);
-		}
-		return type;
-	}
-
-	@CoverageIgnore
-	protected static IQueryParameterType newInstanceType(String chain) {
-		IQueryParameterType type;
-		Class<? extends IQueryParameterType> clazz = RESOURCE_META_PARAMS.get(chain);
-		try {
-			type = clazz.newInstance();
-		} catch (Exception e) {
-			throw new InternalErrorException("Failure creating instance of " + clazz, e);
-		}
-		return type;
-	}
-
 	public static String normalizeString(String theString) {
 		CharArrayWriter outBuffer = new CharArrayWriter(theString.length());
 
@@ -1906,110 +1852,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			retVal.add((BaseCodingDt) next);
 		}
 		return retVal;
-	}
-
-	public static SearchParameterMap translateMatchUrl(IDao theCallingDao, FhirContext theContext, String
-		theMatchUrl, RuntimeResourceDefinition resourceDef) {
-		SearchParameterMap paramMap = new SearchParameterMap();
-		List<NameValuePair> parameters = translateMatchUrl(theMatchUrl);
-
-		ArrayListMultimap<String, QualifiedParamList> nameToParamLists = ArrayListMultimap.create();
-		for (NameValuePair next : parameters) {
-			if (isBlank(next.getValue())) {
-				continue;
-			}
-
-			String paramName = next.getName();
-			String qualifier = null;
-			for (int i = 0; i < paramName.length(); i++) {
-				switch (paramName.charAt(i)) {
-					case '.':
-					case ':':
-						qualifier = paramName.substring(i);
-						paramName = paramName.substring(0, i);
-						i = Integer.MAX_VALUE - 1;
-						break;
-				}
-			}
-
-			QualifiedParamList paramList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, next.getValue());
-			nameToParamLists.put(paramName, paramList);
-		}
-
-		for (String nextParamName : nameToParamLists.keySet()) {
-			List<QualifiedParamList> paramList = nameToParamLists.get(nextParamName);
-			if (Constants.PARAM_LASTUPDATED.equals(nextParamName)) {
-				if (paramList != null && paramList.size() > 0) {
-					if (paramList.size() > 2) {
-						throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED + " parameter repetitions");
-					} else {
-						DateRangeParam p1 = new DateRangeParam();
-						p1.setValuesAsQueryTokens(theContext, nextParamName, paramList);
-						paramMap.setLastUpdated(p1);
-					}
-				}
-				continue;
-			}
-
-			if (Constants.PARAM_HAS.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(theContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
-				paramMap.add(nextParamName, param);
-				continue;
-			}
-
-			if (Constants.PARAM_COUNT.equals(nextParamName)) {
-				if (paramList.size() > 0 && paramList.get(0).size() > 0) {
-					String intString = paramList.get(0).get(0);
-					try {
-						paramMap.setCount(Integer.parseInt(intString));
-					} catch (NumberFormatException e) {
-						throw new InvalidRequestException("Invalid " + Constants.PARAM_COUNT + " value: " + intString);
-					}
-				}
-				continue;
-			}
-
-			if (BaseHapiFhirDao.RESOURCE_META_PARAMS.containsKey(nextParamName)) {
-				if (isNotBlank(paramList.get(0).getQualifier()) && paramList.get(0).getQualifier().startsWith(".")) {
-					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
-				}
-				IQueryParameterAnd<?> type = BaseHapiFhirDao.newInstanceAnd(nextParamName);
-				type.setValuesAsQueryTokens(theContext, nextParamName, (paramList));
-				paramMap.add(nextParamName, type);
-			} else if (nextParamName.startsWith("_")) {
-				// ignore these since they aren't search params (e.g. _sort)
-			} else {
-				RuntimeSearchParam paramDef = theCallingDao.getSearchParamByName(resourceDef, nextParamName);
-				if (paramDef == null) {
-					throw new InvalidRequestException(
-						"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
-				}
-
-				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(theContext, paramDef, nextParamName, paramList);
-				paramMap.add(nextParamName, param);
-			}
-		}
-		return paramMap;
-	}
-
-	public static List<NameValuePair> translateMatchUrl(String theMatchUrl) {
-		List<NameValuePair> parameters;
-		String matchUrl = theMatchUrl;
-		int questionMarkIndex = matchUrl.indexOf('?');
-		if (questionMarkIndex != -1) {
-			matchUrl = matchUrl.substring(questionMarkIndex + 1);
-		}
-		matchUrl = matchUrl.replace("|", "%7C");
-		matchUrl = matchUrl.replace("=>=", "=%3E%3D");
-		matchUrl = matchUrl.replace("=<=", "=%3C%3D");
-		matchUrl = matchUrl.replace("=>", "=%3E");
-		matchUrl = matchUrl.replace("=<", "=%3C");
-		if (matchUrl.contains(" ")) {
-			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - URL is invalid (must not contain spaces)");
-		}
-
-		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
-		return parameters;
 	}
 
 	public static void validateResourceType(BaseHasResource theEntity, String theResourceName) {

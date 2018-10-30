@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.service.MatchUrlService;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -17,11 +19,20 @@ import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.TestUtil;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {TestR4Config.class})
 public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
+
+	@Autowired
+	MatchUrlService myMatchUrlService;
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -36,7 +47,7 @@ public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 		IDao dao = mock(IDao.class);
 		when(dao.getSearchParamByName(any(RuntimeResourceDefinition.class), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
 				
-		SearchParameterMap match = BaseHapiFhirDao.translateMatchUrl(dao, ourCtx, "Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
+		SearchParameterMap match = myMatchUrlService.translateMatchUrl(dao, ourCtx, "Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
 		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
 		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());
 		assertEquals("304", ((ReferenceParam)match.get("patient").get(0).get(0)).getIdPart());
