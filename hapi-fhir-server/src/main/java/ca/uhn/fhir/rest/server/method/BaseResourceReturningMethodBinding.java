@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -191,14 +192,20 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		 * Make sure all returned resources have an ID (if not, this is a bug
 		 * in the user server code)
 		 */
-		String resourceType = theRequest.getResourceName();
+
+		//Add the included names to determine the correct counts.
+		HashSet<String> includeNames = new HashSet<>();
+		for(Include include : theIncludes){
+			includeNames.add(include.getParamName());
+		}
+
 		int requestedResourceTotalNum = 0;
 		for (IBaseResource next : resourceList) {
 			String resourceName = null;
 			if(next instanceof IResource){
 				resourceName = ((IResource)next).getResourceName();
 			}
-			if(resourceType != null  && resourceType.equals(resourceName)){
+			if(resourceName != null  && (includeNames.isEmpty() || includeNames.contains(resourceName))){
 				requestedResourceTotalNum++;
 			}
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
