@@ -27,6 +27,8 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -284,6 +286,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	public abstract Subscription.SubscriptionChannelType getChannelType();
 
+	// TODO KHS move out
 	@SuppressWarnings("unchecked")
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
 		if (myResourceTypeToDao == null) {
@@ -433,7 +436,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected void registerSubscriptionCheckingSubscriber() {
 		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this);
+			ISubscriptionMatcher subscriptionMatcher = new SubscriptionMatcherDatabase(getSubscriptionDao(), this);
+			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this, subscriptionMatcher );
 		}
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}

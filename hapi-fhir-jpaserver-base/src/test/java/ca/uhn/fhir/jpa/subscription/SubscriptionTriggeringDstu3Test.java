@@ -26,6 +26,7 @@ import org.junit.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -44,8 +45,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
-	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
+	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static List<Patient> ourCreatedPatients = Lists.newArrayList();
 	private static List<Patient> ourUpdatedPatients = Lists.newArrayList();
 	private static List<String> ourContentTypes = new ArrayList<>();

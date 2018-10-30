@@ -116,6 +116,15 @@
 				<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java#L62">the example project</a>]]>
 				if they are not already.
 			</action>
+			<action type="add">
+				The FhirTerser <![CDATA[<code>getValues(...)</code>]]> methods have been overloaded. The terser can now be
+				used to create a null-valued element where none exists. Additionally, the terser can now add a null-valued
+				extension where one or more such extensions already exist. These changes allow better population of FHIR
+				elements provided an arbitrary FHIR path.
+			</action>
+			<action type="fix">
+				The FhirTerser <![CDATA[<code>getValues(...)</code>]]> methods were not properly handling modifier
+				extensions for verions of FHIR prior to DSTU3. This has been corrected.
 			<action type="fix">
 				When updating resources in the JPA server, a bug caused index table entries to be refreshed
 				sometimes even though the index value hadn't changed. This issue did not cause incorrect search
