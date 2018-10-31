@@ -17,13 +17,7 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -158,6 +153,50 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourClient.registerInterceptor(myCapturingInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
+
+
+	@Test
+	public void testSearchLinksWorkWithIncludes() {
+		for (int i = 0; i < 5; i++) {
+
+			Organization o = new Organization();
+			o.setId("O" + i);
+			o.setName("O" + i);
+			IIdType oid = ourClient.update().resource(o).execute().getId().toUnqualifiedVersionless();
+
+			Patient p = new Patient();
+			p.setId("P" + i);
+			p.getManagingOrganization().setReference(oid.getValue());
+			ourClient.update().resource(p).execute();
+
+		}
+
+		Bundle output = ourClient
+			.search()
+			.forResource("Patient")
+			.include(IBaseResource.INCLUDE_ALL)
+			.count(3)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		ourLog.info("Ids: {}", ids);
+		assertEquals(6, output.getEntry().size());
+		assertNotNull(output.getLink("next"));
+
+		// Page 2
+		output = ourClient
+			.loadPage()
+			.next(output)
+			.execute();
+
+		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		ourLog.info("Ids: {}", ids);
+		assertEquals(4, output.getEntry().size());
+		assertNull(output.getLink("next"));
+
+	}
+
 
 	@Test
 	public void testDeleteConditional() {
@@ -1658,27 +1697,25 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnResourceType(Bundle.class)
 			.execute();
 
-		TreeSet<String> ids = new TreeSet<>();
+		ArrayList<String> ids = new ArrayList<>();
 		for (int i = 0; i < responseBundle.getEntry().size(); i++) {
-			for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-				ids.add(nextEntry.getResource().getIdElement().getIdPart());
-			}
+			BundleEntryComponent nextEntry = responseBundle.getEntry().get(i);
+			ids.add(nextEntry.getResource().getIdElement().getIdPart());
 		}
 
 		BundleLinkComponent nextLink = responseBundle.getLink("next");
-		ourLog.info("Have {} IDs with next link: ", ids.size(), nextLink);
+		ourLog.info("Have {} IDs with next link[{}] : {}", ids.size(), nextLink, ids);
 
 		while (nextLink != null) {
 			String nextUrl = nextLink.getUrl();
 			responseBundle = ourClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 			for (int i = 0; i < responseBundle.getEntry().size(); i++) {
-				for (BundleEntryComponent nextEntry : responseBundle.getEntry()) {
-					ids.add(nextEntry.getResource().getIdElement().getIdPart());
-				}
+				BundleEntryComponent nextEntry = responseBundle.getEntry().get(i);
+				ids.add(nextEntry.getResource().getIdElement().getIdPart());
 			}
 
 			nextLink = responseBundle.getLink("next");
-			ourLog.info("Have {} IDs with next link: ", ids.size(), nextLink);
+			ourLog.info("Have {} IDs with next link[{}] : {}", ids.size(), nextLink, ids);
 		}
 
 		assertThat(ids, hasItem(id.getIdPart()));

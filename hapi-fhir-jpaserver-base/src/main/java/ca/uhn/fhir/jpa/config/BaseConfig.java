@@ -70,7 +70,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Autowired
 	protected Environment myEnv;
 
-	@Bean
+	@Bean(name = "myDaoRegistry")
 	public DaoRegistry daoRegistry() {
 		return new DaoRegistry();
 	}
@@ -141,13 +141,13 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		return b.getObject();
 	}
 
-	@Bean
+	@Bean(name="mySubscriptionTriggeringProvider")
 	@Lazy
-	public SubscriptionTriggeringProvider mySubscriptionTriggeringProvider() {
+	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
 		return new SubscriptionTriggeringProvider();
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean(autowire = Autowire.BY_TYPE, name = "mySearchCoordinatorSvc")
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
 		return new SearchCoordinatorSvcImpl();
 	}
