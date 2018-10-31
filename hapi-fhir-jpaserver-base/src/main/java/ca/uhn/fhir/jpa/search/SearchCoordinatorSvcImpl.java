@@ -168,7 +168,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
-				ourLog.info("Search entity marked as finished");
+				ourLog.info("Search entity marked as finished with {} results", search.getNumFound());
 				break;
 			}
 			if (search.getNumFound() >= theTo) {
@@ -189,7 +189,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					search = newSearch.get();
 					String resourceType = search.getResourceType();
 					SearchParameterMap params = search.getSearchParameterMap();
-					SearchContinuationTask task = new SearchContinuationTask(search, myDaoRegistry.getResourceDao(resourceType), params, resourceType);
+					IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(resourceType);
+					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType);
 					myIdToSearchTask.put(search.getUuid(), task);
 					myExecutor.submit(task);
 				}
@@ -228,10 +229,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			txTemplate.afterPropertiesSet();
 			return txTemplate.execute(t -> {
-				Optional<Search> searchOpt = mySearchDao.findById(theSearch.getId());
-				Search search = searchOpt.orElseThrow(IllegalStateException::new);
-				if (search.getStatus() != SearchStatusEnum.PASSCMPLET) {
-					throw new IllegalStateException("Can't change to LOADING because state is " + search.getStatus());
+				myEntityManager.refresh(theSearch);
+				if (theSearch.getStatus() != SearchStatusEnum.PASSCMPLET) {
+					throw new IllegalStateException("Can't change to LOADING because state is " + theSearch.getStatus());
 				}
 				theSearch.setStatus(SearchStatusEnum.LOADING);
 				Search newSearch = mySearchDao.save(theSearch);
@@ -239,6 +239,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			});
 		} catch (Exception e) {
 			ourLog.warn("Failed to activate search: {}", e.toString());
+			ourLog.trace("Failed to activate search", e);
 			return Optional.empty();
 		}
 	}
@@ -438,6 +439,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myManagedTxManager = theTxManager;
 	}
 
+	@VisibleForTesting
+	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
 	public abstract class BaseTask implements Callable<Void> {
 		private final SearchParameterMap myParams;
 		private final IDao myCallingDao;
@@ -486,7 +492,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		public List<Long> getResourcePids(int theFromIndex, int theToIndex) {
-			ourLog.info("Requesting search PIDs from {}-{}", theFromIndex, theToIndex);
+			ourLog.debug("Requesting search PIDs from {}-{}", theFromIndex, theToIndex);
 
 			boolean keepWaiting;
 			do {
@@ -506,6 +512,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 								 * coordinator would then stop searching.SearchCoordinatorSvcImplTest
 								 */
 								List<Long> remainingResources = SearchCoordinatorSvcImpl.this.getResources(mySearch.getUuid(), mySyncedPids.size(), theToIndex);
+								ourLog.debug("Adding {} resources to the existing {} synced resource IDs", remainingResources.size(), mySyncedPids.size());
 								mySyncedPids.addAll(remainingResources);
 								keepWaiting = false;
 								break;
@@ -834,6 +841,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * Construct the SQL query we'll be sending to the database
 			 */
 			IResultIterator theResultIterator = sb.createQuery(myParams, mySearch.getUuid());
+			assert (theResultIterator != null);
 
 			/*
 			 * The following loop actually loads the PIDs of the resources
@@ -895,6 +903,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				txTemplate.afterPropertiesSet();
 				txTemplate.execute(t -> {
 					List<Long> previouslyAddedResourcePids = mySearchResultDao.findWithSearchUuid(getSearch());
+					ourLog.debug("Have {} previously added IDs in search: {}", previouslyAddedResourcePids.size(), getSearch().getUuid());
 					setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
 					return null;
 				});
