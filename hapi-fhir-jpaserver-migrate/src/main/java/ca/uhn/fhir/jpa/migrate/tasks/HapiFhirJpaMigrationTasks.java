@@ -277,6 +277,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spp = version.onTable("HFJ_RES_PARAM_PRESENT");
 		version.startSectionWithMessage("Starting work on table: " + spp.getTableName());
 		spp.dropIndex("IDX_RESPARMPRESENT_SPID_RESID");
+		spp.dropColumn("SP_ID");
 		spp
 			.addColumn("HASH_PRESENCE")
 			.nullable()
