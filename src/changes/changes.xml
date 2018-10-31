@@ -100,6 +100,10 @@
 				permission is granted. This has been corrected so that transaction() allows both
 				batch and transaction requests to proceed.
 			</action>
+			<action type="add">
+				The JPA server version migrator tool now runs in a multithreaded way, allowing it to
+				upgrade th database faster when migration tasks require data updates.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">
