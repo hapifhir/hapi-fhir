@@ -492,8 +492,34 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			do {
 				synchronized (mySyncedPids) {
 					ourLog.trace("Search status is {}", mySearch.getStatus());
-					keepWaiting = mySyncedPids.size() < theToIndex && mySearch.getStatus() == SearchStatusEnum.LOADING;
+					boolean haveEnoughResults = mySyncedPids.size() >= theToIndex;
+					if (!haveEnoughResults) {
+						switch (mySearch.getStatus()) {
+							case LOADING:
+								keepWaiting = true;
+								break;
+							case PASSCMPLET:
+								/*
+								 * If we get here, it means that the user requested resources that crossed the
+								 * current pre-fetch boundary. For example, if the prefetch threshold is 50 and the
+								 * user has requested resources 0-60, then they would get 0-50 back but the search
+								 * coordinator would then stop searching.SearchCoordinatorSvcImplTest
+								 */
+								List<Long> remainingResources = SearchCoordinatorSvcImpl.this.getResources(mySearch.getUuid(), mySyncedPids.size(), theToIndex);
+								mySyncedPids.addAll(remainingResources);
+								keepWaiting = false;
+								break;
+							case FAILED:
+							case FINISHED:
+							default:
+								keepWaiting = false;
+								break;
+						}
+					} else {
+						keepWaiting = false;
+					}
 				}
+
 				if (keepWaiting) {
 					ourLog.info("Waiting, as we only have {} results", mySyncedPids.size());
 					try {
