@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -835,14 +836,11 @@ public class ResourceIndexedSearchParams {
 		return populatedResourceLinkParameters;
 	}
 
-	public boolean matchToken(IQueryParameterType theParam) {
-		TokenParam theTokenParam = (TokenParam)theParam;
-		for (ResourceIndexedSearchParamToken token : tokenParams) {
-			if (token.matches(theTokenParam)) {
-				return true;
-			}
-		}
-		return false;
+	public boolean matchToken(String theParamName, IQueryParameterType theParam) {
+		Predicate<ResourceIndexedSearchParamToken> namedTokenPredicate = token ->
+			token.getParamName().equalsIgnoreCase(theParamName) &&
+				token.matches((TokenParam)theParam);
+		return tokenParams.stream().anyMatch(namedTokenPredicate);
 	}
 
 	@Override

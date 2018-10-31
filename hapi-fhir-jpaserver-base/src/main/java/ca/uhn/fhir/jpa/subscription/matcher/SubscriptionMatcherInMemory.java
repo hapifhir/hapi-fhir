@@ -33,7 +33,10 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 
 	@Override
 	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {
-		IBaseResource resource = msg.getNewPayload(myContext);
+		return match(criteria, msg.getNewPayload(myContext));
+	}
+
+	SubscriptionMatchResult match(String criteria, IBaseResource resource) {
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(resource.getIdElement().getResourceType());
 		ResourceIndexedSearchParams searchParams = beanFactory.getBean(ResourceIndexedSearchParams.class);

@@ -37,8 +37,9 @@ public class CriteriaResourceMatcher {
 		for (Map.Entry<String, List<List<? extends IQueryParameterType>>> entry : searchParameterMap.entrySet()) {
 			String theParamName = entry.getKey();
 			List<List<? extends IQueryParameterType>> theAndOrParams = entry.getValue();
-			if (!matchIdsWithAndOr(theParamName, theAndOrParams, theResourceDefinition, theSearchParams).matched()) {
-				return SubscriptionMatchResult.NO_MATCH;
+			SubscriptionMatchResult result = matchIdsWithAndOr(theParamName, theAndOrParams, theResourceDefinition, theSearchParams);
+			if (!result.matched()){
+				return result;
 			}
 		}
 		return SubscriptionMatchResult.MATCH;
@@ -93,7 +94,10 @@ public class CriteriaResourceMatcher {
 						break;
 					case TOKEN:
 						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							return matchTokens(nextAnd, theSearchParams);
+							SubscriptionMatchResult result = matchTokens(theParamName, nextAnd, theSearchParams);
+							if (result.matched()) {
+								return result;
+							}
 						}
 						break;
 					case NUMBER:
@@ -127,10 +131,11 @@ public class CriteriaResourceMatcher {
 		return new SubscriptionMatchResult(theParamName);
 	}
 
-	private SubscriptionMatchResult matchTokens(List<? extends IQueryParameterType> nextAnd, ResourceIndexedSearchParams theSearchParams) {
+	private SubscriptionMatchResult matchTokens(String theParamName, List<? extends IQueryParameterType> nextAnd, ResourceIndexedSearchParams theSearchParams) {
+		
 		boolean matched = false;
 		for (IQueryParameterType token : nextAnd) {
-			matched |= theSearchParams.matchToken(token);
+			matched |= theSearchParams.matchToken(theParamName, token);
 		}
 		return new SubscriptionMatchResult(matched);
 	}
