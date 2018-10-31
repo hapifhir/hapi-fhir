@@ -2099,6 +2099,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams) {
 		myParams = theParams;
 
+		theParams.clean();
 		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : myParams.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			List<List<? extends IQueryParameterType>> andOrParams = nextParamEntry.getValue();
@@ -2109,37 +2110,6 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
-
-		/*
-		 * Filter out
-		 */
-		for (int andListIdx = 0; andListIdx < theAndOrParams.size(); andListIdx++) {
-			List<? extends IQueryParameterType> nextOrList = theAndOrParams.get(andListIdx);
-
-			for (int orListIdx = 0; orListIdx < nextOrList.size(); orListIdx++) {
-				IQueryParameterType nextOr = nextOrList.get(orListIdx);
-				boolean hasNoValue = false;
-				if (nextOr.getMissing() != null) {
-					continue;
-				}
-				if (nextOr instanceof QuantityParam) {
-					if (isBlank(((QuantityParam) nextOr).getValueAsString())) {
-						hasNoValue = true;
-					}
-				}
-
-				if (hasNoValue) {
-					ourLog.debug("Ignoring empty parameter: {}", theParamName);
-					nextOrList.remove(orListIdx);
-					orListIdx--;
-				}
-			}
-
-			if (nextOrList.isEmpty()) {
-				theAndOrParams.remove(andListIdx);
-				andListIdx--;
-			}
-		}
 
 		if (theAndOrParams.isEmpty()) {
 			return;

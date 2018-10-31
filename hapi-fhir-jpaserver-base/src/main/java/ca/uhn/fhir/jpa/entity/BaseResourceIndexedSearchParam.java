@@ -155,5 +155,4 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		HashCode hashCode = hasher.hash();
 		return hashCode.asLong();
 	}
-
 }

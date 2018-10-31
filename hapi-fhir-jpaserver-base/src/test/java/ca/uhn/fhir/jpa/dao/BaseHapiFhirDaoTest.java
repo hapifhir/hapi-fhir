@@ -34,20 +34,17 @@ public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 
 	@Autowired
 	MatchUrlService myMatchUrlService;
-	@Autowired
-	SearchParamProvider mySearchParamProvider;
 
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-
 	@Test
 	public void testTranslateMatchUrl() {
 		RuntimeResourceDefinition resourceDef = ourCtx.getResourceDefinition(Condition.class);
-
-		when(mySearchParamProvider.getSearchParamByName(any(RuntimeResourceDefinition.class), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
+		SearchParamProvider searchParamProvider = mock(SearchParamProvider.class);
+		when(searchParamProvider.getSearchParamByName(any(RuntimeResourceDefinition.class), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
 		SearchParameterMap match = myMatchUrlService.translateMatchUrl("Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
 		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
 		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());

@@ -27,6 +27,7 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -41,12 +42,12 @@ import static org.junit.Assert.fail;
 public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu2Test.class);
-	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
+	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
+	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static List<String> ourContentTypes = new ArrayList<>();
 	private static List<String> ourHeaders = new ArrayList<>();
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();

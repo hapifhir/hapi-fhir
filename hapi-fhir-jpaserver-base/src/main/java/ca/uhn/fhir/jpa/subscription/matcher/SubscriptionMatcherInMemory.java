@@ -26,37 +26,19 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 
 	@Autowired
 	private FhirContext myContext;
-
 	@Autowired
 	private AutowireCapableBeanFactory beanFactory;
-
 	@Autowired
-	private MatchUrlService myMatchUrlService;
-	
+	private CriteriaResourceMatcher myCriteriaResourceMatcher;
+
 	@Override
-	public boolean match(String criteria, ResourceModifiedMessage msg) {
+	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {
 		IBaseResource resource = msg.getNewPayload(myContext);
 		ResourceTable entity = new ResourceTable();
-		RuntimeResourceDefinition resourceDefinition = myContext.getResourceDefinition(resource);
-		entity.setResourceType(resourceDefinition.getName());
+		entity.setResourceType(resource.getIdElement().getResourceType());
 		ResourceIndexedSearchParams searchParams = beanFactory.getBean(ResourceIndexedSearchParams.class);
 		searchParams.extractFromResource(entity, resource);
-
-		SearchParameterMap searchParameterMap = myMatchUrlService.translateMatchUrl(criteria, resourceDefinition);
-
-		for (Map.Entry<String, List<List<? extends IQueryParameterType>>> entry : searchParameterMap.entrySet()) {
-			for (List<? extends IQueryParameterType> parameters : entry.getValue()) {
-				for (IQueryParameterType param : parameters) {
-					ourLog.debug("Param {}: {}", entry, param);
-				}
-			}
-		}
-
-		// FIXME KHS implement
-
-		// Incoming resource fields in searchParams
-		// Search criteria in searchParameterMap
-		// Now just need to marry the two and we're golden
-		return true;
+		RuntimeResourceDefinition resourceDefinition = myContext.getResourceDefinition(resource);
+		return myCriteriaResourceMatcher.match(criteria, resourceDefinition, searchParams);
 	}
 }

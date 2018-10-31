@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionCompositeInMemoryDatabaseMatcher;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -122,9 +123,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
 	@Autowired
-	private SubscriptionMatcherDatabase mySubscriptionMatcherDatabase;
-	@Autowired
-	private SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
+	private SubscriptionCompositeInMemoryDatabaseMatcher mySubscriptionCompositeInMemoryDatabaseMatcher;
 	@Autowired
 	private DaoProvider myDaoProvider;
 	@Autowired
@@ -437,9 +436,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected void registerSubscriptionCheckingSubscriber() {
 		if (mySubscriptionCheckingSubscriber == null) {
-//			mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherDatabase);
-			// FIXME KHS uncomment and continue working from here
-			mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherInMemory);
+			mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionCompositeInMemoryDatabaseMatcher);
 		}
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}

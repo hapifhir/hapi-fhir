@@ -30,9 +30,9 @@ public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 	DaoProvider myDaoProvider;
 	@Autowired
 	MatchUrlService myMatchUrlService;
-	
+
 	@Override
-	public boolean match(String criteria, ResourceModifiedMessage msg) {
+	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {
 		IIdType id = msg.getId(myCtx);
 		String resourceType = id.getResourceType();
 		String resourceId = id.getIdPart();
@@ -44,7 +44,7 @@ public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 
 		ourLog.debug("Subscription check found {} results for query: {}", results.size(), criteria);
 
-		return results.size() > 0;
+		return new SubscriptionMatchResult(results.size() > 0);
 	}
 	
 	/**

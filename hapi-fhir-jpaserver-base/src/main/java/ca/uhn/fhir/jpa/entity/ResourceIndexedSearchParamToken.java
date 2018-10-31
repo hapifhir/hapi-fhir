@@ -251,4 +251,20 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	public static long calculateHashValue(String theResourceType, String theParamName, String theValue) {
 		return hash(theResourceType, theParamName, trim(theValue));
 	}
+
+	public boolean matches(TokenParam theTokenParam) {
+		boolean retval = false;
+		// Only match on system if it wasn't specified
+		if (theTokenParam.getSystem() == null) {
+			if (getValue().equalsIgnoreCase(theTokenParam.getValue())) {
+				retval = true;
+			}
+		} else {
+			if (getSystem().equalsIgnoreCase(theTokenParam.getSystem()) &&
+				getValue().equalsIgnoreCase(theTokenParam.getValue())) {
+				retval = true;
+			}
+		}
+		return retval;
+	}
 }

@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
 import ca.uhn.fhir.jpa.service.IdHelperService;
 import ca.uhn.fhir.jpa.service.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.DaoProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -834,5 +835,28 @@ public class ResourceIndexedSearchParams {
 		return populatedResourceLinkParameters;
 	}
 
+	public boolean matchToken(IQueryParameterType theParam) {
+		TokenParam theTokenParam = (TokenParam)theParam;
+		for (ResourceIndexedSearchParamToken token : tokenParams) {
+			if (token.matches(theTokenParam)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
+	@Override
+	public String toString() {
+		return "ResourceIndexedSearchParams{" +
+			"stringParams=" + stringParams +
+			", tokenParams=" + tokenParams +
+			", numberParams=" + numberParams +
+			", quantityParams=" + quantityParams +
+			", dateParams=" + dateParams +
+			", uriParams=" + uriParams +
+			", coordsParams=" + coordsParams +
+			", compositeStringUniques=" + compositeStringUniques +
+			", links=" + links +
+			'}';
+	}
 }

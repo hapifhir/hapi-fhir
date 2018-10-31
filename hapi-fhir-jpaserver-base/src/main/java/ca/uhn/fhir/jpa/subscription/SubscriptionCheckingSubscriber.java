@@ -120,7 +120,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				continue;
 			}
 
-			if (!mySubscriptionMatcher.match(nextCriteriaString, msg)) {
+			if (!mySubscriptionMatcher.match(nextCriteriaString, msg).matched()) {
 				continue;
 			}
 
