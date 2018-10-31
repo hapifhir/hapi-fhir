@@ -72,49 +72,16 @@ public class CriteriaResourceMatcher {
 			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
 			if (nextParamDef != null) {
 				switch (nextParamDef.getParamType()) {
-					case DATE:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							return new SubscriptionMatchResult(theParamName);
-						}
-						break;
-					case QUANTITY:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							return new SubscriptionMatchResult(theParamName);
-						}
-						break;
-					case REFERENCE:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							return new SubscriptionMatchResult(theParamName);
-						}
-						break;
-					case STRING:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							return new SubscriptionMatchResult(theParamName);
-						}
-						break;
 					case TOKEN:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							SubscriptionMatchResult result = matchTokens(theParamName, nextAnd, theSearchParams);
-							if (result.matched()) {
-								return result;
-							}
-						}
-						break;
+						return new SubscriptionMatchResult(theAndOrParams.stream().anyMatch(nextAnd -> matchTokens(theParamName, nextAnd, theSearchParams)));
+					case DATE:
+					case QUANTITY:
+					case REFERENCE:
+					case STRING:
 					case NUMBER:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							return new SubscriptionMatchResult(theParamName);
-						}
-						break;
 					case COMPOSITE:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							return new SubscriptionMatchResult(theParamName);
-						}
-						break;
 					case URI:
-						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 							return new SubscriptionMatchResult(theParamName);
-						}
-						break;
 					case HAS:
 					case SPECIAL:
 						// should not happen
@@ -131,12 +98,7 @@ public class CriteriaResourceMatcher {
 		return new SubscriptionMatchResult(theParamName);
 	}
 
-	private SubscriptionMatchResult matchTokens(String theParamName, List<? extends IQueryParameterType> nextAnd, ResourceIndexedSearchParams theSearchParams) {
-		
-		boolean matched = false;
-		for (IQueryParameterType token : nextAnd) {
-			matched |= theSearchParams.matchToken(theParamName, token);
-		}
-		return new SubscriptionMatchResult(matched);
+	private boolean matchTokens(String theParamName, List<? extends IQueryParameterType> nextAnd, ResourceIndexedSearchParams theSearchParams) {
+		return nextAnd.stream().anyMatch(token -> theSearchParams.matchToken(theParamName, token));
 	}
 }
