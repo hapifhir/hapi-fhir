@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
@@ -53,7 +52,7 @@ public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 	 */
 	protected IBundleProvider performSearch(String theCriteria) {
 		RuntimeResourceDefinition responseResourceDef = myDaoProvider.getSubscriptionDao().validateCriteriaAndReturnResourceDefinition(theCriteria);
-		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(myDaoProvider.getSubscriptionDao(), myCtx, theCriteria, responseResourceDef);
+		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
 
 		RequestDetails req = new ServletSubRequestDetails();
 		req.setSubRequest(true);

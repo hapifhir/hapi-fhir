@@ -77,7 +77,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 		RuntimeResourceDefinition resourceDef = parseUrlResourceType(myCtx, nextUrl);
 		IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceDef.getName());
 		String queryPart = parseWarmUrlParamPart(nextUrl);
-		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(callingDao, myCtx, queryPart, resourceDef);
+		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
 
 		callingDao.search(responseCriteriaUrl);
 	}

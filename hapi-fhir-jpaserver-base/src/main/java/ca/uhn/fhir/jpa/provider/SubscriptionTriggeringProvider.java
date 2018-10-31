@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -286,7 +285,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider, Applic
 			String resourceType = resourceDef.getName();
 
 			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
-			SearchParameterMap params = myMatchUrlService.translateMatchUrl(callingDao, myFhirContext, queryPart, resourceDef);
+			SearchParameterMap params = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
 
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
 

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.DaoProvider;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -37,11 +38,13 @@ public class MatchUrlService {
 	private DaoProvider myDaoProvider;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private SearchParamProvider mySearchParamProvider;
 
-	public <R extends IBaseResource> Set<Long> processMatchUrl(IDao theCallingDao, String theMatchUrl, Class<R> theResourceType) {
+	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
 
-		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theCallingDao, myContext, theMatchUrl, resourceDef);
+		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
 		paramMap.setLoadSynchronous(true);
 
 		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
@@ -56,8 +59,8 @@ public class MatchUrlService {
 		return dao.searchForIds(paramMap);
 	}
 
-	public SearchParameterMap translateMatchUrl(IDao theCallingDao, FhirContext theContext, String
-		theMatchUrl, RuntimeResourceDefinition resourceDef) {
+	public SearchParameterMap translateMatchUrl(String
+																  theMatchUrl, RuntimeResourceDefinition resourceDef) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		List<NameValuePair> parameters = translateMatchUrl(theMatchUrl);
 
@@ -92,7 +95,7 @@ public class MatchUrlService {
 						throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED + " parameter repetitions");
 					} else {
 						DateRangeParam p1 = new DateRangeParam();
-						p1.setValuesAsQueryTokens(theContext, nextParamName, paramList);
+						p1.setValuesAsQueryTokens(myContext, nextParamName, paramList);
 						paramMap.setLastUpdated(p1);
 					}
 				}
@@ -100,7 +103,7 @@ public class MatchUrlService {
 			}
 
 			if (Constants.PARAM_HAS.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(theContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
+				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 				continue;
 			}
@@ -122,18 +125,18 @@ public class MatchUrlService {
 					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
 				}
 				IQueryParameterAnd<?> type = newInstanceAnd(nextParamName);
-				type.setValuesAsQueryTokens(theContext, nextParamName, (paramList));
+				type.setValuesAsQueryTokens(myContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef = theCallingDao.getSearchParamByName(resourceDef, nextParamName);
+				RuntimeSearchParam paramDef = mySearchParamProvider.getSearchParamByName(resourceDef, nextParamName);
 				if (paramDef == null) {
 					throw new InvalidRequestException(
 						"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);
 				}
 
-				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(theContext, paramDef, nextParamName, paramList);
+				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, paramDef, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			}
 		}

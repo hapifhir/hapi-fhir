@@ -186,7 +186,7 @@ public class ResourceIndexedSearchParams {
 						throw new InvalidRequestException(msg);
 					}
 					Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
-					Set<Long> matches = myMatchUrlService.processMatchUrl(theCallingDao, nextIdText, matchResourceType);
+					Set<Long> matches = myMatchUrlService.processMatchUrl(nextIdText, matchResourceType);
 					if (matches.isEmpty()) {
 						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(msg);
