@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -18,7 +16,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.util.Properties;
 
 /*-
  * #%L
@@ -77,13 +74,17 @@ public enum DriverTypeEnum {
 			throw new InternalErrorException("Unable to find driver class: " + myDriverClassName, e);
 		}
 
-		BasicDataSource dataSource = new BasicDataSource();
-//		dataSource.setAutoCommit(false);
+		BasicDataSource dataSource = new BasicDataSource(){
+			@Override
+			public Connection getConnection() throws SQLException {
+				ourLog.info("Creating new DB connection");
+				return super.getConnection();
+			}
+		};
 		dataSource.setDriverClassName(myDriverClassName);
 		dataSource.setUrl(theUrl);
 		dataSource.setUsername(theUsername);
 		dataSource.setPassword(thePassword);
-//		dataSource.setSuppressClose(true);
 
 		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
 		transactionManager.setDataSource(dataSource);
