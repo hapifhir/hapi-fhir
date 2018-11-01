@@ -167,7 +167,7 @@ public class OperationGenericServerR4Test {
 	}
 
 
-	SmartScopeTranslationSvcImplTest	@Test
+	@Test
 	public void testSearchGetsClassifiedAppropriately() throws Exception {
 		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpPost);
