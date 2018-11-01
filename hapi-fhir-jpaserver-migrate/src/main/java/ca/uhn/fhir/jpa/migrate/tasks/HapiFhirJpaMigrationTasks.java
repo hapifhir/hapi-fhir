@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -277,7 +277,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spp = version.onTable("HFJ_RES_PARAM_PRESENT");
 		version.startSectionWithMessage("Starting work on table: " + spp.getTableName());
 		spp.dropIndex("IDX_RESPARMPRESENT_SPID_RESID");
-		spp.dropColumn("SP_ID");
 		spp
 			.addColumn("HASH_PRESENCE")
 			.nullable()
@@ -306,6 +305,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			consolidateSearchParamPresenceIndexesTask.executeSql("update HFJ_RES_PARAM_PRESENT set HASH_PRESENCE = ? where PID = ?", hash, pid);
 		});
 		version.addTask(consolidateSearchParamPresenceIndexesTask);
+
+		// SP_ID is no longer needed
+		spp.dropColumn("SP_ID");
 
 		// Concept
 		Builder.BuilderWithTableName trmConcept = version.onTable("TRM_CONCEPT");
