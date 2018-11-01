@@ -42,6 +42,35 @@ public class FhirTerserDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 
 	@Test
+	public void testCloneIntoBundle() {
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+
+		Patient pt = new Patient();
+		pt.setId("pt");
+		pt.setActive(true);
+		input
+			.addEntry()
+			.setResource(pt)
+			.getRequest()
+			.setUrl("Patient/pt")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		Observation obs = new Observation();
+		obs.setId("obs");
+		obs.getSubject().setReference("Patient/pt");
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setUrl("Observation/obs")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		Bundle ionputClone = new Bundle();
+		ourCtx.newTerser().cloneInto(input, ionputClone, false);
+	}
+
+	@Test
 	public void testCloneIntoComposite() {
 		Quantity source = new Quantity();
 		source.setCode("CODE");
