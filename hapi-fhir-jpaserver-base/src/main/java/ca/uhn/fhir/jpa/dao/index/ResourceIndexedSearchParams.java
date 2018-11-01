@@ -836,7 +836,7 @@ public class ResourceIndexedSearchParams {
 		return populatedResourceLinkParameters;
 	}
 
-	public boolean matchToken(String theParamName, RuntimeSearchParam paramDef, IQueryParameterType theParam) {
+	public boolean matchParam(String theParamName, RuntimeSearchParam paramDef, IQueryParameterType theParam) {
 		if (paramDef == null) {
 			return false;
 		}
@@ -848,10 +848,14 @@ public class ResourceIndexedSearchParams {
 			case QUANTITY:
 				resourceParams = quantityParams;
 				break;
+			case STRING:
+				resourceParams = stringParams;
+				break;
+			case NUMBER:
+				resourceParams = numberParams;
+				break;
 			case DATE:
 			case REFERENCE:
-			case STRING:
-			case NUMBER:
 			case COMPOSITE:
 			case URI:
 			case HAS:

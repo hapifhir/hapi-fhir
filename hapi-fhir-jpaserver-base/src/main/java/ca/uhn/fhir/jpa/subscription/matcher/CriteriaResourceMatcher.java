@@ -40,6 +40,9 @@ public class CriteriaResourceMatcher {
 			return new SubscriptionMatchResult(theCriteria);
 		}
 		searchParameterMap.clean();
+		if (searchParameterMap.getLastUpdated() != null) {
+			return new SubscriptionMatchResult(Constants.PARAM_LASTUPDATED, "Qualifiers not supported");
+		}
 
 		for (Map.Entry<String, List<List<? extends IQueryParameterType>>> entry : searchParameterMap.entrySet()) {
 			String theParamName = entry.getKey();
@@ -91,11 +94,11 @@ public class CriteriaResourceMatcher {
 				switch (paramDef.getParamType()) {
 					case QUANTITY:
 					case TOKEN:
+					case STRING:
+					case NUMBER:
 						return new SubscriptionMatchResult(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theParamName, paramDef, nextAnd, theSearchParams)));
 					case DATE:
 					case REFERENCE:
-					case STRING:
-					case NUMBER:
 					case COMPOSITE:
 					case URI:
 							return new SubscriptionMatchResult(theParamName);
@@ -116,7 +119,7 @@ public class CriteriaResourceMatcher {
 	}
 
 	private boolean matchParams(String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> nextAnd, ResourceIndexedSearchParams theSearchParams) {
-		return nextAnd.stream().anyMatch(token -> theSearchParams.matchToken(theParamName, paramDef, token));
+		return nextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theParamName, paramDef, token));
 	}
 
 	// FIXME KHS test
