@@ -142,6 +142,10 @@
 				to use a parameter annotated with @ResourceParam to receive the Parameters
 				(or other) resource supplied by the client as the request body.
 			</action>
+			<action type="add">
+				The JPA server version migrator tool now runs in a multithreaded way, allowing it to
+				upgrade th database faster when migration tasks require data updates.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

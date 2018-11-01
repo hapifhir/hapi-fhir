@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,20 +77,13 @@ public enum DriverTypeEnum {
 			throw new InternalErrorException("Unable to find driver class: " + myDriverClassName, e);
 		}
 
-		SingleConnectionDataSource dataSource = new SingleConnectionDataSource(){
-			@Override
-			protected Connection getConnectionFromDriver(Properties props) throws SQLException {
-				Connection connect = driver.connect(theUrl, props);
-				assert connect != null;
-				return connect;
-			}
-		};
-		dataSource.setAutoCommit(false);
+		BasicDataSource dataSource = new BasicDataSource();
+//		dataSource.setAutoCommit(false);
 		dataSource.setDriverClassName(myDriverClassName);
 		dataSource.setUrl(theUrl);
 		dataSource.setUsername(theUsername);
 		dataSource.setPassword(thePassword);
-		dataSource.setSuppressClose(true);
+//		dataSource.setSuppressClose(true);
 
 		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
 		transactionManager.setDataSource(dataSource);
