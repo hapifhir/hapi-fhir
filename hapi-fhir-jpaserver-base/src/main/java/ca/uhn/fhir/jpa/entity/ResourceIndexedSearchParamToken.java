@@ -252,16 +252,21 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return hash(theResourceType, theParamName, trim(theValue));
 	}
 
-	public boolean matches(TokenParam theTokenParam) {
+	@Override
+	public boolean matches(IQueryParameterType theParam) {
+		if (!(theParam instanceof TokenParam)) {
+			return false;
+		}
+		TokenParam token = (TokenParam)theParam;
 		boolean retval = false;
 		// Only match on system if it wasn't specified
-		if (theTokenParam.getSystem() == null) {
-			if (getValue().equalsIgnoreCase(theTokenParam.getValue())) {
+		if (token.getSystem() == null) {
+			if (getValue().equalsIgnoreCase(token.getValue())) {
 				retval = true;
 			}
 		} else {
-			if (getSystem().equalsIgnoreCase(theTokenParam.getSystem()) &&
-				getValue().equalsIgnoreCase(theTokenParam.getValue())) {
+			if (getSystem().equalsIgnoreCase(token.getSystem()) &&
+				getValue().equalsIgnoreCase(token.getValue())) {
 				retval = true;
 			}
 		}

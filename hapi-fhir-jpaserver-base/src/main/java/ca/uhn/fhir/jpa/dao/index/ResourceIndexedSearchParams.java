@@ -836,11 +836,37 @@ public class ResourceIndexedSearchParams {
 		return populatedResourceLinkParameters;
 	}
 
-	public boolean matchToken(String theParamName, IQueryParameterType theParam) {
-		Predicate<ResourceIndexedSearchParamToken> namedTokenPredicate = token ->
-			token.getParamName().equalsIgnoreCase(theParamName) &&
-				token.matches((TokenParam)theParam);
-		return tokenParams.stream().anyMatch(namedTokenPredicate);
+	public boolean matchToken(String theParamName, RuntimeSearchParam paramDef, IQueryParameterType theParam) {
+		if (paramDef == null) {
+			return false;
+		}
+		Collection<? extends BaseResourceIndexedSearchParam> resourceParams;
+		switch (paramDef.getParamType()) {
+			case TOKEN:
+				resourceParams = tokenParams;
+				break;
+			case QUANTITY:
+				resourceParams = quantityParams;
+				break;
+			case DATE:
+			case REFERENCE:
+			case STRING:
+			case NUMBER:
+			case COMPOSITE:
+			case URI:
+			case HAS:
+			case SPECIAL:
+			default:
+				resourceParams = null;
+		}
+		if (resourceParams == null) {
+			return false;
+		}
+		Predicate<BaseResourceIndexedSearchParam> namedParamPredicate = param ->
+			param.getParamName().equalsIgnoreCase(theParamName) &&
+				param.matches(theParam);
+
+		return resourceParams.stream().anyMatch(namedParamPredicate);
 	}
 
 	@Override

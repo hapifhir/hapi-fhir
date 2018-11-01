@@ -20,7 +20,7 @@ public class SubscriptionCompositeInMemoryDatabaseMatcher implements ISubscripti
 		SubscriptionMatchResult result;
 		result = mySubscriptionMatcherInMemory.match(criteria, msg);
 		if (!result.supported()) {
-			ourLog.info("InMemoryMatcher doesn't support {} parameter.  Reverting to DatabaseMatcher", result.getUnsupportedParameter());
+			ourLog.info("Criteria {} not supported by InMemoryMatcher: {}.  Reverting to DatabaseMatcher", criteria, result.getUnsupportedReason());
 			result = mySubscriptionMatcherDatabase.match(criteria, msg);
 		}
 		return result;

@@ -155,4 +155,8 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		HashCode hashCode = hasher.hash();
 		return hashCode.asLong();
 	}
+
+	public boolean matches(IQueryParameterType theParam) {
+		throw new UnsupportedOperationException("No parameter matcher for "+theParam);
+	}
 }
