@@ -55,6 +55,18 @@ public class QuestionnaireResponseValidator extends BaseValidator {
 	 */
 
 	private IWorkerContext myWorkerCtx;
+	private IEnableWhenEvaluator myEnableWhenEvaluator = new DefaultEnableWhenEvaluator();
+	
+	// this is here not to introduce enabledWhen validation unless wanted
+	private boolean skipEnabledCheck = true;
+
+	public boolean isSkipEnabledCheck() {
+		return skipEnabledCheck;
+	}
+
+	public void setSkipEnabledCheck(boolean skipEnabledCheck) {
+		this.skipEnabledCheck = skipEnabledCheck;
+	}
 
 	public QuestionnaireResponseValidator(IWorkerContext theWorkerCtx) {
 		this.myWorkerCtx = theWorkerCtx;
@@ -215,7 +227,7 @@ public class QuestionnaireResponseValidator extends BaseValidator {
 
 				List<QuestionnaireResponseItemComponent> responseItems = findResponsesByLinkId(theResponseItems, linkId);
 				if (responseItems.isEmpty()) {
-					if (nextQuestionnaireItem.getRequired()) {
+					if ((skipEnabledCheck || myEnableWhenEvaluator.isQuestionEnabled(nextQuestionnaireItem, theResponseItems)) && nextQuestionnaireItem.getRequired() ) {
 						if (theValidateRequired) {
 							rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Missing required {0} with linkId[{1}]", itemType, linkId);
 						} else {
