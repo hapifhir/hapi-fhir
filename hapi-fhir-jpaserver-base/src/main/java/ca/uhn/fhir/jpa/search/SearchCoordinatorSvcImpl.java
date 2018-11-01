@@ -229,17 +229,19 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			txTemplate.afterPropertiesSet();
 			return txTemplate.execute(t -> {
-				myEntityManager.refresh(theSearch);
-				if (theSearch.getStatus() != SearchStatusEnum.PASSCMPLET) {
+				Search search = mySearchDao.findById(theSearch.getId()).orElse(theSearch);
+
+				if (search.getStatus() != SearchStatusEnum.PASSCMPLET) {
 					throw new IllegalStateException("Can't change to LOADING because state is " + theSearch.getStatus());
 				}
-				theSearch.setStatus(SearchStatusEnum.LOADING);
-				Search newSearch = mySearchDao.save(theSearch);
+				search.setStatus(SearchStatusEnum.LOADING);
+				Search newSearch = mySearchDao.save(search);
 				return Optional.of(newSearch);
 			});
 		} catch (Exception e) {
 			ourLog.warn("Failed to activate search: {}", e.toString());
-			ourLog.trace("Failed to activate search", e);
+			// FIXME: aaaaa
+			ourLog.info("Failed to activate search", e);
 			return Optional.empty();
 		}
 	}
@@ -511,9 +513,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 								 * user has requested resources 0-60, then they would get 0-50 back but the search
 								 * coordinator would then stop searching.SearchCoordinatorSvcImplTest
 								 */
-								List<Long> remainingResources = SearchCoordinatorSvcImpl.this.getResources(mySearch.getUuid(), mySyncedPids.size(), theToIndex);
-								ourLog.debug("Adding {} resources to the existing {} synced resource IDs", remainingResources.size(), mySyncedPids.size());
-								mySyncedPids.addAll(remainingResources);
+								// FIXME: aaaaaaaa
+//								List<Long> remainingResources = SearchCoordinatorSvcImpl.this.getResources(mySearch.getUuid(), mySyncedPids.size(), theToIndex);
+//								ourLog.debug("Adding {} resources to the existing {} synced resource IDs", remainingResources.size(), mySyncedPids.size());
+//								mySyncedPids.addAll(remainingResources);
 								keepWaiting = false;
 								break;
 							case FAILED:

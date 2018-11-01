@@ -175,6 +175,70 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		fail();
 		return null;
 	}
+	
+	@Test
+	public void testTransactionReSavesPreviouslyDeletedResources() {
+
+		{
+			Bundle input = new Bundle();
+			input.setType(BundleType.TRANSACTION);
+
+			Patient pt = new Patient();
+			pt.setId("pt");
+			pt.setActive(true);
+			input
+				.addEntry()
+				.setResource(pt)
+				.getRequest()
+				.setUrl("Patient/pt")
+				.setMethod(HTTPVerb.PUT);
+
+			Observation obs = new Observation();
+			obs.setId("obs");
+			obs.getSubject().setReference("Patient/pt");
+			input
+				.addEntry()
+				.setResource(obs)
+				.getRequest()
+				.setUrl("Observation/obs")
+				.setMethod(HTTPVerb.PUT);
+
+			mySystemDao.transaction(null, input);
+		}
+
+		myObservationDao.delete(new IdType("Observation/obs"));
+		myPatientDao.delete(new IdType("Patient/pt"));
+
+		{
+			Bundle input = new Bundle();
+			input.setType(BundleType.TRANSACTION);
+
+			Patient pt = new Patient();
+			pt.setId("pt");
+			pt.setActive(true);
+			input
+				.addEntry()
+				.setResource(pt)
+				.getRequest()
+				.setUrl("Patient/pt")
+				.setMethod(HTTPVerb.PUT);
+
+			Observation obs = new Observation();
+			obs.setId("obs");
+			obs.getSubject().setReference("Patient/pt");
+			input
+				.addEntry()
+				.setResource(obs)
+				.getRequest()
+				.setUrl("Observation/obs")
+				.setMethod(HTTPVerb.PUT);
+
+			mySystemDao.transaction(null, input);
+		}
+
+		myPatientDao.read(new IdType("Patient/pt"));
+	}
+	
 
 	@Test
 	public void testResourceCounts() {

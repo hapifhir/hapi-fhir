@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -52,6 +51,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class SearchCoordinatorSvcImplTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	@Captor
 	ArgumentCaptor<Iterable<SearchResult>> mySearchResultIterCaptor;
@@ -69,7 +69,6 @@ public class SearchCoordinatorSvcImplTest {
 	@Mock
 	private ISearchResultDao mySearchResultDao;
 	private SearchCoordinatorSvcImpl mySvc;
-
 	@Mock
 	private PlatformTransactionManager myTxManager;
 	private DaoConfig myDaoConfig;
@@ -159,7 +158,7 @@ public class SearchCoordinatorSvcImplTest {
 		}
 
 	}
-private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
+
 	@Test
 	public void testAsyncSearchLargeResultSetBigCountSameCoordinator() {
 		SearchParameterMap params = new SearchParameterMap();
@@ -174,7 +173,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSv
 			List<Long> returnedValues = iter.getReturnedValues();
 			Pageable page = (Pageable) t.getArguments()[1];
 			int offset = (int) page.getOffset();
-			int end = (int)(page.getOffset() + page.getPageSize());
+			int end = (int) (page.getOffset() + page.getPageSize());
 			end = Math.min(end, returnedValues.size());
 			offset = Math.min(offset, returnedValues.size());
 			ourLog.info("findWithSearchUuid {} - {} out of {} values", offset, end, returnedValues.size());
@@ -214,7 +213,7 @@ private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSv
 		assertEquals(10, allResults.get(0).getResourcePid().longValue());
 		assertEquals(799, allResults.get(789).getResourcePid().longValue());
 
-		myExpectedNumberOfSearchBuildersCreated = 3;
+		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
 
 	@Test
