@@ -85,7 +85,6 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 		IIdType id = msg.getId(getContext());
 		String resourceType = id.getResourceType();
-		String resourceId = id.getIdPart();
 
 		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getRegisteredSubscriptions();
 
