@@ -5,11 +5,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.exceptions.*;
 import org.hl7.fhir.convertors.VersionConvertorConstants;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.instance.validation.DefaultEnableWhenEvaluator;
+import org.hl7.fhir.instance.validation.IEnableWhenEvaluator;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.context.IWorkerContext.ValidationResult;
@@ -198,6 +202,8 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   private IEvaluationContext externalHostServices;
   private boolean noExtensibleWarnings;
   private String serverBase;
+  
+  private IEnableWhenEvaluator myEnableWhenEvaluator = new DefaultEnableWhenEvaluator();
 
   /*
    * Keeps track of whether a particular profile has been checked or not yet
@@ -2777,9 +2783,14 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       List<Element> mapItem = map.get(qItem.getLinkId());
       if (mapItem != null)
         validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack, inProgress);
-      else
-        rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), !qItem.getRequired(), "No response found for required item "+qItem.getLinkId());
-    }
+      else   { 
+    	  //item is missing, is the question enabled?
+    	if(!  myEnableWhenEvaluator.isQuestionEnabled(qItem, element)) {
+    	  
+    	  	rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), !qItem.getRequired(), "No response found for required item "+qItem.getLinkId());
+    	}
+      }
+      }
   }
 
   private void validateQuestionnaireResponseItemQuantity( List<ValidationMessage> errors, Element answer, NodeStack stack)	{
