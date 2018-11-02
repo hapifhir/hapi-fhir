@@ -260,8 +260,12 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		TokenParam token = (TokenParam)theParam;
 		boolean retval = false;
 		// Only match on system if it wasn't specified
-		if (token.getSystem() == null) {
+		if (token.getSystem() == null || token.getSystem().isEmpty()) {
 			if (getValue().equalsIgnoreCase(token.getValue())) {
+				retval = true;
+			}
+		} else if (token.getValue() == null || token.getValue().isEmpty()) {
+			if (getSystem().equalsIgnoreCase(token.getSystem())) {
 				retval = true;
 			}
 		} else {

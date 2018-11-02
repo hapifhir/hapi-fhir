@@ -96,11 +96,11 @@ public class CriteriaResourceMatcher {
 					case TOKEN:
 					case STRING:
 					case NUMBER:
-						return new SubscriptionMatchResult(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theParamName, paramDef, nextAnd, theSearchParams)));
+					case URI:
 					case DATE:
+						return new SubscriptionMatchResult(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theParamName, paramDef, nextAnd, theSearchParams)));
 					case REFERENCE:
 					case COMPOSITE:
-					case URI:
 							return new SubscriptionMatchResult(theParamName);
 					case HAS:
 					case SPECIAL:

@@ -854,10 +854,14 @@ public class ResourceIndexedSearchParams {
 			case NUMBER:
 				resourceParams = numberParams;
 				break;
+			case URI:
+				resourceParams = uriParams;
+				break;
 			case DATE:
+				resourceParams = dateParams;
+				break;
 			case REFERENCE:
 			case COMPOSITE:
-			case URI:
 			case HAS:
 			case SPECIAL:
 			default:

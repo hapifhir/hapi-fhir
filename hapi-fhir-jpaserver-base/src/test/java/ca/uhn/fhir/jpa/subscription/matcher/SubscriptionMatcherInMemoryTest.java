@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -33,6 +34,8 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public class SubscriptionMatcherInMemoryTest {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionMatcherInMemoryTest.class);
+
 	@Autowired
 	SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
 	@Autowired
@@ -40,6 +43,7 @@ public class SubscriptionMatcherInMemoryTest {
 
 	private SubscriptionMatchResult match(IBaseResource resource, SearchParameterMap params) {
 		String criteria = params.toNormalizedQueryString(myContext);
+		ourLog.info("Criteria: <{}>", criteria);
 		return mySubscriptionMatcherInMemory.match(criteria, resource);
 	}
 
@@ -347,4 +351,212 @@ public class SubscriptionMatcherInMemoryTest {
 		assertMatched(patient2, params);
 	}
 
+	@Test
+	public void testSearchTokenParam() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
+		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam1");
+		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
+			.setDisplay("testSearchTokenParamDisplay");
+
+		Patient patient2 = new Patient();
+		patient2.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam002");
+		patient2.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testSearchTokenParam001"));
+			assertMatched(patient, map);
+			assertNotMatched(patient2, map);
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new TokenParam(null, "testSearchTokenParam001"));
+			assertMatched(patient, map);
+			assertNotMatched(patient2, map);
+		}
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_LANGUAGE, new TokenParam("testSearchTokenParamSystem", "testSearchTokenParamCode"));
+			assertMatched(patient, map);
+			assertNotMatched(patient2, map);
+		}
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
+			assertUnsupported(patient, map);
+		}
+
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			TokenOrListParam listParam = new TokenOrListParam();
+			listParam.add("urn:system", "testSearchTokenParam001");
+			listParam.add("urn:system", "testSearchTokenParam002");
+			map.add(Patient.SP_IDENTIFIER, listParam);
+			assertMatched(patient, map);
+			assertMatched(patient2, map);
+		}
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			TokenOrListParam listParam = new TokenOrListParam();
+			listParam.add(null, "testSearchTokenParam001");
+			listParam.add("urn:system", "testSearchTokenParam002");
+			map.add(Patient.SP_IDENTIFIER, listParam);
+			assertMatched(patient, map);
+			assertMatched(patient2, map);
+		}
+	}
+
+	@Test
+	public void testSearchTokenParamNoValue() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
+		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam1");
+		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
+			.setDisplay("testSearchTokenParamDisplay");
+
+		Patient patient2 = new Patient();
+		patient2.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam002");
+		patient2.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
+
+		Patient patient3 = new Patient();
+		patient3.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
+		patient3.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", null));
+			// Match 2
+			assertMatched(patient, map);
+			assertMatched(patient2, map);
+			assertNotMatched(patient3, map);
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", ""));
+			// Match 2
+			assertMatched(patient, map);
+			assertMatched(patient2, map);
+			assertNotMatched(patient3, map);
+		}
+	}
+
+	@Test
+	public void testSearchTokenWrongParam() {
+		Patient p1 = new Patient();
+		p1.setGender(Enumerations.AdministrativeGender.MALE);
+
+		Patient p2 = new Patient();
+		p2.addIdentifier().setValue(Enumerations.AdministrativeGender.MALE.toCode());
+
+		{
+			SearchParameterMap map = new SearchParameterMap().add(Patient.SP_GENDER, new TokenParam(null, "male"));
+			assertMatched(p1, map);
+			assertNotMatched(p2, map);
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, new TokenParam(null, "male"));
+			assertNotMatched(p1, map);
+		}
+	}
+
+	@Test
+	public void testSearchUriWrongParam() {
+		ValueSet v1 = new ValueSet();
+		v1.getUrlElement().setValue("http://foo");
+
+		ValueSet v2 = new ValueSet();
+		v2.getExpansion().getIdentifierElement().setValue("http://foo");
+
+		{
+			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(ValueSet.SP_URL, new UriParam("http://foo"));
+			assertMatched(v1, map);
+			assertNotMatched(v2, map);
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(ValueSet.SP_EXPANSION, new UriParam("http://foo"));
+			assertNotMatched(v1, map);
+			assertMatched(v2, map);
+		}
+	}
+
+	@Test
+	public void testSearchValueQuantity() {
+		String methodName = "testSearchValueQuantity";
+
+		Observation o1 = new Observation();
+		o1.getCode().addCoding().setSystem("urn:foo").setCode(methodName + "code");
+		Quantity q1 = new Quantity().setSystem("urn:bar:" + methodName).setCode(methodName + "units").setValue(10);
+		o1.setValue(q1);
+		Observation o2 = new Observation();
+		o2.getCode().addCoding().setSystem("urn:foo").setCode(methodName + "code");
+		Quantity q2 = new Quantity().setSystem("urn:bar:" + methodName).setCode(methodName + "units").setValue(5);
+		o2.setValue(q2);
+
+		SearchParameterMap map;
+		IBundleProvider found;
+		QuantityParam param;
+
+		map = new SearchParameterMap();
+		param = new QuantityParam(null, new BigDecimal("10"), null, null);
+		map.add(Observation.SP_VALUE_QUANTITY, param);
+		assertMatched(o1, map);
+		assertNotMatched(o2, map);
+
+		map = new SearchParameterMap();
+		param = new QuantityParam(null, new BigDecimal("10"), null, methodName + "units");
+		map.add(Observation.SP_VALUE_QUANTITY, param);
+		assertMatched(o1, map);
+		assertNotMatched(o2, map);
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		param = new QuantityParam(null, new BigDecimal("10"), "urn:bar:" + methodName, null);
+		map.add(Observation.SP_VALUE_QUANTITY, param);
+		assertMatched(o1, map);
+		assertNotMatched(o2, map);
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		param = new QuantityParam(null, new BigDecimal("10"), "urn:bar:" + methodName, methodName + "units");
+		map.add(Observation.SP_VALUE_QUANTITY, param);
+		assertMatched(o1, map);
+		assertNotMatched(o2, map);
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		param = new QuantityParam(null, new BigDecimal("1000"), "urn:bar:" + methodName, methodName + "units");
+		map.add(Observation.SP_VALUE_QUANTITY, param);
+		assertNotMatched(o1, map);
+		assertNotMatched(o2, map);
+	}
+
+	@Test
+	public void testSearchWithDate() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("001");
+
+		Patient patient2 = new Patient();
+		patient2.addIdentifier().setSystem("urn:system").setValue("002");
+		patient2.addName().setFamily("Tester_testSearchStringParam").addGiven("John");
+		patient2.setBirthDateElement(new DateType("2011-01-01"));
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add(Patient.SP_BIRTHDATE, new DateParam("2011-01-01"));
+			assertNotMatched(patient, params);
+			assertMatched(patient2, params);
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add(Patient.SP_BIRTHDATE, new DateParam("2011-01-03"));
+			assertNotMatched(patient, params);
+			assertNotMatched(patient2, params);
+		}
+	}
 }

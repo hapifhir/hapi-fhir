@@ -184,4 +184,14 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		b.append("valueHigh", new InstantDt(getValueHigh()));
 		return b.build();
 	}
+
+	@Override
+	public boolean matches(IQueryParameterType theParam) {
+		if (!(theParam instanceof DateParam)) {
+			return false;
+		}
+		Date date = ((DateParam)theParam).getValue();
+		return (getValueLow().before(date) || getValueLow().equals(date)) &&
+			(getValueHigh().after(date) || getValueHigh().equals(date));
+	}
 }
