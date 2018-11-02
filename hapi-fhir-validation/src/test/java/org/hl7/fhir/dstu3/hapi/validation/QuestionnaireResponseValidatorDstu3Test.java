@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemEnableWhenComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemOptionComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
@@ -302,6 +303,135 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("No response found for required item link0"));
+	}
+	
+	@Test
+	public void testRequiredQuestionWithEnableWhenHdesQuestionHasAnswerTrue() {
+
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
+		
+		// create the questionnaire
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1").setRequired(true);
+		q.addItem(item1);
+		QuestionnaireItemEnableWhenComponent enable = new QuestionnaireItemEnableWhenComponent();
+		item1.addEnableWhen(enable);
+		enable.setQuestion("link0");
+		enable.setHasAnswer(true);
+
+		
+		//q.getItemFirstRep().addEnableWhen().
+		//q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
+	@Test
+	public void testRequiredQuestionWithEnableWhenHidesQuestion() {
+
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		
+		// create the questionnaire
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1").setRequired(true);
+		q.addItem(item1);
+		QuestionnaireItemEnableWhenComponent enable = new QuestionnaireItemEnableWhenComponent();
+		item1.addEnableWhen(enable);
+		enable.setQuestion("link0");
+		enable.setHasAnswer(true);
+
+		
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		//qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
+	@Test
+	public void testRequiredQuestionWithEnableWhenHasAnswerTrueWithAnswer() {
+
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
+		
+		// create the questionnaire
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
+		q.addItem(item1);
+		QuestionnaireItemEnableWhenComponent enable = new QuestionnaireItemEnableWhenComponent();
+		item1.addEnableWhen(enable);
+		enable.setQuestion("link0");
+		enable.setHasAnswer(true);
+
+		
+		//q.getItemFirstRep().addEnableWhen().
+		//q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("BAR"));
+
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
+	
+	@Test
+	public void testRequiredQuestionWithEnableWheHidesRequiredQuestionnHasAnswerFalse() {
+
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		
+		// create the questionnaire
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1").setRequired(true);
+		q.addItem(item1);
+		QuestionnaireItemEnableWhenComponent enable = new QuestionnaireItemEnableWhenComponent();
+		item1.addEnableWhen(enable);
+		enable.setQuestion("link0");
+		enable.setHasAnswer(false);
+
+		
+		//q.getItemFirstRep().addEnableWhen().
+		//q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		
+		// link1 should be disabled, because the enableWhen enables it when link0 doesn't haven an answer
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No issues"));
 	}
 
 	@Test
