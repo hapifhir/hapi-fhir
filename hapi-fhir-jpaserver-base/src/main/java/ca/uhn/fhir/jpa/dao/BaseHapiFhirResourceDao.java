@@ -1254,6 +1254,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBaseResource oldResource = toResource(entity, false);
 
 		/*
+		 * Mark the entity as not deleted - This is also done in the actual updateInternal()
+		 * method later on so it usually doesn't matter whether we do it here, but in the
+		 * case of a transaction with multiple PUTs we don't get there until later so
+		 * having this here means that a transaction can have a reference in one
+		 * resource to another resource in the same transaction that is being
+		 * un-deleted by the transaction. Wacky use case, sure. But it's real.
+		 *
+		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
+		 * for a test that needs this.
+		 */
+		entity.setDeleted(null);
+
+		/*
 		 * If we aren't indexing, that means we're doing this inside a transaction.
 		 * The transaction will do the actual storage to the database a bit later on,
 		 * after placeholder IDs have been replaced, by calling {@link #updateInternal}

@@ -1,0 +1,37 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"fullUrl": "Patient/Patient1063259",
+			"resource": {
+				"resourceType": "Patient",
+				"id": "Patient1063259",
+				"identifier": [
+					{
+						"system": "http://www.foo.com/fhir/identifier-type/EnterpriseId",
+						"value": "1063259"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/Patient1063259"
+			}
+		},
+		{
+			"fullUrl": "DiagnosticReport/ReportSPATH",
+			"resource": {
+				"resourceType": "DiagnosticReport",
+				"id": "ReportSPATH",
+				"subject": {
+					"reference": "Patient/Patient1063259"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "DiagnosticReport/ReportSPATH"
+			}
+		}
+	]
+}

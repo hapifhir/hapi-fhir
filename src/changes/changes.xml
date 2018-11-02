@@ -146,6 +146,11 @@
 				The JPA server version migrator tool now runs in a multithreaded way, allowing it to
 				upgrade th database faster when migration tasks require data updates.
 			</action>
+			<action type="fix">
+				A bug in the JPA server was fixed: When a resource was previously deleted,
+				a transaction could not be posted that both restored the deleted resource but
+				also contained references to the now-restored resource.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">
