@@ -309,9 +309,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	public void testRequiredQuestionWithEnableWhenHdesQuestionHasAnswerTrue() {
 
 		Questionnaire q = new Questionnaire();
-		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
 		
-		//link1 question is enabled when link0 has answer
+		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
 		item1.setLinkId("link1").setRequired(true);
 		q.addItem(item1);
@@ -320,9 +320,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		enable.setQuestion("link0");
 		enable.setHasAnswer(true);
 
+
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
 		String reference = qa.getQuestionnaire().getReference();
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
@@ -332,7 +334,35 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertThat(errors.toString(), containsString("No issues"));
 	}
 	
+	@Test
+	public void testRequiredQuestionWithEnableWhenHidesQuestion() {
 
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		
+		// create the questionnaire
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1").setRequired(true);
+		q.addItem(item1);
+		QuestionnaireItemEnableWhenComponent enable = new QuestionnaireItemEnableWhenComponent();
+		item1.addEnableWhen(enable);
+		enable.setQuestion("link0");
+		enable.setHasAnswer(true);
+
+		
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		//qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
 	@Test
 	public void testRequiredQuestionWithEnableWhenHasAnswerTrueWithAnswer() {
 
@@ -364,10 +394,12 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	
 	
 	@Test
-	public void testRequiredQuestionWithEnableWhenHidesRequiredQuestionnHasAnswerFalse() {
+	public void testRequiredQuestionWithEnableWheHidesRequiredQuestionnHasAnswerFalse() {
 
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		
+		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
 		item1.setLinkId("link1").setRequired(true);
 		q.addItem(item1);
