@@ -1,0 +1,438 @@
+                {
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "Organization/OrgSJHMC",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "OrgSJHMC",
+        "identifier": [
+          {
+            "system": "http://www.foo.com/fhir/OrganizationIdentifier",
+            "value": "SJHMC"
+          }
+        ],
+        "name": "SJHMC"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization/OrgSJHMC"
+      }
+    },
+    {
+      "fullUrl": "Binary/BinaryQ4564699444",
+      "resource": {
+        "resourceType": "Binary",
+        "id": "BinaryQ4564699444",
+        "contentType": "text/plain",
+        "content": "TVNIfF5+XCZ8SE5BTXxTSkhNQ3xITkFNfFNKSE1DfDIwMTYwMzE0MTEwMzI5fHxPUlVeUjAxfFE0NTY0Njk5NDQ0fFR8Mi40fHx8fHx8ODg1OS8xDVBJRHwxfDk2MzI1OHw5NjMyNTheXl5TSkhNQ19NUk5eTVJOfjEwNjMyNTleXl5BWl9FSUR8fEJvYmFeRmV0dHx8MTk3MTEwMTJ8Rnx8MXwxMjQgVyBUSE9NQVMgUkReXlBIT0VOSVheQVpeODUwMTN8fCg2MDIpNjY2LTU1NTV8KDAwMCkwMDAtMDAwMHwxfFN8Tk9OfDE4NTEzMzQxXl5eU0pITUNfRklOfHx8fDJ8fHwwDVBWMXwxfFB8VE9XOF44VDIyXjAxXlNKSE1DfFJ8fHwwNTc1MzleRmdkZWdeVWduZ3heXl5eXl5TSkhNQ19PUkdfRE9DTlVNXjE2OTk3MTAwNDZ8MDU3NTM5XkZnZGVnXlVnbmd4Xl5eXl5eU0pITUNfT1JHX0RPQ05VTV4xNjk5NzEwMDQ2fHxMVFN8fHx8UkF8fHwwNTc1MzleRmdkZWdeVWduZ3heXl5eXl5TSkhNQ19PUkdfRE9DTlVNXjE2OTk3MTAwNDZ8SXx8RXx8fHx8fHx8fHx8fHx8fHx8fHxTSkhNQ3x8QXx8fDIwMTYwMzEzMDkwMDAwDU9SQ3xSRQ1PQlJ8MXw1Njc0ODMyXkhOQU1fT1JERVJJRHx8U1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fDIwMTYwMzEzMTAzOTAwfHx8fHx8fHx8MTIzNDVeVGVzdEdeRUQgUGh5c2ljaWFufHx8fDAwMDEwU1AyMDE2MDAwMDMzNl5ITkFfQUNDTn40MTY3MzY1OF5ITkFfQUNDTklEfHwyMDE2MDMxMzEwNTg1MHx8QVB8Rnx8MXx8fHx8JlJpZ3BtZ2EmTnRnYWFpLUNDJiYmQXBwbGljYXRpb24gU3lzIEFuYWx5c3QgSUkgLSBMfHwxMjM0NV5UZXN0R15FRCBQaHlzaWNpYW4NT0JYfDF8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwyfFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fHx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8M3xUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHx8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDR8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHw1fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDZ8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHw3fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgQ29sbGVjdGVkIERhdGUvVGltZSAgICBSZWNlaXZlZCBEYXRlL1RpbWUgICAgICAgICAgICAgICBBY2Nlc3Npb24gTnVtYmVyfHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHw4fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgMDMvMTMvMjAxNiAxMDozOTowMCAgICAwMy8xMy8yMDE2IDEwOjUyOjUwICAgICAgICAgICAgICAxMC1TUC0xNy0wMDAzMzZ8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDl8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICBNU1QgICAgICAgICAgICAgICAgICAgIE1TVHx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MTB8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwxMXxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIERpYWdub3Npc3x8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MTJ8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICAxLTMuICBMdW5nLCBsZWZ0IHVwcGVyIGxvYmUsIENUIGd1aWRlZCBiaW9wc2llcyB3aXRoIHRvdWNoIHByZXBhcmF0aW9uOnx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MTN8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICAgIC0gUG9vcmx5IGRpZmZlcmVudGlhdGVkIG5vbi1zbWFsbCBjZWxsIGNhcmNpbm9tYSwgcGVuZGluZyBzcGVjaWFsIHN0YWluc3x8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MTR8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwxNXxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIE50Z2FhaS1DQyBSaWdwbWdhLCBBcHBsaWNhdGlvbiBTeXMgQW5hbHlzdCBJSSAtIEx8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDE2fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgKEVsZWN0cm9uaWNhbGx5IHNpZ25lZCl8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDE3fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgVmVyaWZpZWQ6IDAzLzEzLzIwMTYgMTA6NTh8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDE4fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgTlIgL05SfHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwxOXxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHx8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDIwfFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgQ2xpbmljYWwgSW5mb3JtYXRpb258fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDIxfFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgUHJlLW9wIGRpYWdub3NpczogVHJhbnNwbGFudHx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MjJ8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICBQcm9jZWR1cmU6IEJpb3BzeXx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MjN8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICBQb3N0LW9wIGRpYWdub3NpczogTi9BfHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwyNHxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIENsaW5pY2FsIEhpc3Rvcnk6IEx1bmcgdHJhbnNwbGFudHx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MjV8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwyNnxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTcGVjaW1lbiBTdWJtaXR0ZWR8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDI3fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgTFVORywgVFJOU0JSIEJYfHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwyOHxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHx8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDI5fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBHcm9zcyBEZXNjcmlwdGlvbnx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MzB8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICAxLiBSZWNlaXZlZCBpbiBmb3JtYWxpbiBsYWJlbGVkIHdpdGggdGhlIHBhdGllbnQncyBuYW1lLCBtZWRpY2FsIHJlY29yZHx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MzF8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICBudW1iZXIgYW5kIGxlZnQgdXBwZXIgbG9iZSBjb3JlIGJpb3BzeSwgaXMgYSBzaW5nbGUgcmVkLXRhbiwgdmFyaWVnYXRlZCx8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDMyfFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgZnJpYWJsZSBzb2Z0IHRpc3N1ZSBjb3JlLCAwLjkgY20uICBUaGUgc3BlY2ltZW4gaXMgZW50aXJlbHkgc3VibWl0dGVkIGlufHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwzM3xUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIGNhc3NldHRlIDFBLnx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8MzR8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwzNXxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIDIuIFJlY2VpdmVkIGluIGZvcm1hbGluIGxhYmVsZWQgd2l0aCB0aGUgcGF0aWVudCdzIG5hbWUsIG1lZGljYWwgcmVjb3JkfHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwzNnxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIG51bWJlciBhbmQgbGVmdCB1cHBlciBsb2JlIGNvcmUgYmlvcHN5LCBhcmUgdHdvIHBhbGUgZ3JheSwgZnJpYWJsZSBzb2Z0fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHwzN3xUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIHRpc3N1ZSBjb3JlcywgMC40LCBhbmQgMS4wIGNtLiAgVGhlIHNwZWNpbWVuIGlzIGVudGlyZWx5IHN1Ym1pdHRlZCBpbnx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8Mzh8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICBjYXNzZXR0ZSAyQS4gIEEgcXVpY2sgc3RhaW4gaXMgcHJlcGFyZWQgYW5kIGV4YW1pbmVkLnx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8Mzl8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHw0MHxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIFF1aWNrIFN0YWluIEludGVycHJldGF0aW9uOiBbSk1FXXx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8NDF8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICAgIFFTMTogUG9zaXRpdmUufHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHw0MnxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHx8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDQzfFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgMy4gIFJlY2VpdmVkIGluIGZvcm1hbGluIGxhYmVsZWQgd2l0aCB0aGUgcGF0aWVudCdzIG5hbWUsIG1lZGljYWwgcmVjb3JkfHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHw0NHxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIG51bWJlciBhbmQgbGVmdCB1cHBlciBsb2JlIGNvcmUgYmlvcHN5LCBpcyBhIHNpbmdsZSByZWQtdGFuIHNvZnQgdGlzc3VlfHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHw0NXxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIGNvcmUsIDAuNSBjbS4gIFRoZSBzcGVjaW1lbiBpcyBlbnRpcmVseSBzdWJtaXR0ZWQgaW4gY2Fzc2V0dGUgM0EufHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHw0NnxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHx8fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDQ3fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBNaWNyb3Njb3BpYyBEZXNjcmlwdGlvbnx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8NDh8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8ICAgICBNaWNyb3Njb3BpYyBleGFtaW5hdGlvbiBwZXJmb3JtZWQgb24gYWxsIGhpc3RvbG9naWMgc2VjdGlvbnMuQW5kIGFsc28gZm91bmQgaW5jaWRlbnRhbCBsdW5nIG5vZHVsZS58fHx8fHxGfHx8MjAxNjAzMTMxMDU4NTANT0JYfDQ5fFRYfFNVUkdQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnReXlNQQVRIXlN1cmdpY2FsIFBhdGhvbG9neSBSZXBvcnR8fHx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA1PQlh8NTB8VFh8U1VSR1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydF5eU1BBVEheU3VyZ2ljYWwgUGF0aG9sb2d5IFJlcG9ydHx8fHx8fHx8Rnx8fDIwMTYwMzEzMTA1ODUwDU9CWHw1MXxUWHxTVVJHUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0Xl5TUEFUSF5TdXJnaWNhbCBQYXRob2xvZ3kgUmVwb3J0fHwgICAgIFpaVEVTVCwgVFJBTlNQTEFOVCAgICAgICAgICAgICAgICAgICAgIDE1MTYwNTAoU0pIKXx8fHx8fEZ8fHwyMDE2MDMxMzEwNTg1MA=="
+      },
+      "request": {
+        "method": "POST",
+        "url": "Binary"
+      }
+    },
+    {
+      "fullUrl": "Patient/Patient1063259",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "Patient1063259",
+        "extension": [
+          {
+            "url": "http://www.foo.com/fhir/extensions/CurrentWorkFlow",
+            "valueString": "pulmonary"
+          }
+        ],
+        "identifier": [
+          {
+            "system": "http://www.foo.com/fhir/identifier-type/EnterpriseId",
+            "value": "1063259"
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://www.foo.com/Patient/UnknownCode",
+                  "code": "MRN",
+                  "display": "MRN"
+                }
+              ]
+            },
+            "system": "http://www.foo.com/fhir/identifier-type/MR",
+            "value": "963258"
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://www.foo.com/Patient/UnknownCode",
+                  "code": "MRN",
+                  "display": "MRN"
+                }
+              ]
+            },
+            "system": "http://www.foo.com/fhir/identifier-type/MRN",
+            "value": "963258"
+          },
+          {
+            "system": "http://www.foo.com/fhir/identifier-type/",
+            "value": "1063259"
+          },
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/identifier-type",
+                  "code": "AN",
+                  "display": "Account number"
+                }
+              ]
+            },
+            "system": "http://www.foo.com/fhir/identifier-type/AN",
+            "value": "18513341"
+          }
+        ],
+        "name": [
+          {
+            "use": "usual",
+            "family": [
+              "Boba"
+            ],
+            "given": [
+              "Fett"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "(602)666-5555",
+            "use": "home"
+          },
+          {
+            "system": "phone",
+            "value": "(000)000-0000",
+            "use": "work"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1971-10-12",
+        "address": [
+          {
+            "line": [
+              "124 W THOMAS RD"
+            ],
+            "city": "PHOENIX",
+            "state": "AZ",
+            "postalCode": "85013"
+          }
+        ],
+        "maritalStatus": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/v3/MaritalStatus",
+              "code": "S",
+              "display": "Never Married"
+            }
+          ]
+        },
+        "multipleBirthInteger": 0,
+        "communication": [
+          {
+            "language": {
+              "coding": [
+                {
+                  "code": "1"
+                }
+              ]
+            },
+            "preferred": true
+          }
+        ],
+        "active": false
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient/Patient1063259"
+      }
+    },
+    {
+      "fullUrl": "Practitioner/Pract057539",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "Pract057539",
+        "identifier": [
+          {
+            "use": "official",
+            "system": "http://www.foo.com/fhir/PractitionerIdentifier",
+            "value": "057539"
+          }
+        ],
+        "name": {
+          "family": [
+            "Fgdeg"
+          ],
+          "given": [
+            "Ugngx"
+          ]
+        },
+        "gender": "unknown",
+        "practitionerRole": [
+          {
+            "role": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/practitioner-role",
+                  "code": "doctor",
+                  "display": "Doctor"
+                }
+              ]
+            }
+          }
+        ],
+        "communication": [
+          {
+            "coding": [
+              {
+                "code": "1"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/Pract057539"
+      }
+    },
+    {
+      "fullUrl": "Practitioner/Pract12345",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "Pract12345",
+        "identifier": [
+          {
+            "use": "official",
+            "system": "http://www.foo.com/fhir/PractitionerIdentifier",
+            "value": "12345"
+          }
+        ],
+        "name": {
+          "family": [
+            "TestG"
+          ],
+          "given": [
+            "ED Physician"
+          ]
+        },
+        "gender": "unknown",
+        "practitionerRole": [
+          {
+            "role": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/practitioner-role",
+                  "code": "doctor",
+                  "display": "Doctor"
+                }
+              ]
+            }
+          }
+        ],
+        "communication": [
+          {
+            "coding": [
+              {
+                "code": "1"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner/Pract12345"
+      }
+    },
+    {
+      "fullUrl": "Location/LocTOW8.8T22.01",
+      "resource": {
+        "resourceType": "Location",
+        "id": "LocTOW8.8T22.01",
+        "identifier": [
+          {
+            "system": "http://www.foo.com/fhir/LocationIdentifier",
+            "value": "TOW8.8T22.01"
+          }
+        ],
+        "name": "SJHMC"
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Location/LocTOW8.8T22.01"
+      }
+    },
+    {
+      "fullUrl": "Observation/ObxSURGPATH0",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "ObxSURGPATH0",
+        "identifier": [
+          {
+            "type": {
+              "coding": [
+                {
+                  "system": "http://www.foo.com/fhir/",
+                  "code": "LOOKUP",
+                  "display": "LOOKUP"
+                }
+              ]
+            },
+            "value": "_SURGPATH"
+          }
+        ],
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.foo.com/Observation/UnknownCode",
+              "code": "SURGPATH",
+              "display": "SURGPATH"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/Patient1063259",
+          "display": "Boba Fett "
+        },
+        "effectiveDateTime": "2016-03-13T15:58:50Z",
+        "issued": "2016-03-13T15:58:50Z",
+        "performer": [
+          {
+            "reference": "Practitioner/Pract12345"
+          }
+        ],
+        "valueString": "\\\\n\\\\n\\\\n\\\\n                              Surgical Pathology Report\\\\n\\\\n     Collected Date/Time    Received Date/Time               Accession Number\\\\n     03/13/2016 10:39:00    03/13/2016 10:52:50              10-SP-17-000336\\\\n     MST                    MST\\\\n\\\\n                                      Diagnosis\\\\n     1-3.  Lung, left upper lobe, CT guided biopsies with touch preparation:\\\\n       - Poorly differentiated non-small cell carcinoma, pending special stains\\\\n\\\\n     Ntgaai-CC Rigpmga, Application Sys Analyst II - L\\\\n     (Electronically signed)\\\\n     Verified: 03/13/2016 10:58\\\\n     NR /NR\\\\n\\\\n                                Clinical Information\\\\n     Pre-op diagnosis: Transplant\\\\n     Procedure: Biopsy\\\\n     Post-op diagnosis: N/A\\\\n     Clinical History: Lung transplant\\\\n\\\\n                                 Specimen Submitted\\\\n     LUNG, TRNSBR BX\\\\n\\\\n                                  Gross Description\\\\n     1. Received in formalin labeled with the patient's name, medical record\\\\n     number and left upper lobe core biopsy, is a single red-tan, variegated,\\\\n     friable soft tissue core, 0.9 cm.  The specimen is entirely submitted in\\\\n     cassette 1A.\\\\n\\\\n     2. Received in formalin labeled with the patient's name, medical record\\\\n     number and left upper lobe core biopsy, are two pale gray, friable soft\\\\n     tissue cores, 0.4, and 1.0 cm.  The specimen is entirely submitted in\\\\n     cassette 2A.  A quick stain is prepared and examined.\\\\n\\\\n     Quick Stain Interpretation: [JME]\\\\n       QS1: Positive.\\\\n\\\\n     3.  Received in formalin labeled with the patient's name, medical record\\\\n     number and left upper lobe core biopsy, is a single red-tan soft tissue\\\\n     core, 0.5 cm.  The specimen is entirely submitted in cassette 3A.\\\\n\\\\n                               Microscopic Description\\\\n     Microscopic examination performed on all histologic sections.And also found incidental lung nodule.\\\\n\\\\n\\\\n     ZZTEST, TRANSPLANT                     1516050(SJH)",
+        "device": {
+          "display": "EMR"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Observation/ObxSURGPATH0"
+      }
+    },
+    {
+      "fullUrl": "DiagnosticReport/ReportSPATH",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "ReportSPATH",
+        "identifier": [
+          {
+            "system": "http://www.foo.com/fhir/DiagnosticReport",
+            "value": "5674832"
+          }
+        ],
+        "status": "final",
+        "category": {
+          "coding": [
+            {
+              "system": "http://www.foo.com/DiagnosticReport/UnknownCode",
+              "code": "00010SP20160000336",
+              "display": "00010SP20160000336"
+            }
+          ],
+          "text": "00010SP20160000336"
+        },
+        "code": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "SPATH",
+              "display": "Surgical Pathology Report"
+            }
+          ],
+          "text": "Surgical Pathology Report"
+        },
+        "subject": {
+          "reference": "Patient/Patient1063259",
+          "display": "Boba Fett "
+        },
+        "effectiveDateTime": "2016-03-13T15:39:00Z",
+        "issued": "2016-03-13T15:58:50Z",
+        "performer": {
+          "reference": "Practitioner/Pract12345"
+        },
+        "request": [
+          {
+            "reference": "DiagnosticOrder/ORCSPATH"
+          }
+        ],
+        "result": [
+          {
+            "reference": "Observation/ObxSURGPATH0"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "DiagnosticReport/ReportSPATH"
+      }
+    },
+    {
+      "fullUrl": "DiagnosticOrder/ORCSPATH",
+      "resource": {
+        "resourceType": "DiagnosticOrder",
+        "id": "ORCSPATH",
+        "extension": [
+          {
+            "url": "http://www.foo.com/fhir/extensions/ModalityType",
+            "valueString": "AP"
+          },
+          {
+            "url": "http://www.foo.com/fhir/extensions/SendingApplication",
+            "valueString": "EPIC"
+          }
+        ],
+        "subject": {
+          "reference": "Patient/Patient1063259"
+        },
+        "orderer": {
+          "reference": "Practitioner/Pract12345"
+        },
+        "identifier": [
+          {
+            "system": "http://www.foo.com/fhir/DiagnosticOrder",
+            "value": "EPIC_5674832"
+          }
+        ],
+        "status": "completed",
+        "event": [
+          {
+            "status": "in-progress",
+            "dateTime": "2016-03-13T15:39:00Z"
+          }
+        ],
+        "item": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "SPATH",
+                  "display": "Surgical Pathology Report"
+                }
+              ],
+              "text": "Surgical Pathology Report"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "DiagnosticOrder/ORCEPIC5674832"
+      }
+    }
+  ]
+}
