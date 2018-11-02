@@ -306,7 +306,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	}
 	
 	@Test
-	public void testRequiredQuestionWithEnableWhenHasAnswerTrue() {
+	public void testRequiredQuestionWithEnableWhenHdesQuestionHasAnswerTrue() {
 
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
@@ -334,7 +334,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response found for required item link1"));
+		assertThat(errors.toString(), containsString("No issues"));
 	}
 	
 	@Test
@@ -353,9 +353,6 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		enable.setHasAnswer(true);
 
 		
-		//q.getItemFirstRep().addEnableWhen().
-		//q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
-
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
@@ -366,7 +363,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response found for required item link1"));
+		assertThat(errors.toString(), containsString("No issues"));
 	}
 	
 	@Test
@@ -404,10 +401,10 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	
 	
 	@Test
-	public void testRequiredQuestionWithEnableWhenHasAnswerFalse() {
+	public void testRequiredQuestionWithEnableWheHidesRequiredQuestionnHasAnswerFalse() {
 
 		Questionnaire q = new Questionnaire();
-		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
 		
 		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
@@ -425,6 +422,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		
+		// link1 should be disabled, because the enableWhen enables it when link0 doesn't haven an answer
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
 		String reference = qa.getQuestionnaire().getReference();
@@ -432,8 +431,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		// FIXME: should be no assert, fix the assert 
-		assertThat(errors.toString(), containsString("No response found for required item link2"));
+		assertThat(errors.toString(), containsString("No issues"));
 	}
 
 	@Test
