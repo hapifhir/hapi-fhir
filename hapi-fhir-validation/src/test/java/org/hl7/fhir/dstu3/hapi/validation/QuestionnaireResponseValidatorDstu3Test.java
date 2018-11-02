@@ -348,10 +348,6 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		enable.setQuestion("link0");
 		enable.setHasAnswer(true);
 
-		
-		//q.getItemFirstRep().addEnableWhen().
-		//q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
-
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
