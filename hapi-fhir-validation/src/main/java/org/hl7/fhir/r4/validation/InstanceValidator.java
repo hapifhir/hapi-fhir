@@ -203,7 +203,6 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   
   private IEnableWhenEvaluator myEnableWhenEvaluator = new DefaultEnableWhenEvaluator();
 
-
   /*
    * Keeps track of whether a particular profile has been checked or not yet
    */
