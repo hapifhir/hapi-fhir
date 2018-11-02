@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
@@ -20,6 +21,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -558,5 +561,203 @@ public class SubscriptionMatcherInMemoryTest {
 			assertNotMatched(patient, params);
 			assertNotMatched(patient2, params);
 		}
+	}
+
+	@Test
+	public void testSearchWithIncludesIgnored() {
+		String methodName = "testSearchWithIncludes";
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("001");
+		patient.addName().setFamily("Tester_" + methodName + "_P1").addGiven("Joe");
+
+		{
+			// No includes
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
+			assertMatched(patient, params);
+		}
+		{
+			// Named include
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
+			params.addInclude(Patient.INCLUDE_ORGANIZATION.asNonRecursive());
+			assertMatched(patient, params);
+		}
+		{
+			// Named include with parent non-recursive
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
+			params.addInclude(Patient.INCLUDE_ORGANIZATION);
+			params.addInclude(Organization.INCLUDE_PARTOF.asNonRecursive());
+			assertMatched(patient, params);
+		}
+		{
+			// Named include with parent recursive
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
+			params.addInclude(Patient.INCLUDE_ORGANIZATION);
+			params.addInclude(Organization.INCLUDE_PARTOF.asRecursive());
+			assertMatched(patient, params);
+		}
+		{
+			// * include non recursive
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
+			params.addInclude(IBaseResource.INCLUDE_ALL.asNonRecursive());
+			assertMatched(patient, params);
+		}
+		{
+			// * include recursive
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
+			params.addInclude(IBaseResource.INCLUDE_ALL.asRecursive());
+			assertMatched(patient, params);
+		}
+		{
+			// Irrelevant include
+			SearchParameterMap params = new SearchParameterMap();
+			params.add(Patient.SP_FAMILY, new StringParam("Tester_" + methodName + "_P1"));
+			params.addInclude(Encounter.INCLUDE_EPISODE_OF_CARE);
+			assertMatched(patient, params);
+		}
+	}
+
+	@Test
+	public void testSearchWithSecurityAndProfileParamsUnsupported() {
+		String methodName = "testSearchWithSecurityAndProfileParams";
+
+		Organization org = new Organization();
+		org.getNameElement().setValue("FOO");
+		org.getMeta().addSecurity("urn:taglist", methodName + "1a", null);
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_security", new TokenParam("urn:taglist", methodName + "1a"));
+			assertUnsupported(org, params);
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_profile", new UriParam("http://" + methodName));
+			assertUnsupported(org, params);
+		}
+	}
+
+	@Test
+	public void testSearchWithTagParameterUnsupported() {
+		String methodName = "testSearchWithTagParameter";
+
+		Organization org = new Organization();
+		org.getNameElement().setValue("FOO");
+		org.getMeta().addTag("urn:taglist", methodName + "1a", null);
+		org.getMeta().addTag("urn:taglist", methodName + "1b", null);
+
+		{
+			// One tag
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("_tag", new TokenParam("urn:taglist", methodName + "1a"));
+			assertUnsupported(org, params);
+		}
+	}
+
+	@Test
+	public void testSearchWithVeryLongUrlLonger() {
+		Patient p = new Patient();
+		p.addName().setFamily("A1");
+
+
+		SearchParameterMap map = new SearchParameterMap();
+		StringOrListParam or = new StringOrListParam();
+		or.addOr(new StringParam("A1"));
+		for (int i = 0; i < 50; i++) {
+			or.addOr(new StringParam(StringUtils.leftPad("", 200, (char) ('A' + i))));
+		}
+		map.add(Patient.SP_NAME, or);
+		assertMatched(p, map);
+
+		map = new SearchParameterMap();
+		or = new StringOrListParam();
+		or.addOr(new StringParam("A1"));
+		or.addOr(new StringParam("A1"));
+		for (int i = 0; i < 50; i++) {
+			or.addOr(new StringParam(StringUtils.leftPad("", 200, (char) ('A' + i))));
+		}
+		map.add(Patient.SP_NAME, or);
+		assertMatched(p, map);
+	}
+
+	@Test
+	public void testDateSearchParametersShouldBeTimezoneIndependent() {
+
+		List<Observation> nlist = new ArrayList<>();
+		nlist.add(createObservationWithEffective("NO1", "2011-01-02T23:00:00-11:30"));
+		nlist.add(createObservationWithEffective("NO2", "2011-01-03T00:00:00+01:00"));
+
+		List<Observation> ylist = new ArrayList<>();
+		ylist.add(createObservationWithEffective("YES01", "2011-01-02T00:00:00-11:30"));
+		ylist.add(createObservationWithEffective("YES02", "2011-01-02T00:00:00-10:00"));
+		ylist.add(createObservationWithEffective("YES03", "2011-01-02T00:00:00-09:00"));
+		ylist.add(createObservationWithEffective("YES04", "2011-01-02T00:00:00-08:00"));
+		ylist.add(createObservationWithEffective("YES05", "2011-01-02T00:00:00-07:00"));
+		ylist.add(createObservationWithEffective("YES06", "2011-01-02T00:00:00-06:00"));
+		ylist.add(createObservationWithEffective("YES07", "2011-01-02T00:00:00-05:00"));
+		ylist.add(createObservationWithEffective("YES08", "2011-01-02T00:00:00-04:00"));
+		ylist.add(createObservationWithEffective("YES09", "2011-01-02T00:00:00-03:00"));
+		ylist.add(createObservationWithEffective("YES10", "2011-01-02T00:00:00-02:00"));
+		ylist.add(createObservationWithEffective("YES11", "2011-01-02T00:00:00-01:00"));
+		ylist.add(createObservationWithEffective("YES12", "2011-01-02T00:00:00Z"));
+		ylist.add(createObservationWithEffective("YES13", "2011-01-02T00:00:00+01:00"));
+		ylist.add(createObservationWithEffective("YES14", "2011-01-02T00:00:00+02:00"));
+		ylist.add(createObservationWithEffective("YES15", "2011-01-02T00:00:00+03:00"));
+		ylist.add(createObservationWithEffective("YES16", "2011-01-02T00:00:00+04:00"));
+		ylist.add(createObservationWithEffective("YES17", "2011-01-02T00:00:00+05:00"));
+		ylist.add(createObservationWithEffective("YES18", "2011-01-02T00:00:00+06:00"));
+		ylist.add(createObservationWithEffective("YES19", "2011-01-02T00:00:00+07:00"));
+		ylist.add(createObservationWithEffective("YES20", "2011-01-02T00:00:00+08:00"));
+		ylist.add(createObservationWithEffective("YES21", "2011-01-02T00:00:00+09:00"));
+		ylist.add(createObservationWithEffective("YES22", "2011-01-02T00:00:00+10:00"));
+		ylist.add(createObservationWithEffective("YES23", "2011-01-02T00:00:00+11:00"));
+
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Observation.SP_DATE, new DateParam("2011-01-02"));
+
+		for(Observation obs : nlist) {
+//			assertNotMatched(obs, map);
+		}
+		for(Observation obs : ylist) {
+			ourLog.info("Obs {} has time {}", obs.getId(), obs.getEffectiveDateTimeType().getValue().toString());
+			assertMatched(obs, map);
+		}
+	}
+
+	private Observation createObservationWithEffective(String theId, String theEffective) {
+		Observation obs = new Observation();
+		obs.setId(theId);
+		obs.setEffective(new DateTimeType(theEffective));
+		return obs;
+	}
+
+	@Test
+	public void testSearchWithVeryLongUrlShorter() {
+		Patient p = new Patient();
+		p.addName().setFamily("A1");
+
+		SearchParameterMap map = new SearchParameterMap();
+		StringOrListParam or = new StringOrListParam();
+		or.addOr(new StringParam("A1"));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'A')));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'B')));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'C')));
+		map.add(Patient.SP_NAME, or);
+
+		assertMatched(p, map);
+
+		map = new SearchParameterMap();
+		or = new StringOrListParam();
+		or.addOr(new StringParam("A1"));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'A')));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'B')));
+		or.addOr(new StringParam(StringUtils.leftPad("", 200, 'C')));
+		map.add(Patient.SP_NAME, or);
+		assertMatched(p, map);
 	}
 }

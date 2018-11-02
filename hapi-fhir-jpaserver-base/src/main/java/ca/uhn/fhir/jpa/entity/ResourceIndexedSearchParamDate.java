@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -190,8 +191,25 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		if (!(theParam instanceof DateParam)) {
 			return false;
 		}
-		Date date = ((DateParam)theParam).getValue();
-		return (getValueLow().before(date) || getValueLow().equals(date)) &&
-			(getValueHigh().after(date) || getValueHigh().equals(date));
+		DateParam date = (DateParam) theParam;
+		DateRangeParam range = new DateRangeParam(date);
+		Date lowerBound = range.getLowerBoundAsInstant();
+		Date upperBound = range.getUpperBoundAsInstant();
+
+		if (lowerBound == null && upperBound == null) {
+			// should never happen
+			return false;
+		}
+
+		boolean result = true;
+		if (lowerBound != null) {
+			result &= (myValueLow.after(lowerBound) || myValueLow.equals(lowerBound));
+			result &= (myValueHigh.after(lowerBound) || myValueHigh.equals(lowerBound));
+		}
+		if (upperBound != null) {
+			result &= (myValueLow.before(upperBound) || myValueLow.equals(upperBound));
+			result &= (myValueHigh.before(upperBound) || myValueHigh.equals(upperBound));
+		}
+		return result;
 	}
 }
