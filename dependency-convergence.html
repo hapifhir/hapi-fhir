@@ -170,58 +170,46 @@
   <h2 id="Reactor_Dependency_Convergence">Reactor Dependency Convergence</h2>
  </div> 
  <table border="0" class="bodyTable table table-striped table-hover"> 
-  <caption> 
-   <b>Legend:</b> 
-  </caption> 
-  <tbody> 
-   <tr class="a"> 
-    <td><i class="icon-exclamation-sign"></i></td> 
-    <td>At least one dependency has a differing version of the dependency or has SNAPSHOT dependencies.</td> 
-   </tr> 
-  </tbody> 
- </table> 
- <br /> 
- <table border="0" class="bodyTable table table-striped table-hover"> 
   <thead> 
-   <tr class="b"> 
+   <tr class="a"> 
     <th>Ready for release (100% convergence and no SNAPSHOTS):</th> 
-    <td><i class="icon-exclamation-sign"></i>&nbsp;<b>Error</b><br />You do not have 100% convergence.<br />You have SNAPSHOT dependencies.</td> 
+    <td><i class="icon-exclamation-sign"></i>&nbsp;<b>Error</b><br />You have SNAPSHOT dependencies.</td> 
    </tr> 
   </thead> 
   <thead> 
-   <tr class="a"> 
+   <tr class="b"> 
     <th>Convergence (NOD/NOA):</th> 
-    <td><i class="icon-exclamation-sign"></i>&nbsp;<b>96 %</b></td> 
+    <td><i class="icon-ok"></i>&nbsp;<b>100 %</b></td> 
    </tr> 
   </thead> 
   <thead> 
-   <tr class="b"> 
+   <tr class="a"> 
     <th>Number of SNAPSHOT artifacts (NOS):</th> 
-    <td>9</td> 
+    <td>14</td> 
    </tr> 
   </thead> 
   <thead> 
-   <tr class="a"> 
+   <tr class="b"> 
     <th>Number of version-conflicting artifacts (NOC):</th> 
-    <td>6</td> 
-   </tr> 
-  </thead> 
-  <thead> 
-   <tr class="b"> 
-    <th>Number of unique artifacts (NOA):</th> 
-    <td>190</td> 
+    <td>0</td> 
    </tr> 
   </thead> 
   <thead> 
    <tr class="a"> 
-    <th>Number of dependencies (NOD):</th> 
-    <td>183</td> 
+    <th>Number of unique artifacts (NOA):</th> 
+    <td>51</td> 
    </tr> 
   </thead> 
   <thead> 
    <tr class="b"> 
+    <th>Number of dependencies (NOD):</th> 
+    <td>51</td> 
+   </tr> 
+  </thead> 
+  <thead> 
+   <tr class="a"> 
     <th>Number of modules:</th> 
-    <td>10</td> 
+    <td>2</td> 
    </tr> 
   </thead> 
   <caption> 
@@ -230,430 +218,6 @@
   <tbody> 
   </tbody> 
  </table> 
-</div> 
-<div class="section"> 
- <h3 id="Dependencies_used_in_modules">Dependencies used in modules</h3> 
- <div class="section"> 
-  <h4 id="comgooglecodefindbugsjsr305">com.google.code.findbugs:jsr305</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">1.3.9</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-base:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.google.guava:guava:jar:25.0-jre:compile<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.code.findbugs:jsr305:jar:1.3.9:compile - omitted for conflict with 3.0.2)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />+-&nbsp;com.google.guava:guava:jar:25.0-jre:compile<br />|&nbsp;&nbsp;\-&nbsp;com.google.code.findbugs:jsr305:jar:1.3.9:compile<br />\-&nbsp;com.google.guava:guava-testlib:jar:23.0:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.code.findbugs:jsr305:jar:1.3.9:test - omitted for duplicate)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:bundle:3.6.0-SNAPSHOT<br />+-&nbsp;com.google.guava:guava:jar:25.0-jre:test (scope not updated to compile)<br />|&nbsp;&nbsp;\-&nbsp;com.google.code.findbugs:jsr305:jar:1.3.9:test<br />\-&nbsp;com.google.guava:guava-testlib:jar:23.0:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.code.findbugs:jsr305:jar:1.3.9:test - omitted for duplicate)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />+-&nbsp;com.google.guava:guava:jar:25.0-jre:test (scope not updated to compile)<br />|&nbsp;&nbsp;\-&nbsp;com.google.code.findbugs:jsr305:jar:1.3.9:test<br />\-&nbsp;com.google.guava:guava-testlib:jar:23.0:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.code.findbugs:jsr305:jar:1.3.9:test - omitted for duplicate)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-r4:bundle:3.6.0-SNAPSHOT<br />+-&nbsp;com.google.guava:guava:jar:25.0-jre:test (scope not updated to compile)<br />|&nbsp;&nbsp;\-&nbsp;com.google.code.findbugs:jsr305:jar:1.3.9:test<br />\-&nbsp;com.google.guava:guava-testlib:jar:23.0:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.code.findbugs:jsr305:jar:1.3.9:test - omitted for duplicate)<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-        <tr class="a"> 
-         <td width="25%">3.0.2</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-base:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.helger:ph-commons:jar:9.1.1:compile<br />&nbsp;&nbsp;&nbsp;\-&nbsp;com.google.code.findbugs:jsr305:jar:3.0.2:compile<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />\-&nbsp;com.helger:ph-commons:jar:9.1.1:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.code.findbugs:jsr305:jar:3.0.2:compile - scope updated from test; omitted for duplicate)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.helger:ph-schematron:jar:5.0.4:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;com.helger:ph-commons:jar:9.1.1:test<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.code.findbugs:jsr305:jar:3.0.2:test - omitted for conflict with 1.3.9)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.helger:ph-commons:jar:9.1.1:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.code.findbugs:jsr305:jar:3.0.2:compile - scope updated from test; omitted for duplicate)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-r4:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.helger:ph-commons:jar:9.1.1:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.code.findbugs:jsr305:jar:3.0.2:compile - scope updated from test; omitted for duplicate)<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="comgoogleerrorproneerror_prone_annotations">com.google.errorprone:error_prone_annotations</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="b"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="a"> 
-         <td width="25%">2.0.18</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />\-&nbsp;com.google.guava:guava-testlib:jar:23.0:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.errorprone:error_prone_annotations:jar:2.0.18:test - omitted for conflict with 2.1.3)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.google.guava:guava-testlib:jar:23.0:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.errorprone:error_prone_annotations:jar:2.0.18:test - omitted for conflict with 2.1.3)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.google.guava:guava-testlib:jar:23.0:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.errorprone:error_prone_annotations:jar:2.0.18:test - omitted for conflict with 2.1.3)<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-r4:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.google.guava:guava-testlib:jar:23.0:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(com.google.errorprone:error_prone_annotations:jar:2.0.18:test - omitted for conflict with 2.1.3)<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-        <tr class="b"> 
-         <td width="25%">2.1.3</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />\-&nbsp;com.google.guava:guava:jar:25.0-jre:compile<br />&nbsp;&nbsp;&nbsp;\-&nbsp;com.google.errorprone:error_prone_annotations:jar:2.1.3:compile<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.google.guava:guava:jar:25.0-jre:test (scope not updated to compile)<br />&nbsp;&nbsp;&nbsp;\-&nbsp;com.google.errorprone:error_prone_annotations:jar:2.1.3:test<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.google.guava:guava:jar:25.0-jre:test (scope not updated to compile)<br />&nbsp;&nbsp;&nbsp;\-&nbsp;com.google.errorprone:error_prone_annotations:jar:2.1.3:test<br /></li> 
-           <br /> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-r4:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;com.google.guava:guava:jar:25.0-jre:test (scope not updated to compile)<br />&nbsp;&nbsp;&nbsp;\-&nbsp;com.google.errorprone:error_prone_annotations:jar:2.1.3:test<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="commons-codeccommons-codec">commons-codec:commons-codec</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">1.1</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;commons-codec:commons-codec:jar:1.1:compile<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-        <tr class="a"> 
-         <td width="25%">1.11</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />+-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-base:jar:3.6.0-SNAPSHOT:compile<br />|&nbsp;&nbsp;\-&nbsp;(commons-codec:commons-codec:jar:1.11:compile - version managed from 1.9; omitted for conflict with 1.1)<br />+-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-utilities:jar:3.6.0-SNAPSHOT:compile<br />|&nbsp;&nbsp;\-&nbsp;(commons-codec:commons-codec:jar:1.11:compile - omitted for duplicate)<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-client:jar:3.6.0-SNAPSHOT:compile<br />&nbsp;&nbsp;&nbsp;\-&nbsp;org.apache.httpcomponents:httpclient:jar:4.5.3:compile<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\-&nbsp;(commons-codec:commons-codec:jar:1.11:compile - version managed from 1.9; omitted for duplicate)<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="javaxservletjavaxservlet-api">javax.servlet:javax.servlet-api</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="b"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="a"> 
-         <td width="25%">3.0.1</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;javax.servlet:javax.servlet-api:jar:3.0.1:compile<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-        <tr class="b"> 
-         <td width="25%">3.1.0</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;org.eclipse.jetty:jetty-server:jar:9.4.12.v20180830:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(javax.servlet:javax.servlet-api:jar:3.1.0:test - omitted for conflict with 3.0.1)<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="netbytebuddybyte-buddy">net.bytebuddy:byte-buddy</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">1.8.17</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />+-&nbsp;org.hibernate:hibernate-core:jar:5.3.6.Final:compile<br />|&nbsp;&nbsp;\-&nbsp;net.bytebuddy:byte-buddy:jar:1.8.17:compile<br />\-&nbsp;org.hibernate:hibernate-entitymanager:jar:5.3.6.Final:compile<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(net.bytebuddy:byte-buddy:jar:1.8.17:compile - omitted for duplicate)<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-        <tr class="a"> 
-         <td width="25%">1.8.5</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />\-&nbsp;org.mockito:mockito-core:jar:2.18.3:test<br />&nbsp;&nbsp;&nbsp;\-&nbsp;(net.bytebuddy:byte-buddy:jar:1.8.5:test - omitted for conflict with 1.8.17)<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="orgjbossloggingjboss-logging">org.jboss.logging:jboss-logging</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="b"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="a"> 
-         <td width="25%">3.3.1.Final</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />\-&nbsp;org.hibernate:hibernate-core:jar:5.3.6.Final:compile<br />&nbsp;&nbsp;&nbsp;\-&nbsp;org.hibernate.common:hibernate-commons-annotations:jar:5.0.4.Final:compile<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\-&nbsp;(org.jboss.logging:jboss-logging:jar:3.3.1.Final:compile - omitted for conflict with 3.3.2.Final)<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-        <tr class="b"> 
-         <td width="25%">3.3.2.Final</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />+-&nbsp;org.hibernate:hibernate-core:jar:5.3.6.Final:compile<br />|&nbsp;&nbsp;\-&nbsp;org.jboss.logging:jboss-logging:jar:3.3.2.Final:compile<br />+-&nbsp;org.hibernate:hibernate-entitymanager:jar:5.3.6.Final:compile<br />|&nbsp;&nbsp;\-&nbsp;(org.jboss.logging:jboss-logging:jar:3.3.2.Final:compile - omitted for duplicate)<br />+-&nbsp;org.hibernate:hibernate-ehcache:jar:5.3.6.Final:compile<br />|&nbsp;&nbsp;\-&nbsp;(org.jboss.logging:jboss-logging:jar:3.3.2.Final:compile - omitted for duplicate)<br />\-&nbsp;org.hibernate:hibernate-search-orm:jar:5.10.3.Final:compile<br />&nbsp;&nbsp;&nbsp;\-&nbsp;org.hibernate:hibernate-search-engine:jar:5.10.3.Final:compile<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\-&nbsp;(org.jboss.logging:jboss-logging:jar:3.3.2.Final:compile - omitted for duplicate)<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="cauhnhapifhirhapi-fhir-client-okhttp">ca.uhn.hapi.fhir:hapi-fhir-client-okhttp</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">3.6.0-SNAPSHOT</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-base-examples:jar:3.6.0-SNAPSHOT<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:jar:3.6.0-SNAPSHOT:compile<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="cauhnhapifhirhapi-fhir-converter">ca.uhn.hapi.fhir:hapi-fhir-converter</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">3.6.0-SNAPSHOT</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-validation:jar:3.6.0-SNAPSHOT:compile<br />&nbsp;&nbsp;&nbsp;\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-converter:jar:3.6.0-SNAPSHOT:compile<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="cauhnhapifhirhapi-fhir-structures-dstu21">ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2.1</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">3.6.0-SNAPSHOT</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jaxrsserver-base:jar:3.6.0-SNAPSHOT<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2.1:jar:3.6.0-SNAPSHOT:compile<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="cauhnhapifhirhapi-fhir-structures-hl7org-dstu2">ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">3.6.0-SNAPSHOT</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2:jar:3.6.0-SNAPSHOT:compile<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="cauhnhapifhirhapi-fhir-utilities">ca.uhn.hapi.fhir:hapi-fhir-utilities</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">3.6.0-SNAPSHOT</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-utilities:jar:3.6.0-SNAPSHOT:compile<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="cauhnhapifhirhapi-fhir-validation">ca.uhn.hapi.fhir:hapi-fhir-validation</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">3.6.0-SNAPSHOT</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base:jar:3.6.0-SNAPSHOT<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-validation:jar:3.6.0-SNAPSHOT:compile<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="cauhnhapifhirhapi-fhir-validation-resources-dstu2">ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">3.6.0-SNAPSHOT</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2:jar:3.6.0-SNAPSHOT:test<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="cauhnhapifhirhapi-fhir-validation-resources-dstu3">ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">3.6.0-SNAPSHOT</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3:jar:3.6.0-SNAPSHOT:test<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
- <div class="section"> 
-  <h4 id="cauhnhapifhirhapi-fhir-validation-resources-r4">ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4</h4> 
-  <table border="0" class="bodyTable table table-striped table-hover"> 
-   <tbody> 
-    <tr class="a"> 
-     <td><i class="icon-exclamation-sign"></i></td> 
-     <td> 
-      <table border="0" class="bodyTable table table-striped table-hover"> 
-       <tbody> 
-        <tr class="b"> 
-         <td width="25%">3.6.0-SNAPSHOT</td> 
-         <td> 
-          <ol style="list-style-type: decimal"> 
-           <li>ca.uhn.hapi.fhir:hapi-fhir-structures-r4:bundle:3.6.0-SNAPSHOT<br />\-&nbsp;ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:jar:3.6.0-SNAPSHOT:test<br /></li> 
-           <br /> 
-          </ol></td> 
-        </tr> 
-       </tbody> 
-      </table></td> 
-    </tr> 
-   </tbody> 
-  </table> 
- </div> 
 </div>
 			</div>
 		</div>
@@ -662,30 +226,7 @@
 				<div class="well">
 					<ul class="nav nav-list">
 						<li class="nav-header">Table of Contents</li>
-		<li class="dropdown"><a href="#Reactor_Dependency_Convergence" title="Reactor Dependency Convergence">Reactor Dependency Convergence <b class="caret"></b></a>
-			<ul class="nav nav-list">
-		<li class="dropdown"><a href="#Dependencies_used_in_modules" title="Dependencies used in modules">Dependencies used in modules <b class="caret"></b></a>
-			<ul class="nav nav-list">
-		<li><a href="#comgooglecodefindbugsjsr305" title="com.google.code.findbugs:jsr305">com.google.code.findbugs:jsr305</a>
-		<li><a href="#comgoogleerrorproneerror_prone_annotations" title="com.google.errorprone:error_prone_annotations">com.google.errorprone:error_prone_annotations</a>
-		<li><a href="#commons-codeccommons-codec" title="commons-codec:commons-codec">commons-codec:commons-codec</a>
-		<li><a href="#javaxservletjavaxservlet-api" title="javax.servlet:javax.servlet-api">javax.servlet:javax.servlet-api</a>
-		<li><a href="#netbytebuddybyte-buddy" title="net.bytebuddy:byte-buddy">net.bytebuddy:byte-buddy</a>
-		<li><a href="#orgjbossloggingjboss-logging" title="org.jboss.logging:jboss-logging">org.jboss.logging:jboss-logging</a>
-		<li><a href="#cauhnhapifhirhapi-fhir-client-okhttp" title="ca.uhn.hapi.fhir:hapi-fhir-client-okhttp">ca.uhn.hapi.fhir:hapi-fhir-client-okhttp</a>
-		<li><a href="#cauhnhapifhirhapi-fhir-converter" title="ca.uhn.hapi.fhir:hapi-fhir-converter">ca.uhn.hapi.fhir:hapi-fhir-converter</a>
-		<li><a href="#cauhnhapifhirhapi-fhir-structures-dstu21" title="ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2.1">ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2.1</a>
-		<li><a href="#cauhnhapifhirhapi-fhir-structures-hl7org-dstu2" title="ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2">ca.uhn.hapi.fhir:hapi-fhir-structures-hl7org-dstu2</a>
-		<li><a href="#cauhnhapifhirhapi-fhir-utilities" title="ca.uhn.hapi.fhir:hapi-fhir-utilities">ca.uhn.hapi.fhir:hapi-fhir-utilities</a>
-		<li><a href="#cauhnhapifhirhapi-fhir-validation" title="ca.uhn.hapi.fhir:hapi-fhir-validation">ca.uhn.hapi.fhir:hapi-fhir-validation</a>
-		<li><a href="#cauhnhapifhirhapi-fhir-validation-resources-dstu2" title="ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2">ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu2</a>
-		<li><a href="#cauhnhapifhirhapi-fhir-validation-resources-dstu3" title="ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3">ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3</a>
-		<li><a href="#cauhnhapifhirhapi-fhir-validation-resources-r4" title="ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4">ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4</a>
-				<li class="divider"></li>
-			</ul>
-		</li>
-			</ul>
-		</li>
+		<li><a href="#Reactor_Dependency_Convergence" title="Reactor Dependency Convergence">Reactor Dependency Convergence</a>
 					</ul>
 				</div>
 			</div>
