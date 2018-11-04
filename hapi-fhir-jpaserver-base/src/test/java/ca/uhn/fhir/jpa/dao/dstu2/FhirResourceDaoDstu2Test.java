@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu2;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;

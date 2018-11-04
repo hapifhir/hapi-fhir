@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -66,6 +67,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
+	@Autowired
+	protected IResourceReindexingSvc myResourceReindexingSvc;
+	@Autowired
+	protected IResourceReindexJobDao myResourceReindexJobDao;
 	@Autowired
 	@Qualifier("myCoverageDaoDstu3")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
@@ -294,8 +299,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@Before
 	@Transactional()
-	public void beforePurgeDatabase() throws InterruptedException {
-		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
+	public void beforePurgeDatabase() {
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
 	}
 
 	@Before
