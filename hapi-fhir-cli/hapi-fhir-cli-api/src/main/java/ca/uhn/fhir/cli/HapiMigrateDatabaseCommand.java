@@ -42,7 +42,7 @@ public class HapiMigrateDatabaseCommand extends BaseMigrateDatabaseCommand<Versi
 
 	@Override
 	protected void addTasks(Migrator theMigrator, VersionEnum theFrom, VersionEnum theTo) {
-		List<BaseTask<?>> tasks = new HapiFhirJpaMigrationTasks().getTasks(theFrom, theTo);
+		List<BaseTask<?>> tasks = new HapiFhirJpaMigrationTasks(getFlags()).getTasks(theFrom, theTo);
 		tasks.forEach(theMigrator::addTask);
 	}
 }

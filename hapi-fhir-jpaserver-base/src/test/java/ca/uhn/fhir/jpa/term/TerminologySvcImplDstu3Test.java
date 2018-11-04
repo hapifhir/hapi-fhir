@@ -550,14 +550,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("D1V", concept.getDesignation().get(0).getValue());
 	}
 
-	@Test
-	public void testReindexTerminology() {
-		IIdType id = createCodeSystem();
-
-		assertThat(mySystemDao.markAllResourcesForReindexing(), greaterThan(0));
-
-		assertThat(mySystemDao.performReindexingPass(100), greaterThan(0));
-	}
 
 	@Test
 	public void testStoreCodeSystemInvalidCyclicLoop() {

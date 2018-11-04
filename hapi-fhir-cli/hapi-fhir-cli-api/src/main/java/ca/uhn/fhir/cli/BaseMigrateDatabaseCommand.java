@@ -9,9 +9,9 @@ package ca.uhn.fhir.cli;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,15 +25,24 @@ import ca.uhn.fhir.jpa.migrate.Migrator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
 
 	private static final String MIGRATE_DATABASE = "migrate-database";
+	private Set<String> myFlags;
+
+	protected Set<String> getFlags() {
+		return myFlags;
+	}
 
 	@Override
 	public String getCommandDescription() {
@@ -68,6 +77,7 @@ public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCom
 		addRequiredOption(retVal, "f", "from", "Version", "The database schema version to migrate FROM");
 		addRequiredOption(retVal, "t", "to", "Version", "The database schema version to migrate TO");
 		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
+		addOptionalOption(retVal, "x", "flags", "Flags", "A comma-separated list of any specific migration flags (these flags are version specific, see migrator documentation for details)");
 
 		return retVal;
 	}
@@ -96,6 +106,12 @@ public abstract class BaseMigrateDatabaseCommand<T extends Enum> extends BaseCom
 		validateVersionSupported(to);
 
 		boolean dryRun = theCommandLine.hasOption("r");
+
+		String flags = theCommandLine.getOptionValue("x");
+		myFlags = Arrays.stream(defaultString(flags).split(","))
+			.map(String::trim)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toSet());
 
 		Migrator migrator = new Migrator();
 		migrator.setConnectionUrl(url);

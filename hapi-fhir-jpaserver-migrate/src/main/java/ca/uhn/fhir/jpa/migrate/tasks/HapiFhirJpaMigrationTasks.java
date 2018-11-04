@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,13 +30,26 @@ import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @SuppressWarnings({"UnstableApiUsage", "SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
+
+	private final Set<FlagEnum> myFlags;
 
 	/**
 	 * Constructor
 	 */
-	public HapiFhirJpaMigrationTasks() {
+	public HapiFhirJpaMigrationTasks(Set<String> theFlags) {
+		myFlags = theFlags
+			.stream()
+			.map(FlagEnum::fromCommandLineValue)
+			.collect(Collectors.toSet());
+
 		init340();
 		init350();
 		init360();
@@ -60,6 +73,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("OPTLOCK_VERSION")
 			.nullable()
 			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+
+		version.addTable("HFJ_RES_REINDEX_JOB")
+			.addSql(DriverTypeEnum.MSSQL_2012, "create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED bit not null, RES_TYPE varchar(255), SUSPENDED_UNTIL datetime2, UPDATE_THRESHOLD_HIGH datetime2 not null, UPDATE_THRESHOLD_LOW datetime2, primary key (PID))")
+			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED boolean not null, RES_TYPE varchar(255), SUSPENDED_UNTIL timestamp, UPDATE_THRESHOLD_HIGH timestamp not null, UPDATE_THRESHOLD_LOW timestamp, primary key (PID))")
+			.addSql(DriverTypeEnum.MARIADB_10_1, "create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED bit not null, RES_TYPE varchar(255), SUSPENDED_UNTIL datetime(6), UPDATE_THRESHOLD_HIGH datetime(6) not null, UPDATE_THRESHOLD_LOW datetime(6), primary key (PID))")
+			.addSql(DriverTypeEnum.POSTGRES_9_4, "persistence_create_postgres94.sql:create table HFJ_RES_REINDEX_JOB (PID int8 not null, JOB_DELETED boolean not null, RES_TYPE varchar(255), SUSPENDED_UNTIL timestamp, UPDATE_THRESHOLD_HIGH timestamp not null, UPDATE_THRESHOLD_LOW timestamp, primary key (PID))")
+			.addSql(DriverTypeEnum.MYSQL_5_7, " create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED bit not null, RES_TYPE varchar(255), SUSPENDED_UNTIL datetime(6), UPDATE_THRESHOLD_HIGH datetime(6) not null, UPDATE_THRESHOLD_LOW datetime(6), primary key (PID))")
+			.addSql(DriverTypeEnum.ORACLE_12C, "create table HFJ_RES_REINDEX_JOB (PID number(19,0) not null, JOB_DELETED number(1,0) not null, RES_TYPE varchar2(255 char), SUSPENDED_UNTIL timestamp, UPDATE_THRESHOLD_HIGH timestamp not null, UPDATE_THRESHOLD_LOW timestamp, primary key (PID))");
+
 	}
 
 	private void init350() {
@@ -81,64 +103,68 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName spidxCoords = version.onTable("HFJ_SPIDX_COORDS");
 		version.startSectionWithMessage("Starting work on table: " + spidxCoords.getTableName());
 		spidxCoords
-			.dropIndex("IDX_SP_COORDS");
-		spidxCoords
 			.addColumn("HASH_IDENTITY")
 			.nullable()
 			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxCoords
-			.addIndex("IDX_SP_COORDS_HASH")
-			.unique(false)
-			.withColumns("HASH_IDENTITY", "SP_LATITUDE", "SP_LONGITUDE");
-		spidxCoords
-			.addTask(new CalculateHashesTask()
-				.setColumnName("HASH_IDENTITY")
-				.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-			);
+		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+			spidxCoords
+				.dropIndex("IDX_SP_COORDS");
+			spidxCoords
+				.addIndex("IDX_SP_COORDS_HASH")
+				.unique(false)
+				.withColumns("HASH_IDENTITY", "SP_LATITUDE", "SP_LONGITUDE");
+			spidxCoords
+				.addTask(new CalculateHashesTask()
+					.setColumnName("HASH_IDENTITY")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
+				);
+		}
 
 		// Indexes - Date
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
 		version.startSectionWithMessage("Starting work on table: " + spidxDate.getTableName());
 		spidxDate
-			.dropIndex("IDX_SP_TOKEN");
-		spidxDate
 			.addColumn("HASH_IDENTITY")
 			.nullable()
 			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxDate
-			.addIndex("IDX_SP_DATE_HASH")
-			.unique(false)
-			.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH");
-		spidxDate
-			.addTask(new CalculateHashesTask()
-				.setColumnName("HASH_IDENTITY")
-				.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-			);
+		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+			spidxDate
+				.dropIndex("IDX_SP_TOKEN");
+			spidxDate
+				.addIndex("IDX_SP_DATE_HASH")
+				.unique(false)
+				.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH");
+			spidxDate
+				.addTask(new CalculateHashesTask()
+					.setColumnName("HASH_IDENTITY")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
+				);
+		}
 
 		// Indexes - Number
 		Builder.BuilderWithTableName spidxNumber = version.onTable("HFJ_SPIDX_NUMBER");
 		version.startSectionWithMessage("Starting work on table: " + spidxNumber.getTableName());
 		spidxNumber
-			.dropIndex("IDX_SP_NUMBER");
-		spidxNumber
 			.addColumn("HASH_IDENTITY")
 			.nullable()
 			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxNumber
-			.addIndex("IDX_SP_NUMBER_HASH_VAL")
-			.unique(false)
-			.withColumns("HASH_IDENTITY", "SP_VALUE");
-		spidxNumber
-			.addTask(new CalculateHashesTask()
-				.setColumnName("HASH_IDENTITY")
-				.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-			);
+		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+			spidxNumber
+				.dropIndex("IDX_SP_NUMBER");
+			spidxNumber
+				.addIndex("IDX_SP_NUMBER_HASH_VAL")
+				.unique(false)
+				.withColumns("HASH_IDENTITY", "SP_VALUE");
+			spidxNumber
+				.addTask(new CalculateHashesTask()
+					.setColumnName("HASH_IDENTITY")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
+				);
+		}
 
 		// Indexes - Quantity
 		Builder.BuilderWithTableName spidxQuantity = version.onTable("HFJ_SPIDX_QUANTITY");
 		version.startSectionWithMessage("Starting work on table: " + spidxQuantity.getTableName());
-		spidxQuantity
-			.dropIndex("IDX_SP_QUANTITY");
 		spidxQuantity
 			.addColumn("HASH_IDENTITY")
 			.nullable()
@@ -151,61 +177,63 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("HASH_IDENTITY_AND_UNITS")
 			.nullable()
 			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxQuantity
-			.addIndex("IDX_SP_QUANTITY_HASH")
-			.unique(false)
-			.withColumns("HASH_IDENTITY", "SP_VALUE");
-		spidxQuantity
-			.addIndex("IDX_SP_QUANTITY_HASH_UN")
-			.unique(false)
-			.withColumns("HASH_IDENTITY_AND_UNITS", "SP_VALUE");
-		spidxQuantity
-			.addIndex("IDX_SP_QUANTITY_HASH_SYSUN")
-			.unique(false)
-			.withColumns("HASH_IDENTITY_SYS_UNITS", "SP_VALUE");
-		spidxQuantity
-			.addTask(new CalculateHashesTask()
-				.setColumnName("HASH_IDENTITY")
-				.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-				.addCalculator("HASH_IDENTITY_AND_UNITS", t -> ResourceIndexedSearchParamQuantity.calculateHashUnits(t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_UNITS")))
-				.addCalculator("HASH_IDENTITY_SYS_UNITS", t -> ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_SYSTEM"), t.getString("SP_UNITS")))
-			);
+		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+			spidxQuantity
+				.dropIndex("IDX_SP_QUANTITY");
+			spidxQuantity
+				.addIndex("IDX_SP_QUANTITY_HASH")
+				.unique(false)
+				.withColumns("HASH_IDENTITY", "SP_VALUE");
+			spidxQuantity
+				.addIndex("IDX_SP_QUANTITY_HASH_UN")
+				.unique(false)
+				.withColumns("HASH_IDENTITY_AND_UNITS", "SP_VALUE");
+			spidxQuantity
+				.addIndex("IDX_SP_QUANTITY_HASH_SYSUN")
+				.unique(false)
+				.withColumns("HASH_IDENTITY_SYS_UNITS", "SP_VALUE");
+			spidxQuantity
+				.addTask(new CalculateHashesTask()
+					.setColumnName("HASH_IDENTITY")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
+					.addCalculator("HASH_IDENTITY_AND_UNITS", t -> ResourceIndexedSearchParamQuantity.calculateHashUnits(t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_UNITS")))
+					.addCalculator("HASH_IDENTITY_SYS_UNITS", t -> ResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_SYSTEM"), t.getString("SP_UNITS")))
+				);
+		}
 
 		// Indexes - String
 		Builder.BuilderWithTableName spidxString = version.onTable("HFJ_SPIDX_STRING");
 		version.startSectionWithMessage("Starting work on table: " + spidxString.getTableName());
 		spidxString
-			.dropIndex("IDX_SP_STRING");
-		spidxString
 			.addColumn("HASH_NORM_PREFIX")
 			.nullable()
 			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxString
-			.addIndex("IDX_SP_STRING_HASH_NRM")
-			.unique(false)
-			.withColumns("HASH_NORM_PREFIX", "SP_VALUE_NORMALIZED");
-		spidxString
-			.addColumn("HASH_EXACT")
-			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxString
-			.addIndex("IDX_SP_STRING_HASH_EXCT")
-			.unique(false)
-			.withColumns("HASH_EXACT");
-		spidxString
-			.addTask(new CalculateHashesTask()
-				.setColumnName("HASH_NORM_PREFIX")
-				.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new DaoConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
-				.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
-			);
+		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+			spidxString
+				.dropIndex("IDX_SP_STRING");
+			spidxString
+				.addIndex("IDX_SP_STRING_HASH_NRM")
+				.unique(false)
+				.withColumns("HASH_NORM_PREFIX", "SP_VALUE_NORMALIZED");
+			spidxString
+				.addColumn("HASH_EXACT")
+				.nullable()
+				.type(AddColumnTask.ColumnTypeEnum.LONG);
+			spidxString
+				.addIndex("IDX_SP_STRING_HASH_EXCT")
+				.unique(false)
+				.withColumns("HASH_EXACT");
+			spidxString
+				.addTask(new CalculateHashesTask()
+					.setColumnName("HASH_NORM_PREFIX")
+					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new DaoConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
+					.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
+				);
+		}
 
 		// Indexes - Token
 		Builder.BuilderWithTableName spidxToken = version.onTable("HFJ_SPIDX_TOKEN");
 		version.startSectionWithMessage("Starting work on table: " + spidxToken.getTableName());
-		spidxToken
-			.dropIndex("IDX_SP_TOKEN");
-		spidxToken
-			.dropIndex("IDX_SP_TOKEN_UNQUAL");
 		spidxToken
 			.addColumn("HASH_IDENTITY")
 			.nullable()
@@ -222,30 +250,36 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("HASH_VALUE")
 			.nullable()
 			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxToken
-			.addIndex("IDX_SP_TOKEN_HASH")
-			.unique(false)
-			.withColumns("HASH_IDENTITY");
-		spidxToken
-			.addIndex("IDX_SP_TOKEN_HASH_S")
-			.unique(false)
-			.withColumns("HASH_SYS");
-		spidxToken
-			.addIndex("IDX_SP_TOKEN_HASH_SV")
-			.unique(false)
-			.withColumns("HASH_SYS_AND_VALUE");
-		spidxToken
-			.addIndex("IDX_SP_TOKEN_HASH_V")
-			.unique(false)
-			.withColumns("HASH_VALUE");
-		spidxToken
-			.addTask(new CalculateHashesTask()
-				.setColumnName("HASH_IDENTITY")
-				.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-				.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")))
-				.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")))
-				.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")))
-			);
+		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+			spidxToken
+				.dropIndex("IDX_SP_TOKEN");
+			spidxToken
+				.dropIndex("IDX_SP_TOKEN_UNQUAL");
+			spidxToken
+				.addIndex("IDX_SP_TOKEN_HASH")
+				.unique(false)
+				.withColumns("HASH_IDENTITY");
+			spidxToken
+				.addIndex("IDX_SP_TOKEN_HASH_S")
+				.unique(false)
+				.withColumns("HASH_SYS");
+			spidxToken
+				.addIndex("IDX_SP_TOKEN_HASH_SV")
+				.unique(false)
+				.withColumns("HASH_SYS_AND_VALUE");
+			spidxToken
+				.addIndex("IDX_SP_TOKEN_HASH_V")
+				.unique(false)
+				.withColumns("HASH_VALUE");
+			spidxToken
+				.addTask(new CalculateHashesTask()
+					.setColumnName("HASH_IDENTITY")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
+					.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")))
+					.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")))
+					.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")))
+				);
+		}
 
 		// Indexes - URI
 		Builder.BuilderWithTableName spidxUri = version.onTable("HFJ_SPIDX_URI");
@@ -254,24 +288,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("HASH_IDENTITY")
 			.nullable()
 			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxUri
-			.addIndex("IDX_SP_URI_HASH_IDENTITY")
-			.unique(false)
-			.withColumns("HASH_IDENTITY", "SP_URI");
-		spidxUri
-			.addColumn("HASH_URI")
-			.nullable()
-			.type(AddColumnTask.ColumnTypeEnum.LONG);
-		spidxUri
-			.addIndex("IDX_SP_URI_HASH_URI")
-			.unique(false)
-			.withColumns("HASH_URI");
-		spidxUri
-			.addTask(new CalculateHashesTask()
-				.setColumnName("HASH_IDENTITY")
-				.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
-				.addCalculator("HASH_URI", t -> ResourceIndexedSearchParamUri.calculateHashUri(t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_URI")))
-			);
+		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
+			spidxUri
+				.addIndex("IDX_SP_URI_HASH_IDENTITY")
+				.unique(false)
+				.withColumns("HASH_IDENTITY", "SP_URI");
+			spidxUri
+				.addColumn("HASH_URI")
+				.nullable()
+				.type(AddColumnTask.ColumnTypeEnum.LONG);
+			spidxUri
+				.addIndex("IDX_SP_URI_HASH_URI")
+				.unique(false)
+				.withColumns("HASH_URI");
+			spidxUri
+				.addTask(new CalculateHashesTask()
+					.setColumnName("HASH_IDENTITY")
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(t.getResourceType(), t.getString("SP_NAME")))
+					.addCalculator("HASH_URI", t -> ResourceIndexedSearchParamUri.calculateHashUri(t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_URI")))
+				);
+		}
 
 		// Search Parameter Presence
 		Builder.BuilderWithTableName spp = version.onTable("HFJ_RES_PARAM_PRESENT");
@@ -490,6 +526,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 
 
+	}
+
+	public enum FlagEnum {
+		NO_MIGRATE_HASHES("no-migrate-350-hashes");
+
+		private final String myCommandLineValue;
+
+		FlagEnum(String theCommandLineValue) {
+			myCommandLineValue = theCommandLineValue;
+		}
+
+		public String getCommandLineValue() {
+			return myCommandLineValue;
+		}
+
+		public static FlagEnum fromCommandLineValue(String theCommandLineValue) {
+			Optional<FlagEnum> retVal = Arrays.stream(values()).filter(t -> t.myCommandLineValue.equals(theCommandLineValue)).findFirst();
+			return retVal.orElseThrow(() -> {
+				List<String> validValues = Arrays.stream(values()).map(t -> t.myCommandLineValue).sorted().collect(Collectors.toList());
+				return new IllegalArgumentException("Invalid flag \"" + theCommandLineValue + "\". Valid values: " + validValues);
+			});
+		}
 	}
 
 

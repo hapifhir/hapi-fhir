@@ -29,10 +29,10 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
-import ca.uhn.fhir.jpa.util.IReindexController;
 import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
 import ca.uhn.fhir.model.api.*;
@@ -42,7 +42,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
@@ -91,8 +90,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String mySecondaryPrimaryKeyParamName;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private IReindexController myReindexController;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -624,21 +621,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-				Integer updatedCount = txTemplate.execute(new TransactionCallback<Integer>() {
-					@Override
-					public @NonNull
-					Integer doInTransaction(@Nonnull TransactionStatus theStatus) {
-						return myResourceTableDao.markResourcesOfTypeAsRequiringReindexing(resourceType);
-					}
+				txTemplate.execute(t->{
+					myResourceReindexingSvc.markAllResourcesForReindexing(resourceType);
+					return null;
 				});
 
-				ourLog.debug("Marked {} resources for reindexing", updatedCount);
+				ourLog.debug("Marked resources of type {} for reindexing", resourceType);
 			}
 		}
 
 		mySearchParamRegistry.requestRefresh();
-		myReindexController.requestReindex();
 	}
+
+	@Autowired
+	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaAddOperation(IIdType theResourceId, MT theMetaAdd, RequestDetails theRequestDetails) {
@@ -727,6 +723,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@SuppressWarnings("JpaQlInspection")
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails) {
 		// Notify interceptors

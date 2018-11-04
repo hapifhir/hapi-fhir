@@ -20,11 +20,15 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
 
+import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.entity.ResourceTag;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -50,4 +54,5 @@ public interface IndexingSupport {
 	public Long translateForcedIdToPid(String theResourceName, String theResourceId);
 	public String toResourceName(Class<? extends IBaseResource> theResourceType);
 	public IResourceIndexedCompositeStringUniqueDao getResourceIndexedCompositeStringUniqueDao();
+
 }

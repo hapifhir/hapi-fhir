@@ -994,7 +994,8 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		mySearchParameterDao.delete(spId, mySrd);
 
 		mySearchParamRegsitry.forceRefresh();
-		mySystemDao.performReindexingPass(100);
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		// Try with custom gender SP
 		map = new SearchParameterMap();

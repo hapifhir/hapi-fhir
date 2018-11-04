@@ -77,7 +77,7 @@ public enum DriverTypeEnum {
 		BasicDataSource dataSource = new BasicDataSource(){
 			@Override
 			public Connection getConnection() throws SQLException {
-				ourLog.info("Creating new DB connection");
+				ourLog.debug("Creating new DB connection");
 				return super.getConnection();
 			}
 		};

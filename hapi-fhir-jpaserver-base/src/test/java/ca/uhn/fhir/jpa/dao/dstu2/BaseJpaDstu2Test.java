@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -42,7 +43,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -55,6 +56,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected ISearchParamRegistry mySearchParamRegsitry;
 	@Autowired
 	protected ApplicationContext myAppCtx;
+	@Autowired
+	protected IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	@Qualifier("myAppointmentDaoDstu2")
 	protected IFhirResourceDao<Appointment> myAppointmentDao;
@@ -197,7 +200,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() throws InterruptedException {
-		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before

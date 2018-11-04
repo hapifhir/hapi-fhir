@@ -43,7 +43,7 @@ public interface ISearchBuilder {
 									FhirContext theContext, IDao theDao);
 
 	Set<Long> loadIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
-								  DateRangeParam theLastUpdated);
+								  DateRangeParam theLastUpdated, String theSearchIdOrDescription);
 
 	/**
 	 * How many results may be fetched at once

@@ -449,9 +449,9 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		createUniqueObservationSubjectDateCode();
 
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(1000);
-		mySystemDao.performReindexingPass(1000);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());
@@ -462,9 +462,9 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		assertEquals(1, mySearchParamRegsitry.getActiveUniqueSearchParams("Observation").size());
 
-		assertEquals(7, mySystemDao.markAllResourcesForReindexing());
-		mySystemDao.performReindexingPass(1000);
-		mySystemDao.performReindexingPass(1000);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());
@@ -557,8 +557,9 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		createUniqueIndexCoverageBeneficiary();
 
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(1000);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());
@@ -1119,8 +1120,9 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		pt2.setActive(false);
 		myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(1000);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());
@@ -1129,8 +1131,9 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		myResourceIndexedCompositeStringUniqueDao.deleteAll();
 
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(1000);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());

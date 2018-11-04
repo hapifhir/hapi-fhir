@@ -222,8 +222,9 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 
 		createUniqueIndexCoverageBeneficiary();
 
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(1000);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());

@@ -193,7 +193,7 @@ public class SearchCoordinatorSvcImplTest {
 		});
 		when(mySearchDao.findByUuid(any())).thenAnswer(t -> myCurrentSearch);
 		IFhirResourceDao dao = myCallingDao;
-		when(myDaoRegistry.getResourceDao(any())).thenReturn(dao);
+		when(myDaoRegistry.getResourceDao(any(String.class))).thenReturn(dao);
 
 		resources = result.getResources(0, 100000);
 		assertEquals(790, resources.size());

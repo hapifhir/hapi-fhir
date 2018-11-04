@@ -30,10 +30,9 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		CodeSystem cs = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, input);
 		myCodeSystemDao.create(cs, mySrd);
 
-		
-		mySystemDao.markAllResourcesForReindexing();
 
-		int outcome = mySystemDao.performReindexingPass(100);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		int outcome= myResourceReindexingSvc.forceReindexingPass();
 		assertNotEquals(-1, outcome); // -1 means there was a failure
 		
 		myTermSvc.saveDeferred();
