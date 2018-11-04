@@ -115,7 +115,7 @@
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> <em class="jxr_javadoccomment">	 * environment</em>
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> randomizeLocale() {
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
+<a class="jxr_linenumber" name="L110" href="#L110">110</a>  		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 		Locale.setDefault(availableLocales[(<strong class="jxr_keyword">int</strong>) (Math.random() * availableLocales.length)]);
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 		ourLog.info(<span class="jxr_string">"Tests are running in locale: "</span> + Locale.getDefault().getDisplayName());
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 		<strong class="jxr_keyword">if</strong> (Math.random() &lt; 0.5) {

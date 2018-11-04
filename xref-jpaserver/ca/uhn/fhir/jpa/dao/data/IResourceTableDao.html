@@ -8,15 +8,15 @@
 <div id="overview"><a href="../../../../../../../apidocs/ca/uhn/fhir/jpa/dao/data/IResourceTableDao.html">View Javadoc</a></div><pre>
 <a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> ca.uhn.fhir.jpa.dao.data;
 <a class="jxr_linenumber" name="L2" href="#L2">2</a>   
-<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceTable;
-<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Pageable;
-<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Slice;
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.JpaRepository;
-<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Modifying;
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Query;
-<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.repository.query.Param;
-<a class="jxr_linenumber" name="L11" href="#L11">11</a>  
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.ResourceTable;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Pageable;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Slice;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.JpaRepository;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Modifying;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Query;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> org.springframework.data.repository.query.Param;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> java.util.Date;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> java.util.List;
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  
@@ -51,20 +51,19 @@
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  	@Query(<span class="jxr_string">"SELECT t.myId FROM ResourceTable t WHERE t.myId = :resid AND t.myResourceType = :restype AND t.myDeleted IS NOT NULL"</span>)
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  	Slice&lt;Long&gt; findIdsOfDeletedResourcesOfType(Pageable thePageable, @Param(<span class="jxr_string">"resid"</span>) Long theResourceId, @Param(<span class="jxr_string">"restype"</span>) String theResourceName);
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  	@Query(<span class="jxr_string">"SELECT t.myId FROM ResourceTable t WHERE t.myIndexStatus IS NULL"</span>)
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	Slice&lt;Long&gt; findIdsOfResourcesRequiringReindexing(Pageable thePageable);
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  	@Query(<span class="jxr_string">"SELECT t.myResourceType as type, COUNT(t.myResourceType) as count FROM ResourceTable t GROUP BY t.myResourceType"</span>)
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	List&lt;Map&lt;?, ?&gt;&gt; getResourceCounts();
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	@Query(<span class="jxr_string">"SELECT t.myResourceType as type, COUNT(*) as count FROM ResourceTable t GROUP BY t.myResourceType"</span>)
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	List&lt;Map&lt;?, ?&gt;&gt; getResourceCounts();
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	@Query(<span class="jxr_string">"SELECT t.myId FROM ResourceTable t WHERE t.myUpdated &gt;= :low AND t.myUpdated &lt;= :high ORDER BY t.myUpdated ASC"</span>)
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	Slice&lt;Long&gt; findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(Pageable thePage,@Param(<span class="jxr_string">"low"</span>) Date theLow, @Param(<span class="jxr_string">"high"</span>)Date theHigh);
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	@Modifying
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	@Query(<span class="jxr_string">"UPDATE ResourceTable r SET r.myIndexStatus = null WHERE r.myResourceType = :restype"</span>)
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<strong class="jxr_keyword">int</strong> markResourcesOfTypeAsRequiringReindexing(@Param(<span class="jxr_string">"restype"</span>) String theResourceType);
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	@Modifying
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	@Query(<span class="jxr_string">"UPDATE ResourceTable r SET r.myIndexStatus = "</span> + BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED + <span class="jxr_string">" WHERE r.myId = :resid"</span>)
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	<strong class="jxr_keyword">void</strong> updateStatusToErrored(@Param(<span class="jxr_string">"resid"</span>) Long theId);
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  }
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	@Query(<span class="jxr_string">"SELECT t.myId FROM ResourceTable t WHERE t.myUpdated &gt;= :low AND t.myUpdated &lt;= :high AND t.myResourceType = :restype ORDER BY t.myUpdated ASC"</span>)
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	Slice&lt;Long&gt; findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(Pageable thePage,@Param(<span class="jxr_string">"restype"</span>) String theResourceType, @Param(<span class="jxr_string">"low"</span>) Date theLow, @Param(<span class="jxr_string">"high"</span>)Date theHigh);
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  	@Modifying
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	@Query(<span class="jxr_string">"UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id"</span>)
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<strong class="jxr_keyword">void</strong> updateIndexStatus(@Param(<span class="jxr_string">"id"</span>) Long theId, @Param(<span class="jxr_string">"status"</span>) Long theIndexStatus);
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

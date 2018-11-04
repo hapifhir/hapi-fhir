@@ -27,7 +27,7 @@ under the License.
     <item>
       <title>File: 209,
              Errors: 0,
-             Warnings: 1350,
+             Warnings: 1487,
              Infos: 0
       </title>
             <link>http://jamesagnew.github.io/hapi-fhir//checkstyle.html</link>
@@ -2264,7 +2264,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  12
+                  149
                 </td>
                 <td>
                   0

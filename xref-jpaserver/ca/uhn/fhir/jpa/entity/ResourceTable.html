@@ -572,33 +572,31 @@
 <a class="jxr_linenumber" name="L564" href="#L564">564</a> 
 <a class="jxr_linenumber" name="L565" href="#L565">565</a> 		retVal.setPublished(getPublished());
 <a class="jxr_linenumber" name="L566" href="#L566">566</a> 		retVal.setUpdated(getUpdated());
-<a class="jxr_linenumber" name="L567" href="#L567">567</a> <em class="jxr_comment">//		retVal.setEncoding(getEncoding());</em>
-<a class="jxr_linenumber" name="L568" href="#L568">568</a> 		retVal.setFhirVersion(getFhirVersion());
-<a class="jxr_linenumber" name="L569" href="#L569">569</a> <em class="jxr_comment">//		retVal.setResource(getResource());</em>
-<a class="jxr_linenumber" name="L570" href="#L570">570</a> 		retVal.setDeleted(getDeleted());
-<a class="jxr_linenumber" name="L571" href="#L571">571</a> 		retVal.setForcedId(getForcedId());
+<a class="jxr_linenumber" name="L567" href="#L567">567</a> 		retVal.setFhirVersion(getFhirVersion());
+<a class="jxr_linenumber" name="L568" href="#L568">568</a> 		retVal.setDeleted(getDeleted());
+<a class="jxr_linenumber" name="L569" href="#L569">569</a> 		retVal.setForcedId(getForcedId());
+<a class="jxr_linenumber" name="L570" href="#L570">570</a> 
+<a class="jxr_linenumber" name="L571" href="#L571">571</a> 		retVal.getTags().clear();
 <a class="jxr_linenumber" name="L572" href="#L572">572</a> 
-<a class="jxr_linenumber" name="L573" href="#L573">573</a> 		retVal.getTags().clear();
-<a class="jxr_linenumber" name="L574" href="#L574">574</a> 
-<a class="jxr_linenumber" name="L575" href="#L575">575</a> 		retVal.setHasTags(isHasTags());
-<a class="jxr_linenumber" name="L576" href="#L576">576</a> 		<strong class="jxr_keyword">if</strong> (isHasTags()) {
-<a class="jxr_linenumber" name="L577" href="#L577">577</a> 			<strong class="jxr_keyword">for</strong> (ResourceTag next : getTags()) {
-<a class="jxr_linenumber" name="L578" href="#L578">578</a> 				retVal.addTag(next);
-<a class="jxr_linenumber" name="L579" href="#L579">579</a> 			}
-<a class="jxr_linenumber" name="L580" href="#L580">580</a> 		}
-<a class="jxr_linenumber" name="L581" href="#L581">581</a> 
-<a class="jxr_linenumber" name="L582" href="#L582">582</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L583" href="#L583">583</a> 	}
-<a class="jxr_linenumber" name="L584" href="#L584">584</a> 
-<a class="jxr_linenumber" name="L585" href="#L585">585</a> 	@Override
-<a class="jxr_linenumber" name="L586" href="#L586">586</a> 	<strong class="jxr_keyword">public</strong> String toString() {
-<a class="jxr_linenumber" name="L587" href="#L587">587</a> 		ToStringBuilder b = <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>, ToStringStyle.SHORT_PREFIX_STYLE);
-<a class="jxr_linenumber" name="L588" href="#L588">588</a> 		b.append(<span class="jxr_string">"resourceType"</span>, myResourceType);
-<a class="jxr_linenumber" name="L589" href="#L589">589</a> 		b.append(<span class="jxr_string">"pid"</span>, myId);
-<a class="jxr_linenumber" name="L590" href="#L590">590</a> 		<strong class="jxr_keyword">return</strong> b.build();
-<a class="jxr_linenumber" name="L591" href="#L591">591</a> 	}
-<a class="jxr_linenumber" name="L592" href="#L592">592</a> 
-<a class="jxr_linenumber" name="L593" href="#L593">593</a> }
+<a class="jxr_linenumber" name="L573" href="#L573">573</a> 		retVal.setHasTags(isHasTags());
+<a class="jxr_linenumber" name="L574" href="#L574">574</a> 		<strong class="jxr_keyword">if</strong> (isHasTags()) {
+<a class="jxr_linenumber" name="L575" href="#L575">575</a> 			<strong class="jxr_keyword">for</strong> (ResourceTag next : getTags()) {
+<a class="jxr_linenumber" name="L576" href="#L576">576</a> 				retVal.addTag(next);
+<a class="jxr_linenumber" name="L577" href="#L577">577</a> 			}
+<a class="jxr_linenumber" name="L578" href="#L578">578</a> 		}
+<a class="jxr_linenumber" name="L579" href="#L579">579</a> 
+<a class="jxr_linenumber" name="L580" href="#L580">580</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L581" href="#L581">581</a> 	}
+<a class="jxr_linenumber" name="L582" href="#L582">582</a> 
+<a class="jxr_linenumber" name="L583" href="#L583">583</a> 	@Override
+<a class="jxr_linenumber" name="L584" href="#L584">584</a> 	<strong class="jxr_keyword">public</strong> String toString() {
+<a class="jxr_linenumber" name="L585" href="#L585">585</a> 		ToStringBuilder b = <strong class="jxr_keyword">new</strong> ToStringBuilder(<strong class="jxr_keyword">this</strong>, ToStringStyle.SHORT_PREFIX_STYLE);
+<a class="jxr_linenumber" name="L586" href="#L586">586</a> 		b.append(<span class="jxr_string">"resourceType"</span>, myResourceType);
+<a class="jxr_linenumber" name="L587" href="#L587">587</a> 		b.append(<span class="jxr_string">"pid"</span>, myId);
+<a class="jxr_linenumber" name="L588" href="#L588">588</a> 		<strong class="jxr_keyword">return</strong> b.build();
+<a class="jxr_linenumber" name="L589" href="#L589">589</a> 	}
+<a class="jxr_linenumber" name="L590" href="#L590">590</a> 
+<a class="jxr_linenumber" name="L591" href="#L591">591</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

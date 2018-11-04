@@ -4,6 +4,7 @@ ca.uhn.fhir.jpa.config.r4
 ca.uhn.fhir.jpa.dao
 ca.uhn.fhir.jpa.dao.data
 ca.uhn.fhir.jpa.dao.dstu3
+ca.uhn.fhir.jpa.dao.index
 ca.uhn.fhir.jpa.dao.r4
 ca.uhn.fhir.jpa.entity
 ca.uhn.fhir.jpa.graphql
@@ -14,10 +15,12 @@ ca.uhn.fhir.jpa.rp.dstu2
 ca.uhn.fhir.jpa.rp.dstu3
 ca.uhn.fhir.jpa.rp.r4
 ca.uhn.fhir.jpa.search
+ca.uhn.fhir.jpa.search.reindex
 ca.uhn.fhir.jpa.search.warm
 ca.uhn.fhir.jpa.sp
 ca.uhn.fhir.jpa.subscription
 ca.uhn.fhir.jpa.subscription.email
+ca.uhn.fhir.jpa.subscription.matcher
 ca.uhn.fhir.jpa.subscription.resthook
 ca.uhn.fhir.jpa.subscription.websocket
 ca.uhn.fhir.jpa.term
