@@ -539,10 +539,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		createExternalCsAndLocalVs();
 
-		mySystemDao.markAllResourcesForReindexing();
-
-		mySystemDao.performReindexingPass(100);
-		mySystemDao.performReindexingPass(100);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 		myHapiTerminologySvc.saveDeferred();
 		myHapiTerminologySvc.saveDeferred();
 		myHapiTerminologySvc.saveDeferred();
@@ -851,17 +850,17 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addConcept().setCode("ZZZZ");
 
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(null);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 		myTermSvc.saveDeferred();
-		mySystemDao.performReindexingPass(null);
 		myTermSvc.saveDeferred();
 
 		// Again
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(null);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 		myTermSvc.saveDeferred();
-		mySystemDao.performReindexingPass(null);
 		myTermSvc.saveDeferred();
 
 	}

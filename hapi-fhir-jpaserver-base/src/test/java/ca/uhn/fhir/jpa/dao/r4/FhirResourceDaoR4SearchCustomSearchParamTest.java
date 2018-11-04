@@ -146,8 +146,8 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		mySearchParameterDao.create(fooSp, mySrd);
 
-		assertEquals(1, mySystemDao.performReindexingPass(100).intValue());
-		assertEquals(0, mySystemDao.performReindexingPass(100).intValue());
+		assertEquals(1, myResourceReindexingSvc.forceReindexingPass().intValue());
+		assertEquals(0, myResourceReindexingSvc.forceReindexingPass().intValue());
 
 	}
 
@@ -1171,7 +1171,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParameterDao.delete(spId, mySrd);
 
 		mySearchParamRegsitry.forceRefresh();
-		mySystemDao.performReindexingPass(100);
+		myResourceReindexingSvc.forceReindexingPass();
 
 		// Try with custom gender SP
 		map = new SearchParameterMap();

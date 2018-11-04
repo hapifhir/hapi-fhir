@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.*;
 
+import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -236,11 +237,11 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
-		res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(null, res.getIndexStatus());
-		res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
-
+		runInTransaction(()->{
+			List<ResourceReindexJobEntity> allJobs = myResourceReindexJobDao.findAll();
+			assertEquals(1, allJobs.size());
+			assertEquals("Patient", allJobs.get(0).getResourceType());
+		});
 	}
 
 	@Test

@@ -92,4 +92,5 @@ public class Migrator {
 
 		ourLog.info("Finished migration of {} tasks", myTasks.size());
 	}
+
 }

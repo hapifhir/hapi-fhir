@@ -83,6 +83,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private FhirContext myContext;
 	@Autowired
 	private ITransactionProcessorVersionAdapter<BUNDLE, BUNDLEENTRY> myVersionAdapter;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	public static boolean isPlaceholder(IIdType theId) {
 		if (theId != null && theId.getValue() != null) {
@@ -749,7 +751,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	}
 
 	private IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
-		return myDao.getDaoOrThrowException(theClass);
+		return myDaoRegistry.getResourceDao(theClass);
 	}
 
 	protected void flushJpaSession() {
