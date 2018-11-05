@@ -2,13 +2,20 @@ package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
-import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.codesystems.EncounterType;
+import org.hl7.fhir.r4.model.codesystems.EpisodeofcareType;
+import org.hl7.fhir.r4.model.codesystems.MedicationRequestCategory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import javax.persistence.Temporal;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -40,22 +47,240 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseResourceProviderDstu3
 	 */
 
 	@Test
-	public void testCrit1() {
-		QuestionnaireResponse qr = new QuestionnaireResponse();
-		qr.getQuestionnaire().setReference("Questionnaire/HomeAbsenceHospitalizationRecord");
-
+	public void testQuestionnaireResponse() {
 		String criteria = "QuestionnaireResponse?questionnaire=HomeAbsenceHospitalizationRecord,ARIncenterAbsRecord";
-		assertMatched(qr, criteria);
 
+		{
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.getQuestionnaire().setReference("Questionnaire/HomeAbsenceHospitalizationRecord");
+			assertMatched(qr, criteria);
+		}
+		{
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.getQuestionnaire().setReference("Questionnaire/Other");
+			assertNotMatched(qr, criteria);
+		}
+		{
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.getQuestionnaire().setDisplay("Questionnaire/HomeAbsenceHospitalizationRecord");
+			assertNotMatched(qr, criteria);
+		}
 	}
-//				 String criteria = "CommunicationRequest?occurrence==2018-10-17";
-//				 String criteria = "ProcedureRequest?intent=original-order";
-//				 String criteria = "Observation?code=17861-6&context.type=IHD";
-//				 String criteria = "MedicationRequest?intent=instance-order&category=outpatient&date==2018-10-19";
-//				 String criteria = "MedicationRequest?intent=plan&category=outpatient&status=suspended,entered-in-error,cancelled,stopped";
-//				 String criteria = "Observation?code=FR_Org1Blood2nd,FR_Org1Blood3rd,FR_Org%201BldCult,FR_Org2Blood2nd,FR_Org2Blood3rd,FR_Org%202BldCult,FR_Org3Blood2nd,FR_Org3Blood3rd,FR_Org3BldCult,FR_Org4Blood2nd,FR_Org4Blood3rd,FR_Org4BldCult,FR_Org5Blood2nd,FR_Org5Blood3rd,FR_Org%205BldCult,FR_Org6Blood2nd,FR_Org6Blood3rd,FR_Org6BldCult,FR_Org7Blood2nd,FR_Org7Blood3rd,FR_Org7BldCult,FR_Org8Blood2nd,FR_Org8Blood3rd,FR_Org8BldCult,FR_Org9Blood2nd,FR_Org9Blood3rd,FR_Org9BldCult,FR_Bld2ndCulture,FR_Bld3rdCulture,FR_Blood%20Culture,FR_Com1Bld3rd,FR_Com1BldCult,FR_Com2Bld2nd,FR_Com2Bld3rd,FR_Com2BldCult,FR_CultureBld2nd,FR_CultureBld3rd,FR_CultureBldCul,FR_GmStainBldCul,FR_GramStain2Bld,FR_GramStain3Bld,FR_GramStNegBac&context.type=IHD";
-//				 String criteria = "Procedure?category=Hemodialysis";
-//				 String criteria = "Procedure?code=HD_Standard&status=completed&location=L2647";
+
+	@Test
+	public void testCommunicationRequest() {
+		String criteria = "CommunicationRequest?occurrence==2018-10-17";
+
+		{
+			CommunicationRequest cr = new CommunicationRequest();
+			cr.setOccurrence(new DateTimeType("2018-10-17"));
+			assertMatched(cr, criteria);
+		}
+		{
+			CommunicationRequest cr = new CommunicationRequest();
+			cr.setOccurrence(new DateTimeType("2018-10-16"));
+			assertNotMatched(cr, criteria);
+		}
+		{
+			CommunicationRequest cr = new CommunicationRequest();
+			cr.setOccurrence(new DateTimeType("2018-10-16"));
+			assertNotMatched(cr, criteria);
+		}
+	}
+
+	@Test
+	public void testProcedureRequest() {
+		String criteria = "ProcedureRequest?intent=original-order";
+
+		{
+			ProcedureRequest pr = new ProcedureRequest();
+			pr.setIntent(ProcedureRequest.ProcedureRequestIntent.ORIGINALORDER);
+			assertMatched(pr, criteria);
+		}
+		{
+			ProcedureRequest pr = new ProcedureRequest();
+			pr.setIntent(ProcedureRequest.ProcedureRequestIntent.ORDER);
+			assertNotMatched(pr, criteria);
+		}
+	}
+
+	@Test
+	public void testObservationContextTypeUnsupported() {
+		String criteria = "Observation?code=17861-6&context.type=IHD";
+		{
+			Observation obs = new Observation();
+			obs.getCode().addCoding().setCode("XXX");
+			assertNotMatched(obs, criteria);
+		}
+		{
+			Observation obs = new Observation();
+			obs.getCode().addCoding().setCode("17861-6");
+			assertUnsupported(obs, criteria);
+		}
+	}
+
+	// Check that it still fails fast even if the chained parameter is first
+	@Test
+	public void testObservationContextTypeUnsupportedReverse() {
+		String criteria = "Observation?context.type=IHD&code=17861-6";
+		{
+			Observation obs = new Observation();
+			obs.getCode().addCoding().setCode("XXX");
+			assertNotMatched(obs, criteria);
+		}
+		{
+			Observation obs = new Observation();
+			obs.getCode().addCoding().setCode("17861-6");
+			assertUnsupported(obs, criteria);
+		}
+	}
+
+	// FIXME KHS What's with the date== here?
+
+	@Test
+	public void medicationRequestOutpatient() {
+		String criteria = "MedicationRequest?intent=instance-order&category=outpatient&date==2018-10-19";
+
+		{
+			MedicationRequest mr = new MedicationRequest();
+			mr.setIntent(MedicationRequest.MedicationRequestIntent.INSTANCEORDER);
+			mr.getCategory().addCoding().setCode(MedicationRequestCategory.OUTPATIENT.toCode());
+			Dosage dosage = new Dosage();
+			Timing timing = new Timing();
+			timing.getEvent().add(new DateTimeType("2018-10-19"));
+			dosage.setTiming(timing);
+			mr.getDosageInstruction().add(dosage);
+			assertMatched(mr, criteria);
+		}
+
+		{
+			MedicationRequest mr = new MedicationRequest();
+			mr.setIntent(MedicationRequest.MedicationRequestIntent.INSTANCEORDER);
+			mr.getCategory().addCoding().setCode(MedicationRequestCategory.INPATIENT.toCode());
+			Dosage dosage = new Dosage();
+			Timing timing = new Timing();
+			timing.getEvent().add(new DateTimeType("2018-10-19"));
+			dosage.setTiming(timing);
+			mr.getDosageInstruction().add(dosage);
+			assertNotMatched(mr, criteria);
+		}
+
+		{
+			MedicationRequest mr = new MedicationRequest();
+			mr.setIntent(MedicationRequest.MedicationRequestIntent.INSTANCEORDER);
+			mr.getCategory().addCoding().setCode(MedicationRequestCategory.OUTPATIENT.toCode());
+			Dosage dosage = new Dosage();
+			Timing timing = new Timing();
+			timing.getEvent().add(new DateTimeType("2018-10-20"));
+			dosage.setTiming(timing);
+			mr.getDosageInstruction().add(dosage);
+			assertNotMatched(mr, criteria);
+		}
+	}
+
+	@Test
+	public void testMedicationRequestStatuses() {
+		String criteria = "MedicationRequest?intent=plan&category=outpatient&status=suspended,entered-in-error,cancelled,stopped";
+
+		// FIXME KHS
+//		{
+//			MedicationRequest mr = new MedicationRequest();
+//			mr.setIntent(MedicationRequest.MedicationRequestIntent.PLAN);
+//			mr.getCategory().addCoding().setCode(MedicationRequestCategory.OUTPATIENT.toCode());
+//			mr.setStatus("suspended");
+//			assertMatched(mr, criteria);
+//		}
+		{
+			MedicationRequest mr = new MedicationRequest();
+			mr.setIntent(MedicationRequest.MedicationRequestIntent.PLAN);
+			mr.getCategory().addCoding().setCode(MedicationRequestCategory.OUTPATIENT.toCode());
+			mr.setStatus(MedicationRequest.MedicationRequestStatus.ENTEREDINERROR);
+			assertMatched(mr, criteria);
+		}
+		{
+			MedicationRequest mr = new MedicationRequest();
+			mr.setIntent(MedicationRequest.MedicationRequestIntent.PLAN);
+			mr.getCategory().addCoding().setCode(MedicationRequestCategory.OUTPATIENT.toCode());
+			mr.setStatus(MedicationRequest.MedicationRequestStatus.CANCELLED);
+			assertMatched(mr, criteria);
+		}
+		{
+			MedicationRequest mr = new MedicationRequest();
+			mr.setIntent(MedicationRequest.MedicationRequestIntent.PLAN);
+			mr.getCategory().addCoding().setCode(MedicationRequestCategory.OUTPATIENT.toCode());
+			mr.setStatus(MedicationRequest.MedicationRequestStatus.STOPPED);
+			assertMatched(mr, criteria);
+		}
+		{
+			MedicationRequest mr = new MedicationRequest();
+			mr.setIntent(MedicationRequest.MedicationRequestIntent.PLAN);
+			mr.getCategory().addCoding().setCode(MedicationRequestCategory.OUTPATIENT.toCode());
+			mr.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
+			assertNotMatched(mr, criteria);
+		}
+	}
+
+	@Test
+	public void testBloodTest() {
+		String criteria = "Observation?code=FR_Org1Blood2nd,FR_Org1Blood3rd,FR_Org%201BldCult,FR_Org2Blood2nd,FR_Org2Blood3rd,FR_Org%202BldCult,FR_Org3Blood2nd,FR_Org3Blood3rd,FR_Org3BldCult,FR_Org4Blood2nd,FR_Org4Blood3rd,FR_Org4BldCult,FR_Org5Blood2nd,FR_Org5Blood3rd,FR_Org%205BldCult,FR_Org6Blood2nd,FR_Org6Blood3rd,FR_Org6BldCult,FR_Org7Blood2nd,FR_Org7Blood3rd,FR_Org7BldCult,FR_Org8Blood2nd,FR_Org8Blood3rd,FR_Org8BldCult,FR_Org9Blood2nd,FR_Org9Blood3rd,FR_Org9BldCult,FR_Bld2ndCulture,FR_Bld3rdCulture,FR_Blood%20Culture,FR_Com1Bld3rd,FR_Com1BldCult,FR_Com2Bld2nd,FR_Com2Bld3rd,FR_Com2BldCult,FR_CultureBld2nd,FR_CultureBld3rd,FR_CultureBldCul,FR_GmStainBldCul,FR_GramStain2Bld,FR_GramStain3Bld,FR_GramStNegBac&context.type=IHD";
+
+		{
+			Observation obs = new Observation();
+			obs.getCode().addCoding().setCode("FR_Org1Blood2nd");
+			assertUnsupported(obs, criteria);
+		}
+		{
+			Observation obs = new Observation();
+			obs.getCode().addCoding().setCode("XXX");
+			assertNotMatched(obs, criteria);
+		}
+	}
+
+	@Test
+	public void testProcedureHemodialysis() {
+		String criteria = "Procedure?category=Hemodialysis";
+
+		{
+			Procedure proc = new Procedure();
+			proc.getCategory().addCoding().setCode("Hemodialysis");
+			assertMatched(proc, criteria);
+		}
+		{
+			Procedure proc = new Procedure();
+			proc.getCategory().addCoding().setCode("XXX");
+			assertNotMatched(proc, criteria);
+		}
+	}
+
+	@Test
+	public void testProcedureHDStandard() {
+		String criteria = "Procedure?code=HD_Standard&status=completed&location=Lab123";
+
+		{
+			Procedure proc = new Procedure();
+			proc.getCode().addCoding().setCode("HD_Standard");
+			proc.setStatus(Procedure.ProcedureStatus.COMPLETED);
+			IIdType locId = new IdType("Location", "Lab123");
+			proc.getLocation().setReference(locId.getValue());
+			assertMatched(proc, criteria);
+		}
+		{
+			Procedure proc = new Procedure();
+			proc.getCode().addCoding().setCode("HD_Standard");
+			proc.setStatus(Procedure.ProcedureStatus.COMPLETED);
+			IIdType locId = new IdType("Location", "XXX");
+			proc.getLocation().setReference(locId.getValue());
+			assertNotMatched(proc, criteria);
+		}
+		{
+			Procedure proc = new Procedure();
+			proc.getCode().addCoding().setCode("XXX");
+			proc.setStatus(Procedure.ProcedureStatus.COMPLETED);
+			IIdType locId = new IdType("Location", "Lab123");
+			proc.getLocation().setReference(locId.getValue());
+			assertNotMatched(proc, criteria);
+		}
+	}
 //				 String criteria = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
 //				 String criteria = "BodySite?accessType=Catheter,PD%20Catheter";
 //				 String criteria = "Procedure?code=HD_Standard&status=completed";
