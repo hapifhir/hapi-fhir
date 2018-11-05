@@ -46,6 +46,7 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
 
     protected EnableWhenResult evaluateCondition(QuestionnaireItemEnableWhenComponent enableCondition,
             Element questionnaireResponse, String linkId) {
+        //TODO: Fix EnableWhenResult stuff
         List<Element> answerItems = findQuestionAnswers(questionnaireResponse,
                 enableCondition.getQuestion());        
         QuestionnaireItemOperator operator = enableCondition.getOperator();
@@ -98,6 +99,7 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
             } else if (questionnaireItemOperator == QuestionnaireItemOperator.GREATER_THAN){
                 return result > 0;
             }                  
+            throw new RuntimeException("Bad operator for PrimitiveType comparison");
         } else if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
             return actualAnswer.equalsShallow(expectedAnswer);
         } else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
@@ -155,7 +157,7 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         return true;
     }
     private List<Element> findSubItems(Element item) {
-        List<Element> results = item.getChildren(ITEM_ELEMENT)
+        List<Element> results = item.getChildren(LINKID_ELEMENT)
                 .stream()
                 .flatMap(i -> findSubItems(i).stream())
                 .collect(Collectors.toList());
@@ -170,7 +172,4 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         }
         return false;
     }
-
-
-   
 }
