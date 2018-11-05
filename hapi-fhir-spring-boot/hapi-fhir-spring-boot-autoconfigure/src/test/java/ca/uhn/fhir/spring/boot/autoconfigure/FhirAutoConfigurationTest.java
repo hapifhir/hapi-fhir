@@ -54,7 +54,7 @@ public class FhirAutoConfigurationTest {
         assertThat(this.context.getBeansOfType(FhirContext.class)).hasSize(1);
     }
 
-    // FIXME This test is not working with the @ComponentScan in BaseConfig.java.
+    // FIXME KHS This test is not working with the @ComponentScan in BaseConfig.java.
 	// It's a bean loading ordering issue.  The TxManager in BaseSearchParamRegistry
 	// is failing a dependency check becaus the @ComponentScan is loading BaseSearchParamRegistry
 	// Before the TxManager has been loaded.  @Ignoring test for now.
