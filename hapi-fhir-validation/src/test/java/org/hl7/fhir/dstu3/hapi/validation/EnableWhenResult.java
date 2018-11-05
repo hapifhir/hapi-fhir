@@ -1,13 +1,12 @@
-package org.hl7.fhir.instance.validation;
+package org.hl7.fhir.dstu3.hapi.validation;
 
-
-import org.hl7.fhir.r4.elementmodel.Element;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemEnableWhenComponent;
+import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemEnableWhenComponent;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 
 public class EnableWhenResult {
     private final boolean enabled;
     private final QuestionnaireItemEnableWhenComponent enableWhenCondition;
-    private final Element answerItem;
+    private final QuestionnaireResponseItemComponent responseItem;
     private final String linkId;
 
     /**
@@ -19,14 +18,14 @@ public class EnableWhenResult {
      *            LinkId of the questionnaire item
      * @param enableWhenCondition
      *            Evaluated enableWhen condition
-     * @param answerItem
+     * @param responseItem
      *            item in QuestionnaireResponse
      */
     public EnableWhenResult(boolean enabled, String linkId, QuestionnaireItemEnableWhenComponent enableWhenCondition,
-            Element answerItem) {
+            QuestionnaireResponseItemComponent responseItem) {
         this.enabled = enabled;
         this.linkId = linkId;
-        this.answerItem = answerItem;
+        this.responseItem = responseItem;
         this.enableWhenCondition = enableWhenCondition;
     }
 
@@ -38,8 +37,8 @@ public class EnableWhenResult {
         return linkId;
     }
 
-    public Element getAnswerItem() {
-        return answerItem;
+    public QuestionnaireResponseItemComponent getResponseItem() {
+        return responseItem;
     }
 
     public QuestionnaireItemEnableWhenComponent getEnableWhenCondition() {

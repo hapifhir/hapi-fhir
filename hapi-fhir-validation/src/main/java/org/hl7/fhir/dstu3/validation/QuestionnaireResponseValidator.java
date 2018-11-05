@@ -36,8 +36,6 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.instance.validation.DefaultEnableWhenEvaluator;
-import org.hl7.fhir.instance.validation.IEnableWhenEvaluator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 
@@ -57,7 +55,6 @@ public class QuestionnaireResponseValidator extends BaseValidator {
 	 */
 
 	private IWorkerContext myWorkerCtx;
-	private IEnableWhenEvaluator myEnableWhenEvaluator = new DefaultEnableWhenEvaluator();
 	
 	// this is here not to introduce enabledWhen validation unless wanted
 	private boolean skipEnabledCheck = true;
@@ -229,7 +226,7 @@ public class QuestionnaireResponseValidator extends BaseValidator {
 
 				List<QuestionnaireResponseItemComponent> responseItems = findResponsesByLinkId(theResponseItems, linkId);
 				if (responseItems.isEmpty()) {
-					if ((skipEnabledCheck || myEnableWhenEvaluator.isQuestionEnabled(nextQuestionnaireItem, theResponseItems)) && nextQuestionnaireItem.getRequired() ) {
+					if ((skipEnabledCheck /*|| myEnableWhenEvaluator.isQuestionEnabled(nextQuestionnaireItem, theResponseItems)*/) && nextQuestionnaireItem.getRequired() ) {
 						if (theValidateRequired) {
 							rule(theErrors, IssueType.BUSINESSRULE, thePathStack, false, "Missing required {0} with linkId[{1}]", itemType, linkId);
 						} else {
