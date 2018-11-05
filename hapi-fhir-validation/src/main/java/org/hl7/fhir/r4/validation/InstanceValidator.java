@@ -12,8 +12,6 @@ import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
-import org.hl7.fhir.instance.validation.DefaultEnableWhenEvaluator;
-import org.hl7.fhir.instance.validation.IEnableWhenEvaluator;
 import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.context.IWorkerContext.ValidationResult;
@@ -2781,16 +2779,15 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     // ok, now we have a list of known items, grouped by linkId. We"ve made an error for anything out of order
     for (QuestionnaireItemComponent qItem : qItems) {
       List<Element> mapItem = map.get(qItem.getLinkId());
-      if (mapItem != null)
+      if (mapItem != null){
         validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack, inProgress);
-      else   { 
-    	  //item is missing, is the question enabled?
-    	if(!  myEnableWhenEvaluator.isQuestionEnabled(qItem, element)) {
-    	  
-    	  	rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), !qItem.getRequired(), "No response found for required item "+qItem.getLinkId());
+      } else { 
+    	//item is missing, is the question enabled?
+    	if (!myEnableWhenEvaluator.isQuestionEnabled(qItem, element)) {    	  
+    	  rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), !qItem.getRequired(), "No response found for required item "+qItem.getLinkId());
     	}
       }
-      }
+    }
   }
 
   private void validateQuestionnaireResponseItemQuantity( List<ValidationMessage> errors, Element answer, NodeStack stack)	{

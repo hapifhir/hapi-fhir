@@ -1,13 +1,13 @@
-package org.hl7.fhir.instance.validation;
+package org.hl7.fhir.r4.validation;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
-import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.elementmodel.Element;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Questionnaire.*;
+
 /**
  * Evaluates Questionnaire.item.enableWhen against a QuestionnaireResponse.
  * Ignores possible modifierExtensions and extensions.
@@ -18,42 +18,6 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
     public static final String ITEM_ELEMENT = "item";
     public static final String ANSWER_ELEMENT = "answer";
 
-    @Override
-    public boolean isQuestionEnabled(org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent item,
-            List<QuestionnaireResponseItemComponent> resp) {
-        boolean enabled = true;
-        if(item.hasEnableWhen()) {            
-            enabled = false;            
-            for(org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemEnableWhenComponent enable : item.getEnableWhen()) {                
-                if(enable.getHasAnswer()) {
-                     // check if referenced question has answer                    
-                    String itemId = enable.getQuestion();                    
-                    for(QuestionnaireResponseItemComponent respItem : resp) {
-                        if(respItem.getLinkId().equalsIgnoreCase(itemId) && respItem.hasAnswer()) {                            
-                            //TODO check answer value
-                            enabled = true;
-                        } 
-                    }
-                    
-                } else {
-                    // and if not                    
-                    String itemId = enable.getQuestion();                    
-                    for(QuestionnaireResponseItemComponent respItem : resp) {
-                        if(respItem.getLinkId().equalsIgnoreCase(itemId) && !respItem.hasAnswer()) {
-                            
-                            //TODO check answer value
-
-                            enabled = true;
-                        } 
-                    }
-                    
-                }
-            }            
-        }
-        return enabled;
-    }
-
-    
     @Override
     public boolean isQuestionEnabled(QuestionnaireItemComponent questionnaireItem, Element questionnaireResponse) {
         if (!questionnaireItem.hasEnableWhen()) {
@@ -80,37 +44,68 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
     }
 
 
-    public EnableWhenResult evaluateCondition(QuestionnaireItemEnableWhenComponent enableCondition,
+    protected EnableWhenResult evaluateCondition(QuestionnaireItemEnableWhenComponent enableCondition,
             Element questionnaireResponse, String linkId) {
         //TODO: Fix EnableWhenResult stuff
         List<Element> answerItems = findQuestionAnswers(questionnaireResponse,
-                enableCondition.getQuestion());   
-        if (enableCondition.hasAnswer()) {
-            boolean result = answerItems.stream().anyMatch(answer -> evaluateAnswer(answer, enableCondition.getAnswer()));
-            
-            return new EnableWhenResult(result, linkId, enableCondition, questionnaireResponse);
-
-        }
-        return new EnableWhenResult(false, linkId, enableCondition, questionnaireResponse);        
+                enableCondition.getQuestion());        
+        QuestionnaireItemOperator operator = enableCondition.getOperator();
+        if (operator == QuestionnaireItemOperator.EXISTS){
+            Type answer = enableCondition.getAnswer();
+            if (!(answer instanceof BooleanType)){
+                throw new RuntimeException("Exists-operator requires answerBoolean");                
+            }
+            return new EnableWhenResult(((BooleanType)answer).booleanValue() != answerItems.isEmpty(), 
+                    linkId, enableCondition, questionnaireResponse);
+        }        
+        boolean result = answerItems
+                .stream()
+                .anyMatch(answer -> evaluateAnswer(answer, enableCondition.getAnswer(), enableCondition.getOperator()));            
+        return new EnableWhenResult(result, linkId, enableCondition, questionnaireResponse);
     }
 
-    private boolean evaluateAnswer(Element answer, Type expectedAnswer) {
-        org.hl7.fhir.r4.model.Type actualAnswer;
+    protected boolean evaluateAnswer(Element answer, Type expectedAnswer, QuestionnaireItemOperator questionnaireItemOperator) {
+        Type actualAnswer;
         try {
             actualAnswer = answer.asType();
         } catch (FHIRException e) {
             throw new RuntimeException("Unexpected answer type", e);
         }
-        if (!actualAnswer.getClass().isAssignableFrom(expectedAnswer.getClass())) {
+        if (!actualAnswer.getClass().equals(expectedAnswer.getClass())) {
             throw new RuntimeException("Expected answer and actual answer have incompatible types");
-        }
+        }                
         if (expectedAnswer instanceof Coding) {
-            return validateCodingAnswer((Coding)expectedAnswer, (Coding)actualAnswer);
-        } else if (expectedAnswer instanceof PrimitiveType) {           
-            return actualAnswer.equalsShallow(expectedAnswer);
+            return compareCodingAnswer((Coding)expectedAnswer, (Coding)actualAnswer, questionnaireItemOperator);
+        } else if ((expectedAnswer instanceof PrimitiveType)) {
+            return comparePrimitiveAnswer((PrimitiveType<?>)actualAnswer, (PrimitiveType<?>)expectedAnswer, questionnaireItemOperator);
         }
         // TODO: Quantity, Attachment, reference?
         throw new RuntimeException("Unimplemented answer type: " + expectedAnswer.getClass());
+    }
+    private boolean comparePrimitiveAnswer(PrimitiveType<?> actualAnswer, PrimitiveType<?> expectedAnswer, QuestionnaireItemOperator questionnaireItemOperator) {                
+        if (actualAnswer.getValue() instanceof Comparable){            
+            @SuppressWarnings({ "rawtypes", "unchecked" })
+            int result = ((Comparable)actualAnswer.getValue()).compareTo(expectedAnswer.getValue());
+            if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
+                return result == 0;
+            } else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
+                return result != 0;
+            } else if (questionnaireItemOperator == QuestionnaireItemOperator.GREATER_OR_EQUAL){
+                return result >= 0;
+            } else if (questionnaireItemOperator == QuestionnaireItemOperator.LESS_OR_EQUAL){
+                return result <= 0;
+            } else if (questionnaireItemOperator == QuestionnaireItemOperator.LESS_THAN){
+                return result < 0;
+            } else if (questionnaireItemOperator == QuestionnaireItemOperator.GREATER_THAN){
+                return result > 0;
+            }                  
+            throw new RuntimeException("Bad operator for PrimitiveType comparison");
+        } else if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
+            return actualAnswer.equalsShallow(expectedAnswer);
+        } else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
+            return !actualAnswer.equalsShallow(expectedAnswer);
+        }
+        throw new RuntimeException("Bad operator for PrimitiveType comparison");
     }
 
     private List<Element> findQuestionAnswers(Element questionnaireResponse, String question) {
@@ -132,8 +127,14 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
                 .collect(Collectors.toList());
     }
 
-    private boolean validateCodingAnswer(Coding expectedAnswer, Coding actualAnswer) {
-        return compareSystems(expectedAnswer, actualAnswer) && compareCodes(expectedAnswer, actualAnswer);
+    private boolean compareCodingAnswer(Coding expectedAnswer, Coding actualAnswer, QuestionnaireItemOperator questionnaireItemOperator) {
+        boolean result = compareSystems(expectedAnswer, actualAnswer) && compareCodes(expectedAnswer, actualAnswer);
+        if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
+            return result == true;
+        } else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
+            return result == false;
+        }
+        throw new RuntimeException("Bad operator for Coding comparison");
     }
 
     private boolean compareCodes(Coding expectedCoding, Coding value) {
