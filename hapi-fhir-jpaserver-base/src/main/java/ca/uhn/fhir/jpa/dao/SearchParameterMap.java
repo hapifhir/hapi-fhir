@@ -339,6 +339,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 				IQueryParameterType firstValue = nextValuesAnd.get(0);
 				b.append(UrlUtil.escapeUrlParam(nextKey));
 
+				if (nextKey.equals(Constants.PARAM_HAS)) {
+					b.append(':');
+				}
+
 				if (firstValue.getMissing() != null) {
 					b.append(Constants.PARAMQUALIFIER_MISSING);
 					b.append('=');

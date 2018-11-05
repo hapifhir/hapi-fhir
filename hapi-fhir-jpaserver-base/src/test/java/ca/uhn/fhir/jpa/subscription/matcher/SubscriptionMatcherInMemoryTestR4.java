@@ -2,9 +2,7 @@ package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -22,22 +20,18 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
-// These tests are copied from FhirResourceDaoR4SearchNoFtTest
-// TODO KHS Load an app config that doesn't load the database
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
-public class SubscriptionMatcherInMemoryTest {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionMatcherInMemoryTest.class);
+public class SubscriptionMatcherInMemoryTestR4 {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionMatcherInMemoryTestR4.class);
 
 	@Autowired
 	SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
@@ -56,24 +50,51 @@ public class SubscriptionMatcherInMemoryTest {
 
 	private void assertMatched(IBaseResource resource, SearchParameterMap params) {
 		SubscriptionMatchResult result = match(resource, params);
-		assertTrue(result.supported());
+		assertTrue(result.getUnsupportedReason(), result.supported());
 		assertTrue(result.matched());
 	}
 
 	private void assertNotMatched(IBaseResource resource, SearchParameterMap params) {
 		SubscriptionMatchResult result = match(resource, params);
-		assertTrue(result.supported());
+		assertTrue(result.getUnsupportedReason(), result.supported());
 		assertFalse(result.matched());
 	}
 
+	/*
+	 The following tests are copied from FhirResourceDaoR4SearchNoFtTest
+	  */
+
 	@Test
-	public void testReferenceUnsupported() {
+	public void testChainReferenceUnsupported() {
 		Encounter enc1 = new Encounter();
-		enc1.getSubject().setReference("1");
+		IIdType pid1 = new IdType("Patient", 1L);
+		enc1.getSubject().setReference(pid1.getValue());
+
+		SearchParameterMap map;
+
+		map = new SearchParameterMap();
+		map.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "foo|bar").setChain("identifier"));
+		assertUnsupported(enc1, map);
+
+		MedicationAdministration ma = new MedicationAdministration();
+		IIdType mid1 = new IdType("Medication", 1L);
+		ma.setMedication(new Reference(mid1));
+
+		map = new SearchParameterMap();
+		map.add(MedicationAdministration.SP_MEDICATION, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().add(new ReferenceParam("code", "04823543"))));
+		assertUnsupported(ma, map);
+	}
+
+	@Test
+	public void testHasParameterUnsupported() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("001");
+		patient.addName().setFamily("Tester").addGiven("Joe");
 
 		SearchParameterMap params = new SearchParameterMap();
-		params.add(Encounter.SP_SUBJECT, new ReferenceParam("subject", "foo|bar").setChain("identifier"));
-		assertUnsupported(enc1, params);
+		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
+		String criteria = params.toNormalizedQueryString(myContext);
+		assertUnsupported(patient, params);
 	}
 
 	@Test
@@ -280,19 +301,93 @@ public class SubscriptionMatcherInMemoryTest {
 		Condition c2 = new Condition();
 		c2.setOnset(new Range().setLow((SimpleQuantity) new SimpleQuantity().setValue(1L)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(1L)));
 
-		params = new SearchParameterMap().setLoadSynchronous(true).add(Condition.SP_ONSET_AGE, new QuantityParam("1"));
+		params = new SearchParameterMap().add(Condition.SP_ONSET_AGE, new QuantityParam("1"));
 		assertMatched(c2, params);
 	}
 
 	@Test
-	public void testSearchResourceLinkUnsupported() {
+	public void testSearchResourceLinkWithChainUnsupported() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithChainXX");
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithChain01");
+		IIdType patientId01 = new IdType("Patient", 1L);
+		patient.setId(patientId01);
+
+		Patient patient02 = new Patient();
+		patient02.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithChainXX");
+		patient02.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithChain02");
+		IIdType patientId02 = new IdType("Patient", 2L);
+		patient02.setId(patientId02);
+
 		Observation obs01 = new Observation();
 		obs01.setEffective(new DateTimeType(new Date()));
-		obs01.setSubject(new Reference("1"));
+		obs01.setSubject(new Reference(patientId01));
+
+		Observation obs02 = new Observation();
+		obs02.setEffective(new DateTimeType(new Date()));
+		obs02.setSubject(new Reference(patientId02));
 
 		SearchParameterMap params = new SearchParameterMap().add(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChain01"));
 		assertUnsupported(obs01, params);
 	}
+
+	@Test
+	public void testSearchResourceLinkWithTextLogicalId() {
+		Patient patient = new Patient();
+		String patientName01 = "testSearchResourceLinkWithTextLogicalId01";
+		patient.setId(patientName01);
+		patient.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithTextLogicalIdXX");
+		patient.addIdentifier().setSystem("urn:system").setValue(patientName01);
+		IIdType patientId01 = new IdType("Patient", patientName01);
+
+		Patient patient02 = new Patient();
+		String patientName02 = "testSearchResourceLinkWithTextLogicalId02";
+		patient02.setId(patientName02);
+		patient02.addIdentifier().setSystem("urn:system").setValue("testSearchResourceLinkWithTextLogicalIdXX");
+		patient02.addIdentifier().setSystem("urn:system").setValue(patientName02);
+		IIdType patientId02 = new IdType("Patient", patientName02);
+
+		Observation obs01 = new Observation();
+		obs01.setEffective(new DateTimeType(new Date()));
+		obs01.setSubject(new Reference(patientId01));
+
+		Observation obs02 = new Observation();
+		obs02.setEffective(new DateTimeType(new Date()));
+		obs02.setSubject(new Reference(patientId02));
+
+		SearchParameterMap params = new SearchParameterMap().add(Observation.SP_SUBJECT, new ReferenceParam(patientName01));
+		assertMatched(obs01, params);
+		assertNotMatched(obs02, params);
+
+		params = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId99"));
+		assertNotMatched(obs01, params);
+		assertNotMatched(obs02, params);
+
+		params = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("999999999999999"));
+		assertNotMatched(obs01, params);
+		assertNotMatched(obs02, params);
+	}
+
+	@Test
+	public void testSearchResourceReferenceOnlyCorrectPath() {
+			Organization org = new Organization();
+			org.setActive(true);
+			IIdType oid1 = new IdType("Organization", 1L);
+
+			Task task = new Task();
+			task.setRequester(new Reference(oid1));
+			Task task2 = new Task();
+			task2.setOwner(new Reference(oid1));
+
+		SearchParameterMap map;
+
+		map = new SearchParameterMap();
+		map.add(Task.SP_REQUESTER, new ReferenceParam(oid1.getValue()));
+		assertMatched(task, map);
+		assertNotMatched(task2, map);
+	}
+
+	// FIXME KHS continue here
 
 	@Test
 	public void testSearchStringParam() throws Exception {
@@ -720,10 +815,10 @@ public class SubscriptionMatcherInMemoryTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_DATE, new DateParam("2011-01-02"));
 
-		for(Observation obs : nlist) {
+		for (Observation obs : nlist) {
 //			assertNotMatched(obs, map);
 		}
-		for(Observation obs : ylist) {
+		for (Observation obs : ylist) {
 			ourLog.info("Obs {} has time {}", obs.getId(), obs.getEffectiveDateTimeType().getValue().toString());
 			assertMatched(obs, map);
 		}

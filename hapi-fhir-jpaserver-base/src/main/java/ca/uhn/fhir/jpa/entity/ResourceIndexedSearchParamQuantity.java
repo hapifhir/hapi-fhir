@@ -235,7 +235,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return hash(theResourceType, theParamName, theUnits);
 	}
 
-	// FIXME KHS test
 	@Override
 	public boolean matches(IQueryParameterType theParam) {
 		if (!(theParam instanceof QuantityParam)) {

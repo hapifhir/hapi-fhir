@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.service.MatchUrlService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -55,6 +56,7 @@ public class CriteriaResourceMatcher {
 		return SubscriptionMatchResult.MATCH;
 	}
 
+	// This method is modelled from SearchBuilder.searchForIdsWithAndOr()
 	private SubscriptionMatchResult matchIdsWithAndOr(String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams, RuntimeResourceDefinition theResourceDefinition, ResourceIndexedSearchParams theSearchParams) {
 		if (theAndOrParams.isEmpty()) {
 			return SubscriptionMatchResult.MATCH;
@@ -69,6 +71,9 @@ public class CriteriaResourceMatcher {
 
 			return new SubscriptionMatchResult(theParamName, "Prefixes not supported.");
 
+		}
+		if (hasChain(theAndOrParams)) {
+			return new SubscriptionMatchResult(theParamName, "Chained references are not supported");
 		}
 		if (theParamName.equals(IAnyResource.SP_RES_ID)) {
 
@@ -98,14 +103,12 @@ public class CriteriaResourceMatcher {
 					case NUMBER:
 					case URI:
 					case DATE:
-						return new SubscriptionMatchResult(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theParamName, paramDef, nextAnd, theSearchParams)));
 					case REFERENCE:
+						return new SubscriptionMatchResult(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(resourceName, theParamName, paramDef, nextAnd, theSearchParams)));
 					case COMPOSITE:
-							return new SubscriptionMatchResult(theParamName);
 					case HAS:
 					case SPECIAL:
-						// should not happen
-						break;
+						return new SubscriptionMatchResult(theParamName);
 				}
 			} else {
 				if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
@@ -118,16 +121,18 @@ public class CriteriaResourceMatcher {
 		return new SubscriptionMatchResult(theParamName);
 	}
 
-	private boolean matchParams(String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> nextAnd, ResourceIndexedSearchParams theSearchParams) {
-		return nextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theParamName, paramDef, token));
+	private boolean matchParams(String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
+		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theResourceName, theParamName, paramDef, token));
 	}
 
-	// FIXME KHS test
+	private boolean hasChain(List<List<? extends IQueryParameterType>> theAndOrParams) {
+		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param instanceof ReferenceParam && ((ReferenceParam)param).getChain() != null);
+	}
+
 	private boolean hasQualifiers(List<List<? extends IQueryParameterType>> theAndOrParams) {
 		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param.getQueryParameterQualifier() != null);
 	}
 
-	// FIXME KHS test
 	private boolean hasPrefixes(List<List<? extends IQueryParameterType>> theAndOrParams) {
 		Predicate<IQueryParameterType> hasPrefixPredicate = param -> param instanceof BaseParamWithPrefix &&
 			((BaseParamWithPrefix) param).getPrefix() != null;

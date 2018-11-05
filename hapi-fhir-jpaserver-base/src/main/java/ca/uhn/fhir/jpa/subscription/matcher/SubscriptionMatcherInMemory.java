@@ -38,9 +38,12 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 
 	SubscriptionMatchResult match(String criteria, IBaseResource resource) {
 		ResourceTable entity = new ResourceTable();
-		entity.setResourceType(resource.getIdElement().getResourceType());
+		String resourceType = myContext.getResourceDefinition(resource).getName();
+		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams searchParams = beanFactory.getBean(ResourceIndexedSearchParams.class);
 		searchParams.extractFromResource(entity, resource);
+		searchParams.extractInlineReferences(resource);
+		searchParams.extractResourceLinks(entity, resource, resource.getMeta().getLastUpdated(), false);
 		RuntimeResourceDefinition resourceDefinition = myContext.getResourceDefinition(resource);
 		return myCriteriaResourceMatcher.match(criteria, resourceDefinition, searchParams);
 	}
