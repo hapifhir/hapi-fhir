@@ -98,7 +98,6 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
             } else if (questionnaireItemOperator == QuestionnaireItemOperator.GREATER_THAN){
                 return result > 0;
             }                  
-            throw new RuntimeException("Bad operator for PrimitiveType comparison");
         } else if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
             return actualAnswer.equalsShallow(expectedAnswer);
         } else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
