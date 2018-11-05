@@ -3,10 +3,14 @@ package ca.uhn.fhir.jpa.subscription.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -18,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -370,14 +376,14 @@ public class SubscriptionMatcherInMemoryTestR4 {
 
 	@Test
 	public void testSearchResourceReferenceOnlyCorrectPath() {
-			Organization org = new Organization();
-			org.setActive(true);
-			IIdType oid1 = new IdType("Organization", 1L);
+		Organization org = new Organization();
+		org.setActive(true);
+		IIdType oid1 = new IdType("Organization", 1L);
 
-			Task task = new Task();
-			task.setRequester(new Reference(oid1));
-			Task task2 = new Task();
-			task2.setOwner(new Reference(oid1));
+		Task task = new Task();
+		task.setRequester(new Reference(oid1));
+		Task task2 = new Task();
+		task2.setOwner(new Reference(oid1));
 
 		SearchParameterMap map;
 
@@ -386,8 +392,6 @@ public class SubscriptionMatcherInMemoryTestR4 {
 		assertMatched(task, map);
 		assertNotMatched(task2, map);
 	}
-
-	// FIXME KHS continue here
 
 	@Test
 	public void testSearchStringParam() throws Exception {
@@ -544,6 +548,26 @@ public class SubscriptionMatcherInMemoryTestR4 {
 	}
 
 	@Test
+	public void testSearchTokenWithNotModifierUnsupported() {
+		String male, female;
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("001");
+		patient.addName().setFamily("Tester").addGiven("Joe");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+		List<String> patients;
+		SearchParameterMap params;
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_GENDER, new TokenParam(null, "male"));
+		assertMatched(patient, params);
+
+		params = new SearchParameterMap();
+		params.add(Patient.SP_GENDER, new TokenParam(null, "male").setModifier(TokenParamModifier.NOT));
+		assertUnsupported(patient, params);
+	}
+
+	@Test
 	public void testSearchTokenWrongParam() {
 		Patient p1 = new Patient();
 		p1.setGender(Enumerations.AdministrativeGender.MALE);
@@ -631,6 +655,21 @@ public class SubscriptionMatcherInMemoryTestR4 {
 		map.add(Observation.SP_VALUE_QUANTITY, param);
 		assertNotMatched(o1, map);
 		assertNotMatched(o2, map);
+	}
+
+	@Test
+	public void testSearchWithContainsUnsupported() {
+		Patient pt1 = new Patient();
+		pt1.addName().setFamily("ABCDEFGHIJK");
+
+		List<String> ids;
+		SearchParameterMap map;
+		IBundleProvider results;
+
+		// Contains = true
+		map = new SearchParameterMap();
+		map.add(Patient.SP_NAME, new StringParam("FGHIJK").setContains(true));
+		assertUnsupported(pt1, map);
 	}
 
 	@Test
