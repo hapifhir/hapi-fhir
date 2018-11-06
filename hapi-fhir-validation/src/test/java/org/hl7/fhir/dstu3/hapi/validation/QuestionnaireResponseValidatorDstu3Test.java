@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemC
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -52,10 +53,10 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	private FhirInstanceValidator myInstanceVal;
-	private FhirValidator myVal;
+	private static FhirValidator myVal;
 	private IValidationSupport myValSupport;
 	private IWorkerContext myWorkerCtx;
-
+	
 	@Before
 	public void before() {
 		myValSupport = mock(IValidationSupport.class);

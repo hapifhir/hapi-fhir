@@ -32,6 +32,7 @@ import org.hl7.fhir.dstu3.model.ExpansionProfile.DesignationIncludeDesignationCo
 import org.hl7.fhir.dstu3.model.ExpansionProfile.SystemVersionProcessingMode;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Expression.ExpressionLanguage;
+import org.hl7.fhir.r4.model.Questionnaire.EnableWhenBehavior;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Contributor;
 import org.hl7.fhir.r4.model.Identifier;
@@ -16184,6 +16185,7 @@ public class VersionConvertor_30_40 {
       tgt.setType(convertQuestionnaireItemType(src.getType()));
     for (org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemEnableWhenComponent t : src.getEnableWhen())
       tgt.addEnableWhen(convertQuestionnaireItemEnableWhenComponent(t));
+    tgt.setEnableBehavior(EnableWhenBehavior.ANY);
     if (src.hasRequired())
       tgt.setRequired(src.getRequired());
     if (src.hasRepeats())
