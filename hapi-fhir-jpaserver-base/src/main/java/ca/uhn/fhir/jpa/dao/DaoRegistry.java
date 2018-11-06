@@ -70,9 +70,14 @@ public class DaoRegistry implements ApplicationContextAware {
 	}
 
 	public <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theResourceType) {
+		IFhirResourceDao<R> retVal = getResourceDaoIfExists(theResourceType);
+		Validate.notNull(retVal, "No DAO exists for resource type %s - Have: %s", theResourceType, myResourceNameToResourceDao);
+		return retVal;
+	}
+
+	public <R extends IBaseResource> IFhirResourceDao<R> getResourceDaoIfExists(Class<R> theResourceType) {
 		init();
 		IFhirResourceDao<?> retVal = myResourceTypeToResourceDao.get(theResourceType);
-		Validate.notNull(retVal, "No DAO exists for resource type %s - Have: %s", theResourceType, myResourceNameToResourceDao);
 		return (IFhirResourceDao<R>)retVal;
 	}
 

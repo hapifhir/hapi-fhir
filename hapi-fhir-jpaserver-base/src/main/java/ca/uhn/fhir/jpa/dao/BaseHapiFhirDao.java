@@ -576,7 +576,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@SuppressWarnings("unchecked")
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
-		return myDaoRegistry.getResourceDao(theType);
+		return myDaoRegistry.getResourceDaoIfExists(theType);
 	}
 
 	protected IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
