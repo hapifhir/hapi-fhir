@@ -54,17 +54,21 @@ public class FhirAutoConfigurationTest {
         assertThat(this.context.getBeansOfType(FhirContext.class)).hasSize(1);
     }
 
-    // FIXME KHS This test is not working with the @ComponentScan in BaseConfig.java.
-	// It's a bean loading ordering issue.  The TxManager in BaseSearchParamRegistry
-	// is failing a dependency check becaus the @ComponentScan is loading BaseSearchParamRegistry
-	// Before the TxManager has been loaded.  @Ignoring test for now.
     @Test
-	 @Ignore
     public void withFhirVersion() throws Exception {
-        load("hapi.fhir.version:DSTU3");
+        load(Arrays.array(EmbeddedDataSourceConfiguration.class,
+			  HibernateJpaAutoConfiguration.class,
+			  FhirAutoConfiguration.class),
+			  "hapi.fhir.version:DSTU3", "spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles",
+			  "spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
         assertThat(this.context.getBean(FhirContext.class).getVersion()).isEqualTo(FhirVersionEnum.DSTU3.getVersionImplementation());
 
-		 load("hapi.fhir.version:R4");
+		 load(Arrays.array(EmbeddedDataSourceConfiguration.class,
+			 HibernateJpaAutoConfiguration.class,
+			 FhirAutoConfiguration.class),
+			 "hapi.fhir.version:R4",
+			 "spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles",
+			 "spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
 		 assertThat(this.context.getBean(FhirContext.class).getVersion()).isEqualTo(FhirVersionEnum.R4.getVersionImplementation());
     }
 

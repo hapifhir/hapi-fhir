@@ -24,11 +24,6 @@ public class SampleJpaRestfulServerApplicationTest {
     @LocalServerPort
     int port;
 
-	// FIXME KHS This test is not working with the @ComponentScan in BaseConfig.java.
-	// It's a bean loading ordering issue.  The TxManager in BaseSearchParamRegistry
-	// is failing a dependency check becaus the @ComponentScan is loading BaseSearchParamRegistry
-	// Before the TxM
-    @Ignore
     @Test
     public void createAndRead() {
         IGenericClient client = fhirContext.newRestfulGenericClient("http://localhost:" + port + "/fhir");
