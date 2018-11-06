@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -112,9 +111,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private BeanFactory beanFactory;
-	@Autowired
-	private DaoConfig myDaoConfig;
-
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
 	/**
@@ -424,13 +420,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected void registerSubscriptionCheckingSubscriber() {
 		if (mySubscriptionCheckingSubscriber == null) {
-			if (myDaoConfig.isEnableInMemorySubscriptionMatching()) {
-				mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherCompositeInMemoryDatabase);
-			} else {
-				mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherDatabase);
-			}
+			mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherCompositeInMemoryDatabase);
 		}
-
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}
 

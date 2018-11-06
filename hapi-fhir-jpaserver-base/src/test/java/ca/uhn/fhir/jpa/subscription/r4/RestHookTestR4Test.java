@@ -16,6 +16,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.PortUtil;
 import com.google.common.collect.Lists;
+import net.ttddyy.dsproxy.QueryCount;
+import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -23,8 +25,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,8 +54,34 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static List<String> ourContentTypes = new ArrayList<>();
 	private static List<String> ourHeaders = new ArrayList<>();
+	private static SingleQueryCountHolder ourCountHolder;
+
+	@Autowired
+	private SingleQueryCountHolder myCountHolder;
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 	private CountingInterceptor myCountingInterceptor;
+
+	@PostConstruct
+	public void initializeOurCountHolder() {
+		ourCountHolder = myCountHolder;
+	}
+
+	@Before
+	public void enableInMemory() {
+		myDaoConfig.setEnableInMemorySubscriptionMatching(true);
+	}
+
+	@AfterClass
+	public static void reportTotalSelects() {
+		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
+	}
+
+	private static QueryCount getQueryCount() {
+		return ourCountHolder.getQueryCountMap().get("");
+	}
 
 	@After
 	public void afterUnregisterRestHookListener() {
