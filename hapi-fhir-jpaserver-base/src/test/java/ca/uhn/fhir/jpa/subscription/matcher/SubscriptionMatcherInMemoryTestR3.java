@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.persistence.StoredProcedureParameter;
 import javax.persistence.Temporal;
 import java.util.List;
 
@@ -281,12 +283,122 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseResourceProviderDstu3
 			assertNotMatched(proc, criteria);
 		}
 	}
-//				 String criteria = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
-//				 String criteria = "BodySite?accessType=Catheter,PD%20Catheter";
-//				 String criteria = "Procedure?code=HD_Standard&status=completed";
-//				 String criteria = "QuestionnaireResponse?questionnaire=HomeAbsenceHospitalizationRecord,ARIncenterAbsRecord,FMCSWDepressionSymptomsScreener,FMCAKIComprehensiveSW,FMCSWIntensiveScreener,FMCESRDComprehensiveSW,FMCNutritionProgressNote,FMCAKIComprehensiveRN";
-//				 String criteria = "ProcedureRequest?intent=instance-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&occurrence==2018-10-19";
-//				 String criteria = "EpisodeOfCare?status=active";
-//				 String criteria = "ProcedureRequest?intent=original-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&status=suspended,entered-in-error,cancelled";
-//				 String criteria = "Observation?code=70965-9&context.type=IHD";
+
+	// ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: Failed to parse match URL[Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU]
+	// - Resource type Provenance does not have a parameter with name: activity
+	@Test(expected = InvalidRequestException.class)
+	public void testProvenance() {
+		String criteria = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
+
+		{
+			Provenance prov = new Provenance();
+//			prov.setActivity(new Coding().setCode("http://hl7.org/fhir/v3/DocumentCompletion%7CAU"));
+			assertNotMatched(prov, criteria);
+		}
+
+	}
+
+	// ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: Failed to parse match URL[BodySite?accessType=Catheter,PD%20Catheter]
+	// - Resource type BodySite does not have a parameter with name: accessType
+	@Test(expected = InvalidRequestException.class)
+	public void testBodySite() {
+		String criteria = "BodySite?accessType=Catheter,PD%20Catheter";
+
+		{
+			BodySite bodySite = new BodySite();
+			assertNotMatched(bodySite, criteria);
+		}
+
+	}
+
+	@Test
+	public void testProcedureAnyLocation() {
+		String criteria = "Procedure?code=HD_Standard&status=completed";
+		{
+			Procedure proc = new Procedure();
+			proc.getCode().addCoding().setCode("HD_Standard");
+			proc.setStatus(Procedure.ProcedureStatus.COMPLETED);
+			IIdType locId = new IdType("Location", "Lab456");
+			proc.getLocation().setReference(locId.getValue());
+			assertMatched(proc, criteria);
+		}
+		{
+			Procedure proc = new Procedure();
+			proc.getCode().addCoding().setCode("HD_Standard");
+			proc.setStatus(Procedure.ProcedureStatus.ABORTED);
+			assertNotMatched(proc, criteria);
+		}
+		{
+			Procedure proc = new Procedure();
+			proc.getCode().addCoding().setCode("XXX");
+			proc.setStatus(Procedure.ProcedureStatus.COMPLETED);
+			assertNotMatched(proc, criteria);
+		}
+	}
+
+	@Test
+	public void testQuestionnaireResponseLong() {
+		String criteria = "QuestionnaireResponse?questionnaire=HomeAbsenceHospitalizationRecord,ARIncenterAbsRecord,FMCSWDepressionSymptomsScreener,FMCAKIComprehensiveSW,FMCSWIntensiveScreener,FMCESRDComprehensiveSW,FMCNutritionProgressNote,FMCAKIComprehensiveRN";
+
+		{
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.getQuestionnaire().setReference("Questionnaire/HomeAbsenceHospitalizationRecord");
+			assertMatched(qr, criteria);
+		}
+		{
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.getQuestionnaire().setReference("Questionnaire/FMCSWIntensiveScreener");
+			assertMatched(qr, criteria);
+		}
+		{
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.getQuestionnaire().setReference("Questionnaire/FMCAKIComprehensiveRN");
+			assertMatched(qr, criteria);
+		}
+		{
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			assertNotMatched(qr, criteria);
+		}
+		{
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.getQuestionnaire().setReference("Questionnaire/FMCAKIComprehensiveRM");
+			assertNotMatched(qr, criteria);
+		}
+	}
+
+	// ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: Failed to parse match URL[ProcedureRequest?intent=instance-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&occurrence==2018-10-19]
+	// - Resource type ProcedureRequest does not have a parameter with name: category
+	@Test(expected = InvalidRequestException.class)
+	public void testProcedureRequestInvalid() {
+		String criteria = "ProcedureRequest?intent=instance-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&occurrence==2018-10-19";
+
+		{
+			ProcedureRequest pr = new ProcedureRequest();
+			assertNotMatched(pr, criteria);
+		}
+
+	}
+
+	@Test
+	public void testEposideOfCare() {
+		String criteria = "EpisodeOfCare?status=active";
+		{
+			EpisodeOfCare eoc = new EpisodeOfCare();
+			eoc.setStatus(EpisodeOfCare.EpisodeOfCareStatus.ACTIVE);
+			assertMatched(eoc, criteria);
+		}
+		{
+			EpisodeOfCare eoc = new EpisodeOfCare();
+			assertNotMatched(eoc, criteria);
+		}
+		{
+			EpisodeOfCare eoc = new EpisodeOfCare();
+			eoc.setStatus(EpisodeOfCare.EpisodeOfCareStatus.CANCELLED);
+			assertNotMatched(eoc, criteria);
+		}
+	}
+
+	// These last two are covered by other tests above
+	//				 String criteria = "ProcedureRequest?intent=original-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&status=suspended,entered-in-error,cancelled";
+	//				 String criteria = "Observation?code=70965-9&context.type=IHD";
 }
