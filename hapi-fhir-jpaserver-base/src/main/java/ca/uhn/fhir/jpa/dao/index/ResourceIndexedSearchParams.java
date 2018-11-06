@@ -1,60 +1,42 @@
 package ca.uhn.fhir.jpa.dao.index;
 
-import static org.apache.commons.lang3.StringUtils.compare;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Predicate;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.service.IdHelperService;
 import ca.uhn.fhir.jpa.service.MatchUrlService;
-import ca.uhn.fhir.jpa.subscription.DaoProvider;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Reference;
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 @Component
 @Scope("prototype")
@@ -86,7 +68,7 @@ public class ResourceIndexedSearchParams {
 	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired
-	private DaoProvider myDaoProvider;
+	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
@@ -637,17 +619,7 @@ public class ResourceIndexedSearchParams {
 					throw new InvalidRequestException("Invalid resource reference found at path[" + nextPathsUnsplit + "] - Does not contain resource ID - " + nextId.getValue());
 				}
 
-				if (myDaoProvider.getDao(type) == null) {
-					StringBuilder b = new StringBuilder();
-					b.append("This server (version ");
-					b.append(myContext.getVersion().getVersion());
-					b.append(") is not able to handle resources of type[");
-					b.append(nextId.getResourceType());
-					b.append("] - Valid resource types for this server: ");
-					b.append(myDaoProvider.getDaoNameList());
-
-					throw new InvalidRequestException(b.toString());
-				}
+				myDaoRegistry.getDaoOrThrowException(type);
 				ResourceTable target;
 				if (lookUpReferencesInDatabase) {
 					Long valueOf;
@@ -663,7 +635,7 @@ public class ResourceIndexedSearchParams {
 						if (myConfig.isAutoCreatePlaceholderReferenceTargets()) {
 							IBaseResource newResource = missingResourceDef.newInstance();
 							newResource.setId(resName + "/" + id);
-							IFhirResourceDao<IBaseResource> placeholderResourceDao = (IFhirResourceDao<IBaseResource>) myDaoProvider.getDao(newResource.getClass());
+							IFhirResourceDao<IBaseResource> placeholderResourceDao = (IFhirResourceDao<IBaseResource>) myDaoRegistry.getResourceDao(newResource.getClass());
 							ourLog.debug("Automatically creating empty placeholder resource: {}", newResource.getIdElement().getValue());
 							valueOf = placeholderResourceDao.update(newResource).getEntity().getId();
 						} else {

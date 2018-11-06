@@ -1,28 +1,27 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionCompositeInMemoryDatabaseMatcher;
-import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
+import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,10 +48,10 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.*;
+import java.util.concurrent.*;
 
 /*-
  * #%L
@@ -63,9 +62,9 @@ import com.google.common.collect.Multimaps;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -73,25 +72,6 @@ import com.google.common.collect.Multimaps;
  * limitations under the License.
  * #L%
  */
-
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
-import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
-import ca.uhn.fhir.util.StopWatch;
 
 public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> extends ServerOperationInterceptorAdapter {
 
@@ -125,7 +105,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired
 	private SubscriptionCompositeInMemoryDatabaseMatcher mySubscriptionCompositeInMemoryDatabaseMatcher;
 	@Autowired
-	private DaoProvider myDaoProvider;
+	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private BeanFactory beanFactory;
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
@@ -378,7 +358,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			RequestDetails req = new ServletSubRequestDetails();
 			req.setSubRequest(true);
 
-			IBundleProvider subscriptionBundleList = myDaoProvider.getSubscriptionDao().search(map, req);
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			IBundleProvider subscriptionBundleList = subscriptionDao.search(map, req);
 			if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
 				ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
 			}
@@ -542,7 +523,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(myDaoProvider.getSubscriptionDao(), getChannelType(), this, myTxManager, myAsyncTaskExecutor);
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(subscriptionDao, getChannelType(), this, myTxManager, myAsyncTaskExecutor);
 		}
 
 		registerSubscriptionCheckingSubscriber();
@@ -608,14 +590,14 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 
 	public IFhirResourceDao<?> getSubscriptionDao() {
-		return myDaoProvider.getSubscriptionDao();
+		return myDaoRegistry.getResourceDao("Subscription");
 	}
 
 	public IFhirResourceDao getDao(Class type) {
-		return myDaoProvider.getDao(type);
+		return myDaoRegistry.getResourceDao(type);
 	}
 	
-	public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
-		myDaoProvider.setResourceDaos(theResourceDaos);
+	public void setResourceDaos(List<IFhirResourceDao> theResourceDaos) {
+		myDaoRegistry.setResourceDaos(theResourceDaos);
 	}
 }

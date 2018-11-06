@@ -3,9 +3,11 @@ package ca.uhn.fhir.jpa.service;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.ResourceMetaParams;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
-import ca.uhn.fhir.jpa.subscription.DaoProvider;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -35,7 +37,7 @@ public class MatchUrlService {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private DaoProvider myDaoProvider;
+	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -51,7 +53,7 @@ public class MatchUrlService {
 			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
 		}
 
-		IFhirResourceDao<R> dao = myDaoProvider.getDao(theResourceType);
+		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
 		if (dao == null) {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}

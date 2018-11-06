@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ import javax.annotation.PostConstruct;
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
 	@Autowired
-	DaoProvider myDaoProvider;
+	DaoRegistry myDaoRegistry;
 
 	private final Subscription.SubscriptionChannelType myChannelType;
 	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
@@ -52,7 +53,7 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
 	@PostConstruct
 	public void setSubscriptionDao() {
-		mySubscriptionDao = myDaoProvider.getSubscriptionDao();
+		mySubscriptionDao = myDaoRegistry.getResourceDao("Subscription");
 	}
 
 	public Subscription.SubscriptionChannelType getChannelType() {
