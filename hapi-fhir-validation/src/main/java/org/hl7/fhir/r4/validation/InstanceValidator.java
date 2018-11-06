@@ -2783,7 +2783,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack, inProgress);
       } else { 
     	//item is missing, is the question enabled?
-    	if (!myEnableWhenEvaluator.isQuestionEnabled(qItem, element)) {    	  
+    	if (myEnableWhenEvaluator.isQuestionEnabled(qItem, element)) {    	  
     	  rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), !qItem.getRequired(), "No response found for required item "+qItem.getLinkId());
     	}
       }
