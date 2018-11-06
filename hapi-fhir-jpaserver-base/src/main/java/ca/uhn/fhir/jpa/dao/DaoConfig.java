@@ -156,6 +156,7 @@ public class DaoConfig {
 	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myDisableHashBasedSearches;
+	private boolean myEnableInMemorySubscriptionMatching = false;
 
 	/**
 	 * Constructor
@@ -1410,6 +1411,28 @@ public class DaoConfig {
 	 */
 	public void setDisableHashBasedSearches(boolean theDisableHashBasedSearches) {
 		myDisableHashBasedSearches = theDisableHashBasedSearches;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false) the server will not use
+	 * in-memory subscription searching.  When there are subscriptions registered
+	 * on the server, the default behaviour is to create or update a resource
+	 * to the database and then for each subscription, perform a query against the
+	 * database with the id of the changed entity added to the query to see if there
+	 * is a hit.  When set to true, the changed resource is compared to the
+	 * query directly in-memory without going out to the database.  Certain types of
+	 * queries, e.g. chained references of queries with qualifiers or prefixes, are not
+	 * supported by the in-memory matcher and will fall back to the original database
+	 * matcher.
+	 * @since 3.6.0
+	 */
+
+	public boolean isEnableInMemorySubscriptionMatching() {
+		return myEnableInMemorySubscriptionMatching;
+	}
+
+	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
+		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
 	}
 
 	public enum IndexEnabledEnum {

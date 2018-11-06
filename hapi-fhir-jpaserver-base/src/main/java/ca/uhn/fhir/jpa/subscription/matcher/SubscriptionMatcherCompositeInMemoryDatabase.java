@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SubscriptionCompositeInMemoryDatabaseMatcher implements ISubscriptionMatcher {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionCompositeInMemoryDatabaseMatcher.class);
+public class SubscriptionMatcherCompositeInMemoryDatabase implements ISubscriptionMatcher {
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherCompositeInMemoryDatabase.class);
 
 	@Autowired
 	SubscriptionMatcherDatabase mySubscriptionMatcherDatabase;

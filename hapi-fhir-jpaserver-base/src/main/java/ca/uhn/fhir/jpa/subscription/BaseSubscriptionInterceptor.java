@@ -4,11 +4,13 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionCompositeInMemoryDatabaseMatcher;
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherCompositeInMemoryDatabase;
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -103,11 +105,16 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
 	@Autowired
-	private SubscriptionCompositeInMemoryDatabaseMatcher mySubscriptionCompositeInMemoryDatabaseMatcher;
+	private SubscriptionMatcherCompositeInMemoryDatabase mySubscriptionMatcherCompositeInMemoryDatabase;
+	@Autowired
+	private SubscriptionMatcherDatabase mySubscriptionMatcherDatabase;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private BeanFactory beanFactory;
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
 	/**
@@ -417,8 +424,13 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected void registerSubscriptionCheckingSubscriber() {
 		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionCompositeInMemoryDatabaseMatcher);
+			if (myDaoConfig.isEnableInMemorySubscriptionMatching()) {
+				mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherCompositeInMemoryDatabase);
+			} else {
+				mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherDatabase);
+			}
 		}
+
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}
 
