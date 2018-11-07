@@ -157,6 +157,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Transactional(Transactional.TxType.NEVER)
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
 	public Integer runReindexingPass() {
+		if (myDaoConfig.isSchedulingDisabled()) {
+			return null;
+		}
 		if (myIndexingLock.tryLock()) {
 			try {
 				return doReindexingPassInsideLock();
