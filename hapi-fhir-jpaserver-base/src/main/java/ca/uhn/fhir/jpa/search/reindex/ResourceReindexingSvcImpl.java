@@ -177,6 +177,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Transactional(Transactional.TxType.NEVER)
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
 	public Integer runReindexingPass() {
+		if (myDaoConfig.isSchedulingDisabled()) {
+			return null;
+		}
 		if (myIndexingLock.tryLock()) {
 			try {
 				return doReindexingPassInsideLock();
@@ -193,7 +196,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	@Override
-	public Integer forceReindexingPass() {
+	public int forceReindexingPass() {
 		myIndexingLock.lock();
 		try {
 			return doReindexingPassInsideLock();
@@ -216,7 +219,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		expungeJobsMarkedAsDeleted();
 	}
 
-	private Integer runReindexJobs() {
+	private int runReindexJobs() {
 		Collection<ResourceReindexJobEntity> jobs = myTxTemplate.execute(t -> myReindexJobDao.findAll(PageRequest.of(0, 10), false));
 		assert jobs != null;
 
