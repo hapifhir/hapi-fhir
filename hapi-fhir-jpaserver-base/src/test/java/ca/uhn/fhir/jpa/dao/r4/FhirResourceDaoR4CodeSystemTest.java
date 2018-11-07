@@ -31,7 +31,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 		myCodeSystemDao.create(cs, mySrd);
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
-		int outcome = myResourceReindexingSvc.runReindexingPass();
+		int outcome = myResourceReindexingSvc.forceReindexingPass();
 		assertNotEquals(-1, outcome); // -1 means there was a failure
 		
 		myTermSvc.saveDeferred();

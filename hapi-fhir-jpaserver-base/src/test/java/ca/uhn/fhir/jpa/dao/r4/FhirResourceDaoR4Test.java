@@ -182,7 +182,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		});
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
-		myResourceReindexingSvc.runReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
@@ -225,7 +225,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		});
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
-		myResourceReindexingSvc.runReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
