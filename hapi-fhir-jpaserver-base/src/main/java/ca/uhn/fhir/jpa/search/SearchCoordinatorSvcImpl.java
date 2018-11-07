@@ -52,6 +52,7 @@ import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -68,6 +69,7 @@ import java.util.concurrent.*;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+@Component("mySearchCoordinatorSvc")
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 

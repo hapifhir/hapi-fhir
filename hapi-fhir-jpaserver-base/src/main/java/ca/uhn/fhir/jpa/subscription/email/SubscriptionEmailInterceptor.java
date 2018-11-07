@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.email;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
 
@@ -36,11 +37,13 @@ public class SubscriptionEmailInterceptor extends BaseSubscriptionInterceptor {
 	 */
 	@Autowired(required = false)
 	private IEmailSender myEmailSender;
+	@Autowired
+	BeanFactory myBeanFactory;
 	private String myDefaultFromAddress = "noreply@unknown.com";
 
 	@Override
 	protected Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
-		return Optional.of(new SubscriptionDeliveringEmailSubscriber(getSubscriptionDao(), getChannelType(), this));
+		return Optional.of(myBeanFactory.getBean(SubscriptionDeliveringEmailSubscriber.class, getChannelType(), this));
 	}
 
 	@Override

@@ -24,9 +24,11 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.service.MatchUrlService;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	@Autowired
@@ -43,6 +46,8 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	private FhirContext myCtx;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@Override
 	@Scheduled(fixedDelay = 1000)
@@ -72,7 +77,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 		RuntimeResourceDefinition resourceDef = parseUrlResourceType(myCtx, nextUrl);
 		IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceDef.getName());
 		String queryPart = parseWarmUrlParamPart(nextUrl);
-		SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(callingDao, myCtx, queryPart, resourceDef);
+		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
 
 		callingDao.search(responseCriteriaUrl);
 	}

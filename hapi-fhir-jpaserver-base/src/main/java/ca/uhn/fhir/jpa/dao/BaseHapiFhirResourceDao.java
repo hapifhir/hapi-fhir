@@ -26,9 +26,11 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.service.IdHelperService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
@@ -90,6 +92,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String mySecondaryPrimaryKeyParamName;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private SearchParamProvider mySearchParamProvider;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -388,7 +392,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (isNotBlank(theResource.getIdElement().getIdPart())) {
-			if (isValidPid(theResource.getIdElement())) {
+			if (IdHelperService.isValidPid(theResource.getIdElement())) {
 				throw new UnprocessableEntityException(
 					"This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
 			}
@@ -770,7 +774,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myResourceName = def.getName();
 
 		if (mySecondaryPrimaryKeyParamName != null) {
-			RuntimeSearchParam sp = getSearchParamByName(def, mySecondaryPrimaryKeyParamName);
+			RuntimeSearchParam sp = mySearchParamProvider.getSearchParamByName(def, mySecondaryPrimaryKeyParamName);
 			if (sp == null) {
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
@@ -888,7 +892,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId) {
 		validateResourceTypeAndThrowIllegalArgumentException(theId);
 
-		Long pid = translateForcedIdToPid(getResourceName(), theId.getIdPart());
+		Long pid = myIdHelperService.translateForcedIdToPid(getResourceName(), theId.getIdPart());
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
 
 		if (entity == null) {
@@ -928,7 +932,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	protected ResourceTable readEntityLatestVersion(IIdType theId) {
-		ResourceTable entity = myEntityManager.find(ResourceTable.class, translateForcedIdToPid(getResourceName(), theId.getIdPart()));
+		ResourceTable entity = myEntityManager.find(ResourceTable.class, myIdHelperService.translateForcedIdToPid(getResourceName(), theId.getIdPart()));
 		if (entity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -1169,7 +1173,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			// Should not be null since the check above would have caught it
 			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceName);
-			RuntimeSearchParam paramDef = getSearchParamByName(resourceDef, qualifiedParamName.getParamName());
+			RuntimeSearchParam paramDef = mySearchParamProvider.getSearchParamByName(resourceDef, qualifiedParamName.getParamName());
 
 			for (String nextValue : theSource.get(nextParamName)) {
 				if (isNotBlank(nextValue)) {

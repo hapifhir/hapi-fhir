@@ -27,14 +27,18 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope("prototype")
 public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptionSubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriber.class);
 
-	public BaseSubscriptionDeliverySubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
-		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
+	public BaseSubscriptionDeliverySubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+		super(theChannelType, theSubscriptionInterceptor);
 	}
 
 	@Override

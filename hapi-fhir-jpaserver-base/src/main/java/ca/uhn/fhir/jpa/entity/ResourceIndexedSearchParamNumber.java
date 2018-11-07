@@ -20,9 +20,11 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.util.BigDecimalNumericFieldBridge;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -148,5 +150,14 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
 		b.append("value", getValue());
 		return b.build();
+	}
+
+	@Override
+	public boolean matches(IQueryParameterType theParam) {
+		if (!(theParam instanceof NumberParam)) {
+			return false;
+		}
+		NumberParam number = (NumberParam)theParam;
+		return getValue().equals(number.getValue());
 	}
 }

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.service.MatchUrlService;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -83,6 +84,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private FhirContext myContext;
 	@Autowired
 	private ITransactionProcessorVersionAdapter<BUNDLE, BUNDLEENTRY> myVersionAdapter;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -370,7 +373,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			requestDetails.setParameters(new HashMap<>());
 			if (qIndex != -1) {
 				String params = url.substring(qIndex);
-				List<NameValuePair> parameters = BaseHapiFhirDao.translateMatchUrl(params);
+				List<NameValuePair> parameters = myMatchUrlService.translateMatchUrl(params);
 				for (NameValuePair next : parameters) {
 					paramValues.put(next.getName(), next.getValue());
 				}
