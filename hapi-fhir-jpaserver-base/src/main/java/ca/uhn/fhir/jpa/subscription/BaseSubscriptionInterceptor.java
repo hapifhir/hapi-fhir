@@ -3,11 +3,14 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.jpa.service.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherCompositeInMemoryDatabase;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.util.JpaConstants;
@@ -17,6 +20,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -111,6 +115,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private BeanFactory beanFactory;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
 	/**
@@ -602,5 +608,16 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	
 	public void setResourceDaos(List<IFhirResourceDao> theResourceDaos) {
 		myDaoRegistry.setResourceDaos(theResourceDaos);
+	}
+
+	public void validateCriteria(final S theResource) {
+		CanonicalSubscription subscription = canonicalize(theResource);
+		String criteria = subscription.getCriteriaString();
+		try {
+			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myCtx, criteria);
+			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
+		} catch (Throwable e) {
+			throw new UnprocessableEntityException("Invalid subscription criteria submitted: "+criteria);
+		}
 	}
 }

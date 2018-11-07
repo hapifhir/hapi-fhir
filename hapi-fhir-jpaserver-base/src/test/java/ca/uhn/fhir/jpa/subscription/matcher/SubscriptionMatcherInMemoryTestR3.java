@@ -137,10 +137,9 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseResourceProviderDstu3
 		}
 	}
 
-	// FIXME KHS What's with the date== here?
-
 	@Test
 	public void medicationRequestOutpatient() {
+		// Note the date== evaluates to date=eq which is a legacy format supported by hapi fhir
 		String criteria = "MedicationRequest?intent=instance-order&category=outpatient&date==2018-10-19";
 
 		{
@@ -184,14 +183,7 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseResourceProviderDstu3
 	public void testMedicationRequestStatuses() {
 		String criteria = "MedicationRequest?intent=plan&category=outpatient&status=suspended,entered-in-error,cancelled,stopped";
 
-		// FIXME KHS
-//		{
-//			MedicationRequest mr = new MedicationRequest();
-//			mr.setIntent(MedicationRequest.MedicationRequestIntent.PLAN);
-//			mr.getCategory().addCoding().setCode(MedicationRequestCategory.OUTPATIENT.toCode());
-//			mr.setStatus("suspended");
-//			assertMatched(mr, criteria);
-//		}
+		// Note suspended is an invalid status and will never match
 		{
 			MedicationRequest mr = new MedicationRequest();
 			mr.setIntent(MedicationRequest.MedicationRequestIntent.PLAN);

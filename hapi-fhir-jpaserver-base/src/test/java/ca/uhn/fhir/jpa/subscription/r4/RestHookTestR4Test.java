@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.PortUtil;
 import com.google.common.collect.Lists;
@@ -37,8 +38,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -128,6 +128,16 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
+		Subscription subscription = newSubscription(theCriteria, thePayload, theEndpoint);
+
+		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		subscription.setId(methodOutcome.getId().getIdPart());
+		mySubscriptionIds.add(methodOutcome.getId());
+
+		return subscription;
+	}
+
+	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -137,11 +147,6 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload(thePayload);
 		channel.setEndpoint(theEndpoint);
-
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
-		subscription.setId(methodOutcome.getId().getIdPart());
-		mySubscriptionIds.add(methodOutcome.getId());
-
 		return subscription;
 	}
 
@@ -338,9 +343,9 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
 	}
 
 	@Test
@@ -412,9 +417,9 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
 	}
 
 	@Test
@@ -561,6 +566,30 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 	private void waitForQueueToDrain() throws InterruptedException {
 		RestHookTestDstu2Test.waitForQueueToDrain(getRestHookSubscriptionInterceptor());
+	}
+
+	@Test(expected= UnprocessableEntityException.class)
+	public void testInvalidProvenanceParam() {
+		String payload = "application/fhir+json";
+		String criteriabad = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
+		Subscription subscription = newSubscription(criteriabad, payload, ourListenerServerBase);
+		ourClient.create().resource(subscription).execute();
+	}
+
+	@Test(expected= UnprocessableEntityException.class)
+	public void testInvalidProcedureRequestParam() {
+		String payload = "application/fhir+json";
+		String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
+		Subscription subscription = newSubscription(criteriabad, payload, ourListenerServerBase);
+		ourClient.create().resource(subscription).execute();
+	}
+
+	@Test(expected= UnprocessableEntityException.class)
+	public void testInvalidBodySiteParam() {
+		String payload = "application/fhir+json";
+		String criteriabad = "BodySite?accessType=Catheter";
+		Subscription subscription = newSubscription(criteriabad, payload, ourListenerServerBase);
+		ourClient.create().resource(subscription).execute();
 	}
 
 	public static class ObservationListener implements IResourceProvider {
