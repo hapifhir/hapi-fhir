@@ -22,14 +22,17 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import org.apache.commons.lang3.Validate;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DaoRegistry implements ApplicationContextAware {
 	private ApplicationContext myAppCtx;
@@ -55,9 +58,21 @@ public class DaoRegistry implements ApplicationContextAware {
 
 	public IFhirResourceDao<?> getResourceDao(String theResourceName) {
 		IFhirResourceDao<?> retVal = getResourceNameToResourceDao().get(theResourceName);
-		Validate.notNull(retVal, "No DAO exists for resource type %s - Have: %s", theResourceName, myResourceNameToResourceDao);
+		if (retVal == null) {
+			List<String> supportedResourceTypes = getResourceNameToResourceDao()
+				.keySet()
+				.stream()
+				.sorted()
+				.collect(Collectors.toList());
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + theResourceName + " - Can handle: " + supportedResourceTypes);
+		}
 		return retVal;
 
+	}
+
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDao(Class<T> theResourceType) {
+		String resourceName = myCtx.getResourceDefinition(theResourceType).getName();
+		return (IFhirResourceDao<T>) getResourceDao(resourceName);
 	}
 
 	private Map<String, IFhirResourceDao<?>> getResourceNameToResourceDao() {

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
@@ -33,7 +34,9 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
-import org.mockito.Mockito;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -75,6 +78,7 @@ public abstract class BaseJpaTest {
 
 	@Rule
 	public LoggingRule myLoggingRule = new LoggingRule();
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
@@ -89,7 +93,7 @@ public abstract class BaseJpaTest {
 	@After
 	public void afterValidateNoTransaction() {
 		PlatformTransactionManager txManager = getTxManager();
-		if (txManager != null) {
+		if (txManager instanceof JpaTransactionManager) {
 			JpaTransactionManager hibernateTxManager = (JpaTransactionManager) txManager;
 			SessionFactory sessionFactory = (SessionFactory) hibernateTxManager.getEntityManagerFactory();
 			AtomicBoolean isReadOnly = new AtomicBoolean();
@@ -114,8 +118,9 @@ public abstract class BaseJpaTest {
 	}
 
 	@Before
-	public void beforeCreateSrd() {
-		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
+	public void beforeInitMocks() {
+		MockitoAnnotations.initMocks(this);
+
 		when(mySrd.getRequestOperationCallback()).thenReturn(myRequestOperationCallback);
 		myServerInterceptorList = new ArrayList<>();
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
@@ -289,7 +294,7 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	protected List<IIdType> toUnqualifiedVersionlessIds(List<IBaseResource> theFound) {
+	protected List<IIdType> toUnqualifiedVersionlessIds(List<? extends IBaseResource> theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (IBaseResource next : theFound) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
@@ -355,8 +360,9 @@ public abstract class BaseJpaTest {
 		return bundleStr;
 	}
 
-	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
+	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
+		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 
 		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
 		theDaoConfig.setExpungeEnabled(true);

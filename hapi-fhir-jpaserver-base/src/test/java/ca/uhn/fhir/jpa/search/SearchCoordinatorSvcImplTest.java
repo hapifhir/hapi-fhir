@@ -30,6 +30,8 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -49,11 +51,12 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class SearchCoordinatorSvcImplTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	@Captor
 	ArgumentCaptor<Iterable<SearchResult>> mySearchResultIterCaptor;
 	@Mock
-	private IDao myCallingDao;
+	private IFhirResourceDao<?> myCallingDao;
 	@Mock
 	private EntityManager myEntityManager;
 	private int myExpectedNumberOfSearchBuildersCreated = 2;
@@ -66,10 +69,12 @@ public class SearchCoordinatorSvcImplTest {
 	@Mock
 	private ISearchResultDao mySearchResultDao;
 	private SearchCoordinatorSvcImpl mySvc;
-
 	@Mock
 	private PlatformTransactionManager myTxManager;
 	private DaoConfig myDaoConfig;
+	private Search myCurrentSearch;
+	@Mock
+	private DaoRegistry myDaoRegistry;
 
 	@After
 	public void after() {
@@ -78,6 +83,7 @@ public class SearchCoordinatorSvcImplTest {
 
 	@Before
 	public void before() {
+		myCurrentSearch = null;
 
 		mySvc = new SearchCoordinatorSvcImpl();
 		mySvc.setEntityManagerForUnitTest(myEntityManager);
@@ -86,6 +92,7 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setSearchDaoForUnitTest(mySearchDao);
 		mySvc.setSearchDaoIncludeForUnitTest(mySearchIncludeDao);
 		mySvc.setSearchDaoResultForUnitTest(mySearchResultDao);
+		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 
 		myDaoConfig = new DaoConfig();
 		mySvc.setDaoConfigForUnitTest(myDaoConfig);
@@ -158,16 +165,35 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		IResultIterator iter = new SlowIterator(pids.iterator(), 1);
-		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
-
+		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
+		when(mySearchBuider.createQuery(any(), any(String.class))).thenReturn(iter);
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+
+		when(mySearchResultDao.findWithSearchUuid(any(), any())).thenAnswer(t -> {
+			List<Long> returnedValues = iter.getReturnedValues();
+			Pageable page = (Pageable) t.getArguments()[1];
+			int offset = (int) page.getOffset();
+			int end = (int) (page.getOffset() + page.getPageSize());
+			end = Math.min(end, returnedValues.size());
+			offset = Math.min(offset, returnedValues.size());
+			ourLog.info("findWithSearchUuid {} - {} out of {} values", offset, end, returnedValues.size());
+			return new PageImpl<>(returnedValues.subList(offset, end));
+		});
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
 		List<IBaseResource> resources;
+
+		when(mySearchDao.save(any())).thenAnswer(t -> {
+			Search search = (Search) t.getArguments()[0];
+			myCurrentSearch = search;
+			return search;
+		});
+		when(mySearchDao.findByUuid(any())).thenAnswer(t -> myCurrentSearch);
+		IFhirResourceDao dao = myCallingDao;
+		when(myDaoRegistry.getResourceDao(any(String.class))).thenReturn(dao);
 
 		resources = result.getResources(0, 100000);
 		assertEquals(790, resources.size());
@@ -178,7 +204,7 @@ public class SearchCoordinatorSvcImplTest {
 		verify(mySearchDao, atLeastOnce()).save(searchCaptor.capture());
 
 		verify(mySearchResultDao, atLeastOnce()).saveAll(mySearchResultIterCaptor.capture());
-		List<SearchResult> allResults = new ArrayList<SearchResult>();
+		List<SearchResult> allResults = new ArrayList<>();
 		for (Iterable<SearchResult> next : mySearchResultIterCaptor.getAllValues()) {
 			allResults.addAll(Lists.newArrayList(next));
 		}
@@ -186,6 +212,8 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals(790, allResults.size());
 		assertEquals(10, allResults.get(0).getResourcePid().longValue());
 		assertEquals(799, allResults.get(789).getResourcePid().longValue());
+
+		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
 
 	@Test
@@ -224,7 +252,7 @@ public class SearchCoordinatorSvcImplTest {
 		List<Long> pids = createPidSequence(10, 800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuider.createQuery(Mockito.same(params), any(String.class))).thenReturn(iter);
-
+		when(mySearchDao.save(any())).thenAnswer(t -> t.getArguments()[0]);
 		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
@@ -256,12 +284,6 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
-
-		provider = new PersistedJpaBundleProvider(result.getUuid(), myCallingDao);
-		resources = provider.getResources(20, 99999);
-		assertEquals(770, resources.size());
-		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("799", resources.get(769).getIdElement().getValueAsString());
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
@@ -452,11 +474,19 @@ public class SearchCoordinatorSvcImplTest {
 		}
 	}
 
+	/**
+	 * THIS CLASS IS FOR UNIT TESTS ONLY - It is delioberately inefficient
+	 * and keeps things in memory.
+	 * <p>
+	 * Don't use it in real code!
+	 */
 	public static class SlowIterator extends BaseIterator<Long> implements IResultIterator {
 
+		private static final Logger ourLog = LoggerFactory.getLogger(SlowIterator.class);
 		private final IResultIterator myResultIteratorWrap;
 		private int myDelay;
 		private Iterator<Long> myWrap;
+		private List<Long> myReturnedValues = new ArrayList<>();
 
 		public SlowIterator(Iterator<Long> theWrap, int theDelay) {
 			myWrap = theWrap;
@@ -470,9 +500,17 @@ public class SearchCoordinatorSvcImplTest {
 			myDelay = theDelay;
 		}
 
+		public List<Long> getReturnedValues() {
+			return myReturnedValues;
+		}
+
 		@Override
 		public boolean hasNext() {
-			return myWrap.hasNext();
+			boolean retVal = myWrap.hasNext();
+			if (!retVal) {
+				ourLog.info("No more results remaining");
+			}
+			return retVal;
 		}
 
 		@Override
@@ -482,7 +520,9 @@ public class SearchCoordinatorSvcImplTest {
 			} catch (InterruptedException e) {
 				// ignore
 			}
-			return myWrap.next();
+			Long retVal = myWrap.next();
+			myReturnedValues.add(retVal);
+			return retVal;
 		}
 
 		@Override

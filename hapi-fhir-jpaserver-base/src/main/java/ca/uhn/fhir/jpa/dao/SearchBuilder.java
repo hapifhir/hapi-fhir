@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -1958,7 +1958,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	@Override
 	public HashSet<Long> loadIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
-												 boolean theReverseMode, DateRangeParam theLastUpdated) {
+												 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}
@@ -2080,7 +2080,7 @@ public class SearchBuilder implements ISearchBuilder {
 			nextRoundMatches = pidsToInclude;
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
-		ourLog.info("Loaded {} {} in {} rounds and {} ms", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart());
+		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
 
 		return allAdded;
 	}
@@ -2316,7 +2316,7 @@ public class SearchBuilder implements ISearchBuilder {
 				myCurrentOffset = end;
 				Collection<Long> pidsToScan = myCurrentPids.subList(start, end);
 				Set<Include> includes = Collections.singleton(new Include("*", true));
-				Set<Long> newPids = loadIncludes(myCallingDao, myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated());
+				Set<Long> newPids = loadIncludes(myCallingDao, myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated(), mySearchUuid);
 				myCurrentIterator = newPids.iterator();
 
 			}

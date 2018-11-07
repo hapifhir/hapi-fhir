@@ -47,6 +47,8 @@ import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import javax.annotation.Nonnull;
+
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
@@ -108,6 +110,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		return myDescription;
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.SEARCH_TYPE;

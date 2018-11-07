@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
@@ -213,6 +214,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected ISearchIncludeDao mySearchIncludeDao;
 	@Autowired
+	protected IResourceReindexJobDao myResourceReindexJobDao;
+	@Autowired
 	@Qualifier("mySearchParameterDaoR4")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
 	@Autowired
@@ -236,6 +239,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
+	@Autowired
+	protected IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	@Qualifier("mySystemProviderR4")
 	protected JpaSystemProviderR4 mySystemProvider;
@@ -314,7 +319,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Transactional()
 	public void beforePurgeDatabase() throws InterruptedException {
 		final EntityManager entityManager = this.myEntityManager;
-		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegsitry);
 	}
 
 	@Before

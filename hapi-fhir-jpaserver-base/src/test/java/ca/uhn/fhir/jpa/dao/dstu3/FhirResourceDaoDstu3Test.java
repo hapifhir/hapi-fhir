@@ -44,7 +44,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"unchecked", "deprecation"})
@@ -2865,15 +2865,21 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		p.addName().setFamily(methodName);
 		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
+
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system2").setValue(methodName);
 		p.addName().setFamily(methodName);
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
+
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system3").setValue(methodName);
 		p.addName().setFamily(methodName);
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system4").setValue(methodName);

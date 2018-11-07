@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
@@ -166,6 +167,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.GET_PAGE;

@@ -115,6 +115,8 @@
 				<item name="Model API (DSTU2)" href="./apidocs-dstu2/index.html" />
 				<item name="Model API (DSTU3)" href="./apidocs-dstu3/index.html" />
 				<item name="Model API (R4)" href="./apidocs-r4/index.html" />
+				<item name="Client API" href="./apidocs-client/index.html" />
+				<item name="Server API" href="./apidocs-server/index.html" />
 				<item name="JPA Server API" href="./apidocs-jpaserver/index.html" />
 			</item>
 			<item name="Command Line Tool (hapi-fhir-cli)" href="./doc_cli.html" />

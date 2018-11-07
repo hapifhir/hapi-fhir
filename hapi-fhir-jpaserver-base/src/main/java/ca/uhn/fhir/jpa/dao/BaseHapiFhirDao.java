@@ -712,20 +712,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return dao;
 	}
 
-	protected IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
-		IFhirResourceDao<? extends IBaseResource> retVal = getDao(theClass);
-		if (retVal == null) {
-			List<String> supportedResourceTypes = getDaos()
-				.keySet()
-				.stream()
-				.map(t -> myContext.getResourceDefinition(t).getName())
-				.sorted()
-				.collect(Collectors.toList());
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + getContext().getResourceDefinition(theClass).getName() + " - Can handle: " + supportedResourceTypes);
-		}
-		return retVal;
-	}
-
 	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> getDaos() {
 		if (myResourceTypeToDao == null) {
 			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> resourceTypeToDao = new HashMap<>();
