@@ -2063,7 +2063,7 @@
 					</reportsDirectories>
 				</configuration>
 			</plugin>
-			<plugin>
+			<!--			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>3.0.0</version>
@@ -2071,14 +2071,15 @@
 				<reportSets>
 					<reportSet>
 						<reports>
-							<report>project-team</report>
-							<report>issue-tracking</report>
+							<report>team</report>
+							<report>issue-management</report>
 							<report>license</report>
 							<report>scm</report>
 						</reports>
 					</reportSet>
 				</reportSets>
 			</plugin>
+			-->
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> <version>1.1</version> </plugin> -->
 		</plugins>
 	</reporting>
