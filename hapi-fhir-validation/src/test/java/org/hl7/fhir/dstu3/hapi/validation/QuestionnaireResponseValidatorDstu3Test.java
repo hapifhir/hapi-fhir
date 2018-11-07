@@ -7,8 +7,6 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hl7.fhir.dstu3.context.IWorkerContext;
-import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.model.*;
@@ -299,7 +297,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	}
 	
 	@Test
-	public void testRequiredQuestionWithEnableWhenHdesQuestionHasAnswerTrue() {
+	public void testRequiredQuestionWithEnableWhenHidesQuestionHasAnswerTrue() {
 
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
