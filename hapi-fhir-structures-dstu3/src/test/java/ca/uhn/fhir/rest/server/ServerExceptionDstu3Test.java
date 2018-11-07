@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.contains;
 
 public class ServerExceptionDstu3Test {
 
@@ -88,10 +89,7 @@ public class ServerExceptionDstu3Test {
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertEquals("BAR BAR", status.getFirstHeader("X-Foo").getValue());
-			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR"));
+			assertThat(responseContent, containsString("El nombre está vacío"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
