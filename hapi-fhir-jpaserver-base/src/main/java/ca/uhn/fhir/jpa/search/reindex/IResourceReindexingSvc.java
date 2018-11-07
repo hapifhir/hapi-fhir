@@ -44,7 +44,7 @@ public interface IResourceReindexingSvc {
 	 * Does the same thing as {@link #runReindexingPass()} but makes sure to perform at
 	 * least one pass even if one is half finished
 	 */
-	Integer forceReindexingPass();
+	int forceReindexingPass();
 
 	/**
 	 * Cancels all running and future reindexing jobs. This is mainly intended

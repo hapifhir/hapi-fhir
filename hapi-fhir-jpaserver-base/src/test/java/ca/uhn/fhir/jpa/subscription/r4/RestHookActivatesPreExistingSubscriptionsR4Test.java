@@ -23,10 +23,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourceProviderR4Test {
 
@@ -35,9 +37,9 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	private static RestfulServer ourListenerRestServer;
 	private static String ourListenerServerBase;
 	private static Server ourListenerServer;
-	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
-	private static List<String> ourContentTypes = new ArrayList<>();
-	private static List<String> ourHeaders = new ArrayList<>();
+	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
+	private static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
 
 	@After
 	public void afterResetSubscriptionActivatingInterceptor() {
@@ -123,33 +125,6 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 		}
 	}
 
-	@BeforeClass
-	public static void startListenerServer() throws Exception {
-		ourListenerPort = PortUtil.findFreePort();
-		ourListenerRestServer = new RestfulServer(FhirContext.forR4());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
-
-		ObservationListener obsListener = new ObservationListener();
-		ourListenerRestServer.setResourceProviders(obsListener);
-
-		ourListenerServer = new Server(ourListenerPort);
-
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
-
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(ourListenerRestServer);
-		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-
-		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
-	}
-
-	@AfterClass
-	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
-	}
-
 	public static class ObservationListener implements IResourceProvider {
 
 
@@ -179,6 +154,33 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 
+	}
+
+	@BeforeClass
+	public static void startListenerServer() throws Exception {
+		ourListenerPort = PortUtil.findFreePort();
+		ourListenerRestServer = new RestfulServer(FhirContext.forR4());
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+
+		ObservationListener obsListener = new ObservationListener();
+		ourListenerRestServer.setResourceProviders(obsListener);
+
+		ourListenerServer = new Server(ourListenerPort);
+
+		ServletContextHandler proxyHandler = new ServletContextHandler();
+		proxyHandler.setContextPath("/");
+
+		ServletHolder servletHolder = new ServletHolder();
+		servletHolder.setServlet(ourListenerRestServer);
+		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+
+		ourListenerServer.setHandler(proxyHandler);
+		ourListenerServer.start();
+	}
+
+	@AfterClass
+	public static void stopListenerServer() throws Exception {
+		ourListenerServer.stop();
 	}
 
 }

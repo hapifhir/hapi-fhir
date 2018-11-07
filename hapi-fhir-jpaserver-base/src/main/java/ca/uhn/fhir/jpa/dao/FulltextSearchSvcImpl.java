@@ -67,6 +67,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	private Boolean ourDisabled;
 
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	/**
 	 * Constructor
 	 */
@@ -222,7 +225,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				StringParam idParm = (StringParam) idParam;
 				idParamValue = idParm.getValue();
 			}
-			pid = BaseHapiFhirDao.translateForcedIdToPid(theResourceName, idParamValue, myForcedIdDao);
+			pid = BaseHapiFhirDao.translateForcedIdToPid(myDaoConfig, theResourceName, idParamValue, myForcedIdDao);
 		}
 
 		Long referencingPid = pid;
@@ -275,7 +278,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
-		Long pid = BaseHapiFhirDao.translateForcedIdToPid(contextParts[0], contextParts[1], myForcedIdDao);
+		Long pid = BaseHapiFhirDao.translateForcedIdToPid( myDaoConfig, contextParts[0], contextParts[1], myForcedIdDao);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 

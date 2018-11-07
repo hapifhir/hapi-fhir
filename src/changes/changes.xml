@@ -147,6 +147,23 @@
 				The JPA server version migrator tool now runs in a multithreaded way, allowing it to
 				upgrade th database faster when migration tasks require data updates.
 			</action>
+			<action type="fix">
+				A bug in the JPA server was fixed: When a resource was previously deleted,
+				a transaction could not be posted that both restored the deleted resource but
+				also contained references to the now-restored resource.
+			</action>
+			<action type="fix">
+				The $expunge operation could sometimes fail to delete resources if a resource
+				to be deleted had recently been returned in a search result. This has been
+				corrected.
+			</action>
+			<action type="add">
+				A new setting has been added to the JPA Server DopConfig that controls the
+				behaviour when a client-assigned ID is encountered (i.e. the client performs
+				an HTTP PUT to a resource ID that doesn't already exist on the server). It is
+				now possible to disallow this action, to only allow alphanumeric IDs (the default
+				and only option previously) or allow any IDs including alphanumeric.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

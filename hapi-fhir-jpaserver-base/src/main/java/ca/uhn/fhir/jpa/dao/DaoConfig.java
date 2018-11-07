@@ -23,9 +23,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -156,6 +156,7 @@ public class DaoConfig {
 	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myDisableHashBasedSearches;
+	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 
 	/**
 	 * Constructor
@@ -643,8 +644,38 @@ public class DaoConfig {
 	}
 
 	/**
+	 * Controls the behaviour when a client-assigned ID is encountered, i.e. an HTTP PUT
+	 * on a resource ID that does not already exist in the database.
+	 * <p>
+	 * Default is {@link ClientIdStrategyEnum#ALPHANUMERIC}
+	 * </p>
+	 */
+	public ClientIdStrategyEnum getResourceClientIdStrategy() {
+		return myResourceClientIdStrategy;
+	}
+
+	/**
+	 * Controls the behaviour when a client-assigned ID is encountered, i.e. an HTTP PUT
+	 * on a resource ID that does not already exist in the database.
+	 * <p>
+	 * Default is {@link ClientIdStrategyEnum#ALPHANUMERIC}
+	 * </p>
+	 *
+	 * @param theResourceClientIdStrategy Must not be <code>null</code>
+	 */
+	public void setResourceClientIdStrategy(ClientIdStrategyEnum theResourceClientIdStrategy) {
+		Validate.notNull(theResourceClientIdStrategy, "theClientIdStrategy must not be null");
+		myResourceClientIdStrategy = theResourceClientIdStrategy;
+	}
+
+	/**
 	 * This setting configures the strategy to use in generating IDs for newly
 	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 * <p>
+	 * This strategy is only used for server-assigned IDs, i.e. for HTTP POST
+	 * where the client is requesing that the server store a new resource and give
+	 * it an ID.
+	 * </p>
 	 */
 	public IdStrategyEnum getResourceServerIdStrategy() {
 		return myResourceServerIdStrategy;
@@ -653,8 +684,13 @@ public class DaoConfig {
 	/**
 	 * This setting configures the strategy to use in generating IDs for newly
 	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 * <p>
+	 * This strategy is only used for server-assigned IDs, i.e. for HTTP POST
+	 * where the client is requesing that the server store a new resource and give
+	 * it an ID.
+	 * </p>
 	 *
-	 * @param theResourceIdStrategy The strategy. Must not be null.
+	 * @param theResourceIdStrategy The strategy. Must not be <code>null</code>.
 	 */
 	public void setResourceServerIdStrategy(IdStrategyEnum theResourceIdStrategy) {
 		Validate.notNull(theResourceIdStrategy, "theResourceIdStrategy must not be null");
@@ -1353,18 +1389,8 @@ public class DaoConfig {
 	 * given number.
 	 * </p>
 	 */
-	public void setSearchPreFetchThresholds(List<Integer> thePreFetchThresholds) {
-		Validate.isTrue(thePreFetchThresholds.size() > 0, "thePreFetchThresholds must not be empty");
-		int last = 0;
-		for (Integer nextInteger : thePreFetchThresholds) {
-			int nextInt = nextInteger.intValue();
-			Validate.isTrue(nextInt > 0 || nextInt == -1, nextInt + " is not a valid prefetch threshold");
-			Validate.isTrue(nextInt != last, "Prefetch thresholds must be sequential");
-			Validate.isTrue(nextInt > last || nextInt == -1, "Prefetch thresholds must be sequential");
-			Validate.isTrue(last != -1, "Prefetch thresholds must be sequential");
-			last = nextInt;
-		}
-		mySearchPreFetchThresholds = thePreFetchThresholds;
+	public List<Integer> getSearchPreFetchThresholds() {
+		return mySearchPreFetchThresholds;
 	}
 
 	/**
@@ -1380,8 +1406,18 @@ public class DaoConfig {
 	 * given number.
 	 * </p>
 	 */
-	public List<Integer> getSearchPreFetchThresholds() {
-		return mySearchPreFetchThresholds;
+	public void setSearchPreFetchThresholds(List<Integer> thePreFetchThresholds) {
+		Validate.isTrue(thePreFetchThresholds.size() > 0, "thePreFetchThresholds must not be empty");
+		int last = 0;
+		for (Integer nextInteger : thePreFetchThresholds) {
+			int nextInt = nextInteger.intValue();
+			Validate.isTrue(nextInt > 0 || nextInt == -1, nextInt + " is not a valid prefetch threshold");
+			Validate.isTrue(nextInt != last, "Prefetch thresholds must be sequential");
+			Validate.isTrue(nextInt > last || nextInt == -1, "Prefetch thresholds must be sequential");
+			Validate.isTrue(last != -1, "Prefetch thresholds must be sequential");
+			last = nextInt;
+		}
+		mySearchPreFetchThresholds = thePreFetchThresholds;
 	}
 
 	/**
@@ -1427,6 +1463,36 @@ public class DaoConfig {
 		 * Each resource will receive a randomly generated UUID
 		 */
 		UUID
+	}
+
+	public enum ClientIdStrategyEnum {
+		/**
+		 * Clients are not allowed to supply IDs for resources that do not
+		 * already exist
+		 */
+		NOT_ALLOWED,
+
+		/**
+		 * Clients may supply IDs but these IDs are not permitted to be purely
+		 * numeric. In other words, values such as "A", "A1" and "000A" would be considered
+		 * valid but "123" would not.
+		 * <p><b>This is the default setting.</b></p>
+		 */
+		ALPHANUMERIC,
+
+		/**
+		 * Clients may supply any ID including purely numeric IDs. Note that this setting should
+		 * only be set on an empty database, or on a database that has always had this setting
+		 * set as it causes a "forced ID" to be used for all resources.
+		 * <p>
+		 * Note that if you use this setting, it is highly recommended that you also
+		 * set the {@link #setResourceServerIdStrategy(IdStrategyEnum) ResourceServerIdStrategy}
+		 * to {@link IdStrategyEnum#UUID} in order to avoid any potential for conflicts. Otherwise
+		 * a database sequence will be used to generate IDs and these IDs can conflict with
+		 * client-assigned numeric IDs.
+		 * </P>
+		 */
+		ANY
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

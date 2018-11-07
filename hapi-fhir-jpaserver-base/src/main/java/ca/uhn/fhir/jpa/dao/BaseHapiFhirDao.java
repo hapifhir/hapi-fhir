@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -37,6 +36,7 @@ import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
+import ca.uhn.fhir.jpa.dao.data.*;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -81,21 +81,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.index.IndexingSupport;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
@@ -176,7 +161,6 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -261,6 +245,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected EntityManager myEntityManager;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
+	@Autowired
+	protected ISearchResultDao mySearchResultDao;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired()
@@ -319,10 +305,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
-	protected void createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId) {
-		if (theId.isEmpty() == false && theId.hasIdPart()) {
-			if (isValidPid(theId)) {
-				return;
+	/**
+	 * Returns the newly created forced ID. If the entity already had a forced ID, or if
+	 * none was created, returns null.
+	 */
+	protected ForcedId createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId, boolean theCreateForPureNumericIds) {
+		if (theId.isEmpty() == false && theId.hasIdPart() && theEntity.getForcedId() == null) {
+			if (!theCreateForPureNumericIds && isValidPid(theId)) {
+				return null;
 			}
 
 			ForcedId fid = new ForcedId();
@@ -330,7 +320,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			fid.setForcedId(theId.getIdPart());
 			fid.setResource(theEntity);
 			theEntity.setForcedId(fid);
+			return fid;
 		}
+
+		return null;
 	}
 
 	protected ExpungeOutcome doExpunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
@@ -372,6 +365,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					}
 				}
 			});
+
+			/*
+			 * Delete any search result cache entries pointing to the given resource
+			 */
+			if (resourceIds.getContent().size() > 0) {
+				txTemplate.execute(t -> {
+					mySearchResultDao.deleteByResourceIds(resourceIds.getContent());
+					return null;
+				});
+			}
 
 			/*
 			 * Delete historical versions
@@ -416,6 +419,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					}
 				}
 			});
+
 			for (Long next : historicalIds) {
 				txTemplate.execute(t -> {
 					expungeHistoricalVersion(next);
@@ -675,6 +679,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return retVal;
 	}
 
+	@Override
 	public DaoConfig getConfig() {
 		return myConfig;
 	}
@@ -705,6 +710,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
 		Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> resourceTypeToDao = getDaos();
@@ -886,6 +892,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		theProvider.setSearchCoordinatorSvc(mySearchCoordinatorSvc);
 	}
 
+	@Override
 	public boolean isLogicalReference(IIdType theId) {
 		Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
 		if (treatReferencesAsLogical != null) {
@@ -1461,11 +1468,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@Override
 	public Long translateForcedIdToPid(String theResourceName, String theResourceId) {
-		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
+		return translateForcedIdToPids(getConfig(), new IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
 	}
 
 	protected List<Long> translateForcedIdToPids(IIdType theId) {
-		return translateForcedIdToPids(theId, myForcedIdDao);
+		return translateForcedIdToPids(getConfig(), theId, myForcedIdDao);
 	}
 
 
@@ -1649,7 +1656,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 													boolean theForceUpdateVersion, RequestDetails theRequestDetails, ResourceTable theEntity, IIdType
 														theResourceId, IBaseResource theOldResource) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = null;
+		ActionRequestDetails requestDetails;
 		if (theRequestDetails != null) {
 			requestDetails = new ActionRequestDetails(theRequestDetails, theResource, theResourceId.getResourceType(), theResourceId);
 			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
@@ -1988,15 +1995,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return retVal;
 	}
 
-	protected static Long translateForcedIdToPid(String theResourceName, String theResourceId, IForcedIdDao
+	protected static Long translateForcedIdToPid(DaoConfig theDaoConfig, String theResourceName, String theResourceId, IForcedIdDao
 		theForcedIdDao) {
-		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
+		return translateForcedIdToPids(theDaoConfig, new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
 	}
 
-	static List<Long> translateForcedIdToPids(IIdType theId, IForcedIdDao theForcedIdDao) {
+	static List<Long> translateForcedIdToPids(DaoConfig theDaoConfig, IIdType theId, IForcedIdDao theForcedIdDao) {
 		Validate.isTrue(theId.hasIdPart());
 
-		if (isValidPid(theId)) {
+		if (theDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY && isValidPid(theId)) {
 			return Collections.singletonList(theId.getIdPartAsLong());
 		} else {
 			List<ForcedId> forcedId;

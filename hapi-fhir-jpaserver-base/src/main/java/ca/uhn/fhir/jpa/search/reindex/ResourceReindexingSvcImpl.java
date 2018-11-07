@@ -196,7 +196,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	@Override
-	public Integer forceReindexingPass() {
+	public int forceReindexingPass() {
 		myIndexingLock.lock();
 		try {
 			return doReindexingPassInsideLock();
@@ -219,7 +219,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		expungeJobsMarkedAsDeleted();
 	}
 
-	private Integer runReindexJobs() {
+	private int runReindexJobs() {
 		Collection<ResourceReindexJobEntity> jobs = myTxTemplate.execute(t -> myReindexJobDao.findAll(PageRequest.of(0, 10), false));
 		assert jobs != null;
 
