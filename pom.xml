@@ -2079,6 +2079,7 @@
 					</reportSet>
 				</reportSets>
 			</plugin>
+			-->
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> <version>1.1</version> </plugin> -->
 		</plugins>
 	</reporting>
