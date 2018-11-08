@@ -164,10 +164,14 @@
 				now possible to disallow this action, to only allow alphanumeric IDs (the default
 				and only option previously) or allow any IDs including alphanumeric.
 			</action>
-			<action type="add" issue="1103">
+			<action type="add" issue="1103" dev="ruthakm">
 				It is now possible to use your own IMessageResolver instance in the narrative 
 				generator. Thanks to Ruth Alkema for the pull request!
 			</action>
+			<action type="fix" issue="1071" dev="volsch">
+				When restful reponses tried to return multiple instances of the same response header,
+				some instances were discarded. Thanks to Volker Schmidt for the pull request!
+			</action>"
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">
