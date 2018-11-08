@@ -474,6 +474,10 @@
 		<developer>
 			<id>jbalbien</id>
 		</developer>
+		<developer>
+			<id>volsch</id>
+			<name>Volker Schmidt</name>
+		</developer>
 	</developers>
 
 	<licenses>
