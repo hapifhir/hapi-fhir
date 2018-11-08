@@ -171,7 +171,12 @@
 			<action type="fix" issue="1071" dev="volsch">
 				When restful reponses tried to return multiple instances of the same response header,
 				some instances were discarded. Thanks to Volker Schmidt for the pull request!
-			</action>"
+			</action>
+			<action type="add">
+				The REST client now allows for configurable behaviour as to whether a
+				<![CDATA[<code>_format</code>]]>
+				parameter should be included in requests.
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">

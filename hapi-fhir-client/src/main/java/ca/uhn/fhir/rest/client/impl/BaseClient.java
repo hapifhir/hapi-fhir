@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.client.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,49 +20,11 @@ package ca.uhn.fhir.rest.client.impl;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.util.XmlDetectionUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IHttpClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.client.api.IRestfulClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
@@ -72,7 +34,19 @@ import ca.uhn.fhir.rest.client.method.IClientResponseHandlerHandlesBinary;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import ca.uhn.fhir.util.XmlUtil;
+import ca.uhn.fhir.util.XmlDetectionUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseClient implements IRestfulClient {
 
@@ -86,16 +60,17 @@ public abstract class BaseClient implements IRestfulClient {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseClient.class);
 
 	private final IHttpClient myClient;
+	private final RestfulClientFactory myFactory;
+	private final String myUrlBase;
 	private boolean myDontValidateConformance;
 	private EncodingEnum myEncoding = null; // default unspecified (will be XML)
-	private final RestfulClientFactory myFactory;
 	private List<IClientInterceptor> myInterceptors = new ArrayList<IClientInterceptor>();
 	private boolean myKeepResponses = false;
 	private IHttpResponse myLastResponse;
 	private String myLastResponseBody;
 	private Boolean myPrettyPrint = false;
 	private SummaryEnum mySummary;
-	private final String myUrlBase;
+	private RequestFormatParamStyleEnum myRequestFormatParamStyle = RequestFormatParamStyleEnum.SHORT;
 
 	BaseClient(IHttpClient theClient, String theUrlBase, RestfulClientFactory theFactory) {
 		super();
@@ -121,10 +96,12 @@ public abstract class BaseClient implements IRestfulClient {
 	protected Map<String, List<String>> createExtraParams() {
 		HashMap<String, List<String>> retVal = new LinkedHashMap<String, List<String>>();
 
-		if (getEncoding() == EncodingEnum.XML) {
-			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
-		} else if (getEncoding() == EncodingEnum.JSON) {
-			retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+		if (myRequestFormatParamStyle == RequestFormatParamStyleEnum.SHORT) {
+			if (getEncoding() == EncodingEnum.XML) {
+				retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
+			} else if (getEncoding() == EncodingEnum.JSON) {
+				retVal.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+			}
 		}
 
 		if (isPrettyPrint()) {
@@ -148,6 +125,17 @@ public abstract class BaseClient implements IRestfulClient {
 	@Override
 	public EncodingEnum getEncoding() {
 		return myEncoding;
+	}
+
+	/**
+	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not
+	 * explicitly request an encoding. (This is perfectly acceptable behaviour according to the FHIR specification. In
+	 * this case, the server will choose which encoding to return, and the client can handle either XML or JSON)
+	 */
+	@Override
+	public void setEncoding(EncodingEnum theEncoding) {
+		myEncoding = theEncoding;
+		// return this;
 	}
 
 	/**
@@ -192,8 +180,19 @@ public abstract class BaseClient implements IRestfulClient {
 		return mySummary;
 	}
 
+	@Override
+	public void setSummary(SummaryEnum theSummary) {
+		mySummary = theSummary;
+	}
+
 	public String getUrlBase() {
 		return myUrlBase;
+	}
+
+	@Override
+	public void setFormatParamStyle(RequestFormatParamStyleEnum theRequestFormatParamStyle) {
+		Validate.notNull(theRequestFormatParamStyle, "theRequestFormatParamStyle must not be null");
+		myRequestFormatParamStyle = theRequestFormatParamStyle;
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation) {
@@ -219,10 +218,12 @@ public abstract class BaseClient implements IRestfulClient {
 			Map<String, List<String>> params = createExtraParams();
 
 			if (clientInvocation instanceof HttpGetClientInvocation) {
-				if (theEncoding == EncodingEnum.XML) {
-					params.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
-				} else if (theEncoding == EncodingEnum.JSON) {
-					params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+				if (myRequestFormatParamStyle == RequestFormatParamStyleEnum.SHORT) {
+					if (theEncoding == EncodingEnum.XML) {
+						params.put(Constants.PARAM_FORMAT, Collections.singletonList("xml"));
+					} else if (theEncoding == EncodingEnum.JSON) {
+						params.put(Constants.PARAM_FORMAT, Collections.singletonList("json"));
+					}
 				}
 			}
 
@@ -252,7 +253,7 @@ public abstract class BaseClient implements IRestfulClient {
 				addToCacheControlHeader(b, Constants.CACHE_CONTROL_NO_CACHE, theCacheControlDirective.isNoCache());
 				addToCacheControlHeader(b, Constants.CACHE_CONTROL_NO_STORE, theCacheControlDirective.isNoStore());
 				if (theCacheControlDirective.getMaxResults() != null) {
-					addToCacheControlHeader(b, Constants.CACHE_CONTROL_MAX_RESULTS+"="+ Integer.toString(theCacheControlDirective.getMaxResults().intValue()), true);
+					addToCacheControlHeader(b, Constants.CACHE_CONTROL_MAX_RESULTS + "=" + Integer.toString(theCacheControlDirective.getMaxResults().intValue()), true);
 				}
 				if (b.length() > 0) {
 					httpRequest.addHeader(Constants.HEADER_CACHE_CONTROL, b.toString());
@@ -398,12 +399,30 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	/**
+	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
+	 */
+	public void setKeepResponses(boolean theKeepResponses) {
+		myKeepResponses = theKeepResponses;
+	}
+
+	/**
 	 * Returns the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note
 	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other
 	 * servers which might implement it).
 	 */
 	public boolean isPrettyPrint() {
 		return Boolean.TRUE.equals(myPrettyPrint);
+	}
+
+	/**
+	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note
+	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other
+	 * servers which might implement it).
+	 */
+	@Override
+	public void setPrettyPrint(Boolean thePrettyPrint) {
+		myPrettyPrint = thePrettyPrint;
+		// return this;
 	}
 
 	private void keepResponseAndLogIt(boolean theLogRequestAndResponse, IHttpResponse response, String responseString) {
@@ -438,53 +457,10 @@ public abstract class BaseClient implements IRestfulClient {
 		myDontValidateConformance = theDontValidateConformance;
 	}
 
-	/**
-	 * Sets the encoding that will be used on requests. Default is <code>null</code>, which means the client will not
-	 * explicitly request an encoding. (This is perfectly acceptable behaviour according to the FHIR specification. In
-	 * this case, the server will choose which encoding to return, and the client can handle either XML or JSON)
-	 */
-	@Override
-	public void setEncoding(EncodingEnum theEncoding) {
-		myEncoding = theEncoding;
-		// return this;
-	}
-
-	/**
-	 * For now, this is a part of the internal API of HAPI - Use with caution as this method may change!
-	 */
-	public void setKeepResponses(boolean theKeepResponses) {
-		myKeepResponses = theKeepResponses;
-	}
-
-	/**
-	 * Sets the pretty print flag, which is a request to the server for it to return "pretty printed" responses. Note
-	 * that this is currently a non-standard flag (_pretty) which is supported only by HAPI based servers (and any other
-	 * servers which might implement it).
-	 */
-	@Override
-	public void setPrettyPrint(Boolean thePrettyPrint) {
-		myPrettyPrint = thePrettyPrint;
-		// return this;
-	}
-
-	@Override
-	public void setSummary(SummaryEnum theSummary) {
-		mySummary = theSummary;
-	}
-
 	@Override
 	public void unregisterInterceptor(IClientInterceptor theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		myInterceptors.remove(theInterceptor);
-	}
-
-	static ArrayList<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> thePreferResponseType) {
-		ArrayList<Class<? extends IBaseResource>> preferResponseTypes = null;
-		if (thePreferResponseType != null) {
-			preferResponseTypes = new ArrayList<Class<? extends IBaseResource>>(1);
-			preferResponseTypes.add(thePreferResponseType);
-		}
-		return preferResponseTypes;
 	}
 
 	protected final class ResourceResponseHandler<T extends IBaseResource> implements IClientResponseHandler<T> {
@@ -566,6 +542,15 @@ public abstract class BaseClient implements IRestfulClient {
 		public void setPreferResponseTypes(List<Class<? extends IBaseResource>> thePreferResponseTypes) {
 			myPreferResponseTypes = thePreferResponseTypes;
 		}
+	}
+
+	static ArrayList<Class<? extends IBaseResource>> toTypeList(Class<? extends IBaseResource> thePreferResponseType) {
+		ArrayList<Class<? extends IBaseResource>> preferResponseTypes = null;
+		if (thePreferResponseType != null) {
+			preferResponseTypes = new ArrayList<Class<? extends IBaseResource>>(1);
+			preferResponseTypes.add(thePreferResponseType);
+		}
+		return preferResponseTypes;
 	}
 
 }

@@ -1,17 +1,13 @@
 package ca.uhn.fhir.rest.client;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.util.RandomServerPortProvider;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.VersionUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -20,9 +16,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,8 +34,9 @@ public class ClientHeadersR4Test {
 	private static Server ourServer;
 	private static String ourServerBase;
 	private static HashMap<String, List<String>> ourHeaders;
-	private static IGenericClient ourClient;
+	private static HashMap<String, String[]> ourParams;
 	private static String ourMethod;
+	private IGenericClient myClient;
 
 	@Before
 	public void before() {
@@ -49,32 +44,123 @@ public class ClientHeadersR4Test {
 		ourMethod = null;
 	}
 
-	private String expectedUserAgent() {
-		return "HAPI-FHIR/" + VersionUtil.getVersion() + " (FHIR Client; FHIR " + FhirVersionEnum.R4.getFhirVersionString() + "/R4; apache)";
-	}
-
-	private byte[] extractBodyAsByteArray(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		byte[] body = IOUtils.toByteArray(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent());
-		return body;
-	}
-
-	private String extractBodyAsString(ArgumentCaptor<HttpUriRequest> capt) throws IOException {
-		String body = IOUtils.toString(((HttpEntityEnclosingRequestBase) capt.getAllValues().get(0)).getEntity().getContent(), "UTF-8");
-		return body;
-	}
-
 
 	@Test
-	public void testCreateWithPreferRepresentationServerReturnsResource() throws Exception {
+	public void testReadXml() {
+		myClient
+			.read()
+			.resource("Patient")
+			.withId(123L)
+			.encodedXml()
+			.execute();
+
+		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals("xml", ourParams.get(Constants.PARAM_FORMAT)[0]);
+	}
+
+	@Test
+	public void testReadXmlNoParam() {
+		myClient.setFormatParamStyle(RequestFormatParamStyleEnum.NONE);
+		myClient
+			.read()
+			.resource("Patient")
+			.withId(123L)
+			.encodedXml()
+			.execute();
+
+		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals(null, ourParams.get(Constants.PARAM_FORMAT));
+	}
+
+	@Test
+	public void testReadJson() {
+		myClient
+			.read()
+			.resource("Patient")
+			.withId(123L)
+			.encodedJson()
+			.execute();
+
+		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals("json", ourParams.get(Constants.PARAM_FORMAT)[0]);
+	}
+
+	@Test
+	public void testReadJsonNoParam() {
+		myClient.setFormatParamStyle(RequestFormatParamStyleEnum.NONE);
+		myClient
+			.read()
+			.resource("Patient")
+			.withId(123L)
+			.encodedJson()
+			.execute();
+
+		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals(null, ourParams.get(Constants.PARAM_FORMAT));
+	}
+
+	@Test
+	public void testReadXmlDisable() {
+		myClient
+			.read()
+			.resource("Patient")
+			.withId(123L)
+			.encodedXml()
+			.execute();
+
+		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", ourHeaders.get(Constants.HEADER_ACCEPT).get(0));
+		assertEquals("xml", ourParams.get(Constants.PARAM_FORMAT)[0]);
+	}
+
+	@Test
+	public void testCreateWithPreferRepresentationServerReturnsResource() {
 
 		final Patient resp1 = new Patient();
 		resp1.setActive(true);
 
-		MethodOutcome resp = ourClient.create().resource(resp1).execute();
+		MethodOutcome resp = myClient.create().resource(resp1).execute();
 
 		assertNotNull(resp);
 		assertEquals(1, ourHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertEquals("application/fhir+xml; charset=UTF-8", ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
+	}
+
+	@Before
+	public void beforeCreateClient() {
+		myClient = ourCtx.newRestfulGenericClient(ourServerBase);
+	}
+
+	private static class TestServlet extends HttpServlet {
+
+		@Override
+		protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+
+			if (ourHeaders != null) {
+				fail();
+			}
+			ourHeaders = new HashMap<>();
+			ourParams = new HashMap<>(req.getParameterMap());
+			ourMethod = req.getMethod();
+			Enumeration<String> names = req.getHeaderNames();
+			while (names.hasMoreElements()) {
+				String nextName = names.nextElement();
+				ourHeaders.put(nextName, new ArrayList<>());
+				Enumeration<String> values = req.getHeaders(nextName);
+				while (values.hasMoreElements()) {
+					ourHeaders.get(nextName).add(values.nextElement());
+				}
+			}
+
+			resp.setStatus(200);
+
+			if (req.getMethod().equals("GET")) {
+				resp.setContentType("application/json");
+				resp.getWriter().append("{\"resourceType\":\"Patient\"}");
+				resp.getWriter().close();
+			}
+
+		}
+
 	}
 
 	@AfterClass
@@ -94,7 +180,6 @@ public class ClientHeadersR4Test {
 
 		ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 
 		ServletHolder servletHolder = new ServletHolder();
 		servletHolder.setServlet(new TestServlet());
@@ -102,31 +187,6 @@ public class ClientHeadersR4Test {
 
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
-
-	}
-
-	private static class TestServlet extends HttpServlet {
-
-		@Override
-		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-			if (ourHeaders != null) {
-				fail();
-			}
-			ourHeaders = new HashMap<>();
-			ourMethod = req.getMethod();
-			Enumeration<String> names = req.getHeaderNames();
-			while (names.hasMoreElements()) {
-				String nextName = names.nextElement();
-				ourHeaders.put(nextName, new ArrayList<String>());
-				Enumeration<String> values = req.getHeaders(nextName);
-				while (values.hasMoreElements()) {
-					ourHeaders.get(nextName).add(values.nextElement());
-				}
-			}
-
-			resp.setStatus(200);
-		}
 
 	}
 
