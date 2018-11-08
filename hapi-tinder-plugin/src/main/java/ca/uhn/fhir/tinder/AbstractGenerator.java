@@ -21,7 +21,9 @@ package ca.uhn.fhir.tinder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
 import java.io.IOException;
@@ -45,6 +47,9 @@ public abstract class AbstractGenerator {
 		} else if ("dstu3".equals(context.getVersion())) {
 			fhirContext = FhirContext.forDstu3();
 			packageSuffix = ".dstu3";
+		} else if ("r4".equals(context.getVersion())) {
+			fhirContext = FhirContext.forR4();
+			packageSuffix = ".r4";
 		} else {
 			throw new FailureException("Unknown version configured: " + context.getVersion());
 		}
@@ -139,26 +144,45 @@ public abstract class AbstractGenerator {
 		/*
 		 * Load the requested resources
 		 */
-		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
-		context.setResourceGenerator(rp);
+		
 		logInfo("Loading Resources...");
 		try {
-			rp.setBaseResourceNames(includeResources);
-			rp.parse();
-			rp.markResourcesForImports();
+			switch (context.getResourceSource()) {
+				case SPREADSHEET: {
+					logInfo("... resource definitions from spreadsheets");
+					ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
+					context.setResourceGenerator(rp);
+
+					rp.setBaseResourceNames(includeResources);
+					rp.parse();
+
+					rp.markResourcesForImports();
+					rp.bindValueSets(vsp);
+
+					rp.getLocalImports().putAll(datatypeLocalImports);
+					datatypeLocalImports.putAll(rp.getLocalImports());
+					
+					rp.combineContentMaps(dtp);
+					dtp.combineContentMaps(rp);
+					break;
+				}
+				case MODEL: {
+					logInfo("... resource definitions from model structures");
+					ResourceGeneratorUsingModel rp = new ResourceGeneratorUsingModel(context.getVersion(), context.getBaseDir());
+					context.setResourceGenerator(rp);
+					
+					rp.setBaseResourceNames(includeResources);
+					rp.parse();
+					break;
+				}
+			}
 		} catch (Exception e) {
 			throw new FailureException("Failed to load resources", e);
 		}
 
-		rp.bindValueSets(vsp);
-		rp.getLocalImports().putAll(datatypeLocalImports);
-		datatypeLocalImports.putAll(rp.getLocalImports());
-		rp.combineContentMaps(dtp);
-		dtp.combineContentMaps(rp);
-
 	}
 
-	public class FailureException extends Exception {
+	public static class FailureException extends Exception {
 
 		public FailureException(String message, Throwable cause) {
 			super(message, cause);
@@ -173,7 +197,7 @@ public abstract class AbstractGenerator {
 
 	}
 
-	public class ExecutionException extends Exception {
+	public static class ExecutionException extends Exception {
 
 		public ExecutionException(String message, Throwable cause) {
 			super(message, cause);
