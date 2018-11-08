@@ -2652,6 +2652,11 @@ public class GenericClientDstu2Test {
 		}
 
 		@Override
+		public void setFormatParamStyle(RequestFormatParamStyleEnum theRequestFormatParamStyle) {
+			// nothing
+		}
+
+		@Override
 		public EncodingEnum getEncoding() {
 			// TODO Auto-generated method stub
 			return null;
