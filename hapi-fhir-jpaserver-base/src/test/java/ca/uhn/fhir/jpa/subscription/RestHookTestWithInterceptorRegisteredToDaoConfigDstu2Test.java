@@ -1,4 +1,3 @@
-
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -27,6 +26,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.*;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,13 +34,13 @@ import java.util.List;
  */
 public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends BaseResourceProviderDstu2Test {
 
-	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test.class);
+	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test.class);
-	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
+	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -50,7 +50,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		ourClient.delete().resourceConditionalByUrl("Subscription?status=active").execute();
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-	
+
 		myDaoConfig.getInterceptors().remove(ourRestHookSubscriptionInterceptor);
 	}
 
@@ -127,7 +127,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		
+
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
@@ -141,8 +141,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
-		
-		ourClient.delete().resourceById(new IdDt("Subscription/"+ subscription2.getId())).execute();
+
+		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -200,7 +200,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		
+
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
@@ -214,8 +214,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
-		
-		ourClient.delete().resourceById(new IdDt("Subscription/"+ subscription2.getId())).execute();
+
+		ourClient.delete().resourceById(new IdDt("Subscription/" + subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
@@ -256,7 +256,29 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
 
-	
+	public static class ObservationListener implements IResourceProvider {
+
+		@Create
+		public MethodOutcome create(@ResourceParam Observation theObservation) {
+			ourLog.info("Received Listener Create");
+			ourCreatedObservations.add(theObservation);
+			return new MethodOutcome(new IdDt("Observation/1"), true);
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Observation.class;
+		}
+
+		@Update
+		public MethodOutcome update(@ResourceParam Observation theObservation) {
+			ourLog.info("Received Listener Update");
+			ourUpdatedObservations.add(theObservation);
+			return new MethodOutcome(new IdDt("Observation/1"), false);
+		}
+
+	}
+
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
 		ourListenerPort = PortUtil.findFreePort();
@@ -282,29 +304,6 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 	@AfterClass
 	public static void stopListenerServer() throws Exception {
 		ourListenerServer.stop();
-	}
-
-	public static class ObservationListener implements IResourceProvider {
-
-		@Create
-		public MethodOutcome create(@ResourceParam Observation theObservation) {
-			ourLog.info("Received Listener Create");
-			ourCreatedObservations.add(theObservation);
-			return new MethodOutcome(new IdDt("Observation/1"), true);
-		}
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Observation.class;
-		}
-
-		@Update
-		public MethodOutcome update(@ResourceParam Observation theObservation) {
-			ourLog.info("Received Listener Update");
-			ourUpdatedObservations.add(theObservation);
-			return new MethodOutcome(new IdDt("Observation/1"), false);
-		}
-
 	}
 
 }

@@ -83,15 +83,12 @@ public class ServerExceptionDstu3Test {
 		ourException = new InternalErrorException("Error", operationOutcome);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=json");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
 			assertThat(responseContent, containsString("El nombre está vacío"));
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
 	}
@@ -105,16 +102,13 @@ public class ServerExceptionDstu3Test {
 		ourException = new AuthenticationException().addAuthenticateHeaderForRealm("REALM");
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
 
 			assertEquals(401, status.getStatusLine().getStatusCode());
 			assertEquals("Basic realm=\"REALM\"", status.getFirstHeader("WWW-Authenticate").getValue());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
 	}

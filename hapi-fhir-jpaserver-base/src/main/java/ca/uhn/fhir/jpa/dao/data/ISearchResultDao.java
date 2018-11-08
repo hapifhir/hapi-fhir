@@ -46,6 +46,10 @@ public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
 	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
 
 	@Modifying
+	@Query("DELETE FROM SearchResult s WHERE s.myResourcePid IN :ids")
+	void deleteByResourceIds(@Param("ids") List<Long> theContent);
+
+	@Modifying
 	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")
 	void deleteByIds(@Param("ids") List<Long> theContent);
 }

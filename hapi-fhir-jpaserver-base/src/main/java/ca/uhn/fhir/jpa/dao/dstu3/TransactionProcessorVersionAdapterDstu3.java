@@ -150,4 +150,14 @@ public class TransactionProcessorVersionAdapterDstu3 implements TransactionProce
 		theEntry.getResponse().setOutcome((Resource) theOperationOutcome);
 	}
 
+	@Override
+	public void setRequestVerb(Bundle.BundleEntryComponent theEntry, String theVerb) {
+		theEntry.getRequest().setMethod(Bundle.HTTPVerb.fromCode(theVerb));
+	}
+
+	@Override
+	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
+		theEntry.getRequest().setUrl(theUrl);
+	}
+
 }
