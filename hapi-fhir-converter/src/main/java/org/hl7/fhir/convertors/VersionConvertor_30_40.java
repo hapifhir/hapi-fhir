@@ -16304,8 +16304,10 @@ public class VersionConvertor_30_40 {
       tgt.setOperator(org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemOperator.EXISTS);
       tgt.setAnswer(convertType(src.getHasAnswerElement()));
     }
-    else if (src.hasAnswer())
-      tgt.setAnswer(convertType(src.getAnswer()));
+    else if (src.hasAnswer()) {
+    	tgt.setOperator(org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemOperator.EQUAL);
+    	tgt.setAnswer(convertType(src.getAnswer()));
+    }
     return tgt;
   }
 
