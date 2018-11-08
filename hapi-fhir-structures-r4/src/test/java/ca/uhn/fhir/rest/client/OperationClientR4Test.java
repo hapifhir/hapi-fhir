@@ -124,6 +124,24 @@ public class OperationClientR4Test {
 	}
 
 	@Test
+	public void testNonRepeatingGenericUsingUrl2() {
+		ourGenClient
+			.operation()
+			.onServer()
+			.named("nonrepeating")
+			.withParameters(new Parameters())
+			.andSearchParameter("valstr", new StringParam("str"))
+			.andSearchParameter("valtok", new TokenParam("sys2", "val2"))
+			.useHttpGet()
+			.execute();
+		Parameters response = ourAnnClient.nonrepeating(new StringParam("str"), new TokenParam("sys", "val"));
+		assertEquals("FOO", response.getParameter().get(0).getName());
+
+		HttpGet value = (HttpGet) capt.getAllValues().get(0);
+		assertEquals("http://foo/$nonrepeating?valstr=str&valtok=sys2%7Cval2", value.getURI().toASCIIString());
+	}
+
+	@Test
 	public void testOperationOnInstanceWithIncompleteInstanceId() {
 		try {
 			ourGenClient

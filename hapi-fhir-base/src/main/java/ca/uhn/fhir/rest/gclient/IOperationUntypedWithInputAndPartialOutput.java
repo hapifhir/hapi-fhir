@@ -38,6 +38,8 @@ public interface IOperationUntypedWithInputAndPartialOutput<T extends IBaseParam
 	IOperationUntypedWithInputAndPartialOutput<T> andParameter(String theName, IBase theValue);
 
 	/**
+	 * Adds a URL parameter to the request.
+	 *
 	 * Use chained method calls to construct a Parameters input. This form is a convenience
 	 * in order to allow simple method chaining to be used to build up a parameters
 	 * resource for the input of an operation without needing to manually construct one.
