@@ -54,7 +54,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myDaoConfig.setProcessCollectionsAsBatch(new DaoConfig().isProcessCollectionsAsBatch());
 	}
 
 	@Before
@@ -327,9 +326,8 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 
 	@Test
+	@Ignore
 	public void testProcessCollectionAsBatch() throws IOException {
-		myDaoConfig.setProcessCollectionsAsBatch(true);
-
 		byte[] inputBytes = IOUtils.toByteArray(getClass().getResourceAsStream("/dstu3/Reilly_Libby_73.json.gz"));
 		String input = GZipUtil.decompress(inputBytes);
 		Bundle bundle = myFhirCtx.newJsonParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(Bundle.class, input);
@@ -338,7 +336,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		Bundle output = mySystemDao.transaction(mySrd, bundle);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 	}
-
 
 
 	/**
@@ -3059,7 +3056,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionWithReplacement() {
-		byte[] bytes = new byte[] {0, 1, 2, 3, 4};
+		byte[] bytes = new byte[]{0, 1, 2, 3, 4};
 
 		Binary binary = new Binary();
 		binary.setId(IdType.newRandomUuid());
