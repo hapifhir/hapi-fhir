@@ -19,25 +19,34 @@ package ca.uhn.fhir.tinder;
  * #L%
  */
 
-import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
-import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import java.util.List;
+
+import javax.security.auth.login.FailedLoginException;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import java.util.List;
+import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
+import ca.uhn.fhir.tinder.parser.BaseStructureParser;
+import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 
 /**
  * @author Bill.Denton
  *
  */
 public class GeneratorContext {
+	public enum ResourceSource {SPREADSHEET, MODEL};
+	public static final ResourceSource DEFAULT_RESOURCE_SOURCE = ResourceSource.SPREADSHEET;
+	
 	private String version;
 	private String packageSuffix;
 	private String baseDir;
 	private List<String> includeResources;
 	private List<String> excludeResources;
+	private ResourceSource resourceSource = DEFAULT_RESOURCE_SOURCE; 
 	private List<ValueSetFileDefinition> valueSetFiles;
-	private ResourceGeneratorUsingSpreadsheet resourceGenerator = null;
+	private BaseStructureParser resourceGenerator = null;
 	private ValueSetGenerator valueSetGenerator = null;
 	private DatatypeGeneratorUsingSpreadsheet datatypeGenerator = null;
 
@@ -72,6 +81,29 @@ public class GeneratorContext {
 		this.includeResources = includeResources;
 	}
 
+	public ResourceSource getResourceSource() {
+		return resourceSource;
+	}
+
+	public void setResourceSource(ResourceSource resourceSource) {
+		this.resourceSource = resourceSource;
+	}
+
+	public void setResourceSource(String resourceSource) throws FailureException {
+		resourceSource = StringUtils.stripToNull(resourceSource);
+		if (null == resourceSource) { 
+			this.resourceSource = DEFAULT_RESOURCE_SOURCE;
+		} else 
+		if (ResourceSource.SPREADSHEET.name().equalsIgnoreCase(resourceSource)) {
+			this.resourceSource = ResourceSource.SPREADSHEET;
+		} else 
+		if (ResourceSource.MODEL.name().equalsIgnoreCase(resourceSource)) {
+			this.resourceSource = ResourceSource.MODEL;
+		} else {
+			throw new FailureException("Unknown resource-source option: " + resourceSource);
+		}
+	}
+
 	public String getPackageSuffix() {
 		return packageSuffix;
 	}
@@ -80,11 +112,11 @@ public class GeneratorContext {
 		this.packageSuffix = packageSuffix;
 	}
 
-	public ResourceGeneratorUsingSpreadsheet getResourceGenerator() {
+	public BaseStructureParser getResourceGenerator() {
 		return resourceGenerator;
 	}
 
-	public void setResourceGenerator(ResourceGeneratorUsingSpreadsheet resourceGenerator) {
+	public void setResourceGenerator(BaseStructureParser resourceGenerator) {
 		this.resourceGenerator = resourceGenerator;
 	}
 
