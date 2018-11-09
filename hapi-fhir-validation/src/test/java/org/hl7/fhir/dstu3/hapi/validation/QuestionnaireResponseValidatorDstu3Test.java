@@ -7,6 +7,8 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+
+import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.model.*;
@@ -381,6 +383,24 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
+	@Test
+	public void testGivenQuestionIsNotEnabledWithEnableWhenAnswersAreReportedAsErrors() throws Exception {
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link2").setRequired(false).setType(QuestionnaireItemType.STRING).addEnableWhen().setQuestion("link0").setHasAnswer(true);
+		
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qr.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		
+		qr.addItem().setLinkId("link2").addAnswer().setValue(new StringType("FOO"));
+		
+		String reference = qr.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qr);
+		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
 	}
 
 	@Test
