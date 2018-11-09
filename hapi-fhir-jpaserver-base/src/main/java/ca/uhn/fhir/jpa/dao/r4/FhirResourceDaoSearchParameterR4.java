@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
@@ -108,13 +107,48 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 
 		} else {
 
-			FHIRPathEngine fhirPathEngine = new FHIRPathEngine(new HapiWorkerContext(theContext, VALIDATION_SUPPORT));
-			try {
-				fhirPathEngine.parse(theExpression);
-			} catch (FHIRLexer.FHIRLexerException e) {
-				throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + theExpression + "\": " + e.getMessage());
-			}
+			theExpression = theExpression.trim();
 
+			if (!theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+				String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(theExpression);
+				for (String nextPath : expressionSplit) {
+					nextPath = nextPath.trim();
+
+					int dotIdx = nextPath.indexOf('.');
+					if (dotIdx == -1) {
+						throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name");
+					}
+
+					String resourceName = nextPath.substring(0, dotIdx);
+					try {
+						theContext.getResourceDefinition(resourceName);
+					} catch (DataFormatException e) {
+						throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
+					}
+
+					if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+						if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
+							IBaseResource temporaryInstance = theContext.getResourceDefinition(resourceName).newInstance();
+							try {
+								theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
+							} catch (Exception e) {
+								String msg = theContext.getLocalizer().getMessage(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
+								throw new UnprocessableEntityException(msg, e);
+							}
+						}
+					}
+				}
+
+			} else {
+
+				FHIRPathEngine fhirPathEngine = new FHIRPathEngine(new HapiWorkerContext(theContext, VALIDATION_SUPPORT));
+				try {
+					fhirPathEngine.parse(theExpression);
+				} catch (FHIRLexer.FHIRLexerException e) {
+					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + theExpression + "\": " + e.getMessage());
+				}
+
+			}
 		} // if have expression
 	}
 
