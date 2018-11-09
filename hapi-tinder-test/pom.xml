@@ -106,6 +106,11 @@
 					</dependency>
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-structures-r4</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 						<version>${project.version}</version>
 					</dependency>
@@ -117,6 +122,11 @@
 					<dependency>
 						<groupId>ca.uhn.hapi.fhir</groupId>
 						<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>hapi-fhir-validation-resources-r4</artifactId>
 						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
@@ -174,7 +184,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>generic_multi</id>
+						<id>generic_multi_dstu2</id>
 						<goals>
 							<goal>generate-multi-files</goal>
 						</goals>
@@ -192,6 +202,44 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>generic_multi_dstu3</id>
+						<goals>
+							<goal>generate-multi-files</goal>
+						</goals>
+						<configuration>
+							<version>dstu3</version>
+							<generateResources>true</generateResources>
+							<resourceSource>model</resourceSource>
+							<templateFile>${project.basedir}/src/test/resources/templates/resource_test.vm</templateFile>
+							<targetSourceDirectory>${project.build.directory}/generated-sources/tinder</targetSourceDirectory>
+							<targetPackage>ca.uhn.test.generic.multi.dstu3</targetPackage>
+							<filenameSuffix>ResourceTest.java</filenameSuffix>
+							<includeResources>
+								<includeResource>patient</includeResource>
+								<includeResource>organization</includeResource>
+							</includeResources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generic_multi_r4</id>
+						<goals>
+							<goal>generate-multi-files</goal>
+						</goals>
+						<configuration>
+							<version>r4</version>
+							<generateResources>true</generateResources>
+							<resourceSource>model</resourceSource>
+							<templateFile>${project.basedir}/src/test/resources/templates/resource_test.vm</templateFile>
+							<targetSourceDirectory>${project.build.directory}/generated-sources/tinder</targetSourceDirectory>
+							<targetPackage>ca.uhn.test.generic.multi.r4</targetPackage>
+							<filenameSuffix>ResourceTest.java</filenameSuffix>
+							<includeResources>
+								<includeResource>patient</includeResource>
+								<includeResource>organization</includeResource>
+							</includeResources>
+						</configuration>
+					</execution>
+					<execution>
 						<id>generic_multi_json</id>
 						<goals>
 							<goal>generate-multi-files</goal>
@@ -199,6 +247,7 @@
 						<configuration>
 							<version>dstu2</version>
 							<generateResources>true</generateResources>
+							<resourceSource>spreadsheet</resourceSource>
 							<templateFile>${project.basedir}/src/test/resources/templates/resource_map.vm</templateFile>
 							<velocityPath>${project.basedir}/src/test/resources/macros</velocityPath>
 							<targetResourceDirectory>${project.build.directory}/generated-resources/tinder</targetResourceDirectory>
@@ -213,7 +262,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>generic_single</id>
+						<id>generic_single_dstu2</id>
 						<goals>
 							<goal>generate-single-file</goal>
 						</goals>
@@ -225,6 +274,26 @@
 							<targetPackage>ca.uhn.test.generic.single</targetPackage>
 							<packageBase>ca.uhn.test.generic.multi</packageBase>
 							<targetFile>TestConfigDstu2.java</targetFile>
+							<includeResources>
+								<includeResource>patient</includeResource>
+								<includeResource>organization</includeResource>
+							</includeResources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generic_single_r4</id>
+						<goals>
+							<goal>generate-single-file</goal>
+						</goals>
+						<configuration>
+							<version>r4</version>
+							<generateResources>true</generateResources>
+							<resourceSource>model</resourceSource>
+							<templateFile>${project.basedir}/src/test/resources/templates/resource_test_beans_java.vm</templateFile>
+							<targetSourceDirectory>${project.build.directory}/generated-sources/tinder</targetSourceDirectory>
+							<targetPackage>ca.uhn.test.generic.single.r4</targetPackage>
+							<packageBase>ca.uhn.test.generic.multi.r4</packageBase>
+							<targetFile>TestConfigR4.java</targetFile>
 							<includeResources>
 								<includeResource>patient</includeResource>
 								<includeResource>organization</includeResource>
