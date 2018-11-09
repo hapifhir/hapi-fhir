@@ -21,6 +21,7 @@ package ca.uhn.fhir.tinder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
 import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
@@ -112,34 +113,36 @@ public abstract class AbstractGenerator {
 		DatatypeGeneratorUsingSpreadsheet dtp = null;
 		Map<String, String> datatypeLocalImports = new HashMap<String, String>();
 
-		vsp = new ValueSetGenerator(context.getVersion());
-		vsp.setResourceValueSetFiles(context.getValueSetFiles());
-		context.setValueSetGenerator(vsp);
-		try {
-			vsp.parse();
-		} catch (Exception e) {
-			throw new FailureException("Failed to load valuesets", e);
+		if (ResourceSource.SPREADSHEET.equals(context.getResourceSource())) {
+			vsp = new ValueSetGenerator(context.getVersion());
+			vsp.setResourceValueSetFiles(context.getValueSetFiles());
+			context.setValueSetGenerator(vsp);
+			try {
+				vsp.parse();
+			} catch (Exception e) {
+				throw new FailureException("Failed to load valuesets", e);
+			}
+	
+			/*
+			 * A few enums are not found by default because none of the generated classes
+			 * refer to them, but we still want them.
+			 */
+			vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
+
+			logInfo("Loading Datatypes...");
+	
+			dtp = new DatatypeGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
+			context.setDatatypeGenerator(dtp);
+			try {
+				dtp.parse();
+				dtp.markResourcesForImports();
+			} catch (Exception e) {
+				throw new FailureException("Failed to load datatypes", e);
+			}
+			dtp.bindValueSets(vsp);
+	
+			datatypeLocalImports = dtp.getLocalImports();
 		}
-
-		/*
-		 * A few enums are not found by default because none of the generated classes
-		 * refer to them, but we still want them.
-		 */
-		vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
-
-		logInfo("Loading Datatypes...");
-
-		dtp = new DatatypeGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
-		context.setDatatypeGenerator(dtp);
-		try {
-			dtp.parse();
-			dtp.markResourcesForImports();
-		} catch (Exception e) {
-			throw new FailureException("Failed to load datatypes", e);
-		}
-		dtp.bindValueSets(vsp);
-
-		datatypeLocalImports = dtp.getLocalImports();
 
 		/*
 		 * Load the requested resources
@@ -173,6 +176,7 @@ public abstract class AbstractGenerator {
 					
 					rp.setBaseResourceNames(includeResources);
 					rp.parse();
+					rp.markResourcesForImports();
 					break;
 				}
 			}

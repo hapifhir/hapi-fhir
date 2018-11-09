@@ -16,6 +16,7 @@ import org.apache.maven.project.MavenProject;
 
 import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
 import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
+import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
 import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
 import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
@@ -76,7 +77,8 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top">Which source of resource definitions should be processed? Valid values are:<br>
  *     <ul>
  *     <li><code><b>spreadsheet</b></code>&nbsp;&nbsp;to cause resources to be generated based on the FHIR spreadsheets</li>
- *     <li><code><b>model</b></code>&nbsp;&nbsp;to cause resources to be generated based on the model structure classes</li></ul></td> 
+ *     <li><code><b>model</b></code>&nbsp;&nbsp;to cause resources to be generated based on the model structure classes. Note that 
+ *     <code>generateResources</code> is the only one of the above options that can be used when <code>model</code> is specified.</li></ul></td> 
  *     <td valign="top" align="center">No. Defaults to: <code><b>spreadsheet</b></code></td>
  *   </tr>
  *   <tr>
@@ -276,6 +278,14 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			context.setExcludeResources(excludeResources);
 			context.setResourceSource(resourceSource);
 			context.setValueSetFiles(valueSetFiles);
+			if (ResourceSource.MODEL.equals(context.getResourceSource())) {
+				if (generateDatatypes) {
+					throw new MojoFailureException("Cannot use \"generateDatatypes\" when resourceSource=model");
+				}
+				if (generateValueSets) {
+					throw new MojoFailureException("Cannot use \"generateValueSets\" when resourceSource=model");
+				}
+			}
 
 			generator.prepare(context);
 		} catch (ExecutionException e) {
