@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.service;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -17,29 +18,31 @@ import java.util.List;
 public class IdHelperService {
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
+	@Autowired(required = true)
+	private DaoConfig myConfig;
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.delete(forcedId);
 	}
 
 	public Long translateForcedIdToPid(String theResourceName, String theResourceId) {
-		return translateForcedIdToPids(new IdDt(theResourceName, theResourceId)).get(0);
+		return translateForcedIdToPids(myConfig, new IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
 	}
 
 	public List<Long> translateForcedIdToPids(IIdType theId) {
-		return IdHelperService.translateForcedIdToPids(theId, myForcedIdDao);
+		return IdHelperService.translateForcedIdToPids(myConfig, theId, myForcedIdDao);
 	}
 
 	// TODO KHS why static?
-	public static Long translateForcedIdToPid(String theResourceName, String theResourceId, IForcedIdDao
+	public static Long translateForcedIdToPid(DaoConfig theDaoConfig, String theResourceName, String theResourceId, IForcedIdDao
 		theForcedIdDao) {
-		return IdHelperService.translateForcedIdToPids(new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
+		return IdHelperService.translateForcedIdToPids(theDaoConfig, new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
 	}
 
-	static List<Long> translateForcedIdToPids(IIdType theId, IForcedIdDao theForcedIdDao) {
+	static List<Long> translateForcedIdToPids(DaoConfig theDaoConfig, IIdType theId, IForcedIdDao theForcedIdDao) {
 		Validate.isTrue(theId.hasIdPart());
 
-		if (isValidPid(theId)) {
+		if (theDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY && isValidPid(theId)) {
 			return Collections.singletonList(theId.getIdPartAsLong());
 		} else {
 			List<ForcedId> forcedId;

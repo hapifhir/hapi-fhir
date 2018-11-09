@@ -52,16 +52,16 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
 	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	private static List<String> ourContentTypes = new ArrayList<>();
-	private static List<String> ourHeaders = new ArrayList<>();
+	private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
+	private static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
 	private static SingleQueryCountHolder ourCountHolder;
+	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 
 	@Autowired
 	private SingleQueryCountHolder myCountHolder;
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 	private CountingInterceptor myCountingInterceptor;
 
 	@PostConstruct

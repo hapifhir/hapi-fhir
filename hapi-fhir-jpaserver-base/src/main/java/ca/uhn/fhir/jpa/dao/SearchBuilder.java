@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
@@ -129,6 +130,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private SearchParamProvider mySearchParamProvider;
+	@Autowired
+	private IForcedIdDao myForcedIdDao;
 
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
@@ -1611,7 +1614,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParm = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, idParm.getValue());
+				Long pid = IdHelperService.translateForcedIdToPid(myCallingDao.getConfig(), myResourceName, idParm.getValue(), myForcedIdDao);
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}

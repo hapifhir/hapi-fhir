@@ -9,10 +9,7 @@ import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
-import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.hibernate.query.criteria.LiteralHandlingMode;
-import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
@@ -29,7 +26,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
 /*
@@ -83,44 +79,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	 * factory with HAPI FHIR customizations
 	 */
 	protected LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = new LocalContainerEntityManagerFactoryBean() {
-			@Override
-			public Map<String, Object> getJpaPropertyMap() {
-				Map<String, Object> retVal = super.getJpaPropertyMap();
-
-				if (!retVal.containsKey(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE)) {
-					retVal.put(AvailableSettings.CRITERIA_LITERAL_HANDLING_MODE, LiteralHandlingMode.BIND);
-				}
-
-				if (!retVal.containsKey(AvailableSettings.CONNECTION_HANDLING)) {
-					retVal.put(AvailableSettings.CONNECTION_HANDLING, PhysicalConnectionHandlingMode.DELAYED_ACQUISITION_AND_HOLD);
-				}
-
-				/*
-				 * Set some performance options
-				 */
-
-				if (!retVal.containsKey(AvailableSettings.STATEMENT_BATCH_SIZE)) {
-					retVal.put(AvailableSettings.STATEMENT_BATCH_SIZE, "30");
-				}
-
-				if (!retVal.containsKey(AvailableSettings.ORDER_INSERTS)) {
-					retVal.put(AvailableSettings.ORDER_INSERTS, "true");
-				}
-
-				if (!retVal.containsKey(AvailableSettings.ORDER_UPDATES)) {
-					retVal.put(AvailableSettings.ORDER_UPDATES, "true");
-				}
-
-				if (!retVal.containsKey(AvailableSettings.BATCH_VERSIONED_DATA)) {
-					retVal.put(AvailableSettings.BATCH_VERSIONED_DATA, "true");
-				}
-
-				return retVal;
-			}
-
-
-		};
+		LocalContainerEntityManagerFactoryBean retVal = new HapiFhirLocalContainerEntityManagerFactoryBean();
 		configureEntityManagerFactory(retVal, fhirContext());
 		return retVal;
 	}

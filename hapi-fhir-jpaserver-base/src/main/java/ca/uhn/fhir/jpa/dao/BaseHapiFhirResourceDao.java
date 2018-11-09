@@ -55,16 +55,12 @@ import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
-import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -391,12 +387,26 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		boolean serverAssignedId;
 		if (isNotBlank(theResource.getIdElement().getIdPart())) {
-			if (IdHelperService.isValidPid(theResource.getIdElement())) {
-				throw new UnprocessableEntityException(
-					"This server cannot create an entity with a user-specified numeric ID - Client should not specify an ID when creating a new resource, or should include at least one letter in the ID to force a client-defined ID");
+			switch (myDaoConfig.getResourceClientIdStrategy()) {
+				case NOT_ALLOWED:
+					throw new ResourceNotFoundException(
+						getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
+				case ALPHANUMERIC:
+					if (theResource.getIdElement().isIdPartValidLong()) {
+						throw new InvalidRequestException(
+							getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
+					}
+					createForcedIdIfNeeded(entity, theResource.getIdElement(), false);
+					break;
+				case ANY:
+					createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
+					break;
 			}
-			createForcedIdIfNeeded(entity, theResource.getIdElement());
+			serverAssignedId = false;
+		} else {
+			serverAssignedId = true;
 		}
 
 		// Notify interceptors
@@ -417,8 +427,21 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Perform actual DB update
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime, false, thePerformIndexing);
-		theResource.setId(entity.getIdDt());
 
+		theResource.setId(entity.getIdDt());
+		if (serverAssignedId) {
+			switch (myDaoConfig.getResourceClientIdStrategy()) {
+				case NOT_ALLOWED:
+				case ALPHANUMERIC:
+					break;
+				case ANY:
+					ForcedId forcedId = createForcedIdIfNeeded(updatedEntity, theResource.getIdElement(), true);
+					if (forcedId != null) {
+						myForcedIdDao.save(forcedId);
+					}
+					break;
+			}
+		}
 
 		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
@@ -1235,10 +1258,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			try {
 				entity = readEntityLatestVersion(resourceId);
 			} catch (ResourceNotFoundException e) {
-				if (resourceId.isIdPartValidLong()) {
-					throw new InvalidRequestException(
-						getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
-				}
 				return doCreate(theResource, null, thePerformIndexing, new Date(), theRequestDetails);
 			}
 		}
@@ -1329,12 +1348,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {
 		if (entity.getForcedId() != null) {
-			if (theId.isIdPartValidLong()) {
-				// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning that
-				// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal pointer
-				// to the
-				// forced ID)
-				throw new ResourceNotFoundException(theId);
+			if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
+				if (theId.isIdPartValidLong()) {
+					// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning that
+					// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal pointer
+					// to the
+					// forced ID)
+					throw new ResourceNotFoundException(theId);
+				}
 			}
 		}
 	}

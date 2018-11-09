@@ -122,6 +122,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected EntityManager myEntityManager;
 	@Autowired
 	protected IdHelperService myIdHelperService;
+	@Autowired
+	protected IForcedIdDao myForcedIdDao;
+	@Autowired
+	protected ISearchResultDao mySearchResultDao;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired()
@@ -187,11 +191,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
 		}
 	}
-
-	protected void createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId) {
-		if (theId.isEmpty() == false && theId.hasIdPart()) {
-			if (IdHelperService.isValidPid(theId)) {
-				return;
+	/**
+	 * Returns the newly created forced ID. If the entity already had a forced ID, or if
+	 * none was created, returns null.
+	 */
+	protected ForcedId createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId, boolean theCreateForPureNumericIds) {
+		if (theId.isEmpty() == false && theId.hasIdPart() && theEntity.getForcedId() == null) {
+			if (!theCreateForPureNumericIds && IdHelperService.isValidPid(theId)) {
+				return null;
 			}
 
 			ForcedId fid = new ForcedId();
@@ -199,7 +206,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			fid.setForcedId(theId.getIdPart());
 			fid.setResource(theEntity);
 			theEntity.setForcedId(fid);
+			return fid;
 		}
+
+		return null;
 	}
 
 	protected ExpungeOutcome doExpunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
@@ -241,6 +251,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					}
 				}
 			});
+
+			/*
+			 * Delete any search result cache entries pointing to the given resource
+			 */
+			if (resourceIds.getContent().size() > 0) {
+				txTemplate.execute(t -> {
+					mySearchResultDao.deleteByResourceIds(resourceIds.getContent());
+					return null;
+				});
+			}
 
 			/*
 			 * Delete historical versions
@@ -285,6 +305,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					}
 				}
 			});
+
 			for (Long next : historicalIds) {
 				txTemplate.execute(t -> {
 					expungeHistoricalVersion(next);
@@ -1447,7 +1468,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 													boolean theForceUpdateVersion, RequestDetails theRequestDetails, ResourceTable theEntity, IIdType
 														theResourceId, IBaseResource theOldResource) {
 		// Notify interceptors
-		ActionRequestDetails requestDetails = null;
+		ActionRequestDetails requestDetails;
 		if (theRequestDetails != null) {
 			requestDetails = new ActionRequestDetails(theRequestDetails, theResource, theResourceId.getResourceType(), theResourceId);
 			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
