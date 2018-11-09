@@ -165,7 +165,7 @@
 				and only option previously) or allow any IDs including alphanumeric.
 			</action>
 			<action type="add" issue="1103" dev="ruthakm">
-				It is now possible to use your own IMessageResolver instance in the narrative 
+				It is now possible to use your own IMessageResolver instance in the narrative
 				generator. Thanks to Ruth Alkema for the pull request!
 			</action>
 			<action type="fix" issue="1071" dev="volsch">
@@ -176,6 +176,10 @@
 				The REST client now allows for configurable behaviour as to whether a
 				<![CDATA[<code>_format</code>]]>
 				parameter should be included in requests.
+			</action>
+			<action type="add">
+				JPA server R4 SearchParameter custom expression validation is now done using the
+				actual FHIRPath evaluator, meaning it is more rigorous in what it can find.
 			</action>
 		</release>
 

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.jpa.dao.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
@@ -13,7 +14,11 @@ import ca.uhn.fhir.util.ElementUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.utils.FHIRLexer;
+import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -29,9 +34,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,6 +47,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
+	public static final DefaultProfileValidationSupport VALIDATION_SUPPORT = new DefaultProfileValidationSupport();
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
@@ -88,7 +94,7 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid");
 		}
 
-		if (ElementUtil.isEmpty(theBase)) {
+		if (ElementUtil.isEmpty(theBase) && (theType == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(theType.name()))) {
 			throw new UnprocessableEntityException("SearchParameter.base is missing");
 		}
 
@@ -102,35 +108,11 @@ public class FhirResourceDaoSearchParameterR4 extends FhirResourceDaoR4<SearchPa
 
 		} else {
 
-			theExpression = theExpression.trim();
-
-			String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(theExpression);
-			for (String nextPath : expressionSplit) {
-				nextPath = nextPath.trim();
-
-				int dotIdx = nextPath.indexOf('.');
-				if (dotIdx == -1) {
-					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name");
-				}
-
-				String resourceName = nextPath.substring(0, dotIdx);
-				try {
-					theContext.getResourceDefinition(resourceName);
-				} catch (DataFormatException e) {
-					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
-				}
-
-				if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-					if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
-						IBaseResource temporaryInstance = theContext.getResourceDefinition(resourceName).newInstance();
-						try {
-							theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
-						} catch (Exception e) {
-							String msg = theContext.getLocalizer().getMessage(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
-							throw new UnprocessableEntityException(msg, e);
-						}
-					}
-				}
+			FHIRPathEngine fhirPathEngine = new FHIRPathEngine(new HapiWorkerContext(theContext, VALIDATION_SUPPORT));
+			try {
+				fhirPathEngine.parse(theExpression);
+			} catch (FHIRLexer.FHIRLexerException e) {
+				throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + theExpression + "\": " + e.getMessage());
 			}
 
 		} // if have expression
