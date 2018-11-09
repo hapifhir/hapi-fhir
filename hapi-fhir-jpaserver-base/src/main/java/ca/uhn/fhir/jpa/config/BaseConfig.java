@@ -100,29 +100,6 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		return new SubscriptionTriggeringProvider();
 	}
 
-	/**
-	 * Note: If you're going to use this, you need to provide a bean
-	 * of type {@link ca.uhn.fhir.jpa.subscription.email.IEmailSender}
-	 * in your own Spring config
-	 */
-	@Bean
-	@Lazy
-	public SubscriptionEmailInterceptor subscriptionEmailInterceptor() {
-		return new SubscriptionEmailInterceptor();
-	}
-
-	@Bean
-	@Lazy
-	public SubscriptionRestHookInterceptor subscriptionRestHookInterceptor() {
-		return new SubscriptionRestHookInterceptor();
-	}
-
-	@Bean
-	@Lazy
-	public SubscriptionWebsocketInterceptor subscriptionWebsocketInterceptor() {
-		return new SubscriptionWebsocketInterceptor();
-	}
-
 	@Bean(name = TASK_EXECUTOR_NAME)
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();

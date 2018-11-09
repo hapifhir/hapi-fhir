@@ -25,10 +25,20 @@ import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+/**
+ * Note: If you're going to use this, you need to provide a bean
+ * of type {@link ca.uhn.fhir.jpa.subscription.email.IEmailSender}
+ * in your own Spring config
+ */
+
+@Component
+@Lazy
 public class SubscriptionEmailInterceptor extends BaseSubscriptionInterceptor {
 
 	/**
