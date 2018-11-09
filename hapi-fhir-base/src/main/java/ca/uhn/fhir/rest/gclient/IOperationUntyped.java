@@ -34,7 +34,7 @@ public interface IOperationUntyped {
 	 * @param theParameters The parameters to use as input. May also be <code>null</code> if the operation
 	 * does not require any input parameters.
 	 */
-	<T extends IBaseParameters> IOperationUntypedWithInput<T> withParameters(T theParameters);
+	<T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withParameters(T theParameters);
 
 	/**
 	 * The operation does not require any input parameters

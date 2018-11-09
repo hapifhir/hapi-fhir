@@ -433,6 +433,7 @@
 		</developer>
 		<developer>
 			<id>RuthAlk</id>
+			<name>Ruth Alkema</name>
 		</developer>
 		<developer>
 			<id>Tastelezz</id>
@@ -472,6 +473,10 @@
 		</developer>
 		<developer>
 			<id>jbalbien</id>
+		</developer>
+		<developer>
+			<id>volsch</id>
+			<name>Volker Schmidt</name>
 		</developer>
 	</developers>
 

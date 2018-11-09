@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,10 +43,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.*;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -85,17 +82,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private ITransactionProcessorVersionAdapter<BUNDLE, BUNDLEENTRY> myVersionAdapter;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	public static boolean isPlaceholder(IIdType theId) {
-		if (theId != null && theId.getValue() != null) {
-			return theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:");
-		}
-		return false;
-	}
-
-	private static String toStatusString(int theStatusCode) {
-		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
-	}
 
 	private void populateEntryWithOperationOutcome(BaseServerResponseException caughtEx, BUNDLEENTRY nextEntry) {
 		myVersionAdapter.populateEntryWithOperationOutcome(caughtEx, nextEntry);
@@ -164,7 +150,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		return defaultString(theId.getValue()).startsWith(URN_PREFIX);
 	}
 
-
 	public void setDao(BaseHapiFhirDao theDao) {
 		myDao = theDao;
 	}
@@ -186,6 +171,40 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		} finally {
 			BaseHapiFhirDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
+	}
+
+	public BUNDLE collection(final RequestDetails theRequestDetails, BUNDLE theRequest) {
+		String transactionType = myVersionAdapter.getBundleType(theRequest);
+
+		if (!org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION.toCode().equals(transactionType)) {
+			throw new InvalidRequestException("Can not process collection Bundle of type: " + transactionType);
+		}
+
+		ourLog.info("Beginning storing collection with {} resources", myVersionAdapter.getEntries(theRequest).size());
+		long start = System.currentTimeMillis();
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		BUNDLE resp = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
+
+		List<IBaseResource> resources = new ArrayList<>();
+		for (final BUNDLEENTRY nextRequestEntry : myVersionAdapter.getEntries(theRequest)) {
+			IBaseResource resource = myVersionAdapter.getResource(nextRequestEntry);
+			resources.add(resource);
+		}
+
+		BUNDLE transactionBundle = myVersionAdapter.createBundle("transaction");
+		for (IBaseResource next : resources) {
+			BUNDLEENTRY entry = myVersionAdapter.addEntry(transactionBundle);
+			myVersionAdapter.setResource(entry, next);
+			myVersionAdapter.setRequestVerb(entry, "PUT");
+			myVersionAdapter.setRequestUrl(entry, next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+		transaction(theRequestDetails, transactionBundle);
+
+		return resp;
 	}
 
 	private BUNDLE batch(final RequestDetails theRequestDetails, BUNDLE theRequest) {
@@ -255,6 +274,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		validateDependencies();
 
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
+
 		if (org.hl7.fhir.r4.model.Bundle.BundleType.BATCH.toCode().equals(transactionType)) {
 			return batch(theRequestDetails, theRequest);
 		}
@@ -846,18 +866,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		String getEntryRequestIfNoneMatch(BUNDLEENTRY theEntry);
 
 		void setResponseOutcome(BUNDLEENTRY theEntry, IBaseOperationOutcome theOperationOutcome);
-	}
 
-	private static class BaseServerResponseExceptionHolder {
-		private BaseServerResponseException myException;
+		void setRequestVerb(BUNDLEENTRY theEntry, String theVerb);
 
-		public BaseServerResponseException getException() {
-			return myException;
-		}
-
-		public void setException(BaseServerResponseException myException) {
-			this.myException = myException;
-		}
+		void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
 	}
 
 	/**
@@ -961,6 +973,29 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			return o1;
 		}
 
+	}
+
+	private static class BaseServerResponseExceptionHolder {
+		private BaseServerResponseException myException;
+
+		public BaseServerResponseException getException() {
+			return myException;
+		}
+
+		public void setException(BaseServerResponseException myException) {
+			this.myException = myException;
+		}
+	}
+
+	public static boolean isPlaceholder(IIdType theId) {
+		if (theId != null && theId.getValue() != null) {
+			return theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:");
+		}
+		return false;
+	}
+
+	private static String toStatusString(int theStatusCode) {
+		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
 }

@@ -1276,7 +1276,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T extends IBaseParameters> IOperationUntypedWithInput<T> withNoParameters(Class<T> theOutputParameterType) {
+		public <T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withNoParameters(Class<T> theOutputParameterType) {
 			Validate.notNull(theOutputParameterType, "theOutputParameterType may not be null");
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(theOutputParameterType);
 			if (def == null) {
@@ -1307,9 +1307,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings({"unchecked"})
 		@Override
-		public IOperationUntypedWithInput withParameters(IBaseParameters theParameters) {
+		public IOperationUntypedWithInputAndPartialOutput withParameters(IBaseParameters theParameters) {
 			Validate.notNull(theParameters, "theParameters can not be null");
 			myParameters = theParameters;
+			myParametersDef = myContext.getResourceDefinition(theParameters.getClass());
 			return this;
 		}
 
@@ -1445,7 +1446,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
 
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			Map<String, List<String>> params = new HashMap<>();
 			return invoke(params, binding, invocation);
 
 		}
