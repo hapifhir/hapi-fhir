@@ -88,7 +88,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getRegisteredSubscriptions();
 
-		ourLog.trace("Testing {} subscriptions for applicability");
+		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
 
 		for (CanonicalSubscription nextSubscription : subscriptions) {
 

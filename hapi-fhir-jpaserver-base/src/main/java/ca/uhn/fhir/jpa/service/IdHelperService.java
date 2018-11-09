@@ -52,7 +52,7 @@ public class IdHelperService {
 				forcedId = theForcedIdDao.findByForcedId(theId.getIdPart());
 			}
 
-			if (forcedId.isEmpty() == false) {
+			if (!forcedId.isEmpty()) {
 				List<Long> retVal = new ArrayList<>(forcedId.size());
 				for (ForcedId next : forcedId) {
 					retVal.add(next.getResourcePid());

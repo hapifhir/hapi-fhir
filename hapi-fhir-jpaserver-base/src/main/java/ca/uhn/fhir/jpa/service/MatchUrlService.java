@@ -166,9 +166,9 @@ public class MatchUrlService {
 	}
 
 	@CoverageIgnore
-	protected IQueryParameterAnd<?> newInstanceAnd(String chain) {
-		IQueryParameterAnd<?> type;
-		Class<? extends IQueryParameterAnd<?>> clazz = ResourceMetaParams.RESOURCE_META_AND_PARAMS.get(chain);
+	protected IQueryParameterAnd newInstanceAnd(String chain) {
+		IQueryParameterAnd type;
+		Class<? extends IQueryParameterAnd> clazz = ResourceMetaParams.RESOURCE_META_AND_PARAMS.get(chain);
 		try {
 			type = clazz.newInstance();
 		} catch (Exception e) {

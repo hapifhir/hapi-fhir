@@ -66,9 +66,6 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 	private ITermCodeSystemDao myCsDao;
 
 	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
-
-	@Autowired
 	private ValidationSupportChain myValidationSupport;
 
 //	private LookupCodeResult lookup(List<ValueSetExpansionContainsComponent> theContains, String theSystem, String theCode) {

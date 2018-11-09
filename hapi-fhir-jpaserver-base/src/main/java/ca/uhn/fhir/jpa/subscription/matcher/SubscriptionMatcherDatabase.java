@@ -20,11 +20,6 @@ package ca.uhn.fhir.jpa.subscription.matcher;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
@@ -85,7 +80,6 @@ public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);
-		return responseResults;
+		return responseDao.search(responseCriteriaUrl, req);
 	}
 }

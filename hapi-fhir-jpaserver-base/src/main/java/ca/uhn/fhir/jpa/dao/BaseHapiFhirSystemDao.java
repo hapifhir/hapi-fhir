@@ -60,9 +60,6 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
-	@Autowired
-	private IResourceTableDao myResourceTableDao;
-
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)

@@ -458,7 +458,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 				 * not get this error, so we'll let the other one fail and try
 				 * again later.
 				 */
-				ourLog.info("Failed to reindex {} because of a version conflict. Leaving in unindexed state: {}", e.getMessage());
+				ourLog.info("Failed to reindex because of a version conflict. Leaving in unindexed state: {}", e.getMessage());
 				reindexFailure = null;
 			}
 

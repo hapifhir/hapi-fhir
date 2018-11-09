@@ -52,10 +52,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements IHapiTerminologySvcR4 {
 	@Autowired
-	protected ITermCodeSystemDao myCodeSystemDao;
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
-	@Autowired
 	@Qualifier("myConceptMapDaoR4")
 	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
 	@Autowired
@@ -68,8 +64,6 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
-	@Autowired
-	private FhirContext myContext;
 
 	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {

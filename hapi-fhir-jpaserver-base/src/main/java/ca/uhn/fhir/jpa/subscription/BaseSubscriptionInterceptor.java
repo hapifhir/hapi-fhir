@@ -616,8 +616,9 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		try {
 			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myCtx, criteria);
 			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
+			// FIXME KHS check this with Exception
 		} catch (Throwable e) {
-			throw new UnprocessableEntityException("Invalid subscription criteria submitted: "+criteria);
+			throw new UnprocessableEntityException("Invalid subscription criteria submitted: "+criteria+" "+e.getMessage());
 		}
 	}
 }

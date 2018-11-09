@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.subscription.matcher;
 public class SubscriptionMatchResult {
 	// This could be an enum, but we may want to include details about unsupported matches in the future
 	public static final SubscriptionMatchResult MATCH = new SubscriptionMatchResult(true);
-	public static final SubscriptionMatchResult NO_MATCH =  new SubscriptionMatchResult(false);;
+	public static final SubscriptionMatchResult NO_MATCH =  new SubscriptionMatchResult(false);
 
 	private final boolean myMatch;
 	private final boolean mySupported;

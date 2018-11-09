@@ -64,8 +64,6 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
 	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
-	@Autowired
 	private ValidationSupportChain myValidationSupport;
 
 	@Override

@@ -24,7 +24,6 @@ import java.util.function.Predicate;
 
 @Service
 public class CriteriaResourceMatcher {
-	private Logger ourLog = LoggerFactory.getLogger(CriteriaResourceMatcher.class);
 
 	@Autowired
 	private FhirContext myContext;
@@ -95,30 +94,34 @@ public class CriteriaResourceMatcher {
 
 			String resourceName = theResourceDefinition.getName();
 			RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
-			if (paramDef != null) {
-				switch (paramDef.getParamType()) {
-					case QUANTITY:
-					case TOKEN:
-					case STRING:
-					case NUMBER:
-					case URI:
-					case DATE:
-					case REFERENCE:
-						return new SubscriptionMatchResult(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(resourceName, theParamName, paramDef, nextAnd, theSearchParams)));
-					case COMPOSITE:
-					case HAS:
-					case SPECIAL:
-						return new SubscriptionMatchResult(theParamName);
-				}
-			} else {
-				if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
+			return matchResourceParam(theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
+		}
+	}
+
+	private SubscriptionMatchResult matchResourceParam(String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
+		if (theParamDef != null) {
+			switch (theParamDef.getParamType()) {
+				case QUANTITY:
+				case TOKEN:
+				case STRING:
+				case NUMBER:
+				case URI:
+				case DATE:
+				case REFERENCE:
+					return new SubscriptionMatchResult(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
+				case COMPOSITE:
+				case HAS:
+				case SPECIAL:
+				default:
 					return new SubscriptionMatchResult(theParamName);
-				} else {
-					throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + resourceName);
-				}
+			}
+		} else {
+			if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
+				return new SubscriptionMatchResult(theParamName);
+			} else {
+				throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
 			}
 		}
-		return new SubscriptionMatchResult(theParamName);
 	}
 
 	private boolean matchParams(String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
