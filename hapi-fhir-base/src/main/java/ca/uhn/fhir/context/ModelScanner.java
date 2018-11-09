@@ -404,8 +404,8 @@ class ModelScanner {
 				if (paramType == null) {
 					throw new ConfigurationException("Search param " + searchParam.name() + " has an invalid type: " + searchParam.type());
 				}
-				Set<String> providesMembershipInCompartments = null;
-				providesMembershipInCompartments = new HashSet<String>();
+				Set<String> providesMembershipInCompartments;
+				providesMembershipInCompartments = new HashSet<>();
 				for (Compartment next : searchParam.providesMembershipIn()) {
 					if (paramType != RestSearchParameterTypeEnum.REFERENCE) {
 						StringBuilder b = new StringBuilder();
@@ -427,7 +427,8 @@ class ModelScanner {
 				}
 
 
-				RuntimeSearchParam param = new RuntimeSearchParam(searchParam.name(), searchParam.description(), searchParam.path(), paramType, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE);
+				Collection<String> base = Collections.singletonList(theResourceDef.getName());
+				RuntimeSearchParam param = new RuntimeSearchParam(null, null, searchParam.name(), searchParam.description(), searchParam.path(), paramType, null, providesMembershipInCompartments, toTargetList(searchParam.target()), RuntimeSearchParamStatusEnum.ACTIVE, base);
 				theResourceDef.addSearchParam(param);
 				nameToParam.put(param.getName(), param);
 			}
