@@ -183,6 +183,10 @@
 				JPA server R4 SearchParameter custom expression validation is now done using the
 				actual FHIRPath evaluator, meaning it is more rigorous in what it can find.
 			</action>
+			<action type="fix" issue="1047">
+				A NullPointerException in DateRangeParam when a client URL conrtained a malformed
+				date was corrected. Thanks Heinz-Dieter Conradi for the Pull Request!
+			</action>
 		</release>
 
 		<release version="3.5.0" date="2018-09-17">
