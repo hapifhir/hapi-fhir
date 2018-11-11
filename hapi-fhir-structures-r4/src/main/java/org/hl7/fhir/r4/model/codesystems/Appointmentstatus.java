@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum Appointmentstatus {
          */
         BOOKED, 
         /**
-         * The patient/patients has/have arrived and is/are waiting to be seen
+         * The patient/patients has/have arrived and is/are waiting to be seen.
          */
         ARRIVED, 
         /**
@@ -69,7 +69,7 @@ public enum Appointmentstatus {
          */
         ENTEREDINERROR, 
         /**
-         * When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present)
+         * When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present).
          */
         CHECKEDIN, 
         /**
@@ -121,12 +121,12 @@ public enum Appointmentstatus {
             case PROPOSED: return "None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time might not be set yet.";
             case PENDING: return "Some or all of the participant(s) have not finalized their acceptance of the appointment request.";
             case BOOKED: return "All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified.";
-            case ARRIVED: return "The patient/patients has/have arrived and is/are waiting to be seen";
+            case ARRIVED: return "The patient/patients has/have arrived and is/are waiting to be seen.";
             case FULFILLED: return "This appointment has completed and may have resulted in an encounter.";
             case CANCELLED: return "The appointment has been cancelled.";
             case NOSHOW: return "Some or all of the participant(s) have not/did not appear for the appointment (usually the patient).";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
-            case CHECKEDIN: return "When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present)";
+            case CHECKEDIN: return "When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present).";
             default: return "?";
           }
         }

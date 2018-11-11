@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Details and position information for a physical place where services are provided and resources and participants may be stored, found, contained, or accommodated.
  */
-@ResourceDef(name="Location", profile="http://hl7.org/fhir/Profile/Location")
+@ResourceDef(name="Location", profile="http://hl7.org/fhir/StructureDefinition/Location")
 public class Location extends DomainResource {
 
     public enum LocationStatus {
@@ -251,31 +251,31 @@ public class Location extends DomainResource {
 
     public enum DaysOfWeek {
         /**
-         * Monday
+         * Monday.
          */
         MON, 
         /**
-         * Tuesday
+         * Tuesday.
          */
         TUE, 
         /**
-         * Wednesday
+         * Wednesday.
          */
         WED, 
         /**
-         * Thursday
+         * Thursday.
          */
         THU, 
         /**
-         * Friday
+         * Friday.
          */
         FRI, 
         /**
-         * Saturday
+         * Saturday.
          */
         SAT, 
         /**
-         * Sunday
+         * Sunday.
          */
         SUN, 
         /**
@@ -330,13 +330,13 @@ public class Location extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case MON: return "Monday";
-            case TUE: return "Tuesday";
-            case WED: return "Wednesday";
-            case THU: return "Thursday";
-            case FRI: return "Friday";
-            case SAT: return "Saturday";
-            case SUN: return "Sunday";
+            case MON: return "Monday.";
+            case TUE: return "Tuesday.";
+            case WED: return "Wednesday.";
+            case THU: return "Thursday.";
+            case FRI: return "Friday.";
+            case SAT: return "Saturday.";
+            case SUN: return "Sunday.";
             default: return "?";
           }
         }
@@ -1213,11 +1213,11 @@ public class Location extends DomainResource {
     protected Enumeration<LocationStatus> status;
 
     /**
-     * The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.
+     * The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.
      */
     @Child(name = "operationalStatus", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The Operational status of the location (typically only for a bed/room)", formalDefinition="The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0116")
+    @Description(shortDefinition="The Operational status of the location (typically only for a bed/room)", formalDefinition="The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v2-0116")
     protected Coding operationalStatus;
 
     /**
@@ -1228,10 +1228,10 @@ public class Location extends DomainResource {
     protected StringType name;
 
     /**
-     * A list of alternate names that the location is known as or was known as in the past.
+     * A list of alternate names that the location is known as or was known as in the past.
      */
     @Child(name = "alias", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of alternate names that the location is known as or was known as in the past", formalDefinition="A list of alternate names that the location is known as or was known as in the past." )
+    @Description(shortDefinition="A list of alternate names that the location is known as or was known as in the past", formalDefinition="A list of alternate names that the location is known as or was known as in the past." )
     protected List<StringType> alias;
 
     /**
@@ -1254,7 +1254,7 @@ public class Location extends DomainResource {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Type of function performed", formalDefinition="Indicates the type of function performed at the location." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ServiceDeliveryLocationRoleType")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType")
     protected List<CodeableConcept> type;
 
     /**
@@ -1448,7 +1448,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
+     * @return {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
      */
     public Coding getOperationalStatus() { 
       if (this.operationalStatus == null)
@@ -1464,7 +1464,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
+     * @param value {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
      */
     public Location setOperationalStatus(Coding value) { 
       this.operationalStatus = value;
@@ -1521,7 +1521,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public List<StringType> getAlias() { 
       if (this.alias == null)
@@ -1547,7 +1547,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public StringType addAliasElement() {//2 
       StringType t = new StringType();
@@ -1558,7 +1558,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public Location addAlias(String value) { //1
       StringType t = new StringType();
@@ -1570,7 +1570,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
      */
     public boolean hasAlias(String value) { 
       if (this.alias == null)
@@ -2126,9 +2126,9 @@ public class Location extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status property covers the general availability of the resource, not the current value which may be covered by the operationStatus, or by a schedule/slots if they are configured for the location.", 0, 1, status));
-        children.add(new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus));
+        children.add(new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus));
         children.add(new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, 1, name));
-        children.add(new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
+        children.add(new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
         children.add(new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, 1, description));
         children.add(new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, 1, mode));
         children.add(new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type));
@@ -2148,9 +2148,9 @@ public class Location extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status property covers the general availability of the resource, not the current value which may be covered by the operationStatus, or by a schedule/slots if they are configured for the location.", 0, 1, status);
-        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus);
+        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus);
         case 3373707: /*name*/  return new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, 1, name);
-        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
+        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
         case -1724546052: /*description*/  return new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, 1, description);
         case 3357091: /*mode*/  return new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, 1, mode);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type);
@@ -2553,30 +2553,6 @@ public class Location extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTOF = new ca.uhn.fhir.model.api.Include("Location:partof").toLocked();
 
  /**
-   * Search parameter: <b>near-distance</b>
-   * <p>
-   * Description: <b>A distance quantity to limit the near search to locations within a specific distance
-
-Requires the near parameter to also be included</b><br>
-   * Type: <b>quantity</b><br>
-   * Path: <b>Location.position</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="near-distance", path="Location.position", description="A distance quantity to limit the near search to locations within a specific distance\n\nRequires the near parameter to also be included", type="quantity" )
-  public static final String SP_NEAR_DISTANCE = "near-distance";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>near-distance</b>
-   * <p>
-   * Description: <b>A distance quantity to limit the near search to locations within a specific distance
-
-Requires the near parameter to also be included</b><br>
-   * Type: <b>quantity</b><br>
-   * Path: <b>Location.position</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam NEAR_DISTANCE = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_NEAR_DISTANCE);
-
- /**
    * Search parameter: <b>address</b>
    * <p>
    * Description: <b>A (part of the) address of the location</b><br>
@@ -2791,26 +2767,32 @@ Requires the near parameter to also be included</b><br>
  /**
    * Search parameter: <b>near</b>
    * <p>
-   * Description: <b>The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)
+   * Description: <b>Search for locations where the location.position is near to, or within a specified distance of, the provided coordinates expressed as [latitude]|[longitude]|[distance]|[units] (using the WGS84 datum, see notes).
+If the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discression as to what distances should be considered near (and units are irrelevant)
+
+Servers may search using various techniques that might have differing accuracies, depending on implementation efficiency.
 
 Requires the near-distance parameter to be provided also</b><br>
-   * Type: <b>token</b><br>
+   * Type: <b>special</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="near", path="Location.position", description="The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)\n\nRequires the near-distance parameter to be provided also", type="token" )
+  @SearchParamDefinition(name="near", path="Location.position", description="Search for locations where the location.position is near to, or within a specified distance of, the provided coordinates expressed as [latitude]|[longitude]|[distance]|[units] (using the WGS84 datum, see notes).\nIf the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discression as to what distances should be considered near (and units are irrelevant)\n\nServers may search using various techniques that might have differing accuracies, depending on implementation efficiency.\n\nRequires the near-distance parameter to be provided also", type="special" )
   public static final String SP_NEAR = "near";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>near</b>
    * <p>
-   * Description: <b>The coordinates expressed as [latitude]:[longitude] (using the WGS84 datum, see notes) to find locations near to (servers may search using a square rather than a circle for efficiency)
+   * Description: <b>Search for locations where the location.position is near to, or within a specified distance of, the provided coordinates expressed as [latitude]|[longitude]|[distance]|[units] (using the WGS84 datum, see notes).
+If the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discression as to what distances should be considered near (and units are irrelevant)
+
+Servers may search using various techniques that might have differing accuracies, depending on implementation efficiency.
 
 Requires the near-distance parameter to be provided also</b><br>
-   * Type: <b>token</b><br>
+   * Type: <b>special</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam NEAR = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_NEAR);
+  public static final ca.uhn.fhir.rest.gclient.SpecialClientParam NEAR = new ca.uhn.fhir.rest.gclient.SpecialClientParam(SP_NEAR);
 
  /**
    * Search parameter: <b>address-city</b>

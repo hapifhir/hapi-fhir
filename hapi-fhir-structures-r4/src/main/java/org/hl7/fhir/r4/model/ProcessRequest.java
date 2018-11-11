@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the target, request and response, and action details for an action to be performed by the target on or about existing resources.
  */
-@ResourceDef(name="ProcessRequest", profile="http://hl7.org/fhir/Profile/ProcessRequest")
+@ResourceDef(name="ProcessRequest", profile="http://hl7.org/fhir/StructureDefinition/ProcessRequest")
 public class ProcessRequest extends DomainResource {
 
     public enum ProcessRequestStatus {
@@ -491,10 +491,10 @@ public class ProcessRequest extends DomainResource {
     protected Enumeration<ProcessRequestStatus> status;
 
     /**
-     * The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
+     * The type of processing action being requested, for example Reversal, Readjudication, StatusRequest, PendedRequest.
      */
     @Child(name = "action", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="cancel | poll | reprocess | status", formalDefinition="The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest." )
+    @Description(shortDefinition="cancel | poll | reprocess | status", formalDefinition="The type of processing action being requested, for example Reversal, Readjudication, StatusRequest, PendedRequest." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/actionlist")
     protected Enumeration<ActionList> action;
 
@@ -707,7 +707,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #action} (The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
+     * @return {@link #action} (The type of processing action being requested, for example Reversal, Readjudication, StatusRequest, PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
      */
     public Enumeration<ActionList> getActionElement() { 
       if (this.action == null)
@@ -727,7 +727,7 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #action} (The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
+     * @param value {@link #action} (The type of processing action being requested, for example Reversal, Readjudication, StatusRequest, PendedRequest.). This is the underlying object with id, value and extensions. The accessor "getAction" gives direct access to the value
      */
     public ProcessRequest setActionElement(Enumeration<ActionList> value) { 
       this.action = value;
@@ -735,14 +735,14 @@ public class ProcessRequest extends DomainResource {
     }
 
     /**
-     * @return The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
+     * @return The type of processing action being requested, for example Reversal, Readjudication, StatusRequest, PendedRequest.
      */
     public ActionList getAction() { 
       return this.action == null ? null : this.action.getValue();
     }
 
     /**
-     * @param value The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.
+     * @param value The type of processing action being requested, for example Reversal, Readjudication, StatusRequest, PendedRequest.
      */
     public ProcessRequest setAction(ActionList value) { 
       if (value == null)
@@ -1262,7 +1262,7 @@ public class ProcessRequest extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "The ProcessRequest business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
-        children.add(new Property("action", "code", "The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.", 0, 1, action));
+        children.add(new Property("action", "code", "The type of processing action being requested, for example Reversal, Readjudication, StatusRequest, PendedRequest.", 0, 1, action));
         children.add(new Property("target", "Reference(Organization)", "The organization which is the target of the request.", 0, 1, target));
         children.add(new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created));
         children.add(new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the action specified in this request.", 0, 1, provider));
@@ -1281,7 +1281,7 @@ public class ProcessRequest extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The ProcessRequest business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
-        case -1422950858: /*action*/  return new Property("action", "code", "The type of processing action being requested, for example Reversal, Readjudication, StatusRequest,PendedRequest.", 0, 1, action);
+        case -1422950858: /*action*/  return new Property("action", "code", "The type of processing action being requested, for example Reversal, Readjudication, StatusRequest, PendedRequest.", 0, 1, action);
         case -880905839: /*target*/  return new Property("target", "Reference(Organization)", "The organization which is the target of the request.", 0, 1, target);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created);
         case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the action specified in this request.", 0, 1, provider);

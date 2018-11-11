@@ -1,12 +1,9 @@
 package org.hl7.fhir.r4.conformance;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -29,7 +26,7 @@ public class ConstraintJavaGenerator {
   }
 
   public String generate(StructureDefinition sd) throws FHIRException, IOException {
-    String name = Utilities.titleize(sd.getName().replace(".", "").replace("-", "").replace("\"", "")).replace(" ", "");
+    String name = sd.hasName() ? Utilities.titleize(sd.getName().replace(".", "").replace("-", "").replace("\"", "")).replace(" ", "") : "";
     if (!Utilities.nmtokenize(name).equals(name)) {
       System.out.println("Cannot generate Java code for profile "+sd.getUrl()+" because the name \""+name+"\" is not a valid Java class name");
       return null;
@@ -46,6 +43,7 @@ public class ConstraintJavaGenerator {
     
     dest.write("}\r\n");
     dest.flush();
+    dest.close();
     return destFile.getAbsolutePath();
   }
   

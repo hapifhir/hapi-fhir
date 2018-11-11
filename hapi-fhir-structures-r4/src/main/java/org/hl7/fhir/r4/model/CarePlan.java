@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,36 +45,36 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes the intention of how one or more practitioners intend to deliver care for a particular patient, group or community for a period of time, possibly limited to care for a specific condition or set of conditions.
  */
-@ResourceDef(name="CarePlan", profile="http://hl7.org/fhir/Profile/CarePlan")
+@ResourceDef(name="CarePlan", profile="http://hl7.org/fhir/StructureDefinition/CarePlan")
 public class CarePlan extends DomainResource {
 
     public enum CarePlanStatus {
         /**
-         * The plan is in development or awaiting use but is not yet intended to be acted upon.
+         * The request has been created but is not yet complete or ready for action.
          */
         DRAFT, 
         /**
-         * The plan is intended to be followed and used as part of patient care.
+         * The request is in force and ready to be acted upon.
          */
         ACTIVE, 
         /**
-         * The plan has been temporarily stopped but is expected to resume in the future.
+         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.
          */
-        SUSPENDED, 
+        ONHOLD, 
         /**
-         * The plan is no longer in use and is not expected to be followed or used in patient care.
+         * The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.
+         */
+        REVOKED, 
+        /**
+         * Activity against the request has been sufficiently completed to the satisfaction of the requester.
          */
         COMPLETED, 
         /**
-         * The plan was entered in error and voided.
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
-         * The plan has been terminated prior to reaching completion (though it may have been replaced by a new plan).
-         */
-        CANCELLED, 
-        /**
-         * The authoring system doesn't know the current state of the care plan.
+         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.
          */
         UNKNOWN, 
         /**
@@ -88,14 +88,14 @@ public class CarePlan extends DomainResource {
           return DRAFT;
         if ("active".equals(codeString))
           return ACTIVE;
-        if ("suspended".equals(codeString))
-          return SUSPENDED;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("revoked".equals(codeString))
+          return REVOKED;
         if ("completed".equals(codeString))
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
           return ENTEREDINERROR;
-        if ("cancelled".equals(codeString))
-          return CANCELLED;
         if ("unknown".equals(codeString))
           return UNKNOWN;
         if (Configuration.isAcceptInvalidEnums())
@@ -107,46 +107,46 @@ public class CarePlan extends DomainResource {
           switch (this) {
             case DRAFT: return "draft";
             case ACTIVE: return "active";
-            case SUSPENDED: return "suspended";
+            case ONHOLD: return "on-hold";
+            case REVOKED: return "revoked";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
-            case CANCELLED: return "cancelled";
             case UNKNOWN: return "unknown";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case DRAFT: return "http://hl7.org/fhir/care-plan-status";
-            case ACTIVE: return "http://hl7.org/fhir/care-plan-status";
-            case SUSPENDED: return "http://hl7.org/fhir/care-plan-status";
-            case COMPLETED: return "http://hl7.org/fhir/care-plan-status";
-            case ENTEREDINERROR: return "http://hl7.org/fhir/care-plan-status";
-            case CANCELLED: return "http://hl7.org/fhir/care-plan-status";
-            case UNKNOWN: return "http://hl7.org/fhir/care-plan-status";
+            case DRAFT: return "http://hl7.org/fhir/request-status";
+            case ACTIVE: return "http://hl7.org/fhir/request-status";
+            case ONHOLD: return "http://hl7.org/fhir/request-status";
+            case REVOKED: return "http://hl7.org/fhir/request-status";
+            case COMPLETED: return "http://hl7.org/fhir/request-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/request-status";
+            case UNKNOWN: return "http://hl7.org/fhir/request-status";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "The plan is in development or awaiting use but is not yet intended to be acted upon.";
-            case ACTIVE: return "The plan is intended to be followed and used as part of patient care.";
-            case SUSPENDED: return "The plan has been temporarily stopped but is expected to resume in the future.";
-            case COMPLETED: return "The plan is no longer in use and is not expected to be followed or used in patient care.";
-            case ENTEREDINERROR: return "The plan was entered in error and voided.";
-            case CANCELLED: return "The plan has been terminated prior to reaching completion (though it may have been replaced by a new plan).";
-            case UNKNOWN: return "The authoring system doesn't know the current state of the care plan.";
+            case DRAFT: return "The request has been created but is not yet complete or ready for action.";
+            case ACTIVE: return "The request is in force and ready to be acted upon.";
+            case ONHOLD: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.";
+            case REVOKED: return "The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester.";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
+            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case DRAFT: return "Pending";
+            case DRAFT: return "Draft";
             case ACTIVE: return "Active";
-            case SUSPENDED: return "Suspended";
+            case ONHOLD: return "On Hold";
+            case REVOKED: return "Revoked";
             case COMPLETED: return "Completed";
-            case ENTEREDINERROR: return "Entered In Error";
-            case CANCELLED: return "Cancelled";
+            case ENTEREDINERROR: return "Entered in Error";
             case UNKNOWN: return "Unknown";
             default: return "?";
           }
@@ -162,14 +162,14 @@ public class CarePlan extends DomainResource {
           return CarePlanStatus.DRAFT;
         if ("active".equals(codeString))
           return CarePlanStatus.ACTIVE;
-        if ("suspended".equals(codeString))
-          return CarePlanStatus.SUSPENDED;
+        if ("on-hold".equals(codeString))
+          return CarePlanStatus.ONHOLD;
+        if ("revoked".equals(codeString))
+          return CarePlanStatus.REVOKED;
         if ("completed".equals(codeString))
           return CarePlanStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
           return CarePlanStatus.ENTEREDINERROR;
-        if ("cancelled".equals(codeString))
-          return CarePlanStatus.CANCELLED;
         if ("unknown".equals(codeString))
           return CarePlanStatus.UNKNOWN;
         throw new IllegalArgumentException("Unknown CarePlanStatus code '"+codeString+"'");
@@ -186,14 +186,14 @@ public class CarePlan extends DomainResource {
           return new Enumeration<CarePlanStatus>(this, CarePlanStatus.DRAFT);
         if ("active".equals(codeString))
           return new Enumeration<CarePlanStatus>(this, CarePlanStatus.ACTIVE);
-        if ("suspended".equals(codeString))
-          return new Enumeration<CarePlanStatus>(this, CarePlanStatus.SUSPENDED);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<CarePlanStatus>(this, CarePlanStatus.ONHOLD);
+        if ("revoked".equals(codeString))
+          return new Enumeration<CarePlanStatus>(this, CarePlanStatus.REVOKED);
         if ("completed".equals(codeString))
           return new Enumeration<CarePlanStatus>(this, CarePlanStatus.COMPLETED);
         if ("entered-in-error".equals(codeString))
           return new Enumeration<CarePlanStatus>(this, CarePlanStatus.ENTEREDINERROR);
-        if ("cancelled".equals(codeString))
-          return new Enumeration<CarePlanStatus>(this, CarePlanStatus.CANCELLED);
         if ("unknown".equals(codeString))
           return new Enumeration<CarePlanStatus>(this, CarePlanStatus.UNKNOWN);
         throw new FHIRException("Unknown CarePlanStatus code '"+codeString+"'");
@@ -203,14 +203,14 @@ public class CarePlan extends DomainResource {
         return "draft";
       if (code == CarePlanStatus.ACTIVE)
         return "active";
-      if (code == CarePlanStatus.SUSPENDED)
-        return "suspended";
+      if (code == CarePlanStatus.ONHOLD)
+        return "on-hold";
+      if (code == CarePlanStatus.REVOKED)
+        return "revoked";
       if (code == CarePlanStatus.COMPLETED)
         return "completed";
       if (code == CarePlanStatus.ENTEREDINERROR)
         return "entered-in-error";
-      if (code == CarePlanStatus.CANCELLED)
-        return "cancelled";
       if (code == CarePlanStatus.UNKNOWN)
         return "unknown";
       return "?";
@@ -222,21 +222,19 @@ public class CarePlan extends DomainResource {
 
     public enum CarePlanIntent {
         /**
-         * The care plan is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act
+         * null
          */
         PROPOSAL, 
         /**
-         * The care plan represents an intention to ensure something occurs without providing an authorization for others to act
+         * null
          */
         PLAN, 
         /**
-         * The care plan represents a request/demand and authorization for action
+         * null
          */
         ORDER, 
         /**
-         * The care plan represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.
-
-Refer to [[[RequestGroup]]] for additional information on how this status is used
+         * null
          */
         OPTION, 
         /**
@@ -270,28 +268,28 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
         public String getSystem() {
           switch (this) {
-            case PROPOSAL: return "http://hl7.org/fhir/care-plan-intent";
-            case PLAN: return "http://hl7.org/fhir/care-plan-intent";
-            case ORDER: return "http://hl7.org/fhir/care-plan-intent";
-            case OPTION: return "http://hl7.org/fhir/care-plan-intent";
+            case PROPOSAL: return "http://hl7.org/fhir/request-intent";
+            case PLAN: return "http://hl7.org/fhir/request-intent";
+            case ORDER: return "http://hl7.org/fhir/request-intent";
+            case OPTION: return "http://hl7.org/fhir/request-intent";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSAL: return "The care plan is a suggestion made by someone/something that doesn't have an intention to ensure it occurs and without providing an authorization to act";
-            case PLAN: return "The care plan represents an intention to ensure something occurs without providing an authorization for others to act";
-            case ORDER: return "The care plan represents a request/demand and authorization for action";
-            case OPTION: return "The care plan represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.\n\nRefer to [[[RequestGroup]]] for additional information on how this status is used";
+            case PROPOSAL: return "";
+            case PLAN: return "";
+            case ORDER: return "";
+            case OPTION: return "";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case PROPOSAL: return "Proposal";
-            case PLAN: return "Plan";
-            case ORDER: return "Order";
-            case OPTION: return "Option";
+            case PROPOSAL: return "proposal";
+            case PLAN: return "plan";
+            case ORDER: return "order";
+            case OPTION: return "option";
             default: return "?";
           }
         }
@@ -568,6 +566,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
          */
         UNKNOWN, 
         /**
+         * The activity was entered in error and voided.
+         */
+        ENTEREDINERROR, 
+        /**
          * added to help the parsers with the generic types
          */
         NULL;
@@ -590,6 +592,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return STOPPED;
         if ("unknown".equals(codeString))
           return UNKNOWN;
+        if ("entered-in-error".equals(codeString))
+          return ENTEREDINERROR;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -605,6 +609,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
             case CANCELLED: return "cancelled";
             case STOPPED: return "stopped";
             case UNKNOWN: return "unknown";
+            case ENTEREDINERROR: return "entered-in-error";
             default: return "?";
           }
         }
@@ -618,6 +623,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
             case CANCELLED: return "http://hl7.org/fhir/care-plan-activity-status";
             case STOPPED: return "http://hl7.org/fhir/care-plan-activity-status";
             case UNKNOWN: return "http://hl7.org/fhir/care-plan-activity-status";
+            case ENTEREDINERROR: return "http://hl7.org/fhir/care-plan-activity-status";
             default: return "?";
           }
         }
@@ -631,6 +637,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
             case CANCELLED: return "The planned activity has been withdrawn.";
             case STOPPED: return "The planned activity has been ended prior to completion after the activity was started.";
             case UNKNOWN: return "The current state of the activity is not known.  Note: This concept is not to be used for \"other\".";
+            case ENTEREDINERROR: return "The activity was entered in error and voided.";
             default: return "?";
           }
         }
@@ -644,6 +651,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
             case CANCELLED: return "Cancelled";
             case STOPPED: return "Stopped";
             case UNKNOWN: return "Unknown";
+            case ENTEREDINERROR: return "Entered In Error";
             default: return "?";
           }
         }
@@ -670,6 +678,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return CarePlanActivityStatus.STOPPED;
         if ("unknown".equals(codeString))
           return CarePlanActivityStatus.UNKNOWN;
+        if ("entered-in-error".equals(codeString))
+          return CarePlanActivityStatus.ENTEREDINERROR;
         throw new IllegalArgumentException("Unknown CarePlanActivityStatus code '"+codeString+"'");
         }
         public Enumeration<CarePlanActivityStatus> fromType(Base code) throws FHIRException {
@@ -696,6 +706,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return new Enumeration<CarePlanActivityStatus>(this, CarePlanActivityStatus.STOPPED);
         if ("unknown".equals(codeString))
           return new Enumeration<CarePlanActivityStatus>(this, CarePlanActivityStatus.UNKNOWN);
+        if ("entered-in-error".equals(codeString))
+          return new Enumeration<CarePlanActivityStatus>(this, CarePlanActivityStatus.ENTEREDINERROR);
         throw new FHIRException("Unknown CarePlanActivityStatus code '"+codeString+"'");
         }
     public String toCode(CarePlanActivityStatus code) {
@@ -715,6 +727,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         return "stopped";
       if (code == CarePlanActivityStatus.UNKNOWN)
         return "unknown";
+      if (code == CarePlanActivityStatus.ENTEREDINERROR)
+        return "entered-in-error";
       return "?";
       }
     public String toSystem(CarePlanActivityStatus code) {
@@ -1203,16 +1217,23 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         protected Enumeration<CarePlanActivityKind> kind;
 
         /**
-         * Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.
+         * The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.
          */
-        @Child(name = "instantiates", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Protocol or definition", formalDefinition="Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with." )
-        protected UriType instantiates;
+        @Child(name = "instantiatesCanonical", type = {CanonicalType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Instantiates FHIR protocol or definition", formalDefinition="The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity." )
+        protected List<CanonicalType> instantiatesCanonical;
+
+        /**
+         * The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.
+         */
+        @Child(name = "instantiatesUri", type = {UriType.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Instantiates external protocol or definition", formalDefinition="The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity." )
+        protected List<UriType> instantiatesUri;
 
         /**
          * Detailed description of the type of planned activity; e.g. what lab test, what procedure, what kind of encounter.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "code", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Detail type of activity", formalDefinition="Detailed description of the type of planned activity; e.g. what lab test, what procedure, what kind of encounter." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-code")
         protected CodeableConcept code;
@@ -1220,7 +1241,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * Provides the rationale that drove the inclusion of this particular activity as part of the plan or the reason why the activity was prohibited.
          */
-        @Child(name = "reasonCode", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "reasonCode", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Why activity should be done or why activity was prohibited", formalDefinition="Provides the rationale that drove the inclusion of this particular activity as part of the plan or the reason why the activity was prohibited." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/clinical-findings")
         protected List<CodeableConcept> reasonCode;
@@ -1228,7 +1249,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * Indicates another resource, such as the health condition(s), whose existence justifies this request and drove the inclusion of this particular activity as part of the plan.
          */
-        @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Why activity is needed", formalDefinition="Indicates another resource, such as the health condition(s), whose existence justifies this request and drove the inclusion of this particular activity as part of the plan." )
         protected List<Reference> reasonReference;
         /**
@@ -1240,7 +1261,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * Internal reference that identifies the goals that this activity is intended to contribute towards meeting.
          */
-        @Child(name = "goal", type = {Goal.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "goal", type = {Goal.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Goals this activity relates to", formalDefinition="Internal reference that identifies the goals that this activity is intended to contribute towards meeting." )
         protected List<Reference> goal;
         /**
@@ -1252,36 +1273,36 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * Identifies what progress is being made for the specific activity.
          */
-        @Child(name = "status", type = {CodeType.class}, order=7, min=1, max=1, modifier=true, summary=false)
-        @Description(shortDefinition="not-started | scheduled | in-progress | on-hold | completed | cancelled | stopped | unknown", formalDefinition="Identifies what progress is being made for the specific activity." )
+        @Child(name = "status", type = {CodeType.class}, order=8, min=1, max=1, modifier=true, summary=false)
+        @Description(shortDefinition="not-started | scheduled | in-progress | on-hold | completed | cancelled | stopped | unknown | entered-in-error", formalDefinition="Identifies what progress is being made for the specific activity." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-activity-status")
         protected Enumeration<CarePlanActivityStatus> status;
 
         /**
          * Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.
          */
-        @Child(name = "statusReason", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "statusReason", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reason for current status", formalDefinition="Provides reason why the activity isn't yet started, is on hold, was cancelled, etc." )
-        protected StringType statusReason;
+        protected CodeableConcept statusReason;
 
         /**
          * If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.
          */
-        @Child(name = "doNotPerform", type = {BooleanType.class}, order=9, min=0, max=1, modifier=true, summary=false)
+        @Child(name = "doNotPerform", type = {BooleanType.class}, order=10, min=0, max=1, modifier=true, summary=false)
         @Description(shortDefinition="If true, activity is prohibiting action", formalDefinition="If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan." )
         protected BooleanType doNotPerform;
 
         /**
          * The period, timing or frequency upon which the described activity is to occur.
          */
-        @Child(name = "scheduled", type = {Timing.class, Period.class, StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "scheduled", type = {Timing.class, Period.class, StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When activity is to occur", formalDefinition="The period, timing or frequency upon which the described activity is to occur." )
         protected Type scheduled;
 
         /**
          * Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.
          */
-        @Child(name = "location", type = {Location.class}, order=11, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "location", type = {Location.class}, order=12, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Where it should happen", formalDefinition="Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc." )
         protected Reference location;
 
@@ -1293,7 +1314,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * Identifies who's expected to be involved in the activity.
          */
-        @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, RelatedPerson.class, Patient.class, CareTeam.class, HealthcareService.class, Device.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, RelatedPerson.class, Patient.class, CareTeam.class, HealthcareService.class, Device.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Who will be responsible?", formalDefinition="Identifies who's expected to be involved in the activity." )
         protected List<Reference> performer;
         /**
@@ -1305,7 +1326,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * Identifies the food, drug or other product to be consumed or supplied in the activity.
          */
-        @Child(name = "product", type = {CodeableConcept.class, Medication.class, Substance.class}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "product", type = {CodeableConcept.class, Medication.class, Substance.class}, order=14, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="What is to be administered/supplied", formalDefinition="Identifies the food, drug or other product to be consumed or supplied in the activity." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-codes")
         protected Type product;
@@ -1313,25 +1334,25 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * Identifies the quantity expected to be consumed in a given day.
          */
-        @Child(name = "dailyAmount", type = {SimpleQuantity.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "dailyAmount", type = {Quantity.class}, order=15, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="How to consume/day?", formalDefinition="Identifies the quantity expected to be consumed in a given day." )
-        protected SimpleQuantity dailyAmount;
+        protected Quantity dailyAmount;
 
         /**
          * Identifies the quantity expected to be supplied, administered or consumed by the subject.
          */
-        @Child(name = "quantity", type = {SimpleQuantity.class}, order=15, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "quantity", type = {Quantity.class}, order=16, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="How much to administer/supply/consume", formalDefinition="Identifies the quantity expected to be supplied, administered or consumed by the subject." )
-        protected SimpleQuantity quantity;
+        protected Quantity quantity;
 
         /**
          * This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc.
          */
-        @Child(name = "description", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "description", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Extra info describing activity to perform", formalDefinition="This provides a textual description of constraints on the intended activity occurrence, including relation to other activities.  It may also include objectives, pre-conditions and end-conditions.  Finally, it may convey specifics about the activity such as body site, method, route, etc." )
         protected StringType description;
 
-        private static final long serialVersionUID = 447443434L;
+        private static final long serialVersionUID = 1355568081L;
 
     /**
      * Constructor
@@ -1398,52 +1419,125 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @return {@link #instantiates} (Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.). This is the underlying object with id, value and extensions. The accessor "getInstantiates" gives direct access to the value
+         * @return {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.)
          */
-        public UriType getInstantiatesElement() { 
-          if (this.instantiates == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create CarePlanActivityDetailComponent.instantiates");
-            else if (Configuration.doAutoCreate())
-              this.instantiates = new UriType(); // bb
-          return this.instantiates;
-        }
-
-        public boolean hasInstantiatesElement() { 
-          return this.instantiates != null && !this.instantiates.isEmpty();
-        }
-
-        public boolean hasInstantiates() { 
-          return this.instantiates != null && !this.instantiates.isEmpty();
+        public List<CanonicalType> getInstantiatesCanonical() { 
+          if (this.instantiatesCanonical == null)
+            this.instantiatesCanonical = new ArrayList<CanonicalType>();
+          return this.instantiatesCanonical;
         }
 
         /**
-         * @param value {@link #instantiates} (Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.). This is the underlying object with id, value and extensions. The accessor "getInstantiates" gives direct access to the value
+         * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public CarePlanActivityDetailComponent setInstantiatesElement(UriType value) { 
-          this.instantiates = value;
+        public CarePlanActivityDetailComponent setInstantiatesCanonical(List<CanonicalType> theInstantiatesCanonical) { 
+          this.instantiatesCanonical = theInstantiatesCanonical;
+          return this;
+        }
+
+        public boolean hasInstantiatesCanonical() { 
+          if (this.instantiatesCanonical == null)
+            return false;
+          for (CanonicalType item : this.instantiatesCanonical)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.)
+         */
+        public CanonicalType addInstantiatesCanonicalElement() {//2 
+          CanonicalType t = new CanonicalType();
+          if (this.instantiatesCanonical == null)
+            this.instantiatesCanonical = new ArrayList<CanonicalType>();
+          this.instantiatesCanonical.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.)
+         */
+        public CarePlanActivityDetailComponent addInstantiatesCanonical(String value) { //1
+          CanonicalType t = new CanonicalType();
+          t.setValue(value);
+          if (this.instantiatesCanonical == null)
+            this.instantiatesCanonical = new ArrayList<CanonicalType>();
+          this.instantiatesCanonical.add(t);
           return this;
         }
 
         /**
-         * @return Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.
+         * @param value {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.)
          */
-        public String getInstantiates() { 
-          return this.instantiates == null ? null : this.instantiates.getValue();
+        public boolean hasInstantiatesCanonical(String value) { 
+          if (this.instantiatesCanonical == null)
+            return false;
+          for (CanonicalType v : this.instantiatesCanonical)
+            if (v.getValue().equals(value)) // canonical(PlanDefinition|ActivityDefinition|Questionnaire|Measure|OperationDefinition)
+              return true;
+          return false;
         }
 
         /**
-         * @param value Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.
+         * @return {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.)
          */
-        public CarePlanActivityDetailComponent setInstantiates(String value) { 
-          if (Utilities.noString(value))
-            this.instantiates = null;
-          else {
-            if (this.instantiates == null)
-              this.instantiates = new UriType();
-            this.instantiates.setValue(value);
-          }
+        public List<UriType> getInstantiatesUri() { 
+          if (this.instantiatesUri == null)
+            this.instantiatesUri = new ArrayList<UriType>();
+          return this.instantiatesUri;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public CarePlanActivityDetailComponent setInstantiatesUri(List<UriType> theInstantiatesUri) { 
+          this.instantiatesUri = theInstantiatesUri;
           return this;
+        }
+
+        public boolean hasInstantiatesUri() { 
+          if (this.instantiatesUri == null)
+            return false;
+          for (UriType item : this.instantiatesUri)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.)
+         */
+        public UriType addInstantiatesUriElement() {//2 
+          UriType t = new UriType();
+          if (this.instantiatesUri == null)
+            this.instantiatesUri = new ArrayList<UriType>();
+          this.instantiatesUri.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.)
+         */
+        public CarePlanActivityDetailComponent addInstantiatesUri(String value) { //1
+          UriType t = new UriType();
+          t.setValue(value);
+          if (this.instantiatesUri == null)
+            this.instantiatesUri = new ArrayList<UriType>();
+          this.instantiatesUri.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.)
+         */
+        public boolean hasInstantiatesUri(String value) { 
+          if (this.instantiatesUri == null)
+            return false;
+          for (UriType v : this.instantiatesUri)
+            if (v.getValue().equals(value)) // uri
+              return true;
+          return false;
         }
 
         /**
@@ -1707,19 +1801,15 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @return {@link #statusReason} (Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.). This is the underlying object with id, value and extensions. The accessor "getStatusReason" gives direct access to the value
+         * @return {@link #statusReason} (Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.)
          */
-        public StringType getStatusReasonElement() { 
+        public CodeableConcept getStatusReason() { 
           if (this.statusReason == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create CarePlanActivityDetailComponent.statusReason");
             else if (Configuration.doAutoCreate())
-              this.statusReason = new StringType(); // bb
+              this.statusReason = new CodeableConcept(); // cc
           return this.statusReason;
-        }
-
-        public boolean hasStatusReasonElement() { 
-          return this.statusReason != null && !this.statusReason.isEmpty();
         }
 
         public boolean hasStatusReason() { 
@@ -1727,31 +1817,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         }
 
         /**
-         * @param value {@link #statusReason} (Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.). This is the underlying object with id, value and extensions. The accessor "getStatusReason" gives direct access to the value
+         * @param value {@link #statusReason} (Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.)
          */
-        public CarePlanActivityDetailComponent setStatusReasonElement(StringType value) { 
+        public CarePlanActivityDetailComponent setStatusReason(CodeableConcept value) { 
           this.statusReason = value;
-          return this;
-        }
-
-        /**
-         * @return Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.
-         */
-        public String getStatusReason() { 
-          return this.statusReason == null ? null : this.statusReason.getValue();
-        }
-
-        /**
-         * @param value Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.
-         */
-        public CarePlanActivityDetailComponent setStatusReason(String value) { 
-          if (Utilities.noString(value))
-            this.statusReason = null;
-          else {
-            if (this.statusReason == null)
-              this.statusReason = new StringType();
-            this.statusReason.setValue(value);
-          }
           return this;
         }
 
@@ -2027,12 +2096,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @return {@link #dailyAmount} (Identifies the quantity expected to be consumed in a given day.)
          */
-        public SimpleQuantity getDailyAmount() { 
+        public Quantity getDailyAmount() { 
           if (this.dailyAmount == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create CarePlanActivityDetailComponent.dailyAmount");
             else if (Configuration.doAutoCreate())
-              this.dailyAmount = new SimpleQuantity(); // cc
+              this.dailyAmount = new Quantity(); // cc
           return this.dailyAmount;
         }
 
@@ -2043,7 +2112,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #dailyAmount} (Identifies the quantity expected to be consumed in a given day.)
          */
-        public CarePlanActivityDetailComponent setDailyAmount(SimpleQuantity value) { 
+        public CarePlanActivityDetailComponent setDailyAmount(Quantity value) { 
           this.dailyAmount = value;
           return this;
         }
@@ -2051,12 +2120,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @return {@link #quantity} (Identifies the quantity expected to be supplied, administered or consumed by the subject.)
          */
-        public SimpleQuantity getQuantity() { 
+        public Quantity getQuantity() { 
           if (this.quantity == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create CarePlanActivityDetailComponent.quantity");
             else if (Configuration.doAutoCreate())
-              this.quantity = new SimpleQuantity(); // cc
+              this.quantity = new Quantity(); // cc
           return this.quantity;
         }
 
@@ -2067,7 +2136,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         /**
          * @param value {@link #quantity} (Identifies the quantity expected to be supplied, administered or consumed by the subject.)
          */
-        public CarePlanActivityDetailComponent setQuantity(SimpleQuantity value) { 
+        public CarePlanActivityDetailComponent setQuantity(Quantity value) { 
           this.quantity = value;
           return this;
         }
@@ -2124,13 +2193,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("kind", "code", "A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest.", 0, 1, kind));
-          children.add(new Property("instantiates", "uri", "Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.", 0, 1, instantiates));
+          children.add(new Property("instantiatesCanonical", "canonical(PlanDefinition|ActivityDefinition|Questionnaire|Measure|OperationDefinition)", "The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.", 0, java.lang.Integer.MAX_VALUE, instantiatesCanonical));
+          children.add(new Property("instantiatesUri", "uri", "The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.", 0, java.lang.Integer.MAX_VALUE, instantiatesUri));
           children.add(new Property("code", "CodeableConcept", "Detailed description of the type of planned activity; e.g. what lab test, what procedure, what kind of encounter.", 0, 1, code));
           children.add(new Property("reasonCode", "CodeableConcept", "Provides the rationale that drove the inclusion of this particular activity as part of the plan or the reason why the activity was prohibited.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
           children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource, such as the health condition(s), whose existence justifies this request and drove the inclusion of this particular activity as part of the plan.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
           children.add(new Property("goal", "Reference(Goal)", "Internal reference that identifies the goals that this activity is intended to contribute towards meeting.", 0, java.lang.Integer.MAX_VALUE, goal));
           children.add(new Property("status", "code", "Identifies what progress is being made for the specific activity.", 0, 1, status));
-          children.add(new Property("statusReason", "string", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, 1, statusReason));
+          children.add(new Property("statusReason", "CodeableConcept", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, 1, statusReason));
           children.add(new Property("doNotPerform", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.", 0, 1, doNotPerform));
           children.add(new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled));
           children.add(new Property("location", "Reference(Location)", "Identifies the facility where the activity will occur; e.g. home, hospital, specific clinic, etc.", 0, 1, location));
@@ -2145,13 +2215,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3292052: /*kind*/  return new Property("kind", "code", "A description of the kind of resource the in-line definition of a care plan activity is representing.  The CarePlan.activity.detail is an in-line definition when a resource is not referenced using CarePlan.activity.reference.  For example, a MedicationRequest, a ServiceRequest, or a CommunicationRequest.", 0, 1, kind);
-          case -246883639: /*instantiates*/  return new Property("instantiates", "uri", "Identifies the protocol, questionnaire, guideline or other specification the planned activity should be conducted in accordance with.", 0, 1, instantiates);
+          case 8911915: /*instantiatesCanonical*/  return new Property("instantiatesCanonical", "canonical(PlanDefinition|ActivityDefinition|Questionnaire|Measure|OperationDefinition)", "The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.", 0, java.lang.Integer.MAX_VALUE, instantiatesCanonical);
+          case -1926393373: /*instantiatesUri*/  return new Property("instantiatesUri", "uri", "The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan activity.", 0, java.lang.Integer.MAX_VALUE, instantiatesUri);
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Detailed description of the type of planned activity; e.g. what lab test, what procedure, what kind of encounter.", 0, 1, code);
           case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Provides the rationale that drove the inclusion of this particular activity as part of the plan or the reason why the activity was prohibited.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
           case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource, such as the health condition(s), whose existence justifies this request and drove the inclusion of this particular activity as part of the plan.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
           case 3178259: /*goal*/  return new Property("goal", "Reference(Goal)", "Internal reference that identifies the goals that this activity is intended to contribute towards meeting.", 0, java.lang.Integer.MAX_VALUE, goal);
           case -892481550: /*status*/  return new Property("status", "code", "Identifies what progress is being made for the specific activity.", 0, 1, status);
-          case 2051346646: /*statusReason*/  return new Property("statusReason", "string", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, 1, statusReason);
+          case 2051346646: /*statusReason*/  return new Property("statusReason", "CodeableConcept", "Provides reason why the activity isn't yet started, is on hold, was cancelled, etc.", 0, 1, statusReason);
           case -1788508167: /*doNotPerform*/  return new Property("doNotPerform", "boolean", "If true, indicates that the described activity is one that must NOT be engaged in when following the plan.  If false, or missing, indicates that the described activity is one that should be engaged in when following the plan.", 0, 1, doNotPerform);
           case 1162627251: /*scheduled[x]*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
           case -160710483: /*scheduled*/  return new Property("scheduled[x]", "Timing|Period|string", "The period, timing or frequency upon which the described activity is to occur.", 0, 1, scheduled);
@@ -2176,20 +2247,21 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3292052: /*kind*/ return this.kind == null ? new Base[0] : new Base[] {this.kind}; // Enumeration<CarePlanActivityKind>
-        case -246883639: /*instantiates*/ return this.instantiates == null ? new Base[0] : new Base[] {this.instantiates}; // UriType
+        case 8911915: /*instantiatesCanonical*/ return this.instantiatesCanonical == null ? new Base[0] : this.instantiatesCanonical.toArray(new Base[this.instantiatesCanonical.size()]); // CanonicalType
+        case -1926393373: /*instantiatesUri*/ return this.instantiatesUri == null ? new Base[0] : this.instantiatesUri.toArray(new Base[this.instantiatesUri.size()]); // UriType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
         case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 3178259: /*goal*/ return this.goal == null ? new Base[0] : this.goal.toArray(new Base[this.goal.size()]); // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<CarePlanActivityStatus>
-        case 2051346646: /*statusReason*/ return this.statusReason == null ? new Base[0] : new Base[] {this.statusReason}; // StringType
+        case 2051346646: /*statusReason*/ return this.statusReason == null ? new Base[0] : new Base[] {this.statusReason}; // CodeableConcept
         case -1788508167: /*doNotPerform*/ return this.doNotPerform == null ? new Base[0] : new Base[] {this.doNotPerform}; // BooleanType
         case -160710483: /*scheduled*/ return this.scheduled == null ? new Base[0] : new Base[] {this.scheduled}; // Type
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
         case 481140686: /*performer*/ return this.performer == null ? new Base[0] : this.performer.toArray(new Base[this.performer.size()]); // Reference
         case -309474065: /*product*/ return this.product == null ? new Base[0] : new Base[] {this.product}; // Type
-        case -768908335: /*dailyAmount*/ return this.dailyAmount == null ? new Base[0] : new Base[] {this.dailyAmount}; // SimpleQuantity
-        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
+        case -768908335: /*dailyAmount*/ return this.dailyAmount == null ? new Base[0] : new Base[] {this.dailyAmount}; // Quantity
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Quantity
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2203,8 +2275,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           value = new CarePlanActivityKindEnumFactory().fromType(castToCode(value));
           this.kind = (Enumeration) value; // Enumeration<CarePlanActivityKind>
           return value;
-        case -246883639: // instantiates
-          this.instantiates = castToUri(value); // UriType
+        case 8911915: // instantiatesCanonical
+          this.getInstantiatesCanonical().add(castToCanonical(value)); // CanonicalType
+          return value;
+        case -1926393373: // instantiatesUri
+          this.getInstantiatesUri().add(castToUri(value)); // UriType
           return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -2223,7 +2298,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.status = (Enumeration) value; // Enumeration<CarePlanActivityStatus>
           return value;
         case 2051346646: // statusReason
-          this.statusReason = castToString(value); // StringType
+          this.statusReason = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1788508167: // doNotPerform
           this.doNotPerform = castToBoolean(value); // BooleanType
@@ -2241,10 +2316,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.product = castToType(value); // Type
           return value;
         case -768908335: // dailyAmount
-          this.dailyAmount = castToSimpleQuantity(value); // SimpleQuantity
+          this.dailyAmount = castToQuantity(value); // Quantity
           return value;
         case -1285004149: // quantity
-          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          this.quantity = castToQuantity(value); // Quantity
           return value;
         case -1724546052: // description
           this.description = castToString(value); // StringType
@@ -2259,8 +2334,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (name.equals("kind")) {
           value = new CarePlanActivityKindEnumFactory().fromType(castToCode(value));
           this.kind = (Enumeration) value; // Enumeration<CarePlanActivityKind>
-        } else if (name.equals("instantiates")) {
-          this.instantiates = castToUri(value); // UriType
+        } else if (name.equals("instantiatesCanonical")) {
+          this.getInstantiatesCanonical().add(castToCanonical(value));
+        } else if (name.equals("instantiatesUri")) {
+          this.getInstantiatesUri().add(castToUri(value));
         } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("reasonCode")) {
@@ -2273,7 +2350,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           value = new CarePlanActivityStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<CarePlanActivityStatus>
         } else if (name.equals("statusReason")) {
-          this.statusReason = castToString(value); // StringType
+          this.statusReason = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("doNotPerform")) {
           this.doNotPerform = castToBoolean(value); // BooleanType
         } else if (name.equals("scheduled[x]")) {
@@ -2285,9 +2362,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         } else if (name.equals("product[x]")) {
           this.product = castToType(value); // Type
         } else if (name.equals("dailyAmount")) {
-          this.dailyAmount = castToSimpleQuantity(value); // SimpleQuantity
+          this.dailyAmount = castToQuantity(value); // Quantity
         } else if (name.equals("quantity")) {
-          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          this.quantity = castToQuantity(value); // Quantity
         } else if (name.equals("description")) {
           this.description = castToString(value); // StringType
         } else
@@ -2299,13 +2376,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3292052:  return getKindElement();
-        case -246883639:  return getInstantiatesElement();
+        case 8911915:  return addInstantiatesCanonicalElement();
+        case -1926393373:  return addInstantiatesUriElement();
         case 3059181:  return getCode(); 
         case 722137681:  return addReasonCode(); 
         case -1146218137:  return addReasonReference(); 
         case 3178259:  return addGoal(); 
         case -892481550:  return getStatusElement();
-        case 2051346646:  return getStatusReasonElement();
+        case 2051346646:  return getStatusReason(); 
         case -1788508167:  return getDoNotPerformElement();
         case 1162627251:  return getScheduled(); 
         case -160710483:  return getScheduled(); 
@@ -2325,13 +2403,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3292052: /*kind*/ return new String[] {"code"};
-        case -246883639: /*instantiates*/ return new String[] {"uri"};
+        case 8911915: /*instantiatesCanonical*/ return new String[] {"canonical"};
+        case -1926393373: /*instantiatesUri*/ return new String[] {"uri"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
         case -1146218137: /*reasonReference*/ return new String[] {"Reference"};
         case 3178259: /*goal*/ return new String[] {"Reference"};
         case -892481550: /*status*/ return new String[] {"code"};
-        case 2051346646: /*statusReason*/ return new String[] {"string"};
+        case 2051346646: /*statusReason*/ return new String[] {"CodeableConcept"};
         case -1788508167: /*doNotPerform*/ return new String[] {"boolean"};
         case -160710483: /*scheduled*/ return new String[] {"Timing", "Period", "string"};
         case 1901043637: /*location*/ return new String[] {"Reference"};
@@ -2350,8 +2429,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (name.equals("kind")) {
           throw new FHIRException("Cannot call addChild on a primitive type CarePlan.kind");
         }
-        else if (name.equals("instantiates")) {
-          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.instantiates");
+        else if (name.equals("instantiatesCanonical")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.instantiatesCanonical");
+        }
+        else if (name.equals("instantiatesUri")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.instantiatesUri");
         }
         else if (name.equals("code")) {
           this.code = new CodeableConcept();
@@ -2370,7 +2452,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           throw new FHIRException("Cannot call addChild on a primitive type CarePlan.status");
         }
         else if (name.equals("statusReason")) {
-          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.statusReason");
+          this.statusReason = new CodeableConcept();
+          return this.statusReason;
         }
         else if (name.equals("doNotPerform")) {
           throw new FHIRException("Cannot call addChild on a primitive type CarePlan.doNotPerform");
@@ -2403,11 +2486,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           return this.product;
         }
         else if (name.equals("dailyAmount")) {
-          this.dailyAmount = new SimpleQuantity();
+          this.dailyAmount = new Quantity();
           return this.dailyAmount;
         }
         else if (name.equals("quantity")) {
-          this.quantity = new SimpleQuantity();
+          this.quantity = new Quantity();
           return this.quantity;
         }
         else if (name.equals("description")) {
@@ -2421,7 +2504,16 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         CarePlanActivityDetailComponent dst = new CarePlanActivityDetailComponent();
         copyValues(dst);
         dst.kind = kind == null ? null : kind.copy();
-        dst.instantiates = instantiates == null ? null : instantiates.copy();
+        if (instantiatesCanonical != null) {
+          dst.instantiatesCanonical = new ArrayList<CanonicalType>();
+          for (CanonicalType i : instantiatesCanonical)
+            dst.instantiatesCanonical.add(i.copy());
+        };
+        if (instantiatesUri != null) {
+          dst.instantiatesUri = new ArrayList<UriType>();
+          for (UriType i : instantiatesUri)
+            dst.instantiatesUri.add(i.copy());
+        };
         dst.code = code == null ? null : code.copy();
         if (reasonCode != null) {
           dst.reasonCode = new ArrayList<CodeableConcept>();
@@ -2462,13 +2554,13 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (!(other_ instanceof CarePlanActivityDetailComponent))
           return false;
         CarePlanActivityDetailComponent o = (CarePlanActivityDetailComponent) other_;
-        return compareDeep(kind, o.kind, true) && compareDeep(instantiates, o.instantiates, true) && compareDeep(code, o.code, true)
-           && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
-           && compareDeep(goal, o.goal, true) && compareDeep(status, o.status, true) && compareDeep(statusReason, o.statusReason, true)
-           && compareDeep(doNotPerform, o.doNotPerform, true) && compareDeep(scheduled, o.scheduled, true)
-           && compareDeep(location, o.location, true) && compareDeep(performer, o.performer, true) && compareDeep(product, o.product, true)
-           && compareDeep(dailyAmount, o.dailyAmount, true) && compareDeep(quantity, o.quantity, true) && compareDeep(description, o.description, true)
-          ;
+        return compareDeep(kind, o.kind, true) && compareDeep(instantiatesCanonical, o.instantiatesCanonical, true)
+           && compareDeep(instantiatesUri, o.instantiatesUri, true) && compareDeep(code, o.code, true) && compareDeep(reasonCode, o.reasonCode, true)
+           && compareDeep(reasonReference, o.reasonReference, true) && compareDeep(goal, o.goal, true) && compareDeep(status, o.status, true)
+           && compareDeep(statusReason, o.statusReason, true) && compareDeep(doNotPerform, o.doNotPerform, true)
+           && compareDeep(scheduled, o.scheduled, true) && compareDeep(location, o.location, true) && compareDeep(performer, o.performer, true)
+           && compareDeep(product, o.product, true) && compareDeep(dailyAmount, o.dailyAmount, true) && compareDeep(quantity, o.quantity, true)
+           && compareDeep(description, o.description, true);
       }
 
       @Override
@@ -2478,15 +2570,16 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (!(other_ instanceof CarePlanActivityDetailComponent))
           return false;
         CarePlanActivityDetailComponent o = (CarePlanActivityDetailComponent) other_;
-        return compareValues(kind, o.kind, true) && compareValues(instantiates, o.instantiates, true) && compareValues(status, o.status, true)
-           && compareValues(statusReason, o.statusReason, true) && compareValues(doNotPerform, o.doNotPerform, true)
-           && compareValues(description, o.description, true);
+        return compareValues(kind, o.kind, true) && compareValues(instantiatesUri, o.instantiatesUri, true)
+           && compareValues(status, o.status, true) && compareValues(doNotPerform, o.doNotPerform, true) && compareValues(description, o.description, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, instantiates, code
-          , reasonCode, reasonReference, goal, status, statusReason, doNotPerform, scheduled
-          , location, performer, product, dailyAmount, quantity, description);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(kind, instantiatesCanonical
+          , instantiatesUri, code, reasonCode, reasonReference, goal, status, statusReason
+          , doNotPerform, scheduled, location, performer, product, dailyAmount, quantity
+          , description);
       }
 
   public String fhirType() {
@@ -2504,16 +2597,23 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     protected List<Identifier> identifier;
 
     /**
-     * Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.
+     * The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.
      */
-    @Child(name = "instantiates", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Protocol or definition", formalDefinition="Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with." )
-    protected List<UriType> instantiates;
+    @Child(name = "instantiatesCanonical", type = {CanonicalType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Instantiates FHIR protocol or definition", formalDefinition="The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan." )
+    protected List<CanonicalType> instantiatesCanonical;
+
+    /**
+     * The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.
+     */
+    @Child(name = "instantiatesUri", type = {UriType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Instantiates external protocol or definition", formalDefinition="The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan." )
+    protected List<UriType> instantiatesUri;
 
     /**
      * A care plan that is fulfilled in whole or in part by this care plan.
      */
-    @Child(name = "basedOn", type = {CarePlan.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "basedOn", type = {CarePlan.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Fulfills CarePlan", formalDefinition="A care plan that is fulfilled in whole or in part by this care plan." )
     protected List<Reference> basedOn;
     /**
@@ -2525,7 +2625,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Completed or terminated care plan whose function is taken by this new care plan.
      */
-    @Child(name = "replaces", type = {CarePlan.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "replaces", type = {CarePlan.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="CarePlan replaced by this CarePlan", formalDefinition="Completed or terminated care plan whose function is taken by this new care plan." )
     protected List<Reference> replaces;
     /**
@@ -2537,7 +2637,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * A larger care plan of which this particular care plan is a component or step.
      */
-    @Child(name = "partOf", type = {CarePlan.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "partOf", type = {CarePlan.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Part of referenced CarePlan", formalDefinition="A larger care plan of which this particular care plan is a component or step." )
     protected List<Reference> partOf;
     /**
@@ -2549,15 +2649,15 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record.
      */
-    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | suspended | completed | entered-in-error | cancelled | unknown", formalDefinition="Indicates whether the plan is currently being acted upon, represents future intentions or is now a historical record." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-status")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-status")
     protected Enumeration<CarePlanStatus> status;
 
     /**
      * Indicates the level of authority/intentionality associated with the care plan and where the care plan fits into the workflow chain.
      */
-    @Child(name = "intent", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "intent", type = {CodeType.class}, order=7, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposal | plan | order | option", formalDefinition="Indicates the level of authority/intentionality associated with the care plan and where the care plan fits into the workflow chain." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-intent")
     protected Enumeration<CarePlanIntent> intent;
@@ -2565,7 +2665,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Identifies what "kind" of plan this is to support differentiation between multiple co-existing plans; e.g. "Home health", "psychiatric", "asthma", "disease management", "wellness plan", etc.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Type of plan", formalDefinition="Identifies what \"kind\" of plan this is to support differentiation between multiple co-existing plans; e.g. \"Home health\", \"psychiatric\", \"asthma\", \"disease management\", \"wellness plan\", etc." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/care-plan-category")
     protected List<CodeableConcept> category;
@@ -2573,21 +2673,21 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Human-friendly name for the care plan.
      */
-    @Child(name = "title", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "title", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Human-friendly name for the care plan", formalDefinition="Human-friendly name for the care plan." )
     protected StringType title;
 
     /**
      * A description of the scope and nature of the plan.
      */
-    @Child(name = "description", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Summary of nature of plan", formalDefinition="A description of the scope and nature of the plan." )
     protected StringType description;
 
     /**
      * Identifies the patient or group whose intended care is described by the plan.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class}, order=10, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Group.class}, order=11, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who the care plan is for", formalDefinition="Identifies the patient or group whose intended care is described by the plan." )
     protected Reference subject;
 
@@ -2599,7 +2699,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Identifies the original context in which this particular care plan was created.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Created in context of", formalDefinition="Identifies the original context in which this particular care plan was created." )
     protected Reference context;
 
@@ -2611,26 +2711,45 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Indicates when the plan did (or is intended to) come into effect and end.
      */
-    @Child(name = "period", type = {Period.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "period", type = {Period.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Time period plan covers", formalDefinition="Indicates when the plan did (or is intended to) come into effect and end." )
     protected Period period;
 
     /**
-     * Identifies the individual(s) or organization who is responsible for the content of the care plan.
+     * Represents when this particular CarePlan record was created in the system, which is often a system-generated date.
      */
-    @Child(name = "author", type = {Patient.class, Practitioner.class, PractitionerRole.class, Device.class, RelatedPerson.class, Organization.class, CareTeam.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Who is responsible for contents of the plan", formalDefinition="Identifies the individual(s) or organization who is responsible for the content of the care plan." )
-    protected List<Reference> author;
+    @Child(name = "created", type = {DateTimeType.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Date record was first recorded", formalDefinition="Represents when this particular CarePlan record was created in the system, which is often a system-generated date." )
+    protected DateTimeType created;
+
     /**
-     * The actual objects that are the target of the reference (Identifies the individual(s) or organization who is responsible for the content of the care plan.)
+     * When populated, the author is responsible for the care plan.  The care plan is attributed to the author.
      */
-    protected List<Resource> authorTarget;
+    @Child(name = "author", type = {Patient.class, Practitioner.class, PractitionerRole.class, Device.class, RelatedPerson.class, Organization.class, CareTeam.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who is the designated responsible party", formalDefinition="When populated, the author is responsible for the care plan.  The care plan is attributed to the author." )
+    protected Reference author;
+
+    /**
+     * The actual object that is the target of the reference (When populated, the author is responsible for the care plan.  The care plan is attributed to the author.)
+     */
+    protected Resource authorTarget;
+
+    /**
+     * Identifies the individual(s) or organization who provided the contents of the care plan.
+     */
+    @Child(name = "contributor", type = {Patient.class, Practitioner.class, PractitionerRole.class, Device.class, RelatedPerson.class, Organization.class, CareTeam.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Who provided the content of the care plan", formalDefinition="Identifies the individual(s) or organization who provided the contents of the care plan." )
+    protected List<Reference> contributor;
+    /**
+     * The actual objects that are the target of the reference (Identifies the individual(s) or organization who provided the contents of the care plan.)
+     */
+    protected List<Resource> contributorTarget;
 
 
     /**
      * Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.
      */
-    @Child(name = "careTeam", type = {CareTeam.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "careTeam", type = {CareTeam.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Who's involved in plan?", formalDefinition="Identifies all people and organizations who are expected to be involved in the care envisioned by this plan." )
     protected List<Reference> careTeam;
     /**
@@ -2642,7 +2761,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.
      */
-    @Child(name = "addresses", type = {Condition.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "addresses", type = {Condition.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Health issues this plan addresses", formalDefinition="Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan." )
     protected List<Reference> addresses;
     /**
@@ -2654,7 +2773,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include comorbidities, recent procedures, limitations, recent assessments, etc.
      */
-    @Child(name = "supportingInfo", type = {Reference.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supportingInfo", type = {Reference.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Information considered as part of plan", formalDefinition="Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include comorbidities, recent procedures, limitations, recent assessments, etc." )
     protected List<Reference> supportingInfo;
     /**
@@ -2666,7 +2785,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Describes the intended objective(s) of carrying out the care plan.
      */
-    @Child(name = "goal", type = {Goal.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "goal", type = {Goal.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Desired outcome of plan", formalDefinition="Describes the intended objective(s) of carrying out the care plan." )
     protected List<Reference> goal;
     /**
@@ -2678,18 +2797,18 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     /**
      * Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc.
      */
-    @Child(name = "activity", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "activity", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Action to occur as part of plan", formalDefinition="Identifies a planned action to occur as part of the plan.  For example, a medication to be used, lab tests to perform, self-monitoring, education, etc." )
     protected List<CarePlanActivityComponent> activity;
 
     /**
      * General notes about the care plan not covered elsewhere.
      */
-    @Child(name = "note", type = {Annotation.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Comments about the plan", formalDefinition="General notes about the care plan not covered elsewhere." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = -598482702L;
+    private static final long serialVersionUID = 973275448L;
 
   /**
    * Constructor
@@ -2762,61 +2881,122 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @return {@link #instantiates} (Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.)
+     * @return {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.)
      */
-    public List<UriType> getInstantiates() { 
-      if (this.instantiates == null)
-        this.instantiates = new ArrayList<UriType>();
-      return this.instantiates;
+    public List<CanonicalType> getInstantiatesCanonical() { 
+      if (this.instantiatesCanonical == null)
+        this.instantiatesCanonical = new ArrayList<CanonicalType>();
+      return this.instantiatesCanonical;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CarePlan setInstantiates(List<UriType> theInstantiates) { 
-      this.instantiates = theInstantiates;
+    public CarePlan setInstantiatesCanonical(List<CanonicalType> theInstantiatesCanonical) { 
+      this.instantiatesCanonical = theInstantiatesCanonical;
       return this;
     }
 
-    public boolean hasInstantiates() { 
-      if (this.instantiates == null)
+    public boolean hasInstantiatesCanonical() { 
+      if (this.instantiatesCanonical == null)
         return false;
-      for (UriType item : this.instantiates)
+      for (CanonicalType item : this.instantiatesCanonical)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #instantiates} (Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.)
+     * @return {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.)
      */
-    public UriType addInstantiatesElement() {//2 
-      UriType t = new UriType();
-      if (this.instantiates == null)
-        this.instantiates = new ArrayList<UriType>();
-      this.instantiates.add(t);
+    public CanonicalType addInstantiatesCanonicalElement() {//2 
+      CanonicalType t = new CanonicalType();
+      if (this.instantiatesCanonical == null)
+        this.instantiatesCanonical = new ArrayList<CanonicalType>();
+      this.instantiatesCanonical.add(t);
       return t;
     }
 
     /**
-     * @param value {@link #instantiates} (Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.)
+     * @param value {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.)
      */
-    public CarePlan addInstantiates(String value) { //1
-      UriType t = new UriType();
+    public CarePlan addInstantiatesCanonical(String value) { //1
+      CanonicalType t = new CanonicalType();
       t.setValue(value);
-      if (this.instantiates == null)
-        this.instantiates = new ArrayList<UriType>();
-      this.instantiates.add(t);
+      if (this.instantiatesCanonical == null)
+        this.instantiatesCanonical = new ArrayList<CanonicalType>();
+      this.instantiatesCanonical.add(t);
       return this;
     }
 
     /**
-     * @param value {@link #instantiates} (Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.)
+     * @param value {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.)
      */
-    public boolean hasInstantiates(String value) { 
-      if (this.instantiates == null)
+    public boolean hasInstantiatesCanonical(String value) { 
+      if (this.instantiatesCanonical == null)
         return false;
-      for (UriType v : this.instantiates)
+      for (CanonicalType v : this.instantiatesCanonical)
+        if (v.getValue().equals(value)) // canonical(PlanDefinition|Questionnaire|Measure|ActivityDefinition|OperationDefinition)
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.)
+     */
+    public List<UriType> getInstantiatesUri() { 
+      if (this.instantiatesUri == null)
+        this.instantiatesUri = new ArrayList<UriType>();
+      return this.instantiatesUri;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public CarePlan setInstantiatesUri(List<UriType> theInstantiatesUri) { 
+      this.instantiatesUri = theInstantiatesUri;
+      return this;
+    }
+
+    public boolean hasInstantiatesUri() { 
+      if (this.instantiatesUri == null)
+        return false;
+      for (UriType item : this.instantiatesUri)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.)
+     */
+    public UriType addInstantiatesUriElement() {//2 
+      UriType t = new UriType();
+      if (this.instantiatesUri == null)
+        this.instantiatesUri = new ArrayList<UriType>();
+      this.instantiatesUri.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.)
+     */
+    public CarePlan addInstantiatesUri(String value) { //1
+      UriType t = new UriType();
+      t.setValue(value);
+      if (this.instantiatesUri == null)
+        this.instantiatesUri = new ArrayList<UriType>();
+      this.instantiatesUri.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.)
+     */
+    public boolean hasInstantiatesUri(String value) { 
+      if (this.instantiatesUri == null)
+        return false;
+      for (UriType v : this.instantiatesUri)
         if (v.getValue().equals(value)) // uri
           return true;
       return false;
@@ -3391,66 +3571,154 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
     }
 
     /**
-     * @return {@link #author} (Identifies the individual(s) or organization who is responsible for the content of the care plan.)
+     * @return {@link #created} (Represents when this particular CarePlan record was created in the system, which is often a system-generated date.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
-    public List<Reference> getAuthor() { 
+    public DateTimeType getCreatedElement() { 
+      if (this.created == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create CarePlan.created");
+        else if (Configuration.doAutoCreate())
+          this.created = new DateTimeType(); // bb
+      return this.created;
+    }
+
+    public boolean hasCreatedElement() { 
+      return this.created != null && !this.created.isEmpty();
+    }
+
+    public boolean hasCreated() { 
+      return this.created != null && !this.created.isEmpty();
+    }
+
+    /**
+     * @param value {@link #created} (Represents when this particular CarePlan record was created in the system, which is often a system-generated date.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
+     */
+    public CarePlan setCreatedElement(DateTimeType value) { 
+      this.created = value;
+      return this;
+    }
+
+    /**
+     * @return Represents when this particular CarePlan record was created in the system, which is often a system-generated date.
+     */
+    public Date getCreated() { 
+      return this.created == null ? null : this.created.getValue();
+    }
+
+    /**
+     * @param value Represents when this particular CarePlan record was created in the system, which is often a system-generated date.
+     */
+    public CarePlan setCreated(Date value) { 
+      if (value == null)
+        this.created = null;
+      else {
+        if (this.created == null)
+          this.created = new DateTimeType();
+        this.created.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #author} (When populated, the author is responsible for the care plan.  The care plan is attributed to the author.)
+     */
+    public Reference getAuthor() { 
       if (this.author == null)
-        this.author = new ArrayList<Reference>();
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create CarePlan.author");
+        else if (Configuration.doAutoCreate())
+          this.author = new Reference(); // cc
       return this.author;
+    }
+
+    public boolean hasAuthor() { 
+      return this.author != null && !this.author.isEmpty();
+    }
+
+    /**
+     * @param value {@link #author} (When populated, the author is responsible for the care plan.  The care plan is attributed to the author.)
+     */
+    public CarePlan setAuthor(Reference value) { 
+      this.author = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (When populated, the author is responsible for the care plan.  The care plan is attributed to the author.)
+     */
+    public Resource getAuthorTarget() { 
+      return this.authorTarget;
+    }
+
+    /**
+     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (When populated, the author is responsible for the care plan.  The care plan is attributed to the author.)
+     */
+    public CarePlan setAuthorTarget(Resource value) { 
+      this.authorTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #contributor} (Identifies the individual(s) or organization who provided the contents of the care plan.)
+     */
+    public List<Reference> getContributor() { 
+      if (this.contributor == null)
+        this.contributor = new ArrayList<Reference>();
+      return this.contributor;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public CarePlan setAuthor(List<Reference> theAuthor) { 
-      this.author = theAuthor;
+    public CarePlan setContributor(List<Reference> theContributor) { 
+      this.contributor = theContributor;
       return this;
     }
 
-    public boolean hasAuthor() { 
-      if (this.author == null)
+    public boolean hasContributor() { 
+      if (this.contributor == null)
         return false;
-      for (Reference item : this.author)
+      for (Reference item : this.contributor)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public Reference addAuthor() { //3
+    public Reference addContributor() { //3
       Reference t = new Reference();
-      if (this.author == null)
-        this.author = new ArrayList<Reference>();
-      this.author.add(t);
+      if (this.contributor == null)
+        this.contributor = new ArrayList<Reference>();
+      this.contributor.add(t);
       return t;
     }
 
-    public CarePlan addAuthor(Reference t) { //3
+    public CarePlan addContributor(Reference t) { //3
       if (t == null)
         return this;
-      if (this.author == null)
-        this.author = new ArrayList<Reference>();
-      this.author.add(t);
+      if (this.contributor == null)
+        this.contributor = new ArrayList<Reference>();
+      this.contributor.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #author}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #contributor}, creating it if it does not already exist
      */
-    public Reference getAuthorFirstRep() { 
-      if (getAuthor().isEmpty()) {
-        addAuthor();
+    public Reference getContributorFirstRep() { 
+      if (getContributor().isEmpty()) {
+        addContributor();
       }
-      return getAuthor().get(0);
+      return getContributor().get(0);
     }
 
     /**
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<Resource> getAuthorTarget() { 
-      if (this.authorTarget == null)
-        this.authorTarget = new ArrayList<Resource>();
-      return this.authorTarget;
+    public List<Resource> getContributorTarget() { 
+      if (this.contributorTarget == null)
+        this.contributorTarget = new ArrayList<Resource>();
+      return this.contributorTarget;
     }
 
     /**
@@ -3850,7 +4118,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Business identifiers assigned to this care plan by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("instantiates", "uri", "Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.", 0, java.lang.Integer.MAX_VALUE, instantiates));
+        children.add(new Property("instantiatesCanonical", "canonical(PlanDefinition|Questionnaire|Measure|ActivityDefinition|OperationDefinition)", "The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.", 0, java.lang.Integer.MAX_VALUE, instantiatesCanonical));
+        children.add(new Property("instantiatesUri", "uri", "The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.", 0, java.lang.Integer.MAX_VALUE, instantiatesUri));
         children.add(new Property("basedOn", "Reference(CarePlan)", "A care plan that is fulfilled in whole or in part by this care plan.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("replaces", "Reference(CarePlan)", "Completed or terminated care plan whose function is taken by this new care plan.", 0, java.lang.Integer.MAX_VALUE, replaces));
         children.add(new Property("partOf", "Reference(CarePlan)", "A larger care plan of which this particular care plan is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
@@ -3862,7 +4131,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         children.add(new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is described by the plan.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Identifies the original context in which this particular care plan was created.", 0, 1, context));
         children.add(new Property("period", "Period", "Indicates when the plan did (or is intended to) come into effect and end.", 0, 1, period));
-        children.add(new Property("author", "Reference(Patient|Practitioner|PractitionerRole|Device|RelatedPerson|Organization|CareTeam)", "Identifies the individual(s) or organization who is responsible for the content of the care plan.", 0, java.lang.Integer.MAX_VALUE, author));
+        children.add(new Property("created", "dateTime", "Represents when this particular CarePlan record was created in the system, which is often a system-generated date.", 0, 1, created));
+        children.add(new Property("author", "Reference(Patient|Practitioner|PractitionerRole|Device|RelatedPerson|Organization|CareTeam)", "When populated, the author is responsible for the care plan.  The care plan is attributed to the author.", 0, 1, author));
+        children.add(new Property("contributor", "Reference(Patient|Practitioner|PractitionerRole|Device|RelatedPerson|Organization|CareTeam)", "Identifies the individual(s) or organization who provided the contents of the care plan.", 0, java.lang.Integer.MAX_VALUE, contributor));
         children.add(new Property("careTeam", "Reference(CareTeam)", "Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.", 0, java.lang.Integer.MAX_VALUE, careTeam));
         children.add(new Property("addresses", "Reference(Condition)", "Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.", 0, java.lang.Integer.MAX_VALUE, addresses));
         children.add(new Property("supportingInfo", "Reference(Any)", "Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include comorbidities, recent procedures, limitations, recent assessments, etc.", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
@@ -3875,7 +4146,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Business identifiers assigned to this care plan by the performer or other systems which remain constant as the resource is updated and propagates from server to server.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -246883639: /*instantiates*/  return new Property("instantiates", "uri", "Identifies the protocol, questionnaire, guideline or other specification the care plan should be conducted in accordance with.", 0, java.lang.Integer.MAX_VALUE, instantiates);
+        case 8911915: /*instantiatesCanonical*/  return new Property("instantiatesCanonical", "canonical(PlanDefinition|Questionnaire|Measure|ActivityDefinition|OperationDefinition)", "The URL pointing to a FHIR-defined protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.", 0, java.lang.Integer.MAX_VALUE, instantiatesCanonical);
+        case -1926393373: /*instantiatesUri*/  return new Property("instantiatesUri", "uri", "The URL pointing to an externally maintained protocol, guideline, questionnaire or other definition that is adhered to in whole or in part by this CarePlan.", 0, java.lang.Integer.MAX_VALUE, instantiatesUri);
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan)", "A care plan that is fulfilled in whole or in part by this care plan.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case -430332865: /*replaces*/  return new Property("replaces", "Reference(CarePlan)", "Completed or terminated care plan whose function is taken by this new care plan.", 0, java.lang.Integer.MAX_VALUE, replaces);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(CarePlan)", "A larger care plan of which this particular care plan is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
@@ -3887,7 +4159,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is described by the plan.", 0, 1, subject);
         case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "Identifies the original context in which this particular care plan was created.", 0, 1, context);
         case -991726143: /*period*/  return new Property("period", "Period", "Indicates when the plan did (or is intended to) come into effect and end.", 0, 1, period);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Patient|Practitioner|PractitionerRole|Device|RelatedPerson|Organization|CareTeam)", "Identifies the individual(s) or organization who is responsible for the content of the care plan.", 0, java.lang.Integer.MAX_VALUE, author);
+        case 1028554472: /*created*/  return new Property("created", "dateTime", "Represents when this particular CarePlan record was created in the system, which is often a system-generated date.", 0, 1, created);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Patient|Practitioner|PractitionerRole|Device|RelatedPerson|Organization|CareTeam)", "When populated, the author is responsible for the care plan.  The care plan is attributed to the author.", 0, 1, author);
+        case -1895276325: /*contributor*/  return new Property("contributor", "Reference(Patient|Practitioner|PractitionerRole|Device|RelatedPerson|Organization|CareTeam)", "Identifies the individual(s) or organization who provided the contents of the care plan.", 0, java.lang.Integer.MAX_VALUE, contributor);
         case -7323378: /*careTeam*/  return new Property("careTeam", "Reference(CareTeam)", "Identifies all people and organizations who are expected to be involved in the care envisioned by this plan.", 0, java.lang.Integer.MAX_VALUE, careTeam);
         case 874544034: /*addresses*/  return new Property("addresses", "Reference(Condition)", "Identifies the conditions/problems/concerns/diagnoses/etc. whose management and/or mitigation are handled by this plan.", 0, java.lang.Integer.MAX_VALUE, addresses);
         case 1922406657: /*supportingInfo*/  return new Property("supportingInfo", "Reference(Any)", "Identifies portions of the patient's record that specifically influenced the formation of the plan.  These might include comorbidities, recent procedures, limitations, recent assessments, etc.", 0, java.lang.Integer.MAX_VALUE, supportingInfo);
@@ -3903,7 +4177,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
-        case -246883639: /*instantiates*/ return this.instantiates == null ? new Base[0] : this.instantiates.toArray(new Base[this.instantiates.size()]); // UriType
+        case 8911915: /*instantiatesCanonical*/ return this.instantiatesCanonical == null ? new Base[0] : this.instantiatesCanonical.toArray(new Base[this.instantiatesCanonical.size()]); // CanonicalType
+        case -1926393373: /*instantiatesUri*/ return this.instantiatesUri == null ? new Base[0] : this.instantiatesUri.toArray(new Base[this.instantiatesUri.size()]); // UriType
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case -430332865: /*replaces*/ return this.replaces == null ? new Base[0] : this.replaces.toArray(new Base[this.replaces.size()]); // Reference
         case -995410646: /*partOf*/ return this.partOf == null ? new Base[0] : this.partOf.toArray(new Base[this.partOf.size()]); // Reference
@@ -3915,7 +4190,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
-        case -1406328437: /*author*/ return this.author == null ? new Base[0] : this.author.toArray(new Base[this.author.size()]); // Reference
+        case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
+        case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
+        case -1895276325: /*contributor*/ return this.contributor == null ? new Base[0] : this.contributor.toArray(new Base[this.contributor.size()]); // Reference
         case -7323378: /*careTeam*/ return this.careTeam == null ? new Base[0] : this.careTeam.toArray(new Base[this.careTeam.size()]); // Reference
         case 874544034: /*addresses*/ return this.addresses == null ? new Base[0] : this.addresses.toArray(new Base[this.addresses.size()]); // Reference
         case 1922406657: /*supportingInfo*/ return this.supportingInfo == null ? new Base[0] : this.supportingInfo.toArray(new Base[this.supportingInfo.size()]); // Reference
@@ -3933,8 +4210,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
-        case -246883639: // instantiates
-          this.getInstantiates().add(castToUri(value)); // UriType
+        case 8911915: // instantiatesCanonical
+          this.getInstantiatesCanonical().add(castToCanonical(value)); // CanonicalType
+          return value;
+        case -1926393373: // instantiatesUri
+          this.getInstantiatesUri().add(castToUri(value)); // UriType
           return value;
         case -332612366: // basedOn
           this.getBasedOn().add(castToReference(value)); // Reference
@@ -3971,8 +4251,14 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -991726143: // period
           this.period = castToPeriod(value); // Period
           return value;
+        case 1028554472: // created
+          this.created = castToDateTime(value); // DateTimeType
+          return value;
         case -1406328437: // author
-          this.getAuthor().add(castToReference(value)); // Reference
+          this.author = castToReference(value); // Reference
+          return value;
+        case -1895276325: // contributor
+          this.getContributor().add(castToReference(value)); // Reference
           return value;
         case -7323378: // careTeam
           this.getCareTeam().add(castToReference(value)); // Reference
@@ -4001,8 +4287,10 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        } else if (name.equals("instantiates")) {
-          this.getInstantiates().add(castToUri(value));
+        } else if (name.equals("instantiatesCanonical")) {
+          this.getInstantiatesCanonical().add(castToCanonical(value));
+        } else if (name.equals("instantiatesUri")) {
+          this.getInstantiatesUri().add(castToUri(value));
         } else if (name.equals("basedOn")) {
           this.getBasedOn().add(castToReference(value));
         } else if (name.equals("replaces")) {
@@ -4027,8 +4315,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.context = castToReference(value); // Reference
         } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
+        } else if (name.equals("created")) {
+          this.created = castToDateTime(value); // DateTimeType
         } else if (name.equals("author")) {
-          this.getAuthor().add(castToReference(value));
+          this.author = castToReference(value); // Reference
+        } else if (name.equals("contributor")) {
+          this.getContributor().add(castToReference(value));
         } else if (name.equals("careTeam")) {
           this.getCareTeam().add(castToReference(value));
         } else if (name.equals("addresses")) {
@@ -4050,7 +4342,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); 
-        case -246883639:  return addInstantiatesElement();
+        case 8911915:  return addInstantiatesCanonicalElement();
+        case -1926393373:  return addInstantiatesUriElement();
         case -332612366:  return addBasedOn(); 
         case -430332865:  return addReplaces(); 
         case -995410646:  return addPartOf(); 
@@ -4062,7 +4355,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -1867885268:  return getSubject(); 
         case 951530927:  return getContext(); 
         case -991726143:  return getPeriod(); 
-        case -1406328437:  return addAuthor(); 
+        case 1028554472:  return getCreatedElement();
+        case -1406328437:  return getAuthor(); 
+        case -1895276325:  return addContributor(); 
         case -7323378:  return addCareTeam(); 
         case 874544034:  return addAddresses(); 
         case 1922406657:  return addSupportingInfo(); 
@@ -4078,7 +4373,8 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
-        case -246883639: /*instantiates*/ return new String[] {"uri"};
+        case 8911915: /*instantiatesCanonical*/ return new String[] {"canonical"};
+        case -1926393373: /*instantiatesUri*/ return new String[] {"uri"};
         case -332612366: /*basedOn*/ return new String[] {"Reference"};
         case -430332865: /*replaces*/ return new String[] {"Reference"};
         case -995410646: /*partOf*/ return new String[] {"Reference"};
@@ -4090,7 +4386,9 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 951530927: /*context*/ return new String[] {"Reference"};
         case -991726143: /*period*/ return new String[] {"Period"};
+        case 1028554472: /*created*/ return new String[] {"dateTime"};
         case -1406328437: /*author*/ return new String[] {"Reference"};
+        case -1895276325: /*contributor*/ return new String[] {"Reference"};
         case -7323378: /*careTeam*/ return new String[] {"Reference"};
         case 874544034: /*addresses*/ return new String[] {"Reference"};
         case 1922406657: /*supportingInfo*/ return new String[] {"Reference"};
@@ -4107,8 +4405,11 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (name.equals("identifier")) {
           return addIdentifier();
         }
-        else if (name.equals("instantiates")) {
-          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.instantiates");
+        else if (name.equals("instantiatesCanonical")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.instantiatesCanonical");
+        }
+        else if (name.equals("instantiatesUri")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.instantiatesUri");
         }
         else if (name.equals("basedOn")) {
           return addBasedOn();
@@ -4146,8 +4447,15 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           this.period = new Period();
           return this.period;
         }
+        else if (name.equals("created")) {
+          throw new FHIRException("Cannot call addChild on a primitive type CarePlan.created");
+        }
         else if (name.equals("author")) {
-          return addAuthor();
+          this.author = new Reference();
+          return this.author;
+        }
+        else if (name.equals("contributor")) {
+          return addContributor();
         }
         else if (name.equals("careTeam")) {
           return addCareTeam();
@@ -4184,10 +4492,15 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        if (instantiates != null) {
-          dst.instantiates = new ArrayList<UriType>();
-          for (UriType i : instantiates)
-            dst.instantiates.add(i.copy());
+        if (instantiatesCanonical != null) {
+          dst.instantiatesCanonical = new ArrayList<CanonicalType>();
+          for (CanonicalType i : instantiatesCanonical)
+            dst.instantiatesCanonical.add(i.copy());
+        };
+        if (instantiatesUri != null) {
+          dst.instantiatesUri = new ArrayList<UriType>();
+          for (UriType i : instantiatesUri)
+            dst.instantiatesUri.add(i.copy());
         };
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
@@ -4216,10 +4529,12 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
         dst.period = period == null ? null : period.copy();
-        if (author != null) {
-          dst.author = new ArrayList<Reference>();
-          for (Reference i : author)
-            dst.author.add(i.copy());
+        dst.created = created == null ? null : created.copy();
+        dst.author = author == null ? null : author.copy();
+        if (contributor != null) {
+          dst.contributor = new ArrayList<Reference>();
+          for (Reference i : contributor)
+            dst.contributor.add(i.copy());
         };
         if (careTeam != null) {
           dst.careTeam = new ArrayList<Reference>();
@@ -4265,14 +4580,15 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (!(other_ instanceof CarePlan))
           return false;
         CarePlan o = (CarePlan) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(instantiates, o.instantiates, true)
-           && compareDeep(basedOn, o.basedOn, true) && compareDeep(replaces, o.replaces, true) && compareDeep(partOf, o.partOf, true)
-           && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(category, o.category, true)
-           && compareDeep(title, o.title, true) && compareDeep(description, o.description, true) && compareDeep(subject, o.subject, true)
-           && compareDeep(context, o.context, true) && compareDeep(period, o.period, true) && compareDeep(author, o.author, true)
-           && compareDeep(careTeam, o.careTeam, true) && compareDeep(addresses, o.addresses, true) && compareDeep(supportingInfo, o.supportingInfo, true)
-           && compareDeep(goal, o.goal, true) && compareDeep(activity, o.activity, true) && compareDeep(note, o.note, true)
-          ;
+        return compareDeep(identifier, o.identifier, true) && compareDeep(instantiatesCanonical, o.instantiatesCanonical, true)
+           && compareDeep(instantiatesUri, o.instantiatesUri, true) && compareDeep(basedOn, o.basedOn, true)
+           && compareDeep(replaces, o.replaces, true) && compareDeep(partOf, o.partOf, true) && compareDeep(status, o.status, true)
+           && compareDeep(intent, o.intent, true) && compareDeep(category, o.category, true) && compareDeep(title, o.title, true)
+           && compareDeep(description, o.description, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
+           && compareDeep(period, o.period, true) && compareDeep(created, o.created, true) && compareDeep(author, o.author, true)
+           && compareDeep(contributor, o.contributor, true) && compareDeep(careTeam, o.careTeam, true) && compareDeep(addresses, o.addresses, true)
+           && compareDeep(supportingInfo, o.supportingInfo, true) && compareDeep(goal, o.goal, true) && compareDeep(activity, o.activity, true)
+           && compareDeep(note, o.note, true);
       }
 
       @Override
@@ -4282,15 +4598,16 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
         if (!(other_ instanceof CarePlan))
           return false;
         CarePlan o = (CarePlan) other_;
-        return compareValues(instantiates, o.instantiates, true) && compareValues(status, o.status, true) && compareValues(intent, o.intent, true)
-           && compareValues(title, o.title, true) && compareValues(description, o.description, true);
+        return compareValues(instantiatesUri, o.instantiatesUri, true) && compareValues(status, o.status, true)
+           && compareValues(intent, o.intent, true) && compareValues(title, o.title, true) && compareValues(description, o.description, true)
+           && compareValues(created, o.created, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiates, basedOn
-          , replaces, partOf, status, intent, category, title, description, subject, context
-          , period, author, careTeam, addresses, supportingInfo, goal, activity, note
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiatesCanonical
+          , instantiatesUri, basedOn, replaces, partOf, status, intent, category, title
+          , description, subject, context, period, created, author, contributor, careTeam
+          , addresses, supportingInfo, goal, activity, note);
       }
 
   @Override
@@ -4363,26 +4680,6 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
-
- /**
-   * Search parameter: <b>instantiates</b>
-   * <p>
-   * Description: <b>Protocol or definition</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>CarePlan.instantiates</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="instantiates", path="CarePlan.instantiates", description="Protocol or definition", type="uri" )
-  public static final String SP_INSTANTIATES = "instantiates";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>instantiates</b>
-   * <p>
-   * Description: <b>Protocol or definition</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>CarePlan.instantiates</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam INSTANTIATES = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_INSTANTIATES);
 
  /**
    * Search parameter: <b>performer</b>
@@ -4489,6 +4786,32 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
   public static final ca.uhn.fhir.model.api.Include INCLUDE_REPLACES = new ca.uhn.fhir.model.api.Include("CarePlan:replaces").toLocked();
 
  /**
+   * Search parameter: <b>instantiates-canonical</b>
+   * <p>
+   * Description: <b>Instantiates FHIR protocol or definition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CarePlan.instantiatesCanonical</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="instantiates-canonical", path="CarePlan.instantiatesCanonical", description="Instantiates FHIR protocol or definition", type="reference", target={ActivityDefinition.class, Measure.class, OperationDefinition.class, PlanDefinition.class, Questionnaire.class } )
+  public static final String SP_INSTANTIATES_CANONICAL = "instantiates-canonical";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>instantiates-canonical</b>
+   * <p>
+   * Description: <b>Instantiates FHIR protocol or definition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>CarePlan.instantiatesCanonical</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INSTANTIATES_CANONICAL = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INSTANTIATES_CANONICAL);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>CarePlan:instantiates-canonical</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INSTANTIATES_CANONICAL = new ca.uhn.fhir.model.api.Include("CarePlan:instantiates-canonical").toLocked();
+
+ /**
    * Search parameter: <b>part-of</b>
    * <p>
    * Description: <b>Part of referenced CarePlan</b><br>
@@ -4522,7 +4845,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
    * Path: <b>CarePlan.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="CarePlan.context", description="Created in context of", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="encounter", path="CarePlan.context.where(resolve() is Encounter)", description="Created in context of", type="reference", target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -4646,7 +4969,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
    * Path: <b>CarePlan.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="CarePlan.subject", description="Who the care plan is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="CarePlan.subject.where(resolve() is Patient)", description="Who the care plan is for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -4693,22 +5016,42 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
  /**
    * Search parameter: <b>activity-date</b>
    * <p>
-   * Description: <b>Specified date occurs within period specified by CarePlan.activity.timingSchedule</b><br>
+   * Description: <b>Specified date occurs within period specified by CarePlan.activity.detail.scheduled[x]</b><br>
    * Type: <b>date</b><br>
    * Path: <b>CarePlan.activity.detail.scheduled[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="activity-date", path="CarePlan.activity.detail.scheduled", description="Specified date occurs within period specified by CarePlan.activity.timingSchedule", type="date" )
+  @SearchParamDefinition(name="activity-date", path="CarePlan.activity.detail.scheduled", description="Specified date occurs within period specified by CarePlan.activity.detail.scheduled[x]", type="date" )
   public static final String SP_ACTIVITY_DATE = "activity-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>activity-date</b>
    * <p>
-   * Description: <b>Specified date occurs within period specified by CarePlan.activity.timingSchedule</b><br>
+   * Description: <b>Specified date occurs within period specified by CarePlan.activity.detail.scheduled[x]</b><br>
    * Type: <b>date</b><br>
    * Path: <b>CarePlan.activity.detail.scheduled[x]</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam ACTIVITY_DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_ACTIVITY_DATE);
+
+ /**
+   * Search parameter: <b>instantiates-uri</b>
+   * <p>
+   * Description: <b>Instantiates external protocol or definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>CarePlan.instantiatesUri</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="instantiates-uri", path="CarePlan.instantiatesUri", description="Instantiates external protocol or definition", type="uri" )
+  public static final String SP_INSTANTIATES_URI = "instantiates-uri";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>instantiates-uri</b>
+   * <p>
+   * Description: <b>Instantiates external protocol or definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>CarePlan.instantiatesUri</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam INSTANTIATES_URI = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_INSTANTIATES_URI);
 
  /**
    * Search parameter: <b>category</b>

@@ -29,10 +29,11 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
+import org.hl7.fhir.utilities.Utilities;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -44,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The clinical particulars - indications, contraindications etc. of a medicinal product, including for regulatory purposes.
  */
-@ResourceDef(name="MedicinalProductClinicals", profile="http://hl7.org/fhir/Profile/MedicinalProductClinicals")
+@ResourceDef(name="MedicinalProductClinicals", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductClinicals")
 public class MedicinalProductClinicals extends DomainResource {
 
     @Block()
@@ -2063,41 +2064,48 @@ public class MedicinalProductClinicals extends DomainResource {
     @Block()
     public static class MedicinalProductClinicalsInteractionsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
+         * The interaction described.
+         */
+        @Child(name = "interaction", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The interaction described", formalDefinition="The interaction described." )
+        protected StringType interaction;
+
+        /**
          * The specific medication, food or laboratory test that interacts.
          */
-        @Child(name = "interactant", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "interactant", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="The specific medication, food or laboratory test that interacts", formalDefinition="The specific medication, food or laboratory test that interacts." )
         protected List<CodeableConcept> interactant;
 
         /**
          * The type of the interaction.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The type of the interaction", formalDefinition="The type of the interaction." )
         protected CodeableConcept type;
 
         /**
          * The effect of the interaction.
          */
-        @Child(name = "effect", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "effect", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The effect of the interaction", formalDefinition="The effect of the interaction." )
         protected CodeableConcept effect;
 
         /**
          * The incidence of the interaction.
          */
-        @Child(name = "incidence", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "incidence", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The incidence of the interaction", formalDefinition="The incidence of the interaction." )
         protected CodeableConcept incidence;
 
         /**
          * Actions for managing the interaction.
          */
-        @Child(name = "management", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "management", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Actions for managing the interaction", formalDefinition="Actions for managing the interaction." )
         protected CodeableConcept management;
 
-        private static final long serialVersionUID = -1519724968L;
+        private static final long serialVersionUID = -1375751505L;
 
     /**
      * Constructor
@@ -2105,6 +2113,55 @@ public class MedicinalProductClinicals extends DomainResource {
       public MedicinalProductClinicalsInteractionsComponent() {
         super();
       }
+
+        /**
+         * @return {@link #interaction} (The interaction described.). This is the underlying object with id, value and extensions. The accessor "getInteraction" gives direct access to the value
+         */
+        public StringType getInteractionElement() { 
+          if (this.interaction == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MedicinalProductClinicalsInteractionsComponent.interaction");
+            else if (Configuration.doAutoCreate())
+              this.interaction = new StringType(); // bb
+          return this.interaction;
+        }
+
+        public boolean hasInteractionElement() { 
+          return this.interaction != null && !this.interaction.isEmpty();
+        }
+
+        public boolean hasInteraction() { 
+          return this.interaction != null && !this.interaction.isEmpty();
+        }
+
+        /**
+         * @param value {@link #interaction} (The interaction described.). This is the underlying object with id, value and extensions. The accessor "getInteraction" gives direct access to the value
+         */
+        public MedicinalProductClinicalsInteractionsComponent setInteractionElement(StringType value) { 
+          this.interaction = value;
+          return this;
+        }
+
+        /**
+         * @return The interaction described.
+         */
+        public String getInteraction() { 
+          return this.interaction == null ? null : this.interaction.getValue();
+        }
+
+        /**
+         * @param value The interaction described.
+         */
+        public MedicinalProductClinicalsInteractionsComponent setInteraction(String value) { 
+          if (Utilities.noString(value))
+            this.interaction = null;
+          else {
+            if (this.interaction == null)
+              this.interaction = new StringType();
+            this.interaction.setValue(value);
+          }
+          return this;
+        }
 
         /**
          * @return {@link #interactant} (The specific medication, food or laboratory test that interacts.)
@@ -2257,6 +2314,7 @@ public class MedicinalProductClinicals extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
+          children.add(new Property("interaction", "string", "The interaction described.", 0, 1, interaction));
           children.add(new Property("interactant", "CodeableConcept", "The specific medication, food or laboratory test that interacts.", 0, java.lang.Integer.MAX_VALUE, interactant));
           children.add(new Property("type", "CodeableConcept", "The type of the interaction.", 0, 1, type));
           children.add(new Property("effect", "CodeableConcept", "The effect of the interaction.", 0, 1, effect));
@@ -2267,6 +2325,7 @@ public class MedicinalProductClinicals extends DomainResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
+          case 1844104722: /*interaction*/  return new Property("interaction", "string", "The interaction described.", 0, 1, interaction);
           case 1844097009: /*interactant*/  return new Property("interactant", "CodeableConcept", "The specific medication, food or laboratory test that interacts.", 0, java.lang.Integer.MAX_VALUE, interactant);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of the interaction.", 0, 1, type);
           case -1306084975: /*effect*/  return new Property("effect", "CodeableConcept", "The effect of the interaction.", 0, 1, effect);
@@ -2280,6 +2339,7 @@ public class MedicinalProductClinicals extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case 1844104722: /*interaction*/ return this.interaction == null ? new Base[0] : new Base[] {this.interaction}; // StringType
         case 1844097009: /*interactant*/ return this.interactant == null ? new Base[0] : this.interactant.toArray(new Base[this.interactant.size()]); // CodeableConcept
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -1306084975: /*effect*/ return this.effect == null ? new Base[0] : new Base[] {this.effect}; // CodeableConcept
@@ -2293,6 +2353,9 @@ public class MedicinalProductClinicals extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case 1844104722: // interaction
+          this.interaction = castToString(value); // StringType
+          return value;
         case 1844097009: // interactant
           this.getInteractant().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
@@ -2315,7 +2378,9 @@ public class MedicinalProductClinicals extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("interactant")) {
+        if (name.equals("interaction")) {
+          this.interaction = castToString(value); // StringType
+        } else if (name.equals("interactant")) {
           this.getInteractant().add(castToCodeableConcept(value));
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
@@ -2333,6 +2398,7 @@ public class MedicinalProductClinicals extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case 1844104722:  return getInteractionElement();
         case 1844097009:  return addInteractant(); 
         case 3575610:  return getType(); 
         case -1306084975:  return getEffect(); 
@@ -2346,6 +2412,7 @@ public class MedicinalProductClinicals extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case 1844104722: /*interaction*/ return new String[] {"string"};
         case 1844097009: /*interactant*/ return new String[] {"CodeableConcept"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case -1306084975: /*effect*/ return new String[] {"CodeableConcept"};
@@ -2358,7 +2425,10 @@ public class MedicinalProductClinicals extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("interactant")) {
+        if (name.equals("interaction")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicinalProductClinicals.interaction");
+        }
+        else if (name.equals("interactant")) {
           return addInteractant();
         }
         else if (name.equals("type")) {
@@ -2384,6 +2454,7 @@ public class MedicinalProductClinicals extends DomainResource {
       public MedicinalProductClinicalsInteractionsComponent copy() {
         MedicinalProductClinicalsInteractionsComponent dst = new MedicinalProductClinicalsInteractionsComponent();
         copyValues(dst);
+        dst.interaction = interaction == null ? null : interaction.copy();
         if (interactant != null) {
           dst.interactant = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : interactant)
@@ -2403,8 +2474,9 @@ public class MedicinalProductClinicals extends DomainResource {
         if (!(other_ instanceof MedicinalProductClinicalsInteractionsComponent))
           return false;
         MedicinalProductClinicalsInteractionsComponent o = (MedicinalProductClinicalsInteractionsComponent) other_;
-        return compareDeep(interactant, o.interactant, true) && compareDeep(type, o.type, true) && compareDeep(effect, o.effect, true)
-           && compareDeep(incidence, o.incidence, true) && compareDeep(management, o.management, true);
+        return compareDeep(interaction, o.interaction, true) && compareDeep(interactant, o.interactant, true)
+           && compareDeep(type, o.type, true) && compareDeep(effect, o.effect, true) && compareDeep(incidence, o.incidence, true)
+           && compareDeep(management, o.management, true);
       }
 
       @Override
@@ -2414,12 +2486,12 @@ public class MedicinalProductClinicals extends DomainResource {
         if (!(other_ instanceof MedicinalProductClinicalsInteractionsComponent))
           return false;
         MedicinalProductClinicalsInteractionsComponent o = (MedicinalProductClinicalsInteractionsComponent) other_;
-        return true;
+        return compareValues(interaction, o.interaction, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(interactant, type, effect
-          , incidence, management);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(interaction, interactant, type
+          , effect, incidence, management);
       }
 
   public String fhirType() {

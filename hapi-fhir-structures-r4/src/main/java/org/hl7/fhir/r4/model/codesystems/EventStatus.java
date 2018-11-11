@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,27 +41,27 @@ public enum EventStatus {
          */
         PREPARATION, 
         /**
-         * The event is currently occurring
+         * The event is currently occurring.
          */
         INPROGRESS, 
         /**
-         * The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)
+         * The event was terminated prior to any activity beyond preparation.  I.e. The 'main' activity has not yet begun.  The boundary between preparatory and the 'main' activity is context-specific.
          */
         NOTDONE, 
         /**
-         * The event has been temporarily stopped but is expected to resume in the future
+         * The event has been temporarily stopped but is expected to resume in the future.
          */
-        SUSPENDED, 
+        ONHOLD, 
         /**
-         * The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.
+         * The event was terminated prior to the full completion of the intended activity but after at least some of the 'main' activity (beyond preparation) has occurred.
          */
-        ABORTED, 
+        STOPPED, 
         /**
-         * The event has now concluded
+         * The event has now concluded.
          */
         COMPLETED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
@@ -81,10 +81,10 @@ public enum EventStatus {
           return INPROGRESS;
         if ("not-done".equals(codeString))
           return NOTDONE;
-        if ("suspended".equals(codeString))
-          return SUSPENDED;
-        if ("aborted".equals(codeString))
-          return ABORTED;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("stopped".equals(codeString))
+          return STOPPED;
         if ("completed".equals(codeString))
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -98,8 +98,8 @@ public enum EventStatus {
             case PREPARATION: return "preparation";
             case INPROGRESS: return "in-progress";
             case NOTDONE: return "not-done";
-            case SUSPENDED: return "suspended";
-            case ABORTED: return "aborted";
+            case ONHOLD: return "on-hold";
+            case STOPPED: return "stopped";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             case UNKNOWN: return "unknown";
@@ -112,12 +112,12 @@ public enum EventStatus {
         public String getDefinition() {
           switch (this) {
             case PREPARATION: return "The core event has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes.";
-            case INPROGRESS: return "The event is currently occurring";
-            case NOTDONE: return "The event was terminated prior to any impact on the subject (though preparatory actions may have been taken)";
-            case SUSPENDED: return "The event has been temporarily stopped but is expected to resume in the future";
-            case ABORTED: return "The event was  terminated prior to the full completion of the intended actions but after having at least some impact on the subject.";
-            case COMPLETED: return "The event has now concluded";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case INPROGRESS: return "The event is currently occurring.";
+            case NOTDONE: return "The event was terminated prior to any activity beyond preparation.  I.e. The 'main' activity has not yet begun.  The boundary between preparatory and the 'main' activity is context-specific.";
+            case ONHOLD: return "The event has been temporarily stopped but is expected to resume in the future.";
+            case STOPPED: return "The event was terminated prior to the full completion of the intended activity but after at least some of the 'main' activity (beyond preparation) has occurred.";
+            case COMPLETED: return "The event has now concluded.";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
@@ -127,8 +127,8 @@ public enum EventStatus {
             case PREPARATION: return "Preparation";
             case INPROGRESS: return "In Progress";
             case NOTDONE: return "Not Done";
-            case SUSPENDED: return "Suspended";
-            case ABORTED: return "Aborted";
+            case ONHOLD: return "On Hold";
+            case STOPPED: return "Stopped";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
             case UNKNOWN: return "Unknown";

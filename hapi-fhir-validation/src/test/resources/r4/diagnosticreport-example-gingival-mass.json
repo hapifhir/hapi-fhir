@@ -3,7 +3,7 @@
   "id": "gingival-mass",
   "text": {
     "status": "generated",
-    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: gingival-mass</p><p><b>identifier</b>: P73456090</p><p><b>status</b>: final</p><p><b>category</b>: Pathology <span>(Details : {http://hl7.org/fhir/v2/0074 code 'PAT' = 'Pathology (gross &amp; histopath, not surgical)', given as 'Pathology (gross &amp; histopath, not surgical)'})</span></p><p><b>code</b>: Biopsy without Microscopic Description (1 Site/Lesion)-Standard <span>(Details : {https://www.acmeonline.com code '4503' = '4503', given as 'Biopsy without Microscopic Description (1 Site/Lesion)-Standard'})</span></p><p><b>subject</b>: Max Jones</p><p><b>effective</b>: 2-Mar-2017</p><p><b>issued</b>: 15-Mar-2017 8:13:08 AM</p><p><b>performer</b>: Acme Animal Labs</p><p><b>resultsInterpreter</b>: Sean Stover, BS, DVM, DABVP (Canine/Feline), DACVP</p><p><b>presentedForm</b>: </p></div>"
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative with Details</b></p><p><b>id</b>: gingival-mass</p><p><b>identifier</b>: P73456090</p><p><b>status</b>: final</p><p><b>category</b>: Pathology <span>(Details : {http://terminology.hl7.org/CodeSystem/v2-0074 code 'PAT' = 'Pathology (gross &amp; histopath, not surgical)', given as 'Pathology (gross &amp; histopath, not surgical)'})</span></p><p><b>code</b>: Biopsy without Microscopic Description (1 Site/Lesion)-Standard <span>(Details : {https://www.acmeonline.com code '4503' = '4503', given as 'Biopsy without Microscopic Description (1 Site/Lesion)-Standard'})</span></p><p><b>subject</b>: Max Jones</p><p><b>effective</b>: 2-Mar-2017</p><p><b>issued</b>: 15-Mar-2017 8:13:08 AM</p><p><b>performer</b>: Acme Animal Labs</p><p><b>resultsInterpreter</b>: Sean Stover, BS, DVM, DABVP (Canine/Feline), DACVP</p><p><b>presentedForm</b>: </p></div>"
   },
   "identifier": [
     {
@@ -15,7 +15,7 @@
   "category": {
     "coding": [
       {
-        "system": "http://hl7.org/fhir/v2/0074",
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
         "code": "PAT",
         "display": "Pathology (gross & histopath, not surgical)"
       }
@@ -25,8 +25,8 @@
   "code": {
     "coding": [
       {
-        "system": "https://www.acmeonline.com",
-        "code": "4503",
+        "system": "http://loinc.org",
+        "code": "1-8",
         "display": "Biopsy without Microscopic Description (1 Site/Lesion)-Standard"
       }
     ],

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,8 +46,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Defines the characteristics of a message that can be shared between systems, including the type of event that initiates the message, the content to be transmitted and what response(s), if any, are permitted.
  */
-@ResourceDef(name="MessageDefinition", profile="http://hl7.org/fhir/Profile/MessageDefinition")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "replaces", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "base", "parent", "event[x]", "category", "focus", "responseRequired", "allowedResponse"})
+@ResourceDef(name="MessageDefinition", profile="http://hl7.org/fhir/StructureDefinition/MessageDefinition")
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "replaces", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "base", "parent", "event[x]", "category", "focus", "responseRequired", "allowedResponse", "graph"})
 public class MessageDefinition extends MetadataResource {
 
     public enum MessageSignificanceCategory {
@@ -160,19 +160,19 @@ public class MessageDefinition extends MetadataResource {
 
     public enum MessageheaderResponseRequest {
         /**
-         * initiator expects a response for this message
+         * initiator expects a response for this message.
          */
         ALWAYS, 
         /**
-         * initiator expects a response only if in error
+         * initiator expects a response only if in error.
          */
         ONERROR, 
         /**
-         * initiator does not expect a response
+         * initiator does not expect a response.
          */
         NEVER, 
         /**
-         * initiator expects a response only if successful
+         * initiator expects a response only if successful.
          */
         ONSUCCESS, 
         /**
@@ -215,10 +215,10 @@ public class MessageDefinition extends MetadataResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ALWAYS: return "initiator expects a response for this message";
-            case ONERROR: return "initiator expects a response only if in error";
-            case NEVER: return "initiator does not expect a response";
-            case ONSUCCESS: return "initiator expects a response only if successful";
+            case ALWAYS: return "initiator expects a response for this message.";
+            case ONERROR: return "initiator expects a response only if in error.";
+            case NEVER: return "initiator does not expect a response.";
+            case ONSUCCESS: return "initiator expects a response only if successful.";
             default: return "?";
           }
         }
@@ -924,9 +924,9 @@ public class MessageDefinition extends MetadataResource {
     /**
      * A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Additional identifier for the message definition", formalDefinition="A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance." )
-    protected Identifier identifier;
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Primary key for the message definition on a given server", formalDefinition="A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance." )
+    protected List<Identifier> identifier;
 
     /**
      * A MessageDefinition that is superseded by this definition.
@@ -975,7 +975,7 @@ public class MessageDefinition extends MetadataResource {
      * The impact of the content of the message.
      */
     @Child(name = "category", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Consequence | Currency | Notification", formalDefinition="The impact of the content of the message." )
+    @Description(shortDefinition="consequence | currency | notification", formalDefinition="The impact of the content of the message." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/message-significance-category")
     protected Enumeration<MessageSignificanceCategory> category;
 
@@ -990,7 +990,7 @@ public class MessageDefinition extends MetadataResource {
      * Declare at a message definition level whether a response is required or only upon error or success, or never.
      */
     @Child(name = "responseRequired", type = {CodeType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Response circumstances", formalDefinition="Declare at a message definition level whether a response is required or only upon error or success, or never." )
+    @Description(shortDefinition="always | on-error | never | on-success", formalDefinition="Declare at a message definition level whether a response is required or only upon error or success, or never." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/messageheader-response-request")
     protected Enumeration<MessageheaderResponseRequest> responseRequired;
 
@@ -1001,7 +1001,14 @@ public class MessageDefinition extends MetadataResource {
     @Description(shortDefinition="Responses to this message", formalDefinition="Indicates what types of messages may be sent as an application-level response to this message." )
     protected List<MessageDefinitionAllowedResponseComponent> allowedResponse;
 
-    private static final long serialVersionUID = -74603085L;
+    /**
+     * Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.
+     */
+    @Child(name = "graph", type = {CanonicalType.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Canonical URL for a GraphDefinition", formalDefinition="Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources." )
+    protected List<CanonicalType> graph;
+
+    private static final long serialVersionUID = 927775347L;
 
   /**
    * Constructor
@@ -1021,7 +1028,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #url} (An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @return {@link #url} (The business identifier that is used to reference the MessageDefinition and *is* expected to be consistent from server to server.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public UriType getUrlElement() { 
       if (this.url == null)
@@ -1041,7 +1048,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #url} (An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+     * @param value {@link #url} (The business identifier that is used to reference the MessageDefinition and *is* expected to be consistent from server to server.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
      */
     public MessageDefinition setUrlElement(UriType value) { 
       this.url = value;
@@ -1049,14 +1056,14 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.
+     * @return The business identifier that is used to reference the MessageDefinition and *is* expected to be consistent from server to server.
      */
     public String getUrl() { 
       return this.url == null ? null : this.url.getValue();
     }
 
     /**
-     * @param value An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.
+     * @param value The business identifier that is used to reference the MessageDefinition and *is* expected to be consistent from server to server.
      */
     public MessageDefinition setUrl(String value) { 
       if (Utilities.noString(value))
@@ -1072,25 +1079,54 @@ public class MessageDefinition extends MetadataResource {
     /**
      * @return {@link #identifier} (A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.)
      */
-    public Identifier getIdentifier() { 
+    public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MessageDefinition.identifier");
-        else if (Configuration.doAutoCreate())
-          this.identifier = new Identifier(); // cc
+        this.identifier = new ArrayList<Identifier>();
       return this.identifier;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MessageDefinition setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
     public boolean hasIdentifier() { 
-      return this.identifier != null && !this.identifier.isEmpty();
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public MessageDefinition addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #identifier} (A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.)
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
      */
-    public MessageDefinition setIdentifier(Identifier value) { 
-      this.identifier = value;
-      return this;
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -2156,10 +2192,71 @@ public class MessageDefinition extends MetadataResource {
       return getAllowedResponse().get(0);
     }
 
+    /**
+     * @return {@link #graph} (Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
+     */
+    public List<CanonicalType> getGraph() { 
+      if (this.graph == null)
+        this.graph = new ArrayList<CanonicalType>();
+      return this.graph;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public MessageDefinition setGraph(List<CanonicalType> theGraph) { 
+      this.graph = theGraph;
+      return this;
+    }
+
+    public boolean hasGraph() { 
+      if (this.graph == null)
+        return false;
+      for (CanonicalType item : this.graph)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #graph} (Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
+     */
+    public CanonicalType addGraphElement() {//2 
+      CanonicalType t = new CanonicalType();
+      if (this.graph == null)
+        this.graph = new ArrayList<CanonicalType>();
+      this.graph.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #graph} (Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
+     */
+    public MessageDefinition addGraph(String value) { //1
+      CanonicalType t = new CanonicalType();
+      t.setValue(value);
+      if (this.graph == null)
+        this.graph = new ArrayList<CanonicalType>();
+      this.graph.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #graph} (Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
+     */
+    public boolean hasGraph(String value) { 
+      if (this.graph == null)
+        return false;
+      for (CanonicalType v : this.graph)
+        if (v.getValue().equals(value)) // canonical(GraphDefinition)
+          return true;
+      return false;
+    }
+
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("url", "uri", "An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.", 0, 1, url));
-        children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier));
+        children.add(new Property("url", "uri", "The business identifier that is used to reference the MessageDefinition and *is* expected to be consistent from server to server.", 0, 1, url));
+        children.add(new Property("identifier", "Identifier", "A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("version", "string", "The identifier that is used to identify this version of the message definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the message definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version));
         children.add(new Property("name", "string", "A natural language name identifying the message definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name));
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for the message definition.", 0, 1, title));
@@ -2181,13 +2278,14 @@ public class MessageDefinition extends MetadataResource {
         children.add(new Property("focus", "", "Identifies the resource (or resources) that are being addressed by the event.  For example, the Encounter for an admit message or two Account records for a merge.", 0, java.lang.Integer.MAX_VALUE, focus));
         children.add(new Property("responseRequired", "code", "Declare at a message definition level whether a response is required or only upon error or success, or never.", 0, 1, responseRequired));
         children.add(new Property("allowedResponse", "", "Indicates what types of messages may be sent as an application-level response to this message.", 0, java.lang.Integer.MAX_VALUE, allowedResponse));
+        children.add(new Property("graph", "canonical(GraphDefinition)", "Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.", 0, java.lang.Integer.MAX_VALUE, graph));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 116079: /*url*/  return new Property("url", "uri", "An absolute URI that is used to identify this message definition when it is referenced in a specification, model, design or an instance; also called its canonical identifier. This SHOULD be globally unique and SHOULD be a literal address at which this message definition is (or will be) published.", 0, 1, url);
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, 1, identifier);
+        case 116079: /*url*/  return new Property("url", "uri", "The business identifier that is used to reference the MessageDefinition and *is* expected to be consistent from server to server.", 0, 1, url);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A formal identifier that is used to identify this message definition when it is represented in other formats, or referenced in a specification, model, design or an instance.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 351608024: /*version*/  return new Property("version", "string", "The identifier that is used to identify this version of the message definition when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the message definition author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions can be placed in a lexicographical sequence.", 0, 1, version);
         case 3373707: /*name*/  return new Property("name", "string", "A natural language name identifying the message definition. This name should be usable as an identifier for the module by machine processing applications such as code generation.", 0, 1, name);
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for the message definition.", 0, 1, title);
@@ -2212,6 +2310,7 @@ public class MessageDefinition extends MetadataResource {
         case 97604824: /*focus*/  return new Property("focus", "", "Identifies the resource (or resources) that are being addressed by the event.  For example, the Encounter for an admit message or two Account records for a merge.", 0, java.lang.Integer.MAX_VALUE, focus);
         case 791597824: /*responseRequired*/  return new Property("responseRequired", "code", "Declare at a message definition level whether a response is required or only upon error or success, or never.", 0, 1, responseRequired);
         case -1130933751: /*allowedResponse*/  return new Property("allowedResponse", "", "Indicates what types of messages may be sent as an application-level response to this message.", 0, java.lang.Integer.MAX_VALUE, allowedResponse);
+        case 98615630: /*graph*/  return new Property("graph", "canonical(GraphDefinition)", "Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.", 0, java.lang.Integer.MAX_VALUE, graph);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -2221,7 +2320,7 @@ public class MessageDefinition extends MetadataResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UriType
-        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case 351608024: /*version*/ return this.version == null ? new Base[0] : new Base[] {this.version}; // StringType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
@@ -2243,6 +2342,7 @@ public class MessageDefinition extends MetadataResource {
         case 97604824: /*focus*/ return this.focus == null ? new Base[0] : this.focus.toArray(new Base[this.focus.size()]); // MessageDefinitionFocusComponent
         case 791597824: /*responseRequired*/ return this.responseRequired == null ? new Base[0] : new Base[] {this.responseRequired}; // Enumeration<MessageheaderResponseRequest>
         case -1130933751: /*allowedResponse*/ return this.allowedResponse == null ? new Base[0] : this.allowedResponse.toArray(new Base[this.allowedResponse.size()]); // MessageDefinitionAllowedResponseComponent
+        case 98615630: /*graph*/ return this.graph == null ? new Base[0] : this.graph.toArray(new Base[this.graph.size()]); // CanonicalType
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2255,7 +2355,7 @@ public class MessageDefinition extends MetadataResource {
           this.url = castToUri(value); // UriType
           return value;
         case -1618432855: // identifier
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case 351608024: // version
           this.version = castToString(value); // StringType
@@ -2323,6 +2423,9 @@ public class MessageDefinition extends MetadataResource {
         case -1130933751: // allowedResponse
           this.getAllowedResponse().add((MessageDefinitionAllowedResponseComponent) value); // MessageDefinitionAllowedResponseComponent
           return value;
+        case 98615630: // graph
+          this.getGraph().add(castToCanonical(value)); // CanonicalType
+          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -2333,7 +2436,7 @@ public class MessageDefinition extends MetadataResource {
         if (name.equals("url")) {
           this.url = castToUri(value); // UriType
         } else if (name.equals("identifier")) {
-          this.identifier = castToIdentifier(value); // Identifier
+          this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("version")) {
           this.version = castToString(value); // StringType
         } else if (name.equals("name")) {
@@ -2379,6 +2482,8 @@ public class MessageDefinition extends MetadataResource {
           this.responseRequired = (Enumeration) value; // Enumeration<MessageheaderResponseRequest>
         } else if (name.equals("allowedResponse")) {
           this.getAllowedResponse().add((MessageDefinitionAllowedResponseComponent) value);
+        } else if (name.equals("graph")) {
+          this.getGraph().add(castToCanonical(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -2388,7 +2493,7 @@ public class MessageDefinition extends MetadataResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 116079:  return getUrlElement();
-        case -1618432855:  return getIdentifier(); 
+        case -1618432855:  return addIdentifier(); 
         case 351608024:  return getVersionElement();
         case 3373707:  return getNameElement();
         case 110371416:  return getTitleElement();
@@ -2411,6 +2516,7 @@ public class MessageDefinition extends MetadataResource {
         case 97604824:  return addFocus(); 
         case 791597824:  return getResponseRequiredElement();
         case -1130933751:  return addAllowedResponse(); 
+        case 98615630:  return addGraphElement();
         default: return super.makeProperty(hash, name);
         }
 
@@ -2442,6 +2548,7 @@ public class MessageDefinition extends MetadataResource {
         case 97604824: /*focus*/ return new String[] {};
         case 791597824: /*responseRequired*/ return new String[] {"code"};
         case -1130933751: /*allowedResponse*/ return new String[] {};
+        case 98615630: /*graph*/ return new String[] {"canonical"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2453,8 +2560,7 @@ public class MessageDefinition extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.url");
         }
         else if (name.equals("identifier")) {
-          this.identifier = new Identifier();
-          return this.identifier;
+          return addIdentifier();
         }
         else if (name.equals("version")) {
           throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.version");
@@ -2524,6 +2630,9 @@ public class MessageDefinition extends MetadataResource {
         else if (name.equals("allowedResponse")) {
           return addAllowedResponse();
         }
+        else if (name.equals("graph")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MessageDefinition.graph");
+        }
         else
           return super.addChild(name);
       }
@@ -2537,7 +2646,11 @@ public class MessageDefinition extends MetadataResource {
         MessageDefinition dst = new MessageDefinition();
         copyValues(dst);
         dst.url = url == null ? null : url.copy();
-        dst.identifier = identifier == null ? null : identifier.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
@@ -2587,6 +2700,11 @@ public class MessageDefinition extends MetadataResource {
           for (MessageDefinitionAllowedResponseComponent i : allowedResponse)
             dst.allowedResponse.add(i.copy());
         };
+        if (graph != null) {
+          dst.graph = new ArrayList<CanonicalType>();
+          for (CanonicalType i : graph)
+            dst.graph.add(i.copy());
+        };
         return dst;
       }
 
@@ -2605,7 +2723,7 @@ public class MessageDefinition extends MetadataResource {
            && compareDeep(copyright, o.copyright, true) && compareDeep(base, o.base, true) && compareDeep(parent, o.parent, true)
            && compareDeep(event, o.event, true) && compareDeep(category, o.category, true) && compareDeep(focus, o.focus, true)
            && compareDeep(responseRequired, o.responseRequired, true) && compareDeep(allowedResponse, o.allowedResponse, true)
-          ;
+           && compareDeep(graph, o.graph, true);
       }
 
       @Override
@@ -2622,7 +2740,7 @@ public class MessageDefinition extends MetadataResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, replaces, purpose
           , copyright, base, parent, event, category, focus, responseRequired, allowedResponse
-          );
+          , graph);
       }
 
   @Override
@@ -2669,6 +2787,46 @@ public class MessageDefinition extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>parent</b>
+   * <p>
+   * Description: <b>A resource that is the parent of the definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="parent", path="", description="A resource that is the parent of the definition", type="token" )
+  public static final String SP_PARENT = "parent";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>parent</b>
+   * <p>
+   * Description: <b>A resource that is the parent of the definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PARENT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PARENT);
+
+ /**
+   * Search parameter: <b>context-type-value</b>
+   * <p>
+   * Description: <b>A use context type and value assigned to the message definition</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type-value", path="MessageDefinition.useContext", description="A use context type and value assigned to the message definition", type="composite", compositeOf={"context-type", "context"} )
+  public static final String SP_CONTEXT_TYPE_VALUE = "context-type-value";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type-value</b>
+   * <p>
+   * Description: <b>A use context type and value assigned to the message definition</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam> CONTEXT_TYPE_VALUE = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.TokenClientParam>(SP_CONTEXT_TYPE_VALUE);
 
  /**
    * Search parameter: <b>jurisdiction</b>
@@ -2731,6 +2889,26 @@ public class MessageDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam FOCUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_FOCUS);
 
  /**
+   * Search parameter: <b>context-type</b>
+   * <p>
+   * Description: <b>A type of use context assigned to the message definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MessageDefinition.useContext.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type", path="MessageDefinition.useContext.code", description="A type of use context assigned to the message definition", type="token" )
+  public static final String SP_CONTEXT_TYPE = "context-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type</b>
+   * <p>
+   * Description: <b>A type of use context assigned to the message definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MessageDefinition.useContext.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT_TYPE);
+
+ /**
    * Search parameter: <b>title</b>
    * <p>
    * Description: <b>The human-friendly name of the message definition</b><br>
@@ -2791,6 +2969,26 @@ public class MessageDefinition extends MetadataResource {
   public static final ca.uhn.fhir.rest.gclient.UriClientParam URL = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_URL);
 
  /**
+   * Search parameter: <b>context-quantity</b>
+   * <p>
+   * Description: <b>A quantity- or range-valued use context assigned to the message definition</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>MessageDefinition.useContext.valueQuantity, MessageDefinition.useContext.valueRange</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-quantity", path="(MessageDefinition.useContext.value as Quantity) | (MessageDefinition.useContext.value as Range)", description="A quantity- or range-valued use context assigned to the message definition", type="quantity" )
+  public static final String SP_CONTEXT_QUANTITY = "context-quantity";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-quantity</b>
+   * <p>
+   * Description: <b>A quantity- or range-valued use context assigned to the message definition</b><br>
+   * Type: <b>quantity</b><br>
+   * Path: <b>MessageDefinition.useContext.valueQuantity, MessageDefinition.useContext.valueRange</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.QuantityClientParam CONTEXT_QUANTITY = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_CONTEXT_QUANTITY);
+
+ /**
    * Search parameter: <b>name</b>
    * <p>
    * Description: <b>Computationally friendly name of the message definition</b><br>
@@ -2809,6 +3007,26 @@ public class MessageDefinition extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
+
+ /**
+   * Search parameter: <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the message definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MessageDefinition.useContext.valueCodeableConcept</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context", path="(MessageDefinition.useContext.value as CodeableConcept)", description="A use context assigned to the message definition", type="token" )
+  public static final String SP_CONTEXT = "context";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context</b>
+   * <p>
+   * Description: <b>A use context assigned to the message definition</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MessageDefinition.useContext.valueCodeableConcept</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTEXT);
 
  /**
    * Search parameter: <b>publisher</b>
@@ -2869,6 +3087,26 @@ public class MessageDefinition extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
+
+ /**
+   * Search parameter: <b>context-type-quantity</b>
+   * <p>
+   * Description: <b>A use context type and quantity- or range-based value assigned to the message definition</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="context-type-quantity", path="MessageDefinition.useContext", description="A use context type and quantity- or range-based value assigned to the message definition", type="composite", compositeOf={"context-type", "context-quantity"} )
+  public static final String SP_CONTEXT_TYPE_QUANTITY = "context-type-quantity";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>context-type-quantity</b>
+   * <p>
+   * Description: <b>A use context type and quantity- or range-based value assigned to the message definition</b><br>
+   * Type: <b>composite</b><br>
+   * Path: <b></b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.QuantityClientParam> CONTEXT_TYPE_QUANTITY = new ca.uhn.fhir.rest.gclient.CompositeClientParam<ca.uhn.fhir.rest.gclient.TokenClientParam, ca.uhn.fhir.rest.gclient.QuantityClientParam>(SP_CONTEXT_TYPE_QUANTITY);
 
  /**
    * Search parameter: <b>status</b>

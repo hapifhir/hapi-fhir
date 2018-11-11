@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
  */
-@ResourceDef(name="EpisodeOfCare", profile="http://hl7.org/fhir/Profile/EpisodeOfCare")
+@ResourceDef(name="EpisodeOfCare", profile="http://hl7.org/fhir/StructureDefinition/EpisodeOfCare")
 public class EpisodeOfCare extends DomainResource {
 
     public enum EpisodeOfCareStatus {

@@ -433,6 +433,7 @@
 		</developer>
 		<developer>
 			<id>RuthAlk</id>
+			<name>Ruth Alkema</name>
 		</developer>
 		<developer>
 			<id>Tastelezz</id>
@@ -473,6 +474,10 @@
 		<developer>
 			<id>jbalbien</id>
 		</developer>
+		<developer>
+			<id>volsch</id>
+			<name>Volker Schmidt</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -494,7 +499,7 @@
 
 		<!-- Dependency Versions -->
 		<activation_api_version>1.2.0</activation_api_version>
-		<apache_karaf_version>4.1.4</apache_karaf_version>
+		<apache_karaf_version>4.1.6</apache_karaf_version>
 		<aries_spifly_version>1.0.10</aries_spifly_version>
 		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.11</commons_codec_version>
@@ -518,6 +523,7 @@
 		<hibernate_search_version>5.10.3.Final</hibernate_search_version>
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
+		<jackson_version>2.9.7</jackson_version>
 		<lucene_version>5.5.5</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
@@ -563,32 +569,32 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
-				<version>2.9.2</version>
+				<version>${jackson_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
-				<version>2.9.2</version>
+				<version>${jackson_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.9.2</version>
+				<version>${jackson_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.datatype</groupId>
 				<artifactId>jackson-datatype-jsr310</artifactId>
-				<version>2.9.2</version>
+				<version>${jackson_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.dataformat</groupId>
 				<artifactId>jackson-dataformat-yaml</artifactId>
-				<version>2.9.2</version>
+				<version>${jackson_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.module</groupId>
 				<artifactId>jackson-module-jaxb-annotations</artifactId>
-				<version>2.9.2</version>
+				<version>${jackson_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.github.ben-manes.caffeine</groupId>
@@ -673,7 +679,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-compress</artifactId>
-				<version>1.14</version>
+				<version>1.18</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -1727,6 +1733,12 @@
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
+								<copy todir="target/site/apidocs-client">
+									<fileset dir="hapi-fhir-client/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-server">
+									<fileset dir="hapi-fhir-server/target/site/apidocs"/>
+								</copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
 								</copy>
@@ -2057,22 +2069,23 @@
 					</reportsDirectories>
 				</configuration>
 			</plugin>
-			<plugin>
+			<!--			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>2.8.1</version>
+				<version>3.0.0</version>
 				<inherited>false</inherited>
 				<reportSets>
 					<reportSet>
 						<reports>
-							<report>project-team</report>
-							<report>issue-tracking</report>
+							<report>team</report>
+							<report>issue-management</report>
 							<report>license</report>
 							<report>scm</report>
 						</reports>
 					</reportSet>
 				</reportSets>
 			</plugin>
+			-->
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> <version>1.1</version> </plugin> -->
 		</plugins>
 	</reporting>
@@ -2131,6 +2144,8 @@
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-dstu3</module>
 				<module>hapi-fhir-structures-r4</module>
+				<module>hapi-fhir-client</module>
+				<module>hapi-fhir-server</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<!-- <module>hapi-fhir-cobertura</module> -->

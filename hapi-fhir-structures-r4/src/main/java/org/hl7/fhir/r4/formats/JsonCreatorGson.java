@@ -80,4 +80,9 @@ public class JsonCreatorGson implements JsonCreator {
     // not used
   }
 
+  @Override
+  public void valueNum(String value) throws IOException {
+    value(new BigDecimal(value));    
+  }
+
 }

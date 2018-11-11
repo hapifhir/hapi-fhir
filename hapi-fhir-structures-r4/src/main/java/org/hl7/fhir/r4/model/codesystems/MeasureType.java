@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MeasureType {
 
         /**
-         * A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome
+         * A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome.
          */
         PROCESS, 
         /**
-         * A measure that indicates the result of the performance (or non-performance) of a function or process
+         * A measure that indicates the result of the performance (or non-performance) of a function or process.
          */
         OUTCOME, 
         /**
-         * A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care
+         * A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care.
          */
         STRUCTURE, 
         /**
-         * A measure that focuses on patient-reported information such as patient engagement or patient experience measures
+         * A measure that focuses on patient-reported information such as patient engagement or patient experience measures.
          */
         PATIENTREPORTEDOUTCOME, 
         /**
-         * A measure that combines multiple component measures in to a single quality measure
+         * A measure that combines multiple component measures in to a single quality measure.
          */
         COMPOSITE, 
         /**
@@ -86,15 +86,15 @@ public enum MeasureType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/measure-type";
+          return "http://terminology.hl7.org/CodeSystem/measure-type";
         }
         public String getDefinition() {
           switch (this) {
-            case PROCESS: return "A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome";
-            case OUTCOME: return "A measure that indicates the result of the performance (or non-performance) of a function or process";
-            case STRUCTURE: return "A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care";
-            case PATIENTREPORTEDOUTCOME: return "A measure that focuses on patient-reported information such as patient engagement or patient experience measures";
-            case COMPOSITE: return "A measure that combines multiple component measures in to a single quality measure";
+            case PROCESS: return "A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome.";
+            case OUTCOME: return "A measure that indicates the result of the performance (or non-performance) of a function or process.";
+            case STRUCTURE: return "A measure that focuses on a health care provider's capacity, systems, and processes to provide high-quality care.";
+            case PATIENTREPORTEDOUTCOME: return "A measure that focuses on patient-reported information such as patient engagement or patient experience measures.";
+            case COMPOSITE: return "A measure that combines multiple component measures in to a single quality measure.";
             default: return "?";
           }
         }

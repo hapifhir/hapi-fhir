@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Set of definitional characteristics for a kind of observation or measurement produced or consumed by an orderable health care service.
  */
-@ResourceDef(name="ObservationDefinition", profile="http://hl7.org/fhir/Profile/ObservationDefinition")
+@ResourceDef(name="ObservationDefinition", profile="http://hl7.org/fhir/StructureDefinition/ObservationDefinition")
 public class ObservationDefinition extends DomainResource {
 
     @Block()
@@ -414,10 +414,10 @@ public class ObservationDefinition extends DomainResource {
         protected CodeableConcept category;
 
         /**
-         * The value and associated unit of the low bound (inclusive) of the reference range.
+         * The range of the interval.
          */
         @Child(name = "range", type = {Range.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Low bound of reference range, if relevant", formalDefinition="The value and associated unit of the low bound (inclusive) of the reference range." )
+        @Description(shortDefinition="The range of the interval", formalDefinition="The range of the interval." )
         protected Range range;
 
         /**
@@ -491,7 +491,7 @@ public class ObservationDefinition extends DomainResource {
         }
 
         /**
-         * @return {@link #range} (The value and associated unit of the low bound (inclusive) of the reference range.)
+         * @return {@link #range} (The range of the interval.)
          */
         public Range getRange() { 
           if (this.range == null)
@@ -507,7 +507,7 @@ public class ObservationDefinition extends DomainResource {
         }
 
         /**
-         * @param value {@link #range} (The value and associated unit of the low bound (inclusive) of the reference range.)
+         * @param value {@link #range} (The range of the interval.)
          */
         public ObservationDefinitionQualifiedIntervalComponent setRange(Range value) { 
           this.range = value;
@@ -691,7 +691,7 @@ public class ObservationDefinition extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("category", "CodeableConcept", "The category or type of interval.", 0, 1, category));
-          children.add(new Property("range", "Range", "The value and associated unit of the low bound (inclusive) of the reference range.", 0, 1, range));
+          children.add(new Property("range", "Range", "The range of the interval.", 0, 1, range));
           children.add(new Property("type", "CodeableConcept", "Codes to indicate what part of the targeted reference population it applies to. For example, the normal or therapeutic range.", 0, 1, type));
           children.add(new Property("appliesTo", "CodeableConcept", "Codes to indicate the target population this reference range applies to.", 0, java.lang.Integer.MAX_VALUE, appliesTo));
           children.add(new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, 1, age));
@@ -703,7 +703,7 @@ public class ObservationDefinition extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 50511102: /*category*/  return new Property("category", "CodeableConcept", "The category or type of interval.", 0, 1, category);
-          case 108280125: /*range*/  return new Property("range", "Range", "The value and associated unit of the low bound (inclusive) of the reference range.", 0, 1, range);
+          case 108280125: /*range*/  return new Property("range", "Range", "The range of the interval.", 0, 1, range);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Codes to indicate what part of the targeted reference population it applies to. For example, the normal or therapeutic range.", 0, 1, type);
           case -2089924569: /*appliesTo*/  return new Property("appliesTo", "CodeableConcept", "Codes to indicate the target population this reference range applies to.", 0, java.lang.Integer.MAX_VALUE, appliesTo);
           case 96511: /*age*/  return new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, 1, age);
@@ -895,36 +895,43 @@ public class ObservationDefinition extends DomainResource {
     /**
      * A code that classifies the general type of observation.
      */
-    @Child(name = "category", type = {Coding.class}, order=0, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeableConcept.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Category of observation", formalDefinition="A code that classifies the general type of observation." )
-    protected Coding category;
+    protected CodeableConcept category;
 
     /**
      * Describes what will be observed. Sometimes this is called the observation "name".
      */
-    @Child(name = "code", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Type of observation (code / type)", formalDefinition="Describes what will be observed. Sometimes this is called the observation \"name\"." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/observation-codes")
-    protected Coding code;
+    protected CodeableConcept code;
+
+    /**
+     * Unique identifier for this ObservationDefinition artifact.
+     */
+    @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Unique identifier for this ObservationDefinition artifact", formalDefinition="Unique identifier for this ObservationDefinition artifact." )
+    protected List<Identifier> identifier;
 
     /**
      * Data type allowed for the result of the observation.
      */
-    @Child(name = "permittedDataType", type = {Coding.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "permittedDataType", type = {Coding.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Permitted data type for observation value", formalDefinition="Data type allowed for the result of the observation." )
     protected List<Coding> permittedDataType;
 
     /**
      * Multiple results allowed for this kind of observation.
      */
-    @Child(name = "multipleResultsAllowed", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "multipleResultsAllowed", type = {BooleanType.class}, order=4, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Multiple results allowed", formalDefinition="Multiple results allowed for this kind of observation." )
     protected BooleanType multipleResultsAllowed;
 
     /**
      * The method or technique used to perform the observation.
      */
-    @Child(name = "method", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "method", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The method or technique used to perform the observation", formalDefinition="The method or technique used to perform the observation." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/observation-methods")
     protected CodeableConcept method;
@@ -932,53 +939,53 @@ public class ObservationDefinition extends DomainResource {
     /**
      * The preferred name to be used when reporting the results of this observation.
      */
-    @Child(name = "preferredReportName", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "preferredReportName", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Preferred report name", formalDefinition="The preferred name to be used when reporting the results of this observation." )
     protected StringType preferredReportName;
 
     /**
      * Characteristics for quantitative results of this observation.
      */
-    @Child(name = "quantitativeDetails", type = {}, order=6, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "quantitativeDetails", type = {}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Characteristics of quantitative results", formalDefinition="Characteristics for quantitative results of this observation." )
     protected ObservationDefinitionQuantitativeDetailsComponent quantitativeDetails;
 
     /**
      * Reference range for ordinal and continuous observations.
      */
-    @Child(name = "qualifiedInterval", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "qualifiedInterval", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Reference range for observation result", formalDefinition="Reference range for ordinal and continuous observations." )
     protected List<ObservationDefinitionQualifiedIntervalComponent> qualifiedInterval;
 
     /**
      * The set of valid coded results for the observation.
      */
-    @Child(name = "validCodedValueSet", type = {UriType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "validCodedValueSet", type = {UriType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Value set of valid coded values for the observation", formalDefinition="The set of valid coded results for the observation." )
     protected UriType validCodedValueSet;
 
     /**
      * The set of normal coded results for the observation.
      */
-    @Child(name = "normalCodedValueSet", type = {UriType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "normalCodedValueSet", type = {UriType.class}, order=10, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Value set of normal coded values for the observation", formalDefinition="The set of normal coded results for the observation." )
     protected UriType normalCodedValueSet;
 
     /**
      * The set of abnormal coded results for the observation.
      */
-    @Child(name = "abnormalCodedValueSet", type = {UriType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "abnormalCodedValueSet", type = {UriType.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Value set of abnormal coded values for the observation", formalDefinition="The set of abnormal coded results for the observation." )
     protected UriType abnormalCodedValueSet;
 
     /**
      * The set of critical coded results for the observation.
      */
-    @Child(name = "criticalCodedValueSet", type = {UriType.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "criticalCodedValueSet", type = {UriType.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Value set of critical coded values for the observation", formalDefinition="The set of critical coded results for the observation." )
     protected UriType criticalCodedValueSet;
 
-    private static final long serialVersionUID = 1678075048L;
+    private static final long serialVersionUID = 1248420796L;
 
   /**
    * Constructor
@@ -990,7 +997,7 @@ public class ObservationDefinition extends DomainResource {
   /**
    * Constructor
    */
-    public ObservationDefinition(Coding code) {
+    public ObservationDefinition(CodeableConcept code) {
       super();
       this.code = code;
     }
@@ -998,12 +1005,12 @@ public class ObservationDefinition extends DomainResource {
     /**
      * @return {@link #category} (A code that classifies the general type of observation.)
      */
-    public Coding getCategory() { 
+    public CodeableConcept getCategory() { 
       if (this.category == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ObservationDefinition.category");
         else if (Configuration.doAutoCreate())
-          this.category = new Coding(); // cc
+          this.category = new CodeableConcept(); // cc
       return this.category;
     }
 
@@ -1014,7 +1021,7 @@ public class ObservationDefinition extends DomainResource {
     /**
      * @param value {@link #category} (A code that classifies the general type of observation.)
      */
-    public ObservationDefinition setCategory(Coding value) { 
+    public ObservationDefinition setCategory(CodeableConcept value) { 
       this.category = value;
       return this;
     }
@@ -1022,12 +1029,12 @@ public class ObservationDefinition extends DomainResource {
     /**
      * @return {@link #code} (Describes what will be observed. Sometimes this is called the observation "name".)
      */
-    public Coding getCode() { 
+    public CodeableConcept getCode() { 
       if (this.code == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create ObservationDefinition.code");
         else if (Configuration.doAutoCreate())
-          this.code = new Coding(); // cc
+          this.code = new CodeableConcept(); // cc
       return this.code;
     }
 
@@ -1038,9 +1045,62 @@ public class ObservationDefinition extends DomainResource {
     /**
      * @param value {@link #code} (Describes what will be observed. Sometimes this is called the observation "name".)
      */
-    public ObservationDefinition setCode(Coding value) { 
+    public ObservationDefinition setCode(CodeableConcept value) { 
       this.code = value;
       return this;
+    }
+
+    /**
+     * @return {@link #identifier} (Unique identifier for this ObservationDefinition artifact.)
+     */
+    public List<Identifier> getIdentifier() { 
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      return this.identifier;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ObservationDefinition setIdentifier(List<Identifier> theIdentifier) { 
+      this.identifier = theIdentifier;
+      return this;
+    }
+
+    public boolean hasIdentifier() { 
+      if (this.identifier == null)
+        return false;
+      for (Identifier item : this.identifier)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Identifier addIdentifier() { //3
+      Identifier t = new Identifier();
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return t;
+    }
+
+    public ObservationDefinition addIdentifier(Identifier t) { //3
+      if (t == null)
+        return this;
+      if (this.identifier == null)
+        this.identifier = new ArrayList<Identifier>();
+      this.identifier.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #identifier}, creating it if it does not already exist
+     */
+    public Identifier getIdentifierFirstRep() { 
+      if (getIdentifier().isEmpty()) {
+        addIdentifier();
+      }
+      return getIdentifier().get(0);
     }
 
     /**
@@ -1489,8 +1549,9 @@ public class ObservationDefinition extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("category", "Coding", "A code that classifies the general type of observation.", 0, 1, category));
-        children.add(new Property("code", "Coding", "Describes what will be observed. Sometimes this is called the observation \"name\".", 0, 1, code));
+        children.add(new Property("category", "CodeableConcept", "A code that classifies the general type of observation.", 0, 1, category));
+        children.add(new Property("code", "CodeableConcept", "Describes what will be observed. Sometimes this is called the observation \"name\".", 0, 1, code));
+        children.add(new Property("identifier", "Identifier", "Unique identifier for this ObservationDefinition artifact.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("permittedDataType", "Coding", "Data type allowed for the result of the observation.", 0, java.lang.Integer.MAX_VALUE, permittedDataType));
         children.add(new Property("multipleResultsAllowed", "boolean", "Multiple results allowed for this kind of observation.", 0, 1, multipleResultsAllowed));
         children.add(new Property("method", "CodeableConcept", "The method or technique used to perform the observation.", 0, 1, method));
@@ -1506,8 +1567,9 @@ public class ObservationDefinition extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 50511102: /*category*/  return new Property("category", "Coding", "A code that classifies the general type of observation.", 0, 1, category);
-        case 3059181: /*code*/  return new Property("code", "Coding", "Describes what will be observed. Sometimes this is called the observation \"name\".", 0, 1, code);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A code that classifies the general type of observation.", 0, 1, category);
+        case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Describes what will be observed. Sometimes this is called the observation \"name\".", 0, 1, code);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for this ObservationDefinition artifact.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -99492804: /*permittedDataType*/  return new Property("permittedDataType", "Coding", "Data type allowed for the result of the observation.", 0, java.lang.Integer.MAX_VALUE, permittedDataType);
         case -2102414590: /*multipleResultsAllowed*/  return new Property("multipleResultsAllowed", "boolean", "Multiple results allowed for this kind of observation.", 0, 1, multipleResultsAllowed);
         case -1077554975: /*method*/  return new Property("method", "CodeableConcept", "The method or technique used to perform the observation.", 0, 1, method);
@@ -1526,8 +1588,9 @@ public class ObservationDefinition extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // Coding
-        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Coding
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -99492804: /*permittedDataType*/ return this.permittedDataType == null ? new Base[0] : this.permittedDataType.toArray(new Base[this.permittedDataType.size()]); // Coding
         case -2102414590: /*multipleResultsAllowed*/ return this.multipleResultsAllowed == null ? new Base[0] : new Base[] {this.multipleResultsAllowed}; // BooleanType
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
@@ -1547,10 +1610,13 @@ public class ObservationDefinition extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 50511102: // category
-          this.category = castToCoding(value); // Coding
+          this.category = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 3059181: // code
-          this.code = castToCoding(value); // Coding
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1618432855: // identifier
+          this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
         case -99492804: // permittedDataType
           this.getPermittedDataType().add(castToCoding(value)); // Coding
@@ -1590,9 +1656,11 @@ public class ObservationDefinition extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("category")) {
-          this.category = castToCoding(value); // Coding
+          this.category = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("code")) {
-          this.code = castToCoding(value); // Coding
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("identifier")) {
+          this.getIdentifier().add(castToIdentifier(value));
         } else if (name.equals("permittedDataType")) {
           this.getPermittedDataType().add(castToCoding(value));
         } else if (name.equals("multipleResultsAllowed")) {
@@ -1623,6 +1691,7 @@ public class ObservationDefinition extends DomainResource {
         switch (hash) {
         case 50511102:  return getCategory(); 
         case 3059181:  return getCode(); 
+        case -1618432855:  return addIdentifier(); 
         case -99492804:  return addPermittedDataType(); 
         case -2102414590:  return getMultipleResultsAllowedElement();
         case -1077554975:  return getMethod(); 
@@ -1641,8 +1710,9 @@ public class ObservationDefinition extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 50511102: /*category*/ return new String[] {"Coding"};
-        case 3059181: /*code*/ return new String[] {"Coding"};
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case -99492804: /*permittedDataType*/ return new String[] {"Coding"};
         case -2102414590: /*multipleResultsAllowed*/ return new String[] {"boolean"};
         case -1077554975: /*method*/ return new String[] {"CodeableConcept"};
@@ -1661,12 +1731,15 @@ public class ObservationDefinition extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("category")) {
-          this.category = new Coding();
+          this.category = new CodeableConcept();
           return this.category;
         }
         else if (name.equals("code")) {
-          this.code = new Coding();
+          this.code = new CodeableConcept();
           return this.code;
+        }
+        else if (name.equals("identifier")) {
+          return addIdentifier();
         }
         else if (name.equals("permittedDataType")) {
           return addPermittedDataType();
@@ -1714,6 +1787,11 @@ public class ObservationDefinition extends DomainResource {
         copyValues(dst);
         dst.category = category == null ? null : category.copy();
         dst.code = code == null ? null : code.copy();
+        if (identifier != null) {
+          dst.identifier = new ArrayList<Identifier>();
+          for (Identifier i : identifier)
+            dst.identifier.add(i.copy());
+        };
         if (permittedDataType != null) {
           dst.permittedDataType = new ArrayList<Coding>();
           for (Coding i : permittedDataType)
@@ -1746,12 +1824,13 @@ public class ObservationDefinition extends DomainResource {
         if (!(other_ instanceof ObservationDefinition))
           return false;
         ObservationDefinition o = (ObservationDefinition) other_;
-        return compareDeep(category, o.category, true) && compareDeep(code, o.code, true) && compareDeep(permittedDataType, o.permittedDataType, true)
-           && compareDeep(multipleResultsAllowed, o.multipleResultsAllowed, true) && compareDeep(method, o.method, true)
-           && compareDeep(preferredReportName, o.preferredReportName, true) && compareDeep(quantitativeDetails, o.quantitativeDetails, true)
-           && compareDeep(qualifiedInterval, o.qualifiedInterval, true) && compareDeep(validCodedValueSet, o.validCodedValueSet, true)
-           && compareDeep(normalCodedValueSet, o.normalCodedValueSet, true) && compareDeep(abnormalCodedValueSet, o.abnormalCodedValueSet, true)
-           && compareDeep(criticalCodedValueSet, o.criticalCodedValueSet, true);
+        return compareDeep(category, o.category, true) && compareDeep(code, o.code, true) && compareDeep(identifier, o.identifier, true)
+           && compareDeep(permittedDataType, o.permittedDataType, true) && compareDeep(multipleResultsAllowed, o.multipleResultsAllowed, true)
+           && compareDeep(method, o.method, true) && compareDeep(preferredReportName, o.preferredReportName, true)
+           && compareDeep(quantitativeDetails, o.quantitativeDetails, true) && compareDeep(qualifiedInterval, o.qualifiedInterval, true)
+           && compareDeep(validCodedValueSet, o.validCodedValueSet, true) && compareDeep(normalCodedValueSet, o.normalCodedValueSet, true)
+           && compareDeep(abnormalCodedValueSet, o.abnormalCodedValueSet, true) && compareDeep(criticalCodedValueSet, o.criticalCodedValueSet, true)
+          ;
       }
 
       @Override
@@ -1768,10 +1847,10 @@ public class ObservationDefinition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(category, code, permittedDataType
-          , multipleResultsAllowed, method, preferredReportName, quantitativeDetails, qualifiedInterval
-          , validCodedValueSet, normalCodedValueSet, abnormalCodedValueSet, criticalCodedValueSet
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(category, code, identifier
+          , permittedDataType, multipleResultsAllowed, method, preferredReportName, quantitativeDetails
+          , qualifiedInterval, validCodedValueSet, normalCodedValueSet, abnormalCodedValueSet
+          , criticalCodedValueSet);
       }
 
   @Override

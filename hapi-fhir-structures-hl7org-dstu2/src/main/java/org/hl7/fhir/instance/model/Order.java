@@ -30,12 +30,14 @@ package org.hl7.fhir.instance.model;
 */
 
 // Generated on Wed, Jul 13, 2016 05:32+1000 for FHIR v1.0.2
-import java.util.*;
 
+import ca.uhn.fhir.model.api.annotation.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
-import ca.uhn.fhir.model.api.annotation.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 /**
  * A request to perform an action.
  */

@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -70,7 +69,7 @@ public class SubscriptionActivatingSubscriber {
 		Validate.notNull(theTaskExecutor);
 	}
 
-	public synchronized boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
+	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
 		String subscriptionChannelType = myCtx
@@ -162,7 +161,7 @@ public class SubscriptionActivatingSubscriber {
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	public void handleMessage(RestOperationTypeEnum theOperationType, IIdType theId, final IBaseResource theSubscription) throws MessagingException {
+	public void handleMessage(ResourceModifiedMessage.OperationTypeEnum theOperationType, IIdType theId, final IBaseResource theSubscription) throws MessagingException {
 
 		switch (theOperationType) {
 			case DELETE:
@@ -181,7 +180,7 @@ public class SubscriptionActivatingSubscriber {
 
 	}
 
-	private synchronized void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {
+	private void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -191,7 +190,7 @@ public class SubscriptionActivatingSubscriber {
 		});
 	}
 
-	protected boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
+	protected synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
 		CanonicalSubscription existingSubscription = mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement());
 		CanonicalSubscription newSubscription = mySubscriptionInterceptor.canonicalize(theSubscription);
 

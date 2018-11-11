@@ -59,6 +59,8 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		retVal.setFetchSizeDefaultMaximum(10000);
+		retVal.setReindexThreadCount(1);
+		retVal.setExpungeEnabled(true);
 		return retVal;
 	}
 
@@ -134,7 +136,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-//		requestValidator.addValidatorModule(instanceValidatorDstu3());
+		requestValidator.addValidatorModule(instanceValidatorDstu3());
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;

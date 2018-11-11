@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import org.hl7.fhir.exceptions.FHIRException;
  * The shelf-life and storage information for a medicinal product item or container can be described using this class.
  */
 @DatatypeDef(name="ProductShelfLife")
-public class ProductShelfLife extends BackboneElement implements ICompositeType {
+public class ProductShelfLife extends BackboneType implements ICompositeType {
 
     /**
      * Unique identifier for the packaged Medicinal Product.

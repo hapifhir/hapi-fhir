@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedicationStatementTaken {
 
         /**
-         * Positive assertion that patient has taken medication
+         * Positive assertion that patient has taken medication.
          */
         Y, 
         /**
-         * Negative assertion that patient has not taken medication
+         * Negative assertion that patient has not taken medication.
          */
         N, 
         /**
-         * Unknown assertion if patient has taken medication
+         * Unknown assertion if patient has taken medication.
          */
         UNK, 
         /**
-         * Patient reporting does not apply
+         * Patient reporting does not apply.
          */
         NA, 
         /**
@@ -79,14 +79,14 @@ public enum MedicationStatementTaken {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medication-statement-taken";
+          return "http://terminology.hl7.org/CodeSystem/medication-statement-taken";
         }
         public String getDefinition() {
           switch (this) {
-            case Y: return "Positive assertion that patient has taken medication";
-            case N: return "Negative assertion that patient has not taken medication";
-            case UNK: return "Unknown assertion if patient has taken medication";
-            case NA: return "Patient reporting does not apply";
+            case Y: return "Positive assertion that patient has taken medication.";
+            case N: return "Negative assertion that patient has not taken medication.";
+            case UNK: return "Unknown assertion if patient has taken medication.";
+            case NA: return "Patient reporting does not apply.";
             default: return "?";
           }
         }

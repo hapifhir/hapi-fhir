@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,39 +37,39 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum GoalStatus {
 
         /**
-         * A goal is proposed for this patient
+         * A goal is proposed for this patient.
          */
         PROPOSED, 
         /**
-         * A proposed goal was accepted or acknowledged
+         * A proposed goal was accepted or acknowledged.
          */
         ACCEPTED, 
         /**
-         * A goal is planned for this patient
+         * A goal is planned for this patient.
          */
         PLANNED, 
         /**
-         * The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)
+         * The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again).
          */
         INPROGRESS, 
         /**
-         * The goal is on schedule for the planned timelines
+         * The goal is on schedule for the planned timelines.
          */
         ONTARGET, 
         /**
-         * The goal is ahead of the planned timelines
+         * The goal is ahead of the planned timelines.
          */
         AHEADOFTARGET, 
         /**
-         * The goal is behind the planned timelines
+         * The goal is behind the planned timelines.
          */
         BEHINDTARGET, 
         /**
-         * The goal has been met, but ongoing activity is needed to sustain the goal objective
+         * The goal has been met, but ongoing activity is needed to sustain the goal objective.
          */
         SUSTAINING, 
         /**
-         * The goal has been met and no further action is needed
+         * The goal has been met and no further action is needed.
          */
         ACHIEVED, 
         /**
@@ -77,7 +77,7 @@ public enum GoalStatus {
          */
         ONHOLD, 
         /**
-         * The previously accepted goal is no longer being sought
+         * The previously accepted goal is no longer being sought.
          */
         CANCELLED, 
         /**
@@ -85,7 +85,7 @@ public enum GoalStatus {
          */
         ENTEREDINERROR, 
         /**
-         * A proposed goal was rejected
+         * A proposed goal was rejected.
          */
         REJECTED, 
         /**
@@ -146,19 +146,19 @@ public enum GoalStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "A goal is proposed for this patient";
-            case ACCEPTED: return "A proposed goal was accepted or acknowledged";
-            case PLANNED: return "A goal is planned for this patient";
-            case INPROGRESS: return "The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again)";
-            case ONTARGET: return "The goal is on schedule for the planned timelines";
-            case AHEADOFTARGET: return "The goal is ahead of the planned timelines";
-            case BEHINDTARGET: return "The goal is behind the planned timelines";
-            case SUSTAINING: return "The goal has been met, but ongoing activity is needed to sustain the goal objective";
-            case ACHIEVED: return "The goal has been met and no further action is needed";
+            case PROPOSED: return "A goal is proposed for this patient.";
+            case ACCEPTED: return "A proposed goal was accepted or acknowledged.";
+            case PLANNED: return "A goal is planned for this patient.";
+            case INPROGRESS: return "The goal is being sought but has not yet been reached.  (Also applies if goal was reached in the past but there has been regression and goal is being sought again).";
+            case ONTARGET: return "The goal is on schedule for the planned timelines.";
+            case AHEADOFTARGET: return "The goal is ahead of the planned timelines.";
+            case BEHINDTARGET: return "The goal is behind the planned timelines.";
+            case SUSTAINING: return "The goal has been met, but ongoing activity is needed to sustain the goal objective.";
+            case ACHIEVED: return "The goal has been met and no further action is needed.";
             case ONHOLD: return "The goal remains a long term objective but is no longer being actively pursued for a temporary period of time.";
-            case CANCELLED: return "The previously accepted goal is no longer being sought";
+            case CANCELLED: return "The previously accepted goal is no longer being sought.";
             case ENTEREDINERROR: return "The goal was entered in error and voided.";
-            case REJECTED: return "A proposed goal was rejected";
+            case REJECTED: return "A proposed goal was rejected.";
             default: return "?";
           }
         }

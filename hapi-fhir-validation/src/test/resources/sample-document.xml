@@ -1709,8 +1709,8 @@
         <contact>
           <relationship>
             <coding>
-              <system value="http://hl7.org/fhir/ValueSet/patient-contact-relationship"/>
-              <code value="guardian"/>
+              <system value="http://hl7.org/fhir/v2/0131"/>
+              <code value="N"/>
             </coding>
           </relationship>
           <relationship>
@@ -1743,8 +1743,8 @@
         <contact>
           <relationship>
             <coding>
-              <system value="http://hl7.org/fhir/ValueSet/patient-contact-relationship"/>
-              <code value="guardian"/>
+              <system value="http://hl7.org/fhir/v2/0131"/>
+              <code value="N"/>
             </coding>
           </relationship>
           <relationship>

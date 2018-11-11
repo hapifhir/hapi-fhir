@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum SupplyrequestStatus {
 
         /**
-         * The request has been created but is not yet complete or ready for action
+         * The request has been created but is not yet complete or ready for action.
          */
         DRAFT, 
         /**
-         * The request is ready to be acted upon
+         * The request is ready to be acted upon.
          */
         ACTIVE, 
         /**
-         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future
+         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.
          */
         SUSPENDED, 
         /**
@@ -53,11 +53,11 @@ public enum SupplyrequestStatus {
          */
         CANCELLED, 
         /**
-         * Activity against the request has been sufficiently completed to the satisfaction of the requester
+         * Activity against the request has been sufficiently completed to the satisfaction of the requester.
          */
         COMPLETED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
@@ -104,12 +104,12 @@ public enum SupplyrequestStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "The request has been created but is not yet complete or ready for action";
-            case ACTIVE: return "The request is ready to be acted upon";
-            case SUSPENDED: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future";
+            case DRAFT: return "The request has been created but is not yet complete or ready for action.";
+            case ACTIVE: return "The request is ready to be acted upon.";
+            case SUSPENDED: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.";
             case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
-            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester.";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }

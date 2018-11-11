@@ -131,7 +131,7 @@
         "binding": {
           "strength": "example",
           "description": "Codes for identifying types of resources not yet defined by FHIR",
-          "valueSetCanonical": "http://hl7.org/fhir/ValueSet/basic-resource-type"
+          "valueSet": "http://hl7.org/fhir/ValueSet/basic-resource-type"
         },
         "mapping": [
           {

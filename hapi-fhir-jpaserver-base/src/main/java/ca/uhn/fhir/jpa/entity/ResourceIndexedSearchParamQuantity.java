@@ -83,17 +83,19 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	private Long myHashIdentity;
 
 	public ResourceIndexedSearchParamQuantity() {
-		// nothing
+		super();
 	}
 
 
 	public ResourceIndexedSearchParamQuantity(String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
+		this();
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
 		setUnits(theUnits);
 	}
 
+	@Override
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashIdentity == null) {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,6 +69,10 @@ public enum SearchParamType {
          */
         URI, 
         /**
+         * Special logic applies to this parameter per the description of the search parameter.
+         */
+        SPECIAL, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -91,6 +95,8 @@ public enum SearchParamType {
           return QUANTITY;
         if ("uri".equals(codeString))
           return URI;
+        if ("special".equals(codeString))
+          return SPECIAL;
         throw new FHIRException("Unknown SearchParamType code '"+codeString+"'");
         }
         public String toCode() {
@@ -103,6 +109,7 @@ public enum SearchParamType {
             case COMPOSITE: return "composite";
             case QUANTITY: return "quantity";
             case URI: return "uri";
+            case SPECIAL: return "special";
             default: return "?";
           }
         }
@@ -119,6 +126,7 @@ public enum SearchParamType {
             case COMPOSITE: return "A composite search parameter that combines a search on two values together.";
             case QUANTITY: return "A search parameter that searches on a quantity.";
             case URI: return "A search parameter that searches on a URI (RFC 3986).";
+            case SPECIAL: return "Special logic applies to this parameter per the description of the search parameter.";
             default: return "?";
           }
         }
@@ -132,6 +140,7 @@ public enum SearchParamType {
             case COMPOSITE: return "Composite";
             case QUANTITY: return "Quantity";
             case URI: return "URI";
+            case SPECIAL: return "Special";
             default: return "?";
           }
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,36 +45,36 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A specific set of Roles/Locations/specialties/services that a practitioner may perform at an organization for a period of time.
  */
-@ResourceDef(name="PractitionerRole", profile="http://hl7.org/fhir/Profile/PractitionerRole")
+@ResourceDef(name="PractitionerRole", profile="http://hl7.org/fhir/StructureDefinition/PractitionerRole")
 public class PractitionerRole extends DomainResource {
 
     public enum DaysOfWeek {
         /**
-         * Monday
+         * Monday.
          */
         MON, 
         /**
-         * Tuesday
+         * Tuesday.
          */
         TUE, 
         /**
-         * Wednesday
+         * Wednesday.
          */
         WED, 
         /**
-         * Thursday
+         * Thursday.
          */
         THU, 
         /**
-         * Friday
+         * Friday.
          */
         FRI, 
         /**
-         * Saturday
+         * Saturday.
          */
         SAT, 
         /**
-         * Sunday
+         * Sunday.
          */
         SUN, 
         /**
@@ -129,13 +129,13 @@ public class PractitionerRole extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case MON: return "Monday";
-            case TUE: return "Tuesday";
-            case WED: return "Wednesday";
-            case THU: return "Thursday";
-            case FRI: return "Friday";
-            case SAT: return "Saturday";
-            case SUN: return "Sunday";
+            case MON: return "Monday.";
+            case TUE: return "Tuesday.";
+            case WED: return "Wednesday.";
+            case THU: return "Thursday.";
+            case FRI: return "Friday.";
+            case SAT: return "Saturday.";
+            case SUN: return "Sunday.";
             default: return "?";
           }
         }
@@ -941,17 +941,17 @@ public class PractitionerRole extends DomainResource {
     protected List<ContactPoint> telecom;
 
     /**
-     * A collection of times that the Service Site is available.
+     * A collection of times the practitioner is available or performing this role at the location and/or healthcareservice.
      */
     @Child(name = "availableTime", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Times the Service Site is available", formalDefinition="A collection of times that the Service Site is available." )
+    @Description(shortDefinition="Times the Service Site is available", formalDefinition="A collection of times the practitioner is available or performing this role at the location and/or healthcareservice." )
     protected List<PractitionerRoleAvailableTimeComponent> availableTime;
 
     /**
-     * The HealthcareService is not available during this period of time due to the provided reason.
+     * The practitioner is not available or performing this role during this period of time due to the provided reason.
      */
     @Child(name = "notAvailable", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Not available during this time due to provided reason", formalDefinition="The HealthcareService is not available during this period of time due to the provided reason." )
+    @Description(shortDefinition="Not available during this time due to provided reason", formalDefinition="The practitioner is not available or performing this role during this period of time due to the provided reason." )
     protected List<PractitionerRoleNotAvailableComponent> notAvailable;
 
     /**
@@ -1502,7 +1502,7 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return {@link #availableTime} (A collection of times that the Service Site is available.)
+     * @return {@link #availableTime} (A collection of times the practitioner is available or performing this role at the location and/or healthcareservice.)
      */
     public List<PractitionerRoleAvailableTimeComponent> getAvailableTime() { 
       if (this.availableTime == null)
@@ -1555,7 +1555,7 @@ public class PractitionerRole extends DomainResource {
     }
 
     /**
-     * @return {@link #notAvailable} (The HealthcareService is not available during this period of time due to the provided reason.)
+     * @return {@link #notAvailable} (The practitioner is not available or performing this role during this period of time due to the provided reason.)
      */
     public List<PractitionerRoleNotAvailableComponent> getNotAvailable() { 
       if (this.notAvailable == null)
@@ -1743,8 +1743,8 @@ public class PractitionerRole extends DomainResource {
         children.add(new Property("location", "Reference(Location)", "The location(s) at which this practitioner provides care.", 0, java.lang.Integer.MAX_VALUE, location));
         children.add(new Property("healthcareService", "Reference(HealthcareService)", "The list of healthcare services that this worker provides for this role's Organization/Location(s).", 0, java.lang.Integer.MAX_VALUE, healthcareService));
         children.add(new Property("telecom", "ContactPoint", "Contact details that are specific to the role/location/service.", 0, java.lang.Integer.MAX_VALUE, telecom));
-        children.add(new Property("availableTime", "", "A collection of times that the Service Site is available.", 0, java.lang.Integer.MAX_VALUE, availableTime));
-        children.add(new Property("notAvailable", "", "The HealthcareService is not available during this period of time due to the provided reason.", 0, java.lang.Integer.MAX_VALUE, notAvailable));
+        children.add(new Property("availableTime", "", "A collection of times the practitioner is available or performing this role at the location and/or healthcareservice.", 0, java.lang.Integer.MAX_VALUE, availableTime));
+        children.add(new Property("notAvailable", "", "The practitioner is not available or performing this role during this period of time due to the provided reason.", 0, java.lang.Integer.MAX_VALUE, notAvailable));
         children.add(new Property("availabilityExceptions", "string", "A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.", 0, 1, availabilityExceptions));
         children.add(new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the practitioner with this role.", 0, java.lang.Integer.MAX_VALUE, endpoint));
       }
@@ -1762,8 +1762,8 @@ public class PractitionerRole extends DomainResource {
         case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The location(s) at which this practitioner provides care.", 0, java.lang.Integer.MAX_VALUE, location);
         case 1289661064: /*healthcareService*/  return new Property("healthcareService", "Reference(HealthcareService)", "The list of healthcare services that this worker provides for this role's Organization/Location(s).", 0, java.lang.Integer.MAX_VALUE, healthcareService);
         case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "Contact details that are specific to the role/location/service.", 0, java.lang.Integer.MAX_VALUE, telecom);
-        case 1873069366: /*availableTime*/  return new Property("availableTime", "", "A collection of times that the Service Site is available.", 0, java.lang.Integer.MAX_VALUE, availableTime);
-        case -629572298: /*notAvailable*/  return new Property("notAvailable", "", "The HealthcareService is not available during this period of time due to the provided reason.", 0, java.lang.Integer.MAX_VALUE, notAvailable);
+        case 1873069366: /*availableTime*/  return new Property("availableTime", "", "A collection of times the practitioner is available or performing this role at the location and/or healthcareservice.", 0, java.lang.Integer.MAX_VALUE, availableTime);
+        case -629572298: /*notAvailable*/  return new Property("notAvailable", "", "The practitioner is not available or performing this role during this period of time due to the provided reason.", 0, java.lang.Integer.MAX_VALUE, notAvailable);
         case -1149143617: /*availabilityExceptions*/  return new Property("availabilityExceptions", "string", "A description of site availability exceptions, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as details in the available Times and not available Times.", 0, 1, availabilityExceptions);
         case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the practitioner with this role.", 0, java.lang.Integer.MAX_VALUE, endpoint);
         default: return super.getNamedProperty(_hash, _name, _checkValid);

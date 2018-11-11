@@ -85,6 +85,7 @@ public class TextFile {
     sw.flush();
     sw.close();
   }
+  
   public static byte[] stringToBytes(String content, boolean bom) throws IOException {
     ByteArrayOutputStream bs = new ByteArrayOutputStream();
     OutputStreamWriter sw = new OutputStreamWriter(bs, "UTF-8");
@@ -95,6 +96,7 @@ public class TextFile {
     sw.close();
     return bs.toByteArray(); 
   }
+  
   public static void stringToFile(String content, String path) throws IOException  {
     File file = new CSFile(path);
     stringToFile(content, file);

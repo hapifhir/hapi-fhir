@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CompositeMeasureScoring {
 
         /**
-         * Opportunity scoring combines the scores from component measures by combining the numerators and denominators for each component
+         * Opportunity scoring combines the scores from component measures by combining the numerators and denominators for each component.
          */
         OPPORTUNITY, 
         /**
-         * All-or-nothing scoring includes an individual in the numerator of the composite measure if they are in the numerators of all of the component measures in which they are in the denominator
+         * All-or-nothing scoring includes an individual in the numerator of the composite measure if they are in the numerators of all of the component measures in which they are in the denominator.
          */
         ALLORNOTHING, 
         /**
-         * Linear scoring gives an individual a score based on the number of numerators in which they appear
+         * Linear scoring gives an individual a score based on the number of numerators in which they appear.
          */
         LINEAR, 
         /**
-         * Weighted scoring gives an individual a score based on a weighted factor for each component numerator in which they appear
+         * Weighted scoring gives an individual a score based on a weighted factor for each component numerator in which they appear.
          */
         WEIGHTED, 
         /**
@@ -79,14 +79,14 @@ public enum CompositeMeasureScoring {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/composite-measure-scoring";
+          return "http://terminology.hl7.org/CodeSystem/composite-measure-scoring";
         }
         public String getDefinition() {
           switch (this) {
-            case OPPORTUNITY: return "Opportunity scoring combines the scores from component measures by combining the numerators and denominators for each component";
-            case ALLORNOTHING: return "All-or-nothing scoring includes an individual in the numerator of the composite measure if they are in the numerators of all of the component measures in which they are in the denominator";
-            case LINEAR: return "Linear scoring gives an individual a score based on the number of numerators in which they appear";
-            case WEIGHTED: return "Weighted scoring gives an individual a score based on a weighted factor for each component numerator in which they appear";
+            case OPPORTUNITY: return "Opportunity scoring combines the scores from component measures by combining the numerators and denominators for each component.";
+            case ALLORNOTHING: return "All-or-nothing scoring includes an individual in the numerator of the composite measure if they are in the numerators of all of the component measures in which they are in the denominator.";
+            case LINEAR: return "Linear scoring gives an individual a score based on the number of numerators in which they appear.";
+            case WEIGHTED: return "Weighted scoring gives an individual a score based on a weighted factor for each component numerator in which they appear.";
             default: return "?";
           }
         }

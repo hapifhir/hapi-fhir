@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ConsentProvisionType {
 
         /**
-         * Consent is denied for actions meeting these rules
+         * Consent is denied for actions meeting these rules.
          */
         DENY, 
         /**
-         * Consent is provided for actions meeting these rules
+         * Consent is provided for actions meeting these rules.
          */
         PERMIT, 
         /**
@@ -69,8 +69,8 @@ public enum ConsentProvisionType {
         }
         public String getDefinition() {
           switch (this) {
-            case DENY: return "Consent is denied for actions meeting these rules";
-            case PERMIT: return "Consent is provided for actions meeting these rules";
+            case DENY: return "Consent is denied for actions meeting these rules.";
+            case PERMIT: return "Consent is provided for actions meeting these rules.";
             default: return "?";
           }
         }

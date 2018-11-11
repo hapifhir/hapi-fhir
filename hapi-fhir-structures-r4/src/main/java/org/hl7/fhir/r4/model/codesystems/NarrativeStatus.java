@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,15 +41,15 @@ public enum NarrativeStatus {
          */
         GENERATED, 
         /**
-         * The contents of the narrative are entirely generated from the structured data in the content and some of the content is generated from extensions
+         * The contents of the narrative are entirely generated from the structured data in the content and some of the content is generated from extensions. The narrative SHALL reflect the impact of all modifier extensions.
          */
         EXTENSIONS, 
         /**
-         * The contents of the narrative may contain additional information not found in the structured data. Note that there is no computable way to determine what the extra information is, other than by human inspection
+         * The contents of the narrative may contain additional information not found in the structured data. Note that there is no computable way to determine what the extra information is, other than by human inspection.
          */
         ADDITIONAL, 
         /**
-         * The contents of the narrative are some equivalent of "No human-readable text provided in this case"
+         * The contents of the narrative are some equivalent of "No human-readable text provided in this case".
          */
         EMPTY, 
         /**
@@ -84,9 +84,9 @@ public enum NarrativeStatus {
         public String getDefinition() {
           switch (this) {
             case GENERATED: return "The contents of the narrative are entirely generated from the structured data in the content.";
-            case EXTENSIONS: return "The contents of the narrative are entirely generated from the structured data in the content and some of the content is generated from extensions";
-            case ADDITIONAL: return "The contents of the narrative may contain additional information not found in the structured data. Note that there is no computable way to determine what the extra information is, other than by human inspection";
-            case EMPTY: return "The contents of the narrative are some equivalent of \"No human-readable text provided in this case\"";
+            case EXTENSIONS: return "The contents of the narrative are entirely generated from the structured data in the content and some of the content is generated from extensions. The narrative SHALL reflect the impact of all modifier extensions.";
+            case ADDITIONAL: return "The contents of the narrative may contain additional information not found in the structured data. Note that there is no computable way to determine what the extra information is, other than by human inspection.";
+            case EMPTY: return "The contents of the narrative are some equivalent of \"No human-readable text provided in this case\".";
             default: return "?";
           }
         }

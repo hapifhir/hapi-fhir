@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,27 +37,27 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ChargeitemStatus {
 
         /**
-         * The charge item has been entered, but the charged service is not  yet complete, so it shall not be billed yet but might be used in the context of pre-authorization
+         * The charge item has been entered, but the charged service is not  yet complete, so it shall not be billed yet but might be used in the context of pre-authorization.
          */
         PLANNED, 
         /**
-         * The charge item is ready for billing
+         * The charge item is ready for billing.
          */
         BILLABLE, 
         /**
-         * The charge item has been determined to be not billable (e.g. due to rules associated with the billing code)
+         * The charge item has been determined to be not billable (e.g. due to rules associated with the billing code).
          */
         NOTBILLABLE, 
         /**
-         * The processing of the charge was aborted
+         * The processing of the charge was aborted.
          */
         ABORTED, 
         /**
-         * The charge item has been billed (e.g. a billing engine has generated financial transactions by applying the associated ruled for the charge item to the context of the Encounter, and placed them into Claims/Invoices
+         * The charge item has been billed (e.g. a billing engine has generated financial transactions by applying the associated ruled for the charge item to the context of the Encounter, and placed them into Claims/Invoices.
          */
         BILLED, 
         /**
-         * The charge item has been entered in error and should not be processed for billing
+         * The charge item has been entered in error and should not be processed for billing.
          */
         ENTEREDINERROR, 
         /**
@@ -104,12 +104,12 @@ public enum ChargeitemStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case PLANNED: return "The charge item has been entered, but the charged service is not  yet complete, so it shall not be billed yet but might be used in the context of pre-authorization";
-            case BILLABLE: return "The charge item is ready for billing";
-            case NOTBILLABLE: return "The charge item has been determined to be not billable (e.g. due to rules associated with the billing code)";
-            case ABORTED: return "The processing of the charge was aborted";
-            case BILLED: return "The charge item has been billed (e.g. a billing engine has generated financial transactions by applying the associated ruled for the charge item to the context of the Encounter, and placed them into Claims/Invoices";
-            case ENTEREDINERROR: return "The charge item has been entered in error and should not be processed for billing";
+            case PLANNED: return "The charge item has been entered, but the charged service is not  yet complete, so it shall not be billed yet but might be used in the context of pre-authorization.";
+            case BILLABLE: return "The charge item is ready for billing.";
+            case NOTBILLABLE: return "The charge item has been determined to be not billable (e.g. due to rules associated with the billing code).";
+            case ABORTED: return "The processing of the charge was aborted.";
+            case BILLED: return "The charge item has been billed (e.g. a billing engine has generated financial transactions by applying the associated ruled for the charge item to the context of the Encounter, and placed them into Claims/Invoices.";
+            case ENTEREDINERROR: return "The charge item has been entered in error and should not be processed for billing.";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this charge item  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }

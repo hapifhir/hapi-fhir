@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,59 +37,59 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum SmartCapabilities {
 
         /**
-         * support for SMART’s EHR Launch mode
+         * support for SMART’s EHR Launch mode.
          */
         LAUNCHEHR, 
         /**
-         * support for SMART’s Standalone Launch mode
+         * support for SMART’s Standalone Launch mode.
          */
         LAUNCHSTANDALONE, 
         /**
-         * support for SMART’s public client profile (no client authentication)
+         * support for SMART’s public client profile (no client authentication).
          */
         CLIENTPUBLIC, 
         /**
-         * support for SMART’s confidential client profile (symmetric client secret authentication)
+         * support for SMART’s confidential client profile (symmetric client secret authentication).
          */
         CLIENTCONFIDENTIALSYMMETRIC, 
         /**
-         * support for SMART’s OpenID Connect profile
+         * support for SMART’s OpenID Connect profile.
          */
         SSOOPENIDCONNECT, 
         /**
-         * support for “need patient banner” launch context (conveyed via need_patient_banner token parameter)
+         * support for “need patient banner” launch context (conveyed via need_patient_banner token parameter).
          */
         CONTEXTPASSTHROUGHBANNER, 
         /**
-         * support for “SMART style URL” launch context (conveyed via smart_style_url token parameter)
+         * support for “SMART style URL” launch context (conveyed via smart_style_url token parameter).
          */
         CONTEXTPASSTHROUGHSTYLE, 
         /**
-         * support for patient-level launch context (requested by launch/patient scope, conveyed via patient token parameter)
+         * support for patient-level launch context (requested by launch/patient scope, conveyed via patient token parameter).
          */
         CONTEXTEHRPATIENT, 
         /**
-         * support for encounter-level launch context (requested by launch/encounter scope, conveyed via encounter token parameter)
+         * support for encounter-level launch context (requested by launch/encounter scope, conveyed via encounter token parameter).
          */
         CONTEXTEHRENCOUNTER, 
         /**
-         * support for patient-level launch context (requested by launch/patient scope, conveyed via patient token parameter)
+         * support for patient-level launch context (requested by launch/patient scope, conveyed via patient token parameter).
          */
         CONTEXTSTANDALONEPATIENT, 
         /**
-         * support for encounter-level launch context (requested by launch/encounter scope, conveyed via encounter token parameter)
+         * support for encounter-level launch context (requested by launch/encounter scope, conveyed via encounter token parameter).
          */
         CONTEXTSTANDALONEENCOUNTER, 
         /**
-         * support for refresh tokens (requested by offline_access scope)
+         * support for refresh tokens (requested by offline_access scope).
          */
         PERMISSIONOFFLINE, 
         /**
-         * support for patient-level scopes (e.g. patient/Observation.read)
+         * support for patient-level scopes (e.g. patient/Observation.read).
          */
         PERMISSIONPATIENT, 
         /**
-         * support for user-level scopes (e.g. user/Appointment.read)
+         * support for user-level scopes (e.g. user/Appointment.read).
          */
         PERMISSIONUSER, 
         /**
@@ -149,24 +149,24 @@ public enum SmartCapabilities {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/smart-capabilities";
+          return "http://terminology.hl7.org/CodeSystem/smart-capabilities";
         }
         public String getDefinition() {
           switch (this) {
-            case LAUNCHEHR: return "support for SMART’s EHR Launch mode";
-            case LAUNCHSTANDALONE: return "support for SMART’s Standalone Launch mode";
-            case CLIENTPUBLIC: return "support for SMART’s public client profile (no client authentication)";
-            case CLIENTCONFIDENTIALSYMMETRIC: return "support for SMART’s confidential client profile (symmetric client secret authentication)";
-            case SSOOPENIDCONNECT: return "support for SMART’s OpenID Connect profile";
-            case CONTEXTPASSTHROUGHBANNER: return "support for “need patient banner” launch context (conveyed via need_patient_banner token parameter)";
-            case CONTEXTPASSTHROUGHSTYLE: return "support for “SMART style URL” launch context (conveyed via smart_style_url token parameter)";
-            case CONTEXTEHRPATIENT: return "support for patient-level launch context (requested by launch/patient scope, conveyed via patient token parameter)";
-            case CONTEXTEHRENCOUNTER: return "support for encounter-level launch context (requested by launch/encounter scope, conveyed via encounter token parameter)";
-            case CONTEXTSTANDALONEPATIENT: return "support for patient-level launch context (requested by launch/patient scope, conveyed via patient token parameter)";
-            case CONTEXTSTANDALONEENCOUNTER: return "support for encounter-level launch context (requested by launch/encounter scope, conveyed via encounter token parameter)";
-            case PERMISSIONOFFLINE: return "support for refresh tokens (requested by offline_access scope)";
-            case PERMISSIONPATIENT: return "support for patient-level scopes (e.g. patient/Observation.read)";
-            case PERMISSIONUSER: return "support for user-level scopes (e.g. user/Appointment.read)";
+            case LAUNCHEHR: return "support for SMART’s EHR Launch mode.";
+            case LAUNCHSTANDALONE: return "support for SMART’s Standalone Launch mode.";
+            case CLIENTPUBLIC: return "support for SMART’s public client profile (no client authentication).";
+            case CLIENTCONFIDENTIALSYMMETRIC: return "support for SMART’s confidential client profile (symmetric client secret authentication).";
+            case SSOOPENIDCONNECT: return "support for SMART’s OpenID Connect profile.";
+            case CONTEXTPASSTHROUGHBANNER: return "support for “need patient banner” launch context (conveyed via need_patient_banner token parameter).";
+            case CONTEXTPASSTHROUGHSTYLE: return "support for “SMART style URL” launch context (conveyed via smart_style_url token parameter).";
+            case CONTEXTEHRPATIENT: return "support for patient-level launch context (requested by launch/patient scope, conveyed via patient token parameter).";
+            case CONTEXTEHRENCOUNTER: return "support for encounter-level launch context (requested by launch/encounter scope, conveyed via encounter token parameter).";
+            case CONTEXTSTANDALONEPATIENT: return "support for patient-level launch context (requested by launch/patient scope, conveyed via patient token parameter).";
+            case CONTEXTSTANDALONEENCOUNTER: return "support for encounter-level launch context (requested by launch/encounter scope, conveyed via encounter token parameter).";
+            case PERMISSIONOFFLINE: return "support for refresh tokens (requested by offline_access scope).";
+            case PERMISSIONPATIENT: return "support for patient-level scopes (e.g. patient/Observation.read).";
+            case PERMISSIONUSER: return "support for user-level scopes (e.g. user/Appointment.read).";
             default: return "?";
           }
         }

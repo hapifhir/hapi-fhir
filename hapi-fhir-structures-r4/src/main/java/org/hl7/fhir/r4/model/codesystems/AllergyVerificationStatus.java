@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum AllergyVerificationStatus {
          */
         CONFIRMED, 
         /**
-         * A propensity for a reaction to the identified substance has been disproven with a high level of clinical certainty, which may include testing or rechallenge, and is refuted.
+         * A propensity for a reaction to the identified substance has been disputed or disproven with a sufficient level of clinical certainty to justify invalidating the assertion.  This might or might not include testing or rechallenge.
          */
         REFUTED, 
         /**
@@ -85,7 +85,7 @@ public enum AllergyVerificationStatus {
           switch (this) {
             case UNCONFIRMED: return "A low level of certainty about the propensity for a reaction to the identified substance.";
             case CONFIRMED: return "A high level of certainty about the propensity for a reaction to the identified substance, which may include clinical evidence by testing or rechallenge.";
-            case REFUTED: return "A propensity for a reaction to the identified substance has been disproven with a high level of clinical certainty, which may include testing or rechallenge, and is refuted.";
+            case REFUTED: return "A propensity for a reaction to the identified substance has been disputed or disproven with a sufficient level of clinical certainty to justify invalidating the assertion.  This might or might not include testing or rechallenge.";
             case ENTEREDINERROR: return "The statement was entered in error and is not valid.";
             default: return "?";
           }

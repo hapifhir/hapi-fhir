@@ -59,6 +59,7 @@ import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -194,8 +195,18 @@ public class FhirInstanceValidatorDstu3Test {
 		when(myMockSupport.fetchCodeSystem(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
-				CodeSystem retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0], (String) theInvocation.getArguments()[1]);
-				ourLog.debug("fetchCodeSystem({}) : {}", new Object[] {theInvocation.getArguments()[1], retVal});
+				CodeSystem retVal;
+
+				String id = (String) theInvocation.getArguments()[1];
+				retVal = myCodeSystems.get(id);
+
+				if (retVal == null) {
+					retVal = myDefaultValidationSupport.fetchCodeSystem((FhirContext) theInvocation.getArguments()[0], id);
+				}
+
+				if (retVal == null) {
+					ourLog.info("fetchCodeSystem({}) : {}", new Object[]{id, retVal});
+				}
 				return retVal;
 			}
 		});
@@ -407,6 +418,9 @@ public class FhirInstanceValidatorDstu3Test {
 		ValueSet vsConfidentiality = ourCtx.newJsonParser().parseResource(ValueSet.class, loadResource("/dstu3/bug824-vs-confidentiality.json"));
 		myValueSets.put("http://phr.kanta.fi/ValueSet/fiphr-vs-confidentiality", vsConfidentiality);
 
+		CodeSystem csMedicationContext = ourCtx.newJsonParser().parseResource(CodeSystem.class, loadResource("/dstu3/bug824-fhirphr-cs-medicationcontext.json"));
+		myCodeSystems.put("http://phr.kanta.fi/fiphr-cs-medicationcontext", csMedicationContext);
+
 		String input = loadResource("/dstu3/bug824-resource.json");
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> issues = logResultsAndReturnNonInformationalOnes(output);
@@ -518,14 +532,14 @@ public class FhirInstanceValidatorDstu3Test {
 		is.setUid("urn:oid:1.2.3.4");
 		is.getPatient().setReference("Patient/1");
 
-		is.getModalityListFirstRep().setSystem("http://foo");
+		is.getModalityListFirstRep().setSystem("http://dicom.nema.org/resources/ontology/DCM");
 		is.getModalityListFirstRep().setCode("BAR");
 		is.getModalityListFirstRep().setDisplay("Hello");
 
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertEquals(1, outcome.size());
-		assertEquals("The Coding provided is not in the value set http://hl7.org/fhir/ValueSet/dicom-cid29 (http://hl7.org/fhir/ValueSet/dicom-cid29, and a code should come from this value set unless it has no suitable code) (error message = Code http://foo/BAR was not validated because the code system is not present)", outcome.get(0).getMessage());
+		assertEquals(2, outcome.size());
+		assertEquals("Unknown code: http://dicom.nema.org/resources/ontology/DCM / BAR", outcome.get(0).getMessage());
 
 	}
 

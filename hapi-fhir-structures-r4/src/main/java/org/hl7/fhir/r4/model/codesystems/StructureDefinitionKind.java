@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum StructureDefinitionKind {
 
         /**
-         * A primitive type that has a value and an extension. These can be used throughout Resource and extension definitions. Only the base specification can define primitive types.
+         * A primitive type that has a value and an extension. These can be used throughout complex datatype, Resource and extension definitions. Only the base specification can define primitive types.
          */
         PRIMITIVETYPE, 
         /**
-         * A  complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions, and in logical models.
+         * A  complex structure that defines a set of data elements that is suitable for use in 'resources'. The base specification defines a number of complex types, and other specifications can define additional types. These structures do not have a maintained identity.
          */
         COMPLEXTYPE, 
         /**
-         * A resource defined by the FHIR specification.
+         * A 'resource' - a directed acyclic graph of elements that aggregrates other types into an identifiable entity. The base FHIR resources are defined by the FHIR specification itself but other 'resources' can be defined in additional specifications (though these will not be recognised as 'resources' by the FHIR specification (i.e. they do not get end-points etc, or act as the targets of references in FHIR defined resources - though other specificatiosn can treat them this way).
          */
         RESOURCE, 
         /**
-         * A conceptual package of data that will be mapped to resources for implementation.
+         * A pattern or a template that is not intended to be a real resource or complex type.
          */
         LOGICAL, 
         /**
@@ -83,10 +83,10 @@ public enum StructureDefinitionKind {
         }
         public String getDefinition() {
           switch (this) {
-            case PRIMITIVETYPE: return "A primitive type that has a value and an extension. These can be used throughout Resource and extension definitions. Only the base specification can define primitive types.";
-            case COMPLEXTYPE: return "A  complex structure that defines a set of data elements. These can be used throughout Resource and extension definitions, and in logical models.";
-            case RESOURCE: return "A resource defined by the FHIR specification.";
-            case LOGICAL: return "A conceptual package of data that will be mapped to resources for implementation.";
+            case PRIMITIVETYPE: return "A primitive type that has a value and an extension. These can be used throughout complex datatype, Resource and extension definitions. Only the base specification can define primitive types.";
+            case COMPLEXTYPE: return "A  complex structure that defines a set of data elements that is suitable for use in 'resources'. The base specification defines a number of complex types, and other specifications can define additional types. These structures do not have a maintained identity.";
+            case RESOURCE: return "A 'resource' - a directed acyclic graph of elements that aggregrates other types into an identifiable entity. The base FHIR resources are defined by the FHIR specification itself but other 'resources' can be defined in additional specifications (though these will not be recognised as 'resources' by the FHIR specification (i.e. they do not get end-points etc, or act as the targets of references in FHIR defined resources - though other specificatiosn can treat them this way).";
+            case LOGICAL: return "A pattern or a template that is not intended to be a real resource or complex type.";
             default: return "?";
           }
         }
@@ -95,7 +95,7 @@ public enum StructureDefinitionKind {
             case PRIMITIVETYPE: return "Primitive Data Type";
             case COMPLEXTYPE: return "Complex Data Type";
             case RESOURCE: return "Resource";
-            case LOGICAL: return "Logical Model";
+            case LOGICAL: return "Logical";
             default: return "?";
           }
     }

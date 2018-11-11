@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A value set specifies a set of codes drawn from one or more code systems.
  */
-@ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/Profile/ValueSet")
+@ResourceDef(name="ValueSet", profile="http://hl7.org/fhir/StructureDefinition/ValueSet")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "immutable", "purpose", "copyright", "extensible", "compose", "expansion"})
 public class ValueSet extends MetadataResource {
 

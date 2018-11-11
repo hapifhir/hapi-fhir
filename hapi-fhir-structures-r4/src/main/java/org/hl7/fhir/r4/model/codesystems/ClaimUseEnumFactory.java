@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,26 +39,22 @@ public class ClaimUseEnumFactory implements EnumFactory<ClaimUse> {
   public ClaimUse fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("complete".equals(codeString))
-      return ClaimUse.COMPLETE;
-    if ("proposed".equals(codeString))
-      return ClaimUse.PROPOSED;
-    if ("exploratory".equals(codeString))
-      return ClaimUse.EXPLORATORY;
-    if ("other".equals(codeString))
-      return ClaimUse.OTHER;
+    if ("claim".equals(codeString))
+      return ClaimUse.CLAIM;
+    if ("preauthorization".equals(codeString))
+      return ClaimUse.PREAUTHORIZATION;
+    if ("predetermination".equals(codeString))
+      return ClaimUse.PREDETERMINATION;
     throw new IllegalArgumentException("Unknown ClaimUse code '"+codeString+"'");
   }
 
   public String toCode(ClaimUse code) {
-    if (code == ClaimUse.COMPLETE)
-      return "complete";
-    if (code == ClaimUse.PROPOSED)
-      return "proposed";
-    if (code == ClaimUse.EXPLORATORY)
-      return "exploratory";
-    if (code == ClaimUse.OTHER)
-      return "other";
+    if (code == ClaimUse.CLAIM)
+      return "claim";
+    if (code == ClaimUse.PREAUTHORIZATION)
+      return "preauthorization";
+    if (code == ClaimUse.PREDETERMINATION)
+      return "predetermination";
     return "?";
   }
 

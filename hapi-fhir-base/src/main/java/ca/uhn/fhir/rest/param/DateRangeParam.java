@@ -2,15 +2,14 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
 import static java.lang.String.format;
@@ -256,10 +255,18 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	public Date getLowerBoundAsInstant() {
-		if (myLowerBound == null) {
+		if (myLowerBound == null || myLowerBound.getValue() == null) {
 			return null;
 		}
 		Date retVal = myLowerBound.getValue();
+
+		if (myLowerBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
+			Calendar cal = DateUtils.toCalendar(retVal);
+			cal.setTimeZone(TimeZone.getTimeZone("GMT-11:30"));
+			cal = DateUtils.truncate(cal, Calendar.DATE);
+			retVal = cal.getTime();
+		}
+
 		if (myLowerBound.getPrefix() != null) {
 			switch (myLowerBound.getPrefix()) {
 				case GREATERTHAN:
@@ -303,10 +310,19 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	public Date getUpperBoundAsInstant() {
-		if (myUpperBound == null) {
+		if (myUpperBound == null || myUpperBound.getValue() == null) {
 			return null;
 		}
+
 		Date retVal = myUpperBound.getValue();
+
+		if (myUpperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
+			Calendar cal = DateUtils.toCalendar(retVal);
+			cal.setTimeZone(TimeZone.getTimeZone("GMT+11:30"));
+			cal = DateUtils.truncate(cal, Calendar.DATE);
+			retVal = cal.getTime();
+		}
+
 		if (myUpperBound.getPrefix() != null) {
 			switch (myUpperBound.getPrefix()) {
 				case LESSTHAN:

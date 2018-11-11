@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.
  */
-@ResourceDef(name="AuditEvent", profile="http://hl7.org/fhir/Profile/AuditEvent")
+@ResourceDef(name="AuditEvent", profile="http://hl7.org/fhir/StructureDefinition/AuditEvent")
 public class AuditEvent extends DomainResource {
 
     public enum AuditEventAction {

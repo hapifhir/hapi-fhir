@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -52,10 +53,10 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@SuppressWarnings({"unchecked", "deprecation"})
+@SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
@@ -159,22 +160,31 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		pt1.addName().setFamily("FAM");
 		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), greaterThan(0));
+			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
+			assertTrue(tableOpt.isPresent());
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
 		});
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			ResourceTable table = tableOpt.get();
 			table.setIndexStatus(null);
 			table.setDeleted(new Date());
+			table = myResourceTableDao.saveAndFlush(table);
+			ResourceHistoryTable newHistory = table.toHistory();
+			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersion(table.getId(), 1L);
+			newHistory.setEncoding(currentHistory.getEncoding());
+			newHistory.setResource(currentHistory.getResource());
+			myResourceHistoryTableDao.save(newHistory);
 		});
 
-		mySystemDao.performReindexingPass(1000);
-		mySystemDao.performReindexingPass(1000);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
@@ -184,6 +194,48 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testMissingVersionsAreReindexed() {
+		myDaoConfig.setSchedulingDisabled(true);
+
+		Patient pt1 = new Patient();
+		pt1.setActive(true);
+		pt1.addName().setFamily("FAM");
+		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+
+		runInTransaction(() -> {
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), greaterThan(0));
+			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
+			assertTrue(tableOpt.isPresent());
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+		});
+
+		/*
+		 * This triggers a new version in the HFJ_RESOURCE table, but
+		 * we do not create the corresponding entry in the HFJ_RES_VER
+		 * table.
+		 */
+		runInTransaction(() -> {
+			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
+			assertTrue(tableOpt.isPresent());
+			ResourceTable table = tableOpt.get();
+			table.setIndexStatus(null);
+			table.setDeleted(new Date());
+			myResourceTableDao.saveAndFlush(table);
+		});
+
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+
+		runInTransaction(() -> {
+			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
+			assertTrue(tableOpt.isPresent());
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED, tableOpt.get().getIndexStatus().longValue());
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), not(greaterThan(0)));
+		});
+
+
+	}
 
 	@Test
 	public void testCantSearchForDeletedResourceByLanguageOrTag() {
@@ -745,7 +797,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		p.addIdentifier().setSystem("urn:system").setValue("testCreateTextIdFails");
 		p.addName().setFamily("Hello");
 
-		p.getMeta().addTag().setSystem(Constants.TAG_SUBSETTED_SYSTEM).setCode(Constants.TAG_SUBSETTED_CODE);
+		p.getMeta().addTag().setSystem(Constants.TAG_SUBSETTED_SYSTEM_DSTU3).setCode(Constants.TAG_SUBSETTED_CODE);
 
 		try {
 			myPatientDao.create(p, mySrd);
@@ -3794,6 +3846,27 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		StructureDefinition ext = myValidationSupport.fetchStructureDefinition(myFhirCtx, "http://hl7.org/fhir/StructureDefinition/familymemberhistory-type");
 		Validate.notNull(ext);
 		myStructureDefinitionDao.update(ext);
+	}
+
+	@Test
+	public void testDontReuseErrorSearches() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("subject", new ReferenceParam("Patient/123"));
+		String normalized = map.toNormalizedQueryString(myFhirCtx);
+		String uuid = UUID.randomUUID().toString();
+
+		runInTransaction(() -> {
+			Search search = new Search();
+			SearchCoordinatorSvcImpl.populateSearchEntity(map, "Encounter", uuid, normalized, search);
+			search.setStatus(SearchStatusEnum.FAILED);
+			search.setFailureCode(500);
+			search.setFailureMessage("FOO");
+			mySearchEntityDao.save(search);
+		});
+
+		IBundleProvider results = myEncounterDao.search(map);
+		assertEquals(0, results.size().intValue());
+		assertNotEquals(uuid, results.getUuid());
 	}
 
 	@AfterClass

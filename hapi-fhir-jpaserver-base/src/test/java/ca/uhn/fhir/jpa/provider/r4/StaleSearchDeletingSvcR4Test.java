@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
+import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
+import ca.uhn.fhir.rest.gclient.IClientExecutable;
+import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.Patient;
@@ -16,29 +16,26 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.util.AopTestUtils;
 
-import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
-import ca.uhn.fhir.rest.gclient.IClientExecutable;
-import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.util.TestUtil;
+import java.util.Date;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcR4Test.class);
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-
+	@Override
 	@After()
 	public void after() throws Exception {
 		super.after();
 		StaleSearchDeletingSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(myStaleSearchDeletingSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(StaleSearchDeletingSvcImpl.DEFAULT_CUTOFF_SLACK);
+		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteForUnitTest(10000);
 	}
 
+	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
@@ -93,5 +90,76 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 			assertThat(e.getMessage(), containsString("does not exist and may have expired"));
 		}
 	}
+
+	@Test
+	public void testDeleteVeryLargeSearch() {
+		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
+
+		runInTransaction(() -> {
+			Search search = new Search();
+			search.setStatus(SearchStatusEnum.FINISHED);
+			search.setUuid(UUID.randomUUID().toString());
+			search.setCreated(DateUtils.addDays(new Date(), -10000));
+			search.setSearchType(SearchTypeEnum.SEARCH);
+			search.setResourceType("Patient");
+			search.setSearchLastReturned(DateUtils.addDays(new Date(), -10000));
+			search = mySearchEntityDao.save(search);
+
+			for (int i = 0; i < 15; i++) {
+				ResourceTable resource = new ResourceTable();
+				resource.setPublished(new Date());
+				resource.setUpdated(new Date());
+				resource.setResourceType("Patient");
+				resource = myResourceTableDao.saveAndFlush(resource);
+
+				SearchResult sr = new SearchResult(search);
+				sr.setOrder(i);
+				sr.setResourcePid(resource.getId());
+				mySearchResultDao.save(sr);
+			}
+
+
+			SearchInclude si = new SearchInclude(search, "Patient:name", false, false);
+			mySearchIncludeDao.save(si);
+
+		});
+
+		// It should take two passes to delete the search fully
+		assertEquals(1, mySearchEntityDao.count());
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		assertEquals(1, mySearchEntityDao.count());
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		assertEquals(0, mySearchEntityDao.count());
+
+	}
+
+	@Test
+	public void testDeleteVerySmallSearch() {
+		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
+
+		runInTransaction(() -> {
+			Search search = new Search();
+			search.setStatus(SearchStatusEnum.FINISHED);
+			search.setUuid(UUID.randomUUID().toString());
+			search.setCreated(DateUtils.addDays(new Date(), -10000));
+			search.setSearchType(SearchTypeEnum.SEARCH);
+			search.setResourceType("Patient");
+			search.setSearchLastReturned(DateUtils.addDays(new Date(), -10000));
+			search = mySearchEntityDao.save(search);
+
+		});
+
+		// It should take one pass to delete the search fully
+		assertEquals(1, mySearchEntityDao.count());
+		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
+		assertEquals(0, mySearchEntityDao.count());
+
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
 
 }

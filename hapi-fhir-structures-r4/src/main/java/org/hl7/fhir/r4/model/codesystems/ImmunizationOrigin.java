@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,6 +53,10 @@ public enum ImmunizationOrigin {
          */
         SCHOOL, 
         /**
+         * The data for the immunization event originated with an immunization information system (IIS) or registry operating within the jurisdiction.
+         */
+        JURISDICTION, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -67,6 +71,8 @@ public enum ImmunizationOrigin {
           return RECALL;
         if ("school".equals(codeString))
           return SCHOOL;
+        if ("jurisdiction".equals(codeString))
+          return JURISDICTION;
         throw new FHIRException("Unknown ImmunizationOrigin code '"+codeString+"'");
         }
         public String toCode() {
@@ -75,11 +81,12 @@ public enum ImmunizationOrigin {
             case RECORD: return "record";
             case RECALL: return "recall";
             case SCHOOL: return "school";
+            case JURISDICTION: return "jurisdiction";
             default: return "?";
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/immunization-origin";
+          return "http://terminology.hl7.org/CodeSystem/immunization-origin";
         }
         public String getDefinition() {
           switch (this) {
@@ -87,6 +94,7 @@ public enum ImmunizationOrigin {
             case RECORD: return "The data for the immunization event originated with a written record for the patient.";
             case RECALL: return "The data for the immunization event originated from the recollection of the patient or parent/guardian of the patient.";
             case SCHOOL: return "The data for the immunization event originated with a school record for the patient.";
+            case JURISDICTION: return "The data for the immunization event originated with an immunization information system (IIS) or registry operating within the jurisdiction.";
             default: return "?";
           }
         }
@@ -96,6 +104,7 @@ public enum ImmunizationOrigin {
             case RECORD: return "Written Record";
             case RECALL: return "Parent/Guardian/Patient Recall";
             case SCHOOL: return "School Record";
+            case JURISDICTION: return "Jurisdictional IIS";
             default: return "?";
           }
     }

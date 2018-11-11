@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ReferenceHandlingPolicy {
 
         /**
-         * The server supports and populates Literal references where they are known (this code does not guarantee that all references are literal; see 'enforced')
+         * The server supports and populates Literal references (i.e. using Reference.reference) where they are known (this code does not guarantee that all references are literal; see 'enforced').
          */
         LITERAL, 
         /**
-         * The server allows logical references
+         * The server allows logical references (i.e. using Reference.identifier).
          */
         LOGICAL, 
         /**
-         * The server will attempt to resolve logical references to literal references (if resolution fails, the server may still accept resources; see logical)
+         * The server will attempt to resolve logical references to literal references - i.e. converting Reference.identifier to Reference.reference (if resolution fails, the server may still accept resources; see logical).
          */
         RESOLVES, 
         /**
-         * The server enforces that references have integrity - e.g. it ensures that references can always be resolved. This is typically the case for clinical record systems, but often not the case for middleware/proxy systems
+         * The server enforces that references have integrity - e.g. it ensures that references can always be resolved. This is typically the case for clinical record systems, but often not the case for middleware/proxy systems.
          */
         ENFORCED, 
         /**
-         * The server does not support references that point to other servers
+         * The server does not support references that point to other servers.
          */
         LOCAL, 
         /**
@@ -90,11 +90,11 @@ public enum ReferenceHandlingPolicy {
         }
         public String getDefinition() {
           switch (this) {
-            case LITERAL: return "The server supports and populates Literal references where they are known (this code does not guarantee that all references are literal; see 'enforced')";
-            case LOGICAL: return "The server allows logical references";
-            case RESOLVES: return "The server will attempt to resolve logical references to literal references (if resolution fails, the server may still accept resources; see logical)";
-            case ENFORCED: return "The server enforces that references have integrity - e.g. it ensures that references can always be resolved. This is typically the case for clinical record systems, but often not the case for middleware/proxy systems";
-            case LOCAL: return "The server does not support references that point to other servers";
+            case LITERAL: return "The server supports and populates Literal references (i.e. using Reference.reference) where they are known (this code does not guarantee that all references are literal; see 'enforced').";
+            case LOGICAL: return "The server allows logical references (i.e. using Reference.identifier).";
+            case RESOLVES: return "The server will attempt to resolve logical references to literal references - i.e. converting Reference.identifier to Reference.reference (if resolution fails, the server may still accept resources; see logical).";
+            case ENFORCED: return "The server enforces that references have integrity - e.g. it ensures that references can always be resolved. This is typically the case for clinical record systems, but often not the case for middleware/proxy systems.";
+            case LOCAL: return "The server does not support references that point to other servers.";
             default: return "?";
           }
         }

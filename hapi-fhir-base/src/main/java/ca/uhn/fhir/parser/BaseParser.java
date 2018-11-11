@@ -469,7 +469,7 @@ public abstract class BaseParser implements IParser {
 		TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(theIResource);
 		if (shouldAddSubsettedTag()) {
 			tags = new TagList(tags);
-			tags.add(new Tag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE, subsetDescription()));
+			tags.add(new Tag(getSubsettedCodeSystem(), Constants.TAG_SUBSETTED_CODE, subsetDescription()));
 		}
 
 		return tags;
@@ -746,7 +746,7 @@ public abstract class BaseParser implements IParser {
 				if (shouldAddSubsettedTag()) {
 					IBaseCoding coding = metaValue.addTag();
 					coding.setCode(Constants.TAG_SUBSETTED_CODE);
-					coding.setSystem(Constants.TAG_SUBSETTED_SYSTEM);
+					coding.setSystem(getSubsettedCodeSystem());
 					coding.setDisplay(subsetDescription());
 				}
 
@@ -783,6 +783,14 @@ public abstract class BaseParser implements IParser {
 		}
 
 		return retVal;
+	}
+
+	private String getSubsettedCodeSystem() {
+		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			return Constants.TAG_SUBSETTED_SYSTEM_R4;
+		} else {
+			return Constants.TAG_SUBSETTED_SYSTEM_DSTU3;
+		}
 	}
 
 	@Override

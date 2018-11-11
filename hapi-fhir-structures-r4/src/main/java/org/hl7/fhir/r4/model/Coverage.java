@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Financial instrument which may be used to reimburse or pay for health care products and services.
  */
-@ResourceDef(name="Coverage", profile="http://hl7.org/fhir/Profile/Coverage")
+@ResourceDef(name="Coverage", profile="http://hl7.org/fhir/StructureDefinition/Coverage")
 public class Coverage extends DomainResource {
 
     public enum CoverageStatus {
@@ -183,10 +183,10 @@ public class Coverage extends DomainResource {
         protected Coding type;
 
         /**
-         * For example the Group or Plan number.
+         * For example, the Group or Plan number.
          */
         @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The tag or value under the classification", formalDefinition="For example the Group or Plan number." )
+        @Description(shortDefinition="The tag or value under the classification", formalDefinition="For example, the Group or Plan number." )
         protected StringType value;
 
         /**
@@ -239,7 +239,7 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (For example the Group or Plan number.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @return {@link #value} (For example, the Group or Plan number.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public StringType getValueElement() { 
           if (this.value == null)
@@ -259,7 +259,7 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @param value {@link #value} (For example the Group or Plan number.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
+         * @param value {@link #value} (For example, the Group or Plan number.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
          */
         public ClassComponent setValueElement(StringType value) { 
           this.value = value;
@@ -267,14 +267,14 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @return For example the Group or Plan number.
+         * @return For example, the Group or Plan number.
          */
         public String getValue() { 
           return this.value == null ? null : this.value.getValue();
         }
 
         /**
-         * @param value For example the Group or Plan number.
+         * @param value For example, the Group or Plan number.
          */
         public ClassComponent setValue(String value) { 
             if (this.value == null)
@@ -335,7 +335,7 @@ public class Coverage extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "Coding", "The type of classification for which an insurer-specific class tag or number and optional name is provided, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, 1, type));
-          children.add(new Property("value", "string", "For example the Group or Plan number.", 0, 1, value));
+          children.add(new Property("value", "string", "For example, the Group or Plan number.", 0, 1, value));
           children.add(new Property("name", "string", "A short description for the class.", 0, 1, name));
         }
 
@@ -343,7 +343,7 @@ public class Coverage extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "Coding", "The type of classification for which an insurer-specific class tag or number and optional name is provided, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, 1, type);
-          case 111972721: /*value*/  return new Property("value", "string", "For example the Group or Plan number.", 0, 1, value);
+          case 111972721: /*value*/  return new Property("value", "string", "For example, the Group or Plan number.", 0, 1, value);
           case 3373707: /*name*/  return new Property("name", "string", "A short description for the class.", 0, 1, name);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -473,18 +473,18 @@ public class Coverage extends DomainResource {
     @Block()
     public static class CoPayComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.
+         * Types of products or services such as visit, specialist visits, emergency, inpatient care, etc.
          */
         @Child(name = "type", type = {Coding.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The type of service or product", formalDefinition="Types of products or services such as visit, specialist vists, emergency, inpatient care, etc." )
+        @Description(shortDefinition="The type of service or product", formalDefinition="Types of products or services such as visit, specialist visits, emergency, inpatient care, etc." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/coverage-copay-type")
         protected Coding type;
 
         /**
-         * The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.
+         * The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency.
          */
         @Child(name = "value", type = {Quantity.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The amount or percentage of the copayment", formalDefinition="The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,." )
+        @Description(shortDefinition="The amount or percentage of the copayment", formalDefinition="The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency." )
         protected Quantity value;
 
         private static final long serialVersionUID = -410759184L;
@@ -505,7 +505,7 @@ public class Coverage extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.)
+         * @return {@link #type} (Types of products or services such as visit, specialist visits, emergency, inpatient care, etc.)
          */
         public Coding getType() { 
           if (this.type == null)
@@ -521,7 +521,7 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.)
+         * @param value {@link #type} (Types of products or services such as visit, specialist visits, emergency, inpatient care, etc.)
          */
         public CoPayComponent setType(Coding value) { 
           this.type = value;
@@ -529,7 +529,7 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @return {@link #value} (The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.)
+         * @return {@link #value} (The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency.)
          */
         public Quantity getValue() { 
           if (this.value == null)
@@ -545,7 +545,7 @@ public class Coverage extends DomainResource {
         }
 
         /**
-         * @param value {@link #value} (The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.)
+         * @param value {@link #value} (The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency.)
          */
         public CoPayComponent setValue(Quantity value) { 
           this.value = value;
@@ -554,15 +554,15 @@ public class Coverage extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("type", "Coding", "Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.", 0, 1, type));
-          children.add(new Property("value", "Quantity", "The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.", 0, 1, value));
+          children.add(new Property("type", "Coding", "Types of products or services such as visit, specialist visits, emergency, inpatient care, etc.", 0, 1, type));
+          children.add(new Property("value", "Quantity", "The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency.", 0, 1, value));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3575610: /*type*/  return new Property("type", "Coding", "Types of products or services such as visit, specialist vists, emergency, inpatient care, etc.", 0, 1, type);
-          case 111972721: /*value*/  return new Property("value", "Quantity", "The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency,.", 0, 1, value);
+          case 3575610: /*type*/  return new Property("type", "Coding", "Types of products or services such as visit, specialist visits, emergency, inpatient care, etc.", 0, 1, type);
+          case 111972721: /*value*/  return new Property("value", "Quantity", "The amount of patient payments for various types of services/products, expressed as a percentage of the service/product cost or a fixed amount of currency.", 0, 1, value);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -677,10 +677,10 @@ public class Coverage extends DomainResource {
   }
 
     /**
-     * The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatination of the Coverage.SubscriberID and the Coverage.dependant.
+     * The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatenation of the Coverage.SubscriberID and the Coverage.dependant.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="The primary coverage ID", formalDefinition="The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatination of the Coverage.SubscriberID and the Coverage.dependant." )
+    @Description(shortDefinition="The primary coverage ID", formalDefinition="The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatenation of the Coverage.SubscriberID and the Coverage.dependant." )
     protected List<Identifier> identifier;
 
     /**
@@ -731,14 +731,14 @@ public class Coverage extends DomainResource {
     protected StringType subscriberId;
 
     /**
-     * The party who benefits from the insurance coverage., the patient when services are provided.
+     * The party who benefits from the insurance coverage; the patient when services are provided.
      */
     @Child(name = "beneficiary", type = {Patient.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Plan Beneficiary", formalDefinition="The party who benefits from the insurance coverage., the patient when services are provided." )
+    @Description(shortDefinition="Plan Beneficiary", formalDefinition="The party who benefits from the insurance coverage; the patient when services are provided." )
     protected Reference beneficiary;
 
     /**
-     * The actual object that is the target of the reference (The party who benefits from the insurance coverage., the patient when services are provided.)
+     * The actual object that is the target of the reference (The party who benefits from the insurance coverage; the patient when services are provided.)
      */
     protected Patient beneficiaryTarget;
 
@@ -784,10 +784,10 @@ public class Coverage extends DomainResource {
     protected List<ClassComponent> class_;
 
     /**
-     * The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.
+     * The order of applicability of this coverage relative to other coverages which are currently in force. Note, there may be gaps in the numbering and this does not imply primary, secondary etc. as the specific positioning of coverages depends upon the episode of care.
      */
     @Child(name = "order", type = {PositiveIntType.class}, order=12, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Relative order of the coverage", formalDefinition="The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care." )
+    @Description(shortDefinition="Relative order of the coverage", formalDefinition="The order of applicability of this coverage relative to other coverages which are currently in force. Note, there may be gaps in the numbering and this does not imply primary, secondary etc. as the specific positioning of coverages depends upon the episode of care." )
     protected PositiveIntType order;
 
     /**
@@ -826,7 +826,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatination of the Coverage.SubscriberID and the Coverage.dependant.)
+     * @return {@link #identifier} (The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatenation of the Coverage.SubscriberID and the Coverage.dependant.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1079,7 +1079,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #beneficiary} (The party who benefits from the insurance coverage., the patient when services are provided.)
+     * @return {@link #beneficiary} (The party who benefits from the insurance coverage; the patient when services are provided.)
      */
     public Reference getBeneficiary() { 
       if (this.beneficiary == null)
@@ -1095,7 +1095,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @param value {@link #beneficiary} (The party who benefits from the insurance coverage., the patient when services are provided.)
+     * @param value {@link #beneficiary} (The party who benefits from the insurance coverage; the patient when services are provided.)
      */
     public Coverage setBeneficiary(Reference value) { 
       this.beneficiary = value;
@@ -1103,7 +1103,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #beneficiary} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The party who benefits from the insurance coverage., the patient when services are provided.)
+     * @return {@link #beneficiary} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The party who benefits from the insurance coverage; the patient when services are provided.)
      */
     public Patient getBeneficiaryTarget() { 
       if (this.beneficiaryTarget == null)
@@ -1115,7 +1115,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @param value {@link #beneficiary} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The party who benefits from the insurance coverage., the patient when services are provided.)
+     * @param value {@link #beneficiary} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The party who benefits from the insurance coverage; the patient when services are provided.)
      */
     public Coverage setBeneficiaryTarget(Patient value) { 
       this.beneficiaryTarget = value;
@@ -1336,7 +1336,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return {@link #order} (The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.). This is the underlying object with id, value and extensions. The accessor "getOrder" gives direct access to the value
+     * @return {@link #order} (The order of applicability of this coverage relative to other coverages which are currently in force. Note, there may be gaps in the numbering and this does not imply primary, secondary etc. as the specific positioning of coverages depends upon the episode of care.). This is the underlying object with id, value and extensions. The accessor "getOrder" gives direct access to the value
      */
     public PositiveIntType getOrderElement() { 
       if (this.order == null)
@@ -1356,7 +1356,7 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @param value {@link #order} (The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.). This is the underlying object with id, value and extensions. The accessor "getOrder" gives direct access to the value
+     * @param value {@link #order} (The order of applicability of this coverage relative to other coverages which are currently in force. Note, there may be gaps in the numbering and this does not imply primary, secondary etc. as the specific positioning of coverages depends upon the episode of care.). This is the underlying object with id, value and extensions. The accessor "getOrder" gives direct access to the value
      */
     public Coverage setOrderElement(PositiveIntType value) { 
       this.order = value;
@@ -1364,14 +1364,14 @@ public class Coverage extends DomainResource {
     }
 
     /**
-     * @return The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.
+     * @return The order of applicability of this coverage relative to other coverages which are currently in force. Note, there may be gaps in the numbering and this does not imply primary, secondary etc. as the specific positioning of coverages depends upon the episode of care.
      */
     public int getOrder() { 
       return this.order == null || this.order.isEmpty() ? 0 : this.order.getValue();
     }
 
     /**
-     * @param value The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.
+     * @param value The order of applicability of this coverage relative to other coverages which are currently in force. Note, there may be gaps in the numbering and this does not imply primary, secondary etc. as the specific positioning of coverages depends upon the episode of care.
      */
     public Coverage setOrder(int value) { 
         if (this.order == null)
@@ -1559,19 +1559,19 @@ public class Coverage extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatination of the Coverage.SubscriberID and the Coverage.dependant.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatenation of the Coverage.SubscriberID and the Coverage.dependant.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
         children.add(new Property("type", "CodeableConcept", "The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization.", 0, 1, type));
         children.add(new Property("policyHolder", "Reference(Patient|RelatedPerson|Organization)", "The party who 'owns' the insurance policy,  may be an individual, corporation or the subscriber's employer.", 0, 1, policyHolder));
         children.add(new Property("subscriber", "Reference(Patient|RelatedPerson)", "The party who has signed-up for or 'owns' the contractual relationship to the policy or to whom the benefit of the policy for services rendered to them or their family is due.", 0, 1, subscriber));
         children.add(new Property("subscriberId", "string", "The insurer assigned ID for the Subscriber.", 0, 1, subscriberId));
-        children.add(new Property("beneficiary", "Reference(Patient)", "The party who benefits from the insurance coverage., the patient when services are provided.", 0, 1, beneficiary));
+        children.add(new Property("beneficiary", "Reference(Patient)", "The party who benefits from the insurance coverage; the patient when services are provided.", 0, 1, beneficiary));
         children.add(new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, 1, dependent));
         children.add(new Property("relationship", "CodeableConcept", "The relationship of beneficiary (patient) to the subscriber.", 0, 1, relationship));
         children.add(new Property("period", "Period", "Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.", 0, 1, period));
         children.add(new Property("payor", "Reference(Organization|Patient|RelatedPerson)", "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number).", 0, java.lang.Integer.MAX_VALUE, payor));
         children.add(new Property("class", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, class_));
-        children.add(new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.", 0, 1, order));
+        children.add(new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently in force. Note, there may be gaps in the numbering and this does not imply primary, secondary etc. as the specific positioning of coverages depends upon the episode of care.", 0, 1, order));
         children.add(new Property("network", "string", "The insurer-specific identifier for the insurer-defined network of providers to which the beneficiary may seek treatment which will be covered at the 'in-network' rate, otherwise 'out of network' terms and conditions apply.", 0, 1, network));
         children.add(new Property("copay", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, copay));
         children.add(new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract));
@@ -1580,19 +1580,19 @@ public class Coverage extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatination of the Coverage.SubscriberID and the Coverage.dependant.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The main (and possibly only) identifier for the coverage - often referred to as a Member Id, Certificate number, Personal Health Number or Case ID. May be constructed as the concatenation of the Coverage.SubscriberID and the Coverage.dependant.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of coverage: social program, medical plan, accident coverage (workers compensation, auto), group health or payment by an individual or organization.", 0, 1, type);
         case 2046898558: /*policyHolder*/  return new Property("policyHolder", "Reference(Patient|RelatedPerson|Organization)", "The party who 'owns' the insurance policy,  may be an individual, corporation or the subscriber's employer.", 0, 1, policyHolder);
         case -1219769240: /*subscriber*/  return new Property("subscriber", "Reference(Patient|RelatedPerson)", "The party who has signed-up for or 'owns' the contractual relationship to the policy or to whom the benefit of the policy for services rendered to them or their family is due.", 0, 1, subscriber);
         case 327834531: /*subscriberId*/  return new Property("subscriberId", "string", "The insurer assigned ID for the Subscriber.", 0, 1, subscriberId);
-        case -565102875: /*beneficiary*/  return new Property("beneficiary", "Reference(Patient)", "The party who benefits from the insurance coverage., the patient when services are provided.", 0, 1, beneficiary);
+        case -565102875: /*beneficiary*/  return new Property("beneficiary", "Reference(Patient)", "The party who benefits from the insurance coverage; the patient when services are provided.", 0, 1, beneficiary);
         case -1109226753: /*dependent*/  return new Property("dependent", "string", "A unique identifier for a dependent under the coverage.", 0, 1, dependent);
         case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "The relationship of beneficiary (patient) to the subscriber.", 0, 1, relationship);
         case -991726143: /*period*/  return new Property("period", "Period", "Time period during which the coverage is in force. A missing start date indicates the start date isn't known, a missing end date means the coverage is continuing to be in force.", 0, 1, period);
         case 106443915: /*payor*/  return new Property("payor", "Reference(Organization|Patient|RelatedPerson)", "The program or plan underwriter or payor including both insurance and non-insurance agreements, such as patient-pay agreements. May provide multiple identifiers such as insurance company identifier or business identifier (BIN number).", 0, java.lang.Integer.MAX_VALUE, payor);
         case 94742904: /*class*/  return new Property("class", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, class_);
-        case 106006350: /*order*/  return new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently inforce. Note, there may be gaps in the numbering and this does not imply primary, secondard etc. as the specific positioning of coverages depends upon the episode of care.", 0, 1, order);
+        case 106006350: /*order*/  return new Property("order", "positiveInt", "The order of applicability of this coverage relative to other coverages which are currently in force. Note, there may be gaps in the numbering and this does not imply primary, secondary etc. as the specific positioning of coverages depends upon the episode of care.", 0, 1, order);
         case 1843485230: /*network*/  return new Property("network", "string", "The insurer-specific identifier for the insurer-defined network of providers to which the beneficiary may seek treatment which will be covered at the 'in-network' rate, otherwise 'out of network' terms and conditions apply.", 0, 1, network);
         case 94846140: /*copay*/  return new Property("copay", "", "A suite of underwrite specific classifiers, for example may be used to identify a class of coverage or employer group, Policy, Plan.", 0, java.lang.Integer.MAX_VALUE, copay);
         case -566947566: /*contract*/  return new Property("contract", "Reference(Contract)", "The policy(s) which constitute this insurance coverage.", 0, java.lang.Integer.MAX_VALUE, contract);

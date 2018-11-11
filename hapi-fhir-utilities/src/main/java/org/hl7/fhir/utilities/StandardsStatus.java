@@ -4,7 +4,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 
 public enum StandardsStatus {
 
-  EXTERNAL, INFORMATIVE, DRAFT, TRIAL_USE, NORMATIVE;
+  EXTERNAL, INFORMATIVE, DRAFT, TRIAL_USE, DEPRECATED, NORMATIVE;
 
   public String toDisplay() {
     switch (this) {
@@ -18,9 +18,30 @@ public enum StandardsStatus {
       return "Informative";
     case EXTERNAL:
       return "External";
+    case DEPRECATED: 
+      return "Deprecated";
     }
     return "?";
   }
+
+  public String toCode() {
+    switch (this) {
+    case DRAFT : 
+      return "draft";  
+    case NORMATIVE  : 
+      return "normative";
+    case TRIAL_USE : 
+      return "trial-use";  
+    case INFORMATIVE:
+      return "informative";
+    case DEPRECATED: 
+    return "deprecated";
+    case EXTERNAL:
+      return "external";
+    }
+    return "?";
+  }
+
 
   public static StandardsStatus fromCode(String value) throws FHIRException {
     if (Utilities.noString(value))
@@ -39,6 +60,8 @@ public enum StandardsStatus {
       return INFORMATIVE;
     if (value.equalsIgnoreCase("EXTERNAL"))
       return EXTERNAL;
+    if (value.equalsIgnoreCase("DEPRECATED"))
+      return DEPRECATED;
     throw new FHIRException("Incorrect Standards Status '"+value+"'");
   }
 
@@ -52,6 +75,8 @@ public enum StandardsStatus {
       return "TU";  
     case INFORMATIVE:
       return "I";
+    case DEPRECATED: 
+      return "XD";
     case EXTERNAL:
       return "X";
     }
@@ -68,6 +93,8 @@ public enum StandardsStatus {
       return "#fff5e6";  
     case INFORMATIVE:
       return "#ffffe6";
+    case DEPRECATED: 
+      return "#ffcccc";
     case EXTERNAL:
       return "#e6ffff";
     }
@@ -84,6 +111,8 @@ public enum StandardsStatus {
       return "#fff9ec";  
     case INFORMATIVE:
       return "#ffffec";
+    case DEPRECATED: 
+      return "#ffcccc";
     case EXTERNAL:
       return "#ecffff";
     }
@@ -97,6 +126,8 @@ public enum StandardsStatus {
       return (tgtSS != DRAFT);
     if (this == NORMATIVE)
       return (tgtSS == NORMATIVE || tgtSS == EXTERNAL );
+    if (this == DEPRECATED)
+      return (tgtSS == DEPRECATED );
     return false;
   }
 

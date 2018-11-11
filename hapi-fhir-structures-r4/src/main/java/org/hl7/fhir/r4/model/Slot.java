@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A slot of time on a schedule that may be available for booking appointments.
  */
-@ResourceDef(name="Slot", profile="http://hl7.org/fhir/Profile/Slot")
+@ResourceDef(name="Slot", profile="http://hl7.org/fhir/StructureDefinition/Slot")
 public class Slot extends DomainResource {
 
     public enum SlotStatus {
@@ -224,7 +224,7 @@ public class Slot extends DomainResource {
      */
     @Child(name = "appointmentType", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The style of appointment or patient that may be booked in the slot (not service type)", formalDefinition="The style of appointment or patient that may be booked in the slot (not service type)." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0276")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v2-0276")
     protected CodeableConcept appointmentType;
 
     /**

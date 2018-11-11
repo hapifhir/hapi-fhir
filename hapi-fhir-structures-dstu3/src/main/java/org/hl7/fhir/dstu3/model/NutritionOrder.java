@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.
  */
-@ResourceDef(name="NutritionOrder", profile="http://hl7.org/fhir/Profile/NutritionOrder")
+@ResourceDef(name="NutritionOrder", profile="http://hl7.org/fhir/StructureDefinition/NutritionOrder")
 public class NutritionOrder extends DomainResource {
 
     public enum NutritionOrderStatus {

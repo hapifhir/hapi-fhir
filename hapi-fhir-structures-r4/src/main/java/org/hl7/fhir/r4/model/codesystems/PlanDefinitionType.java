@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum PlanDefinitionType {
 
         /**
-         * A pre-defined and approved group of orders related to a particular clinical condition (e.g. hypertension treatment and monitoring) or stage of care (e.g. hospital admission to Coronary Care Unit). An order set is used as a checklist for the clinician when managing a patient with a specific condition. It is a structured collection of orders relevant to that condition and presented to the clinician in a computerized provider order entry (CPOE) system
+         * A pre-defined and approved group of orders related to a particular clinical condition (e.g. hypertension treatment and monitoring) or stage of care (e.g. hospital admission to Coronary Care Unit). An order set is used as a checklist for the clinician when managing a patient with a specific condition. It is a structured collection of orders relevant to that condition and presented to the clinician in a computerized provider order entry (CPOE) system.
          */
         ORDERSET, 
         /**
-         * Defines a desired/typical sequence of clinical activities including preconditions, triggers and temporal relationships
+         * Defines a desired/typical sequence of clinical activities including preconditions, triggers and temporal relationships.
          */
         CLINICALPROTOCOL, 
         /**
-         * A decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of actions that should be taken whenever some condition is met in response to a particular event or events
+         * A decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of actions that should be taken whenever some condition is met in response to a particular event or events.
          */
         ECARULE, 
         /**
-         * Defines the steps for a group of one or more systems in an event flow process along with the step constraints, sequence, pre-conditions and decision points to complete a particular objective
+         * Defines the steps for a group of one or more systems in an event flow process along with the step constraints, sequence, pre-conditions and decision points to complete a particular objective.
          */
         WORKFLOWDEFINITION, 
         /**
@@ -79,14 +79,14 @@ public enum PlanDefinitionType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/plan-definition-type";
+          return "http://terminology.hl7.org/CodeSystem/plan-definition-type";
         }
         public String getDefinition() {
           switch (this) {
-            case ORDERSET: return "A pre-defined and approved group of orders related to a particular clinical condition (e.g. hypertension treatment and monitoring) or stage of care (e.g. hospital admission to Coronary Care Unit). An order set is used as a checklist for the clinician when managing a patient with a specific condition. It is a structured collection of orders relevant to that condition and presented to the clinician in a computerized provider order entry (CPOE) system";
-            case CLINICALPROTOCOL: return "Defines a desired/typical sequence of clinical activities including preconditions, triggers and temporal relationships";
-            case ECARULE: return "A decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of actions that should be taken whenever some condition is met in response to a particular event or events";
-            case WORKFLOWDEFINITION: return "Defines the steps for a group of one or more systems in an event flow process along with the step constraints, sequence, pre-conditions and decision points to complete a particular objective";
+            case ORDERSET: return "A pre-defined and approved group of orders related to a particular clinical condition (e.g. hypertension treatment and monitoring) or stage of care (e.g. hospital admission to Coronary Care Unit). An order set is used as a checklist for the clinician when managing a patient with a specific condition. It is a structured collection of orders relevant to that condition and presented to the clinician in a computerized provider order entry (CPOE) system.";
+            case CLINICALPROTOCOL: return "Defines a desired/typical sequence of clinical activities including preconditions, triggers and temporal relationships.";
+            case ECARULE: return "A decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of actions that should be taken whenever some condition is met in response to a particular event or events.";
+            case WORKFLOWDEFINITION: return "Defines the steps for a group of one or more systems in an event flow process along with the step constraints, sequence, pre-conditions and decision points to complete a particular objective.";
             default: return "?";
           }
         }

@@ -34,17 +34,17 @@ public class OIDUtils {
 			return "http://www.nlm.nih.gov/research/umls/rxnorm"; // todo: confirm this
 
 		if (r.equals("2.16.840.1.113883.5.1008"))
-			return "http://hl7.org/fhir/v3/NullFlavor";
+			return "http://terminology.hl7.org/v3/NullFlavor";
 		if (r.equals("2.16.840.1.113883.5.111"))
-			return "http://hl7.org/fhir/v3/RoleCode";
+			return "http://terminology.hl7.org/v3/RoleCode";
 		if (r.equals("2.16.840.1.113883.5.4"))
-			return "http://hl7.org/fhir/v3/ActCode";
+			return "http://terminology.hl7.org/v3/ActCode";
 		if (r.equals("2.16.840.1.113883.5.8"))
-			return "http://hl7.org/fhir/v3/ActReason";
+			return "http://terminology.hl7.org/v3/ActReason";
 		if (r.equals("2.16.840.1.113883.5.83"))
-			return "http://hl7.org/fhir/v3/ObservationInterpretation";
+			return "http://terminology.hl7.org/v3/ObservationInterpretation";
 		if (r.equals("2.16.840.1.113883.6.238"))
-			return "http://hl7.org/fhir/v3/Race";
+			return "http://terminology.hl7.org/v3/Race";
 
 		if (r.equals("2.16.840.1.113883.6.59"))
 			return "http://hl7.org/fhir/sid/cvx";

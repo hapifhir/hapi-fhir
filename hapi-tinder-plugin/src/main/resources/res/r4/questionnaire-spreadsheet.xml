@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
+﻿<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Grahame Grieve</LastAuthor>
+  <LastAuthor>lloyd</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2018-03-03T07:51:22Z</LastSaved>
+  <LastSaved>2018-08-10T15:52:38Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <CustomDocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
@@ -19,7 +19,6 @@
   
   <TabRatio>613</TabRatio>
   <ActiveSheet>2</ActiveSheet>
-  <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -953,7 +952,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">…  This is the id that will be used to link a QuestionnaireResponse to the Questionnaire the response is for.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The name of the referenced questionnaire can be conveyed using the http://hl7.org/fhir/StructureDefinition/display extension</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.identifier[scope=BUSN;reliability=ISS]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1622,9 +1621,9 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">ElementDefinition - details for the item</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">A reference to an [[[ElementDefinition]]] that provides the details for the item. If a definition is provided, then the following element values can be derived from the definition:   &#10;&#10;* code (ElementDefinition.code) &#10;* type (ElementDefinition.type) &#10;* required (ElementDefinition.min) &#10;* repeats (ElementDefinition.max) &#10;* maxLength (ElementDefinition.maxLength) &#10;* options (ElementDefinition.binding)  &#10;Any information provided in these elements on a Questionnaire Item overrides the information from the definition, and some are require for efficient implementation (e.g. enforcing invariants)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This element is a URI that refers to an [[[ElementDefinition]]] that provides information about this item, including information that might otherwise be included in the instance of the Questionnaire resource. A detailed description of the construction of the URI is shown in Comments, below. If this element is present then the following element values MAY be derived from the Element Definition if the corresponding elements of this Questionnaire resource instance have no value:&#10;&#10;* code (ElementDefinition.code) &#10;* type (ElementDefinition.type) &#10;* required (ElementDefinition.min) &#10;* repeats (ElementDefinition.max) &#10;* maxLength (ElementDefinition.maxLength) &#10;* answerValueSet (ElementDefinition.binding)&#10;* options (ElementDefinition.binding)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">A common pattern is to define a set of data elements and then build multiple questionnaires for different circumstances to gather the data. This element provides traceability to the common definition and allows the content for the question to come from the underlying definition</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">the URI refers to an ElementDefinition in [[[StructureDefinition]]] and always starts with the canonical URL for the target resource. When referring to a StructureDefinition, a fragment identifier is used to specify the element definition by its id [Element.id](element-definitions.html#Element.id). E.g. http://hl7.org/fhir/StructureDefinition/Observation#Observation.value[x]. In the absence of a fragment identifier, the first/root element definition in the target is the matching element definition. </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The uri refers to an ElementDefinition in a [[[StructureDefinition]]] and always starts with the [canonical URL](references.html#canonical) for the target resource. When referring to a StructureDefinition, a fragment identifier is used to specify the element definition by its id [Element.id](element-definitions.html#Element.id). E.g. http://hl7.org/fhir/StructureDefinition/Observation#Observation.value[x]. In the absence of a fragment identifier, the first/root element definition in the target is the matching element definition.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">.outboundRelationship[typeCode=INST].target[classCode=OBS, moodCode=DEF]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1763,7 +1762,7 @@
     <Cell ss:Index="15" ss:StyleID="s87"><Data ss:Type="String">Only allow data when</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">A constraint indicating that this item should only be enabled (displayed/allow answers to be captured) when the specified condition is true</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Allows questionnaires to adapt based on answers to other questions. E.g. If physical gender is specified as a male, no need to capture pregnancy history.  Also allows conditional display of instructions or groups of questions</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s89"><Data ss:Type="String">If multiple repetitions of this extension are present, the item should be enabled when the condition for *any* of the repetitions is true.  I.e. treat "enableWhen"s as being joined by an "or" clause.  This element is a modifier because if enableWhen is present for an item, "required" is ignored unless one of the enableWhen conditions is met.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">If multiple repetitions of this extension are present, the item should be enabled when the condition for *any* of the repetitions is true.  I.e. treat "enableWhen"s as being joined by an "or" clause.  This element is a modifier because if enableWhen is present for an item, "required" is ignored unless one of the enableWhen conditions is met. When an item is disabled, all of its descendants are disabled, regardless of what their own enableWhen logic might evaluate to.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">N/A - MIF rather than RIM level</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="25" ss:StyleID="s95"><Data ss:Type="String">down</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1891,9 +1890,9 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Items are generally assumed not to repeat unless explicitly specified. Systems SHOULD always populate this value</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Whether the item may repeat</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">An indication, if true, that the item may occur multiple times in the response, collecting multiple answers answers for questions or multiple sets of answers for groups</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">An indication, if true, that the item may occur multiple times in the response, collecting multiple answers for questions or multiple sets of answers for groups</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Items may be used to create set of (related) questions that can be repeated to give multiple answers to such a set</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">If a question is marked as repeats=true, then multiple answers can be provided for the question in the corresponding QuestionnaireResponse.  When rendering the questionnaire, it is up to the rendering software whether to render the question text for each answer repetition or to simply list each of the answers beneath the question.  (Which is most appropriate visually may depend on the type of answer as well as whether there are nested items.). The value may come from the ElementDefinition referred to by .definition</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">If a question is marked as repeats=true, then multiple answers can be provided for the question in the corresponding QuestionnaireResponse.  When rendering the questionnaire, it is up to the rendering software whether to render the question text for each answer repetition (i.e. "repeat the question") or to simply allow entry/selection of multiple answers for the question (repeat the answers).  Which is most appropriate visually may depend on the type of answer as well as whether there are nested items.&#10;&#10;The resulting QuestionnaireResponse will be populated the same way regardless of rendering - one 'question' item with multiple answer values.&#10;&#10; The value may come from the ElementDefinition referred to by .definition</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">N/A - MIF rather than RIM level</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1951,7 +1950,7 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="120">
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Questionnaire.item.options</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Questionnaire.item.answerValueSet</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">4,5</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1979,7 +1978,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="105">
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Questionnaire.item.option</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Questionnaire.item.answerOption</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">4,5</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1995,7 +1994,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Permitted answer</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">One of the permitted answers for a "choice" or "open-choice" question.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">This element can be used when the value set machinery of options is deemed too cumbersome or when there's a need to capture options that are not codes.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This element can be used when the value set machinery of answerValueSet is deemed too cumbersome or when there's a need to capture possible answers that are not codes.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">N/A - MIF rather than RIM level</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2006,11 +2005,11 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Questionnaire.item.option.value[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Questionnaire.item.answerOption.value[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">integer | date | time | string | Coding</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">integer | date | time | string | Coding | Reference(Any)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2035,7 +2034,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="45">
-    <Cell ss:StyleID="s93"><Data ss:Type="String">Questionnaire.item.option.initialSelected</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">Questionnaire.item.answerOption.initialSelected</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2050,9 +2049,9 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Only selected items explicitly marked to be selected</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Whether option is selected by default</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Indicates whether the option value is selected when the list of options is initially shown</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Indicates whether the answer value is selected when the list of possible answers is initially shown</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Use this instead of initial[v] if options is present</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Use this instead of initial[v] if answerValueSet is present</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">N/A - MIF rather than RIM level</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -2067,7 +2066,7 @@
     <Cell ss:StyleID="s94"><Data ss:Type="String">Questionnaire.item.initial</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="Number">8</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">8,13</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="10" ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4360,9 +4359,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>28</TopRowBottomPane>
+   <TopRowBottomPane>25</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>7</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -4431,18 +4430,18 @@
     <Cell ss:StyleID="s112"><Data ss:Type="String">ValueSetOrCodings</Data></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s112"><Data ss:Type="String">Questionnaire.item</Data></Cell>
-    <Cell ss:StyleID="s112"><Data ss:Type="String">A question cannot have both option and options</Data></Cell>
-    <Cell ss:StyleID="s112"><Data ss:Type="String">option.empty() or options.empty()</Data></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">not(f:options and f:option)</Data></Cell>
+    <Cell ss:StyleID="s112"><Data ss:Type="String">A question cannot have both answerOption and answerValueSet</Data></Cell>
+    <Cell ss:StyleID="s112"><Data ss:Type="String">answerOption.empty() or answerValueSet.empty()</Data></Cell>
+    <Cell ss:StyleID="s114"><Data ss:Type="String">not(f:answerValueSet and f:answerOption)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s111"><Data ss:Type="Number">5</Data><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s112"><Data ss:Type="String">OptionsForChoice</Data></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s112"><Data ss:Type="String">Questionnaire.item</Data></Cell>
-    <Cell ss:StyleID="s112"><Data ss:Type="String">Only 'choice' items can have options</Data></Cell>
-    <Cell ss:StyleID="s112"><Data ss:Type="String">(type ='choice' or type = 'open-choice' or type = 'decimal' or type = 'integer' or type = 'date' or type = 'dateTime' or type = 'time' or type = 'string' or type = 'quantity') or (options.empty() and option.empty())</Data></Cell>
-    <Cell ss:StyleID="s114"><Data ss:Type="String">f:type/@value=('choice','open-choice','decimal','integer','date','dateTime','time','string','quantity',') or not(f:option or f:options)</Data></Cell>
+    <Cell ss:StyleID="s112"><Data ss:Type="String">Only 'choice' items can have answerValueSet</Data></Cell>
+    <Cell ss:StyleID="s112"><Data ss:Type="String">(type ='choice' or type = 'open-choice' or type = 'decimal' or type = 'integer' or type = 'date' or type = 'dateTime' or type = 'time' or type = 'string' or type = 'quantity') or (answerValueSet.empty() and answerOption.empty())</Data></Cell>
+    <Cell ss:StyleID="s114"><Data ss:Type="String">f:type/@value=('choice','open-choice','decimal','integer','date','dateTime','time','string','quantity',') or not(f:answerOption or f:answerValueSet)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s111"><Data ss:Type="Number">6</Data><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4491,12 +4490,12 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s111"><Data ss:Type="Number">11</Data><NamedCell ss:Name="Invariantids"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">No initial[x] if options</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">No initial[x] if answerOptions</Data></Cell>
     <Cell ss:StyleID="s112"><Data ss:Type="String">error</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Questionnaire.item</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">If one or more option is present, initial[x] must be missing</Data></Cell>
-    <Cell><Data ss:Type="String">option.empty() or initial.empty()</Data></Cell>
-    <Cell ss:StyleID="s113"><Data ss:Type="String">not(f:option) or not(count(f:*[starts-with(local-name(.), 'initial')]))</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">If one or more answerOption is present, initial[x] must be missing</Data></Cell>
+    <Cell><Data ss:Type="String">answerOption.empty() or initial.empty()</Data></Cell>
+    <Cell ss:StyleID="s113"><Data ss:Type="String">not(f:answerOption) or not(count(f:*[starts-with(local-name(.), 'initial')]))</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
     <Cell ss:StyleID="s111"><Data ss:Type="Number">12</Data><NamedCell ss:Name="Invariantids"/></Cell>
@@ -4505,9 +4504,18 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">Questionnaire.item</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">If there are more than one enableWhen, enableBehavior must be specified</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">enableWhen.count() &gt; 2 implies enableBehavior.exists()</Data></Cell>
-    <Cell ss:StyleID="s113"><Data ss:Type="String">not(f:option) or not(count(f:*[starts-with(local-name(.), 'initial')]))</Data></Cell>
+    <Cell ss:StyleID="s113"><Data ss:Type="String">not(f:answerOption) or not(count(f:*[starts-with(local-name(.), 'initial')]))</Data></Cell>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s111"><Data ss:Type="Number">13</Data><NamedCell ss:Name="Invariantids"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">SingleInitialValueOrRepeats</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">error</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Questionnaire.item</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Can only have multiple initial values for repeating items</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">repeats=true or initial.count() &lt;= 1</Data></Cell>
+    <Cell ss:StyleID="s113"><Data ss:Type="String">f:repeats/@value='true' or count(f:initial)&lt;=1</Data></Cell>
+   </Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4516,7 +4524,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4525,7 +4533,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4534,7 +4542,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4543,7 +4551,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4552,7 +4560,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4561,7 +4569,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4570,7 +4578,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4579,7 +4587,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4588,7 +4596,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4597,7 +4605,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4606,7 +4614,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4615,7 +4623,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4624,7 +4632,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4633,7 +4641,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4642,7 +4650,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4651,7 +4659,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4660,7 +4668,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4669,7 +4677,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4678,7 +4686,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4687,7 +4695,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4696,7 +4704,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4705,7 +4713,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4714,7 +4722,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4723,7 +4731,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4732,7 +4740,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4741,7 +4749,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4750,7 +4758,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4759,7 +4767,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4768,7 +4776,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4777,7 +4785,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4786,7 +4794,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4795,7 +4803,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -4804,16 +4812,7 @@
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s113"/>
    </Row>
-   <Row>
-    <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s113"/>
-   </Row>
-   <Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s111"><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"/>
     <Cell ss:StyleID="s90"/>
@@ -5687,7 +5686,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>19</TopRowBottomPane>
+   <TopRowBottomPane>18</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5985,11 +5984,11 @@
     <Cell><Data ss:Type="String">core</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s120"><Data ss:Type="String">cqif-profile</Data></Cell>
-    <Cell ss:StyleID="s122"><Data ss:Type="String">questionnaire-cqif-profile.xml</Data></Cell>
-    <Cell ss:StyleID="s122"><Data ss:Type="String">questionnaire-cqif-profile-spreadsheet.xml</Data></Cell>
+    <Cell ss:StyleID="s120"><Data ss:Type="String">cqf-profile</Data></Cell>
+    <Cell ss:StyleID="s122"><Data ss:Type="String">questionnaire-cqf-profile.xml</Data></Cell>
+    <Cell ss:StyleID="s122"><Data ss:Type="String">questionnaire-cqf-profile-spreadsheet.xml</Data></Cell>
     <Cell ss:StyleID="s123"><Data ss:Type="String">spreadsheet</Data></Cell>
-    <Cell><Data ss:Type="String">cqif</Data></Cell>
+    <Cell><Data ss:Type="String">cqf</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s120"/>
@@ -6310,7 +6309,7 @@
     <Cell ss:StyleID="s121"/>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Questionnaire used to define the questions involved in the PHQ-9 health questionnaire</Data></Cell>
     <Cell ss:StyleID="s121"><Data ss:Type="String">phq-9-questionnaire</Data></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">questionnaire-cqif-example.xml</Data></Cell>
+    <Cell ss:StyleID="s121"><Data ss:Type="String">questionnaire-cqf-example.xml</Data></Cell>
     <Cell ss:StyleID="s138"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">n</Data></Cell>
    </Row>
@@ -6615,7 +6614,6 @@
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="29" ss:StyleID="s118" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s118" ss:Width="176.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s118" ss:Width="275.0"/>
-   <Column ss:Span="1" ss:StyleID="s118" ss:Width="51.0"/>
    <Column ss:Index="5" ss:StyleID="s118" ss:Width="146.0"/>
    <Column ss:StyleID="s118" ss:Width="173.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s118" ss:Width="98.0"/>
@@ -7080,9 +7078,7 @@
    <Column ss:StyleID="s145" ss:Width="80.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s145" ss:Width="35.0"/>
    <Column ss:StyleID="s145" ss:Width="56.0"/>
-   <Column ss:StyleID="s145" ss:Width="51.0"/>
-   <Column ss:Index="6" ss:StyleID="s145" ss:Width="51.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s145" ss:Width="353.0"/>
+   <Column ss:AutoFitWidth="0" ss:Index="7" ss:StyleID="s145" ss:Width="353.0"/>
    <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s145" ss:Width="84.0"/>
    <Column ss:AutoFitWidth="0" ss:Index="10" ss:StyleID="s145" ss:Width="242.0"/>
    <Row ss:AutoFitHeight="0">
@@ -7248,7 +7244,7 @@
     <Cell ss:StyleID="s122"/>
     <Cell ss:StyleID="s159"><Data ss:Type="String">#17</Data></Cell>
     <Cell ss:StyleID="s159"/>
-    <Cell ss:StyleID="s159"><Data ss:Type="String">Question with a Coding drawn from a list of options (specified in either the option property, or via the valueset referenced in the options property) as an answer (valueCoding)</Data></Cell>
+    <Cell ss:StyleID="s159"><Data ss:Type="String">Question with a Coding drawn from a list of possible answers (specified in either the answerOption property, or via the valueset referenced in the answerValueSet property) as an answer (valueCoding)</Data></Cell>
     <Cell ss:StyleID="s138"/>
     <Cell ss:StyleID="s138"/>
     <Cell ss:StyleID="s151"/>
@@ -7260,7 +7256,7 @@
     <Cell ss:StyleID="s122"/>
     <Cell ss:StyleID="s159"><Data ss:Type="String">#17</Data></Cell>
     <Cell ss:StyleID="s159"/>
-    <Cell ss:StyleID="s159"><Data ss:Type="String">Answer is a Coding drawn from a list of options (as with the choice type) or a free-text entry in a string (valueCoding or valueString)</Data></Cell>
+    <Cell ss:StyleID="s159"><Data ss:Type="String">Answer is a Coding drawn from a list of possible answers (as with the choice type) or a free-text entry in a string (valueCoding or valueString)</Data></Cell>
     <Cell ss:StyleID="s138"/>
     <Cell ss:StyleID="s138"/>
     <Cell ss:StyleID="s151"/>

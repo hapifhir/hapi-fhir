@@ -3,8 +3,10 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
@@ -15,6 +17,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
@@ -30,11 +33,11 @@ import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Rule;
-import org.mockito.Mockito;
+import org.junit.*;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -52,16 +55,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public abstract class BaseJpaTest {
-
-	static {
-		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
-	}
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
@@ -71,11 +71,19 @@ public abstract class BaseJpaTest {
 	protected static final String VS_URL = "http://example.com/my_value_set";
 	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
+
+	static {
+		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
+	}
+
 	@Rule
 	public LoggingRule myLoggingRule = new LoggingRule();
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
 	protected ArrayList<IServerInterceptor> myServerInterceptorList;
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
+	@Autowired
+	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 
 	@After
 	public void afterPerformCleanup() {
@@ -85,7 +93,7 @@ public abstract class BaseJpaTest {
 	@After
 	public void afterValidateNoTransaction() {
 		PlatformTransactionManager txManager = getTxManager();
-		if (txManager != null) {
+		if (txManager instanceof JpaTransactionManager) {
 			JpaTransactionManager hibernateTxManager = (JpaTransactionManager) txManager;
 			SessionFactory sessionFactory = (SessionFactory) hibernateTxManager.getEntityManagerFactory();
 			AtomicBoolean isReadOnly = new AtomicBoolean();
@@ -110,18 +118,14 @@ public abstract class BaseJpaTest {
 	}
 
 	@Before
-	public void beforeCreateSrd() {
-		mySrd = mock(ServletRequestDetails.class, Mockito.RETURNS_DEEP_STUBS);
+	public void beforeInitMocks() {
+		MockitoAnnotations.initMocks(this);
+
 		when(mySrd.getRequestOperationCallback()).thenReturn(myRequestOperationCallback);
 		myServerInterceptorList = new ArrayList<>();
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
-	}
-
-	@Before
-	public void beforeRandomizeLocale() {
-		randomizeLocale();
 	}
 
 	protected abstract FhirContext getContext();
@@ -140,6 +144,16 @@ public abstract class BaseJpaTest {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				theRunnable.run();
+			}
+		});
+	}
+
+	public <T> T runInTransaction(Callable<T> theRunnable) {
+		return newTxTemplate().execute(t -> {
+			try {
+				return theRunnable.call();
+			} catch (Exception theE) {
+				throw new InternalErrorException(theE);
 			}
 		});
 	}
@@ -211,15 +225,26 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
-		List<String> retVal = new ArrayList<String>();
-		Integer size = theFound.size();
-		ourLog.info("Found {} results", size);
+		int fromIndex = 0;
+		Integer toIndex = theFound.size();
+		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
+	}
 
-		if (size == null) {
-			size = 99999;
+	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex, boolean theFirstCall) {
+		if (theToIndex == null) {
+			theToIndex = 99999;
 		}
 
-		List<IBaseResource> resources = theFound.getResources(0, size);
+		List<String> retVal = new ArrayList<>();
+
+		IBundleProvider bundleProvider;
+		if (theFirstCall) {
+			bundleProvider = theFound;
+		} else {
+			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(theFound.getUuid());
+		}
+
+		List<IBaseResource> resources = bundleProvider.getResources(theFromIndex, theToIndex);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
@@ -269,7 +294,7 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	protected List<IIdType> toUnqualifiedVersionlessIds(List<IBaseResource> theFound) {
+	protected List<IIdType> toUnqualifiedVersionlessIds(List<? extends IBaseResource> theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (IBaseResource next : theFound) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
@@ -305,6 +330,11 @@ public abstract class BaseJpaTest {
 		return retVal.toArray(new String[retVal.size()]);
 	}
 
+	@BeforeClass
+	public static void beforeClassRandomizeLocale() {
+		randomizeLocale();
+	}
+
 	@SuppressWarnings("RedundantThrows")
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
@@ -330,13 +360,14 @@ public abstract class BaseJpaTest {
 		return bundleStr;
 	}
 
-	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, ISearchParamPresenceSvc theSearchParamPresenceSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
+	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
+		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 
 		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
 		theDaoConfig.setExpungeEnabled(true);
 
-		for (int count = 0;; count++) {
+		for (int count = 0; ; count++) {
 			try {
 				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
 				break;
@@ -376,14 +407,14 @@ public abstract class BaseJpaTest {
 
 	public static void waitForSize(int theTarget, List<?> theList) {
 		StopWatch sw = new StopWatch();
-		while (theList.size() != theTarget && sw.getMillis() <= 15000) {
+		while (theList.size() != theTarget && sw.getMillis() <= 16000) {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException theE) {
 				throw new Error(theE);
 			}
 		}
-		if (sw.getMillis() >= 15000) {
+		if (sw.getMillis() >= 16000) {
 			String describeResults = theList
 				.stream()
 				.map(t -> {
@@ -391,7 +422,7 @@ public abstract class BaseJpaTest {
 						return "null";
 					}
 					if (t instanceof IBaseResource) {
-						return ((IBaseResource)t).getIdElement().getValue();
+						return ((IBaseResource) t).getIdElement().getValue();
 					}
 					return t.toString();
 				})
@@ -416,6 +447,7 @@ public abstract class BaseJpaTest {
 		if (sw.getMillis() >= theTimeout) {
 			fail("Size " + theCallable.call() + " is != target " + theTarget);
 		}
+		Thread.sleep(500);
 	}
 
 }

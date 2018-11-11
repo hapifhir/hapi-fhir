@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The subscription resource is used to define a push-based subscription from a server to another system. Once a subscription is registered with the server, the server checks every resource that is created or updated, and if the resource matches the given criteria, it sends a message on the defined "channel" so that another system can take an appropriate action.
  */
-@ResourceDef(name="Subscription", profile="http://hl7.org/fhir/Profile/Subscription")
+@ResourceDef(name="Subscription", profile="http://hl7.org/fhir/StructureDefinition/Subscription")
 public class Subscription extends DomainResource {
 
     public enum SubscriptionStatus {

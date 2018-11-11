@@ -1,0 +1,37 @@
+{
+	"resourceType": "CodeSystem",
+	"id": "fiphr-cs-medicationcontext",
+	"meta": {
+		"profile": [
+			"http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+		]
+	},
+	"url": "http://phr.kanta.fi/fiphr-cs-medicationcontext",
+	"version": "0.01",
+	"name": "Code System Finnish PHR Medication Context",
+	"status": "draft",
+	"experimental": true,
+	"date": "2017-05-22T06:00:00+00:00",
+	"publisher": "Kela ",
+	"description": "Finnish PHR Medication Context codes.",
+	"caseSensitive": true,
+	"valueSet": "http://phr.kanta.fi/ValueSet/fiphr-vs-medicationcontext",
+	"content": "complete",
+	"concept": [
+		{
+			"code": "1",
+			"display": "Before medication",
+			"definition": "Before medication"
+		},
+		{
+			"code": "2",
+			"display": "After medication",
+			"definition": "After medication"
+		},
+		{
+			"code": "3",
+			"display": "Medication is not used",
+			"definition": "Medication is not used"
+		}
+	]
+}

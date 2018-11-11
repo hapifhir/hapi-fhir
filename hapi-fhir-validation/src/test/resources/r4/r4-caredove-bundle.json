@@ -16,13 +16,10 @@
 
         "id": 1,
 
-        "text": {
-
-          "status": "generated",
-
-          "div": "Human readable HTML narrative of entire ServiceRequest and related resources goes here. For brevity sake, it is omitted here, but can be included in an actual transmission"
-
-        },
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
 
         "status": "active",
 
@@ -100,7 +97,12 @@
 
         "id": 1,
 
-        "identifier": [
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
+
+			"identifier": [
 
           {
 
@@ -393,6 +395,10 @@
         "resourceType": "PractitionerRole",
 
         "id": 1,
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
 
         "practitioner": {
 
@@ -515,6 +521,10 @@
       "resource": {
 
         "resourceType": "Location",
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
 
         "id": 1,
 
@@ -561,6 +571,10 @@
       "resource": {
 
         "resourceType": "PractitionerRole",
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
 
         "id": 2,
 
@@ -627,6 +641,10 @@
       "resource": {
 
         "resourceType": "Practitioner",
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
 
         "id": 2,
 
@@ -685,6 +703,10 @@
       "resource": {
 
         "resourceType": "DocumentReference",
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
 
         "id": 1,
 
@@ -723,6 +745,10 @@
       "resource": {
 
         "resourceType": "Location",
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
 
         "id": 2,
 
@@ -767,6 +793,10 @@
       "resource": {
 
         "resourceType": "Task",
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
 
         "id": 1,
 

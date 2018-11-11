@@ -320,7 +320,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 		for (int i = 0; i < messages.size(); i++) {
 			ValidationMessage next = messages.get(i);
-			if ("Binding has no source, so can't be checked".equals(next.getMessage())) {
+			String message = next.getMessage();
+			if ("Binding has no source, so can't be checked".equals(message) ||
+			    "ValueSet http://hl7.org/fhir/ValueSet/mimetypes not found".equals(message)) {
 				messages.remove(i);
 				i--;
 			}
@@ -339,6 +341,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		private final VersionConvertor_30_40 myConverter;
 		private volatile List<org.hl7.fhir.r4.model.StructureDefinition> myAllStructures;
 		private LoadingCache<ResourceKey, org.hl7.fhir.r4.model.Resource> myFetchResourceCache;
+		private org.hl7.fhir.r4.model.Parameters myExpansionProfile;
 
 		public WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
 			myWrap = theWorkerContext;
@@ -378,7 +381,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 						}
 
 						try {
-							return VersionConvertor_30_40.convertResource(fetched);
+							return VersionConvertor_30_40.convertResource(fetched, true);
 						} catch (FHIRException e) {
 							throw new InternalErrorException(e);
 						}
@@ -389,6 +392,16 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public List<org.hl7.fhir.r4.model.MetadataResource> allConformanceResources() {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public org.hl7.fhir.r4.model.Parameters getExpansionParameters() {
+			return myExpansionProfile;
+		}
+
+		@Override
+		public void setExpansionProfile(org.hl7.fhir.r4.model.Parameters expParameters) {
+			myExpansionProfile = expParameters;
 		}
 
 		@Override
@@ -462,7 +475,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandVS(org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent inc, boolean heirarchical) throws TerminologyServiceException {
+		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent inc, boolean heirarchical) throws TerminologyServiceException {
 			ValueSet.ConceptSetComponent convertedInc = null;
 			if (inc != null) {
 				try {
@@ -473,15 +486,18 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			}
 
 			ValueSet.ValueSetExpansionComponent expansion = myWrap.expandVS(convertedInc, heirarchical);
-			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent retVal = null;
+			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent valueSetExpansionComponent = null;
 			if (expansion != null) {
 				try {
-					retVal = VersionConvertor_30_40.convertValueSetExpansionComponent(expansion);
+					valueSetExpansionComponent = VersionConvertor_30_40.convertValueSetExpansionComponent(expansion);
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
 			}
-			return retVal;
+
+			ValueSetExpander.ValueSetExpansionOutcome outcome = new ValueSetExpander.ValueSetExpansionOutcome(new org.hl7.fhir.r4.model.ValueSet());
+			outcome.getValueset().setExpansion(valueSetExpansionComponent);
+			return outcome;
 		}
 
 		@Override
@@ -536,16 +552,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public org.hl7.fhir.r4.model.ExpansionProfile getExpansionProfile() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setExpansionProfile(org.hl7.fhir.r4.model.ExpansionProfile expProfile) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		public INarrativeGenerator getNarrativeGenerator(String prefix, String basePath) {
 			throw new UnsupportedOperationException();
 		}
@@ -573,6 +579,21 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public org.hl7.fhir.r4.model.StructureMap getTransform(String url) {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getOverrideVersionNs() {
+			return null;
+		}
+
+		@Override
+		public void setOverrideVersionNs(String value) {
+
+		}
+
+		@Override
+		public org.hl7.fhir.r4.model.StructureDefinition fetchTypeDefinition(String typeName) {
+			return fetchResource(org.hl7.fhir.r4.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
 		}
 
 		@Override
@@ -636,6 +657,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
+		public ILoggingService getLogger() {
+			return null;
+		}
+
+		@Override
 		public boolean supportsSystem(String system) throws TerminologyServiceException {
 			return myWrap.supportsSystem(system);
 		}
@@ -669,6 +695,21 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			}
 
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display, convertedVs);
+			return convertValidationResult(result);
+		}
+
+		@Override
+		public ValidationResult validateCode(String code, org.hl7.fhir.r4.model.ValueSet vs) {
+			ValueSet convertedVs = null;
+			try {
+				if (vs != null) {
+					convertedVs = VersionConvertor_30_40.convertValueSet(vs);
+				}
+			} catch (FHIRException e) {
+				throw new InternalErrorException(e);
+			}
+
+			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(null, code, null, convertedVs);
 			return convertValidationResult(result);
 		}
 

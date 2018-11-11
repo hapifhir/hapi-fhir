@@ -201,8 +201,10 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 					 * SPs with the same path the same way. This behaviour is
 					 * used by AuthorizationInterceptor
 					 */
+					String nextPath = massagePathForCompartmentSimilarity(next.getPath());
 					for (RuntimeSearchParam nextAlternate : searchParams) {
-						if (nextAlternate.getPath().equals(next.getPath())) {
+						String nextAlternatePath = massagePathForCompartmentSimilarity(nextAlternate.getPath());
+						if (nextAlternatePath.equals(nextPath)) {
 							if (!nextAlternate.getName().equals(next.getName())) {
 								searchParamsForCompartment.add(nextAlternate);
 							}
@@ -234,6 +236,14 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 			}
 		}
 
+	}
+
+	private String massagePathForCompartmentSimilarity(String thePath) {
+		String path = thePath;
+		if (path.matches(".*\\.where\\(resolve\\(\\) is [a-zA-Z]+\\)")) {
+			path = path.substring(0, path.indexOf(".where"));
+		}
+		return path;
 	}
 
 	@Deprecated

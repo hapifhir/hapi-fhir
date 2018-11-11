@@ -20,14 +20,13 @@ package ca.uhn.fhir.rest.annotation;
  * #L%
  */
 
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
 /**
  * RESTful method annotation used for a method which provides FHIR "operations".
@@ -37,10 +36,18 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 public @interface Operation {
 
 	/**
-	 * The name of the operation, e.g. "<code>$everything</code>" 
-	 * 
+	 * This constant is a special return value for {@link #name()}. If this name is
+	 * used, the given operation method will match all operation calls. This is
+	 * generally not desirable, but can be useful if you have a server that should
+	 * dynamically match any FHIR operations that are requested.
+	 */
+	String NAME_MATCH_ALL = "*";
+
+	/**
+	 * The name of the operation, e.g. "<code>$everything</code>"
+	 *
 	 * <p>
-	 * This may be specified with or without a leading 
+	 * This may be specified with or without a leading
 	 * '$'. (If the leading '$' is omitted, it will be added internally by the API).
 	 * </p>
 	 */
@@ -61,10 +68,10 @@ public @interface Operation {
 	 * (meaning roughly that it does not modify any data or state on the server)
 	 * then this flag should be set to <code>true</code> (default is <code>false</code>).
 	 * <p>
-	 * One the server, setting this to <code>true</code> means that the 
+	 * One the server, setting this to <code>true</code> means that the
 	 * server will allow the operation to be invoked using an <code>HTTP GET</code>
 	 * (on top of the standard <code>HTTP POST</code>)
-	 * </p> 
+	 * </p>
 	 */
 	boolean idempotent() default false;
 
@@ -73,9 +80,9 @@ public @interface Operation {
 	 * response to this operation.
 	 */
 	OperationParam[] returnParameters() default {};
-	
+
 	/**
-	 * If this operation returns a bundle, this parameter can be used to specify the 
+	 * If this operation returns a bundle, this parameter can be used to specify the
 	 * bundle type to set in the bundle.
 	 */
 	BundleTypeEnum bundleType() default BundleTypeEnum.COLLECTION;

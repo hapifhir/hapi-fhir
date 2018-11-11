@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -45,6 +45,8 @@ public class ActionParticipantTypeEnumFactory implements EnumFactory<ActionParti
       return ActionParticipantType.PRACTITIONER;
     if ("related-person".equals(codeString))
       return ActionParticipantType.RELATEDPERSON;
+    if ("device".equals(codeString))
+      return ActionParticipantType.DEVICE;
     throw new IllegalArgumentException("Unknown ActionParticipantType code '"+codeString+"'");
   }
 
@@ -55,6 +57,8 @@ public class ActionParticipantTypeEnumFactory implements EnumFactory<ActionParti
       return "practitioner";
     if (code == ActionParticipantType.RELATEDPERSON)
       return "related-person";
+    if (code == ActionParticipantType.DEVICE)
+      return "device";
     return "?";
   }
 

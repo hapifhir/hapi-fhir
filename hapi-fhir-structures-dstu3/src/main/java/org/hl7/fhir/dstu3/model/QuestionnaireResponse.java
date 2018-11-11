@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the questionnaire being responded to.
  */
-@ResourceDef(name="QuestionnaireResponse", profile="http://hl7.org/fhir/Profile/QuestionnaireResponse")
+@ResourceDef(name="QuestionnaireResponse", profile="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse")
 public class QuestionnaireResponse extends DomainResource {
 
     public enum QuestionnaireResponseStatus {

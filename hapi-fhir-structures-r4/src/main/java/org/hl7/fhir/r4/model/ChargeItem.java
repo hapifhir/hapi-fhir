@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,32 +46,32 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.
  */
-@ResourceDef(name="ChargeItem", profile="http://hl7.org/fhir/Profile/ChargeItem")
+@ResourceDef(name="ChargeItem", profile="http://hl7.org/fhir/StructureDefinition/ChargeItem")
 public class ChargeItem extends DomainResource {
 
     public enum ChargeItemStatus {
         /**
-         * The charge item has been entered, but the charged service is not  yet complete, so it shall not be billed yet but might be used in the context of pre-authorization
+         * The charge item has been entered, but the charged service is not  yet complete, so it shall not be billed yet but might be used in the context of pre-authorization.
          */
         PLANNED, 
         /**
-         * The charge item is ready for billing
+         * The charge item is ready for billing.
          */
         BILLABLE, 
         /**
-         * The charge item has been determined to be not billable (e.g. due to rules associated with the billing code)
+         * The charge item has been determined to be not billable (e.g. due to rules associated with the billing code).
          */
         NOTBILLABLE, 
         /**
-         * The processing of the charge was aborted
+         * The processing of the charge was aborted.
          */
         ABORTED, 
         /**
-         * The charge item has been billed (e.g. a billing engine has generated financial transactions by applying the associated ruled for the charge item to the context of the Encounter, and placed them into Claims/Invoices
+         * The charge item has been billed (e.g. a billing engine has generated financial transactions by applying the associated ruled for the charge item to the context of the Encounter, and placed them into Claims/Invoices.
          */
         BILLED, 
         /**
-         * The charge item has been entered in error and should not be processed for billing
+         * The charge item has been entered in error and should not be processed for billing.
          */
         ENTEREDINERROR, 
         /**
@@ -130,12 +130,12 @@ public class ChargeItem extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PLANNED: return "The charge item has been entered, but the charged service is not  yet complete, so it shall not be billed yet but might be used in the context of pre-authorization";
-            case BILLABLE: return "The charge item is ready for billing";
-            case NOTBILLABLE: return "The charge item has been determined to be not billable (e.g. due to rules associated with the billing code)";
-            case ABORTED: return "The processing of the charge was aborted";
-            case BILLED: return "The charge item has been billed (e.g. a billing engine has generated financial transactions by applying the associated ruled for the charge item to the context of the Encounter, and placed them into Claims/Invoices";
-            case ENTEREDINERROR: return "The charge item has been entered in error and should not be processed for billing";
+            case PLANNED: return "The charge item has been entered, but the charged service is not  yet complete, so it shall not be billed yet but might be used in the context of pre-authorization.";
+            case BILLABLE: return "The charge item is ready for billing.";
+            case NOTBILLABLE: return "The charge item has been determined to be not billable (e.g. due to rules associated with the billing code).";
+            case ABORTED: return "The processing of the charge was aborted.";
+            case BILLED: return "The charge item has been billed (e.g. a billing engine has generated financial transactions by applying the associated ruled for the charge item to the context of the Encounter, and placed them into Claims/Invoices.";
+            case ENTEREDINERROR: return "The charge item has been entered in error and should not be processed for billing.";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this charge item  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
@@ -222,19 +222,19 @@ public class ChargeItem extends DomainResource {
     }
 
     @Block()
-    public static class ChargeItemParticipantComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class ChargeItemPerformerComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.).
          */
-        @Child(name = "role", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "function", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="What type of performance was done", formalDefinition="Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/performer-role")
-        protected CodeableConcept role;
+        protected CodeableConcept function;
 
         /**
          * The device, practitioner, etc. who performed or participated in the service.
          */
-        @Child(name = "actor", type = {Practitioner.class, Organization.class, Patient.class, Device.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "actor", type = {Practitioner.class, PractitionerRole.class, Organization.class, CareTeam.class, Patient.class, Device.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Individual who was performing", formalDefinition="The device, practitioner, etc. who performed or participated in the service." )
         protected Reference actor;
 
@@ -243,44 +243,44 @@ public class ChargeItem extends DomainResource {
          */
         protected Resource actorTarget;
 
-        private static final long serialVersionUID = 805521719L;
+        private static final long serialVersionUID = 1424001049L;
 
     /**
      * Constructor
      */
-      public ChargeItemParticipantComponent() {
+      public ChargeItemPerformerComponent() {
         super();
       }
 
     /**
      * Constructor
      */
-      public ChargeItemParticipantComponent(Reference actor) {
+      public ChargeItemPerformerComponent(Reference actor) {
         super();
         this.actor = actor;
       }
 
         /**
-         * @return {@link #role} (Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.).)
+         * @return {@link #function} (Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.).)
          */
-        public CodeableConcept getRole() { 
-          if (this.role == null)
+        public CodeableConcept getFunction() { 
+          if (this.function == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ChargeItemParticipantComponent.role");
+              throw new Error("Attempt to auto-create ChargeItemPerformerComponent.function");
             else if (Configuration.doAutoCreate())
-              this.role = new CodeableConcept(); // cc
-          return this.role;
+              this.function = new CodeableConcept(); // cc
+          return this.function;
         }
 
-        public boolean hasRole() { 
-          return this.role != null && !this.role.isEmpty();
+        public boolean hasFunction() { 
+          return this.function != null && !this.function.isEmpty();
         }
 
         /**
-         * @param value {@link #role} (Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.).)
+         * @param value {@link #function} (Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.).)
          */
-        public ChargeItemParticipantComponent setRole(CodeableConcept value) { 
-          this.role = value;
+        public ChargeItemPerformerComponent setFunction(CodeableConcept value) { 
+          this.function = value;
           return this;
         }
 
@@ -290,7 +290,7 @@ public class ChargeItem extends DomainResource {
         public Reference getActor() { 
           if (this.actor == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ChargeItemParticipantComponent.actor");
+              throw new Error("Attempt to auto-create ChargeItemPerformerComponent.actor");
             else if (Configuration.doAutoCreate())
               this.actor = new Reference(); // cc
           return this.actor;
@@ -303,7 +303,7 @@ public class ChargeItem extends DomainResource {
         /**
          * @param value {@link #actor} (The device, practitioner, etc. who performed or participated in the service.)
          */
-        public ChargeItemParticipantComponent setActor(Reference value) { 
+        public ChargeItemPerformerComponent setActor(Reference value) { 
           this.actor = value;
           return this;
         }
@@ -318,22 +318,22 @@ public class ChargeItem extends DomainResource {
         /**
          * @param value {@link #actor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The device, practitioner, etc. who performed or participated in the service.)
          */
-        public ChargeItemParticipantComponent setActorTarget(Resource value) { 
+        public ChargeItemPerformerComponent setActorTarget(Resource value) { 
           this.actorTarget = value;
           return this;
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("role", "CodeableConcept", "Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.).", 0, 1, role));
-          children.add(new Property("actor", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson)", "The device, practitioner, etc. who performed or participated in the service.", 0, 1, actor));
+          children.add(new Property("function", "CodeableConcept", "Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.).", 0, 1, function));
+          children.add(new Property("actor", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|Patient|Device|RelatedPerson)", "The device, practitioner, etc. who performed or participated in the service.", 0, 1, actor));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.).", 0, 1, role);
-          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner|Organization|Patient|Device|RelatedPerson)", "The device, practitioner, etc. who performed or participated in the service.", 0, 1, actor);
+          case 1380938712: /*function*/  return new Property("function", "CodeableConcept", "Describes the type of performance or participation(e.g. primary surgeon, anaesthesiologiest, etc.).", 0, 1, function);
+          case 92645877: /*actor*/  return new Property("actor", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|Patient|Device|RelatedPerson)", "The device, practitioner, etc. who performed or participated in the service.", 0, 1, actor);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -342,7 +342,7 @@ public class ChargeItem extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // CodeableConcept
+        case 1380938712: /*function*/ return this.function == null ? new Base[0] : new Base[] {this.function}; // CodeableConcept
         case 92645877: /*actor*/ return this.actor == null ? new Base[0] : new Base[] {this.actor}; // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -352,8 +352,8 @@ public class ChargeItem extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 3506294: // role
-          this.role = castToCodeableConcept(value); // CodeableConcept
+        case 1380938712: // function
+          this.function = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 92645877: // actor
           this.actor = castToReference(value); // Reference
@@ -365,8 +365,8 @@ public class ChargeItem extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("role")) {
-          this.role = castToCodeableConcept(value); // CodeableConcept
+        if (name.equals("function")) {
+          this.function = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("actor")) {
           this.actor = castToReference(value); // Reference
         } else
@@ -377,7 +377,7 @@ public class ChargeItem extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3506294:  return getRole(); 
+        case 1380938712:  return getFunction(); 
         case 92645877:  return getActor(); 
         default: return super.makeProperty(hash, name);
         }
@@ -387,7 +387,7 @@ public class ChargeItem extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3506294: /*role*/ return new String[] {"CodeableConcept"};
+        case 1380938712: /*function*/ return new String[] {"CodeableConcept"};
         case 92645877: /*actor*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -396,9 +396,9 @@ public class ChargeItem extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("role")) {
-          this.role = new CodeableConcept();
-          return this.role;
+        if (name.equals("function")) {
+          this.function = new CodeableConcept();
+          return this.function;
         }
         else if (name.equals("actor")) {
           this.actor = new Reference();
@@ -408,10 +408,10 @@ public class ChargeItem extends DomainResource {
           return super.addChild(name);
       }
 
-      public ChargeItemParticipantComponent copy() {
-        ChargeItemParticipantComponent dst = new ChargeItemParticipantComponent();
+      public ChargeItemPerformerComponent copy() {
+        ChargeItemPerformerComponent dst = new ChargeItemPerformerComponent();
         copyValues(dst);
-        dst.role = role == null ? null : role.copy();
+        dst.function = function == null ? null : function.copy();
         dst.actor = actor == null ? null : actor.copy();
         return dst;
       }
@@ -420,28 +420,28 @@ public class ChargeItem extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof ChargeItemParticipantComponent))
+        if (!(other_ instanceof ChargeItemPerformerComponent))
           return false;
-        ChargeItemParticipantComponent o = (ChargeItemParticipantComponent) other_;
-        return compareDeep(role, o.role, true) && compareDeep(actor, o.actor, true);
+        ChargeItemPerformerComponent o = (ChargeItemPerformerComponent) other_;
+        return compareDeep(function, o.function, true) && compareDeep(actor, o.actor, true);
       }
 
       @Override
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof ChargeItemParticipantComponent))
+        if (!(other_ instanceof ChargeItemPerformerComponent))
           return false;
-        ChargeItemParticipantComponent o = (ChargeItemParticipantComponent) other_;
+        ChargeItemPerformerComponent o = (ChargeItemPerformerComponent) other_;
         return true;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(role, actor);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(function, actor);
       }
 
   public String fhirType() {
-    return "ChargeItem.participant";
+    return "ChargeItem.performer";
 
   }
 
@@ -523,9 +523,9 @@ public class ChargeItem extends DomainResource {
     /**
      * Indicates who or what performed or participated in the charged service.
      */
-    @Child(name = "participant", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "performer", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Who performed charged service", formalDefinition="Indicates who or what performed or participated in the charged service." )
-    protected List<ChargeItemParticipantComponent> participant;
+    protected List<ChargeItemPerformerComponent> performer;
 
     /**
      * The organization requesting the service.
@@ -554,14 +554,14 @@ public class ChargeItem extends DomainResource {
     /**
      * The financial cost center permits the tracking of charge attribution.
      */
-    @Child(name = "costCenter", type = {Organization.class, OrganizationRole.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "costCenter", type = {Organization.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Organization that has ownership of the (potential, future) revenue", formalDefinition="The financial cost center permits the tracking of charge attribution." )
     protected Reference costCenter;
 
     /**
      * The actual object that is the target of the reference (The financial cost center permits the tracking of charge attribution.)
      */
-    protected Resource costCenterTarget;
+    protected Organization costCenterTarget;
 
     /**
      * Quantity of which the charge item has been serviced.
@@ -639,9 +639,17 @@ public class ChargeItem extends DomainResource {
 
 
     /**
+     * Identifies the device, food, drug or other product being charged either by type code or reference to an instance.
+     */
+    @Child(name = "product", type = {Device.class, Medication.class, Substance.class, CodeableConcept.class}, order=21, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Product charged", formalDefinition="Identifies the device, food, drug or other product being charged either by type code or reference to an instance." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-kind")
+    protected Type product;
+
+    /**
      * Account into which this ChargeItems belongs.
      */
-    @Child(name = "account", type = {Account.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "account", type = {Account.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Account to place this charge", formalDefinition="Account into which this ChargeItems belongs." )
     protected List<Reference> account;
     /**
@@ -653,14 +661,14 @@ public class ChargeItem extends DomainResource {
     /**
      * Comments made about the event by the performer, subject or other participants.
      */
-    @Child(name = "note", type = {Annotation.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Comments made about the ChargeItem", formalDefinition="Comments made about the event by the performer, subject or other participants." )
     protected List<Annotation> note;
 
     /**
      * Further information supporting this charge.
      */
-    @Child(name = "supportingInformation", type = {Reference.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supportingInformation", type = {Reference.class}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Further information supporting this charge", formalDefinition="Further information supporting this charge." )
     protected List<Reference> supportingInformation;
     /**
@@ -669,7 +677,7 @@ public class ChargeItem extends DomainResource {
     protected List<Resource> supportingInformationTarget;
 
 
-    private static final long serialVersionUID = -28479866L;
+    private static final long serialVersionUID = 1177477896L;
 
   /**
    * Constructor
@@ -1091,56 +1099,56 @@ public class ChargeItem extends DomainResource {
     }
 
     /**
-     * @return {@link #participant} (Indicates who or what performed or participated in the charged service.)
+     * @return {@link #performer} (Indicates who or what performed or participated in the charged service.)
      */
-    public List<ChargeItemParticipantComponent> getParticipant() { 
-      if (this.participant == null)
-        this.participant = new ArrayList<ChargeItemParticipantComponent>();
-      return this.participant;
+    public List<ChargeItemPerformerComponent> getPerformer() { 
+      if (this.performer == null)
+        this.performer = new ArrayList<ChargeItemPerformerComponent>();
+      return this.performer;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ChargeItem setParticipant(List<ChargeItemParticipantComponent> theParticipant) { 
-      this.participant = theParticipant;
+    public ChargeItem setPerformer(List<ChargeItemPerformerComponent> thePerformer) { 
+      this.performer = thePerformer;
       return this;
     }
 
-    public boolean hasParticipant() { 
-      if (this.participant == null)
+    public boolean hasPerformer() { 
+      if (this.performer == null)
         return false;
-      for (ChargeItemParticipantComponent item : this.participant)
+      for (ChargeItemPerformerComponent item : this.performer)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public ChargeItemParticipantComponent addParticipant() { //3
-      ChargeItemParticipantComponent t = new ChargeItemParticipantComponent();
-      if (this.participant == null)
-        this.participant = new ArrayList<ChargeItemParticipantComponent>();
-      this.participant.add(t);
+    public ChargeItemPerformerComponent addPerformer() { //3
+      ChargeItemPerformerComponent t = new ChargeItemPerformerComponent();
+      if (this.performer == null)
+        this.performer = new ArrayList<ChargeItemPerformerComponent>();
+      this.performer.add(t);
       return t;
     }
 
-    public ChargeItem addParticipant(ChargeItemParticipantComponent t) { //3
+    public ChargeItem addPerformer(ChargeItemPerformerComponent t) { //3
       if (t == null)
         return this;
-      if (this.participant == null)
-        this.participant = new ArrayList<ChargeItemParticipantComponent>();
-      this.participant.add(t);
+      if (this.performer == null)
+        this.performer = new ArrayList<ChargeItemPerformerComponent>();
+      this.performer.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #participant}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #performer}, creating it if it does not already exist
      */
-    public ChargeItemParticipantComponent getParticipantFirstRep() { 
-      if (getParticipant().isEmpty()) {
-        addParticipant();
+    public ChargeItemPerformerComponent getPerformerFirstRep() { 
+      if (getPerformer().isEmpty()) {
+        addPerformer();
       }
-      return getParticipant().get(0);
+      return getPerformer().get(0);
     }
 
     /**
@@ -1258,14 +1266,19 @@ public class ChargeItem extends DomainResource {
     /**
      * @return {@link #costCenter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The financial cost center permits the tracking of charge attribution.)
      */
-    public Resource getCostCenterTarget() { 
+    public Organization getCostCenterTarget() { 
+      if (this.costCenterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ChargeItem.costCenter");
+        else if (Configuration.doAutoCreate())
+          this.costCenterTarget = new Organization(); // aa
       return this.costCenterTarget;
     }
 
     /**
      * @param value {@link #costCenter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The financial cost center permits the tracking of charge attribution.)
      */
-    public ChargeItem setCostCenterTarget(Resource value) { 
+    public ChargeItem setCostCenterTarget(Organization value) { 
       this.costCenterTarget = value;
       return this;
     }
@@ -1692,6 +1705,57 @@ public class ChargeItem extends DomainResource {
     }
 
     /**
+     * @return {@link #product} (Identifies the device, food, drug or other product being charged either by type code or reference to an instance.)
+     */
+    public Type getProduct() { 
+      return this.product;
+    }
+
+    /**
+     * @return {@link #product} (Identifies the device, food, drug or other product being charged either by type code or reference to an instance.)
+     */
+    public Reference getProductReference() throws FHIRException { 
+      if (this.product == null)
+        return null;
+      if (!(this.product instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.product.getClass().getName()+" was encountered");
+      return (Reference) this.product;
+    }
+
+    public boolean hasProductReference() { 
+      return this != null && this.product instanceof Reference;
+    }
+
+    /**
+     * @return {@link #product} (Identifies the device, food, drug or other product being charged either by type code or reference to an instance.)
+     */
+    public CodeableConcept getProductCodeableConcept() throws FHIRException { 
+      if (this.product == null)
+        return null;
+      if (!(this.product instanceof CodeableConcept))
+        throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.product.getClass().getName()+" was encountered");
+      return (CodeableConcept) this.product;
+    }
+
+    public boolean hasProductCodeableConcept() { 
+      return this != null && this.product instanceof CodeableConcept;
+    }
+
+    public boolean hasProduct() { 
+      return this.product != null && !this.product.isEmpty();
+    }
+
+    /**
+     * @param value {@link #product} (Identifies the device, food, drug or other product being charged either by type code or reference to an instance.)
+     */
+    public ChargeItem setProduct(Type value) { 
+      if (value != null && !(value instanceof Reference || value instanceof CodeableConcept))
+        throw new Error("Not the right type for ChargeItem.product[x]: "+value.fhirType());
+      this.product = value;
+      return this;
+    }
+
+    /**
      * @return {@link #account} (Account into which this ChargeItems belongs.)
      */
     public List<Reference> getAccount() { 
@@ -1892,10 +1956,10 @@ public class ChargeItem extends DomainResource {
         children.add(new Property("subject", "Reference(Patient|Group)", "The individual or set of individuals the action is being or was performed on.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this event.", 0, 1, context));
         children.add(new Property("occurrence[x]", "dateTime|Period|Timing", "Date/time(s) or duration when the charged service was applied.", 0, 1, occurrence));
-        children.add(new Property("participant", "", "Indicates who or what performed or participated in the charged service.", 0, java.lang.Integer.MAX_VALUE, participant));
+        children.add(new Property("performer", "", "Indicates who or what performed or participated in the charged service.", 0, java.lang.Integer.MAX_VALUE, performer));
         children.add(new Property("performingOrganization", "Reference(Organization)", "The organization requesting the service.", 0, 1, performingOrganization));
         children.add(new Property("requestingOrganization", "Reference(Organization)", "The organization performing the service.", 0, 1, requestingOrganization));
-        children.add(new Property("costCenter", "Reference(Organization|OrganizationRole)", "The financial cost center permits the tracking of charge attribution.", 0, 1, costCenter));
+        children.add(new Property("costCenter", "Reference(Organization)", "The financial cost center permits the tracking of charge attribution.", 0, 1, costCenter));
         children.add(new Property("quantity", "Quantity", "Quantity of which the charge item has been serviced.", 0, 1, quantity));
         children.add(new Property("bodysite", "CodeableConcept", "The anatomical location where the related service has been applied.", 0, java.lang.Integer.MAX_VALUE, bodysite));
         children.add(new Property("factorOverride", "decimal", "Factor overriding the factor determined by the rules associated with the code.", 0, 1, factorOverride));
@@ -1905,6 +1969,7 @@ public class ChargeItem extends DomainResource {
         children.add(new Property("enteredDate", "dateTime", "Date the charge item was entered.", 0, 1, enteredDate));
         children.add(new Property("reason", "CodeableConcept", "Describes why the event occurred in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reason));
         children.add(new Property("service", "Reference(DiagnosticReport|ImagingStudy|Immunization|MedicationAdministration|MedicationDispense|Observation|Procedure|SupplyDelivery)", "Indicated the rendered service that caused this charge.", 0, java.lang.Integer.MAX_VALUE, service));
+        children.add(new Property("product[x]", "Reference(Device|Medication|Substance)|CodeableConcept", "Identifies the device, food, drug or other product being charged either by type code or reference to an instance.", 0, 1, product));
         children.add(new Property("account", "Reference(Account)", "Account into which this ChargeItems belongs.", 0, java.lang.Integer.MAX_VALUE, account));
         children.add(new Property("note", "Annotation", "Comments made about the event by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
         children.add(new Property("supportingInformation", "Reference(Any)", "Further information supporting this charge.", 0, java.lang.Integer.MAX_VALUE, supportingInformation));
@@ -1925,10 +1990,10 @@ public class ChargeItem extends DomainResource {
         case -298443636: /*occurrenceDateTime*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "Date/time(s) or duration when the charged service was applied.", 0, 1, occurrence);
         case 1397156594: /*occurrencePeriod*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "Date/time(s) or duration when the charged service was applied.", 0, 1, occurrence);
         case 1515218299: /*occurrenceTiming*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "Date/time(s) or duration when the charged service was applied.", 0, 1, occurrence);
-        case 767422259: /*participant*/  return new Property("participant", "", "Indicates who or what performed or participated in the charged service.", 0, java.lang.Integer.MAX_VALUE, participant);
+        case 481140686: /*performer*/  return new Property("performer", "", "Indicates who or what performed or participated in the charged service.", 0, java.lang.Integer.MAX_VALUE, performer);
         case 1273192628: /*performingOrganization*/  return new Property("performingOrganization", "Reference(Organization)", "The organization requesting the service.", 0, 1, performingOrganization);
         case 1279054790: /*requestingOrganization*/  return new Property("requestingOrganization", "Reference(Organization)", "The organization performing the service.", 0, 1, requestingOrganization);
-        case -593192318: /*costCenter*/  return new Property("costCenter", "Reference(Organization|OrganizationRole)", "The financial cost center permits the tracking of charge attribution.", 0, 1, costCenter);
+        case -593192318: /*costCenter*/  return new Property("costCenter", "Reference(Organization)", "The financial cost center permits the tracking of charge attribution.", 0, 1, costCenter);
         case -1285004149: /*quantity*/  return new Property("quantity", "Quantity", "Quantity of which the charge item has been serviced.", 0, 1, quantity);
         case 1703573481: /*bodysite*/  return new Property("bodysite", "CodeableConcept", "The anatomical location where the related service has been applied.", 0, java.lang.Integer.MAX_VALUE, bodysite);
         case -451233221: /*factorOverride*/  return new Property("factorOverride", "decimal", "Factor overriding the factor determined by the rules associated with the code.", 0, 1, factorOverride);
@@ -1938,6 +2003,10 @@ public class ChargeItem extends DomainResource {
         case 555978181: /*enteredDate*/  return new Property("enteredDate", "dateTime", "Date the charge item was entered.", 0, 1, enteredDate);
         case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Describes why the event occurred in coded or textual form.", 0, java.lang.Integer.MAX_VALUE, reason);
         case 1984153269: /*service*/  return new Property("service", "Reference(DiagnosticReport|ImagingStudy|Immunization|MedicationAdministration|MedicationDispense|Observation|Procedure|SupplyDelivery)", "Indicated the rendered service that caused this charge.", 0, java.lang.Integer.MAX_VALUE, service);
+        case 1753005361: /*product[x]*/  return new Property("product[x]", "Reference(Device|Medication|Substance)|CodeableConcept", "Identifies the device, food, drug or other product being charged either by type code or reference to an instance.", 0, 1, product);
+        case -309474065: /*product*/  return new Property("product[x]", "Reference(Device|Medication|Substance)|CodeableConcept", "Identifies the device, food, drug or other product being charged either by type code or reference to an instance.", 0, 1, product);
+        case -669667556: /*productReference*/  return new Property("product[x]", "Reference(Device|Medication|Substance)|CodeableConcept", "Identifies the device, food, drug or other product being charged either by type code or reference to an instance.", 0, 1, product);
+        case 906854066: /*productCodeableConcept*/  return new Property("product[x]", "Reference(Device|Medication|Substance)|CodeableConcept", "Identifies the device, food, drug or other product being charged either by type code or reference to an instance.", 0, 1, product);
         case -1177318867: /*account*/  return new Property("account", "Reference(Account)", "Account into which this ChargeItems belongs.", 0, java.lang.Integer.MAX_VALUE, account);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the event by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note);
         case -1248768647: /*supportingInformation*/  return new Property("supportingInformation", "Reference(Any)", "Further information supporting this charge.", 0, java.lang.Integer.MAX_VALUE, supportingInformation);
@@ -1957,7 +2026,7 @@ public class ChargeItem extends DomainResource {
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case 1687874001: /*occurrence*/ return this.occurrence == null ? new Base[0] : new Base[] {this.occurrence}; // Type
-        case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // ChargeItemParticipantComponent
+        case 481140686: /*performer*/ return this.performer == null ? new Base[0] : this.performer.toArray(new Base[this.performer.size()]); // ChargeItemPerformerComponent
         case 1273192628: /*performingOrganization*/ return this.performingOrganization == null ? new Base[0] : new Base[] {this.performingOrganization}; // Reference
         case 1279054790: /*requestingOrganization*/ return this.requestingOrganization == null ? new Base[0] : new Base[] {this.requestingOrganization}; // Reference
         case -593192318: /*costCenter*/ return this.costCenter == null ? new Base[0] : new Base[] {this.costCenter}; // Reference
@@ -1970,6 +2039,7 @@ public class ChargeItem extends DomainResource {
         case 555978181: /*enteredDate*/ return this.enteredDate == null ? new Base[0] : new Base[] {this.enteredDate}; // DateTimeType
         case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
         case 1984153269: /*service*/ return this.service == null ? new Base[0] : this.service.toArray(new Base[this.service.size()]); // Reference
+        case -309474065: /*product*/ return this.product == null ? new Base[0] : new Base[] {this.product}; // Type
         case -1177318867: /*account*/ return this.account == null ? new Base[0] : this.account.toArray(new Base[this.account.size()]); // Reference
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case -1248768647: /*supportingInformation*/ return this.supportingInformation == null ? new Base[0] : this.supportingInformation.toArray(new Base[this.supportingInformation.size()]); // Reference
@@ -2006,8 +2076,8 @@ public class ChargeItem extends DomainResource {
         case 1687874001: // occurrence
           this.occurrence = castToType(value); // Type
           return value;
-        case 767422259: // participant
-          this.getParticipant().add((ChargeItemParticipantComponent) value); // ChargeItemParticipantComponent
+        case 481140686: // performer
+          this.getPerformer().add((ChargeItemPerformerComponent) value); // ChargeItemPerformerComponent
           return value;
         case 1273192628: // performingOrganization
           this.performingOrganization = castToReference(value); // Reference
@@ -2045,6 +2115,9 @@ public class ChargeItem extends DomainResource {
         case 1984153269: // service
           this.getService().add(castToReference(value)); // Reference
           return value;
+        case -309474065: // product
+          this.product = castToType(value); // Type
+          return value;
         case -1177318867: // account
           this.getAccount().add(castToReference(value)); // Reference
           return value;
@@ -2078,8 +2151,8 @@ public class ChargeItem extends DomainResource {
           this.context = castToReference(value); // Reference
         } else if (name.equals("occurrence[x]")) {
           this.occurrence = castToType(value); // Type
-        } else if (name.equals("participant")) {
-          this.getParticipant().add((ChargeItemParticipantComponent) value);
+        } else if (name.equals("performer")) {
+          this.getPerformer().add((ChargeItemPerformerComponent) value);
         } else if (name.equals("performingOrganization")) {
           this.performingOrganization = castToReference(value); // Reference
         } else if (name.equals("requestingOrganization")) {
@@ -2104,6 +2177,8 @@ public class ChargeItem extends DomainResource {
           this.getReason().add(castToCodeableConcept(value));
         } else if (name.equals("service")) {
           this.getService().add(castToReference(value));
+        } else if (name.equals("product[x]")) {
+          this.product = castToType(value); // Type
         } else if (name.equals("account")) {
           this.getAccount().add(castToReference(value));
         } else if (name.equals("note")) {
@@ -2127,7 +2202,7 @@ public class ChargeItem extends DomainResource {
         case 951530927:  return getContext(); 
         case -2022646513:  return getOccurrence(); 
         case 1687874001:  return getOccurrence(); 
-        case 767422259:  return addParticipant(); 
+        case 481140686:  return addPerformer(); 
         case 1273192628:  return getPerformingOrganization(); 
         case 1279054790:  return getRequestingOrganization(); 
         case -593192318:  return getCostCenter(); 
@@ -2140,6 +2215,8 @@ public class ChargeItem extends DomainResource {
         case 555978181:  return getEnteredDateElement();
         case -934964668:  return addReason(); 
         case 1984153269:  return addService(); 
+        case 1753005361:  return getProduct(); 
+        case -309474065:  return getProduct(); 
         case -1177318867:  return addAccount(); 
         case 3387378:  return addNote(); 
         case -1248768647:  return addSupportingInformation(); 
@@ -2159,7 +2236,7 @@ public class ChargeItem extends DomainResource {
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 951530927: /*context*/ return new String[] {"Reference"};
         case 1687874001: /*occurrence*/ return new String[] {"dateTime", "Period", "Timing"};
-        case 767422259: /*participant*/ return new String[] {};
+        case 481140686: /*performer*/ return new String[] {};
         case 1273192628: /*performingOrganization*/ return new String[] {"Reference"};
         case 1279054790: /*requestingOrganization*/ return new String[] {"Reference"};
         case -593192318: /*costCenter*/ return new String[] {"Reference"};
@@ -2172,6 +2249,7 @@ public class ChargeItem extends DomainResource {
         case 555978181: /*enteredDate*/ return new String[] {"dateTime"};
         case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
         case 1984153269: /*service*/ return new String[] {"Reference"};
+        case -309474065: /*product*/ return new String[] {"Reference", "CodeableConcept"};
         case -1177318867: /*account*/ return new String[] {"Reference"};
         case 3387378: /*note*/ return new String[] {"Annotation"};
         case -1248768647: /*supportingInformation*/ return new String[] {"Reference"};
@@ -2218,8 +2296,8 @@ public class ChargeItem extends DomainResource {
           this.occurrence = new Timing();
           return this.occurrence;
         }
-        else if (name.equals("participant")) {
-          return addParticipant();
+        else if (name.equals("performer")) {
+          return addPerformer();
         }
         else if (name.equals("performingOrganization")) {
           this.performingOrganization = new Reference();
@@ -2263,6 +2341,14 @@ public class ChargeItem extends DomainResource {
         else if (name.equals("service")) {
           return addService();
         }
+        else if (name.equals("productReference")) {
+          this.product = new Reference();
+          return this.product;
+        }
+        else if (name.equals("productCodeableConcept")) {
+          this.product = new CodeableConcept();
+          return this.product;
+        }
         else if (name.equals("account")) {
           return addAccount();
         }
@@ -2304,10 +2390,10 @@ public class ChargeItem extends DomainResource {
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
         dst.occurrence = occurrence == null ? null : occurrence.copy();
-        if (participant != null) {
-          dst.participant = new ArrayList<ChargeItemParticipantComponent>();
-          for (ChargeItemParticipantComponent i : participant)
-            dst.participant.add(i.copy());
+        if (performer != null) {
+          dst.performer = new ArrayList<ChargeItemPerformerComponent>();
+          for (ChargeItemPerformerComponent i : performer)
+            dst.performer.add(i.copy());
         };
         dst.performingOrganization = performingOrganization == null ? null : performingOrganization.copy();
         dst.requestingOrganization = requestingOrganization == null ? null : requestingOrganization.copy();
@@ -2333,6 +2419,7 @@ public class ChargeItem extends DomainResource {
           for (Reference i : service)
             dst.service.add(i.copy());
         };
+        dst.product = product == null ? null : product.copy();
         if (account != null) {
           dst.account = new ArrayList<Reference>();
           for (Reference i : account)
@@ -2365,13 +2452,14 @@ public class ChargeItem extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(status, o.status, true) && compareDeep(partOf, o.partOf, true) && compareDeep(code, o.code, true)
            && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true)
-           && compareDeep(participant, o.participant, true) && compareDeep(performingOrganization, o.performingOrganization, true)
+           && compareDeep(performer, o.performer, true) && compareDeep(performingOrganization, o.performingOrganization, true)
            && compareDeep(requestingOrganization, o.requestingOrganization, true) && compareDeep(costCenter, o.costCenter, true)
            && compareDeep(quantity, o.quantity, true) && compareDeep(bodysite, o.bodysite, true) && compareDeep(factorOverride, o.factorOverride, true)
            && compareDeep(priceOverride, o.priceOverride, true) && compareDeep(overrideReason, o.overrideReason, true)
            && compareDeep(enterer, o.enterer, true) && compareDeep(enteredDate, o.enteredDate, true) && compareDeep(reason, o.reason, true)
-           && compareDeep(service, o.service, true) && compareDeep(account, o.account, true) && compareDeep(note, o.note, true)
-           && compareDeep(supportingInformation, o.supportingInformation, true);
+           && compareDeep(service, o.service, true) && compareDeep(product, o.product, true) && compareDeep(account, o.account, true)
+           && compareDeep(note, o.note, true) && compareDeep(supportingInformation, o.supportingInformation, true)
+          ;
       }
 
       @Override
@@ -2388,10 +2476,10 @@ public class ChargeItem extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, definition, status
-          , partOf, code, subject, context, occurrence, participant, performingOrganization
+          , partOf, code, subject, context, occurrence, performer, performingOrganization
           , requestingOrganization, costCenter, quantity, bodysite, factorOverride, priceOverride
-          , overrideReason, enterer, enteredDate, reason, service, account, note, supportingInformation
-          );
+          , overrideReason, enterer, enteredDate, reason, service, product, account, note
+          , supportingInformation);
       }
 
   @Override
@@ -2512,52 +2600,6 @@ public class ChargeItem extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("ChargeItem:subject").toLocked();
 
  /**
-   * Search parameter: <b>participant-role</b>
-   * <p>
-   * Description: <b>What type of performance was done</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ChargeItem.participant.role</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="participant-role", path="ChargeItem.participant.role", description="What type of performance was done", type="token" )
-  public static final String SP_PARTICIPANT_ROLE = "participant-role";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>participant-role</b>
-   * <p>
-   * Description: <b>What type of performance was done</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ChargeItem.participant.role</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PARTICIPANT_ROLE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PARTICIPANT_ROLE);
-
- /**
-   * Search parameter: <b>participant-actor</b>
-   * <p>
-   * Description: <b>Individual who was performing</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>ChargeItem.participant.actor</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="participant-actor", path="ChargeItem.participant.actor", description="Individual who was performing", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
-  public static final String SP_PARTICIPANT_ACTOR = "participant-actor";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>participant-actor</b>
-   * <p>
-   * Description: <b>Individual who was performing</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>ChargeItem.participant.actor</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PARTICIPANT_ACTOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PARTICIPANT_ACTOR);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ChargeItem:participant-actor</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARTICIPANT_ACTOR = new ca.uhn.fhir.model.api.Include("ChargeItem:participant-actor").toLocked();
-
- /**
    * Search parameter: <b>occurrence</b>
    * <p>
    * Description: <b>When the charged service was applied</b><br>
@@ -2598,6 +2640,26 @@ public class ChargeItem extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam ENTERED_DATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_ENTERED_DATE);
 
  /**
+   * Search parameter: <b>performer-function</b>
+   * <p>
+   * Description: <b>What type of performance was done</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ChargeItem.performer.function</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="performer-function", path="ChargeItem.performer.function", description="What type of performance was done", type="token" )
+  public static final String SP_PERFORMER_FUNCTION = "performer-function";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>performer-function</b>
+   * <p>
+   * Description: <b>What type of performance was done</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>ChargeItem.performer.function</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PERFORMER_FUNCTION = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PERFORMER_FUNCTION);
+
+ /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>Individual service was done for/to</b><br>
@@ -2605,7 +2667,7 @@ public class ChargeItem extends DomainResource {
    * Path: <b>ChargeItem.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ChargeItem.subject", description="Individual service was done for/to", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="ChargeItem.subject.where(resolve() is Patient)", description="Individual service was done for/to", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2740,6 +2802,32 @@ public class ChargeItem extends DomainResource {
    * the path value of "<b>ChargeItem:enterer</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENTERER = new ca.uhn.fhir.model.api.Include("ChargeItem:enterer").toLocked();
+
+ /**
+   * Search parameter: <b>performer-actor</b>
+   * <p>
+   * Description: <b>Individual who was performing</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ChargeItem.performer.actor</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="performer-actor", path="ChargeItem.performer.actor", description="Individual who was performing", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={CareTeam.class, Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
+  public static final String SP_PERFORMER_ACTOR = "performer-actor";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>performer-actor</b>
+   * <p>
+   * Description: <b>Individual who was performing</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ChargeItem.performer.actor</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PERFORMER_ACTOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PERFORMER_ACTOR);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ChargeItem:performer-actor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PERFORMER_ACTOR = new ca.uhn.fhir.model.api.Include("ChargeItem:performer-actor").toLocked();
 
  /**
    * Search parameter: <b>account</b>

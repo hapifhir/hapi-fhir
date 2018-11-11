@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu2;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -385,7 +385,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		p.addName().addFamily("Hello");
 
 		TagList tl = new TagList();
-		tl.addTag(Constants.TAG_SUBSETTED_SYSTEM, Constants.TAG_SUBSETTED_CODE);
+		tl.addTag(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
 		ResourceMetadataKeyEnum.TAG_LIST.put(p, tl);
 
 		try {

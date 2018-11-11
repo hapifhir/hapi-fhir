@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,19 +37,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum EvidenceQuality {
 
         /**
-         * High quality evidence
+         * High quality evidence.
          */
         HIGH, 
         /**
-         * Moderate quality evidence
+         * Moderate quality evidence.
          */
         MODERATE, 
         /**
-         * Low quality evidence
+         * Low quality evidence.
          */
         LOW, 
         /**
-         * Very low quality evidence
+         * Very low quality evidence.
          */
         VERYLOW, 
         /**
@@ -79,14 +79,14 @@ public enum EvidenceQuality {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/evidence-quality";
+          return "http://terminology.hl7.org/CodeSystem/evidence-quality";
         }
         public String getDefinition() {
           switch (this) {
-            case HIGH: return "High quality evidence";
-            case MODERATE: return "Moderate quality evidence";
-            case LOW: return "Low quality evidence";
-            case VERYLOW: return "Very low quality evidence";
+            case HIGH: return "High quality evidence.";
+            case MODERATE: return "Moderate quality evidence.";
+            case LOW: return "Low quality evidence.";
+            case VERYLOW: return "Very low quality evidence.";
             default: return "?";
           }
         }

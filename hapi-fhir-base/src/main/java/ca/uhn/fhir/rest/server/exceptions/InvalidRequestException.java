@@ -44,10 +44,23 @@ public class InvalidRequestException extends BaseServerResponseException {
 	public static final int STATUS_CODE = Constants.STATUS_HTTP_400_BAD_REQUEST;
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor
+	 */
 	public InvalidRequestException(String theMessage) {
 		super(STATUS_CODE, theMessage);
 	}
 
+	/**
+	 * Constructor
+	 */
+	public InvalidRequestException(String theMessage, Throwable theCause) {
+		super(STATUS_CODE, theMessage, theCause);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public InvalidRequestException(Throwable theCause) {
 		super(STATUS_CODE, theCause);
 	}

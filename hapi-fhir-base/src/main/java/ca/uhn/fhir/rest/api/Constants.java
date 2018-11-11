@@ -182,7 +182,8 @@ public class Constants {
 	public static final int STATUS_HTTP_500_INTERNAL_ERROR = 500;
 	public static final int STATUS_HTTP_501_NOT_IMPLEMENTED = 501;
 	public static final String TAG_SUBSETTED_CODE = "SUBSETTED";
-	public static final String TAG_SUBSETTED_SYSTEM = "http://hl7.org/fhir/v3/ObservationValue";
+	public static final String TAG_SUBSETTED_SYSTEM_DSTU3 = "http://hl7.org/fhir/v3/ObservationValue";
+	public static final String TAG_SUBSETTED_SYSTEM_R4 = "http://terminology.hl7.org/CodeSystem/v3-ObservationValue";
 	public static final String URL_TOKEN_HISTORY = "_history";
 	public static final String URL_TOKEN_METADATA = "metadata";
 	public static final String OO_INFOSTATUS_PROCESSING = "processing";
@@ -196,6 +197,7 @@ public class Constants {
 	 * This is provided for testing only! Use with caution as this property may change.
 	 */
 	public static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = "TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
+	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

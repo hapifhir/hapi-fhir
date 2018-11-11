@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Describes the event of a patient consuming or otherwise being administered a medication.  This may be as simple as swallowing a tablet or it may be a long running infusion.  Related resources tie this event to the authorizing prescription, and the specific encounter between patient and health care practitioner.
  */
-@ResourceDef(name="MedicationAdministration", profile="http://hl7.org/fhir/Profile/MedicationAdministration")
+@ResourceDef(name="MedicationAdministration", profile="http://hl7.org/fhir/StructureDefinition/MedicationAdministration")
 public class MedicationAdministration extends DomainResource {
 
     public enum MedicationAdministrationStatus {
@@ -54,7 +54,7 @@ public class MedicationAdministration extends DomainResource {
          */
         INPROGRESS, 
         /**
-         * The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken)
+         * The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken).
          */
         NOTDONE, 
         /**
@@ -130,7 +130,7 @@ public class MedicationAdministration extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case INPROGRESS: return "The administration has started but has not yet completed.";
-            case NOTDONE: return "The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken)";
+            case NOTDONE: return "The administration was terminated prior to any impact on the subject (though preparatory actions may have been taken).";
             case ONHOLD: return "Actions implied by the administration have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
             case COMPLETED: return "All actions that are implied by the administration have occurred.";
             case ENTEREDINERROR: return "The administration was entered in error and therefore nullified.";
@@ -482,18 +482,18 @@ public class MedicationAdministration extends DomainResource {
         /**
          * The amount of the medication given at one administration event.   Use this value when the administration is essentially an instantaneous event such as a swallowing a tablet or giving an injection.
          */
-        @Child(name = "dose", type = {SimpleQuantity.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "dose", type = {Quantity.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Amount of medication per dose", formalDefinition="The amount of the medication given at one administration event.   Use this value when the administration is essentially an instantaneous event such as a swallowing a tablet or giving an injection." )
-        protected SimpleQuantity dose;
+        protected Quantity dose;
 
         /**
          * Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.
          */
-        @Child(name = "rate", type = {Ratio.class, SimpleQuantity.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "rate", type = {Ratio.class, Quantity.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Dose quantity per unit of time", formalDefinition="Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours." )
         protected Type rate;
 
-        private static final long serialVersionUID = 1316915516L;
+        private static final long serialVersionUID = 947835626L;
 
     /**
      * Constructor
@@ -626,12 +626,12 @@ public class MedicationAdministration extends DomainResource {
         /**
          * @return {@link #dose} (The amount of the medication given at one administration event.   Use this value when the administration is essentially an instantaneous event such as a swallowing a tablet or giving an injection.)
          */
-        public SimpleQuantity getDose() { 
+        public Quantity getDose() { 
           if (this.dose == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create MedicationAdministrationDosageComponent.dose");
             else if (Configuration.doAutoCreate())
-              this.dose = new SimpleQuantity(); // cc
+              this.dose = new Quantity(); // cc
           return this.dose;
         }
 
@@ -642,7 +642,7 @@ public class MedicationAdministration extends DomainResource {
         /**
          * @param value {@link #dose} (The amount of the medication given at one administration event.   Use this value when the administration is essentially an instantaneous event such as a swallowing a tablet or giving an injection.)
          */
-        public MedicationAdministrationDosageComponent setDose(SimpleQuantity value) { 
+        public MedicationAdministrationDosageComponent setDose(Quantity value) { 
           this.dose = value;
           return this;
         }
@@ -672,16 +672,16 @@ public class MedicationAdministration extends DomainResource {
         /**
          * @return {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.)
          */
-        public SimpleQuantity getRateSimpleQuantity() throws FHIRException { 
+        public Quantity getRateQuantity() throws FHIRException { 
           if (this.rate == null)
             return null;
-          if (!(this.rate instanceof SimpleQuantity))
-            throw new FHIRException("Type mismatch: the type SimpleQuantity was expected, but "+this.rate.getClass().getName()+" was encountered");
-          return (SimpleQuantity) this.rate;
+          if (!(this.rate instanceof Quantity))
+            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.rate.getClass().getName()+" was encountered");
+          return (Quantity) this.rate;
         }
 
-        public boolean hasRateSimpleQuantity() { 
-          return this != null && this.rate instanceof SimpleQuantity;
+        public boolean hasRateQuantity() { 
+          return this != null && this.rate instanceof Quantity;
         }
 
         public boolean hasRate() { 
@@ -692,7 +692,7 @@ public class MedicationAdministration extends DomainResource {
          * @param value {@link #rate} (Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.)
          */
         public MedicationAdministrationDosageComponent setRate(Type value) { 
-          if (value != null && !(value instanceof Ratio || value instanceof SimpleQuantity))
+          if (value != null && !(value instanceof Ratio || value instanceof Quantity))
             throw new Error("Not the right type for MedicationAdministration.dosage.rate[x]: "+value.fhirType());
           this.rate = value;
           return this;
@@ -719,7 +719,7 @@ public class MedicationAdministration extends DomainResource {
           case 983460768: /*rate[x]*/  return new Property("rate[x]", "Ratio|SimpleQuantity", "Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.", 0, 1, rate);
           case 3493088: /*rate*/  return new Property("rate[x]", "Ratio|SimpleQuantity", "Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.", 0, 1, rate);
           case 204021515: /*rateRatio*/  return new Property("rate[x]", "Ratio|SimpleQuantity", "Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.", 0, 1, rate);
-          case -2121057955: /*rateSimpleQuantity*/  return new Property("rate[x]", "Ratio|SimpleQuantity", "Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.", 0, 1, rate);
+          case -1085459061: /*rateQuantity*/  return new Property("rate[x]", "Ratio|SimpleQuantity", "Identifies the speed with which the medication was or will be introduced into the patient.  Typically the rate for an infusion e.g. 100 ml per 1 hour or 100 ml/hr.  May also be expressed as a rate per unit of time e.g. 500 ml per 2 hours.  Other examples:  200 mcg/min or 200 mcg/1 minute; 1 liter/8 hours.", 0, 1, rate);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -732,7 +732,7 @@ public class MedicationAdministration extends DomainResource {
         case 3530567: /*site*/ return this.site == null ? new Base[0] : new Base[] {this.site}; // CodeableConcept
         case 108704329: /*route*/ return this.route == null ? new Base[0] : new Base[] {this.route}; // CodeableConcept
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
-        case 3089437: /*dose*/ return this.dose == null ? new Base[0] : new Base[] {this.dose}; // SimpleQuantity
+        case 3089437: /*dose*/ return this.dose == null ? new Base[0] : new Base[] {this.dose}; // Quantity
         case 3493088: /*rate*/ return this.rate == null ? new Base[0] : new Base[] {this.rate}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -755,7 +755,7 @@ public class MedicationAdministration extends DomainResource {
           this.method = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 3089437: // dose
-          this.dose = castToSimpleQuantity(value); // SimpleQuantity
+          this.dose = castToQuantity(value); // Quantity
           return value;
         case 3493088: // rate
           this.rate = castToType(value); // Type
@@ -776,7 +776,7 @@ public class MedicationAdministration extends DomainResource {
         } else if (name.equals("method")) {
           this.method = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("dose")) {
-          this.dose = castToSimpleQuantity(value); // SimpleQuantity
+          this.dose = castToQuantity(value); // Quantity
         } else if (name.equals("rate[x]")) {
           this.rate = castToType(value); // Type
         } else
@@ -831,15 +831,15 @@ public class MedicationAdministration extends DomainResource {
           return this.method;
         }
         else if (name.equals("dose")) {
-          this.dose = new SimpleQuantity();
+          this.dose = new Quantity();
           return this.dose;
         }
         else if (name.equals("rateRatio")) {
           this.rate = new Ratio();
           return this.rate;
         }
-        else if (name.equals("rateSimpleQuantity")) {
-          this.rate = new SimpleQuantity();
+        else if (name.equals("rateQuantity")) {
+          this.rate = new Quantity();
           return this.rate;
         }
         else
@@ -927,10 +927,10 @@ public class MedicationAdministration extends DomainResource {
     protected Enumeration<MedicationAdministrationStatus> status;
 
     /**
-     * Indicates the type of medication administration and where the medication is expected to be consumed or administered.
+     * Indicates where the medication is expected to be consumed or administered.
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Type of medication usage", formalDefinition="Indicates the type of medication administration and where the medication is expected to be consumed or administered." )
+    @Description(shortDefinition="Type of medication usage", formalDefinition="Indicates where the medication is expected to be consumed or administered." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-admin-category")
     protected CodeableConcept category;
 
@@ -1313,7 +1313,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (Indicates the type of medication administration and where the medication is expected to be consumed or administered.)
+     * @return {@link #category} (Indicates where the medication is expected to be consumed or administered.)
      */
     public CodeableConcept getCategory() { 
       if (this.category == null)
@@ -1329,7 +1329,7 @@ public class MedicationAdministration extends DomainResource {
     }
 
     /**
-     * @param value {@link #category} (Indicates the type of medication administration and where the medication is expected to be consumed or administered.)
+     * @param value {@link #category} (Indicates where the medication is expected to be consumed or administered.)
      */
     public MedicationAdministration setCategory(CodeableConcept value) { 
       this.category = value;
@@ -2078,7 +2078,7 @@ public class MedicationAdministration extends DomainResource {
         children.add(new Property("instantiates", "uri", "A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, instantiates));
         children.add(new Property("partOf", "Reference(MedicationAdministration|Procedure)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf));
         children.add(new Property("status", "code", "Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way.", 0, 1, status));
-        children.add(new Property("category", "CodeableConcept", "Indicates the type of medication administration and where the medication is expected to be consumed or administered.", 0, 1, category));
+        children.add(new Property("category", "CodeableConcept", "Indicates where the medication is expected to be consumed or administered.", 0, 1, category));
         children.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication));
         children.add(new Property("subject", "Reference(Patient|Group)", "The person or animal or group receiving the medication.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The visit, admission, or other contact between patient and health care provider during which the medication administration was performed.", 0, 1, context));
@@ -2102,7 +2102,7 @@ public class MedicationAdministration extends DomainResource {
         case -246883639: /*instantiates*/  return new Property("instantiates", "uri", "A protocol, guideline, orderset, or other definition that was adhered to in whole or in part by this event.", 0, java.lang.Integer.MAX_VALUE, instantiates);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(MedicationAdministration|Procedure)", "A larger event of which this particular event is a component or step.", 0, java.lang.Integer.MAX_VALUE, partOf);
         case -892481550: /*status*/  return new Property("status", "code", "Will generally be set to show that the administration has been completed.  For some long running administrations such as infusions, it is possible for an administration to be started but not completed or it may be paused while some other process is under way.", 0, 1, status);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates the type of medication administration and where the medication is expected to be consumed or administered.", 0, 1, category);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates where the medication is expected to be consumed or administered.", 0, 1, category);
         case 1458402129: /*medication[x]*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case 1998965455: /*medication*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case -209845038: /*medicationCodeableConcept*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication that was administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
@@ -2572,7 +2572,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationAdministration.medication.as(CodeableConcept)", description="Return administrations of this medication code", type="token" )
+  @SearchParamDefinition(name="code", path="(MedicationAdministration.medication as CodeableConcept)", description="Return administrations of this medication code", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2644,7 +2644,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationAdministration.medication.as(Reference)", description="Return administrations of this medication resource", type="reference", target={Medication.class } )
+  @SearchParamDefinition(name="medication", path="(MedicationAdministration.medication as Reference)", description="Return administrations of this medication resource", type="reference", target={Medication.class } )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
@@ -2690,7 +2690,7 @@ public class MedicationAdministration extends DomainResource {
    * Path: <b>MedicationAdministration.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MedicationAdministration.subject", description="The identity of a patient to list administrations  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="MedicationAdministration.subject.where(resolve() is Patient)", description="The identity of a patient to list administrations  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

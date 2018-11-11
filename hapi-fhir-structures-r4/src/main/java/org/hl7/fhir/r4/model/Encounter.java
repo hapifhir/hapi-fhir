@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or assessing the health status of a patient.
  */
-@ResourceDef(name="Encounter", profile="http://hl7.org/fhir/Profile/Encounter")
+@ResourceDef(name="Encounter", profile="http://hl7.org/fhir/StructureDefinition/Encounter")
 public class Encounter extends DomainResource {
 
     public enum EncounterStatus {
@@ -259,7 +259,7 @@ public class Encounter extends DomainResource {
          */
         PLANNED, 
         /**
-         * The patient is currently at this location, or was between the period specified.A system may update these records when the patient leaves the location to either reserved, or completed
+         * The patient is currently at this location, or was between the period specified.A system may update these records when the patient leaves the location to either reserved, or completed.
          */
         ACTIVE, 
         /**
@@ -267,7 +267,7 @@ public class Encounter extends DomainResource {
          */
         RESERVED, 
         /**
-         * The patient was at this location during the period specified.Not to be used when the patient is currently at the location
+         * The patient was at this location during the period specified.Not to be used when the patient is currently at the location.
          */
         COMPLETED, 
         /**
@@ -311,9 +311,9 @@ public class Encounter extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case PLANNED: return "The patient is planned to be moved to this location at some point in the future.";
-            case ACTIVE: return "The patient is currently at this location, or was between the period specified.\r\rA system may update these records when the patient leaves the location to either reserved, or completed";
+            case ACTIVE: return "The patient is currently at this location, or was between the period specified.\r\rA system may update these records when the patient leaves the location to either reserved, or completed.";
             case RESERVED: return "This location is held empty for this patient.";
-            case COMPLETED: return "The patient was at this location during the period specified.\r\rNot to be used when the patient is currently at the location";
+            case COMPLETED: return "The patient was at this location during the period specified.\r\rNot to be used when the patient is currently at the location.";
             default: return "?";
           }
         }
@@ -613,7 +613,7 @@ public class Encounter extends DomainResource {
          */
         @Child(name = "class", type = {Coding.class}, order=1, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="inpatient | outpatient | ambulatory | emergency +", formalDefinition="inpatient | outpatient | ambulatory | emergency +." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActEncounterCode")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-ActEncounterCode")
         protected Coding class_;
 
         /**
@@ -1438,7 +1438,7 @@ public class Encounter extends DomainResource {
          */
         @Child(name = "reAdmission", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The type of hospital re-admission that has occurred (if any). If the value is absent, then this is not identified as a readmission", formalDefinition="Whether this hospitalization is a readmission and why if known." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0092")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v2-0092")
         protected CodeableConcept reAdmission;
 
         /**
@@ -2403,7 +2403,7 @@ public class Encounter extends DomainResource {
      */
     @Child(name = "class", type = {Coding.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Classification of patient encounter", formalDefinition="Concepts representing classification of patient encounter such as ambulatory (outpatient), inpatient, emergency, home health or others due to local variations." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActEncounterCode")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-ActEncounterCode")
     protected Coding class_;
 
     /**
@@ -2434,7 +2434,7 @@ public class Encounter extends DomainResource {
      */
     @Child(name = "priority", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Indicates the urgency of the encounter", formalDefinition="Indicates the urgency of the encounter." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActPriority")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-ActPriority")
     protected CodeableConcept priority;
 
     /**
@@ -2474,10 +2474,10 @@ public class Encounter extends DomainResource {
 
 
     /**
-     * The list of people responsible for providing the service.
+     * The list of people responsible for providing the service.
      */
     @Child(name = "participant", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="List of participants involved in the encounter", formalDefinition="The list of people responsible for providing the service." )
+    @Description(shortDefinition="List of participants involved in the encounter", formalDefinition="The list of people responsible for providing the service." )
     protected List<EncounterParticipantComponent> participant;
 
     /**
@@ -3108,7 +3108,7 @@ public class Encounter extends DomainResource {
     }
 
     /**
-     * @return {@link #participant} (The list of people responsible for providing the service.)
+     * @return {@link #participant} (The list of people responsible for providing the service.)
      */
     public List<EncounterParticipantComponent> getParticipant() { 
       if (this.participant == null)
@@ -3611,7 +3611,7 @@ public class Encounter extends DomainResource {
         children.add(new Property("subject", "Reference(Patient|Group)", "The patient or group present at the encounter.", 0, 1, subject));
         children.add(new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare));
         children.add(new Property("basedOn", "Reference(ServiceRequest)", "The request this encounter satisfies (e.g. incoming referral or procedure request).", 0, java.lang.Integer.MAX_VALUE, basedOn));
-        children.add(new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant));
+        children.add(new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant));
         children.add(new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment));
         children.add(new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period));
         children.add(new Property("length", "Duration", "Quantity of time the encounter lasted. This excludes the time during leaves of absence.", 0, 1, length));
@@ -3638,7 +3638,7 @@ public class Encounter extends DomainResource {
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient or group present at the encounter.", 0, 1, subject);
         case -1892140189: /*episodeOfCare*/  return new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare);
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ServiceRequest)", "The request this encounter satisfies (e.g. incoming referral or procedure request).", 0, java.lang.Integer.MAX_VALUE, basedOn);
-        case 767422259: /*participant*/  return new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant);
+        case 767422259: /*participant*/  return new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant);
         case -1474995297: /*appointment*/  return new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment);
         case -991726143: /*period*/  return new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period);
         case -1106363674: /*length*/  return new Property("length", "Duration", "Quantity of time the encounter lasted. This excludes the time during leaves of absence.", 0, 1, length);
@@ -4135,32 +4135,6 @@ public class Encounter extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam REASON = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REASON);
 
  /**
-   * Search parameter: <b>episodeofcare</b>
-   * <p>
-   * Description: <b>Episode(s) of care that this encounter should be recorded against</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Encounter.episodeOfCare</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="episodeofcare", path="Encounter.episodeOfCare", description="Episode(s) of care that this encounter should be recorded against", type="reference", target={EpisodeOfCare.class } )
-  public static final String SP_EPISODEOFCARE = "episodeofcare";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>episodeofcare</b>
-   * <p>
-   * Description: <b>Episode(s) of care that this encounter should be recorded against</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>Encounter.episodeOfCare</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam EPISODEOFCARE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_EPISODEOFCARE);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>Encounter:episodeofcare</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_EPISODEOFCARE = new ca.uhn.fhir.model.api.Include("Encounter:episodeofcare").toLocked();
-
- /**
    * Search parameter: <b>participant-type</b>
    * <p>
    * Description: <b>Role of participant in encounter</b><br>
@@ -4188,7 +4162,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.participant.individual</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="practitioner", path="Encounter.participant.individual.where(resolve() is Practitioner)", description="Persons involved in the encounter other than the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_PRACTITIONER = "practitioner";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>practitioner</b>
@@ -4253,6 +4227,32 @@ public class Encounter extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.QuantityClientParam LENGTH = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_LENGTH);
 
  /**
+   * Search parameter: <b>episode-of-care</b>
+   * <p>
+   * Description: <b>Episode(s) of care that this encounter should be recorded against</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.episodeOfCare</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="episode-of-care", path="Encounter.episodeOfCare.where(resolve() is EpisodeOfCare)", description="Episode(s) of care that this encounter should be recorded against", type="reference", target={EpisodeOfCare.class } )
+  public static final String SP_EPISODE_OF_CARE = "episode-of-care";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>episode-of-care</b>
+   * <p>
+   * Description: <b>Episode(s) of care that this encounter should be recorded against</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.episodeOfCare</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam EPISODE_OF_CARE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_EPISODE_OF_CARE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:episode-of-care</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_EPISODE_OF_CARE = new ca.uhn.fhir.model.api.Include("Encounter:episode-of-care").toLocked();
+
+ /**
    * Search parameter: <b>diagnosis</b>
    * <p>
    * Description: <b>Reason the encounter takes place (resource)</b><br>
@@ -4286,7 +4286,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.appointment</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="appointment", path="Encounter.appointment", description="The appointment that scheduled this encounter", type="reference", target={Appointment.class } )
+  @SearchParamDefinition(name="appointment", path="Encounter.appointment.where(resolve() is Appointment)", description="The appointment that scheduled this encounter", type="reference", target={Appointment.class } )
   public static final String SP_APPOINTMENT = "appointment";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>appointment</b>
@@ -4312,7 +4312,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.partOf</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="part-of", path="Encounter.partOf", description="Another Encounter this encounter is part of", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="part-of", path="Encounter.partOf.where(resolve() is Encounter)", description="Another Encounter this encounter is part of", type="reference", target={Encounter.class } )
   public static final String SP_PART_OF = "part-of";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>part-of</b>
@@ -4384,7 +4384,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.basedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="based-on", path="Encounter.basedOn", description="The ServiceRequest that initiated this encounter", type="reference", target={ServiceRequest.class } )
+  @SearchParamDefinition(name="based-on", path="Encounter.basedOn.where(resolve() is ServiceRequest)", description="The ServiceRequest that initiated this encounter", type="reference", target={ServiceRequest.class } )
   public static final String SP_BASED_ON = "based-on";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>based-on</b>
@@ -4410,7 +4410,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="Encounter.subject", description="The patient or group present at the encounter", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="Encounter.subject.where(resolve() is Patient)", description="The patient or group present at the encounter", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -4456,7 +4456,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.location.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Encounter.location.location", description="Location the encounter takes place", type="reference", target={Location.class } )
+  @SearchParamDefinition(name="location", path="Encounter.location.location.where(resolve() is Location)", description="Location the encounter takes place", type="reference", target={Location.class } )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -4482,7 +4482,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.serviceProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="service-provider", path="Encounter.serviceProvider", description="The organization (facility) responsible for this encounter", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="service-provider", path="Encounter.serviceProvider.where(resolve() is Organization)", description="The organization (facility) responsible for this encounter", type="reference", target={Organization.class } )
   public static final String SP_SERVICE_PROVIDER = "service-provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>service-provider</b>
@@ -4548,7 +4548,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.account</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="account", path="Encounter.account", description="The set of accounts that may be used for billing for this Encounter", type="reference", target={Account.class } )
+  @SearchParamDefinition(name="account", path="Encounter.account.where(resolve() is Account)", description="The set of accounts that may be used for billing for this Encounter", type="reference", target={Account.class } )
   public static final String SP_ACCOUNT = "account";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>account</b>

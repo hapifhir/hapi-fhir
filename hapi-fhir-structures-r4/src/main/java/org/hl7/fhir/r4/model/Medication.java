@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,20 +45,20 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource is primarily used for the identification and definition of a medication for the purposes of prescribing, dispensing, and administering a medication as well as for making statements about medication use.
  */
-@ResourceDef(name="Medication", profile="http://hl7.org/fhir/Profile/Medication")
+@ResourceDef(name="Medication", profile="http://hl7.org/fhir/StructureDefinition/Medication")
 public class Medication extends DomainResource {
 
     public enum MedicationStatus {
         /**
-         * The medication is available for use
+         * The medication is available for use.
          */
         ACTIVE, 
         /**
-         * The medication is not available for use
+         * The medication is not available for use.
          */
         INACTIVE, 
         /**
-         * The medication was entered in error
+         * The medication was entered in error.
          */
         ENTEREDINERROR, 
         /**
@@ -97,9 +97,9 @@ public class Medication extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "The medication is available for use";
-            case INACTIVE: return "The medication is not available for use";
-            case ENTEREDINERROR: return "The medication was entered in error";
+            case ACTIVE: return "The medication is available for use.";
+            case INACTIVE: return "The medication is not available for use.";
+            case ENTEREDINERROR: return "The medication was entered in error.";
             default: return "?";
           }
         }
@@ -159,17 +159,17 @@ public class Medication extends DomainResource {
     @Block()
     public static class MedicationIngredientComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The actual ingredient - either a substance (simple ingredient) or another medication.
+         * The actual ingredient - either a substance (simple ingredient) or another medication of a medication.
          */
         @Child(name = "item", type = {CodeableConcept.class, Substance.class, Medication.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The product contained", formalDefinition="The actual ingredient - either a substance (simple ingredient) or another medication." )
+        @Description(shortDefinition="The actual ingredient or content", formalDefinition="The actual ingredient - either a substance (simple ingredient) or another medication of a medication." )
         protected Type item;
 
         /**
-         * Indication of whether this ingredient affects the therapeutic action of the drug.
+         * Indication of whether this ingredient affects the therapeutic action of the drug.
          */
         @Child(name = "isActive", type = {BooleanType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Active ingredient indicator", formalDefinition="Indication of whether this ingredient affects the therapeutic action of the drug." )
+        @Description(shortDefinition="Active ingredient indicator", formalDefinition="Indication of whether this ingredient affects the therapeutic action of the drug." )
         protected BooleanType isActive;
 
         /**
@@ -197,14 +197,14 @@ public class Medication extends DomainResource {
       }
 
         /**
-         * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
+         * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication of a medication.)
          */
         public Type getItem() { 
           return this.item;
         }
 
         /**
-         * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
+         * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication of a medication.)
          */
         public CodeableConcept getItemCodeableConcept() throws FHIRException { 
           if (this.item == null)
@@ -219,7 +219,7 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
+         * @return {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication of a medication.)
          */
         public Reference getItemReference() throws FHIRException { 
           if (this.item == null)
@@ -238,7 +238,7 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @param value {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication.)
+         * @param value {@link #item} (The actual ingredient - either a substance (simple ingredient) or another medication of a medication.)
          */
         public MedicationIngredientComponent setItem(Type value) { 
           if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
@@ -248,7 +248,7 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @return {@link #isActive} (Indication of whether this ingredient affects the therapeutic action of the drug.). This is the underlying object with id, value and extensions. The accessor "getIsActive" gives direct access to the value
+         * @return {@link #isActive} (Indication of whether this ingredient affects the therapeutic action of the drug.). This is the underlying object with id, value and extensions. The accessor "getIsActive" gives direct access to the value
          */
         public BooleanType getIsActiveElement() { 
           if (this.isActive == null)
@@ -268,7 +268,7 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @param value {@link #isActive} (Indication of whether this ingredient affects the therapeutic action of the drug.). This is the underlying object with id, value and extensions. The accessor "getIsActive" gives direct access to the value
+         * @param value {@link #isActive} (Indication of whether this ingredient affects the therapeutic action of the drug.). This is the underlying object with id, value and extensions. The accessor "getIsActive" gives direct access to the value
          */
         public MedicationIngredientComponent setIsActiveElement(BooleanType value) { 
           this.isActive = value;
@@ -276,14 +276,14 @@ public class Medication extends DomainResource {
         }
 
         /**
-         * @return Indication of whether this ingredient affects the therapeutic action of the drug.
+         * @return Indication of whether this ingredient affects the therapeutic action of the drug.
          */
         public boolean getIsActive() { 
           return this.isActive == null || this.isActive.isEmpty() ? false : this.isActive.getValue();
         }
 
         /**
-         * @param value Indication of whether this ingredient affects the therapeutic action of the drug.
+         * @param value Indication of whether this ingredient affects the therapeutic action of the drug.
          */
         public MedicationIngredientComponent setIsActive(boolean value) { 
             if (this.isActive == null)
@@ -318,19 +318,19 @@ public class Medication extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item));
-          children.add(new Property("isActive", "boolean", "Indication of whether this ingredient affects the therapeutic action of the drug.", 0, 1, isActive));
+          children.add(new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication of a medication.", 0, 1, item));
+          children.add(new Property("isActive", "boolean", "Indication of whether this ingredient affects the therapeutic action of the drug.", 0, 1, isActive));
           children.add(new Property("amount", "Ratio", "Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.  This is expressed as a ratio where the numerator is 250mg and the denominator is 1 tablet.", 0, 1, amount));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 2116201613: /*item[x]*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item);
-          case 3242771: /*item*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item);
-          case 106644494: /*itemCodeableConcept*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item);
-          case 1376364920: /*itemReference*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication.", 0, 1, item);
-          case -748916528: /*isActive*/  return new Property("isActive", "boolean", "Indication of whether this ingredient affects the therapeutic action of the drug.", 0, 1, isActive);
+          case 2116201613: /*item[x]*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication of a medication.", 0, 1, item);
+          case 3242771: /*item*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication of a medication.", 0, 1, item);
+          case 106644494: /*itemCodeableConcept*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication of a medication.", 0, 1, item);
+          case 1376364920: /*itemReference*/  return new Property("item[x]", "CodeableConcept|Reference(Substance|Medication)", "The actual ingredient - either a substance (simple ingredient) or another medication of a medication.", 0, 1, item);
+          case -748916528: /*isActive*/  return new Property("isActive", "boolean", "Indication of whether this ingredient affects the therapeutic action of the drug.", 0, 1, isActive);
           case -1413853096: /*amount*/  return new Property("amount", "Ratio", "Specifies how many (or how much) of the items there are in this Medication.  For example, 250 mg per tablet.  This is expressed as a ratio where the numerator is 250mg and the denominator is 1 tablet.", 0, 1, amount);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -792,7 +792,7 @@ public class Medication extends DomainResource {
     /**
      * A code to indicate if the medication is in active use.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | inactive | entered-in-error", formalDefinition="A code to indicate if the medication is in active use." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-status")
     protected Enumeration<MedicationStatus> status;
@@ -820,9 +820,9 @@ public class Medication extends DomainResource {
     /**
      * Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.).
      */
-    @Child(name = "amount", type = {SimpleQuantity.class}, order=4, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "amount", type = {Quantity.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Amount of drug in package", formalDefinition="Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.)." )
-    protected SimpleQuantity amount;
+    protected Quantity amount;
 
     /**
      * Identifies a particular constituent of interest in the product.
@@ -838,7 +838,7 @@ public class Medication extends DomainResource {
     @Description(shortDefinition="Details about packaged medications", formalDefinition="Information that only applies to packages (not products)." )
     protected MedicationBatchComponent batch;
 
-    private static final long serialVersionUID = -733624193L;
+    private static final long serialVersionUID = -482408531L;
 
   /**
    * Constructor
@@ -991,12 +991,12 @@ public class Medication extends DomainResource {
     /**
      * @return {@link #amount} (Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.).)
      */
-    public SimpleQuantity getAmount() { 
+    public Quantity getAmount() { 
       if (this.amount == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Medication.amount");
         else if (Configuration.doAutoCreate())
-          this.amount = new SimpleQuantity(); // cc
+          this.amount = new Quantity(); // cc
       return this.amount;
     }
 
@@ -1007,7 +1007,7 @@ public class Medication extends DomainResource {
     /**
      * @param value {@link #amount} (Specific amount of the drug in the packaged product.  For example, when specifying a product that has the same strength (For example, Insulin glargine 100 unit per mL solution for injection), this attribute provides additional clarification of the package amount (For example, 3 mL, 10mL, etc.).)
      */
-    public Medication setAmount(SimpleQuantity value) { 
+    public Medication setAmount(Quantity value) { 
       this.amount = value;
       return this;
     }
@@ -1122,7 +1122,7 @@ public class Medication extends DomainResource {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<MedicationStatus>
         case -1969347631: /*manufacturer*/ return this.manufacturer == null ? new Base[0] : new Base[] {this.manufacturer}; // Reference
         case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // CodeableConcept
-        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // SimpleQuantity
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Quantity
         case -206409263: /*ingredient*/ return this.ingredient == null ? new Base[0] : this.ingredient.toArray(new Base[this.ingredient.size()]); // MedicationIngredientComponent
         case 93509434: /*batch*/ return this.batch == null ? new Base[0] : new Base[] {this.batch}; // MedicationBatchComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -1147,7 +1147,7 @@ public class Medication extends DomainResource {
           this.form = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1413853096: // amount
-          this.amount = castToSimpleQuantity(value); // SimpleQuantity
+          this.amount = castToQuantity(value); // Quantity
           return value;
         case -206409263: // ingredient
           this.getIngredient().add((MedicationIngredientComponent) value); // MedicationIngredientComponent
@@ -1172,7 +1172,7 @@ public class Medication extends DomainResource {
         } else if (name.equals("form")) {
           this.form = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("amount")) {
-          this.amount = castToSimpleQuantity(value); // SimpleQuantity
+          this.amount = castToQuantity(value); // Quantity
         } else if (name.equals("ingredient")) {
           this.getIngredient().add((MedicationIngredientComponent) value);
         } else if (name.equals("batch")) {
@@ -1230,7 +1230,7 @@ public class Medication extends DomainResource {
           return this.form;
         }
         else if (name.equals("amount")) {
-          this.amount = new SimpleQuantity();
+          this.amount = new Quantity();
           return this.amount;
         }
         else if (name.equals("ingredient")) {
@@ -1305,17 +1305,17 @@ public class Medication extends DomainResource {
  /**
    * Search parameter: <b>ingredient-code</b>
    * <p>
-   * Description: <b>The product contained</b><br>
+   * Description: <b>The actual ingredient or content</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Medication.ingredient.itemCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ingredient-code", path="Medication.ingredient.item.as(CodeableConcept)", description="The product contained", type="token" )
+  @SearchParamDefinition(name="ingredient-code", path="(Medication.ingredient.item as CodeableConcept)", description="The actual ingredient or content", type="token" )
   public static final String SP_INGREDIENT_CODE = "ingredient-code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ingredient-code</b>
    * <p>
-   * Description: <b>The product contained</b><br>
+   * Description: <b>The actual ingredient or content</b><br>
    * Type: <b>token</b><br>
    * Path: <b>Medication.ingredient.itemCodeableConcept</b><br>
    * </p>
@@ -1345,17 +1345,17 @@ public class Medication extends DomainResource {
  /**
    * Search parameter: <b>ingredient</b>
    * <p>
-   * Description: <b>The product contained</b><br>
+   * Description: <b>The actual ingredient or content</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Medication.ingredient.itemReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="ingredient", path="Medication.ingredient.item.as(Reference)", description="The product contained", type="reference", target={Medication.class, Substance.class } )
+  @SearchParamDefinition(name="ingredient", path="(Medication.ingredient.item as Reference)", description="The actual ingredient or content", type="reference", target={Medication.class, Substance.class } )
   public static final String SP_INGREDIENT = "ingredient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>ingredient</b>
    * <p>
-   * Description: <b>The product contained</b><br>
+   * Description: <b>The actual ingredient or content</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Medication.ingredient.itemReference</b><br>
    * </p>

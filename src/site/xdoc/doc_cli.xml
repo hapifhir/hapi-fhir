@@ -142,42 +142,16 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.60-b23, mixed mode)]]></pre>
 		<section name="Migrate Database">
 
 			<p>
-				When upgrading the JPA server from one version of HAPI FHIR to a newer version,
-				often there will be changes to the database schema. The <b>Migrate Database</b>
-				command can be used to perform a migration from one version to the next.
-			</p>
-			<p>
-				Note that this feature was added in HAPI FHIR 3.5.0. It is not able to migrate
-				from versions prior to HAPI FHIR 3.4.0. <b>Please make a backup of your
-				database before running this command!</b>
-			</p>
-			<p>
-				The following example shows how to use the migrator utility to migrate between two versions.
-			</p>
-			<pre>./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u "jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_5_0</pre>
-
-			<p>
-				You may use the following command to get detailed help on the options:
-			</p>
-			<pre>./hapi-fhir-cli help migrate-database</pre>
-
-			<p>
-				Note the arguments:
-				<ul>
-					<li><code>-d [dialect]</code> - This indicates the database dialect to use. See the detailed help for a list of options</li>
-					<li><code>-f [version]</code> - The version to migrate from</li>
-					<li><code>-t [version]</code> - The version to migrate to</li>
-				</ul>
+				The <code>migrate-database</code> command may be used to Migrate a database
+				schema when upgrading a
+				<a href="./doc_jpa.html">HAPI FHIR JPA</a> project from one version of HAPI
+				FHIR to another version.
 			</p>
 
-			<subsection name="Oracle Support">
-				<p>
-					Note that the Oracle JDBC drivers are not distributed in the Maven Central repository,
-					so they are not included in HAPI FHIR. In order to use this command with an Oracle database,
-					you will need to invoke the CLI as follows:
-				</p>
-				<pre>java -cp hapi-fhir-cli.jar ca.uhn.fhir.cli.App migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]" -f V3_4_0 -t V3_5_0</pre>
-			</subsection>
+			<p>
+				See <a href="./doc_jpa.html#upgrading">Upgrading HAPI FHIR JPA</a>
+				for information on how to use this command.
+			</p>
 
 		</section>
 

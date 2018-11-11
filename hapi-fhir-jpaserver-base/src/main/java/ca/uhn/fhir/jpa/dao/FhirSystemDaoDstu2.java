@@ -81,6 +81,8 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	private Bundle batch(final RequestDetails theRequestDetails, Bundle theRequest) {
 		ourLog.info("Beginning batch with {} resources", theRequest.getEntry().size());
@@ -363,7 +365,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				case POST: {
 					// CREATE
 					@SuppressWarnings("rawtypes")
-					IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
+					IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(res.getClass());
 					res.setId((String) null);
 					DaoMethodOutcome outcome;
 					outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theRequestDetails);
@@ -403,7 +405,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				case PUT: {
 					// UPDATE
 					@SuppressWarnings("rawtypes")
-					IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
+					IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(res.getClass());
 
 					DaoMethodOutcome outcome;
 

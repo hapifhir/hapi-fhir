@@ -134,14 +134,32 @@ public class SearchR4Test {
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest");
 		bundle = executeAndReturnBundle(httpGet);
 		assertEquals(1, bundle.getEntry().size());
+	}
+
+	/**
+	 * See #836
+	 */
+	@Test
+	public void testIncludeSingleParameterWithIncludeStar() throws Exception {
+		HttpGet httpGet;
+		Bundle bundle;
 
 		// * include specified
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam("*"));
 		bundle = executeAndReturnBundle(httpGet);
 		assertEquals(2, bundle.getEntry().size());
+	}
+
+	/**
+	 * See #836
+	 */
+	@Test
+	public void testIncludeSingleParameterWithIncludeByName() throws Exception {
+		HttpGet httpGet;
+		Bundle bundle;
 
 		// MedicationRequest:medication include specified
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam("MedicationRequest:medication"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam(MedicationRequest.INCLUDE_MEDICATION.getValue()));
 		bundle = executeAndReturnBundle(httpGet);
 		assertEquals(2, bundle.getEntry().size());
 
@@ -392,38 +410,6 @@ public class SearchR4Test {
 		return ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theBundle);
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-		DummyMedicationRequestResourceProvider medRequestProvider = new DummyMedicationRequestResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
-		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-
-		servlet.setResourceProviders(patientProvider, medRequestProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
@@ -460,7 +446,7 @@ public class SearchR4Test {
 
 		@SuppressWarnings("rawtypes")
 		@Search()
-		public List<MedicationRequest> search(
+		public List<IBaseResource> search(
 			@IncludeParam Set<Include> theIncludes
 		) {
 			MedicationRequest mr = new MedicationRequest();
@@ -470,10 +456,49 @@ public class SearchR4Test {
 			Medication m = new Medication();
 			m.setId("2");
 			m.setStatus(Medication.MedicationStatus.ENTEREDINERROR);
+
 			mr.setMedication(new Reference(m));
 
-			return Lists.newArrayList(mr);
+			ArrayList<IBaseResource> retVal = Lists.newArrayList(mr);
+
+			if (theIncludes.contains(MedicationRequest.INCLUDE_MEDICATION)) {
+				retVal.add(m);
+			}
+
+			return retVal;
 		}
+
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
+
+		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+		DummyMedicationRequestResourceProvider medRequestProvider = new DummyMedicationRequestResourceProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
+		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
+
+		servlet.setResourceProviders(patientProvider, medRequestProvider);
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
 
 	}
 

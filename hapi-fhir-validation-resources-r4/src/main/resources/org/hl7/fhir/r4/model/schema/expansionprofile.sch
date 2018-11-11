@@ -62,10 +62,10 @@
       <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
     </sch:rule>
     <sch:rule context="f:ExpansionProfile/f:designation/f:include/f:designation">
-      <sch:assert test="exists(f:language) or exists(f:use)">exp-3: SHALL have at least one of language or use</sch:assert>
+      <sch:assert test="exists(f:language) or exists(f:use)">expp-3: SHALL have at least one of language or use</sch:assert>
     </sch:rule>
     <sch:rule context="f:ExpansionProfile/f:designation/f:exclude/f:designation">
-      <sch:assert test="exists(f:language) or exists(f:use)">exp-4: SHALL have at least one of language or use</sch:assert>
+      <sch:assert test="exists(f:language) or exists(f:use)">expp-4: SHALL have at least one of language or use</sch:assert>
     </sch:rule>
   </sch:pattern>
 </sch:schema>

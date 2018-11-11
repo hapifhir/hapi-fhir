@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedDispensePerformFunction {
 
         /**
-         * Recorded the details of the request
+         * Recorded the details of the request.
          */
         DATAENTERER, 
         /**
-         * Prepared the medication
+         * Prepared the medication.
          */
         PACKAGER, 
         /**
-         * Performed initial quality assurance on the prepared medication
+         * Performed initial quality assurance on the prepared medication.
          */
         CHECKER, 
         /**
@@ -79,13 +79,13 @@ public enum MedDispensePerformFunction {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/med-dispense-perform-function";
+          return "http://terminology.hl7.org/CodeSystem/med-dispense-perform-function";
         }
         public String getDefinition() {
           switch (this) {
-            case DATAENTERER: return "Recorded the details of the request";
-            case PACKAGER: return "Prepared the medication";
-            case CHECKER: return "Performed initial quality assurance on the prepared medication";
+            case DATAENTERER: return "Recorded the details of the request.";
+            case PACKAGER: return "Prepared the medication.";
+            case CHECKER: return "Performed initial quality assurance on the prepared medication.";
             case FINALCHECKER: return "Performed the final quality assurance on the prepared medication against the request. Typically, this is a pharmacist function.";
             default: return "?";
           }

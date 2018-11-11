@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the adjudication details from the processing of a Claim resource.
  */
-@ResourceDef(name="ClaimResponse", profile="http://hl7.org/fhir/Profile/ClaimResponse")
+@ResourceDef(name="ClaimResponse", profile="http://hl7.org/fhir/StructureDefinition/ClaimResponse")
 public class ClaimResponse extends DomainResource {
 
     public enum ClaimResponseStatus {
@@ -178,19 +178,15 @@ public class ClaimResponse extends DomainResource {
         /**
          * The treatment is complete and this represents a Claim for the services.
          */
-        COMPLETE, 
+        CLAIM, 
         /**
          * The treatment is proposed and this represents a Pre-authorization for the services.
          */
-        PROPOSED, 
+        PREAUTHORIZATION, 
         /**
          * The treatment is proposed and this represents a Pre-determination for the services.
          */
-        EXPLORATORY, 
-        /**
-         * A locally defined or otherwise resolved status.
-         */
-        OTHER, 
+        PREDETERMINATION, 
         /**
          * added to help the parsers with the generic types
          */
@@ -198,14 +194,12 @@ public class ClaimResponse extends DomainResource {
         public static Use fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("complete".equals(codeString))
-          return COMPLETE;
-        if ("proposed".equals(codeString))
-          return PROPOSED;
-        if ("exploratory".equals(codeString))
-          return EXPLORATORY;
-        if ("other".equals(codeString))
-          return OTHER;
+        if ("claim".equals(codeString))
+          return CLAIM;
+        if ("preauthorization".equals(codeString))
+          return PREAUTHORIZATION;
+        if ("predetermination".equals(codeString))
+          return PREDETERMINATION;
         if (Configuration.isAcceptInvalidEnums())
           return null;
         else
@@ -213,37 +207,33 @@ public class ClaimResponse extends DomainResource {
         }
         public String toCode() {
           switch (this) {
-            case COMPLETE: return "complete";
-            case PROPOSED: return "proposed";
-            case EXPLORATORY: return "exploratory";
-            case OTHER: return "other";
+            case CLAIM: return "claim";
+            case PREAUTHORIZATION: return "preauthorization";
+            case PREDETERMINATION: return "predetermination";
             default: return "?";
           }
         }
         public String getSystem() {
           switch (this) {
-            case COMPLETE: return "http://hl7.org/fhir/claim-use";
-            case PROPOSED: return "http://hl7.org/fhir/claim-use";
-            case EXPLORATORY: return "http://hl7.org/fhir/claim-use";
-            case OTHER: return "http://hl7.org/fhir/claim-use";
+            case CLAIM: return "http://hl7.org/fhir/claim-use";
+            case PREAUTHORIZATION: return "http://hl7.org/fhir/claim-use";
+            case PREDETERMINATION: return "http://hl7.org/fhir/claim-use";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLETE: return "The treatment is complete and this represents a Claim for the services.";
-            case PROPOSED: return "The treatment is proposed and this represents a Pre-authorization for the services.";
-            case EXPLORATORY: return "The treatment is proposed and this represents a Pre-determination for the services.";
-            case OTHER: return "A locally defined or otherwise resolved status.";
+            case CLAIM: return "The treatment is complete and this represents a Claim for the services.";
+            case PREAUTHORIZATION: return "The treatment is proposed and this represents a Pre-authorization for the services.";
+            case PREDETERMINATION: return "The treatment is proposed and this represents a Pre-determination for the services.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case COMPLETE: return "Complete";
-            case PROPOSED: return "Proposed";
-            case EXPLORATORY: return "Exploratory";
-            case OTHER: return "Other";
+            case CLAIM: return "Claim";
+            case PREAUTHORIZATION: return "Preauthorization";
+            case PREDETERMINATION: return "Predetermination";
             default: return "?";
           }
         }
@@ -254,14 +244,12 @@ public class ClaimResponse extends DomainResource {
       if (codeString == null || "".equals(codeString))
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("complete".equals(codeString))
-          return Use.COMPLETE;
-        if ("proposed".equals(codeString))
-          return Use.PROPOSED;
-        if ("exploratory".equals(codeString))
-          return Use.EXPLORATORY;
-        if ("other".equals(codeString))
-          return Use.OTHER;
+        if ("claim".equals(codeString))
+          return Use.CLAIM;
+        if ("preauthorization".equals(codeString))
+          return Use.PREAUTHORIZATION;
+        if ("predetermination".equals(codeString))
+          return Use.PREDETERMINATION;
         throw new IllegalArgumentException("Unknown Use code '"+codeString+"'");
         }
         public Enumeration<Use> fromType(Base code) throws FHIRException {
@@ -272,25 +260,21 @@ public class ClaimResponse extends DomainResource {
           String codeString = ((PrimitiveType) code).asStringValue();
           if (codeString == null || "".equals(codeString))
             return null;
-        if ("complete".equals(codeString))
-          return new Enumeration<Use>(this, Use.COMPLETE);
-        if ("proposed".equals(codeString))
-          return new Enumeration<Use>(this, Use.PROPOSED);
-        if ("exploratory".equals(codeString))
-          return new Enumeration<Use>(this, Use.EXPLORATORY);
-        if ("other".equals(codeString))
-          return new Enumeration<Use>(this, Use.OTHER);
+        if ("claim".equals(codeString))
+          return new Enumeration<Use>(this, Use.CLAIM);
+        if ("preauthorization".equals(codeString))
+          return new Enumeration<Use>(this, Use.PREAUTHORIZATION);
+        if ("predetermination".equals(codeString))
+          return new Enumeration<Use>(this, Use.PREDETERMINATION);
         throw new FHIRException("Unknown Use code '"+codeString+"'");
         }
     public String toCode(Use code) {
-      if (code == Use.COMPLETE)
-        return "complete";
-      if (code == Use.PROPOSED)
-        return "proposed";
-      if (code == Use.EXPLORATORY)
-        return "exploratory";
-      if (code == Use.OTHER)
-        return "other";
+      if (code == Use.CLAIM)
+        return "claim";
+      if (code == Use.PREAUTHORIZATION)
+        return "preauthorization";
+      if (code == Use.PREDETERMINATION)
+        return "predetermination";
       return "?";
       }
     public String toSystem(Use code) {
@@ -446,10 +430,10 @@ public class ClaimResponse extends DomainResource {
         protected List<AdjudicationComponent> adjudication;
 
         /**
-         * The second tier service adjudications for submitted services.
+         * The second-tier service adjudications for submitted services.
          */
         @Child(name = "detail", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Detail line items", formalDefinition="The second tier service adjudications for submitted services." )
+        @Description(shortDefinition="Detail line items", formalDefinition="The second-tier service adjudications for submitted services." )
         protected List<ItemDetailComponent> detail;
 
         private static final long serialVersionUID = 701277928L;
@@ -629,7 +613,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #detail} (The second tier service adjudications for submitted services.)
+         * @return {@link #detail} (The second-tier service adjudications for submitted services.)
          */
         public List<ItemDetailComponent> getDetail() { 
           if (this.detail == null)
@@ -686,7 +670,7 @@ public class ClaimResponse extends DomainResource {
           children.add(new Property("itemSequence", "positiveInt", "A service line number.", 0, 1, itemSequence));
           children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
           children.add(new Property("adjudication", "", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
-          children.add(new Property("detail", "", "The second tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail));
+          children.add(new Property("detail", "", "The second-tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
         @Override
@@ -695,7 +679,7 @@ public class ClaimResponse extends DomainResource {
           case 1977979892: /*itemSequence*/  return new Property("itemSequence", "positiveInt", "A service line number.", 0, 1, itemSequence);
           case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
           case -231349275: /*adjudication*/  return new Property("adjudication", "", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
-          case -1335224239: /*detail*/  return new Property("detail", "", "The second tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail);
+          case -1335224239: /*detail*/  return new Property("detail", "", "The second-tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, detail);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1206,17 +1190,17 @@ public class ClaimResponse extends DomainResource {
         protected List<PositiveIntType> noteNumber;
 
         /**
-         * The adjudications results.
+         * The adjudication results.
          */
         @Child(name = "adjudication", type = {AdjudicationComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Detail level adjudication details", formalDefinition="The adjudications results." )
+        @Description(shortDefinition="Detail level adjudication details", formalDefinition="The adjudication results." )
         protected List<AdjudicationComponent> adjudication;
 
         /**
-         * The third tier service adjudications for submitted services.
+         * The third-tier service adjudications for submitted services.
          */
         @Child(name = "subDetail", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Subdetail line items", formalDefinition="The third tier service adjudications for submitted services." )
+        @Description(shortDefinition="Subdetail line items", formalDefinition="The third-tier service adjudications for submitted services." )
         protected List<SubDetailComponent> subDetail;
 
         private static final long serialVersionUID = 1066636111L;
@@ -1343,7 +1327,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #adjudication} (The adjudications results.)
+         * @return {@link #adjudication} (The adjudication results.)
          */
         public List<AdjudicationComponent> getAdjudication() { 
           if (this.adjudication == null)
@@ -1396,7 +1380,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #subDetail} (The third tier service adjudications for submitted services.)
+         * @return {@link #subDetail} (The third-tier service adjudications for submitted services.)
          */
         public List<SubDetailComponent> getSubDetail() { 
           if (this.subDetail == null)
@@ -1452,8 +1436,8 @@ public class ClaimResponse extends DomainResource {
           super.listChildren(children);
           children.add(new Property("detailSequence", "positiveInt", "A service line number.", 0, 1, detailSequence));
           children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
-          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
-          children.add(new Property("subDetail", "", "The third tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, subDetail));
+          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+          children.add(new Property("subDetail", "", "The third-tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, subDetail));
         }
 
         @Override
@@ -1461,8 +1445,8 @@ public class ClaimResponse extends DomainResource {
           switch (_hash) {
           case 1321472818: /*detailSequence*/  return new Property("detailSequence", "positiveInt", "A service line number.", 0, 1, detailSequence);
           case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
-          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
-          case -828829007: /*subDetail*/  return new Property("subDetail", "", "The third tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, subDetail);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          case -828829007: /*subDetail*/  return new Property("subDetail", "", "The third-tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, subDetail);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1631,10 +1615,10 @@ public class ClaimResponse extends DomainResource {
         protected List<PositiveIntType> noteNumber;
 
         /**
-         * The adjudications results.
+         * The adjudication results.
          */
         @Child(name = "adjudication", type = {AdjudicationComponent.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Subdetail level adjudication details", formalDefinition="The adjudications results." )
+        @Description(shortDefinition="Subdetail level adjudication details", formalDefinition="The adjudication results." )
         protected List<AdjudicationComponent> adjudication;
 
         private static final long serialVersionUID = -1083724362L;
@@ -1761,7 +1745,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #adjudication} (The adjudications results.)
+         * @return {@link #adjudication} (The adjudication results.)
          */
         public List<AdjudicationComponent> getAdjudication() { 
           if (this.adjudication == null)
@@ -1817,7 +1801,7 @@ public class ClaimResponse extends DomainResource {
           super.listChildren(children);
           children.add(new Property("subDetailSequence", "positiveInt", "A service line number.", 0, 1, subDetailSequence));
           children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
-          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
         }
 
         @Override
@@ -1825,7 +1809,7 @@ public class ClaimResponse extends DomainResource {
           switch (_hash) {
           case -855462510: /*subDetailSequence*/  return new Property("subDetailSequence", "positiveInt", "A service line number.", 0, 1, subDetailSequence);
           case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
-          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1984,43 +1968,122 @@ public class ClaimResponse extends DomainResource {
         protected List<PositiveIntType> subdetailSequence;
 
         /**
-         * A code to indicate the Professional Service or Product supplied.
+         * The providers who are authorized for the services rendered to the patient.
          */
-        @Child(name = "service", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Group, Service or Product", formalDefinition="A code to indicate the Professional Service or Product supplied." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-uscls")
-        protected CodeableConcept service;
+        @Child(name = "provider", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Authorized providers", formalDefinition="The providers who are authorized for the services rendered to the patient." )
+        protected List<Reference> provider;
+        /**
+         * The actual objects that are the target of the reference (The providers who are authorized for the services rendered to the patient.)
+         */
+        protected List<Resource> providerTarget;
+
 
         /**
-         * Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.
+         * A code to indicate the Professional Service or Product supplied.
          */
-        @Child(name = "modifier", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Service/Product billing modifiers", formalDefinition="Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours." )
+        @Child(name = "billcode", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Group, Service or Product", formalDefinition="A code to indicate the Professional Service or Product supplied." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-uscls")
+        protected CodeableConcept billcode;
+
+        /**
+         * Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.
+         */
+        @Child(name = "modifier", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Service/Product billing modifiers", formalDefinition="Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/claim-modifiers")
         protected List<CodeableConcept> modifier;
 
         /**
-         * The fee charged for the professional service or product..
+         * For programs which require reason codes for the inclusion or covering of this billed item under the program or sub-program.
          */
-        @Child(name = "fee", type = {Money.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Professional fee or Product charge", formalDefinition="The fee charged for the professional service or product.." )
-        protected Money fee;
+        @Child(name = "programCode", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Program specific reason for item inclusion", formalDefinition="For programs which require reason codes for the inclusion or covering of this billed item under the program or sub-program." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/ex-program-code")
+        protected List<CodeableConcept> programCode;
+
+        /**
+         * The date or dates when the service or product was supplied, performed or completed.
+         */
+        @Child(name = "serviced", type = {DateType.class, Period.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Date or dates of Service", formalDefinition="The date or dates when the service or product was supplied, performed or completed." )
+        protected Type serviced;
+
+        /**
+         * Where the service was provided.
+         */
+        @Child(name = "location", type = {CodeableConcept.class, Address.class, Location.class}, order=9, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Place of service", formalDefinition="Where the service was provided." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-place")
+        protected Type location;
+
+        /**
+         * The number of repetitions of a service or product.
+         */
+        @Child(name = "quantity", type = {Quantity.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
+        protected Quantity quantity;
+
+        /**
+         * If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.
+         */
+        @Child(name = "unitPrice", type = {Money.class}, order=11, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group." )
+        protected Money unitPrice;
+
+        /**
+         * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        @Child(name = "factor", type = {DecimalType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
+        protected DecimalType factor;
+
+        /**
+         * The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
+         */
+        @Child(name = "net", type = {Money.class}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
+        protected Money net;
+
+        /**
+         * Physical service site on the patient (limb, tooth, etc.).
+         */
+        @Child(name = "bodySite", type = {CodeableConcept.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Service Location", formalDefinition="Physical service site on the patient (limb, tooth, etc.)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/tooth")
+        protected CodeableConcept bodySite;
+
+        /**
+         * A region or surface of the site, e.g. limb region or tooth surface(s).
+         */
+        @Child(name = "subSite", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Service Sub-location", formalDefinition="A region or surface of the site, e.g. limb region or tooth surface(s)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/surface")
+        protected List<CodeableConcept> subSite;
 
         /**
          * A list of note references to the notes provided below.
          */
-        @Child(name = "noteNumber", type = {PositiveIntType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "noteNumber", type = {PositiveIntType.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="List of note numbers which apply", formalDefinition="A list of note references to the notes provided below." )
         protected List<PositiveIntType> noteNumber;
 
         /**
-         * The adjudications results.
+         * The adjudication results.
          */
-        @Child(name = "adjudication", type = {AdjudicationComponent.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Added items adjudication", formalDefinition="The adjudications results." )
+        @Child(name = "adjudication", type = {AdjudicationComponent.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Added items adjudication", formalDefinition="The adjudication results." )
         protected List<AdjudicationComponent> adjudication;
 
-        private static final long serialVersionUID = -245636774L;
+        /**
+         * The second-tier service adjudications for payor added services.
+         */
+        @Child(name = "detail", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Insurer added line items", formalDefinition="The second-tier service adjudications for payor added services." )
+        protected List<AddedItemDetailComponent> detail;
+
+        private static final long serialVersionUID = 691249599L;
 
     /**
      * Constructor
@@ -2213,31 +2276,94 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #service} (A code to indicate the Professional Service or Product supplied.)
+         * @return {@link #provider} (The providers who are authorized for the services rendered to the patient.)
          */
-        public CodeableConcept getService() { 
-          if (this.service == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create AddedItemComponent.service");
-            else if (Configuration.doAutoCreate())
-              this.service = new CodeableConcept(); // cc
-          return this.service;
-        }
-
-        public boolean hasService() { 
-          return this.service != null && !this.service.isEmpty();
+        public List<Reference> getProvider() { 
+          if (this.provider == null)
+            this.provider = new ArrayList<Reference>();
+          return this.provider;
         }
 
         /**
-         * @param value {@link #service} (A code to indicate the Professional Service or Product supplied.)
+         * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public AddedItemComponent setService(CodeableConcept value) { 
-          this.service = value;
+        public AddedItemComponent setProvider(List<Reference> theProvider) { 
+          this.provider = theProvider;
+          return this;
+        }
+
+        public boolean hasProvider() { 
+          if (this.provider == null)
+            return false;
+          for (Reference item : this.provider)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Reference addProvider() { //3
+          Reference t = new Reference();
+          if (this.provider == null)
+            this.provider = new ArrayList<Reference>();
+          this.provider.add(t);
+          return t;
+        }
+
+        public AddedItemComponent addProvider(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.provider == null)
+            this.provider = new ArrayList<Reference>();
+          this.provider.add(t);
           return this;
         }
 
         /**
-         * @return {@link #modifier} (Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.)
+         * @return The first repetition of repeating field {@link #provider}, creating it if it does not already exist
+         */
+        public Reference getProviderFirstRep() { 
+          if (getProvider().isEmpty()) {
+            addProvider();
+          }
+          return getProvider().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<Resource> getProviderTarget() { 
+          if (this.providerTarget == null)
+            this.providerTarget = new ArrayList<Resource>();
+          return this.providerTarget;
+        }
+
+        /**
+         * @return {@link #billcode} (A code to indicate the Professional Service or Product supplied.)
+         */
+        public CodeableConcept getBillcode() { 
+          if (this.billcode == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemComponent.billcode");
+            else if (Configuration.doAutoCreate())
+              this.billcode = new CodeableConcept(); // cc
+          return this.billcode;
+        }
+
+        public boolean hasBillcode() { 
+          return this.billcode != null && !this.billcode.isEmpty();
+        }
+
+        /**
+         * @param value {@link #billcode} (A code to indicate the Professional Service or Product supplied.)
+         */
+        public AddedItemComponent setBillcode(CodeableConcept value) { 
+          this.billcode = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #modifier} (Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.)
          */
         public List<CodeableConcept> getModifier() { 
           if (this.modifier == null)
@@ -2290,27 +2416,389 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #fee} (The fee charged for the professional service or product..)
+         * @return {@link #programCode} (For programs which require reason codes for the inclusion or covering of this billed item under the program or sub-program.)
          */
-        public Money getFee() { 
-          if (this.fee == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create AddedItemComponent.fee");
-            else if (Configuration.doAutoCreate())
-              this.fee = new Money(); // cc
-          return this.fee;
-        }
-
-        public boolean hasFee() { 
-          return this.fee != null && !this.fee.isEmpty();
+        public List<CodeableConcept> getProgramCode() { 
+          if (this.programCode == null)
+            this.programCode = new ArrayList<CodeableConcept>();
+          return this.programCode;
         }
 
         /**
-         * @param value {@link #fee} (The fee charged for the professional service or product..)
+         * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public AddedItemComponent setFee(Money value) { 
-          this.fee = value;
+        public AddedItemComponent setProgramCode(List<CodeableConcept> theProgramCode) { 
+          this.programCode = theProgramCode;
           return this;
+        }
+
+        public boolean hasProgramCode() { 
+          if (this.programCode == null)
+            return false;
+          for (CodeableConcept item : this.programCode)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addProgramCode() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.programCode == null)
+            this.programCode = new ArrayList<CodeableConcept>();
+          this.programCode.add(t);
+          return t;
+        }
+
+        public AddedItemComponent addProgramCode(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.programCode == null)
+            this.programCode = new ArrayList<CodeableConcept>();
+          this.programCode.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #programCode}, creating it if it does not already exist
+         */
+        public CodeableConcept getProgramCodeFirstRep() { 
+          if (getProgramCode().isEmpty()) {
+            addProgramCode();
+          }
+          return getProgramCode().get(0);
+        }
+
+        /**
+         * @return {@link #serviced} (The date or dates when the service or product was supplied, performed or completed.)
+         */
+        public Type getServiced() { 
+          return this.serviced;
+        }
+
+        /**
+         * @return {@link #serviced} (The date or dates when the service or product was supplied, performed or completed.)
+         */
+        public DateType getServicedDateType() throws FHIRException { 
+          if (this.serviced == null)
+            return null;
+          if (!(this.serviced instanceof DateType))
+            throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.serviced.getClass().getName()+" was encountered");
+          return (DateType) this.serviced;
+        }
+
+        public boolean hasServicedDateType() { 
+          return this != null && this.serviced instanceof DateType;
+        }
+
+        /**
+         * @return {@link #serviced} (The date or dates when the service or product was supplied, performed or completed.)
+         */
+        public Period getServicedPeriod() throws FHIRException { 
+          if (this.serviced == null)
+            return null;
+          if (!(this.serviced instanceof Period))
+            throw new FHIRException("Type mismatch: the type Period was expected, but "+this.serviced.getClass().getName()+" was encountered");
+          return (Period) this.serviced;
+        }
+
+        public boolean hasServicedPeriod() { 
+          return this != null && this.serviced instanceof Period;
+        }
+
+        public boolean hasServiced() { 
+          return this.serviced != null && !this.serviced.isEmpty();
+        }
+
+        /**
+         * @param value {@link #serviced} (The date or dates when the service or product was supplied, performed or completed.)
+         */
+        public AddedItemComponent setServiced(Type value) { 
+          if (value != null && !(value instanceof DateType || value instanceof Period))
+            throw new Error("Not the right type for ClaimResponse.addItem.serviced[x]: "+value.fhirType());
+          this.serviced = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #location} (Where the service was provided.)
+         */
+        public Type getLocation() { 
+          return this.location;
+        }
+
+        /**
+         * @return {@link #location} (Where the service was provided.)
+         */
+        public CodeableConcept getLocationCodeableConcept() throws FHIRException { 
+          if (this.location == null)
+            return null;
+          if (!(this.location instanceof CodeableConcept))
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.location.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.location;
+        }
+
+        public boolean hasLocationCodeableConcept() { 
+          return this != null && this.location instanceof CodeableConcept;
+        }
+
+        /**
+         * @return {@link #location} (Where the service was provided.)
+         */
+        public Address getLocationAddress() throws FHIRException { 
+          if (this.location == null)
+            return null;
+          if (!(this.location instanceof Address))
+            throw new FHIRException("Type mismatch: the type Address was expected, but "+this.location.getClass().getName()+" was encountered");
+          return (Address) this.location;
+        }
+
+        public boolean hasLocationAddress() { 
+          return this != null && this.location instanceof Address;
+        }
+
+        /**
+         * @return {@link #location} (Where the service was provided.)
+         */
+        public Reference getLocationReference() throws FHIRException { 
+          if (this.location == null)
+            return null;
+          if (!(this.location instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.location.getClass().getName()+" was encountered");
+          return (Reference) this.location;
+        }
+
+        public boolean hasLocationReference() { 
+          return this != null && this.location instanceof Reference;
+        }
+
+        public boolean hasLocation() { 
+          return this.location != null && !this.location.isEmpty();
+        }
+
+        /**
+         * @param value {@link #location} (Where the service was provided.)
+         */
+        public AddedItemComponent setLocation(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Address || value instanceof Reference))
+            throw new Error("Not the right type for ClaimResponse.addItem.location[x]: "+value.fhirType());
+          this.location = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #quantity} (The number of repetitions of a service or product.)
+         */
+        public Quantity getQuantity() { 
+          if (this.quantity == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemComponent.quantity");
+            else if (Configuration.doAutoCreate())
+              this.quantity = new Quantity(); // cc
+          return this.quantity;
+        }
+
+        public boolean hasQuantity() { 
+          return this.quantity != null && !this.quantity.isEmpty();
+        }
+
+        /**
+         * @param value {@link #quantity} (The number of repetitions of a service or product.)
+         */
+        public AddedItemComponent setQuantity(Quantity value) { 
+          this.quantity = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #unitPrice} (If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.)
+         */
+        public Money getUnitPrice() { 
+          if (this.unitPrice == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemComponent.unitPrice");
+            else if (Configuration.doAutoCreate())
+              this.unitPrice = new Money(); // cc
+          return this.unitPrice;
+        }
+
+        public boolean hasUnitPrice() { 
+          return this.unitPrice != null && !this.unitPrice.isEmpty();
+        }
+
+        /**
+         * @param value {@link #unitPrice} (If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.)
+         */
+        public AddedItemComponent setUnitPrice(Money value) { 
+          this.unitPrice = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #factor} (A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.). This is the underlying object with id, value and extensions. The accessor "getFactor" gives direct access to the value
+         */
+        public DecimalType getFactorElement() { 
+          if (this.factor == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemComponent.factor");
+            else if (Configuration.doAutoCreate())
+              this.factor = new DecimalType(); // bb
+          return this.factor;
+        }
+
+        public boolean hasFactorElement() { 
+          return this.factor != null && !this.factor.isEmpty();
+        }
+
+        public boolean hasFactor() { 
+          return this.factor != null && !this.factor.isEmpty();
+        }
+
+        /**
+         * @param value {@link #factor} (A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.). This is the underlying object with id, value and extensions. The accessor "getFactor" gives direct access to the value
+         */
+        public AddedItemComponent setFactorElement(DecimalType value) { 
+          this.factor = value;
+          return this;
+        }
+
+        /**
+         * @return A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public BigDecimal getFactor() { 
+          return this.factor == null ? null : this.factor.getValue();
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public AddedItemComponent setFactor(BigDecimal value) { 
+          if (value == null)
+            this.factor = null;
+          else {
+            if (this.factor == null)
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public AddedItemComponent setFactor(long value) { 
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public AddedItemComponent setFactor(double value) { 
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #net} (The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         */
+        public Money getNet() { 
+          if (this.net == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemComponent.net");
+            else if (Configuration.doAutoCreate())
+              this.net = new Money(); // cc
+          return this.net;
+        }
+
+        public boolean hasNet() { 
+          return this.net != null && !this.net.isEmpty();
+        }
+
+        /**
+         * @param value {@link #net} (The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         */
+        public AddedItemComponent setNet(Money value) { 
+          this.net = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #bodySite} (Physical service site on the patient (limb, tooth, etc.).)
+         */
+        public CodeableConcept getBodySite() { 
+          if (this.bodySite == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemComponent.bodySite");
+            else if (Configuration.doAutoCreate())
+              this.bodySite = new CodeableConcept(); // cc
+          return this.bodySite;
+        }
+
+        public boolean hasBodySite() { 
+          return this.bodySite != null && !this.bodySite.isEmpty();
+        }
+
+        /**
+         * @param value {@link #bodySite} (Physical service site on the patient (limb, tooth, etc.).)
+         */
+        public AddedItemComponent setBodySite(CodeableConcept value) { 
+          this.bodySite = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #subSite} (A region or surface of the site, e.g. limb region or tooth surface(s).)
+         */
+        public List<CodeableConcept> getSubSite() { 
+          if (this.subSite == null)
+            this.subSite = new ArrayList<CodeableConcept>();
+          return this.subSite;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AddedItemComponent setSubSite(List<CodeableConcept> theSubSite) { 
+          this.subSite = theSubSite;
+          return this;
+        }
+
+        public boolean hasSubSite() { 
+          if (this.subSite == null)
+            return false;
+          for (CodeableConcept item : this.subSite)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addSubSite() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.subSite == null)
+            this.subSite = new ArrayList<CodeableConcept>();
+          this.subSite.add(t);
+          return t;
+        }
+
+        public AddedItemComponent addSubSite(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.subSite == null)
+            this.subSite = new ArrayList<CodeableConcept>();
+          this.subSite.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #subSite}, creating it if it does not already exist
+         */
+        public CodeableConcept getSubSiteFirstRep() { 
+          if (getSubSite().isEmpty()) {
+            addSubSite();
+          }
+          return getSubSite().get(0);
         }
 
         /**
@@ -2375,7 +2863,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #adjudication} (The adjudications results.)
+         * @return {@link #adjudication} (The adjudication results.)
          */
         public List<AdjudicationComponent> getAdjudication() { 
           if (this.adjudication == null)
@@ -2427,16 +2915,79 @@ public class ClaimResponse extends DomainResource {
           return getAdjudication().get(0);
         }
 
+        /**
+         * @return {@link #detail} (The second-tier service adjudications for payor added services.)
+         */
+        public List<AddedItemDetailComponent> getDetail() { 
+          if (this.detail == null)
+            this.detail = new ArrayList<AddedItemDetailComponent>();
+          return this.detail;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AddedItemComponent setDetail(List<AddedItemDetailComponent> theDetail) { 
+          this.detail = theDetail;
+          return this;
+        }
+
+        public boolean hasDetail() { 
+          if (this.detail == null)
+            return false;
+          for (AddedItemDetailComponent item : this.detail)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public AddedItemDetailComponent addDetail() { //3
+          AddedItemDetailComponent t = new AddedItemDetailComponent();
+          if (this.detail == null)
+            this.detail = new ArrayList<AddedItemDetailComponent>();
+          this.detail.add(t);
+          return t;
+        }
+
+        public AddedItemComponent addDetail(AddedItemDetailComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.detail == null)
+            this.detail = new ArrayList<AddedItemDetailComponent>();
+          this.detail.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #detail}, creating it if it does not already exist
+         */
+        public AddedItemDetailComponent getDetailFirstRep() { 
+          if (getDetail().isEmpty()) {
+            addDetail();
+          }
+          return getDetail().get(0);
+        }
+
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("itemSequence", "positiveInt", "List of input service items which this service line is intended to replace.", 0, java.lang.Integer.MAX_VALUE, itemSequence));
           children.add(new Property("detailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequence));
           children.add(new Property("subdetailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequence));
-          children.add(new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, service));
-          children.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
-          children.add(new Property("fee", "Money", "The fee charged for the professional service or product..", 0, 1, fee));
+          children.add(new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The providers who are authorized for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, provider));
+          children.add(new Property("billcode", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, billcode));
+          children.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
+          children.add(new Property("programCode", "CodeableConcept", "For programs which require reason codes for the inclusion or covering of this billed item under the program or sub-program.", 0, java.lang.Integer.MAX_VALUE, programCode));
+          children.add(new Property("serviced[x]", "date|Period", "The date or dates when the service or product was supplied, performed or completed.", 0, 1, serviced));
+          children.add(new Property("location[x]", "CodeableConcept|Address|Reference(Location)", "Where the service was provided.", 0, 1, location));
+          children.add(new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, 1, quantity));
+          children.add(new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, 1, unitPrice));
+          children.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor));
+          children.add(new Property("net", "Money", "The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net));
+          children.add(new Property("bodySite", "CodeableConcept", "Physical service site on the patient (limb, tooth, etc.).", 0, 1, bodySite));
+          children.add(new Property("subSite", "CodeableConcept", "A region or surface of the site, e.g. limb region or tooth surface(s).", 0, java.lang.Integer.MAX_VALUE, subSite));
           children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
-          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+          children.add(new Property("detail", "", "The second-tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, detail));
         }
 
         @Override
@@ -2445,11 +2996,28 @@ public class ClaimResponse extends DomainResource {
           case 1977979892: /*itemSequence*/  return new Property("itemSequence", "positiveInt", "List of input service items which this service line is intended to replace.", 0, java.lang.Integer.MAX_VALUE, itemSequence);
           case 1321472818: /*detailSequence*/  return new Property("detailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, detailSequence);
           case 146530674: /*subdetailSequence*/  return new Property("subdetailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, java.lang.Integer.MAX_VALUE, subdetailSequence);
-          case 1984153269: /*service*/  return new Property("service", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, service);
-          case -615513385: /*modifier*/  return new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, eg for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier);
-          case 101254: /*fee*/  return new Property("fee", "Money", "The fee charged for the professional service or product..", 0, 1, fee);
+          case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The providers who are authorized for the services rendered to the patient.", 0, java.lang.Integer.MAX_VALUE, provider);
+          case 890074740: /*billcode*/  return new Property("billcode", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, billcode);
+          case -615513385: /*modifier*/  return new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier);
+          case 1010065041: /*programCode*/  return new Property("programCode", "CodeableConcept", "For programs which require reason codes for the inclusion or covering of this billed item under the program or sub-program.", 0, java.lang.Integer.MAX_VALUE, programCode);
+          case -1927922223: /*serviced[x]*/  return new Property("serviced[x]", "date|Period", "The date or dates when the service or product was supplied, performed or completed.", 0, 1, serviced);
+          case 1379209295: /*serviced*/  return new Property("serviced[x]", "date|Period", "The date or dates when the service or product was supplied, performed or completed.", 0, 1, serviced);
+          case 363246749: /*servicedDate*/  return new Property("serviced[x]", "date|Period", "The date or dates when the service or product was supplied, performed or completed.", 0, 1, serviced);
+          case 1534966512: /*servicedPeriod*/  return new Property("serviced[x]", "date|Period", "The date or dates when the service or product was supplied, performed or completed.", 0, 1, serviced);
+          case 552316075: /*location[x]*/  return new Property("location[x]", "CodeableConcept|Address|Reference(Location)", "Where the service was provided.", 0, 1, location);
+          case 1901043637: /*location*/  return new Property("location[x]", "CodeableConcept|Address|Reference(Location)", "Where the service was provided.", 0, 1, location);
+          case -1224800468: /*locationCodeableConcept*/  return new Property("location[x]", "CodeableConcept|Address|Reference(Location)", "Where the service was provided.", 0, 1, location);
+          case -1280020865: /*locationAddress*/  return new Property("location[x]", "CodeableConcept|Address|Reference(Location)", "Where the service was provided.", 0, 1, location);
+          case 755866390: /*locationReference*/  return new Property("location[x]", "CodeableConcept|Address|Reference(Location)", "Where the service was provided.", 0, 1, location);
+          case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, 1, quantity);
+          case -486196699: /*unitPrice*/  return new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, 1, unitPrice);
+          case -1282148017: /*factor*/  return new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor);
+          case 108957: /*net*/  return new Property("net", "Money", "The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net);
+          case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Physical service site on the patient (limb, tooth, etc.).", 0, 1, bodySite);
+          case -1868566105: /*subSite*/  return new Property("subSite", "CodeableConcept", "A region or surface of the site, e.g. limb region or tooth surface(s).", 0, java.lang.Integer.MAX_VALUE, subSite);
           case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
-          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudications results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          case -1335224239: /*detail*/  return new Property("detail", "", "The second-tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, detail);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2461,11 +3029,21 @@ public class ClaimResponse extends DomainResource {
         case 1977979892: /*itemSequence*/ return this.itemSequence == null ? new Base[0] : this.itemSequence.toArray(new Base[this.itemSequence.size()]); // PositiveIntType
         case 1321472818: /*detailSequence*/ return this.detailSequence == null ? new Base[0] : this.detailSequence.toArray(new Base[this.detailSequence.size()]); // PositiveIntType
         case 146530674: /*subdetailSequence*/ return this.subdetailSequence == null ? new Base[0] : this.subdetailSequence.toArray(new Base[this.subdetailSequence.size()]); // PositiveIntType
-        case 1984153269: /*service*/ return this.service == null ? new Base[0] : new Base[] {this.service}; // CodeableConcept
+        case -987494927: /*provider*/ return this.provider == null ? new Base[0] : this.provider.toArray(new Base[this.provider.size()]); // Reference
+        case 890074740: /*billcode*/ return this.billcode == null ? new Base[0] : new Base[] {this.billcode}; // CodeableConcept
         case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : this.modifier.toArray(new Base[this.modifier.size()]); // CodeableConcept
-        case 101254: /*fee*/ return this.fee == null ? new Base[0] : new Base[] {this.fee}; // Money
+        case 1010065041: /*programCode*/ return this.programCode == null ? new Base[0] : this.programCode.toArray(new Base[this.programCode.size()]); // CodeableConcept
+        case 1379209295: /*serviced*/ return this.serviced == null ? new Base[0] : new Base[] {this.serviced}; // Type
+        case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Type
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Quantity
+        case -486196699: /*unitPrice*/ return this.unitPrice == null ? new Base[0] : new Base[] {this.unitPrice}; // Money
+        case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
+        case 108957: /*net*/ return this.net == null ? new Base[0] : new Base[] {this.net}; // Money
+        case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // CodeableConcept
+        case -1868566105: /*subSite*/ return this.subSite == null ? new Base[0] : this.subSite.toArray(new Base[this.subSite.size()]); // CodeableConcept
         case -1110033957: /*noteNumber*/ return this.noteNumber == null ? new Base[0] : this.noteNumber.toArray(new Base[this.noteNumber.size()]); // PositiveIntType
         case -231349275: /*adjudication*/ return this.adjudication == null ? new Base[0] : this.adjudication.toArray(new Base[this.adjudication.size()]); // AdjudicationComponent
+        case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : this.detail.toArray(new Base[this.detail.size()]); // AddedItemDetailComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2483,20 +3061,50 @@ public class ClaimResponse extends DomainResource {
         case 146530674: // subdetailSequence
           this.getSubdetailSequence().add(castToPositiveInt(value)); // PositiveIntType
           return value;
-        case 1984153269: // service
-          this.service = castToCodeableConcept(value); // CodeableConcept
+        case -987494927: // provider
+          this.getProvider().add(castToReference(value)); // Reference
+          return value;
+        case 890074740: // billcode
+          this.billcode = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -615513385: // modifier
           this.getModifier().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case 101254: // fee
-          this.fee = castToMoney(value); // Money
+        case 1010065041: // programCode
+          this.getProgramCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case 1379209295: // serviced
+          this.serviced = castToType(value); // Type
+          return value;
+        case 1901043637: // location
+          this.location = castToType(value); // Type
+          return value;
+        case -1285004149: // quantity
+          this.quantity = castToQuantity(value); // Quantity
+          return value;
+        case -486196699: // unitPrice
+          this.unitPrice = castToMoney(value); // Money
+          return value;
+        case -1282148017: // factor
+          this.factor = castToDecimal(value); // DecimalType
+          return value;
+        case 108957: // net
+          this.net = castToMoney(value); // Money
+          return value;
+        case 1702620169: // bodySite
+          this.bodySite = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1868566105: // subSite
+          this.getSubSite().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1110033957: // noteNumber
           this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
           return value;
         case -231349275: // adjudication
           this.getAdjudication().add((AdjudicationComponent) value); // AdjudicationComponent
+          return value;
+        case -1335224239: // detail
+          this.getDetail().add((AddedItemDetailComponent) value); // AddedItemDetailComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2511,16 +3119,36 @@ public class ClaimResponse extends DomainResource {
           this.getDetailSequence().add(castToPositiveInt(value));
         } else if (name.equals("subdetailSequence")) {
           this.getSubdetailSequence().add(castToPositiveInt(value));
-        } else if (name.equals("service")) {
-          this.service = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("provider")) {
+          this.getProvider().add(castToReference(value));
+        } else if (name.equals("billcode")) {
+          this.billcode = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("modifier")) {
           this.getModifier().add(castToCodeableConcept(value));
-        } else if (name.equals("fee")) {
-          this.fee = castToMoney(value); // Money
+        } else if (name.equals("programCode")) {
+          this.getProgramCode().add(castToCodeableConcept(value));
+        } else if (name.equals("serviced[x]")) {
+          this.serviced = castToType(value); // Type
+        } else if (name.equals("location[x]")) {
+          this.location = castToType(value); // Type
+        } else if (name.equals("quantity")) {
+          this.quantity = castToQuantity(value); // Quantity
+        } else if (name.equals("unitPrice")) {
+          this.unitPrice = castToMoney(value); // Money
+        } else if (name.equals("factor")) {
+          this.factor = castToDecimal(value); // DecimalType
+        } else if (name.equals("net")) {
+          this.net = castToMoney(value); // Money
+        } else if (name.equals("bodySite")) {
+          this.bodySite = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("subSite")) {
+          this.getSubSite().add(castToCodeableConcept(value));
         } else if (name.equals("noteNumber")) {
           this.getNoteNumber().add(castToPositiveInt(value));
         } else if (name.equals("adjudication")) {
           this.getAdjudication().add((AdjudicationComponent) value);
+        } else if (name.equals("detail")) {
+          this.getDetail().add((AddedItemDetailComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -2532,11 +3160,23 @@ public class ClaimResponse extends DomainResource {
         case 1977979892:  return addItemSequenceElement();
         case 1321472818:  return addDetailSequenceElement();
         case 146530674:  return addSubdetailSequenceElement();
-        case 1984153269:  return getService(); 
+        case -987494927:  return addProvider(); 
+        case 890074740:  return getBillcode(); 
         case -615513385:  return addModifier(); 
-        case 101254:  return getFee(); 
+        case 1010065041:  return addProgramCode(); 
+        case -1927922223:  return getServiced(); 
+        case 1379209295:  return getServiced(); 
+        case 552316075:  return getLocation(); 
+        case 1901043637:  return getLocation(); 
+        case -1285004149:  return getQuantity(); 
+        case -486196699:  return getUnitPrice(); 
+        case -1282148017:  return getFactorElement();
+        case 108957:  return getNet(); 
+        case 1702620169:  return getBodySite(); 
+        case -1868566105:  return addSubSite(); 
         case -1110033957:  return addNoteNumberElement();
         case -231349275:  return addAdjudication(); 
+        case -1335224239:  return addDetail(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -2548,11 +3188,21 @@ public class ClaimResponse extends DomainResource {
         case 1977979892: /*itemSequence*/ return new String[] {"positiveInt"};
         case 1321472818: /*detailSequence*/ return new String[] {"positiveInt"};
         case 146530674: /*subdetailSequence*/ return new String[] {"positiveInt"};
-        case 1984153269: /*service*/ return new String[] {"CodeableConcept"};
+        case -987494927: /*provider*/ return new String[] {"Reference"};
+        case 890074740: /*billcode*/ return new String[] {"CodeableConcept"};
         case -615513385: /*modifier*/ return new String[] {"CodeableConcept"};
-        case 101254: /*fee*/ return new String[] {"Money"};
+        case 1010065041: /*programCode*/ return new String[] {"CodeableConcept"};
+        case 1379209295: /*serviced*/ return new String[] {"date", "Period"};
+        case 1901043637: /*location*/ return new String[] {"CodeableConcept", "Address", "Reference"};
+        case -1285004149: /*quantity*/ return new String[] {"SimpleQuantity"};
+        case -486196699: /*unitPrice*/ return new String[] {"Money"};
+        case -1282148017: /*factor*/ return new String[] {"decimal"};
+        case 108957: /*net*/ return new String[] {"Money"};
+        case 1702620169: /*bodySite*/ return new String[] {"CodeableConcept"};
+        case -1868566105: /*subSite*/ return new String[] {"CodeableConcept"};
         case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
         case -231349275: /*adjudication*/ return new String[] {"@ClaimResponse.item.adjudication"};
+        case -1335224239: /*detail*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2569,22 +3219,69 @@ public class ClaimResponse extends DomainResource {
         else if (name.equals("subdetailSequence")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.subdetailSequence");
         }
-        else if (name.equals("service")) {
-          this.service = new CodeableConcept();
-          return this.service;
+        else if (name.equals("provider")) {
+          return addProvider();
+        }
+        else if (name.equals("billcode")) {
+          this.billcode = new CodeableConcept();
+          return this.billcode;
         }
         else if (name.equals("modifier")) {
           return addModifier();
         }
-        else if (name.equals("fee")) {
-          this.fee = new Money();
-          return this.fee;
+        else if (name.equals("programCode")) {
+          return addProgramCode();
+        }
+        else if (name.equals("servicedDate")) {
+          this.serviced = new DateType();
+          return this.serviced;
+        }
+        else if (name.equals("servicedPeriod")) {
+          this.serviced = new Period();
+          return this.serviced;
+        }
+        else if (name.equals("locationCodeableConcept")) {
+          this.location = new CodeableConcept();
+          return this.location;
+        }
+        else if (name.equals("locationAddress")) {
+          this.location = new Address();
+          return this.location;
+        }
+        else if (name.equals("locationReference")) {
+          this.location = new Reference();
+          return this.location;
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new Quantity();
+          return this.quantity;
+        }
+        else if (name.equals("unitPrice")) {
+          this.unitPrice = new Money();
+          return this.unitPrice;
+        }
+        else if (name.equals("factor")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.factor");
+        }
+        else if (name.equals("net")) {
+          this.net = new Money();
+          return this.net;
+        }
+        else if (name.equals("bodySite")) {
+          this.bodySite = new CodeableConcept();
+          return this.bodySite;
+        }
+        else if (name.equals("subSite")) {
+          return addSubSite();
         }
         else if (name.equals("noteNumber")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.noteNumber");
         }
         else if (name.equals("adjudication")) {
           return addAdjudication();
+        }
+        else if (name.equals("detail")) {
+          return addDetail();
         }
         else
           return super.addChild(name);
@@ -2608,13 +3305,1374 @@ public class ClaimResponse extends DomainResource {
           for (PositiveIntType i : subdetailSequence)
             dst.subdetailSequence.add(i.copy());
         };
-        dst.service = service == null ? null : service.copy();
+        if (provider != null) {
+          dst.provider = new ArrayList<Reference>();
+          for (Reference i : provider)
+            dst.provider.add(i.copy());
+        };
+        dst.billcode = billcode == null ? null : billcode.copy();
         if (modifier != null) {
           dst.modifier = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : modifier)
             dst.modifier.add(i.copy());
         };
-        dst.fee = fee == null ? null : fee.copy();
+        if (programCode != null) {
+          dst.programCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : programCode)
+            dst.programCode.add(i.copy());
+        };
+        dst.serviced = serviced == null ? null : serviced.copy();
+        dst.location = location == null ? null : location.copy();
+        dst.quantity = quantity == null ? null : quantity.copy();
+        dst.unitPrice = unitPrice == null ? null : unitPrice.copy();
+        dst.factor = factor == null ? null : factor.copy();
+        dst.net = net == null ? null : net.copy();
+        dst.bodySite = bodySite == null ? null : bodySite.copy();
+        if (subSite != null) {
+          dst.subSite = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : subSite)
+            dst.subSite.add(i.copy());
+        };
+        if (noteNumber != null) {
+          dst.noteNumber = new ArrayList<PositiveIntType>();
+          for (PositiveIntType i : noteNumber)
+            dst.noteNumber.add(i.copy());
+        };
+        if (adjudication != null) {
+          dst.adjudication = new ArrayList<AdjudicationComponent>();
+          for (AdjudicationComponent i : adjudication)
+            dst.adjudication.add(i.copy());
+        };
+        if (detail != null) {
+          dst.detail = new ArrayList<AddedItemDetailComponent>();
+          for (AddedItemDetailComponent i : detail)
+            dst.detail.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof AddedItemComponent))
+          return false;
+        AddedItemComponent o = (AddedItemComponent) other_;
+        return compareDeep(itemSequence, o.itemSequence, true) && compareDeep(detailSequence, o.detailSequence, true)
+           && compareDeep(subdetailSequence, o.subdetailSequence, true) && compareDeep(provider, o.provider, true)
+           && compareDeep(billcode, o.billcode, true) && compareDeep(modifier, o.modifier, true) && compareDeep(programCode, o.programCode, true)
+           && compareDeep(serviced, o.serviced, true) && compareDeep(location, o.location, true) && compareDeep(quantity, o.quantity, true)
+           && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(factor, o.factor, true) && compareDeep(net, o.net, true)
+           && compareDeep(bodySite, o.bodySite, true) && compareDeep(subSite, o.subSite, true) && compareDeep(noteNumber, o.noteNumber, true)
+           && compareDeep(adjudication, o.adjudication, true) && compareDeep(detail, o.detail, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof AddedItemComponent))
+          return false;
+        AddedItemComponent o = (AddedItemComponent) other_;
+        return compareValues(itemSequence, o.itemSequence, true) && compareValues(detailSequence, o.detailSequence, true)
+           && compareValues(subdetailSequence, o.subdetailSequence, true) && compareValues(factor, o.factor, true)
+           && compareValues(noteNumber, o.noteNumber, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(itemSequence, detailSequence
+          , subdetailSequence, provider, billcode, modifier, programCode, serviced, location
+          , quantity, unitPrice, factor, net, bodySite, subSite, noteNumber, adjudication
+          , detail);
+      }
+
+  public String fhirType() {
+    return "ClaimResponse.addItem";
+
+  }
+
+  }
+
+    @Block()
+    public static class AddedItemDetailComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * A code to indicate the Professional Service or Product supplied.
+         */
+        @Child(name = "billcode", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Group, Service or Product", formalDefinition="A code to indicate the Professional Service or Product supplied." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-uscls")
+        protected CodeableConcept billcode;
+
+        /**
+         * Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.
+         */
+        @Child(name = "modifier", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Service/Product billing modifiers", formalDefinition="Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/claim-modifiers")
+        protected List<CodeableConcept> modifier;
+
+        /**
+         * The number of repetitions of a service or product.
+         */
+        @Child(name = "quantity", type = {Quantity.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
+        protected Quantity quantity;
+
+        /**
+         * If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.
+         */
+        @Child(name = "unitPrice", type = {Money.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group." )
+        protected Money unitPrice;
+
+        /**
+         * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        @Child(name = "factor", type = {DecimalType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
+        protected DecimalType factor;
+
+        /**
+         * The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
+         */
+        @Child(name = "net", type = {Money.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
+        protected Money net;
+
+        /**
+         * A list of note references to the notes provided below.
+         */
+        @Child(name = "noteNumber", type = {PositiveIntType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="List of note numbers which apply", formalDefinition="A list of note references to the notes provided below." )
+        protected List<PositiveIntType> noteNumber;
+
+        /**
+         * The adjudication results.
+         */
+        @Child(name = "adjudication", type = {AdjudicationComponent.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Added items detail adjudication", formalDefinition="The adjudication results." )
+        protected List<AdjudicationComponent> adjudication;
+
+        /**
+         * The third-tier service adjudications for payor added services.
+         */
+        @Child(name = "subDetail", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Insurer added line items", formalDefinition="The third-tier service adjudications for payor added services." )
+        protected List<AddedItemSubDetailComponent> subDetail;
+
+        private static final long serialVersionUID = 212805939L;
+
+    /**
+     * Constructor
+     */
+      public AddedItemDetailComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #billcode} (A code to indicate the Professional Service or Product supplied.)
+         */
+        public CodeableConcept getBillcode() { 
+          if (this.billcode == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemDetailComponent.billcode");
+            else if (Configuration.doAutoCreate())
+              this.billcode = new CodeableConcept(); // cc
+          return this.billcode;
+        }
+
+        public boolean hasBillcode() { 
+          return this.billcode != null && !this.billcode.isEmpty();
+        }
+
+        /**
+         * @param value {@link #billcode} (A code to indicate the Professional Service or Product supplied.)
+         */
+        public AddedItemDetailComponent setBillcode(CodeableConcept value) { 
+          this.billcode = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #modifier} (Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.)
+         */
+        public List<CodeableConcept> getModifier() { 
+          if (this.modifier == null)
+            this.modifier = new ArrayList<CodeableConcept>();
+          return this.modifier;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AddedItemDetailComponent setModifier(List<CodeableConcept> theModifier) { 
+          this.modifier = theModifier;
+          return this;
+        }
+
+        public boolean hasModifier() { 
+          if (this.modifier == null)
+            return false;
+          for (CodeableConcept item : this.modifier)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addModifier() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.modifier == null)
+            this.modifier = new ArrayList<CodeableConcept>();
+          this.modifier.add(t);
+          return t;
+        }
+
+        public AddedItemDetailComponent addModifier(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.modifier == null)
+            this.modifier = new ArrayList<CodeableConcept>();
+          this.modifier.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #modifier}, creating it if it does not already exist
+         */
+        public CodeableConcept getModifierFirstRep() { 
+          if (getModifier().isEmpty()) {
+            addModifier();
+          }
+          return getModifier().get(0);
+        }
+
+        /**
+         * @return {@link #quantity} (The number of repetitions of a service or product.)
+         */
+        public Quantity getQuantity() { 
+          if (this.quantity == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemDetailComponent.quantity");
+            else if (Configuration.doAutoCreate())
+              this.quantity = new Quantity(); // cc
+          return this.quantity;
+        }
+
+        public boolean hasQuantity() { 
+          return this.quantity != null && !this.quantity.isEmpty();
+        }
+
+        /**
+         * @param value {@link #quantity} (The number of repetitions of a service or product.)
+         */
+        public AddedItemDetailComponent setQuantity(Quantity value) { 
+          this.quantity = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #unitPrice} (If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.)
+         */
+        public Money getUnitPrice() { 
+          if (this.unitPrice == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemDetailComponent.unitPrice");
+            else if (Configuration.doAutoCreate())
+              this.unitPrice = new Money(); // cc
+          return this.unitPrice;
+        }
+
+        public boolean hasUnitPrice() { 
+          return this.unitPrice != null && !this.unitPrice.isEmpty();
+        }
+
+        /**
+         * @param value {@link #unitPrice} (If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.)
+         */
+        public AddedItemDetailComponent setUnitPrice(Money value) { 
+          this.unitPrice = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #factor} (A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.). This is the underlying object with id, value and extensions. The accessor "getFactor" gives direct access to the value
+         */
+        public DecimalType getFactorElement() { 
+          if (this.factor == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemDetailComponent.factor");
+            else if (Configuration.doAutoCreate())
+              this.factor = new DecimalType(); // bb
+          return this.factor;
+        }
+
+        public boolean hasFactorElement() { 
+          return this.factor != null && !this.factor.isEmpty();
+        }
+
+        public boolean hasFactor() { 
+          return this.factor != null && !this.factor.isEmpty();
+        }
+
+        /**
+         * @param value {@link #factor} (A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.). This is the underlying object with id, value and extensions. The accessor "getFactor" gives direct access to the value
+         */
+        public AddedItemDetailComponent setFactorElement(DecimalType value) { 
+          this.factor = value;
+          return this;
+        }
+
+        /**
+         * @return A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public BigDecimal getFactor() { 
+          return this.factor == null ? null : this.factor.getValue();
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public AddedItemDetailComponent setFactor(BigDecimal value) { 
+          if (value == null)
+            this.factor = null;
+          else {
+            if (this.factor == null)
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public AddedItemDetailComponent setFactor(long value) { 
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public AddedItemDetailComponent setFactor(double value) { 
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #net} (The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         */
+        public Money getNet() { 
+          if (this.net == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemDetailComponent.net");
+            else if (Configuration.doAutoCreate())
+              this.net = new Money(); // cc
+          return this.net;
+        }
+
+        public boolean hasNet() { 
+          return this.net != null && !this.net.isEmpty();
+        }
+
+        /**
+         * @param value {@link #net} (The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         */
+        public AddedItemDetailComponent setNet(Money value) { 
+          this.net = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #noteNumber} (A list of note references to the notes provided below.)
+         */
+        public List<PositiveIntType> getNoteNumber() { 
+          if (this.noteNumber == null)
+            this.noteNumber = new ArrayList<PositiveIntType>();
+          return this.noteNumber;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AddedItemDetailComponent setNoteNumber(List<PositiveIntType> theNoteNumber) { 
+          this.noteNumber = theNoteNumber;
+          return this;
+        }
+
+        public boolean hasNoteNumber() { 
+          if (this.noteNumber == null)
+            return false;
+          for (PositiveIntType item : this.noteNumber)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #noteNumber} (A list of note references to the notes provided below.)
+         */
+        public PositiveIntType addNoteNumberElement() {//2 
+          PositiveIntType t = new PositiveIntType();
+          if (this.noteNumber == null)
+            this.noteNumber = new ArrayList<PositiveIntType>();
+          this.noteNumber.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #noteNumber} (A list of note references to the notes provided below.)
+         */
+        public AddedItemDetailComponent addNoteNumber(int value) { //1
+          PositiveIntType t = new PositiveIntType();
+          t.setValue(value);
+          if (this.noteNumber == null)
+            this.noteNumber = new ArrayList<PositiveIntType>();
+          this.noteNumber.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #noteNumber} (A list of note references to the notes provided below.)
+         */
+        public boolean hasNoteNumber(int value) { 
+          if (this.noteNumber == null)
+            return false;
+          for (PositiveIntType v : this.noteNumber)
+            if (v.getValue().equals(value)) // positiveInt
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #adjudication} (The adjudication results.)
+         */
+        public List<AdjudicationComponent> getAdjudication() { 
+          if (this.adjudication == null)
+            this.adjudication = new ArrayList<AdjudicationComponent>();
+          return this.adjudication;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AddedItemDetailComponent setAdjudication(List<AdjudicationComponent> theAdjudication) { 
+          this.adjudication = theAdjudication;
+          return this;
+        }
+
+        public boolean hasAdjudication() { 
+          if (this.adjudication == null)
+            return false;
+          for (AdjudicationComponent item : this.adjudication)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public AdjudicationComponent addAdjudication() { //3
+          AdjudicationComponent t = new AdjudicationComponent();
+          if (this.adjudication == null)
+            this.adjudication = new ArrayList<AdjudicationComponent>();
+          this.adjudication.add(t);
+          return t;
+        }
+
+        public AddedItemDetailComponent addAdjudication(AdjudicationComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.adjudication == null)
+            this.adjudication = new ArrayList<AdjudicationComponent>();
+          this.adjudication.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #adjudication}, creating it if it does not already exist
+         */
+        public AdjudicationComponent getAdjudicationFirstRep() { 
+          if (getAdjudication().isEmpty()) {
+            addAdjudication();
+          }
+          return getAdjudication().get(0);
+        }
+
+        /**
+         * @return {@link #subDetail} (The third-tier service adjudications for payor added services.)
+         */
+        public List<AddedItemSubDetailComponent> getSubDetail() { 
+          if (this.subDetail == null)
+            this.subDetail = new ArrayList<AddedItemSubDetailComponent>();
+          return this.subDetail;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AddedItemDetailComponent setSubDetail(List<AddedItemSubDetailComponent> theSubDetail) { 
+          this.subDetail = theSubDetail;
+          return this;
+        }
+
+        public boolean hasSubDetail() { 
+          if (this.subDetail == null)
+            return false;
+          for (AddedItemSubDetailComponent item : this.subDetail)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public AddedItemSubDetailComponent addSubDetail() { //3
+          AddedItemSubDetailComponent t = new AddedItemSubDetailComponent();
+          if (this.subDetail == null)
+            this.subDetail = new ArrayList<AddedItemSubDetailComponent>();
+          this.subDetail.add(t);
+          return t;
+        }
+
+        public AddedItemDetailComponent addSubDetail(AddedItemSubDetailComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.subDetail == null)
+            this.subDetail = new ArrayList<AddedItemSubDetailComponent>();
+          this.subDetail.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #subDetail}, creating it if it does not already exist
+         */
+        public AddedItemSubDetailComponent getSubDetailFirstRep() { 
+          if (getSubDetail().isEmpty()) {
+            addSubDetail();
+          }
+          return getSubDetail().get(0);
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("billcode", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, billcode));
+          children.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
+          children.add(new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, 1, quantity));
+          children.add(new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, 1, unitPrice));
+          children.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor));
+          children.add(new Property("net", "Money", "The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net));
+          children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
+          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+          children.add(new Property("subDetail", "", "The third-tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, subDetail));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 890074740: /*billcode*/  return new Property("billcode", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, billcode);
+          case -615513385: /*modifier*/  return new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier);
+          case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, 1, quantity);
+          case -486196699: /*unitPrice*/  return new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, 1, unitPrice);
+          case -1282148017: /*factor*/  return new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor);
+          case 108957: /*net*/  return new Property("net", "Money", "The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net);
+          case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          case -828829007: /*subDetail*/  return new Property("subDetail", "", "The third-tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, subDetail);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 890074740: /*billcode*/ return this.billcode == null ? new Base[0] : new Base[] {this.billcode}; // CodeableConcept
+        case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : this.modifier.toArray(new Base[this.modifier.size()]); // CodeableConcept
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Quantity
+        case -486196699: /*unitPrice*/ return this.unitPrice == null ? new Base[0] : new Base[] {this.unitPrice}; // Money
+        case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
+        case 108957: /*net*/ return this.net == null ? new Base[0] : new Base[] {this.net}; // Money
+        case -1110033957: /*noteNumber*/ return this.noteNumber == null ? new Base[0] : this.noteNumber.toArray(new Base[this.noteNumber.size()]); // PositiveIntType
+        case -231349275: /*adjudication*/ return this.adjudication == null ? new Base[0] : this.adjudication.toArray(new Base[this.adjudication.size()]); // AdjudicationComponent
+        case -828829007: /*subDetail*/ return this.subDetail == null ? new Base[0] : this.subDetail.toArray(new Base[this.subDetail.size()]); // AddedItemSubDetailComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 890074740: // billcode
+          this.billcode = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -615513385: // modifier
+          this.getModifier().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1285004149: // quantity
+          this.quantity = castToQuantity(value); // Quantity
+          return value;
+        case -486196699: // unitPrice
+          this.unitPrice = castToMoney(value); // Money
+          return value;
+        case -1282148017: // factor
+          this.factor = castToDecimal(value); // DecimalType
+          return value;
+        case 108957: // net
+          this.net = castToMoney(value); // Money
+          return value;
+        case -1110033957: // noteNumber
+          this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
+          return value;
+        case -231349275: // adjudication
+          this.getAdjudication().add((AdjudicationComponent) value); // AdjudicationComponent
+          return value;
+        case -828829007: // subDetail
+          this.getSubDetail().add((AddedItemSubDetailComponent) value); // AddedItemSubDetailComponent
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("billcode")) {
+          this.billcode = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("modifier")) {
+          this.getModifier().add(castToCodeableConcept(value));
+        } else if (name.equals("quantity")) {
+          this.quantity = castToQuantity(value); // Quantity
+        } else if (name.equals("unitPrice")) {
+          this.unitPrice = castToMoney(value); // Money
+        } else if (name.equals("factor")) {
+          this.factor = castToDecimal(value); // DecimalType
+        } else if (name.equals("net")) {
+          this.net = castToMoney(value); // Money
+        } else if (name.equals("noteNumber")) {
+          this.getNoteNumber().add(castToPositiveInt(value));
+        } else if (name.equals("adjudication")) {
+          this.getAdjudication().add((AdjudicationComponent) value);
+        } else if (name.equals("subDetail")) {
+          this.getSubDetail().add((AddedItemSubDetailComponent) value);
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 890074740:  return getBillcode(); 
+        case -615513385:  return addModifier(); 
+        case -1285004149:  return getQuantity(); 
+        case -486196699:  return getUnitPrice(); 
+        case -1282148017:  return getFactorElement();
+        case 108957:  return getNet(); 
+        case -1110033957:  return addNoteNumberElement();
+        case -231349275:  return addAdjudication(); 
+        case -828829007:  return addSubDetail(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 890074740: /*billcode*/ return new String[] {"CodeableConcept"};
+        case -615513385: /*modifier*/ return new String[] {"CodeableConcept"};
+        case -1285004149: /*quantity*/ return new String[] {"SimpleQuantity"};
+        case -486196699: /*unitPrice*/ return new String[] {"Money"};
+        case -1282148017: /*factor*/ return new String[] {"decimal"};
+        case 108957: /*net*/ return new String[] {"Money"};
+        case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
+        case -231349275: /*adjudication*/ return new String[] {"@ClaimResponse.item.adjudication"};
+        case -828829007: /*subDetail*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("billcode")) {
+          this.billcode = new CodeableConcept();
+          return this.billcode;
+        }
+        else if (name.equals("modifier")) {
+          return addModifier();
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new Quantity();
+          return this.quantity;
+        }
+        else if (name.equals("unitPrice")) {
+          this.unitPrice = new Money();
+          return this.unitPrice;
+        }
+        else if (name.equals("factor")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.factor");
+        }
+        else if (name.equals("net")) {
+          this.net = new Money();
+          return this.net;
+        }
+        else if (name.equals("noteNumber")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.noteNumber");
+        }
+        else if (name.equals("adjudication")) {
+          return addAdjudication();
+        }
+        else if (name.equals("subDetail")) {
+          return addSubDetail();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public AddedItemDetailComponent copy() {
+        AddedItemDetailComponent dst = new AddedItemDetailComponent();
+        copyValues(dst);
+        dst.billcode = billcode == null ? null : billcode.copy();
+        if (modifier != null) {
+          dst.modifier = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : modifier)
+            dst.modifier.add(i.copy());
+        };
+        dst.quantity = quantity == null ? null : quantity.copy();
+        dst.unitPrice = unitPrice == null ? null : unitPrice.copy();
+        dst.factor = factor == null ? null : factor.copy();
+        dst.net = net == null ? null : net.copy();
+        if (noteNumber != null) {
+          dst.noteNumber = new ArrayList<PositiveIntType>();
+          for (PositiveIntType i : noteNumber)
+            dst.noteNumber.add(i.copy());
+        };
+        if (adjudication != null) {
+          dst.adjudication = new ArrayList<AdjudicationComponent>();
+          for (AdjudicationComponent i : adjudication)
+            dst.adjudication.add(i.copy());
+        };
+        if (subDetail != null) {
+          dst.subDetail = new ArrayList<AddedItemSubDetailComponent>();
+          for (AddedItemSubDetailComponent i : subDetail)
+            dst.subDetail.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof AddedItemDetailComponent))
+          return false;
+        AddedItemDetailComponent o = (AddedItemDetailComponent) other_;
+        return compareDeep(billcode, o.billcode, true) && compareDeep(modifier, o.modifier, true) && compareDeep(quantity, o.quantity, true)
+           && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(factor, o.factor, true) && compareDeep(net, o.net, true)
+           && compareDeep(noteNumber, o.noteNumber, true) && compareDeep(adjudication, o.adjudication, true)
+           && compareDeep(subDetail, o.subDetail, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof AddedItemDetailComponent))
+          return false;
+        AddedItemDetailComponent o = (AddedItemDetailComponent) other_;
+        return compareValues(factor, o.factor, true) && compareValues(noteNumber, o.noteNumber, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(billcode, modifier, quantity
+          , unitPrice, factor, net, noteNumber, adjudication, subDetail);
+      }
+
+  public String fhirType() {
+    return "ClaimResponse.addItem.detail";
+
+  }
+
+  }
+
+    @Block()
+    public static class AddedItemSubDetailComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * A code to indicate the Professional Service or Product supplied.
+         */
+        @Child(name = "billcode", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Group, Service or Product", formalDefinition="A code to indicate the Professional Service or Product supplied." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/service-uscls")
+        protected CodeableConcept billcode;
+
+        /**
+         * Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.
+         */
+        @Child(name = "modifier", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Service/Product billing modifiers", formalDefinition="Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/claim-modifiers")
+        protected List<CodeableConcept> modifier;
+
+        /**
+         * The number of repetitions of a service or product.
+         */
+        @Child(name = "quantity", type = {Quantity.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Count of Products or Services", formalDefinition="The number of repetitions of a service or product." )
+        protected Quantity quantity;
+
+        /**
+         * If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.
+         */
+        @Child(name = "unitPrice", type = {Money.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Fee, charge or cost per point", formalDefinition="If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group." )
+        protected Money unitPrice;
+
+        /**
+         * A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        @Child(name = "factor", type = {DecimalType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Price scaling factor", formalDefinition="A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount." )
+        protected DecimalType factor;
+
+        /**
+         * The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.
+         */
+        @Child(name = "net", type = {Money.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Total item cost", formalDefinition="The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied." )
+        protected Money net;
+
+        /**
+         * A list of note references to the notes provided below.
+         */
+        @Child(name = "noteNumber", type = {PositiveIntType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="List of note numbers which apply", formalDefinition="A list of note references to the notes provided below." )
+        protected List<PositiveIntType> noteNumber;
+
+        /**
+         * The adjudication results.
+         */
+        @Child(name = "adjudication", type = {AdjudicationComponent.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Added items detail adjudication", formalDefinition="The adjudication results." )
+        protected List<AdjudicationComponent> adjudication;
+
+        private static final long serialVersionUID = 374278167L;
+
+    /**
+     * Constructor
+     */
+      public AddedItemSubDetailComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #billcode} (A code to indicate the Professional Service or Product supplied.)
+         */
+        public CodeableConcept getBillcode() { 
+          if (this.billcode == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemSubDetailComponent.billcode");
+            else if (Configuration.doAutoCreate())
+              this.billcode = new CodeableConcept(); // cc
+          return this.billcode;
+        }
+
+        public boolean hasBillcode() { 
+          return this.billcode != null && !this.billcode.isEmpty();
+        }
+
+        /**
+         * @param value {@link #billcode} (A code to indicate the Professional Service or Product supplied.)
+         */
+        public AddedItemSubDetailComponent setBillcode(CodeableConcept value) { 
+          this.billcode = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #modifier} (Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.)
+         */
+        public List<CodeableConcept> getModifier() { 
+          if (this.modifier == null)
+            this.modifier = new ArrayList<CodeableConcept>();
+          return this.modifier;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AddedItemSubDetailComponent setModifier(List<CodeableConcept> theModifier) { 
+          this.modifier = theModifier;
+          return this;
+        }
+
+        public boolean hasModifier() { 
+          if (this.modifier == null)
+            return false;
+          for (CodeableConcept item : this.modifier)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addModifier() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.modifier == null)
+            this.modifier = new ArrayList<CodeableConcept>();
+          this.modifier.add(t);
+          return t;
+        }
+
+        public AddedItemSubDetailComponent addModifier(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.modifier == null)
+            this.modifier = new ArrayList<CodeableConcept>();
+          this.modifier.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #modifier}, creating it if it does not already exist
+         */
+        public CodeableConcept getModifierFirstRep() { 
+          if (getModifier().isEmpty()) {
+            addModifier();
+          }
+          return getModifier().get(0);
+        }
+
+        /**
+         * @return {@link #quantity} (The number of repetitions of a service or product.)
+         */
+        public Quantity getQuantity() { 
+          if (this.quantity == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemSubDetailComponent.quantity");
+            else if (Configuration.doAutoCreate())
+              this.quantity = new Quantity(); // cc
+          return this.quantity;
+        }
+
+        public boolean hasQuantity() { 
+          return this.quantity != null && !this.quantity.isEmpty();
+        }
+
+        /**
+         * @param value {@link #quantity} (The number of repetitions of a service or product.)
+         */
+        public AddedItemSubDetailComponent setQuantity(Quantity value) { 
+          this.quantity = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #unitPrice} (If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.)
+         */
+        public Money getUnitPrice() { 
+          if (this.unitPrice == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemSubDetailComponent.unitPrice");
+            else if (Configuration.doAutoCreate())
+              this.unitPrice = new Money(); // cc
+          return this.unitPrice;
+        }
+
+        public boolean hasUnitPrice() { 
+          return this.unitPrice != null && !this.unitPrice.isEmpty();
+        }
+
+        /**
+         * @param value {@link #unitPrice} (If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.)
+         */
+        public AddedItemSubDetailComponent setUnitPrice(Money value) { 
+          this.unitPrice = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #factor} (A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.). This is the underlying object with id, value and extensions. The accessor "getFactor" gives direct access to the value
+         */
+        public DecimalType getFactorElement() { 
+          if (this.factor == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemSubDetailComponent.factor");
+            else if (Configuration.doAutoCreate())
+              this.factor = new DecimalType(); // bb
+          return this.factor;
+        }
+
+        public boolean hasFactorElement() { 
+          return this.factor != null && !this.factor.isEmpty();
+        }
+
+        public boolean hasFactor() { 
+          return this.factor != null && !this.factor.isEmpty();
+        }
+
+        /**
+         * @param value {@link #factor} (A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.). This is the underlying object with id, value and extensions. The accessor "getFactor" gives direct access to the value
+         */
+        public AddedItemSubDetailComponent setFactorElement(DecimalType value) { 
+          this.factor = value;
+          return this;
+        }
+
+        /**
+         * @return A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public BigDecimal getFactor() { 
+          return this.factor == null ? null : this.factor.getValue();
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public AddedItemSubDetailComponent setFactor(BigDecimal value) { 
+          if (value == null)
+            this.factor = null;
+          else {
+            if (this.factor == null)
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public AddedItemSubDetailComponent setFactor(long value) { 
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          return this;
+        }
+
+        /**
+         * @param value A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.
+         */
+        public AddedItemSubDetailComponent setFactor(double value) { 
+              this.factor = new DecimalType();
+            this.factor.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #net} (The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         */
+        public Money getNet() { 
+          if (this.net == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create AddedItemSubDetailComponent.net");
+            else if (Configuration.doAutoCreate())
+              this.net = new Money(); // cc
+          return this.net;
+        }
+
+        public boolean hasNet() { 
+          return this.net != null && !this.net.isEmpty();
+        }
+
+        /**
+         * @param value {@link #net} (The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.)
+         */
+        public AddedItemSubDetailComponent setNet(Money value) { 
+          this.net = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #noteNumber} (A list of note references to the notes provided below.)
+         */
+        public List<PositiveIntType> getNoteNumber() { 
+          if (this.noteNumber == null)
+            this.noteNumber = new ArrayList<PositiveIntType>();
+          return this.noteNumber;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AddedItemSubDetailComponent setNoteNumber(List<PositiveIntType> theNoteNumber) { 
+          this.noteNumber = theNoteNumber;
+          return this;
+        }
+
+        public boolean hasNoteNumber() { 
+          if (this.noteNumber == null)
+            return false;
+          for (PositiveIntType item : this.noteNumber)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #noteNumber} (A list of note references to the notes provided below.)
+         */
+        public PositiveIntType addNoteNumberElement() {//2 
+          PositiveIntType t = new PositiveIntType();
+          if (this.noteNumber == null)
+            this.noteNumber = new ArrayList<PositiveIntType>();
+          this.noteNumber.add(t);
+          return t;
+        }
+
+        /**
+         * @param value {@link #noteNumber} (A list of note references to the notes provided below.)
+         */
+        public AddedItemSubDetailComponent addNoteNumber(int value) { //1
+          PositiveIntType t = new PositiveIntType();
+          t.setValue(value);
+          if (this.noteNumber == null)
+            this.noteNumber = new ArrayList<PositiveIntType>();
+          this.noteNumber.add(t);
+          return this;
+        }
+
+        /**
+         * @param value {@link #noteNumber} (A list of note references to the notes provided below.)
+         */
+        public boolean hasNoteNumber(int value) { 
+          if (this.noteNumber == null)
+            return false;
+          for (PositiveIntType v : this.noteNumber)
+            if (v.getValue().equals(value)) // positiveInt
+              return true;
+          return false;
+        }
+
+        /**
+         * @return {@link #adjudication} (The adjudication results.)
+         */
+        public List<AdjudicationComponent> getAdjudication() { 
+          if (this.adjudication == null)
+            this.adjudication = new ArrayList<AdjudicationComponent>();
+          return this.adjudication;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public AddedItemSubDetailComponent setAdjudication(List<AdjudicationComponent> theAdjudication) { 
+          this.adjudication = theAdjudication;
+          return this;
+        }
+
+        public boolean hasAdjudication() { 
+          if (this.adjudication == null)
+            return false;
+          for (AdjudicationComponent item : this.adjudication)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public AdjudicationComponent addAdjudication() { //3
+          AdjudicationComponent t = new AdjudicationComponent();
+          if (this.adjudication == null)
+            this.adjudication = new ArrayList<AdjudicationComponent>();
+          this.adjudication.add(t);
+          return t;
+        }
+
+        public AddedItemSubDetailComponent addAdjudication(AdjudicationComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.adjudication == null)
+            this.adjudication = new ArrayList<AdjudicationComponent>();
+          this.adjudication.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #adjudication}, creating it if it does not already exist
+         */
+        public AdjudicationComponent getAdjudicationFirstRep() { 
+          if (getAdjudication().isEmpty()) {
+            addAdjudication();
+          }
+          return getAdjudication().get(0);
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("billcode", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, billcode));
+          children.add(new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier));
+          children.add(new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, 1, quantity));
+          children.add(new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, 1, unitPrice));
+          children.add(new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor));
+          children.add(new Property("net", "Money", "The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net));
+          children.add(new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber));
+          children.add(new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 890074740: /*billcode*/  return new Property("billcode", "CodeableConcept", "A code to indicate the Professional Service or Product supplied.", 0, 1, billcode);
+          case -615513385: /*modifier*/  return new Property("modifier", "CodeableConcept", "Item typification or modifiers codes, e.g. for Oral whether the treatment is cosmetic or associated with TMJ, or for medical whether the treatment was outside the clinic or out of office hours.", 0, java.lang.Integer.MAX_VALUE, modifier);
+          case -1285004149: /*quantity*/  return new Property("quantity", "SimpleQuantity", "The number of repetitions of a service or product.", 0, 1, quantity);
+          case -486196699: /*unitPrice*/  return new Property("unitPrice", "Money", "If the item is a node then this is the fee for the product or service, otherwise this is the total of the fees for the children of the group.", 0, 1, unitPrice);
+          case -1282148017: /*factor*/  return new Property("factor", "decimal", "A real number that represents a multiplier used in determining the overall value of services delivered and/or goods received. The concept of a Factor allows for a discount or surcharge multiplier to be applied to a monetary amount.", 0, 1, factor);
+          case 108957: /*net*/  return new Property("net", "Money", "The quantity times the unit price for an additional service or product or charge. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net);
+          case -1110033957: /*noteNumber*/  return new Property("noteNumber", "positiveInt", "A list of note references to the notes provided below.", 0, java.lang.Integer.MAX_VALUE, noteNumber);
+          case -231349275: /*adjudication*/  return new Property("adjudication", "@ClaimResponse.item.adjudication", "The adjudication results.", 0, java.lang.Integer.MAX_VALUE, adjudication);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 890074740: /*billcode*/ return this.billcode == null ? new Base[0] : new Base[] {this.billcode}; // CodeableConcept
+        case -615513385: /*modifier*/ return this.modifier == null ? new Base[0] : this.modifier.toArray(new Base[this.modifier.size()]); // CodeableConcept
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Quantity
+        case -486196699: /*unitPrice*/ return this.unitPrice == null ? new Base[0] : new Base[] {this.unitPrice}; // Money
+        case -1282148017: /*factor*/ return this.factor == null ? new Base[0] : new Base[] {this.factor}; // DecimalType
+        case 108957: /*net*/ return this.net == null ? new Base[0] : new Base[] {this.net}; // Money
+        case -1110033957: /*noteNumber*/ return this.noteNumber == null ? new Base[0] : this.noteNumber.toArray(new Base[this.noteNumber.size()]); // PositiveIntType
+        case -231349275: /*adjudication*/ return this.adjudication == null ? new Base[0] : this.adjudication.toArray(new Base[this.adjudication.size()]); // AdjudicationComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 890074740: // billcode
+          this.billcode = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -615513385: // modifier
+          this.getModifier().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1285004149: // quantity
+          this.quantity = castToQuantity(value); // Quantity
+          return value;
+        case -486196699: // unitPrice
+          this.unitPrice = castToMoney(value); // Money
+          return value;
+        case -1282148017: // factor
+          this.factor = castToDecimal(value); // DecimalType
+          return value;
+        case 108957: // net
+          this.net = castToMoney(value); // Money
+          return value;
+        case -1110033957: // noteNumber
+          this.getNoteNumber().add(castToPositiveInt(value)); // PositiveIntType
+          return value;
+        case -231349275: // adjudication
+          this.getAdjudication().add((AdjudicationComponent) value); // AdjudicationComponent
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("billcode")) {
+          this.billcode = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("modifier")) {
+          this.getModifier().add(castToCodeableConcept(value));
+        } else if (name.equals("quantity")) {
+          this.quantity = castToQuantity(value); // Quantity
+        } else if (name.equals("unitPrice")) {
+          this.unitPrice = castToMoney(value); // Money
+        } else if (name.equals("factor")) {
+          this.factor = castToDecimal(value); // DecimalType
+        } else if (name.equals("net")) {
+          this.net = castToMoney(value); // Money
+        } else if (name.equals("noteNumber")) {
+          this.getNoteNumber().add(castToPositiveInt(value));
+        } else if (name.equals("adjudication")) {
+          this.getAdjudication().add((AdjudicationComponent) value);
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 890074740:  return getBillcode(); 
+        case -615513385:  return addModifier(); 
+        case -1285004149:  return getQuantity(); 
+        case -486196699:  return getUnitPrice(); 
+        case -1282148017:  return getFactorElement();
+        case 108957:  return getNet(); 
+        case -1110033957:  return addNoteNumberElement();
+        case -231349275:  return addAdjudication(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 890074740: /*billcode*/ return new String[] {"CodeableConcept"};
+        case -615513385: /*modifier*/ return new String[] {"CodeableConcept"};
+        case -1285004149: /*quantity*/ return new String[] {"SimpleQuantity"};
+        case -486196699: /*unitPrice*/ return new String[] {"Money"};
+        case -1282148017: /*factor*/ return new String[] {"decimal"};
+        case 108957: /*net*/ return new String[] {"Money"};
+        case -1110033957: /*noteNumber*/ return new String[] {"positiveInt"};
+        case -231349275: /*adjudication*/ return new String[] {"@ClaimResponse.item.adjudication"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("billcode")) {
+          this.billcode = new CodeableConcept();
+          return this.billcode;
+        }
+        else if (name.equals("modifier")) {
+          return addModifier();
+        }
+        else if (name.equals("quantity")) {
+          this.quantity = new Quantity();
+          return this.quantity;
+        }
+        else if (name.equals("unitPrice")) {
+          this.unitPrice = new Money();
+          return this.unitPrice;
+        }
+        else if (name.equals("factor")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.factor");
+        }
+        else if (name.equals("net")) {
+          this.net = new Money();
+          return this.net;
+        }
+        else if (name.equals("noteNumber")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.noteNumber");
+        }
+        else if (name.equals("adjudication")) {
+          return addAdjudication();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public AddedItemSubDetailComponent copy() {
+        AddedItemSubDetailComponent dst = new AddedItemSubDetailComponent();
+        copyValues(dst);
+        dst.billcode = billcode == null ? null : billcode.copy();
+        if (modifier != null) {
+          dst.modifier = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : modifier)
+            dst.modifier.add(i.copy());
+        };
+        dst.quantity = quantity == null ? null : quantity.copy();
+        dst.unitPrice = unitPrice == null ? null : unitPrice.copy();
+        dst.factor = factor == null ? null : factor.copy();
+        dst.net = net == null ? null : net.copy();
         if (noteNumber != null) {
           dst.noteNumber = new ArrayList<PositiveIntType>();
           for (PositiveIntType i : noteNumber)
@@ -2632,34 +4690,32 @@ public class ClaimResponse extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof AddedItemComponent))
+        if (!(other_ instanceof AddedItemSubDetailComponent))
           return false;
-        AddedItemComponent o = (AddedItemComponent) other_;
-        return compareDeep(itemSequence, o.itemSequence, true) && compareDeep(detailSequence, o.detailSequence, true)
-           && compareDeep(subdetailSequence, o.subdetailSequence, true) && compareDeep(service, o.service, true)
-           && compareDeep(modifier, o.modifier, true) && compareDeep(fee, o.fee, true) && compareDeep(noteNumber, o.noteNumber, true)
-           && compareDeep(adjudication, o.adjudication, true);
+        AddedItemSubDetailComponent o = (AddedItemSubDetailComponent) other_;
+        return compareDeep(billcode, o.billcode, true) && compareDeep(modifier, o.modifier, true) && compareDeep(quantity, o.quantity, true)
+           && compareDeep(unitPrice, o.unitPrice, true) && compareDeep(factor, o.factor, true) && compareDeep(net, o.net, true)
+           && compareDeep(noteNumber, o.noteNumber, true) && compareDeep(adjudication, o.adjudication, true)
+          ;
       }
 
       @Override
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof AddedItemComponent))
+        if (!(other_ instanceof AddedItemSubDetailComponent))
           return false;
-        AddedItemComponent o = (AddedItemComponent) other_;
-        return compareValues(itemSequence, o.itemSequence, true) && compareValues(detailSequence, o.detailSequence, true)
-           && compareValues(subdetailSequence, o.subdetailSequence, true) && compareValues(noteNumber, o.noteNumber, true)
-          ;
+        AddedItemSubDetailComponent o = (AddedItemSubDetailComponent) other_;
+        return compareValues(factor, o.factor, true) && compareValues(noteNumber, o.noteNumber, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(itemSequence, detailSequence
-          , subdetailSequence, service, modifier, fee, noteNumber, adjudication);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(billcode, modifier, quantity
+          , unitPrice, factor, net, noteNumber, adjudication);
       }
 
   public String fhirType() {
-    return "ClaimResponse.addItem";
+    return "ClaimResponse.addItem.detail.subDetail";
 
   }
 
@@ -2689,10 +4745,10 @@ public class ClaimResponse extends DomainResource {
         protected PositiveIntType subDetailSequence;
 
         /**
-         * An error code,from a specified code system, which details why the claim could not be adjudicated.
+         * An error code, from a specified code system, which details why the claim could not be adjudicated.
          */
         @Child(name = "code", type = {CodeableConcept.class}, order=4, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Error code detailing processing issues", formalDefinition="An error code,from a specified code system, which details why the claim could not be adjudicated." )
+        @Description(shortDefinition="Error code detailing processing issues", formalDefinition="An error code, from a specified code system, which details why the claim could not be adjudicated." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adjudication-error")
         protected CodeableConcept code;
 
@@ -2849,7 +4905,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #code} (An error code,from a specified code system, which details why the claim could not be adjudicated.)
+         * @return {@link #code} (An error code, from a specified code system, which details why the claim could not be adjudicated.)
          */
         public CodeableConcept getCode() { 
           if (this.code == null)
@@ -2865,7 +4921,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #code} (An error code,from a specified code system, which details why the claim could not be adjudicated.)
+         * @param value {@link #code} (An error code, from a specified code system, which details why the claim could not be adjudicated.)
          */
         public ErrorComponent setCode(CodeableConcept value) { 
           this.code = value;
@@ -2877,7 +4933,7 @@ public class ClaimResponse extends DomainResource {
           children.add(new Property("itemSequence", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, 1, itemSequence));
           children.add(new Property("detailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, detailSequence));
           children.add(new Property("subDetailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, subDetailSequence));
-          children.add(new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the claim could not be adjudicated.", 0, 1, code));
+          children.add(new Property("code", "CodeableConcept", "An error code, from a specified code system, which details why the claim could not be adjudicated.", 0, 1, code));
         }
 
         @Override
@@ -2886,7 +4942,7 @@ public class ClaimResponse extends DomainResource {
           case 1977979892: /*itemSequence*/  return new Property("itemSequence", "positiveInt", "The sequence number of the line item submitted which contains the error. This value is omitted when the error is elsewhere.", 0, 1, itemSequence);
           case 1321472818: /*detailSequence*/  return new Property("detailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, detailSequence);
           case -855462510: /*subDetailSequence*/  return new Property("subDetailSequence", "positiveInt", "The sequence number of the addition within the line item submitted which contains the error. This value is omitted when the error is not related to an Addition.", 0, 1, subDetailSequence);
-          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "An error code,from a specified code system, which details why the claim could not be adjudicated.", 0, 1, code);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "An error code, from a specified code system, which details why the claim could not be adjudicated.", 0, 1, code);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -3030,10 +5086,10 @@ public class ClaimResponse extends DomainResource {
     @Block()
     public static class TotalComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.
+         * Code indicating: Submitted, Co-Pay, deductible, eligible, benefit, tax, etc.
          */
         @Child(name = "category", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Adjudication category such as submitted, co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc." )
+        @Description(shortDefinition="Adjudication category such as submitted, co-pay, eligible, benefit, etc.", formalDefinition="Code indicating: Submitted, Co-Pay, deductible, eligible, benefit, tax, etc." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/adjudication")
         protected CodeableConcept category;
 
@@ -3063,7 +5119,7 @@ public class ClaimResponse extends DomainResource {
       }
 
         /**
-         * @return {@link #category} (Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @return {@link #category} (Code indicating: Submitted, Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public CodeableConcept getCategory() { 
           if (this.category == null)
@@ -3079,7 +5135,7 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @param value {@link #category} (Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.)
+         * @param value {@link #category} (Code indicating: Submitted, Co-Pay, deductible, eligible, benefit, tax, etc.)
          */
         public TotalComponent setCategory(CodeableConcept value) { 
           this.category = value;
@@ -3112,14 +5168,14 @@ public class ClaimResponse extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("category", "CodeableConcept", "Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.", 0, 1, category));
+          children.add(new Property("category", "CodeableConcept", "Code indicating: Submitted, Co-Pay, deductible, eligible, benefit, tax, etc.", 0, 1, category));
           children.add(new Property("amount", "Money", "Monitory amount associated with the code.", 0, 1, amount));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Code indicating: Submitted, Co-Pay, deductable, elegible, benefit, tax, etc.", 0, 1, category);
+          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Code indicating: Submitted, Co-Pay, deductible, eligible, benefit, tax, etc.", 0, 1, category);
           case -1413853096: /*amount*/  return new Property("amount", "Money", "Monitory amount associated with the code.", 0, 1, amount);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -4044,16 +6100,9 @@ public class ClaimResponse extends DomainResource {
         protected StringType businessArrangement;
 
         /**
-         * A list of references from the Insurer to which these services pertain.
-         */
-        @Child(name = "preAuthRef", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Pre-Authorization/Determination Reference", formalDefinition="A list of references from the Insurer to which these services pertain." )
-        protected List<StringType> preAuthRef;
-
-        /**
          * The Coverages adjudication details.
          */
-        @Child(name = "claimResponse", type = {ClaimResponse.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "claimResponse", type = {ClaimResponse.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Adjudication results", formalDefinition="The Coverages adjudication details." )
         protected Reference claimResponse;
 
@@ -4062,7 +6111,7 @@ public class ClaimResponse extends DomainResource {
          */
         protected ClaimResponse claimResponseTarget;
 
-        private static final long serialVersionUID = -1216535489L;
+        private static final long serialVersionUID = 282380584L;
 
     /**
      * Constructor
@@ -4265,67 +6314,6 @@ public class ClaimResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #preAuthRef} (A list of references from the Insurer to which these services pertain.)
-         */
-        public List<StringType> getPreAuthRef() { 
-          if (this.preAuthRef == null)
-            this.preAuthRef = new ArrayList<StringType>();
-          return this.preAuthRef;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public InsuranceComponent setPreAuthRef(List<StringType> thePreAuthRef) { 
-          this.preAuthRef = thePreAuthRef;
-          return this;
-        }
-
-        public boolean hasPreAuthRef() { 
-          if (this.preAuthRef == null)
-            return false;
-          for (StringType item : this.preAuthRef)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        /**
-         * @return {@link #preAuthRef} (A list of references from the Insurer to which these services pertain.)
-         */
-        public StringType addPreAuthRefElement() {//2 
-          StringType t = new StringType();
-          if (this.preAuthRef == null)
-            this.preAuthRef = new ArrayList<StringType>();
-          this.preAuthRef.add(t);
-          return t;
-        }
-
-        /**
-         * @param value {@link #preAuthRef} (A list of references from the Insurer to which these services pertain.)
-         */
-        public InsuranceComponent addPreAuthRef(String value) { //1
-          StringType t = new StringType();
-          t.setValue(value);
-          if (this.preAuthRef == null)
-            this.preAuthRef = new ArrayList<StringType>();
-          this.preAuthRef.add(t);
-          return this;
-        }
-
-        /**
-         * @param value {@link #preAuthRef} (A list of references from the Insurer to which these services pertain.)
-         */
-        public boolean hasPreAuthRef(String value) { 
-          if (this.preAuthRef == null)
-            return false;
-          for (StringType v : this.preAuthRef)
-            if (v.getValue().equals(value)) // string
-              return true;
-          return false;
-        }
-
-        /**
          * @return {@link #claimResponse} (The Coverages adjudication details.)
          */
         public Reference getClaimResponse() { 
@@ -4375,7 +6363,6 @@ public class ClaimResponse extends DomainResource {
           children.add(new Property("focal", "boolean", "The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated.", 0, 1, focal));
           children.add(new Property("coverage", "Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, 1, coverage));
           children.add(new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement));
-          children.add(new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, java.lang.Integer.MAX_VALUE, preAuthRef));
           children.add(new Property("claimResponse", "Reference(ClaimResponse)", "The Coverages adjudication details.", 0, 1, claimResponse));
         }
 
@@ -4386,7 +6373,6 @@ public class ClaimResponse extends DomainResource {
           case 97604197: /*focal*/  return new Property("focal", "boolean", "The instance number of the Coverage which is the focus for adjudication. The Coverage against which the claim is to be adjudicated.", 0, 1, focal);
           case -351767064: /*coverage*/  return new Property("coverage", "Reference(Coverage)", "Reference to the program or plan identification, underwriter or payor.", 0, 1, coverage);
           case 259920682: /*businessArrangement*/  return new Property("businessArrangement", "string", "The contract number of a business agreement which describes the terms and conditions.", 0, 1, businessArrangement);
-          case 522246568: /*preAuthRef*/  return new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, java.lang.Integer.MAX_VALUE, preAuthRef);
           case 689513629: /*claimResponse*/  return new Property("claimResponse", "Reference(ClaimResponse)", "The Coverages adjudication details.", 0, 1, claimResponse);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -4400,7 +6386,6 @@ public class ClaimResponse extends DomainResource {
         case 97604197: /*focal*/ return this.focal == null ? new Base[0] : new Base[] {this.focal}; // BooleanType
         case -351767064: /*coverage*/ return this.coverage == null ? new Base[0] : new Base[] {this.coverage}; // Reference
         case 259920682: /*businessArrangement*/ return this.businessArrangement == null ? new Base[0] : new Base[] {this.businessArrangement}; // StringType
-        case 522246568: /*preAuthRef*/ return this.preAuthRef == null ? new Base[0] : this.preAuthRef.toArray(new Base[this.preAuthRef.size()]); // StringType
         case 689513629: /*claimResponse*/ return this.claimResponse == null ? new Base[0] : new Base[] {this.claimResponse}; // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -4422,9 +6407,6 @@ public class ClaimResponse extends DomainResource {
         case 259920682: // businessArrangement
           this.businessArrangement = castToString(value); // StringType
           return value;
-        case 522246568: // preAuthRef
-          this.getPreAuthRef().add(castToString(value)); // StringType
-          return value;
         case 689513629: // claimResponse
           this.claimResponse = castToReference(value); // Reference
           return value;
@@ -4443,8 +6425,6 @@ public class ClaimResponse extends DomainResource {
           this.coverage = castToReference(value); // Reference
         } else if (name.equals("businessArrangement")) {
           this.businessArrangement = castToString(value); // StringType
-        } else if (name.equals("preAuthRef")) {
-          this.getPreAuthRef().add(castToString(value));
         } else if (name.equals("claimResponse")) {
           this.claimResponse = castToReference(value); // Reference
         } else
@@ -4459,7 +6439,6 @@ public class ClaimResponse extends DomainResource {
         case 97604197:  return getFocalElement();
         case -351767064:  return getCoverage(); 
         case 259920682:  return getBusinessArrangementElement();
-        case 522246568:  return addPreAuthRefElement();
         case 689513629:  return getClaimResponse(); 
         default: return super.makeProperty(hash, name);
         }
@@ -4473,7 +6452,6 @@ public class ClaimResponse extends DomainResource {
         case 97604197: /*focal*/ return new String[] {"boolean"};
         case -351767064: /*coverage*/ return new String[] {"Reference"};
         case 259920682: /*businessArrangement*/ return new String[] {"string"};
-        case 522246568: /*preAuthRef*/ return new String[] {"string"};
         case 689513629: /*claimResponse*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -4495,9 +6473,6 @@ public class ClaimResponse extends DomainResource {
         else if (name.equals("businessArrangement")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.businessArrangement");
         }
-        else if (name.equals("preAuthRef")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.preAuthRef");
-        }
         else if (name.equals("claimResponse")) {
           this.claimResponse = new Reference();
           return this.claimResponse;
@@ -4513,11 +6488,6 @@ public class ClaimResponse extends DomainResource {
         dst.focal = focal == null ? null : focal.copy();
         dst.coverage = coverage == null ? null : coverage.copy();
         dst.businessArrangement = businessArrangement == null ? null : businessArrangement.copy();
-        if (preAuthRef != null) {
-          dst.preAuthRef = new ArrayList<StringType>();
-          for (StringType i : preAuthRef)
-            dst.preAuthRef.add(i.copy());
-        };
         dst.claimResponse = claimResponse == null ? null : claimResponse.copy();
         return dst;
       }
@@ -4530,8 +6500,8 @@ public class ClaimResponse extends DomainResource {
           return false;
         InsuranceComponent o = (InsuranceComponent) other_;
         return compareDeep(sequence, o.sequence, true) && compareDeep(focal, o.focal, true) && compareDeep(coverage, o.coverage, true)
-           && compareDeep(businessArrangement, o.businessArrangement, true) && compareDeep(preAuthRef, o.preAuthRef, true)
-           && compareDeep(claimResponse, o.claimResponse, true);
+           && compareDeep(businessArrangement, o.businessArrangement, true) && compareDeep(claimResponse, o.claimResponse, true)
+          ;
       }
 
       @Override
@@ -4542,12 +6512,12 @@ public class ClaimResponse extends DomainResource {
           return false;
         InsuranceComponent o = (InsuranceComponent) other_;
         return compareValues(sequence, o.sequence, true) && compareValues(focal, o.focal, true) && compareValues(businessArrangement, o.businessArrangement, true)
-           && compareValues(preAuthRef, o.preAuthRef, true);
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(sequence, focal, coverage
-          , businessArrangement, preAuthRef, claimResponse);
+          , businessArrangement, claimResponse);
       }
 
   public String fhirType() {
@@ -4558,10 +6528,10 @@ public class ClaimResponse extends DomainResource {
   }
 
     /**
-     * The Response business identifier.
+     * The response business identifier.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Response  number", formalDefinition="The Response business identifier." )
+    @Description(shortDefinition="Response  number", formalDefinition="The response business identifier." )
     protected List<Identifier> identifier;
 
     /**
@@ -4573,26 +6543,26 @@ public class ClaimResponse extends DomainResource {
     protected Enumeration<ClaimResponseStatus> status;
 
     /**
-     * The category of claim, eg, oral, pharmacy, vision, insitutional, professional.
+     * The category of claim, e.g, oral, pharmacy, vision, institutional, professional.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Type or discipline", formalDefinition="The category of claim, eg, oral, pharmacy, vision, insitutional, professional." )
+    @Description(shortDefinition="Type or discipline", formalDefinition="The category of claim, e.g, oral, pharmacy, vision, institutional, professional." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/claim-type")
     protected CodeableConcept type;
 
     /**
-     * A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the BillType.
+     * A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the CMS Bill Type.
      */
-    @Child(name = "subType", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Finer grained claim type information", formalDefinition="A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the BillType." )
+    @Child(name = "subType", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Finer grained claim type information", formalDefinition="A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the CMS Bill Type." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/claim-subtype")
-    protected List<CodeableConcept> subType;
+    protected CodeableConcept subType;
 
     /**
-     * Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).
+     * A claim, a list of completed goods and services; a preauthorization, a list or proposed goods and services; or a predetermination, a set of goods and services being considered, for which insurer adjudication is sought.
      */
-    @Child(name = "use", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="complete | proposed | exploratory | other", formalDefinition="Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination)." )
+    @Child(name = "use", type = {CodeType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="claim | preauthorization | predetermination", formalDefinition="A claim, a list of completed goods and services; a preauthorization, a list or proposed goods and services; or a predetermination, a set of goods and services being considered, for which insurer adjudication is sought." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/claim-use")
     protected Enumeration<Use> use;
 
@@ -4609,10 +6579,10 @@ public class ClaimResponse extends DomainResource {
     protected Patient patientTarget;
 
     /**
-     * The date when the enclosed suite of services were performed or completed.
+     * The date when this resource was created.
      */
     @Child(name = "created", type = {DateTimeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Creation date", formalDefinition="The date when the enclosed suite of services were performed or completed." )
+    @Description(shortDefinition="Creation date", formalDefinition="The date when this resource was created." )
     protected DateTimeType created;
 
     /**
@@ -4640,14 +6610,14 @@ public class ClaimResponse extends DomainResource {
     protected Resource requestProviderTarget;
 
     /**
-     * Original request resource referrence.
+     * Original request resource reference.
      */
     @Child(name = "request", type = {Claim.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Id of resource triggering adjudication", formalDefinition="Original request resource referrence." )
+    @Description(shortDefinition="Id of resource triggering adjudication", formalDefinition="Original request resource reference." )
     protected Reference request;
 
     /**
-     * The actual object that is the target of the reference (Original request resource referrence.)
+     * The actual object that is the target of the reference (Original request resource reference.)
      */
     protected Claim requestTarget;
 
@@ -4667,52 +6637,59 @@ public class ClaimResponse extends DomainResource {
     protected StringType disposition;
 
     /**
+     * A list of references from the Insurer to which these services pertain.
+     */
+    @Child(name = "preAuthRef", type = {StringType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Pre-Authorization/Determination Reference", formalDefinition="A list of references from the Insurer to which these services pertain." )
+    protected StringType preAuthRef;
+
+    /**
      * Party to be reimbursed: Subscriber, provider, other.
      */
-    @Child(name = "payeeType", type = {CodeableConcept.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "payeeType", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Party to be paid any benefits payable", formalDefinition="Party to be reimbursed: Subscriber, provider, other." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/payeetype")
     protected CodeableConcept payeeType;
 
     /**
-     * The first tier service adjudications for submitted services.
+     * The first-tier service adjudications for submitted services.
      */
-    @Child(name = "item", type = {}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Line items", formalDefinition="The first tier service adjudications for submitted services." )
+    @Child(name = "item", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Line items", formalDefinition="The first-tier service adjudications for submitted services." )
     protected List<ItemComponent> item;
 
     /**
-     * The first tier service adjudications for payor added services.
+     * The first-tier service adjudications for payor added services.
      */
-    @Child(name = "addItem", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Insurer added line items", formalDefinition="The first tier service adjudications for payor added services." )
+    @Child(name = "addItem", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Insurer added line items", formalDefinition="The first-tier service adjudications for payor added services." )
     protected List<AddedItemComponent> addItem;
 
     /**
      * Mutually exclusive with Services Provided (Item).
      */
-    @Child(name = "error", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "error", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Processing errors", formalDefinition="Mutually exclusive with Services Provided (Item)." )
     protected List<ErrorComponent> error;
 
     /**
      * Totals for amounts submitted, co-pays, benefits payable etc.
      */
-    @Child(name = "total", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "total", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Adjudication totals", formalDefinition="Totals for amounts submitted, co-pays, benefits payable etc." )
     protected List<TotalComponent> total;
 
     /**
      * Payment details for the claim if the claim has been paid.
      */
-    @Child(name = "payment", type = {}, order=17, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Payment details, if paid", formalDefinition="Payment details for the claim if the claim has been paid." )
+    @Child(name = "payment", type = {}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Payment Details", formalDefinition="Payment details for the claim if the claim has been paid." )
     protected PaymentComponent payment;
 
     /**
      * Status of funds reservation (For provider, for Patient, None).
      */
-    @Child(name = "reserved", type = {Coding.class}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "reserved", type = {Coding.class}, order=19, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Funds reserved status", formalDefinition="Status of funds reservation (For provider, for Patient, None)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fundsreserve")
     protected Coding reserved;
@@ -4720,7 +6697,7 @@ public class ClaimResponse extends DomainResource {
     /**
      * The form to be used for printing the content.
      */
-    @Child(name = "form", type = {CodeableConcept.class}, order=19, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "form", type = {CodeableConcept.class}, order=20, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Printed Form Identifier", formalDefinition="The form to be used for printing the content." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/forms")
     protected CodeableConcept form;
@@ -4728,14 +6705,14 @@ public class ClaimResponse extends DomainResource {
     /**
      * Note text.
      */
-    @Child(name = "processNote", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "processNote", type = {}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Processing notes", formalDefinition="Note text." )
     protected List<NoteComponent> processNote;
 
     /**
      * Request for additional supporting or authorizing information, such as: documents, images or resources.
      */
-    @Child(name = "communicationRequest", type = {CommunicationRequest.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "communicationRequest", type = {CommunicationRequest.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Request for additional information", formalDefinition="Request for additional supporting or authorizing information, such as: documents, images or resources." )
     protected List<Reference> communicationRequest;
     /**
@@ -4747,11 +6724,11 @@ public class ClaimResponse extends DomainResource {
     /**
      * Financial instrument by which payment information for health care.
      */
-    @Child(name = "insurance", type = {}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "insurance", type = {}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Insurance or medical plan", formalDefinition="Financial instrument by which payment information for health care." )
     protected List<InsuranceComponent> insurance;
 
-    private static final long serialVersionUID = 2049245539L;
+    private static final long serialVersionUID = -1574471350L;
 
   /**
    * Constructor
@@ -4761,7 +6738,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #identifier} (The Response business identifier.)
+     * @return {@link #identifier} (The response business identifier.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -4863,7 +6840,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (The category of claim, eg, oral, pharmacy, vision, insitutional, professional.)
+     * @return {@link #type} (The category of claim, e.g, oral, pharmacy, vision, institutional, professional.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -4879,7 +6856,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (The category of claim, eg, oral, pharmacy, vision, insitutional, professional.)
+     * @param value {@link #type} (The category of claim, e.g, oral, pharmacy, vision, institutional, professional.)
      */
     public ClaimResponse setType(CodeableConcept value) { 
       this.type = value;
@@ -4887,60 +6864,31 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #subType} (A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the BillType.)
+     * @return {@link #subType} (A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the CMS Bill Type.)
      */
-    public List<CodeableConcept> getSubType() { 
+    public CodeableConcept getSubType() { 
       if (this.subType == null)
-        this.subType = new ArrayList<CodeableConcept>();
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.subType");
+        else if (Configuration.doAutoCreate())
+          this.subType = new CodeableConcept(); // cc
       return this.subType;
     }
 
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public ClaimResponse setSubType(List<CodeableConcept> theSubType) { 
-      this.subType = theSubType;
-      return this;
-    }
-
     public boolean hasSubType() { 
-      if (this.subType == null)
-        return false;
-      for (CodeableConcept item : this.subType)
-        if (!item.isEmpty())
-          return true;
-      return false;
+      return this.subType != null && !this.subType.isEmpty();
     }
 
-    public CodeableConcept addSubType() { //3
-      CodeableConcept t = new CodeableConcept();
-      if (this.subType == null)
-        this.subType = new ArrayList<CodeableConcept>();
-      this.subType.add(t);
-      return t;
-    }
-
-    public ClaimResponse addSubType(CodeableConcept t) { //3
-      if (t == null)
-        return this;
-      if (this.subType == null)
-        this.subType = new ArrayList<CodeableConcept>();
-      this.subType.add(t);
+    /**
+     * @param value {@link #subType} (A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the CMS Bill Type.)
+     */
+    public ClaimResponse setSubType(CodeableConcept value) { 
+      this.subType = value;
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #subType}, creating it if it does not already exist
-     */
-    public CodeableConcept getSubTypeFirstRep() { 
-      if (getSubType().isEmpty()) {
-        addSubType();
-      }
-      return getSubType().get(0);
-    }
-
-    /**
-     * @return {@link #use} (Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
+     * @return {@link #use} (A claim, a list of completed goods and services; a preauthorization, a list or proposed goods and services; or a predetermination, a set of goods and services being considered, for which insurer adjudication is sought.). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
      */
     public Enumeration<Use> getUseElement() { 
       if (this.use == null)
@@ -4960,7 +6908,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #use} (Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
+     * @param value {@link #use} (A claim, a list of completed goods and services; a preauthorization, a list or proposed goods and services; or a predetermination, a set of goods and services being considered, for which insurer adjudication is sought.). This is the underlying object with id, value and extensions. The accessor "getUse" gives direct access to the value
      */
     public ClaimResponse setUseElement(Enumeration<Use> value) { 
       this.use = value;
@@ -4968,14 +6916,14 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).
+     * @return A claim, a list of completed goods and services; a preauthorization, a list or proposed goods and services; or a predetermination, a set of goods and services being considered, for which insurer adjudication is sought.
      */
     public Use getUse() { 
       return this.use == null ? null : this.use.getValue();
     }
 
     /**
-     * @param value Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).
+     * @param value A claim, a list of completed goods and services; a preauthorization, a list or proposed goods and services; or a predetermination, a set of goods and services being considered, for which insurer adjudication is sought.
      */
     public ClaimResponse setUse(Use value) { 
       if (value == null)
@@ -5033,7 +6981,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #created} (The date when the enclosed suite of services were performed or completed.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
+     * @return {@link #created} (The date when this resource was created.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
     public DateTimeType getCreatedElement() { 
       if (this.created == null)
@@ -5053,7 +7001,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #created} (The date when the enclosed suite of services were performed or completed.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
+     * @param value {@link #created} (The date when this resource was created.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
     public ClaimResponse setCreatedElement(DateTimeType value) { 
       this.created = value;
@@ -5061,14 +7009,14 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return The date when the enclosed suite of services were performed or completed.
+     * @return The date when this resource was created.
      */
     public Date getCreated() { 
       return this.created == null ? null : this.created.getValue();
     }
 
     /**
-     * @param value The date when the enclosed suite of services were performed or completed.
+     * @param value The date when this resource was created.
      */
     public ClaimResponse setCreated(Date value) { 
       if (value == null)
@@ -5165,7 +7113,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #request} (Original request resource referrence.)
+     * @return {@link #request} (Original request resource reference.)
      */
     public Reference getRequest() { 
       if (this.request == null)
@@ -5181,7 +7129,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #request} (Original request resource referrence.)
+     * @param value {@link #request} (Original request resource reference.)
      */
     public ClaimResponse setRequest(Reference value) { 
       this.request = value;
@@ -5189,7 +7137,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Original request resource referrence.)
+     * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
      */
     public Claim getRequestTarget() { 
       if (this.requestTarget == null)
@@ -5201,7 +7149,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Original request resource referrence.)
+     * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
      */
     public ClaimResponse setRequestTarget(Claim value) { 
       this.requestTarget = value;
@@ -5307,6 +7255,55 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
+     * @return {@link #preAuthRef} (A list of references from the Insurer to which these services pertain.). This is the underlying object with id, value and extensions. The accessor "getPreAuthRef" gives direct access to the value
+     */
+    public StringType getPreAuthRefElement() { 
+      if (this.preAuthRef == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ClaimResponse.preAuthRef");
+        else if (Configuration.doAutoCreate())
+          this.preAuthRef = new StringType(); // bb
+      return this.preAuthRef;
+    }
+
+    public boolean hasPreAuthRefElement() { 
+      return this.preAuthRef != null && !this.preAuthRef.isEmpty();
+    }
+
+    public boolean hasPreAuthRef() { 
+      return this.preAuthRef != null && !this.preAuthRef.isEmpty();
+    }
+
+    /**
+     * @param value {@link #preAuthRef} (A list of references from the Insurer to which these services pertain.). This is the underlying object with id, value and extensions. The accessor "getPreAuthRef" gives direct access to the value
+     */
+    public ClaimResponse setPreAuthRefElement(StringType value) { 
+      this.preAuthRef = value;
+      return this;
+    }
+
+    /**
+     * @return A list of references from the Insurer to which these services pertain.
+     */
+    public String getPreAuthRef() { 
+      return this.preAuthRef == null ? null : this.preAuthRef.getValue();
+    }
+
+    /**
+     * @param value A list of references from the Insurer to which these services pertain.
+     */
+    public ClaimResponse setPreAuthRef(String value) { 
+      if (Utilities.noString(value))
+        this.preAuthRef = null;
+      else {
+        if (this.preAuthRef == null)
+          this.preAuthRef = new StringType();
+        this.preAuthRef.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #payeeType} (Party to be reimbursed: Subscriber, provider, other.)
      */
     public CodeableConcept getPayeeType() { 
@@ -5331,7 +7328,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #item} (The first tier service adjudications for submitted services.)
+     * @return {@link #item} (The first-tier service adjudications for submitted services.)
      */
     public List<ItemComponent> getItem() { 
       if (this.item == null)
@@ -5384,7 +7381,7 @@ public class ClaimResponse extends DomainResource {
     }
 
     /**
-     * @return {@link #addItem} (The first tier service adjudications for payor added services.)
+     * @return {@link #addItem} (The first-tier service adjudications for payor added services.)
      */
     public List<AddedItemComponent> getAddItem() { 
       if (this.addItem == null)
@@ -5797,21 +7794,22 @@ public class ClaimResponse extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("identifier", "Identifier", "The response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
-        children.add(new Property("type", "CodeableConcept", "The category of claim, eg, oral, pharmacy, vision, insitutional, professional.", 0, 1, type));
-        children.add(new Property("subType", "CodeableConcept", "A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the BillType.", 0, java.lang.Integer.MAX_VALUE, subType));
-        children.add(new Property("use", "code", "Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).", 0, 1, use));
+        children.add(new Property("type", "CodeableConcept", "The category of claim, e.g, oral, pharmacy, vision, institutional, professional.", 0, 1, type));
+        children.add(new Property("subType", "CodeableConcept", "A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the CMS Bill Type.", 0, 1, subType));
+        children.add(new Property("use", "code", "A claim, a list of completed goods and services; a preauthorization, a list or proposed goods and services; or a predetermination, a set of goods and services being considered, for which insurer adjudication is sought.", 0, 1, use));
         children.add(new Property("patient", "Reference(Patient)", "Patient Resource.", 0, 1, patient));
-        children.add(new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created));
+        children.add(new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created));
         children.add(new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer));
         children.add(new Property("requestProvider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
-        children.add(new Property("request", "Reference(Claim)", "Original request resource referrence.", 0, 1, request));
+        children.add(new Property("request", "Reference(Claim)", "Original request resource reference.", 0, 1, request));
         children.add(new Property("outcome", "code", "Transaction: error, complete, partial processing.", 0, 1, outcome));
         children.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition));
+        children.add(new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, 1, preAuthRef));
         children.add(new Property("payeeType", "CodeableConcept", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, payeeType));
-        children.add(new Property("item", "", "The first tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, item));
-        children.add(new Property("addItem", "", "The first tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem));
+        children.add(new Property("item", "", "The first-tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, item));
+        children.add(new Property("addItem", "", "The first-tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem));
         children.add(new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error));
         children.add(new Property("total", "", "Totals for amounts submitted, co-pays, benefits payable etc.", 0, java.lang.Integer.MAX_VALUE, total));
         children.add(new Property("payment", "", "Payment details for the claim if the claim has been paid.", 0, 1, payment));
@@ -5825,21 +7823,22 @@ public class ClaimResponse extends DomainResource {
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
-        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The category of claim, eg, oral, pharmacy, vision, insitutional, professional.", 0, 1, type);
-        case -1868521062: /*subType*/  return new Property("subType", "CodeableConcept", "A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the BillType.", 0, java.lang.Integer.MAX_VALUE, subType);
-        case 116103: /*use*/  return new Property("use", "code", "Complete (Bill or Claim), Proposed (Pre-Authorization), Exploratory (Pre-determination).", 0, 1, use);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The category of claim, e.g, oral, pharmacy, vision, institutional, professional.", 0, 1, type);
+        case -1868521062: /*subType*/  return new Property("subType", "CodeableConcept", "A finer grained suite of claim subtype codes which may convey Inpatient vs Outpatient and/or a specialty service. In the US the CMS Bill Type.", 0, 1, subType);
+        case 116103: /*use*/  return new Property("use", "code", "A claim, a list of completed goods and services; a preauthorization, a list or proposed goods and services; or a predetermination, a set of goods and services being considered, for which insurer adjudication is sought.", 0, 1, use);
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "Patient Resource.", 0, 1, patient);
-        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the enclosed suite of services were performed or completed.", 0, 1, created);
+        case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created);
         case 1957615864: /*insurer*/  return new Property("insurer", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, insurer);
         case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
-        case 1095692943: /*request*/  return new Property("request", "Reference(Claim)", "Original request resource referrence.", 0, 1, request);
+        case 1095692943: /*request*/  return new Property("request", "Reference(Claim)", "Original request resource reference.", 0, 1, request);
         case -1106507950: /*outcome*/  return new Property("outcome", "code", "Transaction: error, complete, partial processing.", 0, 1, outcome);
         case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition);
+        case 522246568: /*preAuthRef*/  return new Property("preAuthRef", "string", "A list of references from the Insurer to which these services pertain.", 0, 1, preAuthRef);
         case -316321118: /*payeeType*/  return new Property("payeeType", "CodeableConcept", "Party to be reimbursed: Subscriber, provider, other.", 0, 1, payeeType);
-        case 3242771: /*item*/  return new Property("item", "", "The first tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, item);
-        case -1148899500: /*addItem*/  return new Property("addItem", "", "The first tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem);
+        case 3242771: /*item*/  return new Property("item", "", "The first-tier service adjudications for submitted services.", 0, java.lang.Integer.MAX_VALUE, item);
+        case -1148899500: /*addItem*/  return new Property("addItem", "", "The first-tier service adjudications for payor added services.", 0, java.lang.Integer.MAX_VALUE, addItem);
         case 96784904: /*error*/  return new Property("error", "", "Mutually exclusive with Services Provided (Item).", 0, java.lang.Integer.MAX_VALUE, error);
         case 110549828: /*total*/  return new Property("total", "", "Totals for amounts submitted, co-pays, benefits payable etc.", 0, java.lang.Integer.MAX_VALUE, total);
         case -786681338: /*payment*/  return new Property("payment", "", "Payment details for the claim if the claim has been paid.", 0, 1, payment);
@@ -5859,7 +7858,7 @@ public class ClaimResponse extends DomainResource {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<ClaimResponseStatus>
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case -1868521062: /*subType*/ return this.subType == null ? new Base[0] : this.subType.toArray(new Base[this.subType.size()]); // CodeableConcept
+        case -1868521062: /*subType*/ return this.subType == null ? new Base[0] : new Base[] {this.subType}; // CodeableConcept
         case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // Enumeration<Use>
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
@@ -5868,6 +7867,7 @@ public class ClaimResponse extends DomainResource {
         case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
         case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Enumeration<RemittanceOutcome>
         case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
+        case 522246568: /*preAuthRef*/ return this.preAuthRef == null ? new Base[0] : new Base[] {this.preAuthRef}; // StringType
         case -316321118: /*payeeType*/ return this.payeeType == null ? new Base[0] : new Base[] {this.payeeType}; // CodeableConcept
         case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // ItemComponent
         case -1148899500: /*addItem*/ return this.addItem == null ? new Base[0] : this.addItem.toArray(new Base[this.addItem.size()]); // AddedItemComponent
@@ -5898,7 +7898,7 @@ public class ClaimResponse extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1868521062: // subType
-          this.getSubType().add(castToCodeableConcept(value)); // CodeableConcept
+          this.subType = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 116103: // use
           value = new UseEnumFactory().fromType(castToCode(value));
@@ -5925,6 +7925,9 @@ public class ClaimResponse extends DomainResource {
           return value;
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
+          return value;
+        case 522246568: // preAuthRef
+          this.preAuthRef = castToString(value); // StringType
           return value;
         case -316321118: // payeeType
           this.payeeType = castToCodeableConcept(value); // CodeableConcept
@@ -5974,7 +7977,7 @@ public class ClaimResponse extends DomainResource {
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("subType")) {
-          this.getSubType().add(castToCodeableConcept(value));
+          this.subType = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("use")) {
           value = new UseEnumFactory().fromType(castToCode(value));
           this.use = (Enumeration) value; // Enumeration<Use>
@@ -5993,6 +7996,8 @@ public class ClaimResponse extends DomainResource {
           this.outcome = (Enumeration) value; // Enumeration<RemittanceOutcome>
         } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
+        } else if (name.equals("preAuthRef")) {
+          this.preAuthRef = castToString(value); // StringType
         } else if (name.equals("payeeType")) {
           this.payeeType = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("item")) {
@@ -6026,7 +8031,7 @@ public class ClaimResponse extends DomainResource {
         case -1618432855:  return addIdentifier(); 
         case -892481550:  return getStatusElement();
         case 3575610:  return getType(); 
-        case -1868521062:  return addSubType(); 
+        case -1868521062:  return getSubType(); 
         case 116103:  return getUseElement();
         case -791418107:  return getPatient(); 
         case 1028554472:  return getCreatedElement();
@@ -6035,6 +8040,7 @@ public class ClaimResponse extends DomainResource {
         case 1095692943:  return getRequest(); 
         case -1106507950:  return getOutcomeElement();
         case 583380919:  return getDispositionElement();
+        case 522246568:  return getPreAuthRefElement();
         case -316321118:  return getPayeeType(); 
         case 3242771:  return addItem(); 
         case -1148899500:  return addAddItem(); 
@@ -6066,6 +8072,7 @@ public class ClaimResponse extends DomainResource {
         case 1095692943: /*request*/ return new String[] {"Reference"};
         case -1106507950: /*outcome*/ return new String[] {"code"};
         case 583380919: /*disposition*/ return new String[] {"string"};
+        case 522246568: /*preAuthRef*/ return new String[] {"string"};
         case -316321118: /*payeeType*/ return new String[] {"CodeableConcept"};
         case 3242771: /*item*/ return new String[] {};
         case -1148899500: /*addItem*/ return new String[] {};
@@ -6095,7 +8102,8 @@ public class ClaimResponse extends DomainResource {
           return this.type;
         }
         else if (name.equals("subType")) {
-          return addSubType();
+          this.subType = new CodeableConcept();
+          return this.subType;
         }
         else if (name.equals("use")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.use");
@@ -6124,6 +8132,9 @@ public class ClaimResponse extends DomainResource {
         }
         else if (name.equals("disposition")) {
           throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.disposition");
+        }
+        else if (name.equals("preAuthRef")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ClaimResponse.preAuthRef");
         }
         else if (name.equals("payeeType")) {
           this.payeeType = new CodeableConcept();
@@ -6181,11 +8192,7 @@ public class ClaimResponse extends DomainResource {
         };
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
-        if (subType != null) {
-          dst.subType = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : subType)
-            dst.subType.add(i.copy());
-        };
+        dst.subType = subType == null ? null : subType.copy();
         dst.use = use == null ? null : use.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.created = created == null ? null : created.copy();
@@ -6194,6 +8201,7 @@ public class ClaimResponse extends DomainResource {
         dst.request = request == null ? null : request.copy();
         dst.outcome = outcome == null ? null : outcome.copy();
         dst.disposition = disposition == null ? null : disposition.copy();
+        dst.preAuthRef = preAuthRef == null ? null : preAuthRef.copy();
         dst.payeeType = payeeType == null ? null : payeeType.copy();
         if (item != null) {
           dst.item = new ArrayList<ItemComponent>();
@@ -6251,11 +8259,11 @@ public class ClaimResponse extends DomainResource {
            && compareDeep(subType, o.subType, true) && compareDeep(use, o.use, true) && compareDeep(patient, o.patient, true)
            && compareDeep(created, o.created, true) && compareDeep(insurer, o.insurer, true) && compareDeep(requestProvider, o.requestProvider, true)
            && compareDeep(request, o.request, true) && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true)
-           && compareDeep(payeeType, o.payeeType, true) && compareDeep(item, o.item, true) && compareDeep(addItem, o.addItem, true)
-           && compareDeep(error, o.error, true) && compareDeep(total, o.total, true) && compareDeep(payment, o.payment, true)
-           && compareDeep(reserved, o.reserved, true) && compareDeep(form, o.form, true) && compareDeep(processNote, o.processNote, true)
-           && compareDeep(communicationRequest, o.communicationRequest, true) && compareDeep(insurance, o.insurance, true)
-          ;
+           && compareDeep(preAuthRef, o.preAuthRef, true) && compareDeep(payeeType, o.payeeType, true) && compareDeep(item, o.item, true)
+           && compareDeep(addItem, o.addItem, true) && compareDeep(error, o.error, true) && compareDeep(total, o.total, true)
+           && compareDeep(payment, o.payment, true) && compareDeep(reserved, o.reserved, true) && compareDeep(form, o.form, true)
+           && compareDeep(processNote, o.processNote, true) && compareDeep(communicationRequest, o.communicationRequest, true)
+           && compareDeep(insurance, o.insurance, true);
       }
 
       @Override
@@ -6266,14 +8274,15 @@ public class ClaimResponse extends DomainResource {
           return false;
         ClaimResponse o = (ClaimResponse) other_;
         return compareValues(status, o.status, true) && compareValues(use, o.use, true) && compareValues(created, o.created, true)
-           && compareValues(outcome, o.outcome, true) && compareValues(disposition, o.disposition, true);
+           && compareValues(outcome, o.outcome, true) && compareValues(disposition, o.disposition, true) && compareValues(preAuthRef, o.preAuthRef, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, type
           , subType, use, patient, created, insurer, requestProvider, request, outcome
-          , disposition, payeeType, item, addItem, error, total, payment, reserved, form
-          , processNote, communicationRequest, insurance);
+          , disposition, preAuthRef, payeeType, item, addItem, error, total, payment, reserved
+          , form, processNote, communicationRequest, insurance);
       }
 
   @Override
@@ -6284,17 +8293,17 @@ public class ClaimResponse extends DomainResource {
  /**
    * Search parameter: <b>identifier</b>
    * <p>
-   * Description: <b>The identity of the claimresponse</b><br>
+   * Description: <b>The identity of the ClaimResponse</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ClaimResponse.identifier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="identifier", path="ClaimResponse.identifier", description="The identity of the claimresponse", type="token" )
+  @SearchParamDefinition(name="identifier", path="ClaimResponse.identifier", description="The identity of the ClaimResponse", type="token" )
   public static final String SP_IDENTIFIER = "identifier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
    * <p>
-   * Description: <b>The identity of the claimresponse</b><br>
+   * Description: <b>The identity of the ClaimResponse</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ClaimResponse.identifier</b><br>
    * </p>
@@ -6396,17 +8405,17 @@ public class ClaimResponse extends DomainResource {
  /**
    * Search parameter: <b>patient</b>
    * <p>
-   * Description: <b>The subject of care.</b><br>
+   * Description: <b>The subject of care</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ClaimResponse.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ClaimResponse.patient", description="The subject of care.", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="ClaimResponse.patient", description="The subject of care", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
    * <p>
-   * Description: <b>The subject of care.</b><br>
+   * Description: <b>The subject of care</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ClaimResponse.patient</b><br>
    * </p>
@@ -6422,17 +8431,17 @@ public class ClaimResponse extends DomainResource {
  /**
    * Search parameter: <b>payment-date</b>
    * <p>
-   * Description: <b>The expected paymentDate</b><br>
+   * Description: <b>The expected payment date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>ClaimResponse.payment.date</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payment-date", path="ClaimResponse.payment.date", description="The expected paymentDate", type="date" )
+  @SearchParamDefinition(name="payment-date", path="ClaimResponse.payment.date", description="The expected payment date", type="date" )
   public static final String SP_PAYMENT_DATE = "payment-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payment-date</b>
    * <p>
-   * Description: <b>The expected paymentDate</b><br>
+   * Description: <b>The expected payment date</b><br>
    * Type: <b>date</b><br>
    * Path: <b>ClaimResponse.payment.date</b><br>
    * </p>
@@ -6488,17 +8497,17 @@ public class ClaimResponse extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>The status of the claim response</b><br>
+   * Description: <b>The status of the ClaimResponse</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ClaimResponse.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="ClaimResponse.status", description="The status of the claim response", type="token" )
+  @SearchParamDefinition(name="status", path="ClaimResponse.status", description="The status of the ClaimResponse", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>The status of the claim response</b><br>
+   * Description: <b>The status of the ClaimResponse</b><br>
    * Type: <b>token</b><br>
    * Path: <b>ClaimResponse.status</b><br>
    * </p>

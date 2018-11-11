@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Indicates that a medication product is to be or has been dispensed for a named person/patient.  This includes a description of the medication product (supply) provided and the instructions for administering the medication.  The medication dispense is the result of a pharmacy system responding to a medication order.
  */
-@ResourceDef(name="MedicationDispense", profile="http://hl7.org/fhir/Profile/MedicationDispense")
+@ResourceDef(name="MedicationDispense", profile="http://hl7.org/fhir/StructureDefinition/MedicationDispense")
 public class MedicationDispense extends DomainResource {
 
     public enum MedicationDispenseStatus {
@@ -476,7 +476,7 @@ public class MedicationDispense extends DomainResource {
          */
         @Child(name = "type", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Code signifying whether a different drug was dispensed from what was prescribed", formalDefinition="A code signifying whether a different drug was dispensed from what was prescribed." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActSubstanceAdminSubstitutionCode")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-ActSubstanceAdminSubstitutionCode")
         protected CodeableConcept type;
 
         /**
@@ -484,7 +484,7 @@ public class MedicationDispense extends DomainResource {
          */
         @Child(name = "reason", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Why was substitution made", formalDefinition="Indicates the reason for the substitution (or lack of substitution) from what was prescribed." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-SubstanceAdminSubstitutionReason")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-SubstanceAdminSubstitutionReason")
         protected List<CodeableConcept> reason;
 
         /**
@@ -902,10 +902,10 @@ public class MedicationDispense extends DomainResource {
     protected Enumeration<MedicationDispenseStatus> status;
 
     /**
-     * Indicates the type of medication dispense and where the medication is expected to be consumed or administered.
+     * Indicates the type of medication dispense (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient)).
      */
     @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Type of medication dispense", formalDefinition="Indicates the type of medication dispense and where the medication is expected to be consumed or administered." )
+    @Description(shortDefinition="Type of medication dispense", formalDefinition="Indicates the type of medication dispense (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient))." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-dispense-category")
     protected CodeableConcept category;
 
@@ -989,22 +989,22 @@ public class MedicationDispense extends DomainResource {
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Trial fill, partial fill, emergency fill, etc.", formalDefinition="Indicates the type of dispensing event that is performed. For example, Trial Fill, Completion of Trial, Partial Fill, Emergency Fill, Samples, etc." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v3-ActPharmacySupplyType")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-ActPharmacySupplyType")
     protected CodeableConcept type;
 
     /**
      * The amount of medication that has been dispensed. Includes unit of measure.
      */
-    @Child(name = "quantity", type = {SimpleQuantity.class}, order=12, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "quantity", type = {Quantity.class}, order=12, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Amount dispensed", formalDefinition="The amount of medication that has been dispensed. Includes unit of measure." )
-    protected SimpleQuantity quantity;
+    protected Quantity quantity;
 
     /**
      * The amount of medication expressed as a timing amount.
      */
-    @Child(name = "daysSupply", type = {SimpleQuantity.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "daysSupply", type = {Quantity.class}, order=13, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Amount of medication expressed as a timing amount", formalDefinition="The amount of medication expressed as a timing amount." )
-    protected SimpleQuantity daysSupply;
+    protected Quantity daysSupply;
 
     /**
      * The time when the dispensed product was packaged and reviewed.
@@ -1097,7 +1097,7 @@ public class MedicationDispense extends DomainResource {
     protected List<Provenance> eventHistoryTarget;
 
 
-    private static final long serialVersionUID = -1232014790L;
+    private static final long serialVersionUID = -804187042L;
 
   /**
    * Constructor
@@ -1289,7 +1289,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @return {@link #category} (Indicates the type of medication dispense and where the medication is expected to be consumed or administered.)
+     * @return {@link #category} (Indicates the type of medication dispense (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient)).)
      */
     public CodeableConcept getCategory() { 
       if (this.category == null)
@@ -1305,7 +1305,7 @@ public class MedicationDispense extends DomainResource {
     }
 
     /**
-     * @param value {@link #category} (Indicates the type of medication dispense and where the medication is expected to be consumed or administered.)
+     * @param value {@link #category} (Indicates the type of medication dispense (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient)).)
      */
     public MedicationDispense setCategory(CodeableConcept value) { 
       this.category = value;
@@ -1703,12 +1703,12 @@ public class MedicationDispense extends DomainResource {
     /**
      * @return {@link #quantity} (The amount of medication that has been dispensed. Includes unit of measure.)
      */
-    public SimpleQuantity getQuantity() { 
+    public Quantity getQuantity() { 
       if (this.quantity == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create MedicationDispense.quantity");
         else if (Configuration.doAutoCreate())
-          this.quantity = new SimpleQuantity(); // cc
+          this.quantity = new Quantity(); // cc
       return this.quantity;
     }
 
@@ -1719,7 +1719,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #quantity} (The amount of medication that has been dispensed. Includes unit of measure.)
      */
-    public MedicationDispense setQuantity(SimpleQuantity value) { 
+    public MedicationDispense setQuantity(Quantity value) { 
       this.quantity = value;
       return this;
     }
@@ -1727,12 +1727,12 @@ public class MedicationDispense extends DomainResource {
     /**
      * @return {@link #daysSupply} (The amount of medication expressed as a timing amount.)
      */
-    public SimpleQuantity getDaysSupply() { 
+    public Quantity getDaysSupply() { 
       if (this.daysSupply == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create MedicationDispense.daysSupply");
         else if (Configuration.doAutoCreate())
-          this.daysSupply = new SimpleQuantity(); // cc
+          this.daysSupply = new Quantity(); // cc
       return this.daysSupply;
     }
 
@@ -1743,7 +1743,7 @@ public class MedicationDispense extends DomainResource {
     /**
      * @param value {@link #daysSupply} (The amount of medication expressed as a timing amount.)
      */
-    public MedicationDispense setDaysSupply(SimpleQuantity value) { 
+    public MedicationDispense setDaysSupply(Quantity value) { 
       this.daysSupply = value;
       return this;
     }
@@ -2289,7 +2289,7 @@ public class MedicationDispense extends DomainResource {
         children.add(new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("partOf", "Reference(Procedure)", "The procedure that trigger the dispense.", 0, java.lang.Integer.MAX_VALUE, partOf));
         children.add(new Property("status", "code", "A code specifying the state of the set of dispense events.", 0, 1, status));
-        children.add(new Property("category", "CodeableConcept", "Indicates the type of medication dispense and where the medication is expected to be consumed or administered.", 0, 1, category));
+        children.add(new Property("category", "CodeableConcept", "Indicates the type of medication dispense (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient)).", 0, 1, category));
         children.add(new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication));
         children.add(new Property("subject", "Reference(Patient|Group)", "A link to a resource representing the person or the group to whom the medication will be given.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care that establishes the context for this event.", 0, 1, context));
@@ -2318,7 +2318,7 @@ public class MedicationDispense extends DomainResource {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier assigned by the dispensing facility - this is an identifier assigned outside FHIR.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -995410646: /*partOf*/  return new Property("partOf", "Reference(Procedure)", "The procedure that trigger the dispense.", 0, java.lang.Integer.MAX_VALUE, partOf);
         case -892481550: /*status*/  return new Property("status", "code", "A code specifying the state of the set of dispense events.", 0, 1, status);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates the type of medication dispense and where the medication is expected to be consumed or administered.", 0, 1, category);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "Indicates the type of medication dispense (for example, where the medication is expected to be consumed or administered (i.e. inpatient or outpatient)).", 0, 1, category);
         case 1458402129: /*medication[x]*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case 1998965455: /*medication*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
         case -209845038: /*medicationCodeableConcept*/  return new Property("medication[x]", "CodeableConcept|Reference(Medication)", "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.", 0, 1, medication);
@@ -2365,8 +2365,8 @@ public class MedicationDispense extends DomainResource {
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
         case -1237557856: /*authorizingPrescription*/ return this.authorizingPrescription == null ? new Base[0] : this.authorizingPrescription.toArray(new Base[this.authorizingPrescription.size()]); // Reference
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // SimpleQuantity
-        case 197175334: /*daysSupply*/ return this.daysSupply == null ? new Base[0] : new Base[] {this.daysSupply}; // SimpleQuantity
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Quantity
+        case 197175334: /*daysSupply*/ return this.daysSupply == null ? new Base[0] : new Base[] {this.daysSupply}; // Quantity
         case -562837097: /*whenPrepared*/ return this.whenPrepared == null ? new Base[0] : new Base[] {this.whenPrepared}; // DateTimeType
         case -940241380: /*whenHandedOver*/ return this.whenHandedOver == null ? new Base[0] : new Base[] {this.whenHandedOver}; // DateTimeType
         case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : new Base[] {this.destination}; // Reference
@@ -2423,10 +2423,10 @@ public class MedicationDispense extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1285004149: // quantity
-          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          this.quantity = castToQuantity(value); // Quantity
           return value;
         case 197175334: // daysSupply
-          this.daysSupply = castToSimpleQuantity(value); // SimpleQuantity
+          this.daysSupply = castToQuantity(value); // Quantity
           return value;
         case -562837097: // whenPrepared
           this.whenPrepared = castToDateTime(value); // DateTimeType
@@ -2491,9 +2491,9 @@ public class MedicationDispense extends DomainResource {
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("quantity")) {
-          this.quantity = castToSimpleQuantity(value); // SimpleQuantity
+          this.quantity = castToQuantity(value); // Quantity
         } else if (name.equals("daysSupply")) {
-          this.daysSupply = castToSimpleQuantity(value); // SimpleQuantity
+          this.daysSupply = castToQuantity(value); // Quantity
         } else if (name.equals("whenPrepared")) {
           this.whenPrepared = castToDateTime(value); // DateTimeType
         } else if (name.equals("whenHandedOver")) {
@@ -2634,11 +2634,11 @@ public class MedicationDispense extends DomainResource {
           return this.type;
         }
         else if (name.equals("quantity")) {
-          this.quantity = new SimpleQuantity();
+          this.quantity = new Quantity();
           return this.quantity;
         }
         else if (name.equals("daysSupply")) {
-          this.daysSupply = new SimpleQuantity();
+          this.daysSupply = new Quantity();
           return this.daysSupply;
         }
         else if (name.equals("whenPrepared")) {
@@ -2858,7 +2858,7 @@ public class MedicationDispense extends DomainResource {
    * Path: <b>MedicationDispense.medicationCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="MedicationDispense.medication.as(CodeableConcept)", description="Returns dispenses of this medicine code", type="token" )
+  @SearchParamDefinition(name="code", path="(MedicationDispense.medication as CodeableConcept)", description="Returns dispenses of this medicine code", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2956,7 +2956,7 @@ public class MedicationDispense extends DomainResource {
    * Path: <b>MedicationDispense.medicationReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="medication", path="MedicationDispense.medication.as(Reference)", description="Returns dispenses of this medicine resource", type="reference", target={Medication.class } )
+  @SearchParamDefinition(name="medication", path="(MedicationDispense.medication as Reference)", description="Returns dispenses of this medicine resource", type="reference", target={Medication.class } )
   public static final String SP_MEDICATION = "medication";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>medication</b>
@@ -3094,7 +3094,7 @@ public class MedicationDispense extends DomainResource {
    * Path: <b>MedicationDispense.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="MedicationDispense.subject", description="The identity of a patient to list dispenses  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="MedicationDispense.subject.where(resolve() is Patient)", description="The identity of a patient to list dispenses  for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

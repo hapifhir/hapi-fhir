@@ -129,6 +129,8 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 
 	public abstract IQueryParameterType toQueryParameterType();
 
+	public abstract void calculateHashes();
+
 	public static long calculateHashIdentity(String theResourceType, String theParamName) {
 		return hash(theResourceType, theParamName);
 	}

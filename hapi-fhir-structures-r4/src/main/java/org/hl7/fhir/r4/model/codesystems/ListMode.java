@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ListMode {
 
         /**
-         * This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes
+         * This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes.
          */
         WORKING, 
         /**
-         * This list was prepared as a snapshot. It should not be assumed to be current
+         * This list was prepared as a snapshot. It should not be assumed to be current.
          */
         SNAPSHOT, 
         /**
-         * A point-in-time list that shows what changes have been made or recommended.  E.g. a discharge medication list showing what was added and removed during an encounter
+         * A point-in-time list that shows what changes have been made or recommended.  E.g. a discharge medication list showing what was added and removed during an encounter.
          */
         CHANGES, 
         /**
@@ -76,9 +76,9 @@ public enum ListMode {
         }
         public String getDefinition() {
           switch (this) {
-            case WORKING: return "This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes";
-            case SNAPSHOT: return "This list was prepared as a snapshot. It should not be assumed to be current";
-            case CHANGES: return "A point-in-time list that shows what changes have been made or recommended.  E.g. a discharge medication list showing what was added and removed during an encounter";
+            case WORKING: return "This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes.";
+            case SNAPSHOT: return "This list was prepared as a snapshot. It should not be assumed to be current.";
+            case CHANGES: return "A point-in-time list that shows what changes have been made or recommended.  E.g. a discharge medication list showing what was added and removed during an encounter.";
             default: return "?";
           }
         }

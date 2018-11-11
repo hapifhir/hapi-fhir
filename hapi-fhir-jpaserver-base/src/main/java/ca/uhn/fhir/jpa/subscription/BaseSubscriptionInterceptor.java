@@ -27,6 +27,8 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -284,6 +286,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	public abstract Subscription.SubscriptionChannelType getChannelType();
 
+	// TODO KHS move out
 	@SuppressWarnings("unchecked")
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
 		if (myResourceTypeToDao == null) {
@@ -433,7 +436,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected void registerSubscriptionCheckingSubscriber() {
 		if (mySubscriptionCheckingSubscriber == null) {
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this);
+			ISubscriptionMatcher subscriptionMatcher = new SubscriptionMatcherDatabase(getSubscriptionDao(), this);
+			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this, subscriptionMatcher );
 		}
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}
@@ -442,7 +446,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theResource.getIdElement());
-		msg.setOperationType(RestOperationTypeEnum.CREATE);
+		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		msg.setNewPayload(myCtx, theResource);
 		submitResourceModified(msg);
 	}
@@ -451,7 +455,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theResource.getIdElement());
-		msg.setOperationType(RestOperationTypeEnum.DELETE);
+		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.DELETE);
 		submitResourceModified(msg);
 	}
 
@@ -463,7 +467,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	void submitResourceModifiedForUpdate(IBaseResource theNewResource) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theNewResource.getIdElement());
-		msg.setOperationType(RestOperationTypeEnum.UPDATE);
+		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 		msg.setNewPayload(myCtx, theNewResource);
 		submitResourceModified(msg);
 	}
@@ -509,8 +513,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@PostConstruct
 	public void start() {
 		for (IFhirResourceDao<?> next : myResourceDaos) {
-			if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
-				mySubscriptionDao = next;
+			if (next.getResourceType() != null) {
+				if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
+					mySubscriptionDao = next;
+				}
 			}
 		}
 		Validate.notNull(mySubscriptionDao);
@@ -563,7 +569,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		});
 	}
 
-	protected void submitResourceModified(final ResourceModifiedMessage theMsg) {
+	/**
+	 * This is an internal API - Use with caution!
+	 */
+	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		mySubscriptionActivatingSubscriber.handleMessage(theMsg.getOperationType(), theMsg.getId(myCtx), theMsg.getNewPayload(myCtx));
 		sendToProcessingChannel(theMsg);
 	}

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActionRequiredBehavior {
 
         /**
-         * An action with this behavior must be included in the actions processed by the end user; the end user SHALL not choose not to include this action
+         * An action with this behavior must be included in the actions processed by the end user; the end user SHALL NOT choose not to include this action.
          */
         MUST, 
         /**
-         * An action with this behavior may be included in the set of actions processed by the end user
+         * An action with this behavior may be included in the set of actions processed by the end user.
          */
         COULD, 
         /**
-         * An action with this behavior must be included in the set of actions processed by the end user, unless the end user provides documentation as to why the action was not included
+         * An action with this behavior must be included in the set of actions processed by the end user, unless the end user provides documentation as to why the action was not included.
          */
         MUSTUNLESSDOCUMENTED, 
         /**
@@ -76,9 +76,9 @@ public enum ActionRequiredBehavior {
         }
         public String getDefinition() {
           switch (this) {
-            case MUST: return "An action with this behavior must be included in the actions processed by the end user; the end user SHALL not choose not to include this action";
-            case COULD: return "An action with this behavior may be included in the set of actions processed by the end user";
-            case MUSTUNLESSDOCUMENTED: return "An action with this behavior must be included in the set of actions processed by the end user, unless the end user provides documentation as to why the action was not included";
+            case MUST: return "An action with this behavior must be included in the actions processed by the end user; the end user SHALL NOT choose not to include this action.";
+            case COULD: return "An action with this behavior may be included in the set of actions processed by the end user.";
+            case MUSTUNLESSDOCUMENTED: return "An action with this behavior must be included in the set of actions processed by the end user, unless the end user provides documentation as to why the action was not included.";
             default: return "?";
           }
         }

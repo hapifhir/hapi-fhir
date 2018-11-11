@@ -3,9 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
-import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
-import ca.uhn.fhir.jpa.rp.r4.OrganizationResourceProvider;
-import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.*;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -17,8 +15,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -42,6 +42,7 @@ import org.junit.*;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
@@ -88,8 +89,21 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
 			organizationRp.setDao(myOrganizationDao);
 
+			LocationResourceProvider locationRp = new LocationResourceProvider();
+			locationRp.setDao(myLocationDao);
+
+			BinaryResourceProvider binaryRp = new BinaryResourceProvider();
+			binaryRp.setDao(myBinaryDao);
+
+			DiagnosticReportResourceProvider diagnosticReportRp = new DiagnosticReportResourceProvider();
+			diagnosticReportRp.setDao(myDiagnosticReportDao);
+			ServiceRequestResourceProvider diagnosticOrderRp = new ServiceRequestResourceProvider();
+			diagnosticOrderRp.setDao(myServiceRequestDao);
+			PractitionerResourceProvider practitionerRp = new PractitionerResourceProvider();
+			practitionerRp.setDao(myPractitionerDao);
+
 			RestfulServer restServer = new RestfulServer(ourCtx);
-			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
+			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp);
 
 			restServer.setPlainProviders(mySystemProvider);
 
@@ -383,6 +397,45 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		resp = ourClient.transaction().withBundle(req).execute();
 		assertEquals(Patient.class, resp.getEntry().get(0).getResource().getClass());
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+	}
+
+
+	@Test
+	public void testTransactionReSavesPreviouslyDeletedResources() throws IOException {
+
+		for (int i = 0; i < 10; i++) {
+			ourLog.info("** Beginning pass {}", i);
+
+			Bundle input = myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/createdeletebundle.json"), Charsets.UTF_8));
+			ourClient.transaction().withBundle(input).execute();
+
+			myPatientDao.read(new IdType("Patient/Patient1063259"));
+
+			deleteAllOfType("Binary");
+			deleteAllOfType("Location");
+			deleteAllOfType("DiagnosticReport");
+			deleteAllOfType("Observation");
+			deleteAllOfType("ServiceRequest");
+			deleteAllOfType("Practitioner");
+			deleteAllOfType("Patient");
+			deleteAllOfType("Organization");
+
+			try {
+				myPatientDao.read(new IdType("Patient/Patient1063259"));
+				fail();
+			} catch (ResourceGoneException e) {
+				// good
+			}
+
+		}
+
+	}
+
+	private void deleteAllOfType(String theType) {
+		BundleUtil.toListOfResources(myFhirCtx, ourClient.search().forResource(theType).execute())
+			.forEach(t -> {
+				ourClient.delete().resourceById(t.getIdElement()).execute();
+			});
 	}
 
 	@Test

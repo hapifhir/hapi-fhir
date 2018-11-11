@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,31 +37,31 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ConceptPropertyType {
 
         /**
-         * The property value is a code that identifies a concept defined in the code system
+         * The property value is a code that identifies a concept defined in the code system.
          */
         CODE, 
         /**
-         * The property  value is a code defined in an external code system. This may be used for translations, but is not the intent
+         * The property  value is a code defined in an external code system. This may be used for translations, but is not the intent.
          */
         CODING, 
         /**
-         * The property value is a string
+         * The property value is a string.
          */
         STRING, 
         /**
-         * The property value is a string (often used to assign ranking values to concepts for supporting score assessments)
+         * The property value is a string (often used to assign ranking values to concepts for supporting score assessments).
          */
         INTEGER, 
         /**
-         * The property value is a boolean true | false
+         * The property value is a boolean true | false.
          */
         BOOLEAN, 
         /**
-         * The property is a date or a date + time
+         * The property is a date or a date + time.
          */
         DATETIME, 
         /**
-         * The property value is a decimal number
+         * The property value is a decimal number.
          */
         DECIMAL, 
         /**
@@ -104,13 +104,13 @@ public enum ConceptPropertyType {
         }
         public String getDefinition() {
           switch (this) {
-            case CODE: return "The property value is a code that identifies a concept defined in the code system";
-            case CODING: return "The property  value is a code defined in an external code system. This may be used for translations, but is not the intent";
-            case STRING: return "The property value is a string";
-            case INTEGER: return "The property value is a string (often used to assign ranking values to concepts for supporting score assessments)";
-            case BOOLEAN: return "The property value is a boolean true | false";
-            case DATETIME: return "The property is a date or a date + time";
-            case DECIMAL: return "The property value is a decimal number";
+            case CODE: return "The property value is a code that identifies a concept defined in the code system.";
+            case CODING: return "The property  value is a code defined in an external code system. This may be used for translations, but is not the intent.";
+            case STRING: return "The property value is a string.";
+            case INTEGER: return "The property value is a string (often used to assign ranking values to concepts for supporting score assessments).";
+            case BOOLEAN: return "The property value is a boolean true | false.";
+            case DATETIME: return "The property is a date or a date + time.";
+            case DECIMAL: return "The property value is a decimal number.";
             default: return "?";
           }
         }

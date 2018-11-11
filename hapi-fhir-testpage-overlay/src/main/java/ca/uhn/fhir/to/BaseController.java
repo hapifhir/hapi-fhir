@@ -631,7 +631,7 @@ public class BaseController {
 				}
 			}
 
-			resultDescription.append(" (").append(resultBody.length() + " bytes)");
+			resultDescription.append(" (").append(defaultString(resultBody).length() + " bytes)");
 
 			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
 			Header[] responseHeaders = lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];

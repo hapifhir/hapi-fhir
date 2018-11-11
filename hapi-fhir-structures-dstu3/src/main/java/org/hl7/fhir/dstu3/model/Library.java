@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The Library resource is a general-purpose container for knowledge asset definitions. It can be used to describe and expose existing knowledge assets such as logic libraries and information model descriptions, as well as to describe a collection of knowledge assets.
  */
-@ResourceDef(name="Library", profile="http://hl7.org/fhir/Profile/Library")
+@ResourceDef(name="Library", profile="http://hl7.org/fhir/StructureDefinition/Library")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "type", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "parameter", "dataRequirement", "content"})
 public class Library extends MetadataResource {
 

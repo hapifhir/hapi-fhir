@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -43,34 +43,34 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.
+ * Represents a defined collection of entities that may be discussed or acted upon collectively but which are not expected to act collectively, and are not formally or legally recognized; i.e. a collection of entities that isn't an Organization.
  */
-@ResourceDef(name="Group", profile="http://hl7.org/fhir/Profile/Group")
+@ResourceDef(name="Group", profile="http://hl7.org/fhir/StructureDefinition/Group")
 public class Group extends DomainResource {
 
     public enum GroupType {
         /**
-         * Group contains "person" Patient resources
+         * Group contains "person" Patient resources.
          */
         PERSON, 
         /**
-         * Group contains "animal" Patient resources
+         * Group contains "animal" Patient resources.
          */
         ANIMAL, 
         /**
-         * Group contains healthcare practitioner resources (Practitioner or PractitionerRole)
+         * Group contains healthcare practitioner resources (Practitioner or PractitionerRole).
          */
         PRACTITIONER, 
         /**
-         * Group contains Device resources
+         * Group contains Device resources.
          */
         DEVICE, 
         /**
-         * Group contains Medication resources
+         * Group contains Medication resources.
          */
         MEDICATION, 
         /**
-         * Group contains Substance resources
+         * Group contains Substance resources.
          */
         SUBSTANCE, 
         /**
@@ -121,12 +121,12 @@ public class Group extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PERSON: return "Group contains \"person\" Patient resources";
-            case ANIMAL: return "Group contains \"animal\" Patient resources";
-            case PRACTITIONER: return "Group contains healthcare practitioner resources (Practitioner or PractitionerRole)";
-            case DEVICE: return "Group contains Device resources";
-            case MEDICATION: return "Group contains Medication resources";
-            case SUBSTANCE: return "Group contains Substance resources";
+            case PERSON: return "Group contains \"person\" Patient resources.";
+            case ANIMAL: return "Group contains \"animal\" Patient resources.";
+            case PRACTITIONER: return "Group contains healthcare practitioner resources (Practitioner or PractitionerRole).";
+            case DEVICE: return "Group contains Device resources.";
+            case MEDICATION: return "Group contains Medication resources.";
+            case SUBSTANCE: return "Group contains Substance resources.";
             default: return "?";
           }
         }
@@ -223,7 +223,7 @@ public class Group extends DomainResource {
         /**
          * If true, indicates the characteristic is one that is NOT held by members of the group.
          */
-        @Child(name = "exclude", type = {BooleanType.class}, order=3, min=1, max=1, modifier=true, summary=false)
+        @Child(name = "exclude", type = {BooleanType.class}, order=3, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Group includes or excludes", formalDefinition="If true, indicates the characteristic is one that is NOT held by members of the group." )
         protected BooleanType exclude;
 
@@ -944,10 +944,10 @@ public class Group extends DomainResource {
     protected UnsignedIntType quantity;
 
     /**
-     * Identifies the traits shared by members of the group.
+     * Identifies traits whose presence r absence is shared by members of the group.
      */
     @Child(name = "characteristic", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Trait of group members", formalDefinition="Identifies the traits shared by members of the group." )
+    @Description(shortDefinition="Include / Exclude group members by Trait", formalDefinition="Identifies traits whose presence r absence is shared by members of the group." )
     protected List<GroupCharacteristicComponent> characteristic;
 
     /**
@@ -1282,7 +1282,7 @@ public class Group extends DomainResource {
     }
 
     /**
-     * @return {@link #characteristic} (Identifies the traits shared by members of the group.)
+     * @return {@link #characteristic} (Identifies traits whose presence r absence is shared by members of the group.)
      */
     public List<GroupCharacteristicComponent> getCharacteristic() { 
       if (this.characteristic == null)
@@ -1396,7 +1396,7 @@ public class Group extends DomainResource {
         children.add(new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc.", 0, 1, code));
         children.add(new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, 1, name));
         children.add(new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, 1, quantity));
-        children.add(new Property("characteristic", "", "Identifies the traits shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic));
+        children.add(new Property("characteristic", "", "Identifies traits whose presence r absence is shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic));
         children.add(new Property("member", "", "Identifies the resource instances that are members of the group.", 0, java.lang.Integer.MAX_VALUE, member));
       }
 
@@ -1410,7 +1410,7 @@ public class Group extends DomainResource {
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Provides a specific type of resource the group includes; e.g. \"cow\", \"syringe\", etc.", 0, 1, code);
         case 3373707: /*name*/  return new Property("name", "string", "A label assigned to the group for human identification and communication.", 0, 1, name);
         case -1285004149: /*quantity*/  return new Property("quantity", "unsignedInt", "A count of the number of resource instances that are part of the group.", 0, 1, quantity);
-        case 366313883: /*characteristic*/  return new Property("characteristic", "", "Identifies the traits shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic);
+        case 366313883: /*characteristic*/  return new Property("characteristic", "", "Identifies traits whose presence r absence is shared by members of the group.", 0, java.lang.Integer.MAX_VALUE, characteristic);
         case -1077769574: /*member*/  return new Property("member", "", "Identifies the resource instances that are members of the group.", 0, java.lang.Integer.MAX_VALUE, member);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }

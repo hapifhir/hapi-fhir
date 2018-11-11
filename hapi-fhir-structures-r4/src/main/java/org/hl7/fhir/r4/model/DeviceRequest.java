@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,32 +45,32 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Represents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.
  */
-@ResourceDef(name="DeviceRequest", profile="http://hl7.org/fhir/Profile/DeviceRequest")
+@ResourceDef(name="DeviceRequest", profile="http://hl7.org/fhir/StructureDefinition/DeviceRequest")
 public class DeviceRequest extends DomainResource {
 
     public enum DeviceRequestStatus {
         /**
-         * The request has been created but is not yet complete or ready for action
+         * The request has been created but is not yet complete or ready for action.
          */
         DRAFT, 
         /**
-         * The request is in force and ready to be acted upon
+         * The request is in force and ready to be acted upon.
          */
         ACTIVE, 
         /**
-         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future
+         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.
          */
-        SUSPENDED, 
+        ONHOLD, 
         /**
-         * The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.
+         * The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.
          */
-        CANCELLED, 
+        REVOKED, 
         /**
-         * Activity against the request has been sufficiently completed to the satisfaction of the requester
+         * Activity against the request has been sufficiently completed to the satisfaction of the requester.
          */
         COMPLETED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
@@ -88,10 +88,10 @@ public class DeviceRequest extends DomainResource {
           return DRAFT;
         if ("active".equals(codeString))
           return ACTIVE;
-        if ("suspended".equals(codeString))
-          return SUSPENDED;
-        if ("cancelled".equals(codeString))
-          return CANCELLED;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("revoked".equals(codeString))
+          return REVOKED;
         if ("completed".equals(codeString))
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -107,8 +107,8 @@ public class DeviceRequest extends DomainResource {
           switch (this) {
             case DRAFT: return "draft";
             case ACTIVE: return "active";
-            case SUSPENDED: return "suspended";
-            case CANCELLED: return "cancelled";
+            case ONHOLD: return "on-hold";
+            case REVOKED: return "revoked";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             case UNKNOWN: return "unknown";
@@ -119,8 +119,8 @@ public class DeviceRequest extends DomainResource {
           switch (this) {
             case DRAFT: return "http://hl7.org/fhir/request-status";
             case ACTIVE: return "http://hl7.org/fhir/request-status";
-            case SUSPENDED: return "http://hl7.org/fhir/request-status";
-            case CANCELLED: return "http://hl7.org/fhir/request-status";
+            case ONHOLD: return "http://hl7.org/fhir/request-status";
+            case REVOKED: return "http://hl7.org/fhir/request-status";
             case COMPLETED: return "http://hl7.org/fhir/request-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/request-status";
             case UNKNOWN: return "http://hl7.org/fhir/request-status";
@@ -129,12 +129,12 @@ public class DeviceRequest extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "The request has been created but is not yet complete or ready for action";
-            case ACTIVE: return "The request is in force and ready to be acted upon";
-            case SUSPENDED: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future";
-            case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
-            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case DRAFT: return "The request has been created but is not yet complete or ready for action.";
+            case ACTIVE: return "The request is in force and ready to be acted upon.";
+            case ONHOLD: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.";
+            case REVOKED: return "The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester.";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.";
             default: return "?";
           }
@@ -143,8 +143,8 @@ public class DeviceRequest extends DomainResource {
           switch (this) {
             case DRAFT: return "Draft";
             case ACTIVE: return "Active";
-            case SUSPENDED: return "Suspended";
-            case CANCELLED: return "Cancelled";
+            case ONHOLD: return "On Hold";
+            case REVOKED: return "Revoked";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
             case UNKNOWN: return "Unknown";
@@ -162,10 +162,10 @@ public class DeviceRequest extends DomainResource {
           return DeviceRequestStatus.DRAFT;
         if ("active".equals(codeString))
           return DeviceRequestStatus.ACTIVE;
-        if ("suspended".equals(codeString))
-          return DeviceRequestStatus.SUSPENDED;
-        if ("cancelled".equals(codeString))
-          return DeviceRequestStatus.CANCELLED;
+        if ("on-hold".equals(codeString))
+          return DeviceRequestStatus.ONHOLD;
+        if ("revoked".equals(codeString))
+          return DeviceRequestStatus.REVOKED;
         if ("completed".equals(codeString))
           return DeviceRequestStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -186,10 +186,10 @@ public class DeviceRequest extends DomainResource {
           return new Enumeration<DeviceRequestStatus>(this, DeviceRequestStatus.DRAFT);
         if ("active".equals(codeString))
           return new Enumeration<DeviceRequestStatus>(this, DeviceRequestStatus.ACTIVE);
-        if ("suspended".equals(codeString))
-          return new Enumeration<DeviceRequestStatus>(this, DeviceRequestStatus.SUSPENDED);
-        if ("cancelled".equals(codeString))
-          return new Enumeration<DeviceRequestStatus>(this, DeviceRequestStatus.CANCELLED);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<DeviceRequestStatus>(this, DeviceRequestStatus.ONHOLD);
+        if ("revoked".equals(codeString))
+          return new Enumeration<DeviceRequestStatus>(this, DeviceRequestStatus.REVOKED);
         if ("completed".equals(codeString))
           return new Enumeration<DeviceRequestStatus>(this, DeviceRequestStatus.COMPLETED);
         if ("entered-in-error".equals(codeString))
@@ -203,10 +203,10 @@ public class DeviceRequest extends DomainResource {
         return "draft";
       if (code == DeviceRequestStatus.ACTIVE)
         return "active";
-      if (code == DeviceRequestStatus.SUSPENDED)
-        return "suspended";
-      if (code == DeviceRequestStatus.CANCELLED)
-        return "cancelled";
+      if (code == DeviceRequestStatus.ONHOLD)
+        return "on-hold";
+      if (code == DeviceRequestStatus.REVOKED)
+        return "revoked";
       if (code == DeviceRequestStatus.COMPLETED)
         return "completed";
       if (code == DeviceRequestStatus.ENTEREDINERROR)
@@ -220,21 +220,209 @@ public class DeviceRequest extends DomainResource {
       }
     }
 
+    public enum RequestIntent {
+        /**
+         * The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act.
+         */
+        PROPOSAL, 
+        /**
+         * The request represents an intention to ensure something occurs without providing an authorization for others to act.
+         */
+        PLAN, 
+        /**
+         * The request represents a request/demand and authorization for action.
+         */
+        ORDER, 
+        /**
+         * The request represents an original authorization for action.
+         */
+        ORIGINALORDER, 
+        /**
+         * The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization.
+         */
+        REFLEXORDER, 
+        /**
+         * The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order.
+         */
+        FILLERORDER, 
+        /**
+         * An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.
+         */
+        INSTANCEORDER, 
+        /**
+         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used.
+         */
+        OPTION, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static RequestIntent fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("proposal".equals(codeString))
+          return PROPOSAL;
+        if ("plan".equals(codeString))
+          return PLAN;
+        if ("order".equals(codeString))
+          return ORDER;
+        if ("original-order".equals(codeString))
+          return ORIGINALORDER;
+        if ("reflex-order".equals(codeString))
+          return REFLEXORDER;
+        if ("filler-order".equals(codeString))
+          return FILLERORDER;
+        if ("instance-order".equals(codeString))
+          return INSTANCEORDER;
+        if ("option".equals(codeString))
+          return OPTION;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown RequestIntent code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case PROPOSAL: return "proposal";
+            case PLAN: return "plan";
+            case ORDER: return "order";
+            case ORIGINALORDER: return "original-order";
+            case REFLEXORDER: return "reflex-order";
+            case FILLERORDER: return "filler-order";
+            case INSTANCEORDER: return "instance-order";
+            case OPTION: return "option";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case PROPOSAL: return "http://hl7.org/fhir/request-intent";
+            case PLAN: return "http://hl7.org/fhir/request-intent";
+            case ORDER: return "http://hl7.org/fhir/request-intent";
+            case ORIGINALORDER: return "http://hl7.org/fhir/request-intent";
+            case REFLEXORDER: return "http://hl7.org/fhir/request-intent";
+            case FILLERORDER: return "http://hl7.org/fhir/request-intent";
+            case INSTANCEORDER: return "http://hl7.org/fhir/request-intent";
+            case OPTION: return "http://hl7.org/fhir/request-intent";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case PROPOSAL: return "The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act.";
+            case PLAN: return "The request represents an intention to ensure something occurs without providing an authorization for others to act.";
+            case ORDER: return "The request represents a request/demand and authorization for action.";
+            case ORIGINALORDER: return "The request represents an original authorization for action.";
+            case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization.";
+            case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order.";
+            case INSTANCEORDER: return "An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.";
+            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case PROPOSAL: return "Proposal";
+            case PLAN: return "Plan";
+            case ORDER: return "Order";
+            case ORIGINALORDER: return "Original Order";
+            case REFLEXORDER: return "Reflex Order";
+            case FILLERORDER: return "Filler Order";
+            case INSTANCEORDER: return "Instance Order";
+            case OPTION: return "Option";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class RequestIntentEnumFactory implements EnumFactory<RequestIntent> {
+    public RequestIntent fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("proposal".equals(codeString))
+          return RequestIntent.PROPOSAL;
+        if ("plan".equals(codeString))
+          return RequestIntent.PLAN;
+        if ("order".equals(codeString))
+          return RequestIntent.ORDER;
+        if ("original-order".equals(codeString))
+          return RequestIntent.ORIGINALORDER;
+        if ("reflex-order".equals(codeString))
+          return RequestIntent.REFLEXORDER;
+        if ("filler-order".equals(codeString))
+          return RequestIntent.FILLERORDER;
+        if ("instance-order".equals(codeString))
+          return RequestIntent.INSTANCEORDER;
+        if ("option".equals(codeString))
+          return RequestIntent.OPTION;
+        throw new IllegalArgumentException("Unknown RequestIntent code '"+codeString+"'");
+        }
+        public Enumeration<RequestIntent> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<RequestIntent>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("proposal".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.PROPOSAL);
+        if ("plan".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.PLAN);
+        if ("order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.ORDER);
+        if ("original-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.ORIGINALORDER);
+        if ("reflex-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.REFLEXORDER);
+        if ("filler-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.FILLERORDER);
+        if ("instance-order".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.INSTANCEORDER);
+        if ("option".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.OPTION);
+        throw new FHIRException("Unknown RequestIntent code '"+codeString+"'");
+        }
+    public String toCode(RequestIntent code) {
+      if (code == RequestIntent.PROPOSAL)
+        return "proposal";
+      if (code == RequestIntent.PLAN)
+        return "plan";
+      if (code == RequestIntent.ORDER)
+        return "order";
+      if (code == RequestIntent.ORIGINALORDER)
+        return "original-order";
+      if (code == RequestIntent.REFLEXORDER)
+        return "reflex-order";
+      if (code == RequestIntent.FILLERORDER)
+        return "filler-order";
+      if (code == RequestIntent.INSTANCEORDER)
+        return "instance-order";
+      if (code == RequestIntent.OPTION)
+        return "option";
+      return "?";
+      }
+    public String toSystem(RequestIntent code) {
+      return code.getSystem();
+      }
+    }
+
     public enum RequestPriority {
         /**
-         * The request has normal priority
+         * The request has normal priority.
          */
         ROUTINE, 
         /**
-         * The request should be actioned promptly - higher priority than routine
+         * The request should be actioned promptly - higher priority than routine.
          */
         URGENT, 
         /**
-         * The request should be actioned as soon as possible - higher priority than urgent
+         * The request should be actioned as soon as possible - higher priority than urgent.
          */
         ASAP, 
         /**
-         * The request should be actioned immediately - highest possible priority.  E.g. an emergency
+         * The request should be actioned immediately - highest possible priority.  E.g. an emergency.
          */
         STAT, 
         /**
@@ -277,10 +465,10 @@ public class DeviceRequest extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ROUTINE: return "The request has normal priority";
-            case URGENT: return "The request should be actioned promptly - higher priority than routine";
-            case ASAP: return "The request should be actioned as soon as possible - higher priority than urgent";
-            case STAT: return "The request should be actioned immediately - highest possible priority.  E.g. an emergency";
+            case ROUTINE: return "The request has normal priority.";
+            case URGENT: return "The request should be actioned promptly - higher priority than routine.";
+            case ASAP: return "The request should be actioned as soon as possible - higher priority than urgent.";
+            case STAT: return "The request should be actioned immediately - highest possible priority.  E.g. an emergency.";
             default: return "?";
           }
         }
@@ -624,16 +812,23 @@ public class DeviceRequest extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.
+     * The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.
      */
-    @Child(name = "instantiates", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Protocol or definition", formalDefinition="Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%." )
-    protected List<UriType> instantiates;
+    @Child(name = "instantiatesCanonical", type = {CanonicalType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Instantiates FHIR protocol or definition", formalDefinition="The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest." )
+    protected List<CanonicalType> instantiatesCanonical;
+
+    /**
+     * The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.
+     */
+    @Child(name = "instantiatesUri", type = {UriType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Instantiates external protocol or definition", formalDefinition="The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest." )
+    protected List<UriType> instantiatesUri;
 
     /**
      * Plan/proposal/order fulfilled by this request.
      */
-    @Child(name = "basedOn", type = {Reference.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "basedOn", type = {Reference.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What request fulfills", formalDefinition="Plan/proposal/order fulfilled by this request." )
     protected List<Reference> basedOn;
     /**
@@ -645,7 +840,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * The request takes the place of the referenced completed or terminated request(s).
      */
-    @Child(name = "priorRequest", type = {Reference.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "priorRequest", type = {Reference.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What request replaces", formalDefinition="The request takes the place of the referenced completed or terminated request(s)." )
     protected List<Reference> priorRequest;
     /**
@@ -657,14 +852,14 @@ public class DeviceRequest extends DomainResource {
     /**
      * Composite request this is part of.
      */
-    @Child(name = "groupIdentifier", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "groupIdentifier", type = {Identifier.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identifier of composite request", formalDefinition="Composite request this is part of." )
     protected Identifier groupIdentifier;
 
     /**
      * The status of the request.
      */
-    @Child(name = "status", type = {CodeType.class}, order=5, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=6, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | suspended | completed | entered-in-error | cancelled", formalDefinition="The status of the request." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-status")
     protected Enumeration<DeviceRequestStatus> status;
@@ -672,14 +867,15 @@ public class DeviceRequest extends DomainResource {
     /**
      * Whether the request is a proposal, plan, an original order or a reflex order.
      */
-    @Child(name = "intent", type = {CodeableConcept.class}, order=6, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "intent", type = {CodeType.class}, order=7, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposal | plan | original-order | encoded | reflex-order", formalDefinition="Whether the request is a proposal, plan, an original order or a reflex order." )
-    protected CodeableConcept intent;
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-intent")
+    protected Enumeration<RequestIntent> intent;
 
     /**
      * Indicates how quickly the {{title}} should be addressed with respect to other requests.
      */
-    @Child(name = "priority", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "priority", type = {CodeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Indicates how quickly the {{title}} should be addressed with respect to other requests", formalDefinition="Indicates how quickly the {{title}} should be addressed with respect to other requests." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-priority")
     protected Enumeration<RequestPriority> priority;
@@ -687,7 +883,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * The details of the device to be used.
      */
-    @Child(name = "code", type = {Device.class, CodeableConcept.class}, order=8, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "code", type = {Device.class, CodeableConcept.class}, order=9, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Device requested", formalDefinition="The details of the device to be used." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-kind")
     protected Type code;
@@ -695,14 +891,14 @@ public class DeviceRequest extends DomainResource {
     /**
      * Specific parameters for the ordered item.  For example, the prism value for lenses.
      */
-    @Child(name = "parameter", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "parameter", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Device details", formalDefinition="Specific parameters for the ordered item.  For example, the prism value for lenses." )
     protected List<DeviceRequestParameterComponent> parameter;
 
     /**
      * The patient who will use the device.
      */
-    @Child(name = "subject", type = {Patient.class, Group.class, Location.class, Device.class}, order=10, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Group.class, Location.class, Device.class}, order=11, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Focus of request", formalDefinition="The patient who will use the device." )
     protected Reference subject;
 
@@ -714,7 +910,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * An encounter that provides additional context in which this request is made.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=11, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=12, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Encounter or Episode motivating request", formalDefinition="An encounter that provides additional context in which this request is made." )
     protected Reference context;
 
@@ -726,21 +922,21 @@ public class DeviceRequest extends DomainResource {
     /**
      * The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. "Every 8 hours"; "Three times a day"; "1/2 an hour before breakfast for 10 days from 23-Dec 2011:"; "15 Oct 2013, 17 Oct 2013 and 1 Nov 2013".
      */
-    @Child(name = "occurrence", type = {DateTimeType.class, Period.class, Timing.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "occurrence", type = {DateTimeType.class, Period.class, Timing.class}, order=13, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Desired time or schedule for use", formalDefinition="The timing schedule for the use of the device. The Schedule data type allows many different expressions, for example. \"Every 8 hours\"; \"Three times a day\"; \"1/2 an hour before breakfast for 10 days from 23-Dec 2011:\"; \"15 Oct 2013, 17 Oct 2013 and 1 Nov 2013\"." )
     protected Type occurrence;
 
     /**
      * When the request transitioned to being actionable.
      */
-    @Child(name = "authoredOn", type = {DateTimeType.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "authoredOn", type = {DateTimeType.class}, order=14, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When recorded", formalDefinition="When the request transitioned to being actionable." )
     protected DateTimeType authoredOn;
 
     /**
      * The individual who initiated the request and has responsibility for its activation.
      */
-    @Child(name = "requester", type = {Device.class, Practitioner.class, PractitionerRole.class, Organization.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "requester", type = {Device.class, Practitioner.class, PractitionerRole.class, Organization.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who/what is requesting diagnostics", formalDefinition="The individual who initiated the request and has responsibility for its activation." )
     protected Reference requester;
 
@@ -752,7 +948,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * Desired type of performer for doing the diagnostic testing.
      */
-    @Child(name = "performerType", type = {CodeableConcept.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "performerType", type = {CodeableConcept.class}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Filler role", formalDefinition="Desired type of performer for doing the diagnostic testing." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participant-role")
     protected CodeableConcept performerType;
@@ -760,7 +956,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * The desired performer for doing the diagnostic testing.
      */
-    @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, CareTeam.class, HealthcareService.class, Patient.class, Device.class, RelatedPerson.class}, order=16, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, CareTeam.class, HealthcareService.class, Patient.class, Device.class, RelatedPerson.class}, order=17, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Requested Filler", formalDefinition="The desired performer for doing the diagnostic testing." )
     protected Reference performer;
 
@@ -772,7 +968,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * Reason or justification for the use of this device.
      */
-    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Coded Reason for request", formalDefinition="Reason or justification for the use of this device." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-code")
     protected List<CodeableConcept> reasonCode;
@@ -780,7 +976,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * Reason or justification for the use of this device.
      */
-    @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Linked Reason for request", formalDefinition="Reason or justification for the use of this device." )
     protected List<Reference> reasonReference;
     /**
@@ -792,7 +988,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be required for delivering the requested service.
      */
-    @Child(name = "insurance", type = {Coverage.class, ClaimResponse.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "insurance", type = {Coverage.class, ClaimResponse.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Associated insurance coverage", formalDefinition="Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be required for delivering the requested service." )
     protected List<Reference> insurance;
     /**
@@ -804,7 +1000,7 @@ public class DeviceRequest extends DomainResource {
     /**
      * Additional clinical information about the patient that may influence the request fulfilment.  For example, this may include where on the subject's body the device will be used (i.e. the target site).
      */
-    @Child(name = "supportingInfo", type = {Reference.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supportingInfo", type = {Reference.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional clinical information", formalDefinition="Additional clinical information about the patient that may influence the request fulfilment.  For example, this may include where on the subject's body the device will be used (i.e. the target site)." )
     protected List<Reference> supportingInfo;
     /**
@@ -816,14 +1012,14 @@ public class DeviceRequest extends DomainResource {
     /**
      * Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement.
      */
-    @Child(name = "note", type = {Annotation.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Notes or comments", formalDefinition="Details about this request that were not represented at all or sufficiently in one of the attributes provided in a class. These may include for example a comment, an instruction, or a note associated with the statement." )
     protected List<Annotation> note;
 
     /**
      * Key events in the history of the request.
      */
-    @Child(name = "relevantHistory", type = {Provenance.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "relevantHistory", type = {Provenance.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Request provenance", formalDefinition="Key events in the history of the request." )
     protected List<Reference> relevantHistory;
     /**
@@ -832,7 +1028,7 @@ public class DeviceRequest extends DomainResource {
     protected List<Provenance> relevantHistoryTarget;
 
 
-    private static final long serialVersionUID = -40631826L;
+    private static final long serialVersionUID = 58336394L;
 
   /**
    * Constructor
@@ -844,7 +1040,7 @@ public class DeviceRequest extends DomainResource {
   /**
    * Constructor
    */
-    public DeviceRequest(CodeableConcept intent, Type code, Reference subject) {
+    public DeviceRequest(Enumeration<RequestIntent> intent, Type code, Reference subject) {
       super();
       this.intent = intent;
       this.code = code;
@@ -905,61 +1101,122 @@ public class DeviceRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #instantiates} (Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.)
+     * @return {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.)
      */
-    public List<UriType> getInstantiates() { 
-      if (this.instantiates == null)
-        this.instantiates = new ArrayList<UriType>();
-      return this.instantiates;
+    public List<CanonicalType> getInstantiatesCanonical() { 
+      if (this.instantiatesCanonical == null)
+        this.instantiatesCanonical = new ArrayList<CanonicalType>();
+      return this.instantiatesCanonical;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public DeviceRequest setInstantiates(List<UriType> theInstantiates) { 
-      this.instantiates = theInstantiates;
+    public DeviceRequest setInstantiatesCanonical(List<CanonicalType> theInstantiatesCanonical) { 
+      this.instantiatesCanonical = theInstantiatesCanonical;
       return this;
     }
 
-    public boolean hasInstantiates() { 
-      if (this.instantiates == null)
+    public boolean hasInstantiatesCanonical() { 
+      if (this.instantiatesCanonical == null)
         return false;
-      for (UriType item : this.instantiates)
+      for (CanonicalType item : this.instantiatesCanonical)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #instantiates} (Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.)
+     * @return {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.)
      */
-    public UriType addInstantiatesElement() {//2 
-      UriType t = new UriType();
-      if (this.instantiates == null)
-        this.instantiates = new ArrayList<UriType>();
-      this.instantiates.add(t);
+    public CanonicalType addInstantiatesCanonicalElement() {//2 
+      CanonicalType t = new CanonicalType();
+      if (this.instantiatesCanonical == null)
+        this.instantiatesCanonical = new ArrayList<CanonicalType>();
+      this.instantiatesCanonical.add(t);
       return t;
     }
 
     /**
-     * @param value {@link #instantiates} (Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.)
+     * @param value {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.)
      */
-    public DeviceRequest addInstantiates(String value) { //1
-      UriType t = new UriType();
+    public DeviceRequest addInstantiatesCanonical(String value) { //1
+      CanonicalType t = new CanonicalType();
       t.setValue(value);
-      if (this.instantiates == null)
-        this.instantiates = new ArrayList<UriType>();
-      this.instantiates.add(t);
+      if (this.instantiatesCanonical == null)
+        this.instantiatesCanonical = new ArrayList<CanonicalType>();
+      this.instantiatesCanonical.add(t);
       return this;
     }
 
     /**
-     * @param value {@link #instantiates} (Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.)
+     * @param value {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.)
      */
-    public boolean hasInstantiates(String value) { 
-      if (this.instantiates == null)
+    public boolean hasInstantiatesCanonical(String value) { 
+      if (this.instantiatesCanonical == null)
         return false;
-      for (UriType v : this.instantiates)
+      for (CanonicalType v : this.instantiatesCanonical)
+        if (v.getValue().equals(value)) // canonical(ActivityDefinition|PlanDefinition)
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.)
+     */
+    public List<UriType> getInstantiatesUri() { 
+      if (this.instantiatesUri == null)
+        this.instantiatesUri = new ArrayList<UriType>();
+      return this.instantiatesUri;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DeviceRequest setInstantiatesUri(List<UriType> theInstantiatesUri) { 
+      this.instantiatesUri = theInstantiatesUri;
+      return this;
+    }
+
+    public boolean hasInstantiatesUri() { 
+      if (this.instantiatesUri == null)
+        return false;
+      for (UriType item : this.instantiatesUri)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.)
+     */
+    public UriType addInstantiatesUriElement() {//2 
+      UriType t = new UriType();
+      if (this.instantiatesUri == null)
+        this.instantiatesUri = new ArrayList<UriType>();
+      this.instantiatesUri.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.)
+     */
+    public DeviceRequest addInstantiatesUri(String value) { //1
+      UriType t = new UriType();
+      t.setValue(value);
+      if (this.instantiatesUri == null)
+        this.instantiatesUri = new ArrayList<UriType>();
+      this.instantiatesUri.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.)
+     */
+    public boolean hasInstantiatesUri(String value) { 
+      if (this.instantiatesUri == null)
+        return false;
+      for (UriType v : this.instantiatesUri)
         if (v.getValue().equals(value)) // uri
           return true;
       return false;
@@ -1165,15 +1422,19 @@ public class DeviceRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #intent} (Whether the request is a proposal, plan, an original order or a reflex order.)
+     * @return {@link #intent} (Whether the request is a proposal, plan, an original order or a reflex order.). This is the underlying object with id, value and extensions. The accessor "getIntent" gives direct access to the value
      */
-    public CodeableConcept getIntent() { 
+    public Enumeration<RequestIntent> getIntentElement() { 
       if (this.intent == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create DeviceRequest.intent");
         else if (Configuration.doAutoCreate())
-          this.intent = new CodeableConcept(); // cc
+          this.intent = new Enumeration<RequestIntent>(new RequestIntentEnumFactory()); // bb
       return this.intent;
+    }
+
+    public boolean hasIntentElement() { 
+      return this.intent != null && !this.intent.isEmpty();
     }
 
     public boolean hasIntent() { 
@@ -1181,10 +1442,27 @@ public class DeviceRequest extends DomainResource {
     }
 
     /**
-     * @param value {@link #intent} (Whether the request is a proposal, plan, an original order or a reflex order.)
+     * @param value {@link #intent} (Whether the request is a proposal, plan, an original order or a reflex order.). This is the underlying object with id, value and extensions. The accessor "getIntent" gives direct access to the value
      */
-    public DeviceRequest setIntent(CodeableConcept value) { 
+    public DeviceRequest setIntentElement(Enumeration<RequestIntent> value) { 
       this.intent = value;
+      return this;
+    }
+
+    /**
+     * @return Whether the request is a proposal, plan, an original order or a reflex order.
+     */
+    public RequestIntent getIntent() { 
+      return this.intent == null ? null : this.intent.getValue();
+    }
+
+    /**
+     * @param value Whether the request is a proposal, plan, an original order or a reflex order.
+     */
+    public DeviceRequest setIntent(RequestIntent value) { 
+        if (this.intent == null)
+          this.intent = new Enumeration<RequestIntent>(new RequestIntentEnumFactory());
+        this.intent.setValue(value);
       return this;
     }
 
@@ -2009,12 +2287,13 @@ public class DeviceRequest extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Identifiers assigned to this order by the orderer or by the receiver.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("instantiates", "uri", "Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.", 0, java.lang.Integer.MAX_VALUE, instantiates));
+        children.add(new Property("instantiatesCanonical", "canonical(ActivityDefinition|PlanDefinition)", "The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.", 0, java.lang.Integer.MAX_VALUE, instantiatesCanonical));
+        children.add(new Property("instantiatesUri", "uri", "The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.", 0, java.lang.Integer.MAX_VALUE, instantiatesUri));
         children.add(new Property("basedOn", "Reference(Any)", "Plan/proposal/order fulfilled by this request.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("priorRequest", "Reference(Any)", "The request takes the place of the referenced completed or terminated request(s).", 0, java.lang.Integer.MAX_VALUE, priorRequest));
         children.add(new Property("groupIdentifier", "Identifier", "Composite request this is part of.", 0, 1, groupIdentifier));
         children.add(new Property("status", "code", "The status of the request.", 0, 1, status));
-        children.add(new Property("intent", "CodeableConcept", "Whether the request is a proposal, plan, an original order or a reflex order.", 0, 1, intent));
+        children.add(new Property("intent", "code", "Whether the request is a proposal, plan, an original order or a reflex order.", 0, 1, intent));
         children.add(new Property("priority", "code", "Indicates how quickly the {{title}} should be addressed with respect to other requests.", 0, 1, priority));
         children.add(new Property("code[x]", "Reference(Device)|CodeableConcept", "The details of the device to be used.", 0, 1, code));
         children.add(new Property("parameter", "", "Specific parameters for the ordered item.  For example, the prism value for lenses.", 0, java.lang.Integer.MAX_VALUE, parameter));
@@ -2037,12 +2316,13 @@ public class DeviceRequest extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers assigned to this order by the orderer or by the receiver.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -246883639: /*instantiates*/  return new Property("instantiates", "uri", "Protocol or definition followed by this request. For example: The proposed act must be performed if the indicated conditions occur, e.g.., shortness of breath, SpO2 less than x%.", 0, java.lang.Integer.MAX_VALUE, instantiates);
+        case 8911915: /*instantiatesCanonical*/  return new Property("instantiatesCanonical", "canonical(ActivityDefinition|PlanDefinition)", "The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.", 0, java.lang.Integer.MAX_VALUE, instantiatesCanonical);
+        case -1926393373: /*instantiatesUri*/  return new Property("instantiatesUri", "uri", "The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this DeviceRequest.", 0, java.lang.Integer.MAX_VALUE, instantiatesUri);
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(Any)", "Plan/proposal/order fulfilled by this request.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case 237568101: /*priorRequest*/  return new Property("priorRequest", "Reference(Any)", "The request takes the place of the referenced completed or terminated request(s).", 0, java.lang.Integer.MAX_VALUE, priorRequest);
         case -445338488: /*groupIdentifier*/  return new Property("groupIdentifier", "Identifier", "Composite request this is part of.", 0, 1, groupIdentifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the request.", 0, 1, status);
-        case -1183762788: /*intent*/  return new Property("intent", "CodeableConcept", "Whether the request is a proposal, plan, an original order or a reflex order.", 0, 1, intent);
+        case -1183762788: /*intent*/  return new Property("intent", "code", "Whether the request is a proposal, plan, an original order or a reflex order.", 0, 1, intent);
         case -1165461084: /*priority*/  return new Property("priority", "code", "Indicates how quickly the {{title}} should be addressed with respect to other requests.", 0, 1, priority);
         case 941839219: /*code[x]*/  return new Property("code[x]", "Reference(Device)|CodeableConcept", "The details of the device to be used.", 0, 1, code);
         case 3059181: /*code*/  return new Property("code[x]", "Reference(Device)|CodeableConcept", "The details of the device to be used.", 0, 1, code);
@@ -2075,12 +2355,13 @@ public class DeviceRequest extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
-        case -246883639: /*instantiates*/ return this.instantiates == null ? new Base[0] : this.instantiates.toArray(new Base[this.instantiates.size()]); // UriType
+        case 8911915: /*instantiatesCanonical*/ return this.instantiatesCanonical == null ? new Base[0] : this.instantiatesCanonical.toArray(new Base[this.instantiatesCanonical.size()]); // CanonicalType
+        case -1926393373: /*instantiatesUri*/ return this.instantiatesUri == null ? new Base[0] : this.instantiatesUri.toArray(new Base[this.instantiatesUri.size()]); // UriType
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case 237568101: /*priorRequest*/ return this.priorRequest == null ? new Base[0] : this.priorRequest.toArray(new Base[this.priorRequest.size()]); // Reference
         case -445338488: /*groupIdentifier*/ return this.groupIdentifier == null ? new Base[0] : new Base[] {this.groupIdentifier}; // Identifier
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DeviceRequestStatus>
-        case -1183762788: /*intent*/ return this.intent == null ? new Base[0] : new Base[] {this.intent}; // CodeableConcept
+        case -1183762788: /*intent*/ return this.intent == null ? new Base[0] : new Base[] {this.intent}; // Enumeration<RequestIntent>
         case -1165461084: /*priority*/ return this.priority == null ? new Base[0] : new Base[] {this.priority}; // Enumeration<RequestPriority>
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // Type
         case 1954460585: /*parameter*/ return this.parameter == null ? new Base[0] : this.parameter.toArray(new Base[this.parameter.size()]); // DeviceRequestParameterComponent
@@ -2108,8 +2389,11 @@ public class DeviceRequest extends DomainResource {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
-        case -246883639: // instantiates
-          this.getInstantiates().add(castToUri(value)); // UriType
+        case 8911915: // instantiatesCanonical
+          this.getInstantiatesCanonical().add(castToCanonical(value)); // CanonicalType
+          return value;
+        case -1926393373: // instantiatesUri
+          this.getInstantiatesUri().add(castToUri(value)); // UriType
           return value;
         case -332612366: // basedOn
           this.getBasedOn().add(castToReference(value)); // Reference
@@ -2125,7 +2409,8 @@ public class DeviceRequest extends DomainResource {
           this.status = (Enumeration) value; // Enumeration<DeviceRequestStatus>
           return value;
         case -1183762788: // intent
-          this.intent = castToCodeableConcept(value); // CodeableConcept
+          value = new RequestIntentEnumFactory().fromType(castToCode(value));
+          this.intent = (Enumeration) value; // Enumeration<RequestIntent>
           return value;
         case -1165461084: // priority
           value = new RequestPriorityEnumFactory().fromType(castToCode(value));
@@ -2185,8 +2470,10 @@ public class DeviceRequest extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        } else if (name.equals("instantiates")) {
-          this.getInstantiates().add(castToUri(value));
+        } else if (name.equals("instantiatesCanonical")) {
+          this.getInstantiatesCanonical().add(castToCanonical(value));
+        } else if (name.equals("instantiatesUri")) {
+          this.getInstantiatesUri().add(castToUri(value));
         } else if (name.equals("basedOn")) {
           this.getBasedOn().add(castToReference(value));
         } else if (name.equals("priorRequest")) {
@@ -2197,7 +2484,8 @@ public class DeviceRequest extends DomainResource {
           value = new DeviceRequestStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<DeviceRequestStatus>
         } else if (name.equals("intent")) {
-          this.intent = castToCodeableConcept(value); // CodeableConcept
+          value = new RequestIntentEnumFactory().fromType(castToCode(value));
+          this.intent = (Enumeration) value; // Enumeration<RequestIntent>
         } else if (name.equals("priority")) {
           value = new RequestPriorityEnumFactory().fromType(castToCode(value));
           this.priority = (Enumeration) value; // Enumeration<RequestPriority>
@@ -2240,12 +2528,13 @@ public class DeviceRequest extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); 
-        case -246883639:  return addInstantiatesElement();
+        case 8911915:  return addInstantiatesCanonicalElement();
+        case -1926393373:  return addInstantiatesUriElement();
         case -332612366:  return addBasedOn(); 
         case 237568101:  return addPriorRequest(); 
         case -445338488:  return getGroupIdentifier(); 
         case -892481550:  return getStatusElement();
-        case -1183762788:  return getIntent(); 
+        case -1183762788:  return getIntentElement();
         case -1165461084:  return getPriorityElement();
         case 941839219:  return getCode(); 
         case 3059181:  return getCode(); 
@@ -2273,12 +2562,13 @@ public class DeviceRequest extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
-        case -246883639: /*instantiates*/ return new String[] {"uri"};
+        case 8911915: /*instantiatesCanonical*/ return new String[] {"canonical"};
+        case -1926393373: /*instantiatesUri*/ return new String[] {"uri"};
         case -332612366: /*basedOn*/ return new String[] {"Reference"};
         case 237568101: /*priorRequest*/ return new String[] {"Reference"};
         case -445338488: /*groupIdentifier*/ return new String[] {"Identifier"};
         case -892481550: /*status*/ return new String[] {"code"};
-        case -1183762788: /*intent*/ return new String[] {"CodeableConcept"};
+        case -1183762788: /*intent*/ return new String[] {"code"};
         case -1165461084: /*priority*/ return new String[] {"code"};
         case 3059181: /*code*/ return new String[] {"Reference", "CodeableConcept"};
         case 1954460585: /*parameter*/ return new String[] {};
@@ -2305,8 +2595,11 @@ public class DeviceRequest extends DomainResource {
         if (name.equals("identifier")) {
           return addIdentifier();
         }
-        else if (name.equals("instantiates")) {
-          throw new FHIRException("Cannot call addChild on a primitive type DeviceRequest.instantiates");
+        else if (name.equals("instantiatesCanonical")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DeviceRequest.instantiatesCanonical");
+        }
+        else if (name.equals("instantiatesUri")) {
+          throw new FHIRException("Cannot call addChild on a primitive type DeviceRequest.instantiatesUri");
         }
         else if (name.equals("basedOn")) {
           return addBasedOn();
@@ -2322,8 +2615,7 @@ public class DeviceRequest extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type DeviceRequest.status");
         }
         else if (name.equals("intent")) {
-          this.intent = new CodeableConcept();
-          return this.intent;
+          throw new FHIRException("Cannot call addChild on a primitive type DeviceRequest.intent");
         }
         else if (name.equals("priority")) {
           throw new FHIRException("Cannot call addChild on a primitive type DeviceRequest.priority");
@@ -2409,10 +2701,15 @@ public class DeviceRequest extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        if (instantiates != null) {
-          dst.instantiates = new ArrayList<UriType>();
-          for (UriType i : instantiates)
-            dst.instantiates.add(i.copy());
+        if (instantiatesCanonical != null) {
+          dst.instantiatesCanonical = new ArrayList<CanonicalType>();
+          for (CanonicalType i : instantiatesCanonical)
+            dst.instantiatesCanonical.add(i.copy());
+        };
+        if (instantiatesUri != null) {
+          dst.instantiatesUri = new ArrayList<UriType>();
+          for (UriType i : instantiatesUri)
+            dst.instantiatesUri.add(i.copy());
         };
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
@@ -2485,8 +2782,9 @@ public class DeviceRequest extends DomainResource {
         if (!(other_ instanceof DeviceRequest))
           return false;
         DeviceRequest o = (DeviceRequest) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(instantiates, o.instantiates, true)
-           && compareDeep(basedOn, o.basedOn, true) && compareDeep(priorRequest, o.priorRequest, true) && compareDeep(groupIdentifier, o.groupIdentifier, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(instantiatesCanonical, o.instantiatesCanonical, true)
+           && compareDeep(instantiatesUri, o.instantiatesUri, true) && compareDeep(basedOn, o.basedOn, true)
+           && compareDeep(priorRequest, o.priorRequest, true) && compareDeep(groupIdentifier, o.groupIdentifier, true)
            && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(priority, o.priority, true)
            && compareDeep(code, o.code, true) && compareDeep(parameter, o.parameter, true) && compareDeep(subject, o.subject, true)
            && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true) && compareDeep(authoredOn, o.authoredOn, true)
@@ -2503,15 +2801,17 @@ public class DeviceRequest extends DomainResource {
         if (!(other_ instanceof DeviceRequest))
           return false;
         DeviceRequest o = (DeviceRequest) other_;
-        return compareValues(instantiates, o.instantiates, true) && compareValues(status, o.status, true) && compareValues(priority, o.priority, true)
-           && compareValues(authoredOn, o.authoredOn, true);
+        return compareValues(instantiatesUri, o.instantiatesUri, true) && compareValues(status, o.status, true)
+           && compareValues(intent, o.intent, true) && compareValues(priority, o.priority, true) && compareValues(authoredOn, o.authoredOn, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiates, basedOn
-          , priorRequest, groupIdentifier, status, intent, priority, code, parameter, subject
-          , context, occurrence, authoredOn, requester, performerType, performer, reasonCode
-          , reasonReference, insurance, supportingInfo, note, relevantHistory);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiatesCanonical
+          , instantiatesUri, basedOn, priorRequest, groupIdentifier, status, intent, priority
+          , code, parameter, subject, context, occurrence, authoredOn, requester, performerType
+          , performer, reasonCode, reasonReference, insurance, supportingInfo, note, relevantHistory
+          );
       }
 
   @Override
@@ -2527,7 +2827,7 @@ public class DeviceRequest extends DomainResource {
    * Path: <b>DeviceRequest.requester</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="requester", path="DeviceRequest.requester", description="Who/what is requesting service", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Practitioner.class, PractitionerRole.class } )
+  @SearchParamDefinition(name="requester", path="DeviceRequest.requester", description="Who/what is requesting service", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_REQUESTER = "requester";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>requester</b>
@@ -2572,26 +2872,6 @@ public class DeviceRequest extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_INSURANCE = new ca.uhn.fhir.model.api.Include("DeviceRequest:insurance").toLocked();
 
  /**
-   * Search parameter: <b>instantiates</b>
-   * <p>
-   * Description: <b>Protocol or definition followed by this request</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>DeviceRequest.instantiates</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="instantiates", path="DeviceRequest.instantiates", description="Protocol or definition followed by this request", type="uri" )
-  public static final String SP_INSTANTIATES = "instantiates";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>instantiates</b>
-   * <p>
-   * Description: <b>Protocol or definition followed by this request</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>DeviceRequest.instantiates</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam INSTANTIATES = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_INSTANTIATES);
-
- /**
    * Search parameter: <b>identifier</b>
    * <p>
    * Description: <b>Business identifier for request/order</b><br>
@@ -2619,7 +2899,7 @@ public class DeviceRequest extends DomainResource {
    * Path: <b>DeviceRequest.codeCodeableConcept</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="code", path="DeviceRequest.code.as(CodeableConcept)", description="Code for what is being requested/ordered", type="token" )
+  @SearchParamDefinition(name="code", path="(DeviceRequest.code as CodeableConcept)", description="Code for what is being requested/ordered", type="token" )
   public static final String SP_CODE = "code";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>code</b>
@@ -2665,7 +2945,7 @@ public class DeviceRequest extends DomainResource {
    * Path: <b>DeviceRequest.occurrenceDateTime, DeviceRequest.occurrencePeriod</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="event-date", path="DeviceRequest.occurrence.as(dateTime) | DeviceRequest.occurrence.as(Period)", description="When service should occur", type="date" )
+  @SearchParamDefinition(name="event-date", path="(DeviceRequest.occurrence as dateTime) | (DeviceRequest.occurrence as Period)", description="When service should occur", type="date" )
   public static final String SP_EVENT_DATE = "event-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>event-date</b>
@@ -2702,6 +2982,32 @@ public class DeviceRequest extends DomainResource {
    * the path value of "<b>DeviceRequest:subject</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("DeviceRequest:subject").toLocked();
+
+ /**
+   * Search parameter: <b>instantiates-canonical</b>
+   * <p>
+   * Description: <b>Instantiates FHIR protocol or definition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceRequest.instantiatesCanonical</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="instantiates-canonical", path="DeviceRequest.instantiatesCanonical", description="Instantiates FHIR protocol or definition", type="reference", target={ActivityDefinition.class, PlanDefinition.class } )
+  public static final String SP_INSTANTIATES_CANONICAL = "instantiates-canonical";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>instantiates-canonical</b>
+   * <p>
+   * Description: <b>Instantiates FHIR protocol or definition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceRequest.instantiatesCanonical</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INSTANTIATES_CANONICAL = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INSTANTIATES_CANONICAL);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DeviceRequest:instantiates-canonical</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INSTANTIATES_CANONICAL = new ca.uhn.fhir.model.api.Include("DeviceRequest:instantiates-canonical").toLocked();
 
  /**
    * Search parameter: <b>encounter</b>
@@ -2816,32 +3122,6 @@ public class DeviceRequest extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_BASED_ON = new ca.uhn.fhir.model.api.Include("DeviceRequest:based-on").toLocked();
 
  /**
-   * Search parameter: <b>priorrequest</b>
-   * <p>
-   * Description: <b>Request takes the place of referenced completed or terminated requests</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>DeviceRequest.priorRequest</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="priorrequest", path="DeviceRequest.priorRequest", description="Request takes the place of referenced completed or terminated requests", type="reference" )
-  public static final String SP_PRIORREQUEST = "priorrequest";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>priorrequest</b>
-   * <p>
-   * Description: <b>Request takes the place of referenced completed or terminated requests</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>DeviceRequest.priorRequest</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PRIORREQUEST = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PRIORREQUEST);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>DeviceRequest:priorrequest</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRIORREQUEST = new ca.uhn.fhir.model.api.Include("DeviceRequest:priorrequest").toLocked();
-
- /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>Individual the service is ordered for</b><br>
@@ -2849,7 +3129,7 @@ public class DeviceRequest extends DomainResource {
    * Path: <b>DeviceRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="DeviceRequest.subject", description="Individual the service is ordered for", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="DeviceRequest.subject.where(resolve() is Patient)", description="Individual the service is ordered for", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2868,6 +3148,52 @@ public class DeviceRequest extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("DeviceRequest:patient").toLocked();
 
  /**
+   * Search parameter: <b>instantiates-uri</b>
+   * <p>
+   * Description: <b>Instantiates external protocol or definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>DeviceRequest.instantiatesUri</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="instantiates-uri", path="DeviceRequest.instantiatesUri", description="Instantiates external protocol or definition", type="uri" )
+  public static final String SP_INSTANTIATES_URI = "instantiates-uri";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>instantiates-uri</b>
+   * <p>
+   * Description: <b>Instantiates external protocol or definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>DeviceRequest.instantiatesUri</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam INSTANTIATES_URI = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_INSTANTIATES_URI);
+
+ /**
+   * Search parameter: <b>prior-request</b>
+   * <p>
+   * Description: <b>Request takes the place of referenced completed or terminated requests</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceRequest.priorRequest</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="prior-request", path="DeviceRequest.priorRequest", description="Request takes the place of referenced completed or terminated requests", type="reference" )
+  public static final String SP_PRIOR_REQUEST = "prior-request";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>prior-request</b>
+   * <p>
+   * Description: <b>Request takes the place of referenced completed or terminated requests</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>DeviceRequest.priorRequest</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PRIOR_REQUEST = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PRIOR_REQUEST);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>DeviceRequest:prior-request</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PRIOR_REQUEST = new ca.uhn.fhir.model.api.Include("DeviceRequest:prior-request").toLocked();
+
+ /**
    * Search parameter: <b>device</b>
    * <p>
    * Description: <b>Reference to resource that is being requested/ordered</b><br>
@@ -2875,7 +3201,7 @@ public class DeviceRequest extends DomainResource {
    * Path: <b>DeviceRequest.codeReference</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device", path="DeviceRequest.code.as(Reference)", description="Reference to resource that is being requested/ordered", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") }, target={Device.class } )
+  @SearchParamDefinition(name="device", path="(DeviceRequest.code as Reference)", description="Reference to resource that is being requested/ordered", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device") }, target={Device.class } )
   public static final String SP_DEVICE = "device";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device</b>

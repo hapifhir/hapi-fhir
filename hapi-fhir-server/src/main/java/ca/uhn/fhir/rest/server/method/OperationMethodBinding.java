@@ -19,50 +19,58 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
+	public static final String WILDCARD_NAME = "$" + Operation.NAME_MATCH_ALL;
+	private final boolean myIdempotent;
+	private final Integer myIdParamIndex;
+	private final String myName;
+	private final RestOperationTypeEnum myOtherOperatiopnType;
+	private final ReturnTypeEnum myReturnType;
 	private BundleTypeEnum myBundleType;
 	private boolean myCanOperateAtInstanceLevel;
 	private boolean myCanOperateAtServerLevel;
 	private boolean myCanOperateAtTypeLevel;
 	private String myDescription;
-	private final boolean myIdempotent;
-	private final Integer myIdParamIndex;
-	private final String myName;
-	private final RestOperationTypeEnum myOtherOperatiopnType;
 	private List<ReturnType> myReturnParams;
-	private final ReturnTypeEnum myReturnType;
 
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
-			boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
-			OperationParam[] theReturnParams, BundleTypeEnum theBundleType) {
+												boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
+												OperationParam[] theReturnParams, BundleTypeEnum theBundleType) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
 		myBundleType = theBundleType;
@@ -91,7 +99,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		if (isBlank(theOperationName)) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
-					+ " but this annotation has no name defined");
+				+ " but this annotation has no name defined");
 		}
 		if (theOperationName.startsWith("$") == false) {
 			theOperationName = "$" + theOperationName;
@@ -152,13 +160,17 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
-			Operation theAnnotation) {
+											Operation theAnnotation) {
 		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.returnParameters(),
-				theAnnotation.bundleType());
+			theAnnotation.bundleType());
 	}
 
 	public String getDescription() {
 		return myDescription;
+	}
+
+	public void setDescription(String theDescription) {
+		myDescription = theDescription;
 	}
 
 	/**
@@ -173,6 +185,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return myBundleType;
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return myOtherOperatiopnType;
@@ -189,15 +202,23 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if (getResourceName() == null) {
-			if (isNotBlank(theRequest.getResourceName())) {
-				return false;
-			}
-		} else if (!getResourceName().equals(theRequest.getResourceName())) {
+		if (isBlank(theRequest.getOperation())) {
 			return false;
 		}
 
 		if (!myName.equals(theRequest.getOperation())) {
+			if (!myName.equals(WILDCARD_NAME)) {
+				return false;
+			}
+		}
+
+		if (getResourceName() == null) {
+			if (isNotBlank(theRequest.getResourceName())) {
+				return false;
+			}
+		}
+
+		if (getResourceName() != null && !getResourceName().equals(theRequest.getResourceName())) {
 			return false;
 		}
 
@@ -220,7 +241,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		return true;
 	}
-
 
 	@Override
 	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
@@ -304,11 +324,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		theDetails.setResource((IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY));
 	}
 
-	public void setDescription(String theDescription) {
-		myDescription = theDescription;
-	}
-
-
 	public static class ReturnType {
 		private int myMax;
 		private int myMin;
@@ -322,28 +337,28 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			return myMax;
 		}
 
-		public int getMin() {
-			return myMin;
-		}
-
-		public String getName() {
-			return myName;
-		}
-
-		public String getType() {
-			return myType;
-		}
-
 		public void setMax(int theMax) {
 			myMax = theMax;
+		}
+
+		public int getMin() {
+			return myMin;
 		}
 
 		public void setMin(int theMin) {
 			myMin = theMin;
 		}
 
+		public String getName() {
+			return myName;
+		}
+
 		public void setName(String theName) {
 			myName = theName;
+		}
+
+		public String getType() {
+			return myType;
 		}
 
 		public void setType(String theType) {

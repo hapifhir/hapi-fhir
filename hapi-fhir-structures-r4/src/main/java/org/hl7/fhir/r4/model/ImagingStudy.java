@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Representation of the content produced in a DICOM imaging study. A study comprises a set of series, each of which includes a set of Service-Object Pair Instances (SOP Instances - images or other data) acquired or produced in a common context.  A series is of only one modality (e.g. X-ray, CT, MR, ultrasound), but a study may have multiple series of different modalities.
  */
-@ResourceDef(name="ImagingStudy", profile="http://hl7.org/fhir/Profile/ImagingStudy")
+@ResourceDef(name="ImagingStudy", profile="http://hl7.org/fhir/StructureDefinition/ImagingStudy")
 public class ImagingStudy extends DomainResource {
 
     public enum ImagingStudyStatus {
@@ -62,7 +62,7 @@ public class ImagingStudy extends DomainResource {
          */
         CANCELLED, 
         /**
-         * The imaging study has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         * The imaging study has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
@@ -116,7 +116,7 @@ public class ImagingStudy extends DomainResource {
             case REGISTERED: return "The existence of the imaging study is registered, but there is nothing yet available.";
             case AVAILABLE: return "At least one instance has been associated with this imaging study.";
             case CANCELLED: return "The imaging study is unavailable because the imaging study was not started or not completed (also sometimes called \"aborted\").";
-            case ENTEREDINERROR: return "The imaging study has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case ENTEREDINERROR: return "The imaging study has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
             case UNKNOWN: return "The system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }
@@ -1872,20 +1872,27 @@ public class ImagingStudy extends DomainResource {
 
 
     /**
-     * Institution-generated description or classification of the Study performed.
+     * Per the recommended DICOM mapping, this element is derived from the Study Description attribute (0008,1030). Observations or findings about the imaging study should be recorded in another resource, e.g. Observation, and not in this element.
      */
     @Child(name = "note", type = {Annotation.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Institution-generated description", formalDefinition="Institution-generated description or classification of the Study performed." )
+    @Description(shortDefinition="User-defined comments", formalDefinition="Per the recommended DICOM mapping, this element is derived from the Study Description attribute (0008,1030). Observations or findings about the imaging study should be recorded in another resource, e.g. Observation, and not in this element." )
     protected List<Annotation> note;
+
+    /**
+     * The Imaging Manager description of the study. Institution-generated description or classification of the Study (component) performed.
+     */
+    @Child(name = "description", type = {StringType.class}, order=18, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Institution-generated description", formalDefinition="The Imaging Manager description of the study. Institution-generated description or classification of the Study (component) performed." )
+    protected StringType description;
 
     /**
      * Each study has one or more series of images or other content.
      */
-    @Child(name = "series", type = {}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "series", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Each study has one or more series of instances", formalDefinition="Each study has one or more series of images or other content." )
     protected List<ImagingStudySeriesComponent> series;
 
-    private static final long serialVersionUID = 1771818489L;
+    private static final long serialVersionUID = -1711589612L;
 
   /**
    * Constructor
@@ -2786,7 +2793,7 @@ public class ImagingStudy extends DomainResource {
     }
 
     /**
-     * @return {@link #note} (Institution-generated description or classification of the Study performed.)
+     * @return {@link #note} (Per the recommended DICOM mapping, this element is derived from the Study Description attribute (0008,1030). Observations or findings about the imaging study should be recorded in another resource, e.g. Observation, and not in this element.)
      */
     public List<Annotation> getNote() { 
       if (this.note == null)
@@ -2836,6 +2843,55 @@ public class ImagingStudy extends DomainResource {
         addNote();
       }
       return getNote().get(0);
+    }
+
+    /**
+     * @return {@link #description} (The Imaging Manager description of the study. Institution-generated description or classification of the Study (component) performed.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     */
+    public StringType getDescriptionElement() { 
+      if (this.description == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ImagingStudy.description");
+        else if (Configuration.doAutoCreate())
+          this.description = new StringType(); // bb
+      return this.description;
+    }
+
+    public boolean hasDescriptionElement() { 
+      return this.description != null && !this.description.isEmpty();
+    }
+
+    public boolean hasDescription() { 
+      return this.description != null && !this.description.isEmpty();
+    }
+
+    /**
+     * @param value {@link #description} (The Imaging Manager description of the study. Institution-generated description or classification of the Study (component) performed.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     */
+    public ImagingStudy setDescriptionElement(StringType value) { 
+      this.description = value;
+      return this;
+    }
+
+    /**
+     * @return The Imaging Manager description of the study. Institution-generated description or classification of the Study (component) performed.
+     */
+    public String getDescription() { 
+      return this.description == null ? null : this.description.getValue();
+    }
+
+    /**
+     * @param value The Imaging Manager description of the study. Institution-generated description or classification of the Study (component) performed.
+     */
+    public ImagingStudy setDescription(String value) { 
+      if (Utilities.noString(value))
+        this.description = null;
+      else {
+        if (this.description == null)
+          this.description = new StringType();
+        this.description.setValue(value);
+      }
+      return this;
     }
 
     /**
@@ -2910,7 +2966,8 @@ public class ImagingStudy extends DomainResource {
         children.add(new Property("location", "Reference(Location)", "The principal physical location where the ImagingStudy was performed.", 0, 1, location));
         children.add(new Property("reasonCode", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
         children.add(new Property("reasonReference", "Reference(Condition|Observation|Media|DiagnosticReport|DocumentReference)", "Indicates another resource whose existence justifies this Study.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
-        children.add(new Property("note", "Annotation", "Institution-generated description or classification of the Study performed.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("note", "Annotation", "Per the recommended DICOM mapping, this element is derived from the Study Description attribute (0008,1030). Observations or findings about the imaging study should be recorded in another resource, e.g. Observation, and not in this element.", 0, java.lang.Integer.MAX_VALUE, note));
+        children.add(new Property("description", "string", "The Imaging Manager description of the study. Institution-generated description or classification of the Study (component) performed.", 0, 1, description));
         children.add(new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series));
       }
 
@@ -2934,7 +2991,8 @@ public class ImagingStudy extends DomainResource {
         case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The principal physical location where the ImagingStudy was performed.", 0, 1, location);
         case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Description of clinical condition indicating why the ImagingStudy was requested.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
         case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|Media|DiagnosticReport|DocumentReference)", "Indicates another resource whose existence justifies this Study.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
-        case 3387378: /*note*/  return new Property("note", "Annotation", "Institution-generated description or classification of the Study performed.", 0, java.lang.Integer.MAX_VALUE, note);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Per the recommended DICOM mapping, this element is derived from the Study Description attribute (0008,1030). Observations or findings about the imaging study should be recorded in another resource, e.g. Observation, and not in this element.", 0, java.lang.Integer.MAX_VALUE, note);
+        case -1724546052: /*description*/  return new Property("description", "string", "The Imaging Manager description of the study. Institution-generated description or classification of the Study (component) performed.", 0, 1, description);
         case -905838985: /*series*/  return new Property("series", "", "Each study has one or more series of images or other content.", 0, java.lang.Integer.MAX_VALUE, series);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -2962,6 +3020,7 @@ public class ImagingStudy extends DomainResource {
         case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
         case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -905838985: /*series*/ return this.series == null ? new Base[0] : this.series.toArray(new Base[this.series.size()]); // ImagingStudySeriesComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -3026,6 +3085,9 @@ public class ImagingStudy extends DomainResource {
         case 3387378: // note
           this.getNote().add(castToAnnotation(value)); // Annotation
           return value;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          return value;
         case -905838985: // series
           this.getSeries().add((ImagingStudySeriesComponent) value); // ImagingStudySeriesComponent
           return value;
@@ -3073,6 +3135,8 @@ public class ImagingStudy extends DomainResource {
           this.getReasonReference().add(castToReference(value));
         } else if (name.equals("note")) {
           this.getNote().add(castToAnnotation(value));
+        } else if (name.equals("description")) {
+          this.description = castToString(value); // StringType
         } else if (name.equals("series")) {
           this.getSeries().add((ImagingStudySeriesComponent) value);
         } else
@@ -3101,6 +3165,7 @@ public class ImagingStudy extends DomainResource {
         case 722137681:  return addReasonCode(); 
         case -1146218137:  return addReasonReference(); 
         case 3387378:  return addNote(); 
+        case -1724546052:  return getDescriptionElement();
         case -905838985:  return addSeries(); 
         default: return super.makeProperty(hash, name);
         }
@@ -3128,6 +3193,7 @@ public class ImagingStudy extends DomainResource {
         case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
         case -1146218137: /*reasonReference*/ return new String[] {"Reference"};
         case 3387378: /*note*/ return new String[] {"Annotation"};
+        case -1724546052: /*description*/ return new String[] {"string"};
         case -905838985: /*series*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -3194,6 +3260,9 @@ public class ImagingStudy extends DomainResource {
         }
         else if (name.equals("note")) {
           return addNote();
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ImagingStudy.description");
         }
         else if (name.equals("series")) {
           return addSeries();
@@ -3264,6 +3333,7 @@ public class ImagingStudy extends DomainResource {
           for (Annotation i : note)
             dst.note.add(i.copy());
         };
+        dst.description = description == null ? null : description.copy();
         if (series != null) {
           dst.series = new ArrayList<ImagingStudySeriesComponent>();
           for (ImagingStudySeriesComponent i : series)
@@ -3290,7 +3360,8 @@ public class ImagingStudy extends DomainResource {
            && compareDeep(numberOfInstances, o.numberOfInstances, true) && compareDeep(procedureReference, o.procedureReference, true)
            && compareDeep(procedureCode, o.procedureCode, true) && compareDeep(location, o.location, true)
            && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
-           && compareDeep(note, o.note, true) && compareDeep(series, o.series, true);
+           && compareDeep(note, o.note, true) && compareDeep(description, o.description, true) && compareDeep(series, o.series, true)
+          ;
       }
 
       @Override
@@ -3301,14 +3372,15 @@ public class ImagingStudy extends DomainResource {
           return false;
         ImagingStudy o = (ImagingStudy) other_;
         return compareValues(status, o.status, true) && compareValues(started, o.started, true) && compareValues(numberOfSeries, o.numberOfSeries, true)
-           && compareValues(numberOfInstances, o.numberOfInstances, true);
+           && compareValues(numberOfInstances, o.numberOfInstances, true) && compareValues(description, o.description, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, modality
           , subject, context, started, basedOn, referrer, interpreter, endpoint, numberOfSeries
           , numberOfInstances, procedureReference, procedureCode, location, reasonCode, reasonReference
-          , note, series);
+          , note, description, series);
       }
 
   @Override
@@ -3582,7 +3654,7 @@ public class ImagingStudy extends DomainResource {
    * Path: <b>ImagingStudy.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ImagingStudy.subject", description="Who the study is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="ImagingStudy.subject.where(resolve() is Patient)", description="Who the study is about", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

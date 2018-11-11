@@ -43,7 +43,6 @@ import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ExpansionProfile;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -651,12 +650,10 @@ public class FHIRToolingClient {
 		return feed;
   }
   
-  public ValueSet expandValueset(ValueSet source, ExpansionProfile profile) {
+  public ValueSet expandValueset(ValueSet source, Parameters expParams) {
     List<Header> headers = null;
-    Parameters p = new Parameters();
+    Parameters p = expParams == null ? new Parameters() : expParams.copy();
     p.addParameter().setName("valueSet").setResource(source);
-    if (profile != null)
-      p.addParameter().setName("profile").setResource(profile);
     ResourceRequest<Resource> result = utils.issuePostRequest(resourceAddress.resolveOperationUri(ValueSet.class, "expand"), 
         utils.getResourceAsByteArray(p, false, isJson(getPreferredResourceFormat())), getPreferredResourceFormat(), headers);
     result.addErrorStatus(410);//gone
@@ -685,12 +682,10 @@ public class FHIRToolingClient {
     }
     return (Parameters) result.getPayload();
   }
-  public ValueSet expandValueset(ValueSet source, ExpansionProfile profile, Map<String, String> params) {
+  public ValueSet expandValueset(ValueSet source, Parameters expParams, Map<String, String> params) {
     List<Header> headers = null;
-    Parameters p = new Parameters();
+    Parameters p = expParams == null ? new Parameters() : expParams.copy();
     p.addParameter().setName("valueSet").setResource(source);
-    if (profile != null)
-      p.addParameter().setName("profile").setResource(profile);
     for (String n : params.keySet())
       p.addParameter().setName(n).setValue(new StringType(params.get(n)));
     ResourceRequest<Resource> result = utils.issuePostRequest(resourceAddress.resolveOperationUri(ValueSet.class, "expand", params), 

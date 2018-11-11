@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A structured set of questions and their answers. The questions are ordered and grouped into coherent subsets, corresponding to the structure of the grouping of the questionnaire being responded to.
  */
-@ResourceDef(name="QuestionnaireResponse", profile="http://hl7.org/fhir/Profile/QuestionnaireResponse")
+@ResourceDef(name="QuestionnaireResponse", profile="http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse")
 public class QuestionnaireResponse extends DomainResource {
 
     public enum QuestionnaireResponseStatus {
@@ -212,32 +212,20 @@ public class QuestionnaireResponse extends DomainResource {
         protected StringType text;
 
         /**
-         * More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.
-         */
-        @Child(name = "subject", type = {Reference.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The subject this group's answers are about", formalDefinition="More specific subject this section's answers are about, details the subject given in QuestionnaireResponse." )
-        protected Reference subject;
-
-        /**
-         * The actual object that is the target of the reference (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
-         */
-        protected Resource subjectTarget;
-
-        /**
          * The respondent's answer(s) to the question.
          */
-        @Child(name = "answer", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "answer", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="The response(s) to the question", formalDefinition="The respondent's answer(s) to the question." )
         protected List<QuestionnaireResponseItemAnswerComponent> answer;
 
         /**
          * Questions or sub-groups nested beneath a question or group.
          */
-        @Child(name = "item", type = {QuestionnaireResponseItemComponent.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "item", type = {QuestionnaireResponseItemComponent.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested questionnaire response items", formalDefinition="Questions or sub-groups nested beneath a question or group." )
         protected List<QuestionnaireResponseItemComponent> item;
 
-        private static final long serialVersionUID = -154786340L;
+        private static final long serialVersionUID = -1395483402L;
 
     /**
      * Constructor
@@ -398,45 +386,6 @@ public class QuestionnaireResponse extends DomainResource {
         }
 
         /**
-         * @return {@link #subject} (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
-         */
-        public Reference getSubject() { 
-          if (this.subject == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create QuestionnaireResponseItemComponent.subject");
-            else if (Configuration.doAutoCreate())
-              this.subject = new Reference(); // cc
-          return this.subject;
-        }
-
-        public boolean hasSubject() { 
-          return this.subject != null && !this.subject.isEmpty();
-        }
-
-        /**
-         * @param value {@link #subject} (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
-         */
-        public QuestionnaireResponseItemComponent setSubject(Reference value) { 
-          this.subject = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
-         */
-        public Resource getSubjectTarget() { 
-          return this.subjectTarget;
-        }
-
-        /**
-         * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.)
-         */
-        public QuestionnaireResponseItemComponent setSubjectTarget(Resource value) { 
-          this.subjectTarget = value;
-          return this;
-        }
-
-        /**
          * @return {@link #answer} (The respondent's answer(s) to the question.)
          */
         public List<QuestionnaireResponseItemAnswerComponent> getAnswer() { 
@@ -547,7 +496,6 @@ public class QuestionnaireResponse extends DomainResource {
           children.add(new Property("linkId", "string", "The item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource.", 0, 1, linkId));
           children.add(new Property("definition", "uri", "A reference to an [[[ElementDefinition]]] that provides the details for the item.", 0, 1, definition));
           children.add(new Property("text", "string", "Text that is displayed above the contents of the group or as the text of the question being answered.", 0, 1, text));
-          children.add(new Property("subject", "Reference(Any)", "More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.", 0, 1, subject));
           children.add(new Property("answer", "", "The respondent's answer(s) to the question.", 0, java.lang.Integer.MAX_VALUE, answer));
           children.add(new Property("item", "@QuestionnaireResponse.item", "Questions or sub-groups nested beneath a question or group.", 0, java.lang.Integer.MAX_VALUE, item));
         }
@@ -558,7 +506,6 @@ public class QuestionnaireResponse extends DomainResource {
           case -1102667083: /*linkId*/  return new Property("linkId", "string", "The item from the Questionnaire that corresponds to this item in the QuestionnaireResponse resource.", 0, 1, linkId);
           case -1014418093: /*definition*/  return new Property("definition", "uri", "A reference to an [[[ElementDefinition]]] that provides the details for the item.", 0, 1, definition);
           case 3556653: /*text*/  return new Property("text", "string", "Text that is displayed above the contents of the group or as the text of the question being answered.", 0, 1, text);
-          case -1867885268: /*subject*/  return new Property("subject", "Reference(Any)", "More specific subject this section's answers are about, details the subject given in QuestionnaireResponse.", 0, 1, subject);
           case -1412808770: /*answer*/  return new Property("answer", "", "The respondent's answer(s) to the question.", 0, java.lang.Integer.MAX_VALUE, answer);
           case 3242771: /*item*/  return new Property("item", "@QuestionnaireResponse.item", "Questions or sub-groups nested beneath a question or group.", 0, java.lang.Integer.MAX_VALUE, item);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -572,7 +519,6 @@ public class QuestionnaireResponse extends DomainResource {
         case -1102667083: /*linkId*/ return this.linkId == null ? new Base[0] : new Base[] {this.linkId}; // StringType
         case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // UriType
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // StringType
-        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case -1412808770: /*answer*/ return this.answer == null ? new Base[0] : this.answer.toArray(new Base[this.answer.size()]); // QuestionnaireResponseItemAnswerComponent
         case 3242771: /*item*/ return this.item == null ? new Base[0] : this.item.toArray(new Base[this.item.size()]); // QuestionnaireResponseItemComponent
         default: return super.getProperty(hash, name, checkValid);
@@ -591,9 +537,6 @@ public class QuestionnaireResponse extends DomainResource {
           return value;
         case 3556653: // text
           this.text = castToString(value); // StringType
-          return value;
-        case -1867885268: // subject
-          this.subject = castToReference(value); // Reference
           return value;
         case -1412808770: // answer
           this.getAnswer().add((QuestionnaireResponseItemAnswerComponent) value); // QuestionnaireResponseItemAnswerComponent
@@ -614,8 +557,6 @@ public class QuestionnaireResponse extends DomainResource {
           this.definition = castToUri(value); // UriType
         } else if (name.equals("text")) {
           this.text = castToString(value); // StringType
-        } else if (name.equals("subject")) {
-          this.subject = castToReference(value); // Reference
         } else if (name.equals("answer")) {
           this.getAnswer().add((QuestionnaireResponseItemAnswerComponent) value);
         } else if (name.equals("item")) {
@@ -631,7 +572,6 @@ public class QuestionnaireResponse extends DomainResource {
         case -1102667083:  return getLinkIdElement();
         case -1014418093:  return getDefinitionElement();
         case 3556653:  return getTextElement();
-        case -1867885268:  return getSubject(); 
         case -1412808770:  return addAnswer(); 
         case 3242771:  return addItem(); 
         default: return super.makeProperty(hash, name);
@@ -645,7 +585,6 @@ public class QuestionnaireResponse extends DomainResource {
         case -1102667083: /*linkId*/ return new String[] {"string"};
         case -1014418093: /*definition*/ return new String[] {"uri"};
         case 3556653: /*text*/ return new String[] {"string"};
-        case -1867885268: /*subject*/ return new String[] {"Reference"};
         case -1412808770: /*answer*/ return new String[] {};
         case 3242771: /*item*/ return new String[] {"@QuestionnaireResponse.item"};
         default: return super.getTypesForProperty(hash, name);
@@ -664,10 +603,6 @@ public class QuestionnaireResponse extends DomainResource {
         else if (name.equals("text")) {
           throw new FHIRException("Cannot call addChild on a primitive type QuestionnaireResponse.text");
         }
-        else if (name.equals("subject")) {
-          this.subject = new Reference();
-          return this.subject;
-        }
         else if (name.equals("answer")) {
           return addAnswer();
         }
@@ -684,7 +619,6 @@ public class QuestionnaireResponse extends DomainResource {
         dst.linkId = linkId == null ? null : linkId.copy();
         dst.definition = definition == null ? null : definition.copy();
         dst.text = text == null ? null : text.copy();
-        dst.subject = subject == null ? null : subject.copy();
         if (answer != null) {
           dst.answer = new ArrayList<QuestionnaireResponseItemAnswerComponent>();
           for (QuestionnaireResponseItemAnswerComponent i : answer)
@@ -706,8 +640,7 @@ public class QuestionnaireResponse extends DomainResource {
           return false;
         QuestionnaireResponseItemComponent o = (QuestionnaireResponseItemComponent) other_;
         return compareDeep(linkId, o.linkId, true) && compareDeep(definition, o.definition, true) && compareDeep(text, o.text, true)
-           && compareDeep(subject, o.subject, true) && compareDeep(answer, o.answer, true) && compareDeep(item, o.item, true)
-          ;
+           && compareDeep(answer, o.answer, true) && compareDeep(item, o.item, true);
       }
 
       @Override
@@ -723,7 +656,7 @@ public class QuestionnaireResponse extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(linkId, definition, text
-          , subject, answer, item);
+          , answer, item);
       }
 
   public String fhirType() {
@@ -1278,7 +1211,7 @@ public class QuestionnaireResponse extends DomainResource {
     /**
      * Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.
      */
-    @Child(name = "author", type = {Device.class, Practitioner.class, Patient.class, RelatedPerson.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Device.class, Practitioner.class, PractitionerRole.class, Patient.class, RelatedPerson.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Person who received and recorded the answers", formalDefinition="Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system." )
     protected Reference author;
 
@@ -1835,7 +1768,7 @@ public class QuestionnaireResponse extends DomainResource {
         children.add(new Property("subject", "Reference(Any)", "The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care with primary association to the questionnaire response.", 0, 1, context));
         children.add(new Property("authored", "dateTime", "The date and/or time that this set of answers were last changed.", 0, 1, authored));
-        children.add(new Property("author", "Reference(Device|Practitioner|Patient|RelatedPerson)", "Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.", 0, 1, author));
+        children.add(new Property("author", "Reference(Device|Practitioner|PractitionerRole|Patient|RelatedPerson|Organization)", "Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.", 0, 1, author));
         children.add(new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "The person who answered the questions about the subject.", 0, 1, source));
         children.add(new Property("item", "", "A group or question item from the original questionnaire for which answers are provided.", 0, java.lang.Integer.MAX_VALUE, item));
       }
@@ -1851,7 +1784,7 @@ public class QuestionnaireResponse extends DomainResource {
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Any)", "The subject of the questionnaire response.  This could be a patient, organization, practitioner, device, etc.  This is who/what the answers apply to, but is not necessarily the source of information.", 0, 1, subject);
         case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter or episode of care with primary association to the questionnaire response.", 0, 1, context);
         case 1433073514: /*authored*/  return new Property("authored", "dateTime", "The date and/or time that this set of answers were last changed.", 0, 1, authored);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Device|Practitioner|Patient|RelatedPerson)", "Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.", 0, 1, author);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Device|Practitioner|PractitionerRole|Patient|RelatedPerson|Organization)", "Person who received the answers to the questions in the QuestionnaireResponse and recorded them in the system.", 0, 1, author);
         case -896505829: /*source*/  return new Property("source", "Reference(Patient|Practitioner|RelatedPerson)", "The person who answered the questions about the subject.", 0, 1, source);
         case 3242771: /*item*/  return new Property("item", "", "A group or question item from the original questionnaire for which answers are provided.", 0, java.lang.Integer.MAX_VALUE, item);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2229,7 +2162,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire response", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="author", path="QuestionnaireResponse.author", description="The author of the questionnaire response", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -2255,7 +2188,7 @@ public class QuestionnaireResponse extends DomainResource {
    * Path: <b>QuestionnaireResponse.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject", description="The patient that is the subject of the questionnaire response", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="QuestionnaireResponse.subject.where(resolve() is Patient)", description="The patient that is the subject of the questionnaire response", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>

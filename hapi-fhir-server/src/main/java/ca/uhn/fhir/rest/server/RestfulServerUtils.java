@@ -78,9 +78,9 @@ public class RestfulServerUtils {
 		}
 
 		if (summaryMode != null) {
-			if (summaryMode.contains(SummaryEnum.COUNT)) {
+			if (summaryMode.contains(SummaryEnum.COUNT) && summaryMode.size() == 1) {
 				parser.setEncodeElements(Collections.singleton("Bundle.total"));
-			} else if (summaryMode.contains(SummaryEnum.TEXT)) {
+			} else if (summaryMode.contains(SummaryEnum.TEXT) && summaryMode.size() == 1) {
 				parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
 			} else {
 				parser.setSuppressNarratives(summaryMode.contains(SummaryEnum.DATA));
@@ -644,9 +644,11 @@ public class RestfulServerUtils {
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
 			if (fullId != null && fullId.hasVersionIdPart()) {
-				response.addHeader(Constants.HEADER_ETAG, "W/\"" + fullId.getVersionIdPart() + '"');
+				String versionIdPart = fullId.getVersionIdPart();
+				response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
 			} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
-				response.addHeader(Constants.HEADER_ETAG, "W/\"" + theResource.getMeta().getVersionId() + '"');
+				String versionId = theResource.getMeta().getVersionId();
+				response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
 			}
 		}
 
@@ -686,7 +688,7 @@ public class RestfulServerUtils {
 			responseEncoding = new ResponseEncoding(theServer.getFhirContext(), theServer.getDefaultResponseEncoding(), null);
 		}
 
-		boolean encodingDomainResourceAsText = theSummaryMode.contains(SummaryEnum.TEXT);
+		boolean encodingDomainResourceAsText = theSummaryMode.size() == 1 && theSummaryMode.contains(SummaryEnum.TEXT);
 		if (encodingDomainResourceAsText) {
 			/*
 			 * If the user requests "text" for a bundle, only suppress the non text elements in the Element.entry.resource
@@ -729,7 +731,15 @@ public class RestfulServerUtils {
 		if (theResource == null) {
 			// No response is being returned
 		} else if (encodingDomainResourceAsText && theResource instanceof IResource) {
+			// DSTU2
 			writer.append(((IResource) theResource).getText().getDiv().getValueAsString());
+		} else if (encodingDomainResourceAsText && theResource instanceof IDomainResource) {
+			// DSTU3+
+			try {
+				writer.append(((IDomainResource) theResource).getText().getDivAsString());
+			} catch (Exception e) {
+				throw new InternalErrorException(e);
+			}
 		} else {
 			FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
 			IParser parser = getNewParser(theServer.getFhirContext(), forVersion, theRequestDetails);
@@ -737,6 +747,10 @@ public class RestfulServerUtils {
 		}
 		//FIXME resource leak
 		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
+	}
+
+	public static String createEtag(String theVersionId) {
+		return "W/\"" + theVersionId + '"';
 	}
 
 	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {

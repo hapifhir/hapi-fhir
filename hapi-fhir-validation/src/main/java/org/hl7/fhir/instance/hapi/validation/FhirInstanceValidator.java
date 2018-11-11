@@ -24,6 +24,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.convertors.NullVersionConverterAdvisor40;
 import org.hl7.fhir.convertors.VersionConvertorAdvisor40;
 import org.hl7.fhir.convertors.VersionConvertor_10_40;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -38,6 +39,7 @@ import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.formats.IParser;
 import org.hl7.fhir.r4.formats.ParserType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.hl7.fhir.r4.utils.INarrativeGenerator;
@@ -500,6 +502,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 					}
 				}
 			});
+		private Parameters myExpansionProfile;
 
 		public WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
 			myWrap = theWorkerContext;
@@ -509,6 +512,16 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public List<org.hl7.fhir.r4.model.MetadataResource> allConformanceResources() {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Parameters getExpansionParameters() {
+			return myExpansionProfile;
+		}
+
+		@Override
+		public void setExpansionProfile(Parameters expParameters) {
+			 myExpansionProfile = expParameters;
 		}
 
 		@Override
@@ -581,7 +594,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandVS(org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent inc, boolean heirarchical) throws TerminologyServiceException {
+		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent inc, boolean heirarchical) throws TerminologyServiceException {
 			ValueSet.ConceptSetComponent convertedInc = null;
 			if (inc != null) {
 				try {
@@ -592,15 +605,18 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			}
 
 			ValueSet.ValueSetExpansionComponent expansion = myWrap.expandVS(convertedInc);
-			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent retVal = null;
+			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent valueSetExpansionComponent = null;
 			if (expansion != null) {
 				try {
-					retVal = new VersionConvertor_10_40(myAdvisor).convertValueSetExpansionComponent(expansion);
+					valueSetExpansionComponent = new VersionConvertor_10_40(myAdvisor).convertValueSetExpansionComponent(expansion);
 				} catch (FHIRException e) {
 					throw new InternalErrorException(e);
 				}
 			}
-			return retVal;
+
+			ValueSetExpander.ValueSetExpansionOutcome outcome = new ValueSetExpander.ValueSetExpansionOutcome(new org.hl7.fhir.r4.model.ValueSet());
+			outcome.getValueset().setExpansion(valueSetExpansionComponent);
+			return outcome;
 		}
 
 		@Override
@@ -651,15 +667,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			return myConverter;
 		}
 
-		@Override
-		public org.hl7.fhir.r4.model.ExpansionProfile getExpansionProfile() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setExpansionProfile(org.hl7.fhir.r4.model.ExpansionProfile expProfile) {
-			throw new UnsupportedOperationException();
-		}
 
 		@Override
 		public INarrativeGenerator getNarrativeGenerator(String prefix, String basePath) {
@@ -689,6 +696,21 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public org.hl7.fhir.r4.model.StructureMap getTransform(String url) {
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getOverrideVersionNs() {
+			return null;
+		}
+
+		@Override
+		public void setOverrideVersionNs(String value) {
+
+		}
+
+		@Override
+		public org.hl7.fhir.r4.model.StructureDefinition fetchTypeDefinition(String typeName) {
+			return fetchResource(org.hl7.fhir.r4.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+typeName);
 		}
 
 		@Override
@@ -752,6 +774,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
+		public ILoggingService getLogger() {
+			return null;
+		}
+
+		@Override
 		public boolean supportsSystem(String system) throws TerminologyServiceException {
 			return myWrap.supportsSystem(system);
 		}
@@ -785,6 +812,22 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			}
 
 			org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display, convertedVs);
+			return convertValidationResult(result);
+		}
+
+		@Override
+		public ValidationResult validateCode(String code, org.hl7.fhir.r4.model.ValueSet vs) {
+			ValueSet convertedVs = null;
+			try {
+				if (vs != null) {
+					VersionConvertorAdvisor40 advisor40 = new NullVersionConverterAdvisor40();
+					convertedVs = new VersionConvertor_10_40(advisor40).convertValueSet(vs);
+				}
+			} catch (FHIRException e) {
+				throw new InternalErrorException(e);
+			}
+
+			org.hl7.fhir.instance.utils.IWorkerContext.ValidationResult result = myWrap.validateCode(null, code, null, convertedVs);
 			return convertValidationResult(result);
 		}
 

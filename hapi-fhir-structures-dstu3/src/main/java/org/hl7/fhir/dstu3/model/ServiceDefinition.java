@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The ServiceDefinition describes a unit of decision support functionality that is made available as a service, such as immunization modules or drug-drug interaction checking.
  */
-@ResourceDef(name="ServiceDefinition", profile="http://hl7.org/fhir/Profile/ServiceDefinition")
+@ResourceDef(name="ServiceDefinition", profile="http://hl7.org/fhir/StructureDefinition/ServiceDefinition")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "description", "purpose", "usage", "approvalDate", "lastReviewDate", "effectivePeriod", "useContext", "jurisdiction", "topic", "contributor", "contact", "copyright", "relatedArtifact", "trigger", "dataRequirement", "operationDefinition"})
 public class ServiceDefinition extends MetadataResource {
 

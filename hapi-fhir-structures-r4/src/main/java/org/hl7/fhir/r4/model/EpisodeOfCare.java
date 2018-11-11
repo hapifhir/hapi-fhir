@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * An association between a patient and an organization / healthcare provider(s) during which time encounters may occur. The managing organization assumes a level of responsibility for the patient during this time.
  */
-@ResourceDef(name="EpisodeOfCare", profile="http://hl7.org/fhir/Profile/EpisodeOfCare")
+@ResourceDef(name="EpisodeOfCare", profile="http://hl7.org/fhir/StructureDefinition/EpisodeOfCare")
 public class EpisodeOfCare extends DomainResource {
 
     public enum EpisodeOfCareStatus {
@@ -1877,7 +1877,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.diagnosis.condition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="condition", path="EpisodeOfCare.diagnosis.condition", description="Conditions/problems/diagnoses this episode of care is for", type="reference", target={Condition.class } )
+  @SearchParamDefinition(name="condition", path="EpisodeOfCare.diagnosis.condition.where(resolve() is Condition)", description="Conditions/problems/diagnoses this episode of care is for", type="reference", target={Condition.class } )
   public static final String SP_CONDITION = "condition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>condition</b>
@@ -1896,32 +1896,6 @@ public class EpisodeOfCare extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_CONDITION = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:condition").toLocked();
 
  /**
-   * Search parameter: <b>incomingreferral</b>
-   * <p>
-   * Description: <b>Incoming Referral Request</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>EpisodeOfCare.referralRequest</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="incomingreferral", path="EpisodeOfCare.referralRequest", description="Incoming Referral Request", type="reference", target={ServiceRequest.class } )
-  public static final String SP_INCOMINGREFERRAL = "incomingreferral";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>incomingreferral</b>
-   * <p>
-   * Description: <b>Incoming Referral Request</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>EpisodeOfCare.referralRequest</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INCOMINGREFERRAL = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INCOMINGREFERRAL);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>EpisodeOfCare:incomingreferral</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_INCOMINGREFERRAL = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:incomingreferral").toLocked();
-
- /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>The patient who is the focus of this episode of care</b><br>
@@ -1929,7 +1903,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient", description="The patient who is the focus of this episode of care", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="EpisodeOfCare.patient.where(resolve() is Patient)", description="The patient who is the focus of this episode of care", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -1955,7 +1929,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="EpisodeOfCare.managingOrganization", description="The organization that has assumed the specific responsibilities of this EpisodeOfCare", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="organization", path="EpisodeOfCare.managingOrganization.where(resolve() is Organization)", description="The organization that has assumed the specific responsibilities of this EpisodeOfCare", type="reference", target={Organization.class } )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
@@ -2001,7 +1975,7 @@ public class EpisodeOfCare extends DomainResource {
    * Path: <b>EpisodeOfCare.careManager</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager", description="Care manager/care coordinator for the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="care-manager", path="EpisodeOfCare.careManager.where(resolve() is Practitioner)", description="Care manager/care coordinator for the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
   public static final String SP_CARE_MANAGER = "care-manager";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>care-manager</b>
@@ -2038,6 +2012,32 @@ public class EpisodeOfCare extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_STATUS);
+
+ /**
+   * Search parameter: <b>incoming-referral</b>
+   * <p>
+   * Description: <b>Incoming Referral Request</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>EpisodeOfCare.referralRequest</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="incoming-referral", path="EpisodeOfCare.referralRequest.where(resolve() is ServiceRequest)", description="Incoming Referral Request", type="reference", target={ServiceRequest.class } )
+  public static final String SP_INCOMING_REFERRAL = "incoming-referral";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>incoming-referral</b>
+   * <p>
+   * Description: <b>Incoming Referral Request</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>EpisodeOfCare.referralRequest</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INCOMING_REFERRAL = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INCOMING_REFERRAL);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>EpisodeOfCare:incoming-referral</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INCOMING_REFERRAL = new ca.uhn.fhir.model.api.Include("EpisodeOfCare:incoming-referral").toLocked();
 
 
 }

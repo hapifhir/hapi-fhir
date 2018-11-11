@@ -21,6 +21,8 @@ import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.ElementDecoration;
+import org.hl7.fhir.utilities.ElementDecoration.DecorationType;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -470,9 +472,30 @@ public class Element extends Base {
 		return this;
 	}
 
-	public void markValidation(StructureDefinition profile, ElementDefinition definition) {
+	public void clearDecorations() {
+	  clearUserData("fhir.decorations");
+	  for (Element e : children)
+	    e.clearDecorations();	  
 	}
 	
+	public void markValidation(StructureDefinition profile, ElementDefinition definition) {
+	  @SuppressWarnings("unchecked")
+    List<ElementDecoration> decorations = (List<ElementDecoration>) getUserData("fhir.decorations");
+	  if (decorations == null) {
+	    decorations = new ArrayList<ElementDecoration>();
+	    setUserData("fhir.decorations", decorations);
+	  }
+	  decorations.add(new ElementDecoration(DecorationType.TYPE, profile.getUserString("path"), definition.getPath()));
+	  if (tail(definition.getId()).contains(":")) {
+	    String[] details = tail(definition.getId()).split("\\:");
+	    decorations.add(new ElementDecoration(DecorationType.SLICE, null, details[1]));
+	  }
+	}
+	
+  private String tail(String id) {
+    return id.contains(".") ? id.substring(id.lastIndexOf(".")+1) : id;
+  }
+
   public Element getNamedChild(String name) {
 	  if (children == null)
   		return null;
@@ -660,7 +683,7 @@ public class Element extends Base {
     private List<ElementDefinition> children;
     public ElementSortComparator(Element e, Property property) {
       String tn = e.getType();
-      StructureDefinition sd = property.getContext().fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(tn));
+      StructureDefinition sd = property.getContext().fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(tn, property.getContext().getOverrideVersionNs()));
       if (sd != null && !sd.getAbstract())
         children = sd.getSnapshot().getElement();
       else

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -45,6 +45,8 @@ public class MeasureReportTypeEnumFactory implements EnumFactory<MeasureReportTy
       return MeasureReportType.SUBJECTLIST;
     if ("summary".equals(codeString))
       return MeasureReportType.SUMMARY;
+    if ("data-collection".equals(codeString))
+      return MeasureReportType.DATACOLLECTION;
     throw new IllegalArgumentException("Unknown MeasureReportType code '"+codeString+"'");
   }
 
@@ -55,6 +57,8 @@ public class MeasureReportTypeEnumFactory implements EnumFactory<MeasureReportTy
       return "subject-list";
     if (code == MeasureReportType.SUMMARY)
       return "summary";
+    if (code == MeasureReportType.DATACOLLECTION)
+      return "data-collection";
     return "?";
   }
 

@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -17,7 +16,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.util.Properties;
 
 /*-
  * #%L
@@ -28,9 +26,9 @@ import java.util.Properties;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -76,20 +74,17 @@ public enum DriverTypeEnum {
 			throw new InternalErrorException("Unable to find driver class: " + myDriverClassName, e);
 		}
 
-		SingleConnectionDataSource dataSource = new SingleConnectionDataSource(){
+		BasicDataSource dataSource = new BasicDataSource(){
 			@Override
-			protected Connection getConnectionFromDriver(Properties props) throws SQLException {
-				Connection connect = driver.connect(theUrl, props);
-				assert connect != null;
-				return connect;
+			public Connection getConnection() throws SQLException {
+				ourLog.debug("Creating new DB connection");
+				return super.getConnection();
 			}
 		};
-		dataSource.setAutoCommit(false);
 		dataSource.setDriverClassName(myDriverClassName);
 		dataSource.setUrl(theUrl);
 		dataSource.setUsername(theUsername);
 		dataSource.setPassword(thePassword);
-		dataSource.setSuppressClose(true);
 
 		DataSourceTransactionManager transactionManager = new DataSourceTransactionManager();
 		transactionManager.setDataSource(dataSource);

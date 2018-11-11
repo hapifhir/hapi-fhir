@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CodeSearchSupport {
 
         /**
-         * The search for code on ValueSet only includes codes explicitly detailed on includes or expansions
+         * The search for code on ValueSet only includes codes explicitly detailed on includes or expansions.
          */
         EXPLICIT, 
         /**
-         * The search for code on ValueSet only includes all codes based on the expansion of the value set
+         * The search for code on ValueSet only includes all codes based on the expansion of the value set.
          */
         ALL, 
         /**
@@ -69,8 +69,8 @@ public enum CodeSearchSupport {
         }
         public String getDefinition() {
           switch (this) {
-            case EXPLICIT: return "The search for code on ValueSet only includes codes explicitly detailed on includes or expansions";
-            case ALL: return "The search for code on ValueSet only includes all codes based on the expansion of the value set";
+            case EXPLICIT: return "The search for code on ValueSet only includes codes explicitly detailed on includes or expansions.";
+            case ALL: return "The search for code on ValueSet only includes all codes based on the expansion of the value set.";
             default: return "?";
           }
         }

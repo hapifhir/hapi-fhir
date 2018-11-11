@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import org.apache.commons.lang3.SerializationUtils;
+import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -39,85 +42,86 @@ import static org.apache.commons.lang3.StringUtils.left;
 })
 public class Search implements Serializable {
 
-	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	@SuppressWarnings("WeakerAccess")
 	public static final int UUID_COLUMN_LENGTH = 36;
+	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
-
+	@OptimisticLock(excluded = true)
+	@Column(name = "SEARCH_DELETED", nullable = true)
+	private Boolean myDeleted;
 	@Column(name = "FAILURE_CODE", nullable = true)
 	private Integer myFailureCode;
-
 	@Column(name = "FAILURE_MESSAGE", length = FAILURE_MESSAGE_LENGTH, nullable = true)
 	private String myFailureMessage;
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH")
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
-
 	@OneToMany(mappedBy = "mySearch")
 	private Collection<SearchInclude> myIncludes;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedHigh;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_LOW", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedLow;
-
 	@Column(name = "NUM_FOUND", nullable = false)
 	private int myNumFound;
-
 	@Column(name = "PREFERRED_PAGE_SIZE", nullable = true)
 	private Integer myPreferredPageSize;
-
 	@Column(name = "RESOURCE_ID", nullable = true)
 	private Long myResourceId;
-
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
-
-	@OneToMany(mappedBy = "mySearch")
+	@OneToMany(mappedBy = "mySearch", fetch = FetchType.LAZY)
 	private Collection<SearchResult> myResults;
-
 	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SEARCH_LAST_RETURNED", nullable = false, updatable = false)
+	@OptimisticLock(excluded = true)
 	private Date mySearchLastReturned;
-
 	@Lob()
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
-
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
-
 	@Enumerated(EnumType.ORDINAL)
 	@Column(name = "SEARCH_TYPE", nullable = false)
 	private SearchTypeEnum mySearchType;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "SEARCH_STATUS", nullable = false, length = 10)
 	private SearchStatusEnum myStatus;
-
 	@Column(name = "TOTAL_COUNT", nullable = true)
 	private Integer myTotalCount;
-
 	@Column(name = "SEARCH_UUID", length = UUID_COLUMN_LENGTH, nullable = false, updatable = false)
 	private String myUuid;
+	@SuppressWarnings("unused")
+	@Version
+	@Column(name = "OPTLOCK_VERSION", nullable = true)
+	private Integer myVersion;
+	@Lob
+	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
+	private byte[] mySearchParameterMap;
 
 	/**
 	 * Constructor
 	 */
 	public Search() {
 		super();
+	}
+
+	public Boolean getDeleted() {
+		return myDeleted;
+	}
+
+	public void setDeleted(Boolean theDeleted) {
+		myDeleted = theDeleted;
 	}
 
 	public Date getCreated() {
@@ -275,7 +279,7 @@ public class Search implements Serializable {
 	}
 
 	private Set<Include> toIncList(boolean theWantReverse) {
-		HashSet<Include> retVal = new HashSet<Include>();
+		HashSet<Include> retVal = new HashSet<>();
 		for (SearchInclude next : getIncludes()) {
 			if (theWantReverse == next.isReverse()) {
 				retVal.add(new Include(next.getInclude(), next.isRecurse()));
@@ -294,5 +298,17 @@ public class Search implements Serializable {
 
 	public void addInclude(SearchInclude theInclude) {
 		getIncludes().add(theInclude);
+	}
+
+	public Integer getVersion() {
+		return myVersion;
+	}
+
+	public SearchParameterMap getSearchParameterMap() {
+		return SerializationUtils.deserialize(mySearchParameterMap);
+	}
+
+	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
+		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
 	}
 }

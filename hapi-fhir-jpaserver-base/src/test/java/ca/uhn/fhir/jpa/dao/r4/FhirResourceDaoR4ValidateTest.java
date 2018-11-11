@@ -131,7 +131,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		input.getMeta().getProfile().add(new CanonicalType(sd.getUrl()));
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
-		input.getContext().setReference("http://foo.com/Encounter/9");
+		input.getEncounter().setReference("http://foo.com/Encounter/9");
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
@@ -171,7 +171,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		input.getMeta().getProfile().add(new CanonicalType(profileUri));
 
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
-		input.getContext().setReference("http://foo.com/Encounter/9");
+		input.getEncounter().setReference("http://foo.com/Encounter/9");
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 

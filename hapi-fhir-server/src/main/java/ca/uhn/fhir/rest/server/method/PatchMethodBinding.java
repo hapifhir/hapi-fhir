@@ -38,6 +38,8 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import javax.annotation.Nonnull;
+
 /**
  * Base class for an operation that has a resource type but not a resource body in the
  * request body
@@ -86,6 +88,7 @@ public class PatchMethodBinding extends BaseOutcomeReturningMethodBindingWithRes
 		return retVal;
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.PATCH;

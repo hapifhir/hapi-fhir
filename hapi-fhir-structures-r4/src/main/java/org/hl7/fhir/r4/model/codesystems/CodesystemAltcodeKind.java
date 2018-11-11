@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,23 +37,23 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CodesystemAltcodeKind {
 
         /**
-         * The code is an alternative code that can be used in any of the circumstances that the primary code can be used
+         * The code is an alternative code that can be used in any of the circumstances that the primary code can be used.
          */
         ALTERNATE, 
         /**
-         * The code should no longer be used, but was used in the past
+         * The code should no longer be used, but was used in the past.
          */
         DEPRECATED, 
         /**
-         * The code is an alternative to be used when a case insensitive code is required (when the primary codes are case sensitive)
+         * The code is an alternative to be used when a case insensitive code is required (when the primary codes are case sensitive).
          */
         CASEINSENSITIVE, 
         /**
-         * The code is an alternative to be used when a case sensitive code is required (when the primary codes are case insensitive)
+         * The code is an alternative to be used when a case sensitive code is required (when the primary codes are case insensitive).
          */
         CASESENSITIVE, 
         /**
-         * The code is an alternative for the primary code that is built using the expression grammar defined by the code system
+         * The code is an alternative for the primary code that is built using the expression grammar defined by the code system.
          */
         EXPRESSION, 
         /**
@@ -86,15 +86,15 @@ public enum CodesystemAltcodeKind {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/codesystem-altcode-kind";
+          return "http://terminology.hl7.org/CodeSystem/codesystem-altcode-kind";
         }
         public String getDefinition() {
           switch (this) {
-            case ALTERNATE: return "The code is an alternative code that can be used in any of the circumstances that the primary code can be used";
-            case DEPRECATED: return "The code should no longer be used, but was used in the past";
-            case CASEINSENSITIVE: return "The code is an alternative to be used when a case insensitive code is required (when the primary codes are case sensitive)";
-            case CASESENSITIVE: return "The code is an alternative to be used when a case sensitive code is required (when the primary codes are case insensitive)";
-            case EXPRESSION: return "The code is an alternative for the primary code that is built using the expression grammar defined by the code system";
+            case ALTERNATE: return "The code is an alternative code that can be used in any of the circumstances that the primary code can be used.";
+            case DEPRECATED: return "The code should no longer be used, but was used in the past.";
+            case CASEINSENSITIVE: return "The code is an alternative to be used when a case insensitive code is required (when the primary codes are case sensitive).";
+            case CASESENSITIVE: return "The code is an alternative to be used when a case sensitive code is required (when the primary codes are case insensitive).";
+            case EXPRESSION: return "The code is an alternative for the primary code that is built using the expression grammar defined by the code system.";
             default: return "?";
           }
         }

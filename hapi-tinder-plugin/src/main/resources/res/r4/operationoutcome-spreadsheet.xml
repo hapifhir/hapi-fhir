@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
+﻿<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
   <LastAuthor>Grahame Grieve</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2015-07-27T21:05:12Z</LastSaved>
+  <LastSaved>2018-08-07T02:18:22Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -780,7 +780,7 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R101C26"/>
   </Names>
-  <Table ss:ExpandedColumnCount="26" ss:ExpandedRowCount="101" ss:StyleID="s68" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="27" ss:ExpandedRowCount="101" ss:StyleID="s68" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s69" ss:Width="227.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="77.0"/>
    <Column ss:StyleID="s68" ss:Width="29.0"/>
@@ -791,7 +791,6 @@
    <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="27.0"/>
    <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s68" ss:Width="107.0"/>
    <Column ss:AutoFitWidth="0" ss:Index="11" ss:StyleID="s68" ss:Width="81.0"/>
-   <Column ss:Span="1" ss:StyleID="s68" ss:Width="51.0"/>
    <Column ss:AutoFitWidth="0" ss:Index="14" ss:StyleID="s68" ss:Width="80.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="120.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s68" ss:Width="161.0"/>
@@ -830,6 +829,7 @@
     <Cell ss:StyleID="s75"><Data ss:Type="String">UML</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Guidance for class location in UML diagram.  Only specify on root. See wiki for guidance</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s75"><Data ss:Type="String">Display Hint</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Provides guidance to narrative auto-generator.  Check Wiki documentation</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s76"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Not published</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">Standards-Status</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="135">
     <Cell ss:StyleID="s77"><Data ss:Type="String">OperationOutcome</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -893,8 +893,8 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Indicates whether the OperationOutcome indicates a failure or a success</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">IssueSeverity</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1014,10 +1014,10 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">Path of element(s) related to issue</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">Deprecated: Path of element(s) related to issue</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. &#10;&#10;For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Allows systems to highlight or otherwise guide users to elements implicated in issues to allow them to be fixed more easily.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">The root of the XPath is the resource or bundle that generated OperationOutcome.  Each XPath SHALL resolve to a single node.  The XPath syntax is used whether the referenced instance is expressed in XML or JSON. Note that expression is being trialed as an alternative to XPath</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">The root of the XPath is the resource or bundle that generated OperationOutcome.  Each XPath SHALL resolve to a single node.  This element is deprecated, and is being replaced by expression</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">./location[parent::AcknowledgmentDetail]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1026,6 +1026,7 @@
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">deprecated</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="135">
     <Cell ss:StyleID="s86"><Data ss:Type="String">OperationOutcome.issue.expression</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3647,9 +3648,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>2</TopRowBottomPane>
+   <TopRowBottomPane>6</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>7</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -5546,7 +5547,7 @@
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s140"><Data ss:Type="String">All OK</Data></Cell>
     <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">An operation outcome that would be returned after a successful operation</Data></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">An operation outcome that would be returned after a successful operation (no issues)</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">allok</Data></Cell>
     <Cell ss:StyleID="s78"><Data ss:Type="String">operationoutcome-example-allok.xml</Data></Cell>
     <Cell ss:StyleID="s130"/>
@@ -5905,8 +5906,7 @@
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="31" ss:StyleID="s111" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s111" ss:Width="114.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="275.0"/>
-   <Column ss:StyleID="s111" ss:Width="51.0"/>
-   <Column ss:StyleID="s111" ss:Width="45.0"/>
+   <Column ss:Index="4" ss:StyleID="s111" ss:Width="45.0"/>
    <Column ss:StyleID="s111" ss:Width="146.0"/>
    <Column ss:StyleID="s111" ss:Width="173.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="98.0"/>
@@ -6980,12 +6980,12 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='issue-type'!R1C1:R1C9"/>
   </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="53" ss:StyleID="s136" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="55" ss:StyleID="s136" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s136" ss:Width="80.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s136" ss:Width="35.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s136" ss:Width="155.0"/>
    <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s136" ss:Width="80.0"/>
-   <Column ss:AutoFitWidth="0" ss:Index="6" ss:StyleID="s136" ss:Width="245.0"/>
+   <Column ss:AutoFitWidth="0" ss:Index="6" ss:StyleID="s136" ss:Width="390.0"/>
    <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s136" ss:Width="84.0"/>
    <Column ss:AutoFitWidth="0" ss:Index="9" ss:StyleID="s136" ss:Width="242.0"/>
    <Row ss:AutoFitHeight="0" ss:Height="16">
@@ -7038,7 +7038,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">#1</Data></Cell>
     <Cell ss:StyleID="s151"><Data ss:Type="String">Element value invalid</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">An element value is invalid.</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">An element or header value is invalid.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7137,7 +7137,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">#11</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">Content not supported</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">The resource or profile is not supported.</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The interaction, operation, resource or profile is not supported.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7154,12 +7154,34 @@
     <Cell ss:StyleID="s141"/>
    </Row>
    <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s140"><Data ss:Type="String">multiple-matches</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">30</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">#11</Data></Cell>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">Multiple Matches</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Multiple matching records were found when the operation required only one match</Data></Cell>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s141"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s140"><Data ss:Type="String">not-found</Data></Cell>
     <Cell ss:StyleID="s130"><Data ss:Type="Number">14</Data></Cell>
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">#11</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">Not Found</Data></Cell>
     <Cell ss:StyleID="s151"><Data ss:Type="String">The reference provided was not found. In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the content is not found further into the application architecture.</Data></Cell>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s141"/>
+   </Row>
+   <Row ss:AutoFitHeight="0">
+    <Cell ss:StyleID="s140"><Data ss:Type="String">deleted</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">29</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">#14</Data></Cell>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">Deleted</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The reference pointed to content (usually a resource) that has been deleted</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7214,7 +7236,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">#11</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">Business Rule Violation</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">The content/operation failed to pass some business rule, and so could not proceed.</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The content/operation failed to pass some business rule and so could not proceed.</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7225,18 +7247,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">#11</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">Edit Version Conflict</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">Content could not be accepted because of an edit conflict (i.e. version aware updates) (In a pure RESTful environment, this would be an HTTP 404 error, but this code may be used where the conflict is discovered further into the application architecture.)</Data></Cell>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s130"/>
-    <Cell ss:StyleID="s141"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s140"><Data ss:Type="String">incomplete</Data></Cell>
-    <Cell ss:StyleID="s130"><Data ss:Type="Number">27</Data></Cell>
-    <Cell ss:StyleID="s117"/>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">#11</Data></Cell>
-    <Cell ss:StyleID="s140"><Data ss:Type="String">Incomplete Results</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">Not all data sources typically accessed could be reached, or responded in time, so the returned information might not be complete.</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Content could not be accepted because of an edit conflict (i.e. version aware updates). (In a pure RESTful environment, this would be an HTTP 409 error, but this code may be used where the conflict is discovered further into the application architecture.)</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7269,7 +7280,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">#20</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">No Store Available</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">The persistent store is unavailable; e.g. the database is down for maintenance or similar action.</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">The persistent store is unavailable; e.g. the database is down for maintenance or similar action, and the interaction or operation cannot be processed</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7280,7 +7291,7 @@
     <Cell ss:StyleID="s117"/>
     <Cell ss:StyleID="s151"><Data ss:Type="String">#20</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">Exception</Data></Cell>
-    <Cell ss:StyleID="s151"><Data ss:Type="String">An unexpected internal error has occurred.</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">y</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>
@@ -7292,6 +7303,17 @@
     <Cell ss:StyleID="s151"><Data ss:Type="String">#20</Data></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">Timeout</Data></Cell>
     <Cell ss:StyleID="s151"><Data ss:Type="String">An internal timeout has occurred.</Data></Cell>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s130"/>
+    <Cell ss:StyleID="s141"/>
+   </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s140"><Data ss:Type="String">incomplete</Data></Cell>
+    <Cell ss:StyleID="s130"><Data ss:Type="Number">27</Data></Cell>
+    <Cell ss:StyleID="s117"/>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">#20</Data></Cell>
+    <Cell ss:StyleID="s140"><Data ss:Type="String">Incomplete Results</Data></Cell>
+    <Cell ss:StyleID="s151"><Data ss:Type="String">Not all data sources typically accessed could be reached or responded in time, so the returned information might not be complete (applies to search interactions and some operations)</Data></Cell>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s130"/>
     <Cell ss:StyleID="s141"/>

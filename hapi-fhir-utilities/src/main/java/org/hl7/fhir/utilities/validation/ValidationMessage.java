@@ -48,6 +48,7 @@ public class ValidationMessage implements Comparator<ValidationMessage>, Compara
     Publisher, 
     Ontology, 
     ProfileComparer, 
+    TerminologyEngine,
     QuestionnaireResponseValidator
   }
 
@@ -121,6 +122,9 @@ public class ValidationMessage implements Comparator<ValidationMessage>, Compara
       case INFORMATION: return "Information";
       default: return "?";
       }
+    }
+    public boolean isError() {
+      return this == FATAL || this == ERROR;
     }
   }
 

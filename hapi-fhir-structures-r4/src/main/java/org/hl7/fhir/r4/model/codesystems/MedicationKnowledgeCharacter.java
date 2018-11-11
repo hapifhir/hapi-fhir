@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,31 +37,31 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedicationKnowledgeCharacter {
 
         /**
-         * Identyifying marks on product
+         * Identyifying marks on product.
          */
         IMPRINTCD, 
         /**
-         * Description of size of the product
+         * Description of size of the product.
          */
         SIZE, 
         /**
-         * Description of shape of the product
+         * Description of shape of the product.
          */
         SHAPE, 
         /**
-         * Description of color of the product
+         * Description of color of the product.
          */
         COLOR, 
         /**
-         * Description of coating of the product
+         * Description of coating of the product.
          */
         COATING, 
         /**
-         * Description of scoring of the product
+         * Description of scoring of the product.
          */
         SCORING, 
         /**
-         * Description of logo of the product
+         * Description of logo of the product.
          */
         LOGO, 
         /**
@@ -100,17 +100,17 @@ public enum MedicationKnowledgeCharacter {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medicationKnowledge-character";
+          return "http://terminology.hl7.org/CodeSystem/medicationKnowledge-character";
         }
         public String getDefinition() {
           switch (this) {
-            case IMPRINTCD: return "Identyifying marks on product";
-            case SIZE: return "Description of size of the product";
-            case SHAPE: return "Description of shape of the product";
-            case COLOR: return "Description of color of the product";
-            case COATING: return "Description of coating of the product";
-            case SCORING: return "Description of scoring of the product";
-            case LOGO: return "Description of logo of the product";
+            case IMPRINTCD: return "Identyifying marks on product.";
+            case SIZE: return "Description of size of the product.";
+            case SHAPE: return "Description of shape of the product.";
+            case COLOR: return "Description of color of the product.";
+            case COATING: return "Description of coating of the product.";
+            case SCORING: return "Description of scoring of the product.";
+            case LOGO: return "Description of logo of the product.";
             default: return "?";
           }
         }

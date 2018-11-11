@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Demographics and other administrative information about an individual or animal receiving care or other health-related services.
  */
-@ResourceDef(name="Patient", profile="http://hl7.org/fhir/Profile/Patient")
+@ResourceDef(name="Patient", profile="http://hl7.org/fhir/StructureDefinition/Patient")
 public class Patient extends DomainResource {
 
     public enum LinkType {
@@ -180,7 +180,7 @@ public class Patient extends DomainResource {
          */
         @Child(name = "relationship", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="The kind of relationship", formalDefinition="The nature of the relationship between the patient and the contact person." )
-        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/v2-0131")
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/patient-contactrelationship")
         protected List<CodeableConcept> relationship;
 
         /**
@@ -964,7 +964,7 @@ public class Patient extends DomainResource {
          * The type of link between this patient resource and another patient resource.
          */
         @Child(name = "type", type = {CodeType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="replaced-by | replaces | refer | seealso - type of link", formalDefinition="The type of link between this patient resource and another patient resource." )
+        @Description(shortDefinition="replaced-by | replaces | refer | seealso", formalDefinition="The type of link between this patient resource and another patient resource." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/link-type")
         protected Enumeration<LinkType> type;
 
@@ -1203,10 +1203,15 @@ public class Patient extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Whether this patient record is in active use.
+     * Whether this patient record is in active use. 
+Many systems use this property to mark as non-current patients, such as those that have not been seen for a period of time based on an organization's business rules.
+
+It is often used to filter patient lists to exclude inactive patients
+
+Deceased patients may also be marked as inactive for the same reasons, but may be active for some time after death.
      */
     @Child(name = "active", type = {BooleanType.class}, order=1, min=0, max=1, modifier=true, summary=true)
-    @Description(shortDefinition="Whether this patient's record is in active use", formalDefinition="Whether this patient record is in active use." )
+    @Description(shortDefinition="Whether this patient's record is in active use", formalDefinition="Whether this patient record is in active use. \nMany systems use this property to mark as non-current patients, such as those that have not been seen for a period of time based on an organization's business rules.\n\nIt is often used to filter patient lists to exclude inactive patients\n\nDeceased patients may also be marked as inactive for the same reasons, but may be active for some time after death." )
     protected BooleanType active;
 
     /**
@@ -1261,10 +1266,10 @@ public class Patient extends DomainResource {
     protected CodeableConcept maritalStatus;
 
     /**
-     * Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).
+     * Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).
      */
     @Child(name = "multipleBirth", type = {BooleanType.class, IntegerType.class}, order=9, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Whether patient is part of a multiple birth", formalDefinition="Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer)." )
+    @Description(shortDefinition="Whether patient is part of a multiple birth", formalDefinition="Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer)." )
     protected Type multipleBirth;
 
     /**
@@ -1382,7 +1387,12 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return {@link #active} (Whether this patient record is in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     * @return {@link #active} (Whether this patient record is in active use. 
+Many systems use this property to mark as non-current patients, such as those that have not been seen for a period of time based on an organization's business rules.
+
+It is often used to filter patient lists to exclude inactive patients
+
+Deceased patients may also be marked as inactive for the same reasons, but may be active for some time after death.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
      */
     public BooleanType getActiveElement() { 
       if (this.active == null)
@@ -1402,7 +1412,12 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @param value {@link #active} (Whether this patient record is in active use.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
+     * @param value {@link #active} (Whether this patient record is in active use. 
+Many systems use this property to mark as non-current patients, such as those that have not been seen for a period of time based on an organization's business rules.
+
+It is often used to filter patient lists to exclude inactive patients
+
+Deceased patients may also be marked as inactive for the same reasons, but may be active for some time after death.). This is the underlying object with id, value and extensions. The accessor "getActive" gives direct access to the value
      */
     public Patient setActiveElement(BooleanType value) { 
       this.active = value;
@@ -1410,14 +1425,24 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return Whether this patient record is in active use.
+     * @return Whether this patient record is in active use. 
+Many systems use this property to mark as non-current patients, such as those that have not been seen for a period of time based on an organization's business rules.
+
+It is often used to filter patient lists to exclude inactive patients
+
+Deceased patients may also be marked as inactive for the same reasons, but may be active for some time after death.
      */
     public boolean getActive() { 
       return this.active == null || this.active.isEmpty() ? false : this.active.getValue();
     }
 
     /**
-     * @param value Whether this patient record is in active use.
+     * @param value Whether this patient record is in active use. 
+Many systems use this property to mark as non-current patients, such as those that have not been seen for a period of time based on an organization's business rules.
+
+It is often used to filter patient lists to exclude inactive patients
+
+Deceased patients may also be marked as inactive for the same reasons, but may be active for some time after death.
      */
     public Patient setActive(boolean value) { 
         if (this.active == null)
@@ -1759,14 +1784,14 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
+     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).)
      */
     public Type getMultipleBirth() { 
       return this.multipleBirth;
     }
 
     /**
-     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
+     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).)
      */
     public BooleanType getMultipleBirthBooleanType() throws FHIRException { 
       if (this.multipleBirth == null)
@@ -1781,7 +1806,7 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
+     * @return {@link #multipleBirth} (Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).)
      */
     public IntegerType getMultipleBirthIntegerType() throws FHIRException { 
       if (this.multipleBirth == null)
@@ -1800,7 +1825,7 @@ public class Patient extends DomainResource {
     }
 
     /**
-     * @param value {@link #multipleBirth} (Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).)
+     * @param value {@link #multipleBirth} (Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).)
      */
     public Patient setMultipleBirth(Type value) { 
       if (value != null && !(value instanceof BooleanType || value instanceof IntegerType))
@@ -2131,7 +2156,7 @@ public class Patient extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "An identifier for this patient.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("active", "boolean", "Whether this patient record is in active use.", 0, 1, active));
+        children.add(new Property("active", "boolean", "Whether this patient record is in active use. \nMany systems use this property to mark as non-current patients, such as those that have not been seen for a period of time based on an organization's business rules.\n\nIt is often used to filter patient lists to exclude inactive patients\n\nDeceased patients may also be marked as inactive for the same reasons, but may be active for some time after death.", 0, 1, active));
         children.add(new Property("name", "HumanName", "A name associated with the individual.", 0, java.lang.Integer.MAX_VALUE, name));
         children.add(new Property("telecom", "ContactPoint", "A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.", 0, java.lang.Integer.MAX_VALUE, telecom));
         children.add(new Property("gender", "code", "Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.", 0, 1, gender));
@@ -2139,7 +2164,7 @@ public class Patient extends DomainResource {
         children.add(new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased));
         children.add(new Property("address", "Address", "An address for the individual.", 0, java.lang.Integer.MAX_VALUE, address));
         children.add(new Property("maritalStatus", "CodeableConcept", "This field contains a patient's most recent marital (civil) status.", 0, 1, maritalStatus));
-        children.add(new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth));
+        children.add(new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).", 0, 1, multipleBirth));
         children.add(new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo));
         children.add(new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("communication", "", "A language which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication));
@@ -2152,7 +2177,7 @@ public class Patient extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "An identifier for this patient.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this patient record is in active use.", 0, 1, active);
+        case -1422950650: /*active*/  return new Property("active", "boolean", "Whether this patient record is in active use. \nMany systems use this property to mark as non-current patients, such as those that have not been seen for a period of time based on an organization's business rules.\n\nIt is often used to filter patient lists to exclude inactive patients\n\nDeceased patients may also be marked as inactive for the same reasons, but may be active for some time after death.", 0, 1, active);
         case 3373707: /*name*/  return new Property("name", "HumanName", "A name associated with the individual.", 0, java.lang.Integer.MAX_VALUE, name);
         case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "A contact detail (e.g. a telephone number or an email address) by which the individual may be contacted.", 0, java.lang.Integer.MAX_VALUE, telecom);
         case -1249512767: /*gender*/  return new Property("gender", "code", "Administrative Gender - the gender that the patient is considered to have for administration and record keeping purposes.", 0, 1, gender);
@@ -2163,10 +2188,10 @@ public class Patient extends DomainResource {
         case -1971804369: /*deceasedDateTime*/  return new Property("deceased[x]", "boolean|dateTime", "Indicates if the individual is deceased or not.", 0, 1, deceased);
         case -1147692044: /*address*/  return new Property("address", "Address", "An address for the individual.", 0, java.lang.Integer.MAX_VALUE, address);
         case 1756919302: /*maritalStatus*/  return new Property("maritalStatus", "CodeableConcept", "This field contains a patient's most recent marital (civil) status.", 0, 1, maritalStatus);
-        case -1764672111: /*multipleBirth[x]*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
-        case -677369713: /*multipleBirth*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
-        case -247534439: /*multipleBirthBoolean*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
-        case 1645805999: /*multipleBirthInteger*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (bool) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
+        case -1764672111: /*multipleBirth[x]*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
+        case -677369713: /*multipleBirth*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
+        case -247534439: /*multipleBirthBoolean*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
+        case 1645805999: /*multipleBirthInteger*/  return new Property("multipleBirth[x]", "boolean|integer", "Indicates whether the patient is part of a multiple (boolean) or indicates the actual birth order (integer).", 0, 1, multipleBirth);
         case 106642994: /*photo*/  return new Property("photo", "Attachment", "Image of the patient.", 0, java.lang.Integer.MAX_VALUE, photo);
         case 951526432: /*contact*/  return new Property("contact", "", "A contact party (e.g. guardian, partner, friend) for the patient.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1035284522: /*communication*/  return new Property("communication", "", "A language which may be used to communicate with the patient about his or her health.", 0, java.lang.Integer.MAX_VALUE, communication);
@@ -2609,7 +2634,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.deceased[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="deceased", path="Patient.deceased.exists()", description="This patient has been marked as deceased, or as a death date entered", type="token" )
+  @SearchParamDefinition(name="deceased", path="Patient.deceased.exists() and Patient.deceased != false", description="This patient has been marked as deceased, or as a death date entered", type="token" )
   public static final String SP_DECEASED = "deceased";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>deceased</b>
@@ -2801,7 +2826,7 @@ public class Patient extends DomainResource {
    * Path: <b>Patient.deceasedDateTime</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="death-date", path="Patient.deceased.as(dateTime)", description="The date of death has been provided and satisfies this search value", type="date" )
+  @SearchParamDefinition(name="death-date", path="(Patient.deceased as dateTime)", description="The date of death has been provided and satisfies this search value", type="date" )
   public static final String SP_DEATH_DATE = "death-date";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>death-date</b>
@@ -2856,17 +2881,17 @@ public class Patient extends DomainResource {
  /**
    * Search parameter: <b>organization</b>
    * <p>
-   * Description: <b>The organization at which this person is a patient</b><br>
+   * Description: <b>The organization that is the custodian of the patient record</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Patient.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization at which this person is a patient", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="organization", path="Patient.managingOrganization", description="The organization that is the custodian of the patient record", type="reference", target={Organization.class } )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>
    * <p>
-   * Description: <b>The organization at which this person is a patient</b><br>
+   * Description: <b>The organization that is the custodian of the patient record</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Patient.managingOrganization</b><br>
    * </p>

@@ -18,6 +18,8 @@ import ca.uhn.fhir.model.${version}.resource.*; //
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
@@ -73,7 +75,10 @@ public class ${className}ResourceProvider extends
 			StringAndListParam the${param.nameCapitalized}, 
 #elseif (${param.type} == 'token' )
 			@OptionalParam(name="${param.name}")
-			TokenAndListParam the${param.nameCapitalized}, 
+			TokenAndListParam the${param.nameCapitalized},
+#elseif (${param.type} == 'special' )
+			@OptionalParam(name="${param.name}")
+			SpecialAndListParam the${param.nameCapitalized},
 #elseif (${param.type} == 'date' )
 			@OptionalParam(name="${param.name}")
 			DateRangeParam the${param.nameCapitalized}, 
@@ -127,8 +132,13 @@ public class ${className}ResourceProvider extends
 			SortSpec theSort,
 			
 			@ca.uhn.fhir.rest.annotation.Count
-			Integer theCount
-	) {
+			Integer theCount,
+
+			SummaryEnum theSummaryMode,
+
+			SearchTotalModeEnum theSearchTotalMode
+
+			) {
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
@@ -148,6 +158,8 @@ public class ${className}ResourceProvider extends
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
+			paramMap.setSummaryMode(theSummaryMode);
+			paramMap.setSearchTotalMode(theSearchTotalMode);
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 

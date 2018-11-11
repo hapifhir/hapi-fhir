@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ReportResultCodes {
 
         /**
-         * All test operations successfully passed all asserts
+         * All test operations successfully passed all asserts.
          */
         PASS, 
         /**
-         * One or more test operations failed one or more asserts
+         * One or more test operations failed one or more asserts.
          */
         FAIL, 
         /**
-         * One or more test operations is pending execution completion
+         * One or more test operations is pending execution completion.
          */
         PENDING, 
         /**
@@ -76,9 +76,9 @@ public enum ReportResultCodes {
         }
         public String getDefinition() {
           switch (this) {
-            case PASS: return "All test operations successfully passed all asserts";
-            case FAIL: return "One or more test operations failed one or more asserts";
-            case PENDING: return "One or more test operations is pending execution completion";
+            case PASS: return "All test operations successfully passed all asserts.";
+            case FAIL: return "One or more test operations failed one or more asserts.";
+            case PENDING: return "One or more test operations is pending execution completion.";
             default: return "?";
           }
         }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,27 +37,27 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ActionSelectionBehavior {
 
         /**
-         * Any number of the actions in the group may be chosen, from zero to all
+         * Any number of the actions in the group may be chosen, from zero to all.
          */
         ANY, 
         /**
-         * All the actions in the group must be selected as a single unit
+         * All the actions in the group must be selected as a single unit.
          */
         ALL, 
         /**
-         * All the actions in the group are meant to be chosen as a single unit: either all must be selected by the end user, or none may be selected
+         * All the actions in the group are meant to be chosen as a single unit: either all must be selected by the end user, or none may be selected.
          */
         ALLORNONE, 
         /**
-         * The end user must choose one and only one of the selectable actions in the group. The user SHALL not choose none of the actions in the group
+         * The end user must choose one and only one of the selectable actions in the group. The user SHALL NOT choose none of the actions in the group.
          */
         EXACTLYONE, 
         /**
-         * The end user may choose zero or at most one of the actions in the group
+         * The end user may choose zero or at most one of the actions in the group.
          */
         ATMOSTONE, 
         /**
-         * The end user must choose a minimum of one, and as many additional as desired
+         * The end user must choose a minimum of one, and as many additional as desired.
          */
         ONEORMORE, 
         /**
@@ -97,12 +97,12 @@ public enum ActionSelectionBehavior {
         }
         public String getDefinition() {
           switch (this) {
-            case ANY: return "Any number of the actions in the group may be chosen, from zero to all";
-            case ALL: return "All the actions in the group must be selected as a single unit";
-            case ALLORNONE: return "All the actions in the group are meant to be chosen as a single unit: either all must be selected by the end user, or none may be selected";
-            case EXACTLYONE: return "The end user must choose one and only one of the selectable actions in the group. The user SHALL not choose none of the actions in the group";
-            case ATMOSTONE: return "The end user may choose zero or at most one of the actions in the group";
-            case ONEORMORE: return "The end user must choose a minimum of one, and as many additional as desired";
+            case ANY: return "Any number of the actions in the group may be chosen, from zero to all.";
+            case ALL: return "All the actions in the group must be selected as a single unit.";
+            case ALLORNONE: return "All the actions in the group are meant to be chosen as a single unit: either all must be selected by the end user, or none may be selected.";
+            case EXACTLYONE: return "The end user must choose one and only one of the selectable actions in the group. The user SHALL NOT choose none of the actions in the group.";
+            case ATMOSTONE: return "The end user may choose zero or at most one of the actions in the group.";
+            case ONEORMORE: return "The end user must choose a minimum of one, and as many additional as desired.";
             default: return "?";
           }
         }

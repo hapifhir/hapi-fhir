@@ -51,11 +51,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirSystemDaoR4Test.class);
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@After
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
@@ -174,6 +169,69 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		}
 		fail();
 		return null;
+	}
+
+	@Test
+	public void testTransactionReSavesPreviouslyDeletedResources() {
+
+		{
+			Bundle input = new Bundle();
+			input.setType(BundleType.TRANSACTION);
+
+			Patient pt = new Patient();
+			pt.setId("pt");
+			pt.setActive(true);
+			input
+				.addEntry()
+				.setResource(pt)
+				.getRequest()
+				.setUrl("Patient/pt")
+				.setMethod(HTTPVerb.PUT);
+
+			Observation obs = new Observation();
+			obs.setId("obs");
+			obs.getSubject().setReference("Patient/pt");
+			input
+				.addEntry()
+				.setResource(obs)
+				.getRequest()
+				.setUrl("Observation/obs")
+				.setMethod(HTTPVerb.PUT);
+
+			mySystemDao.transaction(null, input);
+		}
+
+		myObservationDao.delete(new IdType("Observation/obs"));
+		myPatientDao.delete(new IdType("Patient/pt"));
+
+		{
+			Bundle input = new Bundle();
+			input.setType(BundleType.TRANSACTION);
+
+			Patient pt = new Patient();
+			pt.setId("pt");
+			pt.setActive(true);
+			input
+				.addEntry()
+				.setResource(pt)
+				.getRequest()
+				.setUrl("Patient/pt")
+				.setMethod(HTTPVerb.PUT);
+
+			Observation obs = new Observation();
+			obs.setId("obs");
+			obs.getSubject().setReference("Patient/pt");
+			input
+				.addEntry()
+				.setResource(obs)
+				.getRequest()
+				.setUrl("Observation/obs")
+				.setMethod(HTTPVerb.PUT);
+
+			mySystemDao.transaction(null, input);
+		}
+
+		myPatientDao.read(new IdType("Patient/pt"));
 	}
 
 	@Test
@@ -470,69 +528,43 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		vs.setUrl("http://foo");
 		myValueSetDao.create(vs, mySrd);
 
-		ResourceTable entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				return myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-			}
-		});
+		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
-		mySystemDao.markAllResourcesForReindexing();
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
 
-		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				return myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-			}
-		});
-		assertEquals(null, entity.getIndexStatus());
-
-		mySystemDao.performReindexingPass(null);
-
-		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				return myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-			}
-		});
+		entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
 		// Just make sure this doesn't cause a choke
-		mySystemDao.performReindexingPass(100000);
+		myResourceReindexingSvc.forceReindexingPass();
 
 		// Try making the resource unparseable
 
 		TransactionTemplate template = new TransactionTemplate(myTxManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		template.execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				ResourceHistoryTable resourceHistoryTable = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), id.getVersionIdPartAsLong());
-				resourceHistoryTable.setEncoding(ResourceEncodingEnum.JSON);
-				try {
-					resourceHistoryTable.setResource("{\"resourceType\":\"FOO\"}".getBytes("UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					throw new Error(e);
-				}
-				myResourceHistoryTableDao.save(resourceHistoryTable);
-
-				ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-				table.setIndexStatus(null);
-				myResourceTableDao.save(table);
-
-				return null;
+		template.execute((TransactionCallback<ResourceTable>) t -> {
+			ResourceHistoryTable resourceHistoryTable = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), id.getVersionIdPartAsLong());
+			resourceHistoryTable.setEncoding(ResourceEncodingEnum.JSON);
+			try {
+				resourceHistoryTable.setResource("{\"resourceType\":\"FOO\"}".getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				throw new Error(e);
 			}
+			myResourceHistoryTableDao.save(resourceHistoryTable);
+
+			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
+			table.setIndexStatus(null);
+			myResourceTableDao.save(table);
+
+			return null;
 		});
 
-		mySystemDao.performReindexingPass(null);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
 
-		entity = new TransactionTemplate(myTxManager).execute(new TransactionCallback<ResourceTable>() {
-			@Override
-			public ResourceTable doInTransaction(TransactionStatus theStatus) {
-				return myEntityManager.find(ResourceTable.class, id.getIdPartAsLong());
-			}
-		});
+		entity = new TransactionTemplate(myTxManager).execute(theStatus -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(2), entity.getIndexStatus());
 
 	}
@@ -3055,6 +3087,44 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(1, found.size().intValue());
 	}
 
+	@Test
+	public void testTransactionWithRelativeOidIds() {
+		Bundle res = new Bundle();
+		res.setType(BundleType.TRANSACTION);
+
+		Patient p1 = new Patient();
+		p1.setId("urn:oid:0.1.2.3");
+		p1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds01");
+		res.addEntry().setResource(p1).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+
+		Observation o1 = new Observation();
+		o1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds02");
+		o1.setSubject(new Reference("urn:oid:0.1.2.3"));
+		res.addEntry().setResource(o1).getRequest().setMethod(HTTPVerb.POST).setUrl("Observation");
+
+		Observation o2 = new Observation();
+		o2.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds03");
+		o2.setSubject(new Reference("urn:oid:0.1.2.3"));
+		res.addEntry().setResource(o2).getRequest().setMethod(HTTPVerb.POST).setUrl("Observation");
+
+		Bundle resp = mySystemDao.transaction(mySrd, res);
+
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		assertEquals(BundleType.TRANSACTIONRESPONSE, resp.getTypeElement().getValue());
+		assertEquals(3, resp.getEntry().size());
+
+		assertTrue(resp.getEntry().get(0).getResponse().getLocation(), new IdType(resp.getEntry().get(0).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+		assertTrue(resp.getEntry().get(1).getResponse().getLocation(), new IdType(resp.getEntry().get(1).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+		assertTrue(resp.getEntry().get(2).getResponse().getLocation(), new IdType(resp.getEntry().get(2).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
+
+		o1 = myObservationDao.read(new IdType(resp.getEntry().get(1).getResponse().getLocation()), mySrd);
+		o2 = myObservationDao.read(new IdType(resp.getEntry().get(2).getResponse().getLocation()), mySrd);
+		assertThat(o1.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
+		assertThat(o2.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
+
+	}
+
 	//
 	//
 	// /**
@@ -3156,44 +3226,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	// assertEquals(existing2.get(0).getId(), existing.get(2).getId());
 	//
 	// }
-
-	@Test
-	public void testTransactionWithRelativeOidIds() {
-		Bundle res = new Bundle();
-		res.setType(BundleType.TRANSACTION);
-
-		Patient p1 = new Patient();
-		p1.setId("urn:oid:0.1.2.3");
-		p1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds01");
-		res.addEntry().setResource(p1).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
-
-		Observation o1 = new Observation();
-		o1.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds02");
-		o1.setSubject(new Reference("urn:oid:0.1.2.3"));
-		res.addEntry().setResource(o1).getRequest().setMethod(HTTPVerb.POST).setUrl("Observation");
-
-		Observation o2 = new Observation();
-		o2.addIdentifier().setSystem("system").setValue("testTransactionWithRelativeOidIds03");
-		o2.setSubject(new Reference("urn:oid:0.1.2.3"));
-		res.addEntry().setResource(o2).getRequest().setMethod(HTTPVerb.POST).setUrl("Observation");
-
-		Bundle resp = mySystemDao.transaction(mySrd, res);
-
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
-
-		assertEquals(BundleType.TRANSACTIONRESPONSE, resp.getTypeElement().getValue());
-		assertEquals(3, resp.getEntry().size());
-
-		assertTrue(resp.getEntry().get(0).getResponse().getLocation(), new IdType(resp.getEntry().get(0).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
-		assertTrue(resp.getEntry().get(1).getResponse().getLocation(), new IdType(resp.getEntry().get(1).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
-		assertTrue(resp.getEntry().get(2).getResponse().getLocation(), new IdType(resp.getEntry().get(2).getResponse().getLocation()).getIdPart().matches("^[0-9]+$"));
-
-		o1 = myObservationDao.read(new IdType(resp.getEntry().get(1).getResponse().getLocation()), mySrd);
-		o2 = myObservationDao.read(new IdType(resp.getEntry().get(2).getResponse().getLocation()), mySrd);
-		assertThat(o1.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
-		assertThat(o2.getSubject().getReferenceElement().getValue(), endsWith("Patient/" + p1.getIdElement().getIdPart()));
-
-	}
 
 	/**
 	 * This is not the correct way to do it, but we'll allow it to be lenient
@@ -3405,6 +3437,11 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		id = myAllergyIntoleranceDao.read(ai.getIdElement().toUnqualifiedVersionless()).getIdElement();
 		assertEquals("3", id.getVersionIdPart());
 
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

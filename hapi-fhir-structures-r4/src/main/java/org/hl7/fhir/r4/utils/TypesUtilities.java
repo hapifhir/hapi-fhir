@@ -3,6 +3,8 @@ package org.hl7.fhir.r4.utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.utilities.Utilities;
+
 
 public class TypesUtilities {
 
@@ -95,11 +97,16 @@ public class TypesUtilities {
     res.add(new WildcardInformation("ContactDetail"));
     res.add(new WildcardInformation("Contributor"));
     res.add(new WildcardInformation("TriggerDefinition"));
+    res.add(new WildcardInformation("Expression"));
     res.add(new WildcardInformation("UsageContext"));
     
     // special cases
     res.add(new WildcardInformation("Dosage"));
     return res;
+  }
+
+  public static boolean isPrimitive(String code) {
+    return Utilities.existsInList(code, "boolean", "integer", "string", "decimal", "uri", "url", "canonical", "base64Binary", "instant", "date", "dateTime", "time", "code", "oid", "id", "markdown", "unsignedInt", "positiveInt", "xhtml");
   }
 }
 

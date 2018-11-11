@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The details of a healthcare service available at a location.
  */
-@ResourceDef(name="HealthcareService", profile="http://hl7.org/fhir/Profile/HealthcareService")
+@ResourceDef(name="HealthcareService", profile="http://hl7.org/fhir/StructureDefinition/HealthcareService")
 public class HealthcareService extends DomainResource {
 
     public enum DaysOfWeek {

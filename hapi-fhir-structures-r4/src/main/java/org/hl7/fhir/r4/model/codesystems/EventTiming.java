@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,51 +37,51 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum EventTiming {
 
         /**
-         * Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         MORN, 
         /**
-         * Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         MORN_EARLY, 
         /**
-         * Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         MORN_LATE, 
         /**
-         * Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         NOON, 
         /**
-         * Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         AFT, 
         /**
-         * Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         AFT_EARLY, 
         /**
-         * Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         AFT_LATE, 
         /**
-         * Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         EVE, 
         /**
-         * Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         EVE_EARLY, 
         /**
-         * Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         EVE_LATE, 
         /**
-         * Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         NIGHT, 
         /**
-         * Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         PHS, 
         /**
@@ -139,18 +139,18 @@ public enum EventTiming {
         }
         public String getDefinition() {
           switch (this) {
-            case MORN: return "Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation";
-            case MORN_EARLY: return "Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation";
-            case MORN_LATE: return "Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation";
-            case NOON: return "Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation";
-            case AFT: return "Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation";
-            case AFT_EARLY: return "Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation";
-            case AFT_LATE: return "Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation";
-            case EVE: return "Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation";
-            case EVE_EARLY: return "Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation";
-            case EVE_LATE: return "Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation";
-            case NIGHT: return "Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation";
-            case PHS: return "Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation";
+            case MORN: return "Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case MORN_EARLY: return "Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case MORN_LATE: return "Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case NOON: return "Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case AFT: return "Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case AFT_EARLY: return "Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case AFT_LATE: return "Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case EVE: return "Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case EVE_EARLY: return "Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case EVE_LATE: return "Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case NIGHT: return "Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case PHS: return "Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation.";
             default: return "?";
           }
         }

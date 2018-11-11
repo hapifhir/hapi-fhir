@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,32 +45,32 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of a request for service such as diagnostic investigations, treatments, or operations to be performed.
  */
-@ResourceDef(name="ServiceRequest", profile="http://hl7.org/fhir/Profile/ServiceRequest")
+@ResourceDef(name="ServiceRequest", profile="http://hl7.org/fhir/StructureDefinition/ServiceRequest")
 public class ServiceRequest extends DomainResource {
 
     public enum ServiceRequestStatus {
         /**
-         * The request has been created but is not yet complete or ready for action
+         * The request has been created but is not yet complete or ready for action.
          */
         DRAFT, 
         /**
-         * The request is in force and ready to be acted upon
+         * The request is in force and ready to be acted upon.
          */
         ACTIVE, 
         /**
-         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future
+         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.
          */
-        SUSPENDED, 
+        ONHOLD, 
         /**
-         * The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.
+         * The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.
          */
-        CANCELLED, 
+        REVOKED, 
         /**
-         * Activity against the request has been sufficiently completed to the satisfaction of the requester
+         * Activity against the request has been sufficiently completed to the satisfaction of the requester.
          */
         COMPLETED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".)
+         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
@@ -88,10 +88,10 @@ public class ServiceRequest extends DomainResource {
           return DRAFT;
         if ("active".equals(codeString))
           return ACTIVE;
-        if ("suspended".equals(codeString))
-          return SUSPENDED;
-        if ("cancelled".equals(codeString))
-          return CANCELLED;
+        if ("on-hold".equals(codeString))
+          return ONHOLD;
+        if ("revoked".equals(codeString))
+          return REVOKED;
         if ("completed".equals(codeString))
           return COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -107,8 +107,8 @@ public class ServiceRequest extends DomainResource {
           switch (this) {
             case DRAFT: return "draft";
             case ACTIVE: return "active";
-            case SUSPENDED: return "suspended";
-            case CANCELLED: return "cancelled";
+            case ONHOLD: return "on-hold";
+            case REVOKED: return "revoked";
             case COMPLETED: return "completed";
             case ENTEREDINERROR: return "entered-in-error";
             case UNKNOWN: return "unknown";
@@ -119,8 +119,8 @@ public class ServiceRequest extends DomainResource {
           switch (this) {
             case DRAFT: return "http://hl7.org/fhir/request-status";
             case ACTIVE: return "http://hl7.org/fhir/request-status";
-            case SUSPENDED: return "http://hl7.org/fhir/request-status";
-            case CANCELLED: return "http://hl7.org/fhir/request-status";
+            case ONHOLD: return "http://hl7.org/fhir/request-status";
+            case REVOKED: return "http://hl7.org/fhir/request-status";
             case COMPLETED: return "http://hl7.org/fhir/request-status";
             case ENTEREDINERROR: return "http://hl7.org/fhir/request-status";
             case UNKNOWN: return "http://hl7.org/fhir/request-status";
@@ -129,12 +129,12 @@ public class ServiceRequest extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "The request has been created but is not yet complete or ready for action";
-            case ACTIVE: return "The request is in force and ready to be acted upon";
-            case SUSPENDED: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future";
-            case CANCELLED: return "The authorization/request to act has been terminated prior to the full completion of the intended actions.  No further activity should occur.";
-            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)";
+            case DRAFT: return "The request has been created but is not yet complete or ready for action.";
+            case ACTIVE: return "The request is in force and ready to be acted upon.";
+            case ONHOLD: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.";
+            case REVOKED: return "The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester.";
+            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.";
             default: return "?";
           }
@@ -143,8 +143,8 @@ public class ServiceRequest extends DomainResource {
           switch (this) {
             case DRAFT: return "Draft";
             case ACTIVE: return "Active";
-            case SUSPENDED: return "Suspended";
-            case CANCELLED: return "Cancelled";
+            case ONHOLD: return "On Hold";
+            case REVOKED: return "Revoked";
             case COMPLETED: return "Completed";
             case ENTEREDINERROR: return "Entered in Error";
             case UNKNOWN: return "Unknown";
@@ -162,10 +162,10 @@ public class ServiceRequest extends DomainResource {
           return ServiceRequestStatus.DRAFT;
         if ("active".equals(codeString))
           return ServiceRequestStatus.ACTIVE;
-        if ("suspended".equals(codeString))
-          return ServiceRequestStatus.SUSPENDED;
-        if ("cancelled".equals(codeString))
-          return ServiceRequestStatus.CANCELLED;
+        if ("on-hold".equals(codeString))
+          return ServiceRequestStatus.ONHOLD;
+        if ("revoked".equals(codeString))
+          return ServiceRequestStatus.REVOKED;
         if ("completed".equals(codeString))
           return ServiceRequestStatus.COMPLETED;
         if ("entered-in-error".equals(codeString))
@@ -186,10 +186,10 @@ public class ServiceRequest extends DomainResource {
           return new Enumeration<ServiceRequestStatus>(this, ServiceRequestStatus.DRAFT);
         if ("active".equals(codeString))
           return new Enumeration<ServiceRequestStatus>(this, ServiceRequestStatus.ACTIVE);
-        if ("suspended".equals(codeString))
-          return new Enumeration<ServiceRequestStatus>(this, ServiceRequestStatus.SUSPENDED);
-        if ("cancelled".equals(codeString))
-          return new Enumeration<ServiceRequestStatus>(this, ServiceRequestStatus.CANCELLED);
+        if ("on-hold".equals(codeString))
+          return new Enumeration<ServiceRequestStatus>(this, ServiceRequestStatus.ONHOLD);
+        if ("revoked".equals(codeString))
+          return new Enumeration<ServiceRequestStatus>(this, ServiceRequestStatus.REVOKED);
         if ("completed".equals(codeString))
           return new Enumeration<ServiceRequestStatus>(this, ServiceRequestStatus.COMPLETED);
         if ("entered-in-error".equals(codeString))
@@ -203,10 +203,10 @@ public class ServiceRequest extends DomainResource {
         return "draft";
       if (code == ServiceRequestStatus.ACTIVE)
         return "active";
-      if (code == ServiceRequestStatus.SUSPENDED)
-        return "suspended";
-      if (code == ServiceRequestStatus.CANCELLED)
-        return "cancelled";
+      if (code == ServiceRequestStatus.ONHOLD)
+        return "on-hold";
+      if (code == ServiceRequestStatus.REVOKED)
+        return "revoked";
       if (code == ServiceRequestStatus.COMPLETED)
         return "completed";
       if (code == ServiceRequestStatus.ENTEREDINERROR)
@@ -222,27 +222,27 @@ public class ServiceRequest extends DomainResource {
 
     public enum ServiceRequestIntent {
         /**
-         * The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act
+         * The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act.
          */
         PROPOSAL, 
         /**
-         * The request represents an intention to ensure something occurs without providing an authorization for others to act
+         * The request represents an intention to ensure something occurs without providing an authorization for others to act.
          */
         PLAN, 
         /**
-         * The request represents a request/demand and authorization for action
+         * The request represents a request/demand and authorization for action.
          */
         ORDER, 
         /**
-         * The request represents an original authorization for action
+         * The request represents an original authorization for action.
          */
         ORIGINALORDER, 
         /**
-         * The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization
+         * The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization.
          */
         REFLEXORDER, 
         /**
-         * The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order
+         * The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order.
          */
         FILLERORDER, 
         /**
@@ -250,7 +250,7 @@ public class ServiceRequest extends DomainResource {
          */
         INSTANCEORDER, 
         /**
-         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used
+         * The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used.
          */
         OPTION, 
         /**
@@ -309,14 +309,14 @@ public class ServiceRequest extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSAL: return "The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act";
-            case PLAN: return "The request represents an intention to ensure something occurs without providing an authorization for others to act";
-            case ORDER: return "The request represents a request/demand and authorization for action";
-            case ORIGINALORDER: return "The request represents an original authorization for action";
-            case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization";
-            case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order";
+            case PROPOSAL: return "The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act.";
+            case PLAN: return "The request represents an intention to ensure something occurs without providing an authorization for others to act.";
+            case ORDER: return "The request represents a request/demand and authorization for action.";
+            case ORIGINALORDER: return "The request represents an original authorization for action.";
+            case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization.";
+            case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order.";
             case INSTANCEORDER: return "An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.";
-            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used";
+            case OPTION: return "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used.";
             default: return "?";
           }
         }
@@ -410,19 +410,19 @@ public class ServiceRequest extends DomainResource {
 
     public enum ServiceRequestPriority {
         /**
-         * The request has normal priority
+         * The request has normal priority.
          */
         ROUTINE, 
         /**
-         * The request should be actioned promptly - higher priority than routine
+         * The request should be actioned promptly - higher priority than routine.
          */
         URGENT, 
         /**
-         * The request should be actioned as soon as possible - higher priority than urgent
+         * The request should be actioned as soon as possible - higher priority than urgent.
          */
         ASAP, 
         /**
-         * The request should be actioned immediately - highest possible priority.  E.g. an emergency
+         * The request should be actioned immediately - highest possible priority.  E.g. an emergency.
          */
         STAT, 
         /**
@@ -465,10 +465,10 @@ public class ServiceRequest extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ROUTINE: return "The request has normal priority";
-            case URGENT: return "The request should be actioned promptly - higher priority than routine";
-            case ASAP: return "The request should be actioned as soon as possible - higher priority than urgent";
-            case STAT: return "The request should be actioned immediately - highest possible priority.  E.g. an emergency";
+            case ROUTINE: return "The request has normal priority.";
+            case URGENT: return "The request should be actioned promptly - higher priority than routine.";
+            case ASAP: return "The request should be actioned as soon as possible - higher priority than urgent.";
+            case STAT: return "The request should be actioned immediately - highest possible priority.  E.g. an emergency.";
             default: return "?";
           }
         }
@@ -540,16 +540,23 @@ public class ServiceRequest extends DomainResource {
     protected List<Identifier> identifier;
 
     /**
-     * Protocol or definition followed by this request.
+     * The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.
      */
-    @Child(name = "instantiates", type = {UriType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Protocol or definition", formalDefinition="Protocol or definition followed by this request." )
-    protected List<UriType> instantiates;
+    @Child(name = "instantiatesCanonical", type = {CanonicalType.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Instantiates FHIR protocol or definition", formalDefinition="The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest." )
+    protected List<CanonicalType> instantiatesCanonical;
+
+    /**
+     * The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.
+     */
+    @Child(name = "instantiatesUri", type = {UriType.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Instantiates external protocol or definition", formalDefinition="The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest." )
+    protected List<UriType> instantiatesUri;
 
     /**
      * Plan/proposal/order fulfilled by this request.
      */
-    @Child(name = "basedOn", type = {CarePlan.class, ServiceRequest.class, MedicationRequest.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "basedOn", type = {CarePlan.class, ServiceRequest.class, MedicationRequest.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What request fulfills", formalDefinition="Plan/proposal/order fulfilled by this request." )
     protected List<Reference> basedOn;
     /**
@@ -561,7 +568,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * The request takes the place of the referenced completed or terminated request(s).
      */
-    @Child(name = "replaces", type = {ServiceRequest.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "replaces", type = {ServiceRequest.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="What request replaces", formalDefinition="The request takes the place of the referenced completed or terminated request(s)." )
     protected List<Reference> replaces;
     /**
@@ -573,14 +580,14 @@ public class ServiceRequest extends DomainResource {
     /**
      * A shared identifier common to all service requests that were authorized more or less simultaneously by a single author, representing the composite or group identifier.
      */
-    @Child(name = "requisition", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "requisition", type = {Identifier.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Composite Request ID", formalDefinition="A shared identifier common to all service requests that were authorized more or less simultaneously by a single author, representing the composite or group identifier." )
     protected Identifier requisition;
 
     /**
      * The status of the order.
      */
-    @Child(name = "status", type = {CodeType.class}, order=5, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="draft | active | suspended | completed | entered-in-error | cancelled", formalDefinition="The status of the order." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-status")
     protected Enumeration<ServiceRequestStatus> status;
@@ -588,7 +595,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * Whether the request is a proposal, plan, an original order or a reflex order.
      */
-    @Child(name = "intent", type = {CodeType.class}, order=6, min=1, max=1, modifier=true, summary=true)
+    @Child(name = "intent", type = {CodeType.class}, order=7, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="proposal | plan | order +", formalDefinition="Whether the request is a proposal, plan, an original order or a reflex order." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-intent")
     protected Enumeration<ServiceRequestIntent> intent;
@@ -596,7 +603,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * A code that classifies the service for searching, sorting and display purposes (e.g. "Surgical Procedure").
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Classification of service", formalDefinition="A code that classifies the service for searching, sorting and display purposes (e.g. \"Surgical Procedure\")." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/servicerequest-category")
     protected List<CodeableConcept> category;
@@ -604,7 +611,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * Indicates how quickly the ServiceRequest should be addressed with respect to other requests.
      */
-    @Child(name = "priority", type = {CodeType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "priority", type = {CodeType.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="routine | urgent | asap | stat", formalDefinition="Indicates how quickly the ServiceRequest should be addressed with respect to other requests." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/request-priority")
     protected Enumeration<ServiceRequestPriority> priority;
@@ -612,14 +619,14 @@ public class ServiceRequest extends DomainResource {
     /**
      * Set this to true if the record is saying that the service/procedure should NOT be performed.
      */
-    @Child(name = "doNotPerform", type = {BooleanType.class}, order=9, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "doNotPerform", type = {BooleanType.class}, order=10, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="True if service/procedure should not be performed", formalDefinition="Set this to true if the record is saying that the service/procedure should NOT be performed." )
     protected BooleanType doNotPerform;
 
     /**
      * A code that identifies a particular service (i.e., procedure, diagnostic investigation, or panel of investigations) that have been requested.
      */
-    @Child(name = "code", type = {CodeableConcept.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "code", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What is being requested/ordered", formalDefinition="A code that identifies a particular service (i.e., procedure, diagnostic investigation, or panel of investigations) that have been requested." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-code")
     protected CodeableConcept code;
@@ -627,15 +634,22 @@ public class ServiceRequest extends DomainResource {
     /**
      * Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.
      */
-    @Child(name = "orderDetail", type = {CodeableConcept.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "orderDetail", type = {CodeableConcept.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Additional order information", formalDefinition="Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/servicerequest-orderdetail")
     protected List<CodeableConcept> orderDetail;
 
     /**
+     * An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).
+     */
+    @Child(name = "quantity", type = {Quantity.class, Ratio.class, Range.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Service amount", formalDefinition="An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction)." )
+    protected Type quantity;
+
+    /**
      * On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).
      */
-    @Child(name = "subject", type = {Patient.class, Group.class, Location.class, Device.class}, order=12, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "subject", type = {Patient.class, Group.class, Location.class, Device.class}, order=14, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Individual the service is ordered for", formalDefinition="On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans)." )
     protected Reference subject;
 
@@ -647,7 +661,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * An encounter or episode of care that provides additional information about the healthcare context in which this request is made.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=13, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=15, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Encounter or Episode during which request was created", formalDefinition="An encounter or episode of care that provides additional information about the healthcare context in which this request is made." )
     protected Reference context;
 
@@ -659,14 +673,14 @@ public class ServiceRequest extends DomainResource {
     /**
      * The date/time at which the requested service should occur.
      */
-    @Child(name = "occurrence", type = {DateTimeType.class, Period.class, Timing.class}, order=14, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "occurrence", type = {DateTimeType.class, Period.class, Timing.class}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="When service should occur", formalDefinition="The date/time at which the requested service should occur." )
     protected Type occurrence;
 
     /**
      * If a CodeableConcept is present, it indicates the pre-condition for performing the service.  For example "pain", "on flare-up", etc.
      */
-    @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "asNeeded", type = {BooleanType.class, CodeableConcept.class}, order=17, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Preconditions for service", formalDefinition="If a CodeableConcept is present, it indicates the pre-condition for performing the service.  For example \"pain\", \"on flare-up\", etc." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/medication-as-needed-reason")
     protected Type asNeeded;
@@ -674,14 +688,14 @@ public class ServiceRequest extends DomainResource {
     /**
      * When the request transitioned to being actionable.
      */
-    @Child(name = "authoredOn", type = {DateTimeType.class}, order=16, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "authoredOn", type = {DateTimeType.class}, order=18, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Date request signed", formalDefinition="When the request transitioned to being actionable." )
     protected DateTimeType authoredOn;
 
     /**
      * The individual who initiated the request and has responsibility for its activation.
      */
-    @Child(name = "requester", type = {Practitioner.class, PractitionerRole.class, Organization.class, Patient.class, RelatedPerson.class, Device.class}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "requester", type = {Practitioner.class, PractitionerRole.class, Organization.class, Patient.class, RelatedPerson.class, Device.class}, order=19, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who/what is requesting service", formalDefinition="The individual who initiated the request and has responsibility for its activation." )
     protected Reference requester;
 
@@ -693,7 +707,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * Desired type of performer for doing the requested service.
      */
-    @Child(name = "performerType", type = {CodeableConcept.class}, order=18, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "performerType", type = {CodeableConcept.class}, order=20, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Performer role", formalDefinition="Desired type of performer for doing the requested service." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/participant-role")
     protected CodeableConcept performerType;
@@ -701,7 +715,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.
      */
-    @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, CareTeam.class, HealthcareService.class, Patient.class, Device.class, RelatedPerson.class}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Organization.class, CareTeam.class, HealthcareService.class, Patient.class, Device.class, RelatedPerson.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Requested performer", formalDefinition="The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc." )
     protected List<Reference> performer;
     /**
@@ -711,9 +725,29 @@ public class ServiceRequest extends DomainResource {
 
 
     /**
+     * The preferred location(s) where the procedure should actually happen in coded or free text form. E.g. at home or nursing day care center.
+     */
+    @Child(name = "locationCode", type = {CodeableConcept.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Requested location", formalDefinition="The preferred location(s) where the procedure should actually happen in coded or free text form. E.g. at home or nursing day care center." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType")
+    protected List<CodeableConcept> locationCode;
+
+    /**
+     * A reference to the the preferred location(s) where the procedure should actually happen. E.g. at home or nursing day care center.
+     */
+    @Child(name = "locationReference", type = {Location.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Requested location", formalDefinition="A reference to the the preferred location(s) where the procedure should actually happen. E.g. at home or nursing day care center." )
+    protected List<Reference> locationReference;
+    /**
+     * The actual objects that are the target of the reference (A reference to the the preferred location(s) where the procedure should actually happen. E.g. at home or nursing day care center.)
+     */
+    protected List<Location> locationReferenceTarget;
+
+
+    /**
      * An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.
      */
-    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Explanation/Justification for procedure or service", formalDefinition="An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-reason")
     protected List<CodeableConcept> reasonCode;
@@ -721,7 +755,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.
      */
-    @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Explanation/Justification for service or service", formalDefinition="Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation." )
     protected List<Reference> reasonReference;
     /**
@@ -733,7 +767,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be needed for delivering the requested service.
      */
-    @Child(name = "insurance", type = {Coverage.class, ClaimResponse.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "insurance", type = {Coverage.class, ClaimResponse.class}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Associated insurance coverage", formalDefinition="Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be needed for delivering the requested service." )
     protected List<Reference> insurance;
     /**
@@ -745,7 +779,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * Additional clinical information about the patient or specimen that may influence the services or their interpretations.     This information includes diagnosis, clinical findings and other observations.  In laboratory ordering these are typically referred to as "ask at order entry questions (AOEs)".  This includes observations explicitly requested by the producer (filler) to provide context or supporting information needed to complete the order. For example,  reporting the amount of inspired oxygen for blood gas measurements.
      */
-    @Child(name = "supportingInfo", type = {Reference.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "supportingInfo", type = {Reference.class}, order=27, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Additional clinical information", formalDefinition="Additional clinical information about the patient or specimen that may influence the services or their interpretations.     This information includes diagnosis, clinical findings and other observations.  In laboratory ordering these are typically referred to as \"ask at order entry questions (AOEs)\".  This includes observations explicitly requested by the producer (filler) to provide context or supporting information needed to complete the order. For example,  reporting the amount of inspired oxygen for blood gas measurements." )
     protected List<Reference> supportingInfo;
     /**
@@ -757,7 +791,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * One or more specimens that the laboratory procedure will use.
      */
-    @Child(name = "specimen", type = {Specimen.class}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "specimen", type = {Specimen.class}, order=28, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Procedure Samples", formalDefinition="One or more specimens that the laboratory procedure will use." )
     protected List<Reference> specimen;
     /**
@@ -769,7 +803,7 @@ public class ServiceRequest extends DomainResource {
     /**
      * Anatomic location where the procedure should be performed. This is the target site.
      */
-    @Child(name = "bodySite", type = {CodeableConcept.class}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "bodySite", type = {CodeableConcept.class}, order=29, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Location on Body", formalDefinition="Anatomic location where the procedure should be performed. This is the target site." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/body-site")
     protected List<CodeableConcept> bodySite;
@@ -777,21 +811,21 @@ public class ServiceRequest extends DomainResource {
     /**
      * Any other notes and comments made about the service request. For example, internal billing notes.
      */
-    @Child(name = "note", type = {Annotation.class}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "note", type = {Annotation.class}, order=30, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Comments", formalDefinition="Any other notes and comments made about the service request. For example, internal billing notes." )
     protected List<Annotation> note;
 
     /**
      * Instructions in terms that are understood by the patient or consumer.
      */
-    @Child(name = "patientInstruction", type = {StringType.class}, order=27, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "patientInstruction", type = {StringType.class}, order=31, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Patient or consumer-oriented instructions", formalDefinition="Instructions in terms that are understood by the patient or consumer." )
     protected StringType patientInstruction;
 
     /**
      * Key events in the history of the request.
      */
-    @Child(name = "relevantHistory", type = {Provenance.class}, order=28, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "relevantHistory", type = {Provenance.class}, order=32, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Request provenance", formalDefinition="Key events in the history of the request." )
     protected List<Reference> relevantHistory;
     /**
@@ -800,7 +834,7 @@ public class ServiceRequest extends DomainResource {
     protected List<Provenance> relevantHistoryTarget;
 
 
-    private static final long serialVersionUID = 1742384872L;
+    private static final long serialVersionUID = 1917439228L;
 
   /**
    * Constructor
@@ -873,61 +907,122 @@ public class ServiceRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #instantiates} (Protocol or definition followed by this request.)
+     * @return {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.)
      */
-    public List<UriType> getInstantiates() { 
-      if (this.instantiates == null)
-        this.instantiates = new ArrayList<UriType>();
-      return this.instantiates;
+    public List<CanonicalType> getInstantiatesCanonical() { 
+      if (this.instantiatesCanonical == null)
+        this.instantiatesCanonical = new ArrayList<CanonicalType>();
+      return this.instantiatesCanonical;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public ServiceRequest setInstantiates(List<UriType> theInstantiates) { 
-      this.instantiates = theInstantiates;
+    public ServiceRequest setInstantiatesCanonical(List<CanonicalType> theInstantiatesCanonical) { 
+      this.instantiatesCanonical = theInstantiatesCanonical;
       return this;
     }
 
-    public boolean hasInstantiates() { 
-      if (this.instantiates == null)
+    public boolean hasInstantiatesCanonical() { 
+      if (this.instantiatesCanonical == null)
         return false;
-      for (UriType item : this.instantiates)
+      for (CanonicalType item : this.instantiatesCanonical)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
     /**
-     * @return {@link #instantiates} (Protocol or definition followed by this request.)
+     * @return {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.)
      */
-    public UriType addInstantiatesElement() {//2 
-      UriType t = new UriType();
-      if (this.instantiates == null)
-        this.instantiates = new ArrayList<UriType>();
-      this.instantiates.add(t);
+    public CanonicalType addInstantiatesCanonicalElement() {//2 
+      CanonicalType t = new CanonicalType();
+      if (this.instantiatesCanonical == null)
+        this.instantiatesCanonical = new ArrayList<CanonicalType>();
+      this.instantiatesCanonical.add(t);
       return t;
     }
 
     /**
-     * @param value {@link #instantiates} (Protocol or definition followed by this request.)
+     * @param value {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.)
      */
-    public ServiceRequest addInstantiates(String value) { //1
-      UriType t = new UriType();
+    public ServiceRequest addInstantiatesCanonical(String value) { //1
+      CanonicalType t = new CanonicalType();
       t.setValue(value);
-      if (this.instantiates == null)
-        this.instantiates = new ArrayList<UriType>();
-      this.instantiates.add(t);
+      if (this.instantiatesCanonical == null)
+        this.instantiatesCanonical = new ArrayList<CanonicalType>();
+      this.instantiatesCanonical.add(t);
       return this;
     }
 
     /**
-     * @param value {@link #instantiates} (Protocol or definition followed by this request.)
+     * @param value {@link #instantiatesCanonical} (The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.)
      */
-    public boolean hasInstantiates(String value) { 
-      if (this.instantiates == null)
+    public boolean hasInstantiatesCanonical(String value) { 
+      if (this.instantiatesCanonical == null)
         return false;
-      for (UriType v : this.instantiates)
+      for (CanonicalType v : this.instantiatesCanonical)
+        if (v.getValue().equals(value)) // canonical(ActivityDefinition|PlanDefinition)
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.)
+     */
+    public List<UriType> getInstantiatesUri() { 
+      if (this.instantiatesUri == null)
+        this.instantiatesUri = new ArrayList<UriType>();
+      return this.instantiatesUri;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ServiceRequest setInstantiatesUri(List<UriType> theInstantiatesUri) { 
+      this.instantiatesUri = theInstantiatesUri;
+      return this;
+    }
+
+    public boolean hasInstantiatesUri() { 
+      if (this.instantiatesUri == null)
+        return false;
+      for (UriType item : this.instantiatesUri)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    /**
+     * @return {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.)
+     */
+    public UriType addInstantiatesUriElement() {//2 
+      UriType t = new UriType();
+      if (this.instantiatesUri == null)
+        this.instantiatesUri = new ArrayList<UriType>();
+      this.instantiatesUri.add(t);
+      return t;
+    }
+
+    /**
+     * @param value {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.)
+     */
+    public ServiceRequest addInstantiatesUri(String value) { //1
+      UriType t = new UriType();
+      t.setValue(value);
+      if (this.instantiatesUri == null)
+        this.instantiatesUri = new ArrayList<UriType>();
+      this.instantiatesUri.add(t);
+      return this;
+    }
+
+    /**
+     * @param value {@link #instantiatesUri} (The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.)
+     */
+    public boolean hasInstantiatesUri(String value) { 
+      if (this.instantiatesUri == null)
+        return false;
+      for (UriType v : this.instantiatesUri)
         if (v.getValue().equals(value)) // uri
           return true;
       return false;
@@ -1410,6 +1505,72 @@ public class ServiceRequest extends DomainResource {
     }
 
     /**
+     * @return {@link #quantity} (An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).)
+     */
+    public Type getQuantity() { 
+      return this.quantity;
+    }
+
+    /**
+     * @return {@link #quantity} (An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).)
+     */
+    public Quantity getQuantityQuantity() throws FHIRException { 
+      if (this.quantity == null)
+        return null;
+      if (!(this.quantity instanceof Quantity))
+        throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.quantity.getClass().getName()+" was encountered");
+      return (Quantity) this.quantity;
+    }
+
+    public boolean hasQuantityQuantity() { 
+      return this != null && this.quantity instanceof Quantity;
+    }
+
+    /**
+     * @return {@link #quantity} (An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).)
+     */
+    public Ratio getQuantityRatio() throws FHIRException { 
+      if (this.quantity == null)
+        return null;
+      if (!(this.quantity instanceof Ratio))
+        throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.quantity.getClass().getName()+" was encountered");
+      return (Ratio) this.quantity;
+    }
+
+    public boolean hasQuantityRatio() { 
+      return this != null && this.quantity instanceof Ratio;
+    }
+
+    /**
+     * @return {@link #quantity} (An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).)
+     */
+    public Range getQuantityRange() throws FHIRException { 
+      if (this.quantity == null)
+        return null;
+      if (!(this.quantity instanceof Range))
+        throw new FHIRException("Type mismatch: the type Range was expected, but "+this.quantity.getClass().getName()+" was encountered");
+      return (Range) this.quantity;
+    }
+
+    public boolean hasQuantityRange() { 
+      return this != null && this.quantity instanceof Range;
+    }
+
+    public boolean hasQuantity() { 
+      return this.quantity != null && !this.quantity.isEmpty();
+    }
+
+    /**
+     * @param value {@link #quantity} (An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).)
+     */
+    public ServiceRequest setQuantity(Type value) { 
+      if (value != null && !(value instanceof Quantity || value instanceof Ratio || value instanceof Range))
+        throw new Error("Not the right type for ServiceRequest.quantity[x]: "+value.fhirType());
+      this.quantity = value;
+      return this;
+    }
+
+    /**
      * @return {@link #subject} (On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).)
      */
     public Reference getSubject() { 
@@ -1777,6 +1938,134 @@ public class ServiceRequest extends DomainResource {
       if (this.performerTarget == null)
         this.performerTarget = new ArrayList<Resource>();
       return this.performerTarget;
+    }
+
+    /**
+     * @return {@link #locationCode} (The preferred location(s) where the procedure should actually happen in coded or free text form. E.g. at home or nursing day care center.)
+     */
+    public List<CodeableConcept> getLocationCode() { 
+      if (this.locationCode == null)
+        this.locationCode = new ArrayList<CodeableConcept>();
+      return this.locationCode;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ServiceRequest setLocationCode(List<CodeableConcept> theLocationCode) { 
+      this.locationCode = theLocationCode;
+      return this;
+    }
+
+    public boolean hasLocationCode() { 
+      if (this.locationCode == null)
+        return false;
+      for (CodeableConcept item : this.locationCode)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addLocationCode() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.locationCode == null)
+        this.locationCode = new ArrayList<CodeableConcept>();
+      this.locationCode.add(t);
+      return t;
+    }
+
+    public ServiceRequest addLocationCode(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.locationCode == null)
+        this.locationCode = new ArrayList<CodeableConcept>();
+      this.locationCode.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #locationCode}, creating it if it does not already exist
+     */
+    public CodeableConcept getLocationCodeFirstRep() { 
+      if (getLocationCode().isEmpty()) {
+        addLocationCode();
+      }
+      return getLocationCode().get(0);
+    }
+
+    /**
+     * @return {@link #locationReference} (A reference to the the preferred location(s) where the procedure should actually happen. E.g. at home or nursing day care center.)
+     */
+    public List<Reference> getLocationReference() { 
+      if (this.locationReference == null)
+        this.locationReference = new ArrayList<Reference>();
+      return this.locationReference;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public ServiceRequest setLocationReference(List<Reference> theLocationReference) { 
+      this.locationReference = theLocationReference;
+      return this;
+    }
+
+    public boolean hasLocationReference() { 
+      if (this.locationReference == null)
+        return false;
+      for (Reference item : this.locationReference)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addLocationReference() { //3
+      Reference t = new Reference();
+      if (this.locationReference == null)
+        this.locationReference = new ArrayList<Reference>();
+      this.locationReference.add(t);
+      return t;
+    }
+
+    public ServiceRequest addLocationReference(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.locationReference == null)
+        this.locationReference = new ArrayList<Reference>();
+      this.locationReference.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #locationReference}, creating it if it does not already exist
+     */
+    public Reference getLocationReferenceFirstRep() { 
+      if (getLocationReference().isEmpty()) {
+        addLocationReference();
+      }
+      return getLocationReference().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Location> getLocationReferenceTarget() { 
+      if (this.locationReferenceTarget == null)
+        this.locationReferenceTarget = new ArrayList<Location>();
+      return this.locationReferenceTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public Location addLocationReferenceTarget() { 
+      Location r = new Location();
+      if (this.locationReferenceTarget == null)
+        this.locationReferenceTarget = new ArrayList<Location>();
+      this.locationReferenceTarget.add(r);
+      return r;
     }
 
     /**
@@ -2329,7 +2618,8 @@ public class ServiceRequest extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Identifiers assigned to this order instance by the orderer and/or the receiver and/or order fulfiller.", 0, java.lang.Integer.MAX_VALUE, identifier));
-        children.add(new Property("instantiates", "uri", "Protocol or definition followed by this request.", 0, java.lang.Integer.MAX_VALUE, instantiates));
+        children.add(new Property("instantiatesCanonical", "canonical(ActivityDefinition|PlanDefinition)", "The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.", 0, java.lang.Integer.MAX_VALUE, instantiatesCanonical));
+        children.add(new Property("instantiatesUri", "uri", "The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.", 0, java.lang.Integer.MAX_VALUE, instantiatesUri));
         children.add(new Property("basedOn", "Reference(CarePlan|ServiceRequest|MedicationRequest)", "Plan/proposal/order fulfilled by this request.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("replaces", "Reference(ServiceRequest)", "The request takes the place of the referenced completed or terminated request(s).", 0, java.lang.Integer.MAX_VALUE, replaces));
         children.add(new Property("requisition", "Identifier", "A shared identifier common to all service requests that were authorized more or less simultaneously by a single author, representing the composite or group identifier.", 0, 1, requisition));
@@ -2340,6 +2630,7 @@ public class ServiceRequest extends DomainResource {
         children.add(new Property("doNotPerform", "boolean", "Set this to true if the record is saying that the service/procedure should NOT be performed.", 0, 1, doNotPerform));
         children.add(new Property("code", "CodeableConcept", "A code that identifies a particular service (i.e., procedure, diagnostic investigation, or panel of investigations) that have been requested.", 0, 1, code));
         children.add(new Property("orderDetail", "CodeableConcept", "Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.", 0, java.lang.Integer.MAX_VALUE, orderDetail));
+        children.add(new Property("quantity[x]", "Quantity|Ratio|Range", "An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).", 0, 1, quantity));
         children.add(new Property("subject", "Reference(Patient|Group|Location|Device)", "On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).", 0, 1, subject));
         children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter or episode of care that provides additional information about the healthcare context in which this request is made.", 0, 1, context));
         children.add(new Property("occurrence[x]", "dateTime|Period|Timing", "The date/time at which the requested service should occur.", 0, 1, occurrence));
@@ -2348,6 +2639,8 @@ public class ServiceRequest extends DomainResource {
         children.add(new Property("requester", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson|Device)", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester));
         children.add(new Property("performerType", "CodeableConcept", "Desired type of performer for doing the requested service.", 0, 1, performerType));
         children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.", 0, java.lang.Integer.MAX_VALUE, performer));
+        children.add(new Property("locationCode", "CodeableConcept", "The preferred location(s) where the procedure should actually happen in coded or free text form. E.g. at home or nursing day care center.", 0, java.lang.Integer.MAX_VALUE, locationCode));
+        children.add(new Property("locationReference", "Reference(Location)", "A reference to the the preferred location(s) where the procedure should actually happen. E.g. at home or nursing day care center.", 0, java.lang.Integer.MAX_VALUE, locationReference));
         children.add(new Property("reasonCode", "CodeableConcept", "An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
         children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         children.add(new Property("insurance", "Reference(Coverage|ClaimResponse)", "Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be needed for delivering the requested service.", 0, java.lang.Integer.MAX_VALUE, insurance));
@@ -2363,7 +2656,8 @@ public class ServiceRequest extends DomainResource {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers assigned to this order instance by the orderer and/or the receiver and/or order fulfiller.", 0, java.lang.Integer.MAX_VALUE, identifier);
-        case -246883639: /*instantiates*/  return new Property("instantiates", "uri", "Protocol or definition followed by this request.", 0, java.lang.Integer.MAX_VALUE, instantiates);
+        case 8911915: /*instantiatesCanonical*/  return new Property("instantiatesCanonical", "canonical(ActivityDefinition|PlanDefinition)", "The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.", 0, java.lang.Integer.MAX_VALUE, instantiatesCanonical);
+        case -1926393373: /*instantiatesUri*/  return new Property("instantiatesUri", "uri", "The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this ServiceRequest.", 0, java.lang.Integer.MAX_VALUE, instantiatesUri);
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan|ServiceRequest|MedicationRequest)", "Plan/proposal/order fulfilled by this request.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case -430332865: /*replaces*/  return new Property("replaces", "Reference(ServiceRequest)", "The request takes the place of the referenced completed or terminated request(s).", 0, java.lang.Integer.MAX_VALUE, replaces);
         case 395923612: /*requisition*/  return new Property("requisition", "Identifier", "A shared identifier common to all service requests that were authorized more or less simultaneously by a single author, representing the composite or group identifier.", 0, 1, requisition);
@@ -2374,6 +2668,11 @@ public class ServiceRequest extends DomainResource {
         case -1788508167: /*doNotPerform*/  return new Property("doNotPerform", "boolean", "Set this to true if the record is saying that the service/procedure should NOT be performed.", 0, 1, doNotPerform);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code that identifies a particular service (i.e., procedure, diagnostic investigation, or panel of investigations) that have been requested.", 0, 1, code);
         case 1187338559: /*orderDetail*/  return new Property("orderDetail", "CodeableConcept", "Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.", 0, java.lang.Integer.MAX_VALUE, orderDetail);
+        case -515002347: /*quantity[x]*/  return new Property("quantity[x]", "Quantity|Ratio|Range", "An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).", 0, 1, quantity);
+        case -1285004149: /*quantity*/  return new Property("quantity[x]", "Quantity|Ratio|Range", "An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).", 0, 1, quantity);
+        case -1087409610: /*quantityQuantity*/  return new Property("quantity[x]", "Quantity|Ratio|Range", "An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).", 0, 1, quantity);
+        case -1004987840: /*quantityRatio*/  return new Property("quantity[x]", "Quantity|Ratio|Range", "An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).", 0, 1, quantity);
+        case -1004993678: /*quantityRange*/  return new Property("quantity[x]", "Quantity|Ratio|Range", "An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).", 0, 1, quantity);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Location|Device)", "On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).", 0, 1, subject);
         case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter or episode of care that provides additional information about the healthcare context in which this request is made.", 0, 1, context);
         case -2022646513: /*occurrence[x]*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date/time at which the requested service should occur.", 0, 1, occurrence);
@@ -2389,6 +2688,8 @@ public class ServiceRequest extends DomainResource {
         case 693933948: /*requester*/  return new Property("requester", "Reference(Practitioner|PractitionerRole|Organization|Patient|RelatedPerson|Device)", "The individual who initiated the request and has responsibility for its activation.", 0, 1, requester);
         case -901444568: /*performerType*/  return new Property("performerType", "CodeableConcept", "Desired type of performer for doing the requested service.", 0, 1, performerType);
         case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.", 0, java.lang.Integer.MAX_VALUE, performer);
+        case -58794174: /*locationCode*/  return new Property("locationCode", "CodeableConcept", "The preferred location(s) where the procedure should actually happen in coded or free text form. E.g. at home or nursing day care center.", 0, java.lang.Integer.MAX_VALUE, locationCode);
+        case 755866390: /*locationReference*/  return new Property("locationReference", "Reference(Location)", "A reference to the the preferred location(s) where the procedure should actually happen. E.g. at home or nursing day care center.", 0, java.lang.Integer.MAX_VALUE, locationReference);
         case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
         case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
         case 73049818: /*insurance*/  return new Property("insurance", "Reference(Coverage|ClaimResponse)", "Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be needed for delivering the requested service.", 0, java.lang.Integer.MAX_VALUE, insurance);
@@ -2407,7 +2708,8 @@ public class ServiceRequest extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
-        case -246883639: /*instantiates*/ return this.instantiates == null ? new Base[0] : this.instantiates.toArray(new Base[this.instantiates.size()]); // UriType
+        case 8911915: /*instantiatesCanonical*/ return this.instantiatesCanonical == null ? new Base[0] : this.instantiatesCanonical.toArray(new Base[this.instantiatesCanonical.size()]); // CanonicalType
+        case -1926393373: /*instantiatesUri*/ return this.instantiatesUri == null ? new Base[0] : this.instantiatesUri.toArray(new Base[this.instantiatesUri.size()]); // UriType
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case -430332865: /*replaces*/ return this.replaces == null ? new Base[0] : this.replaces.toArray(new Base[this.replaces.size()]); // Reference
         case 395923612: /*requisition*/ return this.requisition == null ? new Base[0] : new Base[] {this.requisition}; // Identifier
@@ -2418,6 +2720,7 @@ public class ServiceRequest extends DomainResource {
         case -1788508167: /*doNotPerform*/ return this.doNotPerform == null ? new Base[0] : new Base[] {this.doNotPerform}; // BooleanType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 1187338559: /*orderDetail*/ return this.orderDetail == null ? new Base[0] : this.orderDetail.toArray(new Base[this.orderDetail.size()]); // CodeableConcept
+        case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Type
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
         case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
         case 1687874001: /*occurrence*/ return this.occurrence == null ? new Base[0] : new Base[] {this.occurrence}; // Type
@@ -2426,6 +2729,8 @@ public class ServiceRequest extends DomainResource {
         case 693933948: /*requester*/ return this.requester == null ? new Base[0] : new Base[] {this.requester}; // Reference
         case -901444568: /*performerType*/ return this.performerType == null ? new Base[0] : new Base[] {this.performerType}; // CodeableConcept
         case 481140686: /*performer*/ return this.performer == null ? new Base[0] : this.performer.toArray(new Base[this.performer.size()]); // Reference
+        case -58794174: /*locationCode*/ return this.locationCode == null ? new Base[0] : this.locationCode.toArray(new Base[this.locationCode.size()]); // CodeableConcept
+        case 755866390: /*locationReference*/ return this.locationReference == null ? new Base[0] : this.locationReference.toArray(new Base[this.locationReference.size()]); // Reference
         case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
         case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 73049818: /*insurance*/ return this.insurance == null ? new Base[0] : this.insurance.toArray(new Base[this.insurance.size()]); // Reference
@@ -2446,8 +2751,11 @@ public class ServiceRequest extends DomainResource {
         case -1618432855: // identifier
           this.getIdentifier().add(castToIdentifier(value)); // Identifier
           return value;
-        case -246883639: // instantiates
-          this.getInstantiates().add(castToUri(value)); // UriType
+        case 8911915: // instantiatesCanonical
+          this.getInstantiatesCanonical().add(castToCanonical(value)); // CanonicalType
+          return value;
+        case -1926393373: // instantiatesUri
+          this.getInstantiatesUri().add(castToUri(value)); // UriType
           return value;
         case -332612366: // basedOn
           this.getBasedOn().add(castToReference(value)); // Reference
@@ -2482,6 +2790,9 @@ public class ServiceRequest extends DomainResource {
         case 1187338559: // orderDetail
           this.getOrderDetail().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
+        case -1285004149: // quantity
+          this.quantity = castToType(value); // Type
+          return value;
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           return value;
@@ -2505,6 +2816,12 @@ public class ServiceRequest extends DomainResource {
           return value;
         case 481140686: // performer
           this.getPerformer().add(castToReference(value)); // Reference
+          return value;
+        case -58794174: // locationCode
+          this.getLocationCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case 755866390: // locationReference
+          this.getLocationReference().add(castToReference(value)); // Reference
           return value;
         case 722137681: // reasonCode
           this.getReasonCode().add(castToCodeableConcept(value)); // CodeableConcept
@@ -2542,8 +2859,10 @@ public class ServiceRequest extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("identifier")) {
           this.getIdentifier().add(castToIdentifier(value));
-        } else if (name.equals("instantiates")) {
-          this.getInstantiates().add(castToUri(value));
+        } else if (name.equals("instantiatesCanonical")) {
+          this.getInstantiatesCanonical().add(castToCanonical(value));
+        } else if (name.equals("instantiatesUri")) {
+          this.getInstantiatesUri().add(castToUri(value));
         } else if (name.equals("basedOn")) {
           this.getBasedOn().add(castToReference(value));
         } else if (name.equals("replaces")) {
@@ -2567,6 +2886,8 @@ public class ServiceRequest extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("orderDetail")) {
           this.getOrderDetail().add(castToCodeableConcept(value));
+        } else if (name.equals("quantity[x]")) {
+          this.quantity = castToType(value); // Type
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
         } else if (name.equals("context")) {
@@ -2583,6 +2904,10 @@ public class ServiceRequest extends DomainResource {
           this.performerType = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("performer")) {
           this.getPerformer().add(castToReference(value));
+        } else if (name.equals("locationCode")) {
+          this.getLocationCode().add(castToCodeableConcept(value));
+        } else if (name.equals("locationReference")) {
+          this.getLocationReference().add(castToReference(value));
         } else if (name.equals("reasonCode")) {
           this.getReasonCode().add(castToCodeableConcept(value));
         } else if (name.equals("reasonReference")) {
@@ -2610,7 +2935,8 @@ public class ServiceRequest extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855:  return addIdentifier(); 
-        case -246883639:  return addInstantiatesElement();
+        case 8911915:  return addInstantiatesCanonicalElement();
+        case -1926393373:  return addInstantiatesUriElement();
         case -332612366:  return addBasedOn(); 
         case -430332865:  return addReplaces(); 
         case 395923612:  return getRequisition(); 
@@ -2621,6 +2947,8 @@ public class ServiceRequest extends DomainResource {
         case -1788508167:  return getDoNotPerformElement();
         case 3059181:  return getCode(); 
         case 1187338559:  return addOrderDetail(); 
+        case -515002347:  return getQuantity(); 
+        case -1285004149:  return getQuantity(); 
         case -1867885268:  return getSubject(); 
         case 951530927:  return getContext(); 
         case -2022646513:  return getOccurrence(); 
@@ -2631,6 +2959,8 @@ public class ServiceRequest extends DomainResource {
         case 693933948:  return getRequester(); 
         case -901444568:  return getPerformerType(); 
         case 481140686:  return addPerformer(); 
+        case -58794174:  return addLocationCode(); 
+        case 755866390:  return addLocationReference(); 
         case 722137681:  return addReasonCode(); 
         case -1146218137:  return addReasonReference(); 
         case 73049818:  return addInsurance(); 
@@ -2649,7 +2979,8 @@ public class ServiceRequest extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
-        case -246883639: /*instantiates*/ return new String[] {"uri"};
+        case 8911915: /*instantiatesCanonical*/ return new String[] {"canonical"};
+        case -1926393373: /*instantiatesUri*/ return new String[] {"uri"};
         case -332612366: /*basedOn*/ return new String[] {"Reference"};
         case -430332865: /*replaces*/ return new String[] {"Reference"};
         case 395923612: /*requisition*/ return new String[] {"Identifier"};
@@ -2660,6 +2991,7 @@ public class ServiceRequest extends DomainResource {
         case -1788508167: /*doNotPerform*/ return new String[] {"boolean"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case 1187338559: /*orderDetail*/ return new String[] {"CodeableConcept"};
+        case -1285004149: /*quantity*/ return new String[] {"Quantity", "Ratio", "Range"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
         case 951530927: /*context*/ return new String[] {"Reference"};
         case 1687874001: /*occurrence*/ return new String[] {"dateTime", "Period", "Timing"};
@@ -2668,6 +3000,8 @@ public class ServiceRequest extends DomainResource {
         case 693933948: /*requester*/ return new String[] {"Reference"};
         case -901444568: /*performerType*/ return new String[] {"CodeableConcept"};
         case 481140686: /*performer*/ return new String[] {"Reference"};
+        case -58794174: /*locationCode*/ return new String[] {"CodeableConcept"};
+        case 755866390: /*locationReference*/ return new String[] {"Reference"};
         case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
         case -1146218137: /*reasonReference*/ return new String[] {"Reference"};
         case 73049818: /*insurance*/ return new String[] {"Reference"};
@@ -2687,8 +3021,11 @@ public class ServiceRequest extends DomainResource {
         if (name.equals("identifier")) {
           return addIdentifier();
         }
-        else if (name.equals("instantiates")) {
-          throw new FHIRException("Cannot call addChild on a primitive type ServiceRequest.instantiates");
+        else if (name.equals("instantiatesCanonical")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ServiceRequest.instantiatesCanonical");
+        }
+        else if (name.equals("instantiatesUri")) {
+          throw new FHIRException("Cannot call addChild on a primitive type ServiceRequest.instantiatesUri");
         }
         else if (name.equals("basedOn")) {
           return addBasedOn();
@@ -2721,6 +3058,18 @@ public class ServiceRequest extends DomainResource {
         }
         else if (name.equals("orderDetail")) {
           return addOrderDetail();
+        }
+        else if (name.equals("quantityQuantity")) {
+          this.quantity = new Quantity();
+          return this.quantity;
+        }
+        else if (name.equals("quantityRatio")) {
+          this.quantity = new Ratio();
+          return this.quantity;
+        }
+        else if (name.equals("quantityRange")) {
+          this.quantity = new Range();
+          return this.quantity;
         }
         else if (name.equals("subject")) {
           this.subject = new Reference();
@@ -2763,6 +3112,12 @@ public class ServiceRequest extends DomainResource {
         }
         else if (name.equals("performer")) {
           return addPerformer();
+        }
+        else if (name.equals("locationCode")) {
+          return addLocationCode();
+        }
+        else if (name.equals("locationReference")) {
+          return addLocationReference();
         }
         else if (name.equals("reasonCode")) {
           return addReasonCode();
@@ -2808,10 +3163,15 @@ public class ServiceRequest extends DomainResource {
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
         };
-        if (instantiates != null) {
-          dst.instantiates = new ArrayList<UriType>();
-          for (UriType i : instantiates)
-            dst.instantiates.add(i.copy());
+        if (instantiatesCanonical != null) {
+          dst.instantiatesCanonical = new ArrayList<CanonicalType>();
+          for (CanonicalType i : instantiatesCanonical)
+            dst.instantiatesCanonical.add(i.copy());
+        };
+        if (instantiatesUri != null) {
+          dst.instantiatesUri = new ArrayList<UriType>();
+          for (UriType i : instantiatesUri)
+            dst.instantiatesUri.add(i.copy());
         };
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
@@ -2839,6 +3199,7 @@ public class ServiceRequest extends DomainResource {
           for (CodeableConcept i : orderDetail)
             dst.orderDetail.add(i.copy());
         };
+        dst.quantity = quantity == null ? null : quantity.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
         dst.occurrence = occurrence == null ? null : occurrence.copy();
@@ -2850,6 +3211,16 @@ public class ServiceRequest extends DomainResource {
           dst.performer = new ArrayList<Reference>();
           for (Reference i : performer)
             dst.performer.add(i.copy());
+        };
+        if (locationCode != null) {
+          dst.locationCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : locationCode)
+            dst.locationCode.add(i.copy());
+        };
+        if (locationReference != null) {
+          dst.locationReference = new ArrayList<Reference>();
+          for (Reference i : locationReference)
+            dst.locationReference.add(i.copy());
         };
         if (reasonCode != null) {
           dst.reasonCode = new ArrayList<CodeableConcept>();
@@ -2906,18 +3277,20 @@ public class ServiceRequest extends DomainResource {
         if (!(other_ instanceof ServiceRequest))
           return false;
         ServiceRequest o = (ServiceRequest) other_;
-        return compareDeep(identifier, o.identifier, true) && compareDeep(instantiates, o.instantiates, true)
-           && compareDeep(basedOn, o.basedOn, true) && compareDeep(replaces, o.replaces, true) && compareDeep(requisition, o.requisition, true)
-           && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(category, o.category, true)
-           && compareDeep(priority, o.priority, true) && compareDeep(doNotPerform, o.doNotPerform, true) && compareDeep(code, o.code, true)
-           && compareDeep(orderDetail, o.orderDetail, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(instantiatesCanonical, o.instantiatesCanonical, true)
+           && compareDeep(instantiatesUri, o.instantiatesUri, true) && compareDeep(basedOn, o.basedOn, true)
+           && compareDeep(replaces, o.replaces, true) && compareDeep(requisition, o.requisition, true) && compareDeep(status, o.status, true)
+           && compareDeep(intent, o.intent, true) && compareDeep(category, o.category, true) && compareDeep(priority, o.priority, true)
+           && compareDeep(doNotPerform, o.doNotPerform, true) && compareDeep(code, o.code, true) && compareDeep(orderDetail, o.orderDetail, true)
+           && compareDeep(quantity, o.quantity, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
            && compareDeep(occurrence, o.occurrence, true) && compareDeep(asNeeded, o.asNeeded, true) && compareDeep(authoredOn, o.authoredOn, true)
            && compareDeep(requester, o.requester, true) && compareDeep(performerType, o.performerType, true)
-           && compareDeep(performer, o.performer, true) && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
-           && compareDeep(insurance, o.insurance, true) && compareDeep(supportingInfo, o.supportingInfo, true)
-           && compareDeep(specimen, o.specimen, true) && compareDeep(bodySite, o.bodySite, true) && compareDeep(note, o.note, true)
-           && compareDeep(patientInstruction, o.patientInstruction, true) && compareDeep(relevantHistory, o.relevantHistory, true)
-          ;
+           && compareDeep(performer, o.performer, true) && compareDeep(locationCode, o.locationCode, true)
+           && compareDeep(locationReference, o.locationReference, true) && compareDeep(reasonCode, o.reasonCode, true)
+           && compareDeep(reasonReference, o.reasonReference, true) && compareDeep(insurance, o.insurance, true)
+           && compareDeep(supportingInfo, o.supportingInfo, true) && compareDeep(specimen, o.specimen, true)
+           && compareDeep(bodySite, o.bodySite, true) && compareDeep(note, o.note, true) && compareDeep(patientInstruction, o.patientInstruction, true)
+           && compareDeep(relevantHistory, o.relevantHistory, true);
       }
 
       @Override
@@ -2927,17 +3300,19 @@ public class ServiceRequest extends DomainResource {
         if (!(other_ instanceof ServiceRequest))
           return false;
         ServiceRequest o = (ServiceRequest) other_;
-        return compareValues(instantiates, o.instantiates, true) && compareValues(status, o.status, true) && compareValues(intent, o.intent, true)
-           && compareValues(priority, o.priority, true) && compareValues(doNotPerform, o.doNotPerform, true) && compareValues(authoredOn, o.authoredOn, true)
-           && compareValues(patientInstruction, o.patientInstruction, true);
+        return compareValues(instantiatesUri, o.instantiatesUri, true) && compareValues(status, o.status, true)
+           && compareValues(intent, o.intent, true) && compareValues(priority, o.priority, true) && compareValues(doNotPerform, o.doNotPerform, true)
+           && compareValues(authoredOn, o.authoredOn, true) && compareValues(patientInstruction, o.patientInstruction, true)
+          ;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiates, basedOn
-          , replaces, requisition, status, intent, category, priority, doNotPerform, code
-          , orderDetail, subject, context, occurrence, asNeeded, authoredOn, requester, performerType
-          , performer, reasonCode, reasonReference, insurance, supportingInfo, specimen, bodySite
-          , note, patientInstruction, relevantHistory);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiatesCanonical
+          , instantiatesUri, basedOn, replaces, requisition, status, intent, category, priority
+          , doNotPerform, code, orderDetail, quantity, subject, context, occurrence, asNeeded
+          , authoredOn, requester, performerType, performer, locationCode, locationReference
+          , reasonCode, reasonReference, insurance, supportingInfo, specimen, bodySite, note
+          , patientInstruction, relevantHistory);
       }
 
   @Override
@@ -2990,26 +3365,6 @@ public class ServiceRequest extends DomainResource {
    * the path value of "<b>ServiceRequest:requester</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTER = new ca.uhn.fhir.model.api.Include("ServiceRequest:requester").toLocked();
-
- /**
-   * Search parameter: <b>instantiates</b>
-   * <p>
-   * Description: <b>Protocol or definition</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ServiceRequest.instantiates</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="instantiates", path="ServiceRequest.instantiates", description="Protocol or definition", type="uri" )
-  public static final String SP_INSTANTIATES = "instantiates";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>instantiates</b>
-   * <p>
-   * Description: <b>Protocol or definition</b><br>
-   * Type: <b>uri</b><br>
-   * Path: <b>ServiceRequest.instantiates</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.UriClientParam INSTANTIATES = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_INSTANTIATES);
 
  /**
    * Search parameter: <b>identifier</b>
@@ -3150,6 +3505,32 @@ public class ServiceRequest extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SUBJECT = new ca.uhn.fhir.model.api.Include("ServiceRequest:subject").toLocked();
 
  /**
+   * Search parameter: <b>instantiates-canonical</b>
+   * <p>
+   * Description: <b>Instantiates FHIR protocol or definition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ServiceRequest.instantiatesCanonical</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="instantiates-canonical", path="ServiceRequest.instantiatesCanonical", description="Instantiates FHIR protocol or definition", type="reference", target={ActivityDefinition.class, PlanDefinition.class } )
+  public static final String SP_INSTANTIATES_CANONICAL = "instantiates-canonical";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>instantiates-canonical</b>
+   * <p>
+   * Description: <b>Instantiates FHIR protocol or definition</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>ServiceRequest.instantiatesCanonical</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam INSTANTIATES_CANONICAL = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_INSTANTIATES_CANONICAL);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>ServiceRequest:instantiates-canonical</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_INSTANTIATES_CANONICAL = new ca.uhn.fhir.model.api.Include("ServiceRequest:instantiates-canonical").toLocked();
+
+ /**
    * Search parameter: <b>encounter</b>
    * <p>
    * Description: <b>An encounter in which this request is made</b><br>
@@ -3157,7 +3538,7 @@ public class ServiceRequest extends DomainResource {
    * Path: <b>ServiceRequest.context</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="ServiceRequest.context", description="An encounter in which this request is made", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="encounter", path="ServiceRequest.context.where(resolve() is Encounter)", description="An encounter in which this request is made", type="reference", target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
@@ -3289,7 +3670,7 @@ public class ServiceRequest extends DomainResource {
    * Path: <b>ServiceRequest.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="ServiceRequest.subject", description="Search by subject - a patient", type="reference", target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="ServiceRequest.subject.where(resolve() is Patient)", description="Search by subject - a patient", type="reference", target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -3358,6 +3739,26 @@ public class ServiceRequest extends DomainResource {
    * the path value of "<b>ServiceRequest:context</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("ServiceRequest:context").toLocked();
+
+ /**
+   * Search parameter: <b>instantiates-uri</b>
+   * <p>
+   * Description: <b>Instantiates external protocol or definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ServiceRequest.instantiatesUri</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="instantiates-uri", path="ServiceRequest.instantiatesUri", description="Instantiates external protocol or definition", type="uri" )
+  public static final String SP_INSTANTIATES_URI = "instantiates-uri";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>instantiates-uri</b>
+   * <p>
+   * Description: <b>Instantiates external protocol or definition</b><br>
+   * Type: <b>uri</b><br>
+   * Path: <b>ServiceRequest.instantiatesUri</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.UriClientParam INSTANTIATES_URI = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_INSTANTIATES_URI);
 
  /**
    * Search parameter: <b>body-site</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -222,31 +222,31 @@ public class Timing extends BackboneType implements ICompositeType {
 
     public enum DayOfWeek {
         /**
-         * Monday
+         * Monday.
          */
         MON, 
         /**
-         * Tuesday
+         * Tuesday.
          */
         TUE, 
         /**
-         * Wednesday
+         * Wednesday.
          */
         WED, 
         /**
-         * Thursday
+         * Thursday.
          */
         THU, 
         /**
-         * Friday
+         * Friday.
          */
         FRI, 
         /**
-         * Saturday
+         * Saturday.
          */
         SAT, 
         /**
-         * Sunday
+         * Sunday.
          */
         SUN, 
         /**
@@ -301,13 +301,13 @@ public class Timing extends BackboneType implements ICompositeType {
         }
         public String getDefinition() {
           switch (this) {
-            case MON: return "Monday";
-            case TUE: return "Tuesday";
-            case WED: return "Wednesday";
-            case THU: return "Thursday";
-            case FRI: return "Friday";
-            case SAT: return "Saturday";
-            case SUN: return "Sunday";
+            case MON: return "Monday.";
+            case TUE: return "Tuesday.";
+            case WED: return "Wednesday.";
+            case THU: return "Thursday.";
+            case FRI: return "Friday.";
+            case SAT: return "Saturday.";
+            case SUN: return "Sunday.";
             default: return "?";
           }
         }
@@ -394,51 +394,51 @@ public class Timing extends BackboneType implements ICompositeType {
 
     public enum EventTiming {
         /**
-         * Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         MORN, 
         /**
-         * Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         MORN_EARLY, 
         /**
-         * Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         MORN_LATE, 
         /**
-         * Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         NOON, 
         /**
-         * Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         AFT, 
         /**
-         * Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         AFT_EARLY, 
         /**
-         * Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         AFT_LATE, 
         /**
-         * Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         EVE, 
         /**
-         * Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         EVE_EARLY, 
         /**
-         * Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         EVE_LATE, 
         /**
-         * Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         NIGHT, 
         /**
-         * Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation
+         * Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation.
          */
         PHS, 
         /**
@@ -606,37 +606,37 @@ public class Timing extends BackboneType implements ICompositeType {
             case EVE_LATE: return "http://hl7.org/fhir/event-timing";
             case NIGHT: return "http://hl7.org/fhir/event-timing";
             case PHS: return "http://hl7.org/fhir/event-timing";
-            case HS: return "http://hl7.org/fhir/v3/TimingEvent";
-            case WAKE: return "http://hl7.org/fhir/v3/TimingEvent";
-            case C: return "http://hl7.org/fhir/v3/TimingEvent";
-            case CM: return "http://hl7.org/fhir/v3/TimingEvent";
-            case CD: return "http://hl7.org/fhir/v3/TimingEvent";
-            case CV: return "http://hl7.org/fhir/v3/TimingEvent";
-            case AC: return "http://hl7.org/fhir/v3/TimingEvent";
-            case ACM: return "http://hl7.org/fhir/v3/TimingEvent";
-            case ACD: return "http://hl7.org/fhir/v3/TimingEvent";
-            case ACV: return "http://hl7.org/fhir/v3/TimingEvent";
-            case PC: return "http://hl7.org/fhir/v3/TimingEvent";
-            case PCM: return "http://hl7.org/fhir/v3/TimingEvent";
-            case PCD: return "http://hl7.org/fhir/v3/TimingEvent";
-            case PCV: return "http://hl7.org/fhir/v3/TimingEvent";
+            case HS: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case WAKE: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case C: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case CM: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case CD: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case CV: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case AC: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case ACM: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case ACD: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case ACV: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case PC: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case PCM: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case PCD: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
+            case PCV: return "http://terminology.hl7.org/CodeSystem/v3-TimingEvent";
             default: return "?";
           }
         }
         public String getDefinition() {
           switch (this) {
-            case MORN: return "Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation";
-            case MORN_EARLY: return "Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation";
-            case MORN_LATE: return "Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation";
-            case NOON: return "Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation";
-            case AFT: return "Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation";
-            case AFT_EARLY: return "Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation";
-            case AFT_LATE: return "Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation";
-            case EVE: return "Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation";
-            case EVE_EARLY: return "Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation";
-            case EVE_LATE: return "Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation";
-            case NIGHT: return "Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation";
-            case PHS: return "Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation";
+            case MORN: return "Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case MORN_EARLY: return "Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case MORN_LATE: return "Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case NOON: return "Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case AFT: return "Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case AFT_EARLY: return "Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case AFT_LATE: return "Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case EVE: return "Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case EVE_EARLY: return "Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case EVE_LATE: return "Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case NIGHT: return "Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation.";
+            case PHS: return "Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation.";
             case HS: return "";
             case WAKE: return "";
             case C: return "";
@@ -878,31 +878,31 @@ public class Timing extends BackboneType implements ICompositeType {
         protected Type bounds;
 
         /**
-         * A total count of the desired number of repetitions across the duration of the entire timing specification.
+         * A total count of the desired number of repetitions across the duration of the entire timing specification. If countMax is present, this element indicates the lower bound of the allowed range of count values.
          */
-        @Child(name = "count", type = {IntegerType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Number of times to repeat", formalDefinition="A total count of the desired number of repetitions across the duration of the entire timing specification." )
-        protected IntegerType count;
+        @Child(name = "count", type = {PositiveIntType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Number of times to repeat", formalDefinition="A total count of the desired number of repetitions across the duration of the entire timing specification. If countMax is present, this element indicates the lower bound of the allowed range of count values." )
+        protected PositiveIntType count;
 
         /**
-         * A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).
+         * If present, indicates that the count is a range - so to perform the action between [count] and [countMax] times.
          */
-        @Child(name = "countMax", type = {IntegerType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Maximum number of times to repeat", formalDefinition="A maximum value for the count of the desired repetitions (e.g. do something 6-8 times)." )
-        protected IntegerType countMax;
+        @Child(name = "countMax", type = {PositiveIntType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Maximum number of times to repeat", formalDefinition="If present, indicates that the count is a range - so to perform the action between [count] and [countMax] times." )
+        protected PositiveIntType countMax;
 
         /**
-         * How long this thing happens for when it happens.
+         * How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration.
          */
         @Child(name = "duration", type = {DecimalType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="How long when it happens", formalDefinition="How long this thing happens for when it happens." )
+        @Description(shortDefinition="How long when it happens", formalDefinition="How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration." )
         protected DecimalType duration;
 
         /**
-         * The upper limit of how long this thing happens for when it happens.
+         * If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length.
          */
         @Child(name = "durationMax", type = {DecimalType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="How long when it happens (Max)", formalDefinition="The upper limit of how long this thing happens for when it happens." )
+        @Description(shortDefinition="How long when it happens (Max)", formalDefinition="If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length." )
         protected DecimalType durationMax;
 
         /**
@@ -914,24 +914,24 @@ public class Timing extends BackboneType implements ICompositeType {
         protected Enumeration<UnitsOfTime> durationUnit;
 
         /**
-         * The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).
+         * The number of times to repeat the action within the specified period. If frequencyMax is present, this element indicates the lower bound of the allowed range of the frequency.
          */
-        @Child(name = "frequency", type = {IntegerType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided)." )
-        protected IntegerType frequency;
+        @Child(name = "frequency", type = {PositiveIntType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="The number of times to repeat the action within the specified period. If frequencyMax is present, this element indicates the lower bound of the allowed range of the frequency." )
+        protected PositiveIntType frequency;
 
         /**
          * If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.
          */
-        @Child(name = "frequencyMax", type = {IntegerType.class}, order=8, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "frequencyMax", type = {PositiveIntType.class}, order=8, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Event occurs up to frequencyMax times per period", formalDefinition="If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range." )
-        protected IntegerType frequencyMax;
+        protected PositiveIntType frequencyMax;
 
         /**
-         * Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period.
+         * Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length.
          */
         @Child(name = "period", type = {DecimalType.class}, order=9, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period." )
+        @Description(shortDefinition="Event occurs frequency times per period", formalDefinition="Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length." )
         protected DecimalType period;
 
         /**
@@ -979,7 +979,7 @@ public class Timing extends BackboneType implements ICompositeType {
         @Description(shortDefinition="Minutes from event (before or after)", formalDefinition="The number of minutes from the event. If the event code does not indicate whether the minutes is before or after the event, then the offset is assumed to be after the event." )
         protected UnsignedIntType offset;
 
-        private static final long serialVersionUID = -1590643356L;
+        private static final long serialVersionUID = -900253756L;
 
     /**
      * Constructor
@@ -1055,14 +1055,14 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @return {@link #count} (A total count of the desired number of repetitions across the duration of the entire timing specification.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+         * @return {@link #count} (A total count of the desired number of repetitions across the duration of the entire timing specification. If countMax is present, this element indicates the lower bound of the allowed range of count values.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
          */
-        public IntegerType getCountElement() { 
+        public PositiveIntType getCountElement() { 
           if (this.count == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TimingRepeatComponent.count");
             else if (Configuration.doAutoCreate())
-              this.count = new IntegerType(); // bb
+              this.count = new PositiveIntType(); // bb
           return this.count;
         }
 
@@ -1075,39 +1075,39 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value {@link #count} (A total count of the desired number of repetitions across the duration of the entire timing specification.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
+         * @param value {@link #count} (A total count of the desired number of repetitions across the duration of the entire timing specification. If countMax is present, this element indicates the lower bound of the allowed range of count values.). This is the underlying object with id, value and extensions. The accessor "getCount" gives direct access to the value
          */
-        public TimingRepeatComponent setCountElement(IntegerType value) { 
+        public TimingRepeatComponent setCountElement(PositiveIntType value) { 
           this.count = value;
           return this;
         }
 
         /**
-         * @return A total count of the desired number of repetitions across the duration of the entire timing specification.
+         * @return A total count of the desired number of repetitions across the duration of the entire timing specification. If countMax is present, this element indicates the lower bound of the allowed range of count values.
          */
         public int getCount() { 
           return this.count == null || this.count.isEmpty() ? 0 : this.count.getValue();
         }
 
         /**
-         * @param value A total count of the desired number of repetitions across the duration of the entire timing specification.
+         * @param value A total count of the desired number of repetitions across the duration of the entire timing specification. If countMax is present, this element indicates the lower bound of the allowed range of count values.
          */
         public TimingRepeatComponent setCount(int value) { 
             if (this.count == null)
-              this.count = new IntegerType();
+              this.count = new PositiveIntType();
             this.count.setValue(value);
           return this;
         }
 
         /**
-         * @return {@link #countMax} (A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).). This is the underlying object with id, value and extensions. The accessor "getCountMax" gives direct access to the value
+         * @return {@link #countMax} (If present, indicates that the count is a range - so to perform the action between [count] and [countMax] times.). This is the underlying object with id, value and extensions. The accessor "getCountMax" gives direct access to the value
          */
-        public IntegerType getCountMaxElement() { 
+        public PositiveIntType getCountMaxElement() { 
           if (this.countMax == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TimingRepeatComponent.countMax");
             else if (Configuration.doAutoCreate())
-              this.countMax = new IntegerType(); // bb
+              this.countMax = new PositiveIntType(); // bb
           return this.countMax;
         }
 
@@ -1120,32 +1120,32 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value {@link #countMax} (A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).). This is the underlying object with id, value and extensions. The accessor "getCountMax" gives direct access to the value
+         * @param value {@link #countMax} (If present, indicates that the count is a range - so to perform the action between [count] and [countMax] times.). This is the underlying object with id, value and extensions. The accessor "getCountMax" gives direct access to the value
          */
-        public TimingRepeatComponent setCountMaxElement(IntegerType value) { 
+        public TimingRepeatComponent setCountMaxElement(PositiveIntType value) { 
           this.countMax = value;
           return this;
         }
 
         /**
-         * @return A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).
+         * @return If present, indicates that the count is a range - so to perform the action between [count] and [countMax] times.
          */
         public int getCountMax() { 
           return this.countMax == null || this.countMax.isEmpty() ? 0 : this.countMax.getValue();
         }
 
         /**
-         * @param value A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).
+         * @param value If present, indicates that the count is a range - so to perform the action between [count] and [countMax] times.
          */
         public TimingRepeatComponent setCountMax(int value) { 
             if (this.countMax == null)
-              this.countMax = new IntegerType();
+              this.countMax = new PositiveIntType();
             this.countMax.setValue(value);
           return this;
         }
 
         /**
-         * @return {@link #duration} (How long this thing happens for when it happens.). This is the underlying object with id, value and extensions. The accessor "getDuration" gives direct access to the value
+         * @return {@link #duration} (How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration.). This is the underlying object with id, value and extensions. The accessor "getDuration" gives direct access to the value
          */
         public DecimalType getDurationElement() { 
           if (this.duration == null)
@@ -1165,7 +1165,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value {@link #duration} (How long this thing happens for when it happens.). This is the underlying object with id, value and extensions. The accessor "getDuration" gives direct access to the value
+         * @param value {@link #duration} (How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration.). This is the underlying object with id, value and extensions. The accessor "getDuration" gives direct access to the value
          */
         public TimingRepeatComponent setDurationElement(DecimalType value) { 
           this.duration = value;
@@ -1173,14 +1173,14 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @return How long this thing happens for when it happens.
+         * @return How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration.
          */
         public BigDecimal getDuration() { 
           return this.duration == null ? null : this.duration.getValue();
         }
 
         /**
-         * @param value How long this thing happens for when it happens.
+         * @param value How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration.
          */
         public TimingRepeatComponent setDuration(BigDecimal value) { 
           if (value == null)
@@ -1194,7 +1194,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value How long this thing happens for when it happens.
+         * @param value How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration.
          */
         public TimingRepeatComponent setDuration(long value) { 
               this.duration = new DecimalType();
@@ -1203,7 +1203,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value How long this thing happens for when it happens.
+         * @param value How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration.
          */
         public TimingRepeatComponent setDuration(double value) { 
               this.duration = new DecimalType();
@@ -1212,7 +1212,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @return {@link #durationMax} (The upper limit of how long this thing happens for when it happens.). This is the underlying object with id, value and extensions. The accessor "getDurationMax" gives direct access to the value
+         * @return {@link #durationMax} (If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length.). This is the underlying object with id, value and extensions. The accessor "getDurationMax" gives direct access to the value
          */
         public DecimalType getDurationMaxElement() { 
           if (this.durationMax == null)
@@ -1232,7 +1232,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value {@link #durationMax} (The upper limit of how long this thing happens for when it happens.). This is the underlying object with id, value and extensions. The accessor "getDurationMax" gives direct access to the value
+         * @param value {@link #durationMax} (If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length.). This is the underlying object with id, value and extensions. The accessor "getDurationMax" gives direct access to the value
          */
         public TimingRepeatComponent setDurationMaxElement(DecimalType value) { 
           this.durationMax = value;
@@ -1240,14 +1240,14 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @return The upper limit of how long this thing happens for when it happens.
+         * @return If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length.
          */
         public BigDecimal getDurationMax() { 
           return this.durationMax == null ? null : this.durationMax.getValue();
         }
 
         /**
-         * @param value The upper limit of how long this thing happens for when it happens.
+         * @param value If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length.
          */
         public TimingRepeatComponent setDurationMax(BigDecimal value) { 
           if (value == null)
@@ -1261,7 +1261,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value The upper limit of how long this thing happens for when it happens.
+         * @param value If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length.
          */
         public TimingRepeatComponent setDurationMax(long value) { 
               this.durationMax = new DecimalType();
@@ -1270,7 +1270,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value The upper limit of how long this thing happens for when it happens.
+         * @param value If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length.
          */
         public TimingRepeatComponent setDurationMax(double value) { 
               this.durationMax = new DecimalType();
@@ -1328,14 +1328,14 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @return {@link #frequency} (The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).). This is the underlying object with id, value and extensions. The accessor "getFrequency" gives direct access to the value
+         * @return {@link #frequency} (The number of times to repeat the action within the specified period. If frequencyMax is present, this element indicates the lower bound of the allowed range of the frequency.). This is the underlying object with id, value and extensions. The accessor "getFrequency" gives direct access to the value
          */
-        public IntegerType getFrequencyElement() { 
+        public PositiveIntType getFrequencyElement() { 
           if (this.frequency == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TimingRepeatComponent.frequency");
             else if (Configuration.doAutoCreate())
-              this.frequency = new IntegerType(); // bb
+              this.frequency = new PositiveIntType(); // bb
           return this.frequency;
         }
 
@@ -1348,26 +1348,26 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value {@link #frequency} (The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).). This is the underlying object with id, value and extensions. The accessor "getFrequency" gives direct access to the value
+         * @param value {@link #frequency} (The number of times to repeat the action within the specified period. If frequencyMax is present, this element indicates the lower bound of the allowed range of the frequency.). This is the underlying object with id, value and extensions. The accessor "getFrequency" gives direct access to the value
          */
-        public TimingRepeatComponent setFrequencyElement(IntegerType value) { 
+        public TimingRepeatComponent setFrequencyElement(PositiveIntType value) { 
           this.frequency = value;
           return this;
         }
 
         /**
-         * @return The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).
+         * @return The number of times to repeat the action within the specified period. If frequencyMax is present, this element indicates the lower bound of the allowed range of the frequency.
          */
         public int getFrequency() { 
           return this.frequency == null || this.frequency.isEmpty() ? 0 : this.frequency.getValue();
         }
 
         /**
-         * @param value The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).
+         * @param value The number of times to repeat the action within the specified period. If frequencyMax is present, this element indicates the lower bound of the allowed range of the frequency.
          */
         public TimingRepeatComponent setFrequency(int value) { 
             if (this.frequency == null)
-              this.frequency = new IntegerType();
+              this.frequency = new PositiveIntType();
             this.frequency.setValue(value);
           return this;
         }
@@ -1375,12 +1375,12 @@ public class Timing extends BackboneType implements ICompositeType {
         /**
          * @return {@link #frequencyMax} (If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
          */
-        public IntegerType getFrequencyMaxElement() { 
+        public PositiveIntType getFrequencyMaxElement() { 
           if (this.frequencyMax == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create TimingRepeatComponent.frequencyMax");
             else if (Configuration.doAutoCreate())
-              this.frequencyMax = new IntegerType(); // bb
+              this.frequencyMax = new PositiveIntType(); // bb
           return this.frequencyMax;
         }
 
@@ -1395,7 +1395,7 @@ public class Timing extends BackboneType implements ICompositeType {
         /**
          * @param value {@link #frequencyMax} (If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.). This is the underlying object with id, value and extensions. The accessor "getFrequencyMax" gives direct access to the value
          */
-        public TimingRepeatComponent setFrequencyMaxElement(IntegerType value) { 
+        public TimingRepeatComponent setFrequencyMaxElement(PositiveIntType value) { 
           this.frequencyMax = value;
           return this;
         }
@@ -1412,13 +1412,13 @@ public class Timing extends BackboneType implements ICompositeType {
          */
         public TimingRepeatComponent setFrequencyMax(int value) { 
             if (this.frequencyMax == null)
-              this.frequencyMax = new IntegerType();
+              this.frequencyMax = new PositiveIntType();
             this.frequencyMax.setValue(value);
           return this;
         }
 
         /**
-         * @return {@link #period} (Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period.). This is the underlying object with id, value and extensions. The accessor "getPeriod" gives direct access to the value
+         * @return {@link #period} (Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length.). This is the underlying object with id, value and extensions. The accessor "getPeriod" gives direct access to the value
          */
         public DecimalType getPeriodElement() { 
           if (this.period == null)
@@ -1438,7 +1438,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value {@link #period} (Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period.). This is the underlying object with id, value and extensions. The accessor "getPeriod" gives direct access to the value
+         * @param value {@link #period} (Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length.). This is the underlying object with id, value and extensions. The accessor "getPeriod" gives direct access to the value
          */
         public TimingRepeatComponent setPeriodElement(DecimalType value) { 
           this.period = value;
@@ -1446,14 +1446,14 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @return Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period.
+         * @return Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length.
          */
         public BigDecimal getPeriod() { 
           return this.period == null ? null : this.period.getValue();
         }
 
         /**
-         * @param value Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period.
+         * @param value Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length.
          */
         public TimingRepeatComponent setPeriod(BigDecimal value) { 
           if (value == null)
@@ -1467,7 +1467,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period.
+         * @param value Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length.
          */
         public TimingRepeatComponent setPeriod(long value) { 
               this.period = new DecimalType();
@@ -1476,7 +1476,7 @@ public class Timing extends BackboneType implements ICompositeType {
         }
 
         /**
-         * @param value Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period.
+         * @param value Indicates the duration of time over which repetitions are to occur; e.g. to express "3 times per day", 3 would be the frequency and "1 day" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length.
          */
         public TimingRepeatComponent setPeriod(double value) { 
               this.period = new DecimalType();
@@ -1831,14 +1831,14 @@ public class Timing extends BackboneType implements ICompositeType {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds));
-          children.add(new Property("count", "integer", "A total count of the desired number of repetitions across the duration of the entire timing specification.", 0, 1, count));
-          children.add(new Property("countMax", "integer", "A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).", 0, 1, countMax));
-          children.add(new Property("duration", "decimal", "How long this thing happens for when it happens.", 0, 1, duration));
-          children.add(new Property("durationMax", "decimal", "The upper limit of how long this thing happens for when it happens.", 0, 1, durationMax));
+          children.add(new Property("count", "positiveInt", "A total count of the desired number of repetitions across the duration of the entire timing specification. If countMax is present, this element indicates the lower bound of the allowed range of count values.", 0, 1, count));
+          children.add(new Property("countMax", "positiveInt", "If present, indicates that the count is a range - so to perform the action between [count] and [countMax] times.", 0, 1, countMax));
+          children.add(new Property("duration", "decimal", "How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration.", 0, 1, duration));
+          children.add(new Property("durationMax", "decimal", "If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length.", 0, 1, durationMax));
           children.add(new Property("durationUnit", "code", "The units of time for the duration, in UCUM units.", 0, 1, durationUnit));
-          children.add(new Property("frequency", "integer", "The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).", 0, 1, frequency));
-          children.add(new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, 1, frequencyMax));
-          children.add(new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period.", 0, 1, period));
+          children.add(new Property("frequency", "positiveInt", "The number of times to repeat the action within the specified period. If frequencyMax is present, this element indicates the lower bound of the allowed range of the frequency.", 0, 1, frequency));
+          children.add(new Property("frequencyMax", "positiveInt", "If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, 1, frequencyMax));
+          children.add(new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length.", 0, 1, period));
           children.add(new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days.", 0, 1, periodMax));
           children.add(new Property("periodUnit", "code", "The units of time for the period in UCUM units.", 0, 1, periodUnit));
           children.add(new Property("dayOfWeek", "code", "If one or more days of week is provided, then the action happens only on the specified day(s).", 0, java.lang.Integer.MAX_VALUE, dayOfWeek));
@@ -1855,14 +1855,14 @@ public class Timing extends BackboneType implements ICompositeType {
           case -189193367: /*boundsDuration*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
           case -1001768056: /*boundsRange*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
           case -1043481386: /*boundsPeriod*/  return new Property("bounds[x]", "Duration|Range|Period", "Either a duration for the length of the timing schedule, a range of possible length, or outer bounds for start and/or end limits of the timing schedule.", 0, 1, bounds);
-          case 94851343: /*count*/  return new Property("count", "integer", "A total count of the desired number of repetitions across the duration of the entire timing specification.", 0, 1, count);
-          case -372044331: /*countMax*/  return new Property("countMax", "integer", "A maximum value for the count of the desired repetitions (e.g. do something 6-8 times).", 0, 1, countMax);
-          case -1992012396: /*duration*/  return new Property("duration", "decimal", "How long this thing happens for when it happens.", 0, 1, duration);
-          case -478083280: /*durationMax*/  return new Property("durationMax", "decimal", "The upper limit of how long this thing happens for when it happens.", 0, 1, durationMax);
+          case 94851343: /*count*/  return new Property("count", "positiveInt", "A total count of the desired number of repetitions across the duration of the entire timing specification. If countMax is present, this element indicates the lower bound of the allowed range of count values.", 0, 1, count);
+          case -372044331: /*countMax*/  return new Property("countMax", "positiveInt", "If present, indicates that the count is a range - so to perform the action between [count] and [countMax] times.", 0, 1, countMax);
+          case -1992012396: /*duration*/  return new Property("duration", "decimal", "How long this thing happens for when it happens. If durationMax is present, this element indicates the lower bound of the allowed range of the duration.", 0, 1, duration);
+          case -478083280: /*durationMax*/  return new Property("durationMax", "decimal", "If present, indicates that the duration is a range - so to perform the action between [duration] and [durationMax] time length.", 0, 1, durationMax);
           case -1935429320: /*durationUnit*/  return new Property("durationUnit", "code", "The units of time for the duration, in UCUM units.", 0, 1, durationUnit);
-          case -70023844: /*frequency*/  return new Property("frequency", "integer", "The number of times to repeat the action within the specified period / period range (i.e. both period and periodMax provided).", 0, 1, frequency);
-          case 1273846376: /*frequencyMax*/  return new Property("frequencyMax", "integer", "If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, 1, frequencyMax);
-          case -991726143: /*period*/  return new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period.", 0, 1, period);
+          case -70023844: /*frequency*/  return new Property("frequency", "positiveInt", "The number of times to repeat the action within the specified period. If frequencyMax is present, this element indicates the lower bound of the allowed range of the frequency.", 0, 1, frequency);
+          case 1273846376: /*frequencyMax*/  return new Property("frequencyMax", "positiveInt", "If present, indicates that the frequency is a range - so to repeat between [frequency] and [frequencyMax] times within the period or period range.", 0, 1, frequencyMax);
+          case -991726143: /*period*/  return new Property("period", "decimal", "Indicates the duration of time over which repetitions are to occur; e.g. to express \"3 times per day\", 3 would be the frequency and \"1 day\" would be the period. If periodMax is present, this element indicates the lower bound of the allowed range of the period length.", 0, 1, period);
           case 566580195: /*periodMax*/  return new Property("periodMax", "decimal", "If present, indicates that the period is a range from [period] to [periodMax], allowing expressing concepts such as \"do this once every 3-5 days.", 0, 1, periodMax);
           case 384367333: /*periodUnit*/  return new Property("periodUnit", "code", "The units of time for the period in UCUM units.", 0, 1, periodUnit);
           case -730552025: /*dayOfWeek*/  return new Property("dayOfWeek", "code", "If one or more days of week is provided, then the action happens only on the specified day(s).", 0, java.lang.Integer.MAX_VALUE, dayOfWeek);
@@ -1878,13 +1878,13 @@ public class Timing extends BackboneType implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1383205195: /*bounds*/ return this.bounds == null ? new Base[0] : new Base[] {this.bounds}; // Type
-        case 94851343: /*count*/ return this.count == null ? new Base[0] : new Base[] {this.count}; // IntegerType
-        case -372044331: /*countMax*/ return this.countMax == null ? new Base[0] : new Base[] {this.countMax}; // IntegerType
+        case 94851343: /*count*/ return this.count == null ? new Base[0] : new Base[] {this.count}; // PositiveIntType
+        case -372044331: /*countMax*/ return this.countMax == null ? new Base[0] : new Base[] {this.countMax}; // PositiveIntType
         case -1992012396: /*duration*/ return this.duration == null ? new Base[0] : new Base[] {this.duration}; // DecimalType
         case -478083280: /*durationMax*/ return this.durationMax == null ? new Base[0] : new Base[] {this.durationMax}; // DecimalType
         case -1935429320: /*durationUnit*/ return this.durationUnit == null ? new Base[0] : new Base[] {this.durationUnit}; // Enumeration<UnitsOfTime>
-        case -70023844: /*frequency*/ return this.frequency == null ? new Base[0] : new Base[] {this.frequency}; // IntegerType
-        case 1273846376: /*frequencyMax*/ return this.frequencyMax == null ? new Base[0] : new Base[] {this.frequencyMax}; // IntegerType
+        case -70023844: /*frequency*/ return this.frequency == null ? new Base[0] : new Base[] {this.frequency}; // PositiveIntType
+        case 1273846376: /*frequencyMax*/ return this.frequencyMax == null ? new Base[0] : new Base[] {this.frequencyMax}; // PositiveIntType
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // DecimalType
         case 566580195: /*periodMax*/ return this.periodMax == null ? new Base[0] : new Base[] {this.periodMax}; // DecimalType
         case 384367333: /*periodUnit*/ return this.periodUnit == null ? new Base[0] : new Base[] {this.periodUnit}; // Enumeration<UnitsOfTime>
@@ -1904,10 +1904,10 @@ public class Timing extends BackboneType implements ICompositeType {
           this.bounds = castToType(value); // Type
           return value;
         case 94851343: // count
-          this.count = castToInteger(value); // IntegerType
+          this.count = castToPositiveInt(value); // PositiveIntType
           return value;
         case -372044331: // countMax
-          this.countMax = castToInteger(value); // IntegerType
+          this.countMax = castToPositiveInt(value); // PositiveIntType
           return value;
         case -1992012396: // duration
           this.duration = castToDecimal(value); // DecimalType
@@ -1920,10 +1920,10 @@ public class Timing extends BackboneType implements ICompositeType {
           this.durationUnit = (Enumeration) value; // Enumeration<UnitsOfTime>
           return value;
         case -70023844: // frequency
-          this.frequency = castToInteger(value); // IntegerType
+          this.frequency = castToPositiveInt(value); // PositiveIntType
           return value;
         case 1273846376: // frequencyMax
-          this.frequencyMax = castToInteger(value); // IntegerType
+          this.frequencyMax = castToPositiveInt(value); // PositiveIntType
           return value;
         case -991726143: // period
           this.period = castToDecimal(value); // DecimalType
@@ -1959,9 +1959,9 @@ public class Timing extends BackboneType implements ICompositeType {
         if (name.equals("bounds[x]")) {
           this.bounds = castToType(value); // Type
         } else if (name.equals("count")) {
-          this.count = castToInteger(value); // IntegerType
+          this.count = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("countMax")) {
-          this.countMax = castToInteger(value); // IntegerType
+          this.countMax = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("duration")) {
           this.duration = castToDecimal(value); // DecimalType
         } else if (name.equals("durationMax")) {
@@ -1970,9 +1970,9 @@ public class Timing extends BackboneType implements ICompositeType {
           value = new UnitsOfTimeEnumFactory().fromType(castToCode(value));
           this.durationUnit = (Enumeration) value; // Enumeration<UnitsOfTime>
         } else if (name.equals("frequency")) {
-          this.frequency = castToInteger(value); // IntegerType
+          this.frequency = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("frequencyMax")) {
-          this.frequencyMax = castToInteger(value); // IntegerType
+          this.frequencyMax = castToPositiveInt(value); // PositiveIntType
         } else if (name.equals("period")) {
           this.period = castToDecimal(value); // DecimalType
         } else if (name.equals("periodMax")) {
@@ -2023,13 +2023,13 @@ public class Timing extends BackboneType implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1383205195: /*bounds*/ return new String[] {"Duration", "Range", "Period"};
-        case 94851343: /*count*/ return new String[] {"integer"};
-        case -372044331: /*countMax*/ return new String[] {"integer"};
+        case 94851343: /*count*/ return new String[] {"positiveInt"};
+        case -372044331: /*countMax*/ return new String[] {"positiveInt"};
         case -1992012396: /*duration*/ return new String[] {"decimal"};
         case -478083280: /*durationMax*/ return new String[] {"decimal"};
         case -1935429320: /*durationUnit*/ return new String[] {"code"};
-        case -70023844: /*frequency*/ return new String[] {"integer"};
-        case 1273846376: /*frequencyMax*/ return new String[] {"integer"};
+        case -70023844: /*frequency*/ return new String[] {"positiveInt"};
+        case 1273846376: /*frequencyMax*/ return new String[] {"positiveInt"};
         case -991726143: /*period*/ return new String[] {"decimal"};
         case 566580195: /*periodMax*/ return new String[] {"decimal"};
         case 384367333: /*periodUnit*/ return new String[] {"code"};
@@ -2196,7 +2196,7 @@ public class Timing extends BackboneType implements ICompositeType {
      * A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code).
      */
     @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="BID | TID | QID | AM | PM | QD | QOD | Q4H | Q6H +", formalDefinition="A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code)." )
+    @Description(shortDefinition="BID | TID | QID | AM | PM | QD | QOD | +", formalDefinition="A code for the timing schedule (or just text in code.text). Some codes such as BID are ubiquitous, but many institutions define their own additional codes. If a code is provided, the code is understood to be a complete statement of whatever is specified in the structured timing data, and either the code or the data may be used to interpret the Timing, with the exception that .repeat.bounds still applies over the code (and is not contained in the code)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/timing-abbreviation")
     protected CodeableConcept code;
 

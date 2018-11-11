@@ -101,7 +101,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testUploadMissingPackage() throws Exception {
+	public void testUploadMissingPackage() {
 		//@formatter:off
 		try {
 			ourClient

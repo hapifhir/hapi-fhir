@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CatalogType {
 
         /**
-         * Medication Catalog
+         * Medication Catalog.
          */
         MEDICATION, 
         /**
-         * Device Catalog
+         * Device Catalog.
          */
         DEVICE, 
         /**
-         * Protocol List
+         * Protocol List.
          */
         PROTOCOL, 
         /**
@@ -72,13 +72,13 @@ public enum CatalogType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/catalogType";
+          return "http://terminology.hl7.org/CodeSystem/catalogType";
         }
         public String getDefinition() {
           switch (this) {
-            case MEDICATION: return "Medication Catalog";
-            case DEVICE: return "Device Catalog";
-            case PROTOCOL: return "Protocol List";
+            case MEDICATION: return "Medication Catalog.";
+            case DEVICE: return "Device Catalog.";
+            case PROTOCOL: return "Protocol List.";
             default: return "?";
           }
         }

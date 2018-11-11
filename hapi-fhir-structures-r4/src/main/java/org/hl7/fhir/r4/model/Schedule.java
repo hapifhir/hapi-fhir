@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A container for slots of time that may be available for booking appointments.
  */
-@ResourceDef(name="Schedule", profile="http://hl7.org/fhir/Profile/Schedule")
+@ResourceDef(name="Schedule", profile="http://hl7.org/fhir/StructureDefinition/Schedule")
 public class Schedule extends DomainResource {
 
     /**

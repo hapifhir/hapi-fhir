@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -39,19 +39,15 @@ public enum ClaimUse {
         /**
          * The treatment is complete and this represents a Claim for the services.
          */
-        COMPLETE, 
+        CLAIM, 
         /**
          * The treatment is proposed and this represents a Pre-authorization for the services.
          */
-        PROPOSED, 
+        PREAUTHORIZATION, 
         /**
          * The treatment is proposed and this represents a Pre-determination for the services.
          */
-        EXPLORATORY, 
-        /**
-         * A locally defined or otherwise resolved status.
-         */
-        OTHER, 
+        PREDETERMINATION, 
         /**
          * added to help the parsers
          */
@@ -59,22 +55,19 @@ public enum ClaimUse {
         public static ClaimUse fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("complete".equals(codeString))
-          return COMPLETE;
-        if ("proposed".equals(codeString))
-          return PROPOSED;
-        if ("exploratory".equals(codeString))
-          return EXPLORATORY;
-        if ("other".equals(codeString))
-          return OTHER;
+        if ("claim".equals(codeString))
+          return CLAIM;
+        if ("preauthorization".equals(codeString))
+          return PREAUTHORIZATION;
+        if ("predetermination".equals(codeString))
+          return PREDETERMINATION;
         throw new FHIRException("Unknown ClaimUse code '"+codeString+"'");
         }
         public String toCode() {
           switch (this) {
-            case COMPLETE: return "complete";
-            case PROPOSED: return "proposed";
-            case EXPLORATORY: return "exploratory";
-            case OTHER: return "other";
+            case CLAIM: return "claim";
+            case PREAUTHORIZATION: return "preauthorization";
+            case PREDETERMINATION: return "predetermination";
             default: return "?";
           }
         }
@@ -83,19 +76,17 @@ public enum ClaimUse {
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLETE: return "The treatment is complete and this represents a Claim for the services.";
-            case PROPOSED: return "The treatment is proposed and this represents a Pre-authorization for the services.";
-            case EXPLORATORY: return "The treatment is proposed and this represents a Pre-determination for the services.";
-            case OTHER: return "A locally defined or otherwise resolved status.";
+            case CLAIM: return "The treatment is complete and this represents a Claim for the services.";
+            case PREAUTHORIZATION: return "The treatment is proposed and this represents a Pre-authorization for the services.";
+            case PREDETERMINATION: return "The treatment is proposed and this represents a Pre-determination for the services.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case COMPLETE: return "Complete";
-            case PROPOSED: return "Proposed";
-            case EXPLORATORY: return "Exploratory";
-            case OTHER: return "Other";
+            case CLAIM: return "Claim";
+            case PREAUTHORIZATION: return "Preauthorization";
+            case PREDETERMINATION: return "Predetermination";
             default: return "?";
           }
     }

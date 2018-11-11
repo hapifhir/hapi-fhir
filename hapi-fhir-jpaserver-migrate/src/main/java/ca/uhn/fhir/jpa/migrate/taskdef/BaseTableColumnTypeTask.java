@@ -39,6 +39,13 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	 * Constructor
 	 */
 	BaseTableColumnTypeTask() {
+		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.DERBY_EMBEDDED, "integer");
+		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MARIADB_10_1, "integer");
+		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MYSQL_5_7, "integer");
+		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MSSQL_2012, "int");
+		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.ORACLE_12C, "number(10,0)");
+		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.POSTGRES_9_4, "int4");
+
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.DERBY_EMBEDDED, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.MARIADB_10_1, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.MYSQL_5_7, "bigint");
@@ -147,7 +154,15 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
 				return "timestamp";
 			}
+		},
+		INT {
+			@Override
+			public String getDescriptor(Long theColumnLength) {
+				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
+				return "int";
+			}
 		};
+
 
 		public abstract String getDescriptor(Long theColumnLength);
 

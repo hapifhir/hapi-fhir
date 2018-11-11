@@ -37,6 +37,8 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 
+import javax.annotation.Nonnull;
+
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
@@ -86,6 +88,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		return false;
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.METADATA;

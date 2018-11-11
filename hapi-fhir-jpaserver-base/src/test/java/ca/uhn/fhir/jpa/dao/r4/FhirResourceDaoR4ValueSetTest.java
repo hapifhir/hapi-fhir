@@ -228,15 +228,17 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		IPrimitiveType<String> display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
-		StringType vsIdentifier = new StringType("http://hl7.org/fhir/ValueSet/v2-0487");
-		StringType code = new StringType("BRN");
-		StringType system = new StringType("http://hl7.org/fhir/v2/0487");
+		StringType vsIdentifier = new StringType("http://hl7.org/fhir/ValueSet/yesnodontknow");
+		StringType code = new StringType("Y");
+		StringType system = new StringType("http://terminology.hl7.org/CodeSystem/v2-0136");
 		ValidateCodeResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
 		
 		ourLog.info(result.getMessage());
 		assertTrue(result.getMessage(), result.isResult());
+		assertEquals("Yes", result.getDisplay());
 	}
 
 	
 }
+
 

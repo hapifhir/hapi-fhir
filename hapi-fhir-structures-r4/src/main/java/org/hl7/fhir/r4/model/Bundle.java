@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A container for a collection of resources.
  */
-@ResourceDef(name="Bundle", profile="http://hl7.org/fhir/Profile/Bundle")
+@ResourceDef(name="Bundle", profile="http://hl7.org/fhir/StructureDefinition/Bundle")
 public class Bundle extends Resource implements IBaseBundle {
 
     public enum BundleType {
@@ -67,7 +67,7 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         TRANSACTIONRESPONSE, 
         /**
-         * The bundle is a transaction - intended to be processed by a server as a group of actions.
+         * The bundle is a set of actions - intended to be processed by a server as a group of independent actions.
          */
         BATCH, 
         /**
@@ -83,7 +83,7 @@ public class Bundle extends Resource implements IBaseBundle {
          */
         SEARCHSET, 
         /**
-         * The bundle is a set of resources collected into a single package for ease of distribution.
+         * The bundle is a set of resources collected into a single package for ease of distribution that imposes no processing obligations or behavioral rules beyond persistence.
          */
         COLLECTION, 
         /**
@@ -150,11 +150,11 @@ public class Bundle extends Resource implements IBaseBundle {
             case MESSAGE: return "The bundle is a message. The first resource is a MessageHeader.";
             case TRANSACTION: return "The bundle is a transaction - intended to be processed by a server as an atomic commit.";
             case TRANSACTIONRESPONSE: return "The bundle is a transaction response. Because the response is a transaction response, the transaction has succeeded, and all responses are error free.";
-            case BATCH: return "The bundle is a transaction - intended to be processed by a server as a group of actions.";
+            case BATCH: return "The bundle is a set of actions - intended to be processed by a server as a group of independent actions.";
             case BATCHRESPONSE: return "The bundle is a batch response. Note that as a batch, some responses may indicate failure and others success.";
             case HISTORY: return "The bundle is a list of resources from a history interaction on a server.";
             case SEARCHSET: return "The bundle is a list of resources returned as a result of a search/query interaction, operation, or message.";
-            case COLLECTION: return "The bundle is a set of resources collected into a single package for ease of distribution.";
+            case COLLECTION: return "The bundle is a set of resources collected into a single package for ease of distribution that imposes no processing obligations or behavioral rules beyond persistence.";
             default: return "?";
           }
         }
@@ -363,27 +363,27 @@ public class Bundle extends Resource implements IBaseBundle {
 
     public enum HTTPVerb {
         /**
-         * HTTP GET
+         * HTTP GET Command.
          */
         GET, 
         /**
-         * HTTP HEAD
+         * HTTP HEAD Command.
          */
         HEAD, 
         /**
-         * HTTP POST
+         * HTTP POST Command.
          */
         POST, 
         /**
-         * HTTP PUT
+         * HTTP PUT Command.
          */
         PUT, 
         /**
-         * HTTP DELETE
+         * HTTP DELETE Command.
          */
         DELETE, 
         /**
-         * HTTP PATCH
+         * HTTP PATCH Command.
          */
         PATCH, 
         /**
@@ -434,12 +434,12 @@ public class Bundle extends Resource implements IBaseBundle {
         }
         public String getDefinition() {
           switch (this) {
-            case GET: return "HTTP GET";
-            case HEAD: return "HTTP HEAD";
-            case POST: return "HTTP POST";
-            case PUT: return "HTTP PUT";
-            case DELETE: return "HTTP DELETE";
-            case PATCH: return "HTTP PATCH";
+            case GET: return "HTTP GET Command.";
+            case HEAD: return "HTTP HEAD Command.";
+            case POST: return "HTTP POST Command.";
+            case PUT: return "HTTP PUT Command.";
+            case DELETE: return "HTTP DELETE Command.";
+            case PATCH: return "HTTP PATCH Command.";
             default: return "?";
           }
         }
@@ -773,19 +773,19 @@ public class Bundle extends Resource implements IBaseBundle {
         protected List<BundleLinkComponent> link;
 
         /**
-         * The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+         * The Absolute URL for the resource.  The fullUrl SHALL NOT disagree with the id in the resource - i.e. if the fullUrl is not a urn:uuid, the URL shall be version-independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
 * fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
 * Results from operations might involve resources that are not identified.
          */
         @Child(name = "fullUrl", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Absolute URL for resource (server address, or UUID/OID)", formalDefinition="The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: \n* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)\n* Results from operations might involve resources that are not identified." )
+        @Description(shortDefinition="URI for resource (Absolute URL server address or URI for UUID/OID)", formalDefinition="The Absolute URL for the resource.  The fullUrl SHALL NOT disagree with the id in the resource - i.e. if the fullUrl is not a urn:uuid, the URL shall be version-independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: \n* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)\n* Results from operations might involve resources that are not identified." )
         protected UriType fullUrl;
 
         /**
-         * The Resources for the entry.
+         * The Resource for the entry. The purpose/meaning of the resource is determined by the Bundle.type.
          */
         @Child(name = "resource", type = {Resource.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="A resource in the bundle", formalDefinition="The Resources for the entry." )
+        @Description(shortDefinition="A resource in the bundle", formalDefinition="The Resource for the entry. The purpose/meaning of the resource is determined by the Bundle.type." )
         protected Resource resource;
 
         /**
@@ -796,17 +796,17 @@ public class Bundle extends Resource implements IBaseBundle {
         protected BundleEntrySearchComponent search;
 
         /**
-         * Additional information about how this entry should be processed as part of a transaction.
+         * Additional information about how this entry should be processed as part of a transaction or batch.  For history, it shows how the entry was processed to create the version contained in the entry.
          */
         @Child(name = "request", type = {}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Transaction Related Information", formalDefinition="Additional information about how this entry should be processed as part of a transaction." )
+        @Description(shortDefinition="Additional execution information (transaction/batch/history)", formalDefinition="Additional information about how this entry should be processed as part of a transaction or batch.  For history, it shows how the entry was processed to create the version contained in the entry." )
         protected BundleEntryRequestComponent request;
 
         /**
-         * Additional information about how this entry should be processed as part of a transaction.
+         * Indicates the results of processing the corresponding 'request' entry in the batch or transaction being responded to or what the results of an operation where when returning history.
          */
         @Child(name = "response", type = {}, order=6, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Transaction Related Information", formalDefinition="Additional information about how this entry should be processed as part of a transaction." )
+        @Description(shortDefinition="Results of execution (transaction/batch/history)", formalDefinition="Indicates the results of processing the corresponding 'request' entry in the batch or transaction being responded to or what the results of an operation where when returning history." )
         protected BundleEntryResponseComponent response;
 
         private static final long serialVersionUID = 517783054L;
@@ -872,7 +872,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #fullUrl} (The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+         * @return {@link #fullUrl} (The Absolute URL for the resource.  The fullUrl SHALL NOT disagree with the id in the resource - i.e. if the fullUrl is not a urn:uuid, the URL shall be version-independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
 * fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
 * Results from operations might involve resources that are not identified.). This is the underlying object with id, value and extensions. The accessor "getFullUrl" gives direct access to the value
          */
@@ -894,7 +894,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #fullUrl} (The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+         * @param value {@link #fullUrl} (The Absolute URL for the resource.  The fullUrl SHALL NOT disagree with the id in the resource - i.e. if the fullUrl is not a urn:uuid, the URL shall be version-independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
 * fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
 * Results from operations might involve resources that are not identified.). This is the underlying object with id, value and extensions. The accessor "getFullUrl" gives direct access to the value
          */
@@ -904,7 +904,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+         * @return The Absolute URL for the resource.  The fullUrl SHALL NOT disagree with the id in the resource - i.e. if the fullUrl is not a urn:uuid, the URL shall be version-independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
 * fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
 * Results from operations might involve resources that are not identified.
          */
@@ -913,7 +913,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
+         * @param value The Absolute URL for the resource.  The fullUrl SHALL NOT disagree with the id in the resource - i.e. if the fullUrl is not a urn:uuid, the URL shall be version-independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: 
 * fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)
 * Results from operations might involve resources that are not identified.
          */
@@ -929,7 +929,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #resource} (The Resources for the entry.)
+         * @return {@link #resource} (The Resource for the entry. The purpose/meaning of the resource is determined by the Bundle.type.)
          */
         public Resource getResource() { 
           return this.resource;
@@ -940,7 +940,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #resource} (The Resources for the entry.)
+         * @param value {@link #resource} (The Resource for the entry. The purpose/meaning of the resource is determined by the Bundle.type.)
          */
         public BundleEntryComponent setResource(Resource value) { 
           this.resource = value;
@@ -972,7 +972,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #request} (Additional information about how this entry should be processed as part of a transaction.)
+         * @return {@link #request} (Additional information about how this entry should be processed as part of a transaction or batch.  For history, it shows how the entry was processed to create the version contained in the entry.)
          */
         public BundleEntryRequestComponent getRequest() { 
           if (this.request == null)
@@ -988,7 +988,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #request} (Additional information about how this entry should be processed as part of a transaction.)
+         * @param value {@link #request} (Additional information about how this entry should be processed as part of a transaction or batch.  For history, it shows how the entry was processed to create the version contained in the entry.)
          */
         public BundleEntryComponent setRequest(BundleEntryRequestComponent value) { 
           this.request = value;
@@ -996,7 +996,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #response} (Additional information about how this entry should be processed as part of a transaction.)
+         * @return {@link #response} (Indicates the results of processing the corresponding 'request' entry in the batch or transaction being responded to or what the results of an operation where when returning history.)
          */
         public BundleEntryResponseComponent getResponse() { 
           if (this.response == null)
@@ -1012,7 +1012,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #response} (Additional information about how this entry should be processed as part of a transaction.)
+         * @param value {@link #response} (Indicates the results of processing the corresponding 'request' entry in the batch or transaction being responded to or what the results of an operation where when returning history.)
          */
         public BundleEntryComponent setResponse(BundleEntryResponseComponent value) { 
           this.response = value;
@@ -1069,22 +1069,22 @@ public class Bundle extends Resource implements IBaseBundle {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("link", "@Bundle.link", "A series of links that provide context to this entry.", 0, java.lang.Integer.MAX_VALUE, link));
-          children.add(new Property("fullUrl", "uri", "The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: \n* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)\n* Results from operations might involve resources that are not identified.", 0, 1, fullUrl));
-          children.add(new Property("resource", "Resource", "The Resources for the entry.", 0, 1, resource));
+          children.add(new Property("fullUrl", "uri", "The Absolute URL for the resource.  The fullUrl SHALL NOT disagree with the id in the resource - i.e. if the fullUrl is not a urn:uuid, the URL shall be version-independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: \n* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)\n* Results from operations might involve resources that are not identified.", 0, 1, fullUrl));
+          children.add(new Property("resource", "Resource", "The Resource for the entry. The purpose/meaning of the resource is determined by the Bundle.type.", 0, 1, resource));
           children.add(new Property("search", "", "Information about the search process that lead to the creation of this entry.", 0, 1, search));
-          children.add(new Property("request", "", "Additional information about how this entry should be processed as part of a transaction.", 0, 1, request));
-          children.add(new Property("response", "", "Additional information about how this entry should be processed as part of a transaction.", 0, 1, response));
+          children.add(new Property("request", "", "Additional information about how this entry should be processed as part of a transaction or batch.  For history, it shows how the entry was processed to create the version contained in the entry.", 0, 1, request));
+          children.add(new Property("response", "", "Indicates the results of processing the corresponding 'request' entry in the batch or transaction being responded to or what the results of an operation where when returning history.", 0, 1, response));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3321850: /*link*/  return new Property("link", "@Bundle.link", "A series of links that provide context to this entry.", 0, java.lang.Integer.MAX_VALUE, link);
-          case -511251360: /*fullUrl*/  return new Property("fullUrl", "uri", "The Absolute URL for the resource.  The fullUrl SHALL not disagree with the id in the resource. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: \n* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)\n* Results from operations might involve resources that are not identified.", 0, 1, fullUrl);
-          case -341064690: /*resource*/  return new Property("resource", "Resource", "The Resources for the entry.", 0, 1, resource);
+          case -511251360: /*fullUrl*/  return new Property("fullUrl", "uri", "The Absolute URL for the resource.  The fullUrl SHALL NOT disagree with the id in the resource - i.e. if the fullUrl is not a urn:uuid, the URL shall be version-independent URL consistent with the Resource.id. The fullUrl is a version independent reference to the resource. The fullUrl element SHALL have a value except that: \n* fullUrl can be empty on a POST (although it does not need to when specifying a temporary id for reference in the bundle)\n* Results from operations might involve resources that are not identified.", 0, 1, fullUrl);
+          case -341064690: /*resource*/  return new Property("resource", "Resource", "The Resource for the entry. The purpose/meaning of the resource is determined by the Bundle.type.", 0, 1, resource);
           case -906336856: /*search*/  return new Property("search", "", "Information about the search process that lead to the creation of this entry.", 0, 1, search);
-          case 1095692943: /*request*/  return new Property("request", "", "Additional information about how this entry should be processed as part of a transaction.", 0, 1, request);
-          case -340323263: /*response*/  return new Property("response", "", "Additional information about how this entry should be processed as part of a transaction.", 0, 1, response);
+          case 1095692943: /*request*/  return new Property("request", "", "Additional information about how this entry should be processed as part of a transaction or batch.  For history, it shows how the entry was processed to create the version contained in the entry.", 0, 1, request);
+          case -340323263: /*response*/  return new Property("response", "", "Indicates the results of processing the corresponding 'request' entry in the batch or transaction being responded to or what the results of an operation where when returning history.", 0, 1, response);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1257,10 +1257,10 @@ public class Bundle extends Resource implements IBaseBundle {
     @Block()
     public static class BundleEntrySearchComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Why this entry is in the result set - whether it's included as a match or because of an _include requirement.
+         * Why this entry is in the result set - whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process.
          */
         @Child(name = "mode", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="match | include | outcome - why this is in the result set", formalDefinition="Why this entry is in the result set - whether it's included as a match or because of an _include requirement." )
+        @Description(shortDefinition="match | include | outcome - why this is in the result set", formalDefinition="Why this entry is in the result set - whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/search-entry-mode")
         protected Enumeration<SearchEntryMode> mode;
 
@@ -1281,7 +1281,7 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
         /**
-         * @return {@link #mode} (Why this entry is in the result set - whether it's included as a match or because of an _include requirement.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+         * @return {@link #mode} (Why this entry is in the result set - whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
         public Enumeration<SearchEntryMode> getModeElement() { 
           if (this.mode == null)
@@ -1301,7 +1301,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #mode} (Why this entry is in the result set - whether it's included as a match or because of an _include requirement.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
+         * @param value {@link #mode} (Why this entry is in the result set - whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process.). This is the underlying object with id, value and extensions. The accessor "getMode" gives direct access to the value
          */
         public BundleEntrySearchComponent setModeElement(Enumeration<SearchEntryMode> value) { 
           this.mode = value;
@@ -1309,14 +1309,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return Why this entry is in the result set - whether it's included as a match or because of an _include requirement.
+         * @return Why this entry is in the result set - whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process.
          */
         public SearchEntryMode getMode() { 
           return this.mode == null ? null : this.mode.getValue();
         }
 
         /**
-         * @param value Why this entry is in the result set - whether it's included as a match or because of an _include requirement.
+         * @param value Why this entry is in the result set - whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process.
          */
         public BundleEntrySearchComponent setMode(SearchEntryMode value) { 
           if (value == null)
@@ -1398,14 +1398,14 @@ public class Bundle extends Resource implements IBaseBundle {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("mode", "code", "Why this entry is in the result set - whether it's included as a match or because of an _include requirement.", 0, 1, mode));
+          children.add(new Property("mode", "code", "Why this entry is in the result set - whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process.", 0, 1, mode));
           children.add(new Property("score", "decimal", "When searching, the server's search ranking score for the entry.", 0, 1, score));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3357091: /*mode*/  return new Property("mode", "code", "Why this entry is in the result set - whether it's included as a match or because of an _include requirement.", 0, 1, mode);
+          case 3357091: /*mode*/  return new Property("mode", "code", "Why this entry is in the result set - whether it's included as a match or because of an _include requirement, or to convey information or warning information about the search process.", 0, 1, mode);
           case 109264530: /*score*/  return new Property("score", "decimal", "When searching, the server's search ranking score for the entry.", 0, 1, score);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1523,10 +1523,10 @@ public class Bundle extends Resource implements IBaseBundle {
     @Block()
     public static class BundleEntryRequestComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The HTTP verb for this entry in either a change history, or a transaction/ transaction response.
+         * In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred.
          */
         @Child(name = "method", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="GET | HEAD | POST | PUT | DELETE | PATCH", formalDefinition="The HTTP verb for this entry in either a change history, or a transaction/ transaction response." )
+        @Description(shortDefinition="GET | HEAD | POST | PUT | DELETE | PATCH", formalDefinition="In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/http-verb")
         protected Enumeration<HTTPVerb> method;
 
@@ -1548,7 +1548,7 @@ public class Bundle extends Resource implements IBaseBundle {
          * Only perform the operation if the last updated date matches. See the API documentation for ["Conditional Read"](http.html#cread).
          */
         @Child(name = "ifModifiedSince", type = {InstantType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="For managing update contention", formalDefinition="Only perform the operation if the last updated date matches. See the API documentation for [\"Conditional Read\"](http.html#cread)." )
+        @Description(shortDefinition="For managing cache currency", formalDefinition="Only perform the operation if the last updated date matches. See the API documentation for [\"Conditional Read\"](http.html#cread)." )
         protected InstantType ifModifiedSince;
 
         /**
@@ -1584,7 +1584,7 @@ public class Bundle extends Resource implements IBaseBundle {
       }
 
         /**
-         * @return {@link #method} (The HTTP verb for this entry in either a change history, or a transaction/ transaction response.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
+         * @return {@link #method} (In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
          */
         public Enumeration<HTTPVerb> getMethodElement() { 
           if (this.method == null)
@@ -1604,7 +1604,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #method} (The HTTP verb for this entry in either a change history, or a transaction/ transaction response.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
+         * @param value {@link #method} (In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
          */
         public BundleEntryRequestComponent setMethodElement(Enumeration<HTTPVerb> value) { 
           this.method = value;
@@ -1612,14 +1612,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return The HTTP verb for this entry in either a change history, or a transaction/ transaction response.
+         * @return In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred.
          */
         public HTTPVerb getMethod() { 
           return this.method == null ? null : this.method.getValue();
         }
 
         /**
-         * @param value The HTTP verb for this entry in either a change history, or a transaction/ transaction response.
+         * @param value In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred.
          */
         public BundleEntryRequestComponent setMethod(HTTPVerb value) { 
             if (this.method == null)
@@ -1871,7 +1871,7 @@ public class Bundle extends Resource implements IBaseBundle {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("method", "code", "The HTTP verb for this entry in either a change history, or a transaction/ transaction response.", 0, 1, method));
+          children.add(new Property("method", "code", "In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred.", 0, 1, method));
           children.add(new Property("url", "uri", "The URL for this entry, relative to the root (the address to which the request is posted).", 0, 1, url));
           children.add(new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not Modified status. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, 1, ifNoneMatch));
           children.add(new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, 1, ifModifiedSince));
@@ -1882,7 +1882,7 @@ public class Bundle extends Resource implements IBaseBundle {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -1077554975: /*method*/  return new Property("method", "code", "The HTTP verb for this entry in either a change history, or a transaction/ transaction response.", 0, 1, method);
+          case -1077554975: /*method*/  return new Property("method", "code", "In a transaction or batch, this is the HTTP action to be executed for this entry. In a history bundle, this indicates the HTTP action that occurred.", 0, 1, method);
           case 116079: /*url*/  return new Property("url", "uri", "The URL for this entry, relative to the root (the address to which the request is posted).", 0, 1, url);
           case 171868368: /*ifNoneMatch*/  return new Property("ifNoneMatch", "string", "If the ETag values match, return a 304 Not Modified status. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, 1, ifNoneMatch);
           case -2061602860: /*ifModifiedSince*/  return new Property("ifModifiedSince", "instant", "Only perform the operation if the last updated date matches. See the API documentation for [\"Conditional Read\"](http.html#cread).", 0, 1, ifModifiedSince);
@@ -2064,17 +2064,17 @@ public class Bundle extends Resource implements IBaseBundle {
         protected StringType status;
 
         /**
-         * The location header created by processing this operation.
+         * The location header created by processing this operation, populated if the operation returns a location.
          */
         @Child(name = "location", type = {UriType.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The location, if the operation returns a location", formalDefinition="The location header created by processing this operation." )
+        @Description(shortDefinition="The location (if the operation returns a location)", formalDefinition="The location header created by processing this operation, populated if the operation returns a location." )
         protected UriType location;
 
         /**
-         * The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
+         * The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
          */
         @Child(name = "etag", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The Etag for the resource (if relevant)", formalDefinition="The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency))." )
+        @Description(shortDefinition="The Etag for the resource (if relevant)", formalDefinition="The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency))." )
         protected StringType etag;
 
         /**
@@ -2154,7 +2154,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #location} (The location header created by processing this operation.). This is the underlying object with id, value and extensions. The accessor "getLocation" gives direct access to the value
+         * @return {@link #location} (The location header created by processing this operation, populated if the operation returns a location.). This is the underlying object with id, value and extensions. The accessor "getLocation" gives direct access to the value
          */
         public UriType getLocationElement() { 
           if (this.location == null)
@@ -2174,7 +2174,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #location} (The location header created by processing this operation.). This is the underlying object with id, value and extensions. The accessor "getLocation" gives direct access to the value
+         * @param value {@link #location} (The location header created by processing this operation, populated if the operation returns a location.). This is the underlying object with id, value and extensions. The accessor "getLocation" gives direct access to the value
          */
         public BundleEntryResponseComponent setLocationElement(UriType value) { 
           this.location = value;
@@ -2182,14 +2182,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return The location header created by processing this operation.
+         * @return The location header created by processing this operation, populated if the operation returns a location.
          */
         public String getLocation() { 
           return this.location == null ? null : this.location.getValue();
         }
 
         /**
-         * @param value The location header created by processing this operation.
+         * @param value The location header created by processing this operation, populated if the operation returns a location.
          */
         public BundleEntryResponseComponent setLocation(String value) { 
           if (Utilities.noString(value))
@@ -2203,7 +2203,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return {@link #etag} (The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
+         * @return {@link #etag} (The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
          */
         public StringType getEtagElement() { 
           if (this.etag == null)
@@ -2223,7 +2223,7 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @param value {@link #etag} (The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
+         * @param value {@link #etag} (The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).). This is the underlying object with id, value and extensions. The accessor "getEtag" gives direct access to the value
          */
         public BundleEntryResponseComponent setEtagElement(StringType value) { 
           this.etag = value;
@@ -2231,14 +2231,14 @@ public class Bundle extends Resource implements IBaseBundle {
         }
 
         /**
-         * @return The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
+         * @return The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
          */
         public String getEtag() { 
           return this.etag == null ? null : this.etag.getValue();
         }
 
         /**
-         * @param value The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
+         * @param value The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).
          */
         public BundleEntryResponseComponent setEtag(String value) { 
           if (Utilities.noString(value))
@@ -2322,8 +2322,8 @@ public class Bundle extends Resource implements IBaseBundle {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("status", "string", "The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.", 0, 1, status));
-          children.add(new Property("location", "uri", "The location header created by processing this operation.", 0, 1, location));
-          children.add(new Property("etag", "string", "The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).", 0, 1, etag));
+          children.add(new Property("location", "uri", "The location header created by processing this operation, populated if the operation returns a location.", 0, 1, location));
+          children.add(new Property("etag", "string", "The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).", 0, 1, etag));
           children.add(new Property("lastModified", "instant", "The date/time that the resource was modified on the server.", 0, 1, lastModified));
           children.add(new Property("outcome", "Resource", "An OperationOutcome containing hints and warnings produced as part of processing this entry in a batch or transaction.", 0, 1, outcome));
         }
@@ -2332,8 +2332,8 @@ public class Bundle extends Resource implements IBaseBundle {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -892481550: /*status*/  return new Property("status", "string", "The status code returned by processing this entry. The status SHALL start with a 3 digit HTTP code (e.g. 404) and may contain the standard HTTP description associated with the status code.", 0, 1, status);
-          case 1901043637: /*location*/  return new Property("location", "uri", "The location header created by processing this operation.", 0, 1, location);
-          case 3123477: /*etag*/  return new Property("etag", "string", "The Etag for the resource, it the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).", 0, 1, etag);
+          case 1901043637: /*location*/  return new Property("location", "uri", "The location header created by processing this operation, populated if the operation returns a location.", 0, 1, location);
+          case 3123477: /*etag*/  return new Property("etag", "string", "The Etag for the resource, if the operation for the entry produced a versioned resource (see [Resource Metadata and Versioning](http.html#versioning) and [Managing Resource Contention](http.html#concurrency)).", 0, 1, etag);
           case 1959003007: /*lastModified*/  return new Property("lastModified", "instant", "The date/time that the resource was modified on the server.", 0, 1, lastModified);
           case -1106507950: /*outcome*/  return new Property("outcome", "Resource", "An OperationOutcome containing hints and warnings produced as part of processing this entry in a batch or transaction.", 0, 1, outcome);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2487,17 +2487,17 @@ public class Bundle extends Resource implements IBaseBundle {
   }
 
     /**
-     * A persistent identifier for the batch that won't change as a batch is copied from server to server.
+     * A persistent identifier for the bundle that won't change as a bundle is copied from server to server.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Persistent identifier for the bundle", formalDefinition="A persistent identifier for the batch that won't change as a batch is copied from server to server." )
+    @Description(shortDefinition="Persistent identifier for the bundle", formalDefinition="A persistent identifier for the bundle that won't change as a bundle is copied from server to server." )
     protected Identifier identifier;
 
     /**
-     * Indicates the purpose of this bundle - how it was intended to be used.
+     * Indicates the purpose of this bundle - how it is intended to be used.
      */
     @Child(name = "type", type = {CodeType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", formalDefinition="Indicates the purpose of this bundle - how it was intended to be used." )
+    @Description(shortDefinition="document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection", formalDefinition="Indicates the purpose of this bundle - how it is intended to be used." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/bundle-type")
     protected Enumeration<BundleType> type;
 
@@ -2509,10 +2509,10 @@ public class Bundle extends Resource implements IBaseBundle {
     protected InstantType timestamp;
 
     /**
-     * If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).
+     * If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.  It does not include search.mode = 'include' or 'outcome' entries and it does not provide a count of the number of entries in the Bundle.
      */
     @Child(name = "total", type = {UnsignedIntType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="If search, the total number of matches", formalDefinition="If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle)." )
+    @Description(shortDefinition="If search, the total number of matches", formalDefinition="If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.  It does not include search.mode = 'include' or 'outcome' entries and it does not provide a count of the number of entries in the Bundle." )
     protected UnsignedIntType total;
 
     /**
@@ -2523,10 +2523,10 @@ public class Bundle extends Resource implements IBaseBundle {
     protected List<BundleLinkComponent> link;
 
     /**
-     * An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).
+     * An entry in a bundle resource - will either contain a resource or information about a resource (transactions and history only).
      */
     @Child(name = "entry", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Entry in the bundle - will have a resource, or information", formalDefinition="An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only)." )
+    @Description(shortDefinition="Entry in the bundle - will have a resource or information", formalDefinition="An entry in a bundle resource - will either contain a resource or information about a resource (transactions and history only)." )
     protected List<BundleEntryComponent> entry;
 
     /**
@@ -2554,7 +2554,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return {@link #identifier} (A persistent identifier for the batch that won't change as a batch is copied from server to server.)
+     * @return {@link #identifier} (A persistent identifier for the bundle that won't change as a bundle is copied from server to server.)
      */
     public Identifier getIdentifier() { 
       if (this.identifier == null)
@@ -2570,7 +2570,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @param value {@link #identifier} (A persistent identifier for the batch that won't change as a batch is copied from server to server.)
+     * @param value {@link #identifier} (A persistent identifier for the bundle that won't change as a bundle is copied from server to server.)
      */
     public Bundle setIdentifier(Identifier value) { 
       this.identifier = value;
@@ -2578,7 +2578,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return {@link #type} (Indicates the purpose of this bundle - how it was intended to be used.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @return {@link #type} (Indicates the purpose of this bundle - how it is intended to be used.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public Enumeration<BundleType> getTypeElement() { 
       if (this.type == null)
@@ -2598,7 +2598,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @param value {@link #type} (Indicates the purpose of this bundle - how it was intended to be used.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+     * @param value {@link #type} (Indicates the purpose of this bundle - how it is intended to be used.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
      */
     public Bundle setTypeElement(Enumeration<BundleType> value) { 
       this.type = value;
@@ -2606,14 +2606,14 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return Indicates the purpose of this bundle - how it was intended to be used.
+     * @return Indicates the purpose of this bundle - how it is intended to be used.
      */
     public BundleType getType() { 
       return this.type == null ? null : this.type.getValue();
     }
 
     /**
-     * @param value Indicates the purpose of this bundle - how it was intended to be used.
+     * @param value Indicates the purpose of this bundle - how it is intended to be used.
      */
     public Bundle setType(BundleType value) { 
         if (this.type == null)
@@ -2672,7 +2672,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return {@link #total} (If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).). This is the underlying object with id, value and extensions. The accessor "getTotal" gives direct access to the value
+     * @return {@link #total} (If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.  It does not include search.mode = 'include' or 'outcome' entries and it does not provide a count of the number of entries in the Bundle.). This is the underlying object with id, value and extensions. The accessor "getTotal" gives direct access to the value
      */
     public UnsignedIntType getTotalElement() { 
       if (this.total == null)
@@ -2692,7 +2692,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @param value {@link #total} (If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).). This is the underlying object with id, value and extensions. The accessor "getTotal" gives direct access to the value
+     * @param value {@link #total} (If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.  It does not include search.mode = 'include' or 'outcome' entries and it does not provide a count of the number of entries in the Bundle.). This is the underlying object with id, value and extensions. The accessor "getTotal" gives direct access to the value
      */
     public Bundle setTotalElement(UnsignedIntType value) { 
       this.total = value;
@@ -2700,14 +2700,14 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).
+     * @return If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.  It does not include search.mode = 'include' or 'outcome' entries and it does not provide a count of the number of entries in the Bundle.
      */
     public int getTotal() { 
       return this.total == null || this.total.isEmpty() ? 0 : this.total.getValue();
     }
 
     /**
-     * @param value If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).
+     * @param value If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.  It does not include search.mode = 'include' or 'outcome' entries and it does not provide a count of the number of entries in the Bundle.
      */
     public Bundle setTotal(int value) { 
         if (this.total == null)
@@ -2770,7 +2770,7 @@ public class Bundle extends Resource implements IBaseBundle {
     }
 
     /**
-     * @return {@link #entry} (An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).)
+     * @return {@link #entry} (An entry in a bundle resource - will either contain a resource or information about a resource (transactions and history only).)
      */
     public List<BundleEntryComponent> getEntry() { 
       if (this.entry == null)
@@ -2895,24 +2895,24 @@ public class Bundle extends Resource implements IBaseBundle {
   }
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "A persistent identifier for the batch that won't change as a batch is copied from server to server.", 0, 1, identifier));
-        children.add(new Property("type", "code", "Indicates the purpose of this bundle - how it was intended to be used.", 0, 1, type));
+        children.add(new Property("identifier", "Identifier", "A persistent identifier for the bundle that won't change as a bundle is copied from server to server.", 0, 1, identifier));
+        children.add(new Property("type", "code", "Indicates the purpose of this bundle - how it is intended to be used.", 0, 1, type));
         children.add(new Property("timestamp", "instant", "The date/time that the bundle was assembled - i.e. when the resources were placed in the bundle.", 0, 1, timestamp));
-        children.add(new Property("total", "unsignedInt", "If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).", 0, 1, total));
+        children.add(new Property("total", "unsignedInt", "If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.  It does not include search.mode = 'include' or 'outcome' entries and it does not provide a count of the number of entries in the Bundle.", 0, 1, total));
         children.add(new Property("link", "", "A series of links that provide context to this bundle.", 0, java.lang.Integer.MAX_VALUE, link));
-        children.add(new Property("entry", "", "An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).", 0, java.lang.Integer.MAX_VALUE, entry));
+        children.add(new Property("entry", "", "An entry in a bundle resource - will either contain a resource or information about a resource (transactions and history only).", 0, java.lang.Integer.MAX_VALUE, entry));
         children.add(new Property("signature", "Signature", "Digital Signature - base64 encoded. XML-DSig or a JWT.", 0, 1, signature));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A persistent identifier for the batch that won't change as a batch is copied from server to server.", 0, 1, identifier);
-        case 3575610: /*type*/  return new Property("type", "code", "Indicates the purpose of this bundle - how it was intended to be used.", 0, 1, type);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A persistent identifier for the bundle that won't change as a bundle is copied from server to server.", 0, 1, identifier);
+        case 3575610: /*type*/  return new Property("type", "code", "Indicates the purpose of this bundle - how it is intended to be used.", 0, 1, type);
         case 55126294: /*timestamp*/  return new Property("timestamp", "instant", "The date/time that the bundle was assembled - i.e. when the resources were placed in the bundle.", 0, 1, timestamp);
-        case 110549828: /*total*/  return new Property("total", "unsignedInt", "If a set of search matches, this is the total number of matches for the search (as opposed to the number of results in this bundle).", 0, 1, total);
+        case 110549828: /*total*/  return new Property("total", "unsignedInt", "If a set of search matches, this is the total number of entries of type 'match' across all pages in the search.  It does not include search.mode = 'include' or 'outcome' entries and it does not provide a count of the number of entries in the Bundle.", 0, 1, total);
         case 3321850: /*link*/  return new Property("link", "", "A series of links that provide context to this bundle.", 0, java.lang.Integer.MAX_VALUE, link);
-        case 96667762: /*entry*/  return new Property("entry", "", "An entry in a bundle resource - will either contain a resource, or information about a resource (transactions and history only).", 0, java.lang.Integer.MAX_VALUE, entry);
+        case 96667762: /*entry*/  return new Property("entry", "", "An entry in a bundle resource - will either contain a resource or information about a resource (transactions and history only).", 0, java.lang.Integer.MAX_VALUE, entry);
         case 1073584312: /*signature*/  return new Property("signature", "Signature", "Digital Signature - base64 encoded. XML-DSig or a JWT.", 0, 1, signature);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -3131,17 +3131,17 @@ public class Bundle extends Resource implements IBaseBundle {
  /**
    * Search parameter: <b>composition</b>
    * <p>
-   * Description: <b>The first resource in the bundle, if the bundle type is "document" - this is a composition, and this parameter provides access to searches its contents</b><br>
+   * Description: <b>The first resource in the bundle, if the bundle type is "document" - this is a composition, and this parameter provides access to search its contents</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="composition", path="Bundle.entry[0].resource", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to searches its contents", type="reference", target={Composition.class } )
+  @SearchParamDefinition(name="composition", path="Bundle.entry[0].resource", description="The first resource in the bundle, if the bundle type is \"document\" - this is a composition, and this parameter provides access to search its contents", type="reference", target={Composition.class } )
   public static final String SP_COMPOSITION = "composition";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>composition</b>
    * <p>
-   * Description: <b>The first resource in the bundle, if the bundle type is "document" - this is a composition, and this parameter provides access to searches its contents</b><br>
+   * Description: <b>The first resource in the bundle, if the bundle type is "document" - this is a composition, and this parameter provides access to search its contents</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Bundle.entry(0).resource</b><br>
    * </p>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum GoalRelationshipType {
 
         /**
-         * Indicates that the target goal is one which must be met before striving for the current goal
+         * Indicates that the target goal is one which must be met before striving for the current goal.
          */
         PREDECESSOR, 
         /**
-         * Indicates that the target goal is a desired objective once the current goal is met
+         * Indicates that the target goal is a desired objective once the current goal is met.
          */
         SUCCESSOR, 
         /**
-         * Indicates that this goal has been replaced by the target goal
+         * Indicates that this goal has been replaced by the target goal.
          */
         REPLACEMENT, 
         /**
@@ -53,7 +53,7 @@ public enum GoalRelationshipType {
          */
         MILESTONE, 
         /**
-         * Indicates that the relationship is not covered by one of the pre-defined codes.  (An extension may convey more information about the meaning of the relationship.)
+         * Indicates that the relationship is not covered by one of the pre-defined codes.  (An extension may convey more information about the meaning of the relationship.).
          */
         OTHER, 
         /**
@@ -86,15 +86,15 @@ public enum GoalRelationshipType {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/goal-relationship-type";
+          return "http://terminology.hl7.org/CodeSystem/goal-relationship-type";
         }
         public String getDefinition() {
           switch (this) {
-            case PREDECESSOR: return "Indicates that the target goal is one which must be met before striving for the current goal";
-            case SUCCESSOR: return "Indicates that the target goal is a desired objective once the current goal is met";
-            case REPLACEMENT: return "Indicates that this goal has been replaced by the target goal";
+            case PREDECESSOR: return "Indicates that the target goal is one which must be met before striving for the current goal.";
+            case SUCCESSOR: return "Indicates that the target goal is a desired objective once the current goal is met.";
+            case REPLACEMENT: return "Indicates that this goal has been replaced by the target goal.";
             case MILESTONE: return "Indicates that the target goal is considered to be a \"piece\" of attaining this goal.";
-            case OTHER: return "Indicates that the relationship is not covered by one of the pre-defined codes.  (An extension may convey more information about the meaning of the relationship.)";
+            case OTHER: return "Indicates that the relationship is not covered by one of the pre-defined codes.  (An extension may convey more information about the meaning of the relationship.).";
             default: return "?";
           }
         }

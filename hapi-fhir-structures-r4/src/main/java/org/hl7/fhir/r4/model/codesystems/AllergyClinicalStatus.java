@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum AllergyClinicalStatus {
          */
         INACTIVE, 
         /**
-         * A reaction to the identified substance has been clinically reassessed by testing or re-exposure and considered to be resolved.
+         * A reaction to the identified substance has been clinically reassessed by testing or re-exposure and considered to be resolved. Re-exposure could be accidental, unplanned, or outside of any clinical setting.
          */
         RESOLVED, 
         /**
@@ -78,7 +78,7 @@ public enum AllergyClinicalStatus {
           switch (this) {
             case ACTIVE: return "An active record of a risk of a reaction to the identified substance.";
             case INACTIVE: return "An inactivated record of a risk of a reaction to the identified substance.";
-            case RESOLVED: return "A reaction to the identified substance has been clinically reassessed by testing or re-exposure and considered to be resolved.";
+            case RESOLVED: return "A reaction to the identified substance has been clinically reassessed by testing or re-exposure and considered to be resolved. Re-exposure could be accidental, unplanned, or outside of any clinical setting.";
             default: return "?";
           }
         }

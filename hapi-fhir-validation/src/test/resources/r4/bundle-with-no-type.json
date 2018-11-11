@@ -6,7 +6,11 @@
       "resource": {
         "resourceType": "Person",
         "id": "PERSON1",
-        "meta": {
+			"text": {
+				"status": "generated",
+				"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"> </div>"
+			},
+			"meta": {
           "versionId": "1",
           "lastUpdated": "2017-08-17T16:19:40.109+03:00"
         },

@@ -1,6 +1,7 @@
 
 package ca.uhn.fhir.jpa.subscription.r4;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jetty.server.Server;
@@ -27,13 +28,13 @@ import ca.uhn.fhir.rest.server.RestfulServer;
  */
 public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends BaseResourceProviderR4Test {
 
-	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
+	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestWithInterceptorRegisteredToDaoConfigR4Test.class);
-	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
+	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 
 	@Override
 	protected boolean shouldLogClient() {
@@ -249,6 +250,8 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
+
+		ourLog.info("Have observations: {}", toUnqualifiedVersionlessIds(ourUpdatedObservations));
 
 		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
 		Assert.assertFalse(observation1.getId().isEmpty());

@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.conformance.ProfileUtilities;
 import org.hl7.fhir.r4.context.BaseWorkerContext.NullTranslator;
 import org.hl7.fhir.r4.context.IWorkerContext.ValidationResult;
 import org.hl7.fhir.r4.context.IWorkerContext.ILoggingService.LogCategory;
+import org.hl7.fhir.r4.context.TerminologyCache.CacheToken;
 import org.hl7.fhir.r4.formats.JsonParser;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -31,13 +32,14 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Constants;
-import org.hl7.fhir.r4.model.ExpansionProfile;
+import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.NamingSystem;
 import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -54,10 +56,12 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetFilterComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.hl7.fhir.r4.terminologies.ValueSetCheckerSimple;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ETooCostly;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.TerminologyServiceErrorClass;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderFactory;
+import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.r4.terminologies.ValueSetExpansionCache;
 import org.hl7.fhir.r4.utils.ToolingExtensions;
 import org.hl7.fhir.r4.utils.client.FHIRToolingClient;
@@ -66,6 +70,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.NoTerminologyServiceException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
+import org.hl7.fhir.utilities.MimeType;
 import org.hl7.fhir.utilities.OIDUtils;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.TranslationServices;
@@ -91,46 +96,42 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   private Map<String, ValueSet> valueSets = new HashMap<String, ValueSet>();
   private Map<String, ConceptMap> maps = new HashMap<String, ConceptMap>();
   private Map<String, StructureMap> transforms = new HashMap<String, StructureMap>();
-//  private Map<String, StructureDefinition> profiles = new HashMap<String, StructureDefinition>();
   private Map<String, StructureDefinition> structures = new HashMap<String, StructureDefinition>();
-//  private Map<String, StructureDefinition> extensionDefinitions = new HashMap<String, StructureDefinition>();
+  private Map<String, ImplementationGuide> guides = new HashMap<String, ImplementationGuide>();
   private Map<String, SearchParameter> searchParameters = new HashMap<String, SearchParameter>();
   private Map<String, Questionnaire> questionnaires = new HashMap<String, Questionnaire>();
   private Map<String, OperationDefinition> operations = new HashMap<String, OperationDefinition>();
+  private Map<String, PlanDefinition> plans = new HashMap<String, PlanDefinition>();
   private List<NamingSystem> systems = new ArrayList<NamingSystem>();
-
   
-  private ValueSetExpansionCache expansionCache = new ValueSetExpansionCache(this, lock);
-  protected boolean cacheValidation; // if true, do an expansion and cache the expansion
-  private Set<String> failed = new HashSet<String>(); // value sets for which we don't try to do expansion, since the first attempt to get a comprehensive expansion was not successful
   protected Map<String, Map<String, ValidationResult>> validationCache = new HashMap<String, Map<String,ValidationResult>>();
   protected String tsServer;
-  protected String validationCachePath;
   protected String name;
   private boolean allowLoadingDuplicates;
-
-  // private ValueSetExpansionCache expansionCache; //   
 
   protected FHIRToolingClient txServer;
   private Bundle bndCodeSystems;
   private boolean canRunWithoutTerminology;
   protected boolean noTerminologyServer;
-  protected String cache;
   private int expandCodesLimit = 1000;
   protected ILoggingService logger;
-  protected ExpansionProfile expProfile;
+  protected Parameters expParameters;
   private TranslationServices translator = new NullTranslator();
-
-  public BaseWorkerContext() {
+  protected TerminologyCache txCache;
+  
+  public BaseWorkerContext() throws FileNotFoundException, IOException, FHIRException {
     super();
+    txCache = new TerminologyCache(lock, null);
   }
 
-  public BaseWorkerContext(Map<String, CodeSystem> codeSystems, Map<String, ValueSet> valueSets, Map<String, ConceptMap> maps,  Map<String, StructureDefinition> profiles) {
+  public BaseWorkerContext(Map<String, CodeSystem> codeSystems, Map<String, ValueSet> valueSets, Map<String, ConceptMap> maps, Map<String, StructureDefinition> profiles, Map<String, ImplementationGuide> guides) throws FileNotFoundException, IOException, FHIRException {
     super();
     this.codeSystems = codeSystems;
     this.valueSets = valueSets;
     this.maps = maps;
     this.structures = profiles;
+    this.guides = guides;
+    txCache = new TerminologyCache(lock, null);
   }
 
   protected void copy(BaseWorkerContext other) {
@@ -144,23 +145,24 @@ public abstract class BaseWorkerContext implements IWorkerContext {
       transforms.putAll(other.transforms);
       structures.putAll(other.structures);
       searchParameters.putAll(other.searchParameters);
+      plans.putAll(other.plans);
       questionnaires.putAll(other.questionnaires);
       operations.putAll(other.operations);
       systems.addAll(other.systems);
+      guides.putAll(other.guides);
 
       allowLoadingDuplicates = other.allowLoadingDuplicates;
-      cacheValidation = other.cacheValidation;
       tsServer = other.tsServer;
-      validationCachePath = other.validationCachePath;
       name = other.name;
       txServer = other.txServer;
       bndCodeSystems = other.bndCodeSystems;
       canRunWithoutTerminology = other.canRunWithoutTerminology;
       noTerminologyServer = other.noTerminologyServer;
-      cache = other.cache;
+      if (other.txCache != null)
+        txCache = other.txCache.copy();
       expandCodesLimit = other.expandCodesLimit;
       logger = other.logger;
-      expProfile = other.expProfile;
+      expParameters = other.expParameters;
     }
   }
   
@@ -184,8 +186,12 @@ public abstract class BaseWorkerContext implements IWorkerContext {
           seeMetadataResource((ValueSet) m, valueSets, false);
         else if (r instanceof CodeSystem)
           seeMetadataResource((CodeSystem) m, codeSystems, false);
+        else if (r instanceof ImplementationGuide)
+          seeMetadataResource((ImplementationGuide) m, guides, false);
         else if (r instanceof SearchParameter)
           seeMetadataResource((SearchParameter) m, searchParameters, false);
+        else if (r instanceof PlanDefinition)
+          seeMetadataResource((PlanDefinition) m, plans, false);
         else if (r instanceof OperationDefinition)
           seeMetadataResource((OperationDefinition) m, operations, false);
         else if (r instanceof Questionnaire)
@@ -290,14 +296,16 @@ public abstract class BaseWorkerContext implements IWorkerContext {
           return false;
         if (bndCodeSystems == null) {
           try {
-            tlog("Terminology server: Check for supported code systems for "+system);
+            log("Terminology server: Check for supported code systems for "+system);
             bndCodeSystems = txServer.fetchFeed(txServer.getAddress()+"/CodeSystem?content-mode=not-present&_summary=true&_count=1000");
           } catch (Exception e) {
             if (canRunWithoutTerminology) {
               noTerminologyServer = true;
               log("==============!! Running without terminology server !! ==============");
-              log("txServer = "+txServer.getAddress());
-              log("Error = "+e.getMessage()+"");
+              if (txServer!=null) {
+                log("txServer = "+txServer.getAddress());
+                log("Error = "+e.getMessage()+"");
+              }
               log("=====================================================================");
               return false;
             } else
@@ -307,7 +315,9 @@ public abstract class BaseWorkerContext implements IWorkerContext {
         if (bndCodeSystems != null) {
           for (BundleEntryComponent be : bndCodeSystems.getEntry()) {
             CodeSystem cs = (CodeSystem) be.getResource();
-            if (!codeSystems.containsKey(cs.getUrl())) {
+//            if (cs == null)
+//              System.out.println("no resource for "+be.getFullUrl());
+            if (cs != null && !codeSystems.containsKey(cs.getUrl())) {
               codeSystems.put(cs.getUrl(), null);
             }
           }
@@ -327,291 +337,243 @@ public abstract class BaseWorkerContext implements IWorkerContext {
       System.out.println(message);
   }
 
+
+  protected void tlog(String msg) {
+    System.out.println("-tx cache miss: "+msg);
+  }
+
+  // --- expansion support ------------------------------------------------------------------------------------------------------------
+
+  public int getExpandCodesLimit() {
+    return expandCodesLimit;
+  }
+
+  public void setExpandCodesLimit(int expandCodesLimit) {
+    this.expandCodesLimit = expandCodesLimit;
+  }
+
   @Override
-  public ValueSetExpansionOutcome expandVS(ValueSet vs, boolean cacheOk, boolean heirarchical) {
-    try {
-      if (vs.hasExpansion()) {
-        return new ValueSetExpansionOutcome(vs.copy());
-      }
-      String cacheFn = null;
-      if (cache != null) {
-        cacheFn = Utilities.path(cache, determineCacheId(vs, heirarchical)+".json");
-        if (new File(cacheFn).exists())
-          return loadFromCache(vs.copy(), cacheFn);
-      }
-      if (cacheOk && vs.hasUrl()) {
-        if (expProfile == null)
-          throw new Exception("No ExpansionProfile provided");
-        ValueSetExpansionOutcome vse = expansionCache.getExpander().expand(vs, expProfile.setExcludeNested(!heirarchical));
-        if (vse.getValueset() != null) {
-          if (cache != null) {
-            FileOutputStream s = new FileOutputStream(cacheFn);
-            newJsonParser().compose(new FileOutputStream(cacheFn), vse.getValueset());
-            s.close();
-          }
-        }
-        return vse;
-      } else {
-        ValueSetExpansionOutcome res = expandOnServer(vs, cacheFn);
-        if (cacheFn != null) {
-          if (res.getValueset() != null) {
-            saveToCache(res.getValueset(), cacheFn);
-          } else { 
-            OperationOutcome oo = new OperationOutcome();
-            oo.addIssue().getDetails().setText(res.getError());
-            saveToCache(oo, cacheFn);
-          }
-        }
-        return res;
-      }
-    } catch (NoTerminologyServiceException e) {
-      return new ValueSetExpansionOutcome(e.getMessage() == null ? e.getClass().getName() : e.getMessage(), TerminologyServiceErrorClass.NOSERVICE);
-    } catch (Exception e) {
-      return new ValueSetExpansionOutcome(e.getMessage() == null ? e.getClass().getName() : e.getMessage(), TerminologyServiceErrorClass.UNKNOWN);
-    }
+  public ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heirarchical) throws FHIRException {
+    ValueSet vs = null;
+    vs = fetchResource(ValueSet.class, binding.getValueSet());
+    if (vs == null)
+      throw new FHIRException("Unable to resolve value Set "+binding.getValueSet());
+    return expandVS(vs, cacheOk, heirarchical);
   }
-
-  private ValueSetExpansionOutcome loadFromCache(ValueSet vs, String cacheFn) throws FileNotFoundException, Exception {
-    JsonParser parser = new JsonParser();
-    Resource r = parser.parse(new FileInputStream(cacheFn));
-    if (r instanceof OperationOutcome)
-      return new ValueSetExpansionOutcome(((OperationOutcome) r).getIssue().get(0).getDetails().getText(), TerminologyServiceErrorClass.UNKNOWN);
-    else {
-      vs.setExpansion(((ValueSet) r).getExpansion()); // because what is cached might be from a different value set
-      return new ValueSetExpansionOutcome(vs);
-    }
-  }
-
-  private void saveToCache(Resource res, String cacheFn) throws FileNotFoundException, Exception {
-    JsonParser parser = new JsonParser();
-    parser.compose(new FileOutputStream(cacheFn), res);
-  }
-
-  private String determineCacheId(ValueSet vs, boolean heirarchical) throws Exception {
-    // just the content logical definition is hashed
-    ValueSet vsid = new ValueSet();
-    vsid.setCompose(vs.getCompose());
-    JsonParser parser = new JsonParser();
-    parser.setOutputStyle(OutputStyle.NORMAL);
-    ByteArrayOutputStream b = new  ByteArrayOutputStream();
-    parser.compose(b, vsid);
-    b.close();
-    String s = new String(b.toByteArray(), Charsets.UTF_8);
-    // any code systems we can find, we add these too. 
-    for (ConceptSetComponent inc : vs.getCompose().getInclude()) {
-      CodeSystem cs = fetchCodeSystem(inc.getSystem());
-      if (cs != null) {
-        String css = cacheValue(cs);
-        s = s + css;
-      }
-    }
-    s = s + "-"+Boolean.toString(heirarchical);
-    String r = Integer.toString(s.hashCode());
-    //    TextFile.stringToFile(s, Utilities.path(cache, r+".id.json"));
-    return r;
-  }
-
-
-  private String cacheValue(CodeSystem cs) throws IOException {
-    CodeSystem csid = new CodeSystem();
-    csid.setId(cs.getId());
-    csid.setVersion(cs.getVersion());
-    csid.setContent(cs.getContent());
-    csid.setHierarchyMeaning(CodeSystemHierarchyMeaning.GROUPEDBY);
-    for (ConceptDefinitionComponent cc : cs.getConcept()) 
-      csid.getConcept().add(processCSConcept(cc));
-    JsonParser parser = new JsonParser();
-    parser.setOutputStyle(OutputStyle.NORMAL);
-    ByteArrayOutputStream b = new  ByteArrayOutputStream();
-    parser.compose(b, csid);
-    b.close();
-    return new String(b.toByteArray(), Charsets.UTF_8);
-  }
-
-
-  private ConceptDefinitionComponent processCSConcept(ConceptDefinitionComponent cc) {
-    ConceptDefinitionComponent ccid = new ConceptDefinitionComponent();
-    ccid.setCode(cc.getCode());
-    ccid.setDisplay(cc.getDisplay());
-    for (ConceptDefinitionComponent cci : cc.getConcept()) 
-      ccid.getConcept().add(processCSConcept(cci));
-    return ccid;
-  }
-
-  public ValueSetExpansionOutcome expandOnServer(ValueSet vs, String fn) throws Exception {
+  
+  @Override
+  public ValueSetExpansionOutcome expandVS(ConceptSetComponent inc, boolean heirachical) throws TerminologyServiceException {
+    ValueSet vs = new ValueSet();
+    vs.setCompose(new ValueSetComposeComponent());
+    vs.getCompose().getInclude().add(inc);
+    CacheToken cacheToken = txCache.generateExpandToken(vs, heirachical);
+    ValueSetExpansionOutcome res;
+    res = txCache.getExpansion(cacheToken);
+    if (res != null)
+      return res;
+    Parameters p = expParameters.copy(); 
+    p.setParameter("includeDefinition", false);
+    p.setParameter("excludeNested", !heirachical);
+    
     if (noTerminologyServer)
       return new ValueSetExpansionOutcome("Error expanding ValueSet: running without terminology services", TerminologyServiceErrorClass.NOSERVICE);
-    if (expProfile == null)
-      throw new Exception("No ExpansionProfile provided");
-
+    Map<String, String> params = new HashMap<String, String>();
+    params.put("_limit", Integer.toString(expandCodesLimit ));
+    params.put("_incomplete", "true");
+    tlog("$expand on "+txCache.summary(vs));
     try {
+      ValueSet result = txServer.expandValueset(vs, p, params);
+      res = new ValueSetExpansionOutcome(result);  
+    } catch (Exception e) {
+      res = new ValueSetExpansionOutcome(e.getMessage() == null ? e.getClass().getName() : e.getMessage(), TerminologyServiceErrorClass.UNKNOWN);
+    }
+    txCache.cacheExpansion(cacheToken, res, TerminologyCache.PERMANENT);
+    return res;
+
+
+
+  }
+
+  @Override
+  public ValueSetExpansionOutcome expandVS(ValueSet vs, boolean cacheOk, boolean heirarchical) {
+    if (expParameters == null)
+      throw new Error("No Expansion Parameters provided");
+    Parameters p = expParameters.copy(); 
+    return expandVS(vs, cacheOk, heirarchical, p);
+  }
+  
+  public ValueSetExpansionOutcome expandVS(ValueSet vs, boolean cacheOk, boolean heirarchical, Parameters p)  {
+    if (p == null)
+      throw new Error("No Parameters provided to expandVS");
+    if (vs.hasExpansion()) {
+      return new ValueSetExpansionOutcome(vs.copy());
+    }
+    if (!vs.hasUrl())
+      throw new Error("no value set");
+    
+      CacheToken cacheToken = txCache.generateExpandToken(vs, heirarchical);
+      ValueSetExpansionOutcome res;
+      if (cacheOk) {
+        res = txCache.getExpansion(cacheToken);
+        if (res != null)
+          return res;
+      }
+      p.setParameter("includeDefinition", false);
+      p.setParameter("excludeNested", !heirarchical);
+      
+      // ok, first we try to expand locally
+      try {
+        ValueSetExpanderSimple vse = new ValueSetExpanderSimple(this);
+        res = vse.doExpand(vs, p);
+        if (!res.getValueset().hasUrl())
+          throw new Error("no url in expand value set");
+        txCache.cacheExpansion(cacheToken, res, TerminologyCache.TRANSIENT);
+        return res;
+      } catch (Exception e) {
+      }
+      
+      // if that failed, we try to expand on the server
+      if (noTerminologyServer)
+        return new ValueSetExpansionOutcome("Error expanding ValueSet: running without terminology services", TerminologyServiceErrorClass.NOSERVICE);
       Map<String, String> params = new HashMap<String, String>();
       params.put("_limit", Integer.toString(expandCodesLimit ));
       params.put("_incomplete", "true");
-      tlog("Terminology Server: $expand on "+getVSSummary(vs));
-      ValueSet result = txServer.expandValueset(vs, expProfile.setIncludeDefinition(false), params);
-      return new ValueSetExpansionOutcome(result);  
-    } catch (Exception e) {
-      return new ValueSetExpansionOutcome("Error expanding ValueSet \""+vs.getUrl()+": "+e.getMessage(), TerminologyServiceErrorClass.UNKNOWN);
-    }
-  }
-
-  private String getVSSummary(ValueSet vs) {
-    CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
-    for (ConceptSetComponent cc : vs.getCompose().getInclude())
-      b.append("Include "+getIncSummary(cc));
-    for (ConceptSetComponent cc : vs.getCompose().getExclude())
-      b.append("Exclude "+getIncSummary(cc));
-    return b.toString();
-  }
-
-  private String getIncSummary(ConceptSetComponent cc) {
-    CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
-    for (UriType vs : cc.getValueSet())
-      b.append(vs.asStringValue());
-    String vsd = b.length() > 0 ? " where the codes are in the value sets ("+b.toString()+")" : "";
-    String system = cc.getSystem();
-    if (cc.hasConcept())
-      return Integer.toString(cc.getConcept().size())+" codes from "+system+vsd;
-    if (cc.hasFilter()) {
-      String s = "";
-      for (ConceptSetFilterComponent f : cc.getFilter()) {
-        if (!Utilities.noString(s))
-          s = s + " & ";
-        s = s + f.getProperty()+" "+f.getOp().toCode()+" "+f.getValue();
+      tlog("$expand on "+txCache.summary(vs));
+      try {
+        ValueSet result = txServer.expandValueset(vs, p, params);
+        if (!result.hasUrl())
+          result.setUrl(vs.getUrl());
+        if (!result.hasUrl())
+          throw new Error("no url in expand value set 2");
+        res = new ValueSetExpansionOutcome(result);  
+      } catch (Exception e) {
+        res = new ValueSetExpansionOutcome(e.getMessage() == null ? e.getClass().getName() : e.getMessage(), TerminologyServiceErrorClass.UNKNOWN);
       }
-      return "from "+system+" where "+s+vsd;
-    }
-    return "All codes from "+system+vsd;
+      txCache.cacheExpansion(cacheToken, res, TerminologyCache.PERMANENT);
+      return res;
   }
 
-  private ValidationResult handleByCache(ValueSet vs, Coding coding, boolean tryCache) {
-    String cacheId = cacheId(coding);
-    Map<String, ValidationResult> cache = validationCache.get(vs.getUrl());
-    if (cache == null) {
-      cache = new HashMap<String, IWorkerContext.ValidationResult>();
-      validationCache.put(vs.getUrl(), cache);
-    }
-    if (cache.containsKey(cacheId))
-      return cache.get(cacheId);
-    if (!tryCache)
-      return null;
-    if (!cacheValidation)
-      return null;
-    if (failed.contains(vs.getUrl()))
-      return null;
-    ValueSetExpansionOutcome vse = expandVS(vs, true, false);
-    if (vse.getValueset() == null || notcomplete(vse.getValueset())) {
-      failed.add(vs.getUrl());
-      return null;
-    }
 
-    ValidationResult res = validateCode(coding, vse.getValueset());
-    cache.put(cacheId, res);
-    return res;
+  private boolean hasTooCostlyExpansion(ValueSet valueset) {
+    return valueset != null && valueset.hasExpansion() && ToolingExtensions.hasExtension(valueset.getExpansion(), "http://hl7.org/fhir/StructureDefinition/valueset-toocostly");
+  }
+  // --- validate code -------------------------------------------------------------------------------
+  
+  @Override
+  public ValidationResult validateCode(String system, String code, String display) {
+    Coding c = new Coding(system, code, display);
+    return validateCode(c, null);
   }
 
-  private boolean notcomplete(ValueSet vs) {
-    if (!vs.hasExpansion())
-      return true;
-    if (!vs.getExpansion().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/valueset-unclosed").isEmpty())
-      return true;
-    if (!vs.getExpansion().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/valueset-toocostly").isEmpty())
-      return true;
-    return false;
+  @Override
+  public ValidationResult validateCode(String system, String code, String display, ValueSet vs) {
+    Coding c = new Coding(system, code, display);
+    return validateCode(c, vs);
   }
 
-  private ValidationResult handleByCache(ValueSet vs, CodeableConcept concept, boolean tryCache) {
-    String cacheId = cacheId(concept);
-    Map<String, ValidationResult> cache = validationCache.get(vs.getUrl());
-    if (cache == null) {
-      cache = new HashMap<String, IWorkerContext.ValidationResult>();
-      validationCache.put(vs.getUrl(), cache);
-    }
-    if (cache.containsKey(cacheId))
-      return cache.get(cacheId);
-
-    if (validationCache.containsKey(vs.getUrl()) && validationCache.get(vs.getUrl()).containsKey(cacheId))
-      return validationCache.get(vs.getUrl()).get(cacheId);
-    if (!tryCache)
-      return null;
-    if (!cacheValidation)
-      return null;
-    if (failed.contains(vs.getUrl()))
-      return null;
-    ValueSetExpansionOutcome vse = expandVS(vs, true, false);
-    if (vse.getValueset() == null || notcomplete(vse.getValueset())) {
-      failed.add(vs.getUrl());
-      return null;
-    }
-    ValidationResult res = validateCode(concept, vse.getValueset());
-    cache.put(cacheId, res);
-    return res;
+  @Override
+  public ValidationResult validateCode(String code, ValueSet vs) {
+    Coding c = new Coding(null, code, null);
+    return doValidateCode(c, vs, true);
   }
 
-  private String cacheId(Coding coding) {
-    return "|"+coding.getSystem()+"|"+coding.getVersion()+"|"+coding.getCode()+"|"+coding.getDisplay();
+  @Override
+  public ValidationResult validateCode(String system, String code, String display, ConceptSetComponent vsi) {
+    Coding c = new Coding(system, code, display);
+    ValueSet vs = new ValueSet();
+    vs.setUrl(Utilities.makeUuidUrn());
+    vs.getCompose().addInclude(vsi);
+    return validateCode(c, vs);
   }
 
-  private String cacheId(CodeableConcept cc) {
-    StringBuilder b = new StringBuilder();
-    for (Coding c : cc.getCoding()) {
-      b.append("#");
-      b.append(cacheId(c));
-    }    
-    return b.toString();
+  @Override
+  public ValidationResult validateCode(Coding code, ValueSet vs) {
+    return doValidateCode(code, vs, false);
   }
-
-  private ValidationResult verifyCodeExternal(ValueSet vs, Coding coding, boolean tryCache) throws Exception {
-    ValidationResult res = vs == null ? null : handleByCache(vs, coding, tryCache);
+  
+  public ValidationResult doValidateCode(Coding code, ValueSet vs, boolean implySystem) {
+    CacheToken cacheToken = txCache.generateValidationToken(code, vs);
+    ValidationResult res = txCache.getValidation(cacheToken);
     if (res != null)
       return res;
-    Parameters pin = new Parameters();
-    pin.addParameter().setName("coding").setValue(coding);
+
+    // ok, first we try to validate locally
+    try {
+      ValueSetCheckerSimple vsc = new ValueSetCheckerSimple(vs, this); 
+      res = vsc.validateCode(code);
+      txCache.cacheValidation(cacheToken, res, TerminologyCache.TRANSIENT);
+      return res;
+    } catch (Exception e) {
+    }
+
+    // if that failed, we try to validate on the server
+    if (noTerminologyServer)
+      return new ValidationResult(IssueSeverity.ERROR,  "Error validating code: running without terminology services", TerminologyServiceErrorClass.NOSERVICE);
+    String csumm = txCache.summary(code);
+    tlog("$validate "+csumm+" for "+ txCache.summary(vs));
+    try {
+      Parameters pIn = new Parameters();
+      pIn.addParameter().setName("coding").setValue(code);
+      if (implySystem)
+        pIn.addParameter().setName("implySystem").setValue(new BooleanType(true));
+      res = validateOnServer(vs, pIn);
+    } catch (Exception e) {
+      res = new ValidationResult(IssueSeverity.ERROR, e.getMessage() == null ? e.getClass().getName() : e.getMessage());
+    }
+    txCache.cacheValidation(cacheToken, res, TerminologyCache.PERMANENT);
+    return res;
+  }
+
+  @Override
+  public ValidationResult validateCode(CodeableConcept code, ValueSet vs) {
+    CacheToken cacheToken = txCache.generateValidationToken(code, vs);
+    ValidationResult res = txCache.getValidation(cacheToken);
+    if (res != null)
+      return res;
+
+    // ok, first we try to validate locally
+    try {
+      ValueSetCheckerSimple vsc = new ValueSetCheckerSimple(vs, this); 
+      res = vsc.validateCode(code);
+      txCache.cacheValidation(cacheToken, res, TerminologyCache.TRANSIENT);
+      return res;
+    } catch (Exception e) {
+    }
+
+    // if that failed, we try to validate on the server
+    if (noTerminologyServer)
+      return new ValidationResult(IssueSeverity.ERROR, "Error validating code: running without terminology services", TerminologyServiceErrorClass.NOSERVICE);
+    tlog("$validate "+txCache.summary(code)+" for "+ txCache.summary(vs));
+    try {
+      Parameters pIn = new Parameters();
+      pIn.addParameter().setName("codeableConcept").setValue(code);
+      res = validateOnServer(vs, pIn);
+    } catch (Exception e) {
+      res = new ValidationResult(IssueSeverity.ERROR, e.getMessage() == null ? e.getClass().getName() : e.getMessage());
+    }
+    txCache.cacheValidation(cacheToken, res, TerminologyCache.PERMANENT);
+    return res;
+  }
+
+  private ValidationResult validateOnServer(ValueSet vs, Parameters pin) {
     if (vs != null)
       pin.addParameter().setName("valueSet").setResource(vs);
-    res = serverValidateCode(pin, vs == null);
-    if (vs != null) {
-      Map<String, ValidationResult> cache = validationCache.get(vs.getUrl());
-      cache.put(cacheId(coding), res);
-    }
-    return res;
-  }
-
-  private ValidationResult verifyCodeExternal(ValueSet vs, CodeableConcept cc, boolean tryCache) throws Exception {
-    ValidationResult res = handleByCache(vs, cc, tryCache);
-    if (res != null)
-      return res;
-    Parameters pin = new Parameters();
-    pin.addParameter().setName("codeableConcept").setValue(cc);
-    pin.addParameter().setName("valueSet").setResource(vs);
-    res = serverValidateCode(pin, tryCache);
-    Map<String, ValidationResult> cache = validationCache.get(vs.getUrl());
-    cache.put(cacheId(cc), res);
-    return res;
-  }
-
-  private ValidationResult serverValidateCode(Parameters pin, boolean doCache) throws Exception {
-    if (noTerminologyServer)
-      return new ValidationResult(null, null, TerminologyServiceErrorClass.NOSERVICE);
-    String cacheName = doCache ? generateCacheName(pin) : null;
-    ValidationResult res = loadFromCache(cacheName);
-    if (res != null)
-      return res;
-    tlog("Terminology Server: $validate-code "+describeValidationParameters(pin));
     for (ParametersParameterComponent pp : pin.getParameter())
       if (pp.getName().equals("profile"))
         throw new Error("Can only specify profile in the context");
-    if (expProfile == null)
-      throw new Exception("No ExpansionProfile provided");
-    pin.addParameter().setName("profile").setResource(expProfile);
-
-    Parameters pout = txServer.operateType(ValueSet.class, "validate-code", pin);
+    if (expParameters == null)
+      throw new Error("No ExpansionProfile provided");
+    pin.addParameter().setName("profile").setResource(expParameters);
+    Parameters pOut;
+    if (vs == null)
+      pOut = txServer.operateType(CodeSystem.class, "validate-code", pin);
+    else
+      pOut = txServer.operateType(ValueSet.class, "validate-code", pin);
     boolean ok = false;
     String message = "No Message returned";
     String display = null;
     TerminologyServiceErrorClass err = TerminologyServiceErrorClass.UNKNOWN;
-    for (ParametersParameterComponent p : pout.getParameter()) {
+    for (ParametersParameterComponent p : pOut.getParameter()) {
       if (p.getName().equals("result"))
         ok = ((BooleanType) p.getValue()).getValue().booleanValue();
       else if (p.getName().equals("message"))
@@ -630,208 +592,19 @@ public abstract class BaseWorkerContext implements IWorkerContext {
       }
     }
     if (!ok)
-      res = new ValidationResult(IssueSeverity.ERROR, message, err);
-    else if (message != null) 
-      res = new ValidationResult(IssueSeverity.WARNING, message, new ConceptDefinitionComponent().setDisplay(display));
+      return new ValidationResult(IssueSeverity.ERROR, message, err);
+    else if (message != null && !message.equals("No Message returned")) 
+      return new ValidationResult(IssueSeverity.WARNING, message, new ConceptDefinitionComponent().setDisplay(display));
     else if (display != null)
-      res = new ValidationResult(new ConceptDefinitionComponent().setDisplay(display));
+      return new ValidationResult(new ConceptDefinitionComponent().setDisplay(display));
     else
-      res = new ValidationResult(new ConceptDefinitionComponent());
-    saveToCache(res, cacheName);
-    return res;
+      return new ValidationResult(new ConceptDefinitionComponent());
   }
 
-
-  protected void tlog(String msg) {
-    System.out.println("-tx: "+msg);
-  }
-
-  @SuppressWarnings("rawtypes")
-  private String describeValidationParameters(Parameters pin) {
-    CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
-    for (ParametersParameterComponent p : pin.getParameter()) {
-      if (p.hasValue() && p.getValue() instanceof PrimitiveType) {
-        b.append(p.getName()+"="+((PrimitiveType) p.getValue()).asStringValue());
-      } else if (p.hasValue() && p.getValue() instanceof Coding) {
-        b.append("system="+((Coding) p.getValue()).getSystem());
-        b.append("code="+((Coding) p.getValue()).getCode());
-        b.append("display="+((Coding) p.getValue()).getDisplay());
-      } else if (p.hasValue() && p.getValue() instanceof CodeableConcept) {
-        if (((CodeableConcept) p.getValue()).hasCoding()) {
-          Coding c = ((CodeableConcept) p.getValue()).getCodingFirstRep();
-          b.append("system="+c.getSystem());
-          b.append("code="+c.getCode());
-          b.append("display="+c.getDisplay());
-        } else if (((CodeableConcept) p.getValue()).hasText()) {
-          b.append("text="+((CodeableConcept) p.getValue()).getText());
-        }
-      } else if (p.hasResource() && (p.getResource() instanceof ValueSet)) {
-        b.append("valueset="+getVSSummary((ValueSet) p.getResource()));
-      } 
-    }
-    return b.toString();
-  }
-
-  private ValidationResult loadFromCache(String fn) throws FileNotFoundException, IOException {
-    if (fn == null)
-      return null;
-    if (!(new File(fn).exists()))
-      return null;
-    String cnt = TextFile.fileToString(fn);
-    if (cnt.startsWith("!error: "))
-      return new ValidationResult(IssueSeverity.ERROR, cnt.substring(8));
-    else if (cnt.startsWith("!warning: "))
-      return new ValidationResult(IssueSeverity.ERROR, cnt.substring(10));
-    else
-      return new ValidationResult(new ConceptDefinitionComponent().setDisplay(cnt));
-  }
-
-  private void saveToCache(ValidationResult res, String cacheName) throws IOException {
-    if (cacheName == null)
-      return;
-    if (res.getDisplay() != null)
-      TextFile.stringToFile(res.getDisplay(), cacheName);
-    else if (res.getMessage() != null) {
-      if (res.getSeverity() == IssueSeverity.WARNING)
-        TextFile.stringToFile("!warning: "+res.getMessage(), cacheName);
-      else 
-        TextFile.stringToFile("!error: "+res.getMessage(), cacheName);
-    }
-  }
-
-  private String generateCacheName(Parameters pin) throws IOException {
-    if (cache == null)
-      return null;
-    String json = new JsonParser().composeString(pin);
-    return Utilities.path(cache, "vc"+Integer.toString(json.hashCode())+".json");
-  }
-
-  @Override
-  public ValueSetExpansionComponent expandVS(ConceptSetComponent inc, boolean heirachical) throws TerminologyServiceException {
-    ValueSet vs = new ValueSet();
-    vs.setCompose(new ValueSetComposeComponent());
-    vs.getCompose().getInclude().add(inc);
-    ValueSetExpansionOutcome vse = expandVS(vs, true, heirachical);
-    ValueSet valueset = vse.getValueset();
-    if (valueset == null)
-      throw new TerminologyServiceException("Error Expanding ValueSet: "+vse.getError());
-    return valueset.getExpansion();
-  }
-
-  @Override
-  public ValidationResult validateCode(String system, String code, String display) {
-    try {
-      CodeSystem cs = null;
-      synchronized (lock) {
-        cs = codeSystems.get(system);
-      }
-      
-      if (cs != null && cs.getContent() == CodeSystemContentMode.COMPLETE)
-        return verifyCodeInCodeSystem(cs, system, code, display);
-      else 
-        return verifyCodeExternal(null, new Coding().setSystem(system).setCode(code).setDisplay(display), false);
-    } catch (Exception e) {
-      return new ValidationResult(IssueSeverity.FATAL, "Error validating code \""+code+"\" in system \""+system+"\": "+e.getMessage());
-    }
-  }
-
-
-  @Override
-  public ValidationResult validateCode(Coding code, ValueSet vs) {
-    CodeSystem cs = null;
-    synchronized (lock) {
-      cs = codeSystems.get(code.getSystem());
-    }
-    if (cs != null) 
-      try {
-        return verifyCodeInCodeSystem(cs, code.getSystem(), code.getCode(), code.getDisplay());
-      } catch (Exception e) {
-        return new ValidationResult(IssueSeverity.FATAL, "Error validating code \""+code+"\" in system \""+code.getSystem()+"\": "+e.getMessage());
-      }
-    else if (vs != null && vs.hasExpansion()) 
-      try {
-        return verifyCodeInternal(vs, code.getSystem(), code.getCode(), code.getDisplay());
-      } catch (Exception e) {
-        return new ValidationResult(IssueSeverity.FATAL, "Error validating code \""+code+"\" in system \""+code.getSystem()+"\": "+e.getMessage());
-      }
-    else 
-      try {
-        return verifyCodeExternal(vs, code, true);
-      } catch (Exception e) {
-        return new ValidationResult(IssueSeverity.WARNING, "Error validating code \""+code+"\" in system \""+code.getSystem()+"\": "+e.getMessage());
-      }
-  }
-
-  @Override
-  public ValidationResult validateCode(CodeableConcept code, ValueSet vs) {
-    try {
-      if (vs.hasExpansion()) 
-        return verifyCodeInternal(vs, code);
-      else {
-        // we'll try expanding first; if that doesn't work, then we'll just pass it to the server to validate 
-        // ... could be a problem if the server doesn't have the code systems we have locally, so we try not to depend on the server
-        try {
-          ValueSetExpansionOutcome vse = expandVS(vs, true, false);
-          if (vse.getValueset() != null && !hasTooCostlyExpansion(vse.getValueset()))
-            return verifyCodeInternal(vse.getValueset(), code);
-        } catch (Exception e) {
-          // failed? we'll just try the server
-        }        
-        return verifyCodeExternal(vs, code, true);
-      }
-    } catch (Exception e) {
-      return new ValidationResult(IssueSeverity.FATAL, "Error validating code \""+code.toString()+"\": "+e.getMessage(), TerminologyServiceErrorClass.SERVER_ERROR);
-    }
-  }
-
-
-  private boolean hasTooCostlyExpansion(ValueSet valueset) {
-    return valueset != null && valueset.hasExpansion() && ToolingExtensions.hasExtension(valueset.getExpansion(), "http://hl7.org/fhir/StructureDefinition/valueset-toocostly");
-  }
-
-  @Override
-  public ValidationResult validateCode(String system, String code, String display, ValueSet vs) {
-    try {
-      if (system == null && display == null)
-        return verifyCodeInternal(vs, code);
-      CodeSystem cs = null;
-      synchronized (lock) {
-        cs = codeSystems.get(system);
-      }
-      
-      if (cs != null || vs.hasExpansion()) 
-        return verifyCodeInternal(vs, system, code, display);
-      else 
-        return verifyCodeExternal(vs, new Coding().setSystem(system).setCode(code).setDisplay(display), true);
-    } catch (Exception e) {
-      return new ValidationResult(IssueSeverity.FATAL, "Error validating code \""+code+"\" in system \""+system+"\": "+e.getMessage(), TerminologyServiceErrorClass.SERVER_ERROR);
-    }
-  }
-
-  @Override
-  public ValidationResult validateCode(String system, String code, String display, ConceptSetComponent vsi) {
-    try {
-      ValueSet vs = new ValueSet();
-      vs.setUrl(Utilities.makeUuidUrn());
-      vs.getCompose().addInclude(vsi);
-      return verifyCodeExternal(vs, new Coding().setSystem(system).setCode(code).setDisplay(display), true);
-    } catch (Exception e) {
-      return new ValidationResult(IssueSeverity.FATAL, "Error validating code \""+code+"\" in system \""+system+"\": "+e.getMessage());
-    }
-  }
-
+  // --------------------------------------------------------------------------------------------------------------------------------------------------------
+  
   public void initTS(String cachePath) throws Exception {
-    cache = cachePath;
-    expansionCache = new ValueSetExpansionCache(this, null, lock);
-    validationCachePath = Utilities.path(cachePath, "validation.cache");
-    try {
-      loadValidationCache();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  protected void loadValidationCache() throws JsonSyntaxException, Exception {
+    txCache = new TerminologyCache(lock, cachePath);
   }
 
   @Override
@@ -845,118 +618,6 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     }
   }
 
-  private ValidationResult verifyCodeInternal(ValueSet vs, CodeableConcept code) throws Exception {
-    for (Coding c : code.getCoding()) {
-      ValidationResult res = verifyCodeInternal(vs, c.getSystem(), c.getCode(), c.getDisplay());
-      if (res.isOk())
-        return res;
-    }
-    if (code.getCoding().isEmpty())
-      return new ValidationResult(IssueSeverity.ERROR, "None code provided");
-    else
-      return new ValidationResult(IssueSeverity.ERROR, "None of the codes are in the specified value set");
-  }
-
-  private ValidationResult verifyCodeInternal(ValueSet vs, String system, String code, String display) throws Exception {
-    if (vs.hasExpansion())
-      return verifyCodeInExpansion(vs, system, code, display);
-    else {
-      ValueSetExpansionOutcome vse = expansionCache.getExpander().expand(vs, null);
-      if (vse.getValueset() != null) 
-        return verifyCodeExternal(vs, new Coding().setSystem(system).setCode(code).setDisplay(display), false);
-      else
-        return verifyCodeInExpansion(vse.getValueset(), system, code, display);
-    }
-  }
-
-  private ValidationResult verifyCodeInternal(ValueSet vs, String code) throws FileNotFoundException, ETooCostly, IOException, FHIRException {
-    if (vs.hasExpansion())
-      return verifyCodeInExpansion(vs, code);
-    else {
-      ValueSetExpansionOutcome vse = expansionCache.getExpander().expand(vs, null);
-      if (vse.getValueset() == null)
-        return new ValidationResult(IssueSeverity.ERROR, vse.getError(), vse.getErrorClass());
-      else
-        return verifyCodeInExpansion(vse.getValueset(), code);
-    }
-  }
-
-  private ValidationResult verifyCodeInCodeSystem(CodeSystem cs, String system, String code, String display) throws Exception {
-    ConceptDefinitionComponent cc = findCodeInConcept(cs.getConcept(), code);
-    if (cc == null)
-      if (cs.getContent().equals(CodeSystem.CodeSystemContentMode.COMPLETE))
-        return new ValidationResult(IssueSeverity.ERROR, "Unknown Code "+code+" in "+cs.getUrl());
-      else if (!cs.getContent().equals(CodeSystem.CodeSystemContentMode.NOTPRESENT))
-        return new ValidationResult(IssueSeverity.WARNING, "Unknown Code "+code+" in partial code list of "+cs.getUrl());
-      else 
-        return verifyCodeExternal(null, new Coding().setSystem(system).setCode(code).setDisplay(display), false);
-    //
-    //        return new ValidationResult(IssueSeverity.WARNING, "A definition was found for "+cs.getUrl()+", but it has no codes in the definition");
-    //      return new ValidationResult(IssueSeverity.ERROR, "Unknown Code "+code+" in "+cs.getUrl());
-    if (display == null)
-      return new ValidationResult(cc);
-    CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
-    if (cc.hasDisplay()) {
-      b.append(cc.getDisplay());
-      if (display.equalsIgnoreCase(cc.getDisplay()))
-        return new ValidationResult(cc);
-    }
-    for (ConceptDefinitionDesignationComponent ds : cc.getDesignation()) {
-      b.append(ds.getValue());
-      if (display.equalsIgnoreCase(ds.getValue()))
-        return new ValidationResult(cc);
-    }
-    return new ValidationResult(IssueSeverity.WARNING, "Display Name for "+code+" must be one of '"+b.toString()+"'", cc);
-  }
-
-
-  private ValidationResult verifyCodeInExpansion(ValueSet vs, String system,String code, String display) {
-    ValueSetExpansionContainsComponent cc = findCode(vs.getExpansion().getContains(), code, system);
-    if (cc == null)
-      return new ValidationResult(IssueSeverity.ERROR, "Unknown Code "+code+" in "+vs.getUrl());
-    if (display == null)
-      return new ValidationResult(new ConceptDefinitionComponent().setCode(code).setDisplay(cc.getDisplay()));
-    if (cc.hasDisplay()) {
-      if (display.equalsIgnoreCase(cc.getDisplay()))
-        return new ValidationResult(new ConceptDefinitionComponent().setCode(code).setDisplay(cc.getDisplay()));
-      return new ValidationResult(IssueSeverity.WARNING, "Display Name for "+code+" must be '"+cc.getDisplay()+"'", new ConceptDefinitionComponent().setCode(code).setDisplay(cc.getDisplay()));
-    }
-    return null;
-  }
-
-  private ValidationResult verifyCodeInExpansion(ValueSet vs, String code) throws FHIRException {
-    if (vs.getExpansion().hasExtension("http://hl7.org/fhir/StructureDefinition/valueset-toocostly")) {
-      throw new FHIRException("Unable to validate core - value set is too costly to expand"); 
-    } else {
-      ValueSetExpansionContainsComponent cc = findCode(vs.getExpansion().getContains(), code, null);
-      if (cc == null)
-        return new ValidationResult(IssueSeverity.ERROR, "Unknown Code "+code+" in "+vs.getUrl());
-      return null;
-    }
-  }
-
-  private ValueSetExpansionContainsComponent findCode(List<ValueSetExpansionContainsComponent> contains, String code, String system) {
-    for (ValueSetExpansionContainsComponent cc : contains) {
-      if (code.equals(cc.getCode()) && (system == null || cc.getSystem().equals(system)))
-        return cc;
-      ValueSetExpansionContainsComponent c = findCode(cc.getContains(), code, system);
-      if (c != null)
-        return c;
-    }
-    return null;
-  }
-
-  private ConceptDefinitionComponent findCodeInConcept(List<ConceptDefinitionComponent> concept, String code) {
-    for (ConceptDefinitionComponent cc : concept) {
-      if (code.equals(cc.getCode()))
-        return cc;
-      ConceptDefinitionComponent c = findCodeInConcept(cc.getConcept(), code);
-      if (c != null)
-        return c;
-    }
-    return null;
-  }
-
   public boolean isCanRunWithoutTerminology() {
     return canRunWithoutTerminology;
   }
@@ -965,24 +626,16 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     this.canRunWithoutTerminology = canRunWithoutTerminology;
   }
 
-  public int getExpandCodesLimit() {
-    return expandCodesLimit;
-  }
-
-  public void setExpandCodesLimit(int expandCodesLimit) {
-    this.expandCodesLimit = expandCodesLimit;
-  }
-
   public void setLogger(ILoggingService logger) {
     this.logger = logger;
   }
 
-  public ExpansionProfile getExpansionProfile() {
-    return expProfile;
+  public Parameters getExpansionParameters() {
+    return expParameters;
   }
 
-  public void setExpansionProfile(ExpansionProfile expProfile) {
-    this.expProfile = expProfile;
+  public void setExpansionProfile(Parameters expParameters) {
+    this.expParameters = expParameters;
   }
 
   @Override
@@ -1017,7 +670,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   @Override
   public <T extends Resource> T fetchResourceWithException(Class<T> class_, String uri) throws FHIRException {
        if (class_ == StructureDefinition.class)
-      uri = ProfileUtilities.sdNs(uri);
+      uri = ProfileUtilities.sdNs(uri, getOverrideVersionNs());
     synchronized (lock) {
 
       if (uri.startsWith("http:") || uri.startsWith("https:")) {
@@ -1027,6 +680,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
         if (class_ == Resource.class || class_ == null) {
           if (structures.containsKey(uri))
             return (T) structures.get(uri);
+          if (guides.containsKey(uri))
+            return (T) guides.get(uri);
           if (valueSets.containsKey(uri))
             return (T) valueSets.get(uri);
           if (codeSystems.containsKey(uri))
@@ -1035,6 +690,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
             return (T) operations.get(uri);
           if (searchParameters.containsKey(uri))
             return (T) searchParameters.get(uri);
+          if (plans.containsKey(uri))
+            return (T) plans.get(uri);
           if (maps.containsKey(uri))
             return (T) maps.get(uri);
           if (transforms.containsKey(uri))
@@ -1042,6 +699,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
           if (questionnaires.containsKey(uri))
             return (T) questionnaires.get(uri);
           return null;      
+        } else if (class_ == ImplementationGuide.class) {
+          return (T) guides.get(uri);
         } else if (class_ == StructureDefinition.class) {
           return (T) structures.get(uri);
         } else if (class_ == ValueSet.class) {
@@ -1050,6 +709,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
           return (T) codeSystems.get(uri);
         } else if (class_ == ConceptMap.class) {
           return (T) maps.get(uri);
+        } else if (class_ == PlanDefinition.class) {
+          return (T) plans.get(uri);
         } else if (class_ == OperationDefinition.class) {
           OperationDefinition od = operations.get(uri);
           return (T) od;
@@ -1074,7 +735,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
 
         // it might be a special URL.
         if (Utilities.isAbsoluteUrl(uri) || uri.startsWith("ValueSet/")) {
-          Resource res = findTxValueSet(uri);
+          Resource res = null; // findTxValueSet(uri);
           if (res != null)
             return (T) res;
         }
@@ -1085,31 +746,33 @@ public abstract class BaseWorkerContext implements IWorkerContext {
   }
 
   private Set<String> notCanonical = new HashSet<String>();
+
+  private String overrideVersionNs;
   
-  private MetadataResource findTxValueSet(String uri) {
-    MetadataResource res = expansionCache.getStoredResource(uri);
-    if (res != null)
-      return res;
-    synchronized (lock) {
-      if (notCanonical.contains(uri))
-        return null;
-    }
-    try {
-      tlog("get canonical "+uri);
-      res = txServer.getCanonical(ValueSet.class, uri);
-    } catch (Exception e) {
-      synchronized (lock) {
-        notCanonical.add(uri);
-      }
-      return null;
-    }
-    if (res != null)
-      try {
-        expansionCache.storeResource(res);
-      } catch (IOException e) {
-      }
-    return res;
-  }
+//  private MetadataResource findTxValueSet(String uri) {
+//    MetadataResource res = expansionCache.getStoredResource(uri);
+//    if (res != null)
+//      return res;
+//    synchronized (lock) {
+//      if (notCanonical.contains(uri))
+//        return null;
+//    }
+//    try {
+//      tlog("get canonical "+uri);
+//      res = txServer.getCanonical(ValueSet.class, uri);
+//    } catch (Exception e) {
+//      synchronized (lock) {
+//        notCanonical.add(uri);
+//      }
+//      return null;
+//    }
+//    if (res != null)
+//      try {
+//        expansionCache.storeResource(res);
+//      } catch (IOException e) {
+//      }
+//    return res;
+//  }
 
   @Override
   public Resource fetchResourceById(String type, String uri) {
@@ -1144,21 +807,6 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     }
   }
 
-  @Override
-  public ValueSetExpansionOutcome expandVS(ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heirarchical) throws FHIRException {
-    ValueSet vs = null;
-    if (binding.hasValueSetCanonicalType()) {
-      vs = fetchResource(ValueSet.class, binding.getValueSetCanonicalType().getValue());
-      if (vs == null)
-        throw new FHIRException("Unable to resolve value Set "+binding.getValueSetCanonicalType().getValue());
-    } else {
-      vs = fetchResource(ValueSet.class, binding.getValueSetUriType().asStringValue());
-      if (vs == null)
-        throw new FHIRException("Unable to resolve value Set "+binding.getValueSetUriType().asStringValue());
-    }
-    return expandVS(vs, cacheOk, heirarchical);
-  }
-  
 
   public TranslationServices translator() {
     return translator;
@@ -1216,6 +864,7 @@ public abstract class BaseWorkerContext implements IWorkerContext {
       json.addProperty("conceptmap-count", maps.size());
       json.addProperty("transforms-count", transforms.size());
       json.addProperty("structures-count", structures.size());
+      json.addProperty("guides-count", guides.size());
     }
   }
 
@@ -1237,6 +886,8 @@ public abstract class BaseWorkerContext implements IWorkerContext {
 
       if (fhirType.equals("StructureDefinition"))
         dropMetadataResource(structures, id);
+      else if (fhirType.equals("ImplementationGuide"))
+        dropMetadataResource(guides, id);
       else if (fhirType.equals("ValueSet"))
         dropMetadataResource(valueSets, id);
       else if (fhirType.equals("CodeSystem"))
@@ -1274,10 +925,12 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     synchronized (lock) {
       List<MetadataResource> result = new ArrayList<MetadataResource>();
       result.addAll(structures.values());
+      result.addAll(guides.values());
       result.addAll(codeSystems.values());
       result.addAll(valueSets.values());
       result.addAll(maps.values());
       result.addAll(transforms.values());
+      result.addAll(plans.values());
       return result;
     }
   }
@@ -1340,12 +993,6 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     }
   }
 
-  public void setCache(ValueSetExpansionCache cache) {
-    synchronized (lock) {
-      this.expansionCache = cache;
-    }
-  }
-
   @Override
   public String oid2Uri(String oid) {
     synchronized (lock) {
@@ -1390,6 +1037,29 @@ public abstract class BaseWorkerContext implements IWorkerContext {
     synchronized (lock) {
       return searchParameters.get(code);
     }
+  }
+
+  @Override
+  public String getOverrideVersionNs() {
+    return overrideVersionNs;
+  }
+
+  @Override
+  public void setOverrideVersionNs(String value) {
+    overrideVersionNs = value;
+  }
+
+  @Override
+  public ILoggingService getLogger() {
+    return logger;
+  }
+
+  @Override
+  public StructureDefinition fetchTypeDefinition(String typeName) {
+    if (Utilities.isAbsoluteUrl(typeName))
+      return fetchResource(StructureDefinition.class, typeName);
+    else
+      return fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+typeName);
   }
 
   

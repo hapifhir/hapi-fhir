@@ -80,7 +80,7 @@ public class JsonParser extends ParserBase {
 		  assert (map.containsKey(obj));
 			return parse(obj);	
 		} else {
-			JsonObject obj = (JsonObject) new com.google.gson.JsonParser().parse(source);
+			JsonObject obj = JsonTrackingParser.parse(source, null); // (JsonObject) new com.google.gson.JsonParser().parse(source);
 //			assert (map.containsKey(obj));
 			return parse(obj);	
 		} 
@@ -284,7 +284,7 @@ public class JsonParser extends ParserBase {
 			logError(line(res), col(res), npath, IssueType.INVALID, "Unable to find resourceType property", IssueSeverity.FATAL);
 		} else {
 			String name = rt.getAsString();
-			StructureDefinition sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(name));
+			StructureDefinition sd = context.fetchResource(StructureDefinition.class, ProfileUtilities.sdNs(name, context.getOverrideVersionNs()));
 			if (sd == null)
 				throw new FHIRFormatError("Contained resource does not appear to be a FHIR resource (unknown name '"+name+"')");
 			parent.updateProperty(new Property(context, sd.getSnapshot().getElement().get(0), sd), SpecialElement.fromProperty(parent.getProperty()), elementProperty);
@@ -447,7 +447,11 @@ public class JsonParser extends ParserBase {
 		else if (Utilities.existsInList(type, "integer", "unsignedInt", "positiveInt"))
 			json.value(new Integer(item.getValue()));
 		else if (Utilities.existsInList(type, "decimal"))
-			json.value(new BigDecimal(item.getValue()));
+		  try {
+  			json.value(new BigDecimal(item.getValue()));
+		  } catch (Exception e) {
+		    throw new NumberFormatException("error writing number '"+item.getValue()+"' to JSON");
+		  }
 		else
 			json.value(item.getValue());	
 	}

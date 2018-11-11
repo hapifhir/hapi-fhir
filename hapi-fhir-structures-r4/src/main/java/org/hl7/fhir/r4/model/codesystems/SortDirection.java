@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum SortDirection {
 
         /**
-         * Sort by the value ascending, so that lower values appear first
+         * Sort by the value ascending, so that lower values appear first.
          */
         ASCENDING, 
         /**
-         * Sort by the value descending, so that lower values appear last
+         * Sort by the value descending, so that lower values appear last.
          */
         DESCENDING, 
         /**
@@ -69,8 +69,8 @@ public enum SortDirection {
         }
         public String getDefinition() {
           switch (this) {
-            case ASCENDING: return "Sort by the value ascending, so that lower values appear first";
-            case DESCENDING: return "Sort by the value descending, so that lower values appear last";
+            case ASCENDING: return "Sort by the value ascending, so that lower values appear first.";
+            case DESCENDING: return "Sort by the value descending, so that lower values appear last.";
             default: return "?";
           }
         }

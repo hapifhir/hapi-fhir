@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.utils.formats.JsonTrackingParser;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.TextFile;
@@ -65,7 +66,7 @@ public abstract class JsonParserBase extends ParserBase implements IParser {
 	  return ParserType.JSON;
   }
 
-	private static com.google.gson.JsonParser  parser = new com.google.gson.JsonParser();
+	// private static com.google.gson.JsonParser  parser = new com.google.gson.JsonParser();
   
   // -- in descendent generated code --------------------------------------
   
@@ -122,7 +123,7 @@ public abstract class JsonParserBase extends ParserBase implements IParser {
     if (style == OutputStyle.CANONICAL)
       json = new JsonCreatorCanonical(osw);
     else
-      json = new JsonCreatorGson(osw);
+      json = new JsonCreatorDirect(osw); // use this instead of Gson because this preserves decimal formatting
     json.setIndent(style == OutputStyle.PRETTY ? "  " : "");
     json.beginObject();
     composeResource(resource);
@@ -146,7 +147,7 @@ public abstract class JsonParserBase extends ParserBase implements IParser {
     if (style == OutputStyle.CANONICAL)
       json = new JsonCreatorCanonical(osw);
     else
-      json = new JsonCreatorGson(osw);
+      json = new JsonCreatorDirect(osw);// use this instead of Gson because this preserves decimal formatting
     json.setIndent(style == OutputStyle.PRETTY ? "  " : "");
     json.beginObject();
     composeTypeInner(type);
@@ -163,7 +164,8 @@ public abstract class JsonParserBase extends ParserBase implements IParser {
   private boolean htmlPretty;
   
   private JsonObject loadJson(InputStream input) throws JsonSyntaxException, IOException {
-    return parser.parse(TextFile.streamToString(input)).getAsJsonObject();
+    return JsonTrackingParser.parse(TextFile.streamToString(input), null);
+    // return parser.parse(TextFile.streamToString(input)).getAsJsonObject();
   }
   
 //  private JsonObject loadJson(String input) {
@@ -215,6 +217,12 @@ public abstract class JsonParserBase extends ParserBase implements IParser {
     if (name != null)
       json.name(name);
     json.value(value);
+  }
+
+  protected void propNum(String name, String value) throws IOException {
+    if (name != null)
+      json.name(name);
+    json.valueNum(value);
   }
 
   protected void prop(String name, java.lang.Integer value) throws IOException {

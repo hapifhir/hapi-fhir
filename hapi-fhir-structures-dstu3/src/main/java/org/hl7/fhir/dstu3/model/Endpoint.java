@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The technical details of an endpoint that can be used for electronic services, such as for web services providing XDS.b or a REST endpoint for another FHIR server. This may include any security context information.
  */
-@ResourceDef(name="Endpoint", profile="http://hl7.org/fhir/Profile/Endpoint")
+@ResourceDef(name="Endpoint", profile="http://hl7.org/fhir/StructureDefinition/Endpoint")
 public class Endpoint extends DomainResource {
 
     public enum EndpointStatus {

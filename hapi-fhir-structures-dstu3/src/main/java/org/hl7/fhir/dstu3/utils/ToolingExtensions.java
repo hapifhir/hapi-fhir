@@ -90,7 +90,7 @@ public class ToolingExtensions {
   public static final String EXT_MAPPING_PREFIX = "http://hl7.org/fhir/tools/StructureDefinition/logical-mapping-prefix";
   public static final String EXT_MAPPING_SUFFIX = "http://hl7.org/fhir/tools/StructureDefinition/logical-mapping-suffix";
 
-//  public static final String EXT_FLYOVER = "http://hl7.org/fhir/Profile/questionnaire-extensions#flyover";
+//  public static final String EXT_FLYOVER = "http://hl7.org/fhir/StructureDefinition/questionnaire-extensions#flyover";
   public static final String EXT_QTYPE = "http://hl7.org/fhir/StructureDefinition/questionnnaire-baseType";
 //  private static final String EXT_QREF = "http://www.healthintersections.com.au/fhir/Profile/metadata#reference";
 //  private static final String EXTENSION_FILTER_ONLY = "http://www.healthintersections.com.au/fhir/Profile/metadata#expandNeedsFilter";
@@ -545,6 +545,14 @@ public class ToolingExtensions {
     }
   }
 
+  public static int readIntegerExtension(DomainResource dr, String uri, int defaultValue) {
+    Extension ex = ExtensionHelper.getExtension(dr, uri);
+    if (ex == null)
+      return defaultValue;
+    if (ex.getValue() instanceof IntegerType)
+      return ((IntegerType) ex.getValue()).getValue();
+    throw new Error("Unable to read extension "+uri+" as an integer");
+  }
 
 //  public static boolean hasOID(ValueSet vs) {
 //    return hasExtension(vs, EXT_OID);

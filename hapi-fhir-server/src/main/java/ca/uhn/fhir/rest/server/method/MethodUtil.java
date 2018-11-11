@@ -128,6 +128,8 @@ public class MethodUtil {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(PatchTypeEnum.class)) {
 				param = new PatchTypeParameter();
+			} else if (parameterType.equals(SearchTotalModeEnum.class)) {
+				param = new SearchTotalModeParameter();
 			} else {
 				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];
@@ -191,7 +193,8 @@ public class MethodUtil {
 							b.append(" or String or byte[]");
 							throw new ConfigurationException(b.toString());
 						}
-						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode);
+						boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
+						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode, methodIsOperation);
 					} else if (nextAnnotation instanceof IdParam) {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {

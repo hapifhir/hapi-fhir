@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,17 +37,21 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedicationDispenseCategory {
 
         /**
-         * Includes dispenses for medications to be administered or consumed in an inpatient or acute care setting
+         * Includes dispenses for medications to be administered or consumed in an inpatient or acute care setting.
          */
         INPATIENT, 
         /**
-         * Includes dispenses for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)
+         * Includes dispenses for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office).
          */
         OUTPATIENT, 
         /**
-         * Includes dispenses for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.)
+         * Includes dispenses for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.).
          */
         COMMUNITY, 
+        /**
+         * Includes dispenses for medications created when the patient is being released from a facility.
+         */
+        DISCHARGE, 
         /**
          * added to help the parsers
          */
@@ -61,6 +65,8 @@ public enum MedicationDispenseCategory {
           return OUTPATIENT;
         if ("community".equals(codeString))
           return COMMUNITY;
+        if ("discharge".equals(codeString))
+          return DISCHARGE;
         throw new FHIRException("Unknown MedicationDispenseCategory code '"+codeString+"'");
         }
         public String toCode() {
@@ -68,17 +74,19 @@ public enum MedicationDispenseCategory {
             case INPATIENT: return "inpatient";
             case OUTPATIENT: return "outpatient";
             case COMMUNITY: return "community";
+            case DISCHARGE: return "discharge";
             default: return "?";
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medication-dispense-category";
+          return "http://terminology.hl7.org/CodeSystem/medication-dispense-category";
         }
         public String getDefinition() {
           switch (this) {
-            case INPATIENT: return "Includes dispenses for medications to be administered or consumed in an inpatient or acute care setting";
-            case OUTPATIENT: return "Includes dispenses for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)";
-            case COMMUNITY: return "Includes dispenses for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.)";
+            case INPATIENT: return "Includes dispenses for medications to be administered or consumed in an inpatient or acute care setting.";
+            case OUTPATIENT: return "Includes dispenses for medications to be administered or consumed in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office).";
+            case COMMUNITY: return "Includes dispenses for medications to be administered or consumed by the patient in their home (this would include long term care or nursing homes, hospices, etc.).";
+            case DISCHARGE: return "Includes dispenses for medications created when the patient is being released from a facility.";
             default: return "?";
           }
         }
@@ -87,6 +95,7 @@ public enum MedicationDispenseCategory {
             case INPATIENT: return "Inpatient";
             case OUTPATIENT: return "Outpatient";
             case COMMUNITY: return "Community";
+            case DISCHARGE: return "Discharge";
             default: return "?";
           }
     }

@@ -1,9 +1,18 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Collection;
-
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /*
  * #%L
@@ -25,23 +34,22 @@ import org.springframework.data.domain.Pageable;
  * #L%
  */
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchResult;
-
 public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
-	
-	@Query(value="SELECT r FROM SearchResult r WHERE r.mySearch = :search")
-	Collection<SearchResult> findWithSearchUuid(@Param("search") Search theSearch);
 	
 	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
 	Page<Long> findWithSearchUuid(@Param("search") Search theSearch, Pageable thePage);
 
+	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
+	List<Long> findWithSearchUuid(@Param("search") Search theSearch);
+
+	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
+	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
+
 	@Modifying
-	@Query(value="DELETE FROM SearchResult r WHERE r.mySearchPid = :search")
-	void deleteForSearch(@Param("search") Long theSearchPid);
+	@Query("DELETE FROM SearchResult s WHERE s.myResourcePid IN :ids")
+	void deleteByResourceIds(@Param("ids") List<Long> theContent);
+
+	@Modifying
+	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")
+	void deleteByIds(@Param("ids") List<Long> theContent);
 }

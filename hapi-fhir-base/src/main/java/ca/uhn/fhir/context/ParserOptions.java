@@ -133,7 +133,7 @@ public class ParserOptions {
 		} else if (thePaths instanceof HashSet) {
 			myDontStripVersionsFromReferencesAtPaths = (Set<String>) ((HashSet<String>) thePaths).clone();
 		} else {
-			myDontStripVersionsFromReferencesAtPaths = new HashSet<String>(thePaths);
+			myDontStripVersionsFromReferencesAtPaths = new HashSet<>(thePaths);
 		}
 		return this;
 	}

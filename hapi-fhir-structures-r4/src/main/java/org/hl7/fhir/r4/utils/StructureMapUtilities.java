@@ -78,6 +78,7 @@ import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.r4.utils.FHIRLexer.FHIRLexerException;
 import org.hl7.fhir.r4.utils.FHIRPathEngine.IEvaluationContext;
+import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
@@ -85,6 +86,7 @@ import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
@@ -108,6 +110,7 @@ public class StructureMapUtilities {
     public StructureMap targetMap;
   }
   public static final String MAP_WHERE_CHECK = "map.where.check";
+  public static final String MAP_WHERE_LOG = "map.where.log";
 	public static final String MAP_WHERE_EXPRESSION = "map.where.expression";
 	public static final String MAP_SEARCH_EXPRESSION = "map.search.expression";
 	public static final String MAP_EXPRESSION = "map.transform.expression";
@@ -176,6 +179,20 @@ public class StructureMapUtilities {
       if (services == null)
         return null;
       return services.resolveReference(appContext, url);
+    }
+
+    @Override
+    public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
+      IResourceValidator val = worker.newValidator();
+      List<ValidationMessage> valerrors = new ArrayList<ValidationMessage>();
+      if (item instanceof Resource) {
+        val.validate(appContext, valerrors, (Resource) item, url);
+        boolean ok = true;
+        for (ValidationMessage v : valerrors)
+          ok = ok && v.getLevel().isError();
+        return ok;
+      }
+      throw new NotImplementedException("Not done yet (FFHIRPathHostServices.conformsToProfile), when item is element");
     }
 	  
 	}
@@ -513,6 +530,10 @@ public class StructureMapUtilities {
 			b.append(" check ");
 			b.append(rs.getCheck());
 		}
+    if (rs.hasLogMessage()) {
+      b.append(" log ");
+      b.append(rs.getLogMessage());
+    }
 	}
 
   public static String targetToString(StructureMapGroupRuleTargetComponent rt) {
@@ -948,6 +969,12 @@ public class StructureMapUtilities {
 			source.setUserData(MAP_WHERE_CHECK, node);
 			source.setCheck(node.toString());
 		}
+    if (lexer.hasToken("log")) {
+      lexer.take();
+      ExpressionNode node = fpe.parse(lexer);
+      source.setUserData(MAP_WHERE_CHECK, node);
+      source.setLogMessage(node.toString());
+    }
 	}
 
 	private void parseTarget(StructureMapGroupRuleComponent rule, FHIRLexer lexer) throws FHIRException {
@@ -1556,6 +1583,20 @@ public class StructureMapUtilities {
       }
     } 
 
+    if (src.hasLogMessage()) {
+      ExpressionNode expr = (ExpressionNode) src.getUserData(MAP_WHERE_LOG);
+      if (expr == null) {
+        expr = fpe.parse(src.getLogMessage());
+        //        fpe.check(context.appInfo, ??, ??, expr)
+        src.setUserData(MAP_WHERE_LOG, expr);
+      }
+      CommaSeparatedStringBuilder b = new CommaSeparatedStringBuilder();
+      for (Base item : items) 
+        b.appendIfNotNull(fpe.evaluateToString(vars, null, item, expr));
+      if (b.length() > 0)
+        services.log(b.toString());
+    } 
+
 		
 		if (src.hasListMode() && !items.isEmpty()) {
 		  switch (src.getListMode()) {
@@ -1635,8 +1676,16 @@ public class StructureMapUtilities {
 	          tn = determineTypeFromSourceType(map, group, vars.get(VariableMode.INPUT, srcVar), types);
 	        } else
 	          throw new Error("Cannot determine type implicitly because there is no single input variable");
-	      } else
+	      } else {
 	        tn = getParamStringNoNull(vars, tgt.getParameter().get(0), tgt.toString());
+	        // ok, now we resolve the type name against the import statements 
+	        for (StructureMapStructureComponent uses : map.getStructure()) {
+	          if (uses.getMode() == StructureMapModelMode.TARGET && uses.hasAlias() && tn.equals(uses.getAlias())) {
+	            tn = uses.getUrl();
+	            break;
+	          }
+	        }
+	      }
 	      Base res = services != null ? services.createType(context.getAppInfo(), tn) : ResourceFactory.createResourceOrType(tn);
 	      if (res.isResource() && !res.fhirType().equals("Parameters")) {
 //	        res.setIdBase(tgt.getParameter().size() > 1 ? getParamString(vars, tgt.getParameter().get(0)) : UUID.randomUUID().toString().toLowerCase());
@@ -2494,7 +2543,7 @@ public class StructureMapUtilities {
     if (t.equals(code))
       return true;
     if (t.equals("string")) {
-      StructureDefinition sd = worker.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/"+code);
+      StructureDefinition sd = worker.fetchTypeDefinition(code);
       if (sd != null && sd.getBaseDefinition().equals("http://hl7.org/fhir/StructureDefinition/string"))
         return true;
     }
@@ -2594,7 +2643,7 @@ public class StructureMapUtilities {
   private TypeDetails getParam(VariablesForProfiling vars, StructureMapGroupRuleTargetParameterComponent parameter) throws DefinitionException {
     Type p = parameter.getValue();
     if (!(p instanceof IdType))
-      return new TypeDetails(CollectionStatus.SINGLETON, ProfileUtilities.sdNs(p.fhirType()));
+      return new TypeDetails(CollectionStatus.SINGLETON, ProfileUtilities.sdNs(p.fhirType(), worker.getOverrideVersionNs()));
     else { 
       String n = ((IdType) p).asStringValue();
       VariableForProfiling b = vars.get(VariableMode.INPUT, n);

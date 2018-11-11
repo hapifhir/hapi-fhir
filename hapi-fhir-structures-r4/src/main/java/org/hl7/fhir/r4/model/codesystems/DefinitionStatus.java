@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum DefinitionStatus {
 
         /**
-         * The definition is in the design stage and is not yet considered to be "ready for use"
+         * The definition is in the design stage and is not yet considered to be "ready for use".
          */
         DRAFT, 
         /**
-         * The definition is considered ready for use
+         * The definition is considered ready for use.
          */
         ACTIVE, 
         /**
-         * The definition should no longer be used
+         * The definition should no longer be used.
          */
         WITHDRAWN, 
         /**
@@ -79,13 +79,13 @@ public enum DefinitionStatus {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/definition-status";
+          return "http://terminology.hl7.org/CodeSystem/definition-status";
         }
         public String getDefinition() {
           switch (this) {
-            case DRAFT: return "The definition is in the design stage and is not yet considered to be \"ready for use\"";
-            case ACTIVE: return "The definition is considered ready for use";
-            case WITHDRAWN: return "The definition should no longer be used";
+            case DRAFT: return "The definition is in the design stage and is not yet considered to be \"ready for use\".";
+            case ACTIVE: return "The definition is considered ready for use.";
+            case WITHDRAWN: return "The definition should no longer be used.";
             case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it's just not known which one.";
             default: return "?";
           }

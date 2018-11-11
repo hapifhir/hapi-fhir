@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Sun, May 6, 2018 17:51-0400 for FHIR v3.4.0
+// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
 
 import java.util.*;
 
@@ -46,28 +46,28 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A summary of information based on the results of executing a TestScript.
  */
-@ResourceDef(name="TestReport", profile="http://hl7.org/fhir/Profile/TestReport")
+@ResourceDef(name="TestReport", profile="http://hl7.org/fhir/StructureDefinition/TestReport")
 public class TestReport extends DomainResource {
 
     public enum TestReportStatus {
         /**
-         * All test operations have completed
+         * All test operations have completed.
          */
         COMPLETED, 
         /**
-         * A test operations is currently executing
+         * A test operations is currently executing.
          */
         INPROGRESS, 
         /**
-         * A test operation is waiting for an external client request
+         * A test operation is waiting for an external client request.
          */
         WAITING, 
         /**
-         * The test script execution was manually stopped
+         * The test script execution was manually stopped.
          */
         STOPPED, 
         /**
-         * This test report was entered or created in error
+         * This test report was entered or created in error.
          */
         ENTEREDINERROR, 
         /**
@@ -114,11 +114,11 @@ public class TestReport extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case COMPLETED: return "All test operations have completed";
-            case INPROGRESS: return "A test operations is currently executing";
-            case WAITING: return "A test operation is waiting for an external client request";
-            case STOPPED: return "The test script execution was manually stopped";
-            case ENTEREDINERROR: return "This test report was entered or created in error";
+            case COMPLETED: return "All test operations have completed.";
+            case INPROGRESS: return "A test operations is currently executing.";
+            case WAITING: return "A test operation is waiting for an external client request.";
+            case STOPPED: return "The test script execution was manually stopped.";
+            case ENTEREDINERROR: return "This test report was entered or created in error.";
             default: return "?";
           }
         }
@@ -191,15 +191,15 @@ public class TestReport extends DomainResource {
 
     public enum TestReportResult {
         /**
-         * All test operations successfully passed all asserts
+         * All test operations successfully passed all asserts.
          */
         PASS, 
         /**
-         * One or more test operations failed one or more asserts
+         * One or more test operations failed one or more asserts.
          */
         FAIL, 
         /**
-         * One or more test operations is pending execution completion
+         * One or more test operations is pending execution completion.
          */
         PENDING, 
         /**
@@ -238,9 +238,9 @@ public class TestReport extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case PASS: return "All test operations successfully passed all asserts";
-            case FAIL: return "One or more test operations failed one or more asserts";
-            case PENDING: return "One or more test operations is pending execution completion";
+            case PASS: return "All test operations successfully passed all asserts.";
+            case FAIL: return "One or more test operations failed one or more asserts.";
+            case PENDING: return "One or more test operations is pending execution completion.";
             default: return "?";
           }
         }
@@ -303,11 +303,11 @@ public class TestReport extends DomainResource {
          */
         TESTENGINE, 
         /**
-         * A FHIR Client
+         * A FHIR Client.
          */
         CLIENT, 
         /**
-         * A FHIR Server
+         * A FHIR Server.
          */
         SERVER, 
         /**
@@ -347,8 +347,8 @@ public class TestReport extends DomainResource {
         public String getDefinition() {
           switch (this) {
             case TESTENGINE: return "The test execution engine.";
-            case CLIENT: return "A FHIR Client";
-            case SERVER: return "A FHIR Server";
+            case CLIENT: return "A FHIR Client.";
+            case SERVER: return "A FHIR Server.";
             default: return "?";
           }
         }

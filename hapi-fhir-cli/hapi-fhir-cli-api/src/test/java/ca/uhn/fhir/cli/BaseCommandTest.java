@@ -17,7 +17,7 @@ public class BaseCommandTest {
 
 		InputStream stdin = System.in;
 		try {
-			System.setIn(new ByteArrayInputStream("A VALUE".getBytes()));
+			System.setIn(new ByteArrayInputStream("A VALUE\n".getBytes()));
 
 			String value = new MyBaseCommand().read();
 			assertEquals("A VALUE", value);
