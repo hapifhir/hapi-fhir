@@ -54,9 +54,13 @@
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  	Slice&lt;Long&gt; findForSearch(Pageable thePage, @Param(<span class="jxr_string">"search"</span>) Long theSearchPid);
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  	@Modifying
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	@Query(<span class="jxr_string">"DELETE FROM SearchResult s WHERE s.myId IN :ids"</span>)
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">void</strong> deleteByIds(@Param(<span class="jxr_string">"ids"</span>) List&lt;Long&gt; theContent);
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  }
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	@Query(<span class="jxr_string">"DELETE FROM SearchResult s WHERE s.myResourcePid IN :ids"</span>)
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">void</strong> deleteByResourceIds(@Param(<span class="jxr_string">"ids"</span>) List&lt;Long&gt; theContent);
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	@Modifying
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	@Query(<span class="jxr_string">"DELETE FROM SearchResult s WHERE s.myId IN :ids"</span>)
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<strong class="jxr_keyword">void</strong> deleteByIds(@Param(<span class="jxr_string">"ids"</span>) List&lt;Long&gt; theContent);
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
