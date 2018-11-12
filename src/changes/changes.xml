@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.6.0" date="TBD">
+		<release version="3.6.0" date="2018-11-12">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
@@ -29,14 +29,15 @@
 				has been streamlined to generate more predictable IDs in some cases.
 			</action>
 			<action type="fix">
-				An issue in the HAPI FHIR CLI database mogrator command has been resolved, where
+				An issue in the HAPI FHIR CLI database migrator command has been resolved, where
 				some database drivers did not automatically register and had to be manually added to
 				the classpath.
 			</action>
 			<action type="add">
 				The module which deletes stale searches has been modified so that it deletes very large
 				searches (searches with 10000+ results in the query cache) in smaller batches, in order
-				to avoid having very long running delete operations running.
+				to avoid having very long running delete operations occupying database connections for a 
+				long time or timing out.
 			</action>
 			<action type="fix">
 				When invoking an operation using the fluent client on an instance, the operation would
@@ -101,11 +102,6 @@
 				AuthorizationInterceptor did not allow FHIR batch operations when the transaction()
 				permission is granted. This has been corrected so that transaction() allows both
 				batch and transaction requests to proceed.
-			</action>
-			<action type="fix">
-				The AuthorizationInterceptor was previously not able to authorize the FHIR
-				batch operation. As of this version, when authorizing a transaction operation
-				(via the transaction() rule), both batch and transaction will be allowed.
 			</action>
 			<action type="add">
 				The JPA server now automatically supplies several appropriate hibernate performance
