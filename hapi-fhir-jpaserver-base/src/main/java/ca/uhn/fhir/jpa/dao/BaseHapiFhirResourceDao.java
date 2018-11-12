@@ -642,7 +642,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange()) {
-			if (isNotBlank(theExpression)) {
+			if (isNotBlank(theExpression) && theExpression.contains(".")) {
 				final String resourceType = theExpression.substring(0, theExpression.indexOf('.'));
 				ourLog.debug("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
 
