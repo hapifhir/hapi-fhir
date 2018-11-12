@@ -48,9 +48,11 @@
 				A new operation has been added to the JPA server called
 				<![CDATA[<code>$trigger-subscription</code>]]>. This can
 				be used to cause a transaction to redeliver a resource that previously triggered.
-				See <a href="https://smilecdr.com/docs/current/fhir_repository/subscription.html#manually-triggering-subscriptions">this link</a> for a description of how this feature works. Note that you must add the 
+				See 
+				<![CDATA[<a href="https://smilecdr.com/docs/current/fhir_repository/subscription.html#manually-triggering-subscriptions">this link</a>]]>
+				for a description of how this feature works. Note that you must add the 
 				SubscriptionRetriggeringProvider as shown in the sample project
-				<a href="https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/java/ca/uhn/fhir/jpa/demo/JpaServerDemo.java">here</a>.
+				<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/java/ca/uhn/fhir/jpa/demo/JpaServerDemo.java">here</a>.]]>
 			</action>
 			<action type="add">
 				When operating in R4 mode, the HAPI FHIR server will now populate Bundle.entry.response
