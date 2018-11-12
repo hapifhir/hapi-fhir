@@ -186,15 +186,15 @@
 </div> 
 <div class="section"> 
  <h2 id="Announcements">Announcements</h2> 
- <p> <b>Nov 12, 2018 - HAPI FHIR 3.6.0 Released</b> - The next release of HAPI has now been uploaded to the Maven repos and GitHub's releases section. </p> 
- <p> This release brings us back to our regular 3 month release cycle (although we're only two months after the last release, which was delayed more than we wer ehoping). </p> 
+ <p> <b>Nov 12, 2018 - HAPI FHIR 3.6.0 (Food) Released</b> - The next release of HAPI has now been uploaded to the Maven repos and GitHub's releases section. </p> 
+ <p> This release brings us back to our regular 3 month release cycle (although we're only two months after the last release, which was delayed more than we were hoping). This also marks the beginning of codenamed major releases. Our first codename is Food, and we will be following the popular (and admittedly unoriginal) strategy of using the next letter in the alphabet for each release. </p> 
  <p> As always, see the <a class="externalLink" href="http://hapifhir.io/changes-report.html">changelog</a> for a full list of changes. Notable changes include: </p> 
  <ul> 
   <li> The FHIR R4 structures have been upgraded to the latest (3.6.0) version of the structures. This marks an exciting (but pointless) milestone that HAPI FHIR and FHIR itself have the same version number! </li> 
   <li> The JPA Server migrator tool has been enhanced so that it is now possible to run a rolling migration from 3.4.0 to 3.6.0 instead of needing to incur a long downtime while the indexes are rebuilt. See <a class="externalLink" href="http://hapifhir.io/doc_jpa.html#Migrating_340_to_350">this link</a> for details. In addition, the migrator can now migrate HAPI FHIR 3.3.0 as well. This tool now also operates in a multithreaded way, meaning that it can run migrations much faster in systems with a lot of data. </li> 
   <li> A new custom FHIR operation has been added, allowing subscriptions to be manually triggered/retriggered. This means that it is possible to cause a subscription to process a resource in the database as though that resource had been updated, without actually updating it. </li> 
   <li> The JPA SearchCoordinator now pre-fetches only the first few pages of a search by default instead of pre-fetching all possible results. This makes searches dramatically more efficient in servers where users commonly perform searches that could potentially return many pages but only actually load the first few. </li> 
-  <li> </li> 
+  <li> A new JPA sample project has been added. This sample has existed for a while, but this is now the offical &quot;reference&quot; project for anyone looking to get started with HAPI FHIR JPA. </li> 
  </ul> 
  <p> Thanks to everyone who contributed to this release! </p> 
  <p> - <a class="externalLink" href="https://github.com/jamesagnew/">James Agnew</a> </p> 
