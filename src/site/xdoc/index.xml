@@ -68,13 +68,16 @@
 
 		<section name="Announcements">
 			<p>
-				<b>Nov 12, 2018 - HAPI FHIR 3.6.0 Released</b> -
+				<b>Nov 12, 2018 - HAPI FHIR 3.6.0 (Food) Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
 				GitHub's releases section.
 			</p>
 			<p>
 				This release brings us back to our regular 3 month release cycle (although we're
-				only two months after the last release, which was delayed more than we wer ehoping).
+				only two months after the last release, which was delayed more than we were hoping).
+				This also marks the beginning of codenamed major releases. Our first codename
+				is Food, and we will be following the popular (and admittedly unoriginal) strategy
+				of using the next letter in the alphabet for each release.
 			</p>
 			<p>
 				As always, see the
@@ -108,6 +111,9 @@
 					that could potentially return many pages but only actually load the first few.
 				</li>
 				<li>
+					A new JPA sample project has been added. This sample has existed for a while, but
+					this is now the offical "reference" project for anyone looking to get started with
+					HAPI FHIR JPA.
 				</li>
 			</ul>
 			<p>
