@@ -6,13 +6,15 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.6.0" date="TBD">
+		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>
 						<li>Karaf (OSGi): 4.1.4 -&gt; 4.1.6</li>
+						<li>Commons-Compress (JPA): 1.14 -&gt; 1.18</li>
+						<li>Jackson (JPA): 2.9.2 -&gt; 2.9.7</li>
 					</ul>
 				]]>
 			</action>
@@ -27,14 +29,15 @@
 				has been streamlined to generate more predictable IDs in some cases.
 			</action>
 			<action type="fix">
-				An issue in the HAPI FHIR CLI database mogrator command has been resolved, where
+				An issue in the HAPI FHIR CLI database migrator command has been resolved, where
 				some database drivers did not automatically register and had to be manually added to
 				the classpath.
 			</action>
 			<action type="add">
 				The module which deletes stale searches has been modified so that it deletes very large
 				searches (searches with 10000+ results in the query cache) in smaller batches, in order
-				to avoid having very long running delete operations running.
+				to avoid having very long running delete operations occupying database connections for a 
+				long time or timing out.
 			</action>
 			<action type="fix">
 				When invoking an operation using the fluent client on an instance, the operation would
@@ -45,6 +48,11 @@
 				A new operation has been added to the JPA server called
 				<![CDATA[<code>$trigger-subscription</code>]]>. This can
 				be used to cause a transaction to redeliver a resource that previously triggered.
+				See 
+				<![CDATA[<a href="https://smilecdr.com/docs/current/fhir_repository/subscription.html#manually-triggering-subscriptions">this link</a>]]>
+				for a description of how this feature works. Note that you must add the 
+				SubscriptionRetriggeringProvider as shown in the sample project
+				<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/java/ca/uhn/fhir/jpa/demo/JpaServerDemo.java">here</a>.]]>
 			</action>
 			<action type="add">
 				When operating in R4 mode, the HAPI FHIR server will now populate Bundle.entry.response
@@ -99,11 +107,6 @@
 				AuthorizationInterceptor did not allow FHIR batch operations when the transaction()
 				permission is granted. This has been corrected so that transaction() allows both
 				batch and transaction requests to proceed.
-			</action>
-			<action type="fix">
-				The AuthorizationInterceptor was previously not able to authorize the FHIR
-				batch operation. As of this version, when authorizing a transaction operation
-				(via the transaction() rule), both batch and transaction will be allowed.
 			</action>
 			<action type="add">
 				The JPA server now automatically supplies several appropriate hibernate performance
@@ -180,6 +183,10 @@
 			<action type="add">
 				JPA server R4 SearchParameter custom expression validation is now done using the
 				actual FHIRPath evaluator, meaning it is more rigorous in what it can find.
+			</action>
+			<action type="fix" issue="1047">
+				A NullPointerException in DateRangeParam when a client URL conrtained a malformed
+				date was corrected. Thanks Heinz-Dieter Conradi for the Pull Request!
 			</action>
 		</release>
 
