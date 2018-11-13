@@ -63,21 +63,6 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 				return;
 			}
 
-			// Load the resource
-			IIdType payloadId = msg.getPayloadId(getContext());
-			Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
-			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(type);
-			IBaseResource loadedPayload;
-			try {
-				loadedPayload = dao.read(payloadId);
-			} catch (ResourceNotFoundException e) {
-				// This can happen if a last minute failure happens when saving a resource,
-				// eg a constraint causes the transaction to roll back on commit
-				ourLog.warn("Unable to find resource {} - Aborting delivery", payloadId.getValue());
-				return;
-			}
-			msg.setPayload(getContext(), loadedPayload);
-
 			handleMessage(msg);
 		} catch (Exception e) {
 			String msg = "Failure handling subscription payload for subscription: " + subscriptionId;
