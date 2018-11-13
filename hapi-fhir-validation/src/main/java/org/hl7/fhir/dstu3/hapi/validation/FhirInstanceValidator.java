@@ -31,6 +31,8 @@ import org.hl7.fhir.r4.utils.INarrativeGenerator;
 import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.r4.utils.IResourceValidator.IdStatus;
+import org.hl7.fhir.r4.validation.DefaultEnableWhenEvaluator;
+import org.hl7.fhir.r4.validation.IEnableWhenEvaluator;
 import org.hl7.fhir.r4.validation.InstanceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -47,6 +49,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @SuppressWarnings({"PackageAccessibility", "Duplicates"})
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
@@ -60,6 +63,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
+	private Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier = ctx -> new DefaultEnableWhenEvaluator();
 
 	/**
 	 * Constructor
@@ -202,6 +206,15 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	public boolean isNoTerminologyChecks() {
 		return noTerminologyChecks;
 	}
+	
+	/**
+	 * Sets a customized {@link IEnableWhenEvaluator} which is injected to created InstanceValidators 
+	 * @param myEnableWhenEvaluator
+	 */
+	public void setEnableWhenEvaluatorSupplier(
+			Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier) {
+		this.enableWhenEvaluatorSupplier = enableWhenEvaluatorSupplier;
+	}
 
 	/**
 	 * If set to {@literal true} (default is false) the valueSet will not be validate
@@ -235,6 +248,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
+		v.setMyEnableWhenEvaluator(enableWhenEvaluatorSupplier.apply(wrappedWorkerContext));
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
