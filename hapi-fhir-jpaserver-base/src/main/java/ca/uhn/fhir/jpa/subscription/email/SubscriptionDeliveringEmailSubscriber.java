@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.email;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
