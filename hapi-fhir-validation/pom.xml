@@ -27,7 +27,7 @@
 			<version>3.6.0</version>
 		</dependency>
 		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
+			<groupId>fi.kela.kanta.phr</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
 			<version>3.6.1-PHRFIX-SNAPSHOT</version>
 		</dependency>
