@@ -50,8 +50,6 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
-	@Autowired
-	private IForcedIdDao myForcedIdDao;
 	private ReentrantLock myReindexLock = new ReentrantLock(false);
 	@Autowired
 	private ITermConceptDao myTermConceptDao;

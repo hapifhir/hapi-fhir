@@ -52,8 +52,8 @@ public class DaoRegistry implements ApplicationContextAware {
 		myAppCtx = theApplicationContext;
 	}
 
-	public IFhirSystemDao<?, ?> getSystemDao() {
-		IFhirSystemDao<?, ?> retVal = mySystemDao;
+	public IFhirSystemDao getSystemDao() {
+		IFhirSystemDao retVal = mySystemDao;
 		if (retVal == null) {
 			retVal = myAppCtx.getBean(IFhirSystemDao.class);
 			mySystemDao = retVal;
@@ -61,9 +61,9 @@ public class DaoRegistry implements ApplicationContextAware {
 		return retVal;
 	}
 
-	public IFhirResourceDao<?> getResourceDao(String theResourceName) {
+	public IFhirResourceDao getResourceDao(String theResourceName) {
 		init();
-		IFhirResourceDao<?> retVal = myResourceNameToResourceDao.get(theResourceName);
+		IFhirResourceDao retVal = myResourceNameToResourceDao.get(theResourceName);
 		if (retVal == null) {
 			List<String> supportedResourceTypes = myResourceNameToResourceDao
 				.keySet()
@@ -106,8 +106,8 @@ public class DaoRegistry implements ApplicationContextAware {
 		}
 	}
 
-	public IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
-		IFhirResourceDao<? extends IBaseResource> retVal = getResourceDao(theClass);
+	public IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
+		IFhirResourceDao retVal = getResourceDao(theClass);
 		if (retVal == null) {
 			List<String> supportedResourceNames = myResourceNameToResourceDao
 				.keySet()
