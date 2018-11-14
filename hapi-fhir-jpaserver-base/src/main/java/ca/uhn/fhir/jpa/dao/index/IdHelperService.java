@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.service;
+package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;

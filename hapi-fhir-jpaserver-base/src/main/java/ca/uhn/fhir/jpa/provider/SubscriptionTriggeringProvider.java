@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
-import ca.uhn.fhir.jpa.service.MatchUrlService;
+import ca.uhn.fhir.jpa.dao.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.util.JpaConstants;

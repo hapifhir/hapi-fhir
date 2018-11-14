@@ -3,12 +3,12 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.dao.index.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.jpa.service.IdHelperService;
-import ca.uhn.fhir.jpa.service.MatchUrlService;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
@@ -183,6 +183,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private SearchParamProvider mySearchParamProvider;
+	@Autowired
+	private SearchParamExtractorService mySearchParamExtractorService;
 
 	private ApplicationContext myApplicationContext;
 
@@ -1320,14 +1322,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			theEntity.setPublished(theUpdateTime);
 		}
 
-		ResourceIndexedSearchParams existingParams = beanFactory.getBean(ResourceIndexedSearchParams.class, theEntity);
+		ResourceIndexedSearchParams existingParams = new ResourceIndexedSearchParams(theEntity);
 
 		ResourceIndexedSearchParams newParams = null;
 
 		EncodedResource changed;
 		if (theDeletedTimestampOrNull != null) {
 			
-			newParams = beanFactory.getBean(ResourceIndexedSearchParams.class);
+			newParams = new ResourceIndexedSearchParams();
 
 			theEntity.setDeleted(theDeletedTimestampOrNull);
 			theEntity.setUpdated(theDeletedTimestampOrNull);
@@ -1343,8 +1345,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 			if (thePerformIndexing) {
 
-				newParams = beanFactory.getBean(ResourceIndexedSearchParams.class);
-				newParams.populateFromResource(this, theUpdateTime, theEntity, theResource, existingParams);
+				newParams = new ResourceIndexedSearchParams();
+				mySearchParamExtractorService.populateFromResource(newParams, this, theUpdateTime, theEntity, theResource, existingParams);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 
@@ -1448,7 +1450,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 * Indexing
 		 */
 		if (thePerformIndexing) {
-			newParams.removeCommon(theEntity, existingParams);
+			mySearchParamExtractorService.removeCommon(newParams, theEntity, existingParams);
 		} // if thePerformIndexing
 
 		if (theResource != null) {
