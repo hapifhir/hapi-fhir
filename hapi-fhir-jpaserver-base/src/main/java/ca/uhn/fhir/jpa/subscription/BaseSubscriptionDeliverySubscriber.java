@@ -28,8 +28,6 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
 
-@Component
-@Scope("prototype")
 public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptionSubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriber.class);
 

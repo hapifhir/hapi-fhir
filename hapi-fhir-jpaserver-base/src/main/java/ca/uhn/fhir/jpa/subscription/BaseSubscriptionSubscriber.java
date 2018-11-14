@@ -31,8 +31,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-@Component
-@Scope("prototype")
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
 	@Autowired
