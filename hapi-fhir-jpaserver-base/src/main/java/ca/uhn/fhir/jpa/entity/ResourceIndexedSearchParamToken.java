@@ -265,11 +265,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 				retval = true;
 			}
 		} else if (token.getValue() == null || token.getValue().isEmpty()) {
-			if (getSystem().equalsIgnoreCase(token.getSystem())) {
+			if (token.getSystem().equalsIgnoreCase(getSystem())) {
 				retval = true;
 			}
 		} else {
-			if (getSystem().equalsIgnoreCase(token.getSystem()) &&
+			if (token.getSystem().equalsIgnoreCase(getSystem()) &&
 				getValue().equalsIgnoreCase(token.getValue())) {
 				retval = true;
 			}

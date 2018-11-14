@@ -1,23 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.matcher;
 
-import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.codesystems.EncounterType;
-import org.hl7.fhir.r4.model.codesystems.EpisodeofcareType;
 import org.hl7.fhir.r4.model.codesystems.MedicationRequestCategory;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import javax.persistence.StoredProcedureParameter;
-import javax.persistence.Temporal;
-import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -276,28 +265,68 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseResourceProviderDstu3
 		}
 	}
 
-	// ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: Failed to parse match URL[Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU]
-	// - Resource type Provenance does not have a parameter with name: activity
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void testProvenance() {
 		String criteria = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
 
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Provenance");
+		sp.setCode("activity");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Provenance.activity");
+		sp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp);
+		mySearchParamRegsitry.forceRefresh();
+
 		{
 			Provenance prov = new Provenance();
-//			prov.setActivity(new Coding().setCode("http://hl7.org/fhir/v3/DocumentCompletion%7CAU"));
+			prov.setActivity(new Coding().setSystem("http://hl7.org/fhir/v3/DocumentCompletion").setCode("AU"));
+			assertMatched(prov, criteria);
+		}
+		{
+			Provenance prov = new Provenance();
+			assertNotMatched(prov, criteria);
+		}
+		{
+			Provenance prov = new Provenance();
+			prov.setActivity(new Coding().setCode("XXX"));
 			assertNotMatched(prov, criteria);
 		}
 
 	}
 
-	// ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: Failed to parse match URL[BodySite?accessType=Catheter,PD%20Catheter]
-	// - Resource type BodySite does not have a parameter with name: accessType
-	@Test(expected = InvalidRequestException.class)
+	@Test
 	public void testBodySite() {
 		String criteria = "BodySite?accessType=Catheter,PD%20Catheter";
 
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("BodySite");
+		sp.setCode("accessType");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("BodySite.extension('BodySite#accessType')");
+		sp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp);
+		mySearchParamRegsitry.forceRefresh();
+
 		{
 			BodySite bodySite = new BodySite();
+			bodySite.addExtension().setUrl("BodySite#accessType").setValue(new Coding().setCode("Catheter"));
+			assertMatched(bodySite, criteria);
+		}
+		{
+			BodySite bodySite = new BodySite();
+			bodySite.addExtension().setUrl("BodySite#accessType").setValue(new Coding().setCode("PD Catheter"));
+			assertMatched(bodySite, criteria);
+		}
+		{
+			BodySite bodySite = new BodySite();
+			assertNotMatched(bodySite, criteria);
+		}
+		{
+			BodySite bodySite = new BodySite();
+			bodySite.addExtension().setUrl("BodySite#accessType").setValue(new Coding().setCode("XXX"));
 			assertNotMatched(bodySite, criteria);
 		}
 
@@ -358,17 +387,78 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseResourceProviderDstu3
 		}
 	}
 
-	// ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: Failed to parse match URL[ProcedureRequest?intent=instance-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&occurrence==2018-10-19]
-	// - Resource type ProcedureRequest does not have a parameter with name: category
-	@Test(expected = InvalidRequestException.class)
-	public void testProcedureRequestInvalid() {
+	@Test
+	public void testProcedureRequestCategory() {
 		String criteria = "ProcedureRequest?intent=instance-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&occurrence==2018-10-19";
+
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("ProcedureRequest");
+		sp.setCode("category");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("ProcedureRequest.category");
+		sp.setXpathUsage(org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp);
+		mySearchParamRegsitry.forceRefresh();
 
 		{
 			ProcedureRequest pr = new ProcedureRequest();
+			pr.setIntent(ProcedureRequest.ProcedureRequestIntent.INSTANCEORDER);
+			CodeableConcept code = new CodeableConcept();
+			code.addCoding().setCode("Laboratory");
+			pr.getCategory().add(code);
+			pr.setOccurrence(new DateTimeType("2018-10-19"));
+			assertMatched(pr, criteria);
+		}
+		{
+			ProcedureRequest pr = new ProcedureRequest();
+			pr.setIntent(ProcedureRequest.ProcedureRequestIntent.INSTANCEORDER);
+			CodeableConcept code = new CodeableConcept();
+			code.addCoding().setCode("Ancillary Orders");
+			pr.getCategory().add(code);
+			pr.setOccurrence(new DateTimeType("2018-10-19"));
+			assertMatched(pr, criteria);
+		}
+		{
+			ProcedureRequest pr = new ProcedureRequest();
+			pr.setIntent(ProcedureRequest.ProcedureRequestIntent.INSTANCEORDER);
+			CodeableConcept code = new CodeableConcept();
+			code.addCoding().setCode("Hemodialysis");
+			pr.getCategory().add(code);
+			pr.setOccurrence(new DateTimeType("2018-10-19"));
+			assertMatched(pr, criteria);
+		}
+		{
+			ProcedureRequest pr = new ProcedureRequest();
+			pr.setIntent(ProcedureRequest.ProcedureRequestIntent.INSTANCEORDER);
+			pr.setOccurrence(new DateTimeType("2018-10-19"));
 			assertNotMatched(pr, criteria);
 		}
-
+		{
+			ProcedureRequest pr = new ProcedureRequest();
+			CodeableConcept code = new CodeableConcept();
+			code.addCoding().setCode("Hemodialysis");
+			pr.getCategory().add(code);
+			pr.setOccurrence(new DateTimeType("2018-10-19"));
+			assertNotMatched(pr, criteria);
+		}
+		{
+			ProcedureRequest pr = new ProcedureRequest();
+			pr.setIntent(ProcedureRequest.ProcedureRequestIntent.INSTANCEORDER);
+			CodeableConcept code = new CodeableConcept();
+			code.addCoding().setCode("Hemodialysis");
+			pr.getCategory().add(code);
+			assertNotMatched(pr, criteria);
+		}
+		{
+			ProcedureRequest pr = new ProcedureRequest();
+			pr.setIntent(ProcedureRequest.ProcedureRequestIntent.INSTANCEORDER);
+			CodeableConcept code = new CodeableConcept();
+			code.addCoding().setCode("XXX");
+			pr.getCategory().add(code);
+			pr.setOccurrence(new DateTimeType("2018-10-19"));
+			assertNotMatched(pr, criteria);
+		}
 	}
 
 	@Test
