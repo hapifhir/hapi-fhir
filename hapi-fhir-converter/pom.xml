@@ -9,6 +9,7 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
+	<groupId>fi.kela.kanta.phr</groupId>
 	<artifactId>hapi-fhir-converter</artifactId>
 	<packaging>bundle</packaging>
 	<version>3.6.1-PHRFIX-SNAPSHOT</version>
