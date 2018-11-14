@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
@@ -616,8 +617,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		try {
 			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myCtx, criteria);
 			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
-			// FIXME KHS check this with Exception
-		} catch (Throwable e) {
+		} catch (InvalidRequestException e) {
 			throw new UnprocessableEntityException("Invalid subscription criteria submitted: "+criteria+" "+e.getMessage());
 		}
 	}
