@@ -567,6 +567,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return retVal;
 	}
 
+	// FIXME KHS remove
 	public DaoConfig getConfig() {
 		return myConfig;
 	}
@@ -606,6 +607,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return myDaoRegistry.getDaoOrThrowException(theClass);
 	}
 
+	// FIXME KHS remove this
 	public IResourceIndexedCompositeStringUniqueDao getResourceIndexedCompositeStringUniqueDao() {
 		return myResourceIndexedCompositeStringUniqueDao;
 	}
@@ -1092,6 +1094,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		// nothing
 	}
 
+	// FIXME KHS remove
 	@Override
 	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
 		return myMatchUrlService.processMatchUrl(theMatchUrl, theResourceType);

@@ -19,24 +19,18 @@ public class IdHelperService {
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired(required = true)
-	private DaoConfig myConfig;
+	private DaoConfig myDaoConfig;
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.delete(forcedId);
 	}
 
 	public Long translateForcedIdToPid(String theResourceName, String theResourceId) {
-		return translateForcedIdToPids(myConfig, new IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
+		return translateForcedIdToPids(myDaoConfig, new IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
 	}
 
 	public List<Long> translateForcedIdToPids(IIdType theId) {
-		return IdHelperService.translateForcedIdToPids(myConfig, theId, myForcedIdDao);
-	}
-
-	// TODO KHS why static?
-	public static Long translateForcedIdToPid(DaoConfig theDaoConfig, String theResourceName, String theResourceId, IForcedIdDao
-		theForcedIdDao) {
-		return IdHelperService.translateForcedIdToPids(theDaoConfig, new IdDt(theResourceName, theResourceId), theForcedIdDao).get(0);
+		return IdHelperService.translateForcedIdToPids(myDaoConfig, theId, myForcedIdDao);
 	}
 
 	static List<Long> translateForcedIdToPids(DaoConfig theDaoConfig, IIdType theId, IForcedIdDao theForcedIdDao) {
