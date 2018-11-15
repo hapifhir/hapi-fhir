@@ -478,6 +478,10 @@
 			<id>volsch</id>
 			<name>Volker Schmidt</name>
 		</developer>
+		<developer>
+			<id>magnuswatn</id>
+			<name>Magnus Watn</name>
+		</developers>
 	</developers>
 
 	<licenses>

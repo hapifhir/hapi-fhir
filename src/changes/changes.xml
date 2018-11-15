@@ -24,6 +24,10 @@
 				within a single DB transaction. This improves performance and reduces contention when
 				performing large expunge workloads.
 			</action>
+			<action type="add" issue="1117">
+				A badly formatted log message when handing exceptions was cleaned up. Thanks to
+				Magnus Watn for the pull request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
