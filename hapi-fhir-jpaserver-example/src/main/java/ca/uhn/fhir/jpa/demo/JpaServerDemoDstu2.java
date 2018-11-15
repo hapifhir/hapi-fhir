@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
-import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.springframework.web.context.ContextLoaderListener;
@@ -95,7 +94,7 @@ public class JpaServerDemoDstu2 extends RestfulServer {
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			IFhirSystemDao<Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-			myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(SearchParamProvider.class));
+			myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {
