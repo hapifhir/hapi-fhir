@@ -163,7 +163,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf-spring4</artifactId>
+			<artifactId>thymeleaf-spring5</artifactId>
 		</dependency>
 
 		<!-- For UCUM: TODO we should replace this with org.fhir UCUM -->

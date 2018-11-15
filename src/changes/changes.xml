@@ -6,6 +6,25 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="3.7.0" date="TBD" description="Gale">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>thymeleaf-spring4 (Testpage Overlay) has been replaced with thymeleaf-spring5</li>
+					</ul>
+				]]>
+			</action>
+			<action type="fix">
+				The JPA server $expunge operation could sometimes fail to expunge if
+				another resource linked to a resource that was being
+				expunged. This has been corrected. In addition, the $expunge operation 
+				has been refactored to use smaller chunks of work
+				within a single DB transaction. This improves performance and reduces contention when
+				performing large expunge workloads.
+			</action>
+		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
