@@ -2,12 +2,12 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.dao.index.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
@@ -43,6 +43,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -133,6 +134,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired()
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired
+	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired()
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
 	@Autowired()
@@ -213,6 +216,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	protected ExpungeOutcome doExpunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId, theVersion, theExpungeOptions);
 
 		if (!getConfig().isExpungeEnabled()) {
@@ -252,11 +256,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			});
 
 			/*
-			 * Delete any search result cache entries pointing to the given resource
+			 * Delete any search result cache entries pointing to the given resource. We do
+			 * this in batches to avoid sending giant batches of parameters to the DB
 			 */
-			if (resourceIds.getContent().size() > 0) {
+			List<List<Long>> partitions = Lists.partition(resourceIds.getContent(), 800);
+			for (List<Long> nextPartition : partitions) {
+				ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
 				txTemplate.execute(t -> {
-					mySearchResultDao.deleteByResourceIds(resourceIds.getContent());
+					mySearchResultDao.deleteByResourceIds(nextPartition);
 					return null;
 				});
 			}
@@ -323,7 +330,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		ourLog.info("** BEGINNING GLOBAL $expunge **");
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
+		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute(t -> {
 			doExpungeEverythingQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null");
 			doExpungeEverythingQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null");
@@ -406,6 +413,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		myResourceIndexedSearchParamQuantityDao.deleteAll(resource.getParamsQuantity());
 		myResourceIndexedSearchParamStringDao.deleteAll(resource.getParamsString());
 		myResourceIndexedSearchParamTokenDao.deleteAll(resource.getParamsToken());
+		myResourceLinkDao.deleteAll(resource.getResourceLinks());
+		myResourceLinkDao.deleteAll(resource.getResourceLinksAsTarget());
 
 		myResourceTagDao.deleteAll(resource.getTags());
 		resource.getTags().clear();

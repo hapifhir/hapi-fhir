@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
@@ -97,8 +98,16 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		return new SubscriptionTriggeringProvider();
 	}
 
-	@Bean(name = TASK_EXECUTOR_NAME)
+	@Bean()
 	public TaskScheduler taskScheduler() {
+		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
+		retVal.setConcurrentExecutor(scheduledExecutorService());
+		retVal.setScheduledExecutor(scheduledExecutorService());
+		return retVal;
+	}
+
+	@Bean(name = TASK_EXECUTOR_NAME)
+	public AsyncTaskExecutor taskExecutor() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
 		retVal.setConcurrentExecutor(scheduledExecutorService());
 		retVal.setScheduledExecutor(scheduledExecutorService());
