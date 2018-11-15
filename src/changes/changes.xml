@@ -28,6 +28,11 @@
 				A badly formatted log message when handing exceptions was cleaned up. Thanks to
 				Magnus Watn for the pull request!
 			</action>
+			<action type="fix" issue="944">
+				A NullPointerException has been fixed when using custom resource classes that
+				have a @Block class as a child element. Thanks to Lars Gram Mathiasen for
+				reporting and providing a test case!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
