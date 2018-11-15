@@ -4,6 +4,7 @@ package ca.uhn.fhir.jpa.demo;
 import java.util.Collection;
 import java.util.List;
 
+import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
@@ -100,7 +101,7 @@ public class JpaServerDemo extends RestfulServer {
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			IFhirSystemDao<Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-			myAppCtx.getBean(DaoConfig.class));
+			myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(SearchParamProvider.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
@@ -125,7 +126,7 @@ public class TestRestfulServer extends RestfulServer {
 				plainProviders.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
 				systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
-				JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+				JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(SearchParamProvider.class));
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
@@ -143,7 +144,7 @@ public class TestRestfulServer extends RestfulServer {
 				plainProviders.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 				systemDao = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
-				JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao, myAppCtx.getBean(DaoConfig.class));
+				JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(SearchParamProvider.class));
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
