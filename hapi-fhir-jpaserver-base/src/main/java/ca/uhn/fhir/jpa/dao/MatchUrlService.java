@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -37,7 +36,7 @@ public class MatchUrlService {
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
-	private SearchParamProvider mySearchParamProvider;
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
@@ -128,7 +127,7 @@ public class MatchUrlService {
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
-				RuntimeSearchParam paramDef = mySearchParamProvider.getSearchParamByName(resourceDef, nextParamName);
+				RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(resourceDef, nextParamName);
 				if (paramDef == null) {
 					throw new InvalidRequestException(
 						"Failed to parse match URL[" + theMatchUrl + "] - Resource type " + resourceDef.getName() + " does not have a parameter with name: " + nextParamName);

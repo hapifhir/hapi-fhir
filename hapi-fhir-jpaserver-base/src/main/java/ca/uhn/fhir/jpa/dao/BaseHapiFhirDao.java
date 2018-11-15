@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.dao.index.SearchParamExtractorService;
-import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -170,7 +169,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
+	protected ISearchParamRegistry mySearchParamRegistry;
 	//@Autowired
 	//private ISearchResultDao mySearchResultDao;
 	@Autowired
@@ -181,8 +180,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-	@Autowired
-	protected SearchParamProvider mySearchParamProvider;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
 
@@ -1756,7 +1753,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
-	public SearchParamProvider getSearchParamProvider() {
-		return mySearchParamProvider;
+	public ISearchParamRegistry getSearchParamRegistry() {
+		return mySearchParamRegistry;
 	}
 }

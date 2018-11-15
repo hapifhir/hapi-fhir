@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
@@ -49,5 +48,5 @@ public interface IDao {
 
 	<R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);
 
-	SearchParamProvider getSearchParamProvider();
+	ISearchParamRegistry getSearchParamRegistry();
 }

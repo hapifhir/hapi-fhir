@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -128,8 +127,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private IHapiTerminologySvc myTerminologySvc;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-	@Autowired
-	private SearchParamProvider mySearchParamProvider;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 
@@ -235,12 +232,12 @@ public class SearchBuilder implements ISearchBuilder {
 
 			assert parameterName != null;
 			String paramName = parameterName.replaceAll("\\..*", "");
-			RuntimeSearchParam owningParameterDef = mySearchParamProvider.getSearchParamByName(targetResourceDefinition, paramName);
+			RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
 			if (owningParameterDef == null) {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
 			}
 
-			owningParameterDef = mySearchParamProvider.getSearchParamByName(targetResourceDefinition, owningParameter);
+			owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, owningParameter);
 			if (owningParameterDef == null) {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + owningParameter);
 			}
@@ -432,7 +429,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 						if (resourceTypes.isEmpty()) {
 							RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
-							RuntimeSearchParam searchParamByName = mySearchParamProvider.getSearchParamByName(resourceDef, theParamName);
+							RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
 							if (searchParamByName == null) {
 								throw new InternalErrorException("Could not find parameter " + theParamName);
 							}
@@ -509,7 +506,7 @@ public class SearchBuilder implements ISearchBuilder {
 						boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
 						RuntimeSearchParam param = null;
 						if (!isMeta) {
-							param = mySearchParamProvider.getSearchParamByName(typeDef, chain);
+							param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
 							if (param == null) {
 								ourLog.debug("Type {} doesn't have search param {}", nextType.getSimpleName(), param);
 								continue;
@@ -1727,7 +1724,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
-		RuntimeSearchParam param = mySearchParamProvider.getSearchParamByName(resourceDef, theSort.getParamName());
+		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theSort.getParamName());
 		if (param == null) {
 			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
@@ -1821,7 +1818,7 @@ public class SearchBuilder implements ISearchBuilder {
 		String retVal = theSystem;
 		if (retVal == null) {
 			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
-			RuntimeSearchParam param = mySearchParamProvider.getSearchParamByName(resourceDef, theParamName);
+			RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
 			if (param != null) {
 				Set<String> valueSetUris = Sets.newHashSet();
 				for (String nextPath : param.getPathsSplit()) {
@@ -2031,7 +2028,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 					String paramName = nextInclude.getParamName();
 					if (isNotBlank(paramName)) {
-						param = mySearchParamProvider.getSearchParamByName(def, paramName);
+						param = mySearchParamRegistry.getSearchParamByName(def, paramName);
 					} else {
 						param = null;
 					}
@@ -2608,7 +2605,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
 																				String theResourceType) {
 		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
-		RuntimeSearchParam param = mySearchParamProvider.getSearchParamByName(resourceDef, theParamName);
+		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
 		List<String> path = param.getPathsSplit();
 
 		/*

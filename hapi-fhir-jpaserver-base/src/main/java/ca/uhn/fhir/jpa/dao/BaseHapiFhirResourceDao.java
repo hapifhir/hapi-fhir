@@ -25,8 +25,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
-import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -85,8 +83,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String mySecondaryPrimaryKeyParamName;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private SearchParamProvider mySearchParamProvider;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
@@ -796,7 +792,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myResourceName = def.getName();
 
 		if (mySecondaryPrimaryKeyParamName != null) {
-			RuntimeSearchParam sp = mySearchParamProvider.getSearchParamByName(def, mySecondaryPrimaryKeyParamName);
+			RuntimeSearchParam sp = mySearchParamRegistry.getSearchParamByName(def, mySecondaryPrimaryKeyParamName);
 			if (sp == null) {
 				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
 			}
@@ -1195,7 +1191,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			// Should not be null since the check above would have caught it
 			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceName);
-			RuntimeSearchParam paramDef = mySearchParamProvider.getSearchParamByName(resourceDef, qualifiedParamName.getParamName());
+			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(resourceDef, qualifiedParamName.getParamName());
 
 			for (String nextValue : theSource.get(nextParamName)) {
 				if (isNotBlank(nextValue)) {

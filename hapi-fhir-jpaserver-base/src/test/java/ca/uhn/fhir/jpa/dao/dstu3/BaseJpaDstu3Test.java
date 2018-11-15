@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
-import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
@@ -254,7 +253,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
 	@Autowired
-	protected SearchParamProvider mySearchParamProvider;
+	protected ISearchParamRegistry mySearchParamRegistry;
 
 	@After()
 	public void afterCleanupDao() {

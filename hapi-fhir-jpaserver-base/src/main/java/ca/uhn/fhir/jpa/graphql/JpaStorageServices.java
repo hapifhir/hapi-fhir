@@ -64,7 +64,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 
 		for (Argument nextArgument : theSearchParams) {
 
-			RuntimeSearchParam searchParam = mySearchParamProvider.getSearchParamByName(typeDef, nextArgument.getName());
+			RuntimeSearchParam searchParam = mySearchParamRegistry.getSearchParamByName(typeDef, nextArgument.getName());
 
 			for (Value nextValue : nextArgument.getValues()) {
 				String value = nextValue.getValue();

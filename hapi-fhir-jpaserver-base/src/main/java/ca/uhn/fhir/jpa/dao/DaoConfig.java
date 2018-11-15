@@ -156,7 +156,7 @@ public class DaoConfig {
 	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myDisableHashBasedSearches;
-	private boolean myEnableInMemorySubscriptionMatching = false;
+	private boolean myEnableInMemorySubscriptionMatching = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 
 	/**
@@ -1450,22 +1450,44 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If set to <code>true</code> (default is false) the server will not use
-	 * in-memory subscription searching.  When there are subscriptions registered
-	 * on the server, the default behaviour is to create or update a resource
-	 * to the database and then for each subscription, perform a query against the
-	 * database with the id of the changed entity added to the query to see if there
-	 * is a hit.  When set to true, the changed resource is compared to the
-	 * query directly in-memory without going out to the database.  Certain types of
-	 * queries, e.g. chained references of queries with qualifiers or prefixes, are not
-	 * supported by the in-memory matcher and will fall back to the original database
-	 * matcher.
-	 * @since 3.6.0
+	 * If set to <code>false</code> (default is true) the server will not use
+	 * in-memory subscription searching and instead use the database matcher for all subscription
+	 * criteria matching.
+	 * <p>
+	 * When there are subscriptions registered
+	 * on the server, the default behaviour is to compare the changed resource to the
+	 * subscription criteria directly in-memory without going out to the database.
+	 * Certain types of subscription criteria, e.g. chained references of queries with
+	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
+	 * to a database matcher.
+	 * <p>
+	 * The database matcher performs a query against the
+	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
+	 *
+	 * @since 3.6.1
 	 */
 
 	public boolean isEnableInMemorySubscriptionMatching() {
 		return myEnableInMemorySubscriptionMatching;
 	}
+
+	/**
+	 * If set to <code>false</code> (default is true) the server will not use
+	 * in-memory subscription searching and instead use the database matcher for all subscription
+	 * criteria matching.
+	 * <p>
+	 * When there are subscriptions registered
+	 * on the server, the default behaviour is to compare the changed resource to the
+	 * subscription criteria directly in-memory without going out to the database.
+	 * Certain types of subscription criteria, e.g. chained references of queries with
+	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
+	 * to a database matcher.
+	 * <p>
+	 * The database matcher performs a query against the
+	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
+	 *
+	 * @since 3.6.1
+	 */
 
 	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
 		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;

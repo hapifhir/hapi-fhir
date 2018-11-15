@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -41,8 +40,8 @@ public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 	@Test
 	public void testTranslateMatchUrl() {
 		RuntimeResourceDefinition resourceDef = ourCtx.getResourceDefinition(Condition.class);
-		SearchParamProvider searchParamProvider = mock(SearchParamProvider.class);
-		when(searchParamProvider.getSearchParamByName(any(RuntimeResourceDefinition.class), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
+		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
+		when(searchParamRegistry.getSearchParamByName(any(RuntimeResourceDefinition.class), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
 		SearchParameterMap match = myMatchUrlService.translateMatchUrl("Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
 		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
 		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());
