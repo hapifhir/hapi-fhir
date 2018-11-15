@@ -1,17 +1,14 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.entity.IBaseResourceEntity;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
-import java.util.Set;
 
 /*
  * #%L
@@ -52,4 +49,5 @@ public interface IDao {
 
 	<R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);
 
+	SearchParamProvider getSearchParamProvider();
 }

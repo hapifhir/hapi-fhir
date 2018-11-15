@@ -61,12 +61,12 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 	/**
 	 * Constructor
 	 */
-	public JpaConformanceProviderR4(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig, SearchParamProvider theSearchParamProvider) {
+	public JpaConformanceProviderR4(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
-		mySearchParamProvider = theSearchParamProvider;
+		mySearchParamProvider = theSystemDao.getSearchParamProvider();
 		super.setCache(false);
 		setIncludeResourceCounts(true);
 	}

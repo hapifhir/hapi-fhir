@@ -1755,4 +1755,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				"Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
 		}
 	}
+
+	public SearchParamProvider getSearchParamProvider() {
+		return mySearchParamProvider;
+	}
 }
