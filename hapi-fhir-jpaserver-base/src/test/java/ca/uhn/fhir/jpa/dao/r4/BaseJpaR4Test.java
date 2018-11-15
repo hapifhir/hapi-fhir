@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.dao.index.SearchParamProvider;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
@@ -269,6 +270,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected ICacheWarmingSvc myCacheWarmingSvc;
 	@Autowired
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
+	@Autowired
+	protected SearchParamProvider mySearchParamProvider;
 
 	@After()
 	public void afterCleanupDao() {

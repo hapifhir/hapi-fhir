@@ -87,6 +87,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private SearchParamProvider mySearchParamProvider;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -273,7 +275,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 
-		Set<Long> resource = processMatchUrl(theUrl, myResourceType);
+		Set<Long> resource = myMatchUrlService.processMatchUrl(theUrl, myResourceType);
 		if (resource.size() > 1) {
 			if (myDaoConfig.isAllowMultipleDelete() == false) {
 				throw new PreconditionFailedException(getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resource.size()));
@@ -373,7 +375,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setResourceType(toResourceName(theResource));
 
 		if (isNotBlank(theIfNoneExist)) {
-			Set<Long> match = processMatchUrl(theIfNoneExist, myResourceType);
+			Set<Long> match = myMatchUrlService.processMatchUrl(theIfNoneExist, myResourceType);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
 				throw new PreconditionFailedException(msg);
@@ -850,7 +852,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public Set<Long> processMatchUrl(String theMatchUrl) {
-		return processMatchUrl(theMatchUrl, getResourceType());
+		return myMatchUrlService.processMatchUrl(theMatchUrl, getResourceType());
 	}
 
 	@Override
@@ -1233,7 +1235,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IIdType resourceId;
 		if (isNotBlank(theMatchUrl)) {
 			StopWatch sw = new StopWatch();
-			Set<Long> match = processMatchUrl(theMatchUrl, myResourceType);
+			Set<Long> match = myMatchUrlService.processMatchUrl(theMatchUrl, myResourceType);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(msg);

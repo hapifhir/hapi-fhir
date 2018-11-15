@@ -106,9 +106,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private static String ourLastHandlerThreadForUnitTest;
 	private static boolean ourTrackHandlersForUnitTest;
 	private final boolean myDontUseHashesForSearch;
+	private final DaoConfig myDaoConfig;
 
-	@Autowired
-	DaoConfig myDaoConfig;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
@@ -154,7 +153,8 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	SearchBuilder(BaseHapiFhirDao<?> theDao) {
 		myCallingDao = theDao;
-		myDontUseHashesForSearch = theDao.getConfig().getDisableHashBasedSearches();
+		myDaoConfig = theDao.getConfig();
+		myDontUseHashesForSearch = myDaoConfig.getDisableHashBasedSearches();
 	}
 
 	@Override

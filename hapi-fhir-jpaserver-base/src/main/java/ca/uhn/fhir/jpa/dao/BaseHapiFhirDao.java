@@ -182,7 +182,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
-	private SearchParamProvider mySearchParamProvider;
+	protected SearchParamProvider mySearchParamProvider;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
 
@@ -567,8 +567,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return retVal;
 	}
 
-	// FIXME KHS remove
-	public DaoConfig getConfig() {
+	protected DaoConfig getConfig() {
 		return myConfig;
 	}
 
@@ -605,23 +604,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	protected IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
 		return myDaoRegistry.getDaoOrThrowException(theClass);
-	}
-
-	// FIXME KHS remove this
-	public IResourceIndexedCompositeStringUniqueDao getResourceIndexedCompositeStringUniqueDao() {
-		return myResourceIndexedCompositeStringUniqueDao;
-	}
-
-	// TODO KHS remove these two.  Only jpaconformanceproviders use them
-	@Override
-	public RuntimeSearchParam
-	getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-		return mySearchParamProvider.getSearchParamByName(theResourceDef, theParamName);
-	}
-
-	@Override
-	public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-		return mySearchParamProvider.getSearchParamsByResourceType(theResourceDef);
 	}
 
 	protected TagDefinition getTagOrNull(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -808,7 +790,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return retVal.toString();
 	}
 
-	@Override
 	public void populateFullTextFields(final IBaseResource theResource, ResourceTable theEntity) {
 		if (theEntity.getDeleted() != null) {
 			theEntity.setNarrativeTextParsedIntoWords(null);
@@ -1092,12 +1073,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	 */
 	protected void postUpdate(ResourceTable theEntity, T theResource) {
 		// nothing
-	}
-
-	// FIXME KHS remove
-	@Override
-	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
-		return myMatchUrlService.processMatchUrl(theMatchUrl, theResourceType);
 	}
 
 	@CoverageIgnore
