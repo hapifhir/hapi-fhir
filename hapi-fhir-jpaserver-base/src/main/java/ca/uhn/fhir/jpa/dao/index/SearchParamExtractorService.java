@@ -110,7 +110,7 @@ public class SearchParamExtractorService {
 		}
 	}
 
-	/*
+	/**
 	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
 	 * matching resource.
 	 */
