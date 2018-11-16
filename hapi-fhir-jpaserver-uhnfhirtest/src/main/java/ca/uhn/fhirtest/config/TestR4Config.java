@@ -154,4 +154,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
+
+
+
 }
