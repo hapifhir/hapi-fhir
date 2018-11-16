@@ -113,11 +113,7 @@ class ModelScanner {
 			for (Class<? extends IBase> nextClass : typesToScan) {
 				scan(nextClass);
 			}
-			for (Iterator<Class<? extends IBase>> iter = myScanAlso.iterator(); iter.hasNext(); ) {
-				if (myClassToElementDefinitions.containsKey(iter.next())) {
-					iter.remove();
-				}
-			}
+			myScanAlso.removeIf(theClass -> myClassToElementDefinitions.containsKey(theClass));
 			typesToScan.clear();
 			typesToScan.addAll(myScanAlso);
 			myScanAlso.clear();
@@ -210,6 +206,13 @@ class ModelScanner {
 		String resourceName = theClass.getCanonicalName();
 		if (isBlank(resourceName)) {
 			throw new ConfigurationException("Block type @" + Block.class.getSimpleName() + " annotation contains no name: " + theClass.getCanonicalName());
+		}
+
+		// Just in case someone messes up when upgrading from DSTU2
+		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			if (BaseIdentifiableElement.class.isAssignableFrom(theClass)) {
+				throw new ConfigurationException("@Block class for version " + myContext.getVersion().getVersion().name() + " should not extend " + BaseIdentifiableElement.class.getSimpleName() + ": " + theClass.getName());
+			}
 		}
 
 		RuntimeResourceBlockDefinition blockDef = new RuntimeResourceBlockDefinition(resourceName, theClass, isStandardType(theClass), myContext, myClassToElementDefinitions);

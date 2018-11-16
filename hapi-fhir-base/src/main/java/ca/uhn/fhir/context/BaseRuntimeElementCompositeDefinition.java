@@ -115,7 +115,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			}
 		} while (current != null);
 
-		Set<Field> fields = new HashSet<Field>();
+		Set<Field> fields = new HashSet<>();
 		for (Class<? extends IBase> nextClass : classes) {
 			int fieldIndexInClass = 0;
 			for (Field next : nextClass.getDeclaredFields()) {
@@ -181,11 +181,17 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			if (IBase.class.isAssignableFrom(next.getElementType())) {
 				if (next.getElementType().isInterface() == false && Modifier.isAbstract(next.getElementType().getModifiers()) == false) {
 					theScanAlso.add((Class<? extends IBase>) next.getElementType());
+					if (theScanAlso.toString().contains("ExtensionDt")) {
+						theScanAlso.toString();//FIXME: remove
+					}
 				}
 			}
 			for (Class<? extends IBase> nextChildType : next.getChoiceTypes()) {
 				if (nextChildType.isInterface() == false && Modifier.isAbstract(nextChildType.getModifiers()) == false) {
 					theScanAlso.add(nextChildType);
+					if (theScanAlso.toString().contains("ExtensionDt")) {
+						theScanAlso.toString();//FIXME: remove
+					}
 				}
 			}
 		}
