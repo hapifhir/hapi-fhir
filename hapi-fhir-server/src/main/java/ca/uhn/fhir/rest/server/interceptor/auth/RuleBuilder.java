@@ -237,6 +237,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			return new RuleBuilderRuleOp();
 		}
 
+		@Override
+		public IAuthRuleBuilderGraphQL graphQL() {
+			return new RuleBuilderGraphQL();
+		}
+
 		private class RuleBuilderRuleConditional implements IAuthRuleBuilderRuleConditional {
 
 			private AppliesTypeEnum myAppliesTo;
@@ -539,6 +544,17 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				BaseRule rule = new RuleImplPatch(myRuleName)
 					.setAllRequests(true)
 					.setMode(myRuleMode);
+				myRules.add(rule);
+				return new RuleBuilderFinished(rule);
+			}
+		}
+
+		private class RuleBuilderGraphQL implements IAuthRuleBuilderGraphQL {
+			@Override
+			public IAuthRuleFinished any() {
+				RuleImplOp rule = new RuleImplOp(myRuleName);
+				rule.setOp(RuleOpEnum.GRAPHQL);
+				rule.setMode(myRuleMode);
 				myRules.add(rule);
 				return new RuleBuilderFinished(rule);
 			}

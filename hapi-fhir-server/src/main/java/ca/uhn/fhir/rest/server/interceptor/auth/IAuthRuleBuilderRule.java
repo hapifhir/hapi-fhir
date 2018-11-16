@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import com.google.common.base.CharMatcher;
+
 public interface IAuthRuleBuilderRule {
 
 	/**
@@ -108,4 +110,8 @@ public interface IAuthRuleBuilderRule {
 	 */
 	IAuthRuleBuilderRuleOp write();
 
+	/**
+	 * Allow a GraphQL query
+	 */
+	IAuthRuleBuilderGraphQL graphQL();
 }
