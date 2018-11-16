@@ -87,10 +87,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "RES_ID")
 	private Long myId;
 
-	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@OptimisticLock(excluded = true)
-	private Collection<ResourceLink> myIncomingResourceLinks;
-
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
 	@OptimisticLock(excluded = true)
 	private Long myIndexStatus;
@@ -182,11 +178,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private Collection<ResourceIndexedCompositeStringUnique> myParamsCompositeStringUnique;
 
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded()
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinks;
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded()
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN)

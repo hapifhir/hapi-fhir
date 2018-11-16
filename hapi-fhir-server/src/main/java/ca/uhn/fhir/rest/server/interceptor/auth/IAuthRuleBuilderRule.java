@@ -108,4 +108,8 @@ public interface IAuthRuleBuilderRule {
 	 */
 	IAuthRuleBuilderRuleOp write();
 
+	/**
+	 * Allow a GraphQL query
+	 */
+	IAuthRuleBuilderGraphQL graphQL();
 }

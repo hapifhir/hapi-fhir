@@ -237,7 +237,7 @@ public class SearchBuilder implements ISearchBuilder {
 				match = Collections.singleton(-1L);
 			}
 
-			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myIncomingResourceLinks", JoinType.LEFT);
+			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 
 			Predicate predicate = join.get("mySourceResourcePid").in(match);
 			myPredicates.add(predicate);
