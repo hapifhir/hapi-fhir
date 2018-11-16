@@ -33,6 +33,12 @@
 				have a @Block class as a child element. Thanks to Lars Gram Mathiasen for
 				reporting and providing a test case!
 			</action>
+			<action type="add">
+				AuthorizationInterceptor now allows the GraphQL operation to be
+				authorized. Note that this is an all-or-nothing grant for now, it
+				is not yet possible to specify individual resource security when
+				using GraphQL.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

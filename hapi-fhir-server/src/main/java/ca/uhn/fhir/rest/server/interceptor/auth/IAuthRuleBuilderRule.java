@@ -20,8 +20,6 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
-import com.google.common.base.CharMatcher;
-
 public interface IAuthRuleBuilderRule {
 
 	/**
