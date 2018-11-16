@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -185,26 +185,32 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@IndexedEmbedded()
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinks;
-
+	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@IndexedEmbedded()
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceLink> myResourceLinksAsTarget;
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
 	@Field
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
-
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Collection<SearchParamPresent> mySearchParamPresents;
-
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Set<ResourceTag> myTags;
-
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
-
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
+
+	public Collection<ResourceLink> getResourceLinksAsTarget() {
+		if (myResourceLinksAsTarget == null) {
+			myResourceLinksAsTarget = new ArrayList<>();
+		}
+		return myResourceLinksAsTarget;
+	}
 
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {

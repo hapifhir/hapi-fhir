@@ -478,6 +478,10 @@
 			<id>volsch</id>
 			<name>Volker Schmidt</name>
 		</developer>
+		<developer>
+			<id>magnuswatn</id>
+			<name>Magnus Watn</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -518,9 +522,9 @@
 		<jsr305_version>3.0.2</jsr305_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
 		<hibernate_version>5.3.6.Final</hibernate_version>
+		<hibernate_search_version>5.10.3.Final</hibernate_search_version>
 		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.10.3.Final</hibernate_search_version>
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
 		<jackson_version>2.9.7</jackson_version>
@@ -1246,7 +1250,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
-				<artifactId>thymeleaf-spring4</artifactId>
+				<artifactId>thymeleaf-spring5</artifactId>
 				<version>${thymeleaf-version}</version>
 			</dependency>
 			<dependency>
