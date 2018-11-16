@@ -185,6 +185,9 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 				// Nothing yet
 				return OperationExamineDirection.NONE;
 
+			case GRAPHQL_REQUEST:
+				return OperationExamineDirection.IN;
+
 			default:
 				// Should not happen
 				throw new IllegalStateException("Unable to apply security to event of type " + theOperation);

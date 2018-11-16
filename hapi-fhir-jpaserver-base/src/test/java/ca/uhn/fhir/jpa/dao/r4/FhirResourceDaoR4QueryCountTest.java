@@ -129,7 +129,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		p.getPhotoFirstRep().setCreationElement(new DateTimeType("2012")); // non-indexed field
 		myPatientDao.update(p).getId().toUnqualifiedVersionless();
 
-		assertEquals(5, getQueryCount().getSelect());
+		assertEquals(4, getQueryCount().getSelect());
 		assertEquals(1, getQueryCount().getInsert());
 		assertEquals(0, getQueryCount().getDelete());
 		assertEquals(1, getQueryCount().getUpdate());

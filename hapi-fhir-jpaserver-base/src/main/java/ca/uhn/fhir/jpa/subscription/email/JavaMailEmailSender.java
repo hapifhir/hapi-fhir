@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.subscription.email;
  * #L%
  */
 
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;

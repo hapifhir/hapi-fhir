@@ -15,9 +15,11 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -50,9 +52,6 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class AuthorizationInterceptorR4Test {
 
@@ -499,7 +498,6 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
-
 
 
 	}
@@ -1818,6 +1816,57 @@ public class AuthorizationInterceptorR4Test {
 
 	}
 
+
+	@Test
+	public void testReadWithGraphQL() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.allow("Rule 2").graphQL().any().andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Collections.singletonList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+	}
+
+	@Test
+	public void testReadWithGraphQLAllowAll() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.deny("Rule 1").read().resourcesOfType(Observation.class).withAnyId().andThen()
+					.allowAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Collections.singletonList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+	}
+
 	@Test
 	public void testReadByAnyIdWithTenantId() throws Exception {
 		ourServlet.setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
@@ -3032,45 +3081,6 @@ public class AuthorizationInterceptorR4Test {
 		assertTrue(ourHitMethod);
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
-		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
-		DummyOrganizationResourceProvider orgProv = new DummyOrganizationResourceProvider();
-		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
-		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
-		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
-		DummyMessageHeaderResourceProvider mshProv = new DummyMessageHeaderResourceProvider();
-		PlainProvider plainProvider = new PlainProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, mshProv);
-		ourServlet.setPlainProviders(plainProvider);
-		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
 	public static class DummyCarePlanResourceProvider implements IResourceProvider {
 
 		@Override
@@ -3141,7 +3151,7 @@ public class AuthorizationInterceptorR4Test {
 		}
 
 		@Operation(name = "process-message", idempotent = true)
-		public Parameters operation0(@OperationParam(name="content") Bundle theInput) {
+		public Parameters operation0(@OperationParam(name = "content") Bundle theInput) {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
@@ -3421,6 +3431,49 @@ public class AuthorizationInterceptorR4Test {
 			return (Bundle) ourReturn.get(0);
 		}
 
+		@GraphQL
+		public String graphql(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
+			return "{}";
+		}
+
 	}
 
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
+
+		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
+		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
+		DummyOrganizationResourceProvider orgProv = new DummyOrganizationResourceProvider();
+		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
+		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
+		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
+		DummyMessageHeaderResourceProvider mshProv = new DummyMessageHeaderResourceProvider();
+		PlainProvider plainProvider = new PlainProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setFhirContext(ourCtx);
+		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, mshProv);
+		ourServlet.setPlainProviders(plainProvider);
+		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
+	}
 }

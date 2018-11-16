@@ -32,5 +32,6 @@ enum RuleOpEnum {
 	METADATA, 
 	DELETE,
 	OPERATION,
+	GRAPHQL,
 	PATCH
 }
