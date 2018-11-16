@@ -73,12 +73,12 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseRuntimeElementCompositeDefinition.class);
 	private Map<String, Integer> forcedOrder = null;
-	private List<BaseRuntimeChildDefinition> myChildren = new ArrayList<BaseRuntimeChildDefinition>();
+	private List<BaseRuntimeChildDefinition> myChildren = new ArrayList<>();
 	private List<BaseRuntimeChildDefinition> myChildrenAndExtensions;
 	private Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinitions;
-	private FhirContext myContext;
-	private Map<String, BaseRuntimeChildDefinition> myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();
-	private List<ScannedField> myScannedFields = new ArrayList<BaseRuntimeElementCompositeDefinition.ScannedField>();
+	private final FhirContext myContext;
+	private Map<String, BaseRuntimeChildDefinition> myNameToChild = new HashMap<>();
+	private List<ScannedField> myScannedFields = new ArrayList<>();
 	private volatile boolean mySealed;
 
 	@SuppressWarnings("unchecked")
@@ -92,12 +92,12 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		 * We scan classes for annotated fields in the class but also all of its superclasses
 		 */
 		Class<? extends IBase> current = theImplementingClass;
-		LinkedList<Class<? extends IBase>> classes = new LinkedList<Class<? extends IBase>>();
+		LinkedList<Class<? extends IBase>> classes = new LinkedList<>();
 		do {
 			if (forcedOrder == null) {
 				ChildOrder childOrder = current.getAnnotation(ChildOrder.class);
 				if (childOrder != null) {
-					forcedOrder = new HashMap<String, Integer>();
+					forcedOrder = new HashMap<>();
 					for (int i = 0; i < childOrder.names().length; i++) {
 						String nextName = childOrder.names()[i];
 						if (nextName.endsWith("[x]")) {
@@ -181,26 +181,20 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			if (IBase.class.isAssignableFrom(next.getElementType())) {
 				if (next.getElementType().isInterface() == false && Modifier.isAbstract(next.getElementType().getModifiers()) == false) {
 					theScanAlso.add((Class<? extends IBase>) next.getElementType());
-					if (theScanAlso.toString().contains("ExtensionDt")) {
-						theScanAlso.toString();//FIXME: remove
-					}
 				}
 			}
 			for (Class<? extends IBase> nextChildType : next.getChoiceTypes()) {
 				if (nextChildType.isInterface() == false && Modifier.isAbstract(nextChildType.getModifiers()) == false) {
 					theScanAlso.add(nextChildType);
-					if (theScanAlso.toString().contains("ExtensionDt")) {
-						theScanAlso.toString();//FIXME: remove
-					}
 				}
 			}
 		}
 	}
 	
 	private void scanCompositeElementForChildren() {
-		Set<String> elementNames = new HashSet<String>();
-		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToElementDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
-		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToExtensionDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
+		Set<String> elementNames = new HashSet<>();
+		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToElementDef = new TreeMap<>();
+		TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> orderToExtensionDef = new TreeMap<>();
 
 		scanCompositeElementForChildren(elementNames, orderToElementDef, orderToExtensionDef);
 
@@ -209,7 +203,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			 * Find out how many elements don't match any entry in the list
 			 * for forced order. Those elements come first.
 			 */
-			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> newOrderToExtensionDef = new TreeMap<Integer, BaseRuntimeDeclaredChildDefinition>();
+			TreeMap<Integer, BaseRuntimeDeclaredChildDefinition> newOrderToExtensionDef = new TreeMap<>();
 			int unknownCount = 0;
 			for (BaseRuntimeDeclaredChildDefinition nextEntry : orderToElementDef.values()) {
 				if (!forcedOrder.containsKey(nextEntry.getElementName())) {
@@ -226,7 +220,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			orderToElementDef = newOrderToExtensionDef;
 		}
 		
-		TreeSet<Integer> orders = new TreeSet<Integer>();
+		TreeSet<Integer> orders = new TreeSet<>();
 		orders.addAll(orderToElementDef.keySet());
 		orders.addAll(orderToExtensionDef.keySet());
 
@@ -335,7 +329,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			 * Anything that's marked as unknown is given a new ID that is <0 so that it doesn't conflict with any given IDs and can be figured out later
 			 */
 			if (order == Child.ORDER_UNKNOWN) {
-				order = Integer.valueOf(0);
+				order = 0;
 				while (orderMap.containsKey(order)) {
 					order++;
 				}
@@ -392,7 +386,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 					/*
 					 * Child is a resource reference
 					 */
-					List<Class<? extends IBaseResource>> refTypesList = new ArrayList<Class<? extends IBaseResource>>();
+					List<Class<? extends IBaseResource>> refTypesList = new ArrayList<>();
 					for (Class<? extends IElement> nextType : childAnnotation.type()) {
 						if (IBaseReference.class.isAssignableFrom(nextType)) {
 							refTypesList.add(myContext.getVersion().getVersion().isRi() ? IAnyResource.class : IResource.class);
@@ -475,10 +469,10 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			next.sealAndInitialize(theContext, theClassToElementDefinitions);
 		}
 
-		myNameToChild = new HashMap<String, BaseRuntimeChildDefinition>();
+		myNameToChild = new HashMap<>();
 		for (BaseRuntimeChildDefinition next : myChildren) {	
 			if (next instanceof RuntimeChildChoiceDefinition) {
-				String key = ((RuntimeChildChoiceDefinition) next).getElementName()+"[x]";
+				String key = next.getElementName()+"[x]";
 				myNameToChild.put(key, next);
 			}
 			for (String nextName : next.getValidChildNames()) {
@@ -492,7 +486,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 		myChildren = Collections.unmodifiableList(myChildren);
 		myNameToChild = Collections.unmodifiableMap(myNameToChild);
 		
-		List<BaseRuntimeChildDefinition> children = new ArrayList<BaseRuntimeChildDefinition>();
+		List<BaseRuntimeChildDefinition> children = new ArrayList<>();
 		children.addAll(myChildren);
 		
 		/*
@@ -560,11 +554,11 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 	private static class ScannedField {
 		private Child myChildAnnotation;
 
-		private List<Class<? extends IBase>> myChoiceTypes = new ArrayList<Class<? extends IBase>>();
+		private List<Class<? extends IBase>> myChoiceTypes = new ArrayList<>();
 		private Class<?> myElementType;
 		private Field myField;
 		private boolean myFirstFieldInNewClass;
-		public ScannedField(Field theField, Class<?> theClass, boolean theFirstFieldInNewClass) {
+		ScannedField(Field theField, Class<?> theClass, boolean theFirstFieldInNewClass) {
 			myField = theField;
 			myFirstFieldInNewClass = theFirstFieldInNewClass;
 
@@ -580,10 +574,8 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 			
 			myChildAnnotation = childAnnotation;
 			myElementType = ModelScanner.determineElementType(theField);
-			
-			for (Class<? extends IBase> nextChoiceType : childAnnotation.type()) {
-				myChoiceTypes.add(nextChoiceType);
-			}
+
+			Collections.addAll(myChoiceTypes, childAnnotation.type());
 		}
 		
 		public Child getChildAnnotation() {
