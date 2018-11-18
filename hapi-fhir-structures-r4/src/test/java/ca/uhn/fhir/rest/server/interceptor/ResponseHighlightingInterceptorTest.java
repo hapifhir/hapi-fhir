@@ -2,17 +2,6 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.resource.Binary;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome.Issue;
-import ca.uhn.fhir.model.dstu2.resource.Organization;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -28,9 +17,9 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
 import com.helger.collection.iterate.ArrayEnumeration;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -39,12 +28,12 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.web.cors.CorsConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
@@ -65,10 +54,8 @@ public class ResponseHighlightingInterceptorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlightingInterceptorTest.class);
 	private static ResponseHighlighterInterceptor ourInterceptor = new ResponseHighlighterInterceptor();
 	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forR4();
 	private static int ourPort;
-
-	private static Server ourServer;
 	private static RestfulServer ourServlet;
 
 	@Before
@@ -83,13 +70,30 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 		httpGet.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("foo", status.getFirstHeader("content-type").getValue());
 		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
 		assertArrayEquals(new byte[]{1, 2, 3, 4}, responseContent);
+	}
+
+	/**
+	 * Return a Binary response type - Client accepts text/html but is not a browser
+	 */
+	@Test
+	public void testBinaryReadHtmlResponseFromProvider() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/html");
+		httpGet.addHeader("Accept", "text/html");
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("text/html", status.getFirstHeader("content-type").getValue());
+		assertEquals("<html>DATA</html>", responseContent);
+		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
 	}
 
 	@Test
@@ -98,13 +102,13 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 		httpGet.addHeader("Accept", Constants.CT_FHIR_JSON);
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertNull(status.getFirstHeader("Content-Disposition"));
-		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", responseContent);
+		assertEquals("{\"resourceType\":\"Binary\",\"id\":\"foo\",\"contentType\":\"foo\",\"data\":\"AQIDBA==\"}", responseContent);
 
 	}
 
@@ -112,9 +116,9 @@ public class ResponseHighlightingInterceptorTest {
 	public void testBinaryReadAcceptMissing() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("foo", status.getFirstHeader("content-type").getValue());
 		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
@@ -127,29 +131,19 @@ public class ResponseHighlightingInterceptorTest {
 		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
-			@Override
-			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9");
-			}
-		});
-		when(req.getHeader(Constants.HEADER_ORIGIN)).thenAnswer(new Answer<String>() {
-			@Override
-			public String answer(InvocationOnMock theInvocation) throws Throwable {
-				return "http://example.com";
-			}
-		});
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
+		when(req.getHeader(Constants.HEADER_ORIGIN)).thenAnswer(theInvocation -> "http://example.com");
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
 		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("FAMILY");
+		resource.addName().setFamily("FAMILY");
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		HashMap<String, String[]> params = new HashMap<String, String[]>();
+		HashMap<String, String[]> params = new HashMap<>();
 		reqDetails.setParameters(params);
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
@@ -164,11 +158,11 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=application/json");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, not(containsString("html")));
 	}
 
@@ -177,9 +171,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=application/json+fhir");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, not(containsString("html")));
@@ -190,9 +184,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/json+fhir"));
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, not(containsString("html")));
@@ -203,11 +197,11 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=application/xml");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, not(containsString("html")));
 	}
 
@@ -216,9 +210,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=application/xml+fhir");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, not(containsString("html")));
@@ -229,9 +223,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("application/xml+fhir"));
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, not(containsString("html")));
@@ -242,9 +236,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, containsString("html"));
@@ -259,9 +253,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=" + UrlUtil.escapeUrlParam("html/json; fhirVersion=1.0"));
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, containsString("html"));
@@ -276,9 +270,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/xml");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, containsString("html"));
@@ -291,11 +285,11 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=json");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, not(containsString("html")));
 	}
 
@@ -303,9 +297,9 @@ public class ResponseHighlightingInterceptorTest {
 	public void testForceResponseTime() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -319,7 +313,7 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("Accept", "text/html");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 
 		ourLog.info("Resp: {}", responseContent);
 		assertEquals(404, status.getStatusLine().getStatusCode());
@@ -333,14 +327,14 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 
 		ourLog.info("Resp: {}", responseContent);
 		assertEquals(404, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, not(stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle")));
 		assertThat(responseContent, (stringContainsInOrder("Unknown resource type 'Foobar'")));
-		assertThat(status.getFirstHeader("Content-Type").getValue(), containsString("application/xml+fhir"));
+		assertEquals(Constants.CT_FHIR_XML_NEW + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 
 	}
 
@@ -349,8 +343,8 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/");
 		httpGet.addHeader("Accept", "text/html");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
 
 		ourLog.info("Resp: {}", responseContent);
 		assertEquals(400, status.getStatusLine().getStatusCode());
@@ -364,19 +358,14 @@ public class ResponseHighlightingInterceptorTest {
 		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
-			@Override
-			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<String>("text/html,application/xhtml+xml,application/xml;q=0.9");
-			}
-		});
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
 		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("FAMILY");
+		resource.addName().setFamily("FAMILY");
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
@@ -387,7 +376,7 @@ public class ResponseHighlightingInterceptorTest {
 		// reqDetails.setParameters(null);
 
 		ResourceNotFoundException exception = new ResourceNotFoundException("Not found");
-		exception.setOperationOutcome(new OperationOutcome().addIssue(new Issue().setDiagnostics("Hello")));
+		exception.setOperationOutcome(new OperationOutcome().addIssue(new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics("Hello")));
 
 		assertFalse(ic.handleException(reqDetails, exception, req, resp));
 
@@ -404,23 +393,18 @@ public class ResponseHighlightingInterceptorTest {
 		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
-			@Override
-			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<String>("application/xml+fhir");
-			}
-		});
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("application/xml+fhir"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
 		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("FAMILY");
+		resource.addName().setFamily("FAMILY");
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		HashMap<String, String[]> params = new HashMap<String, String[]>();
+		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_FORMAT, new String[]{Constants.FORMAT_HTML});
 		reqDetails.setParameters(params);
 		reqDetails.setServer(new RestfulServer(ourCtx));
@@ -438,23 +422,18 @@ public class ResponseHighlightingInterceptorTest {
 		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
-			@Override
-			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<String>("application/xml+fhir");
-			}
-		});
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("application/xml+fhir"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
 		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("FAMILY");
+		resource.addName().setFamily("FAMILY");
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		HashMap<String, String[]> params = new HashMap<String, String[]>();
+		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_FORMAT, new String[]{Constants.CT_HTML});
 		reqDetails.setParameters(params);
 		reqDetails.setServer(new RestfulServer(ourCtx));
@@ -469,23 +448,18 @@ public class ResponseHighlightingInterceptorTest {
 		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
-			@Override
-			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<String>("text/html,application/xhtml+xml,application/xml;q=0.9");
-			}
-		});
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
 		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("FAMILY");
+		resource.addName().setFamily("FAMILY");
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		HashMap<String, String[]> params = new HashMap<String, String[]>();
+		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_PRETTY, new String[]{Constants.PARAM_PRETTY_VALUE_TRUE});
 		params.put(Constants.PARAM_FORMAT, new String[]{Constants.CT_XML});
 		params.put(ResponseHighlighterInterceptor.PARAM_RAW, new String[]{ResponseHighlighterInterceptor.PARAM_RAW_TRUE});
@@ -503,23 +477,18 @@ public class ResponseHighlightingInterceptorTest {
 		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
-			@Override
-			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<String>("text/html,application/xhtml+xml,application/xml;q=0.9");
-			}
-		});
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
 		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("FAMILY");
+		resource.addName().setFamily("FAMILY");
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		reqDetails.setParameters(new HashMap<String, String[]>());
+		reqDetails.setParameters(new HashMap<>());
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
 
@@ -537,23 +506,18 @@ public class ResponseHighlightingInterceptorTest {
 		ResponseHighlighterInterceptor ic = ourInterceptor;
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
-			@Override
-			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<String>("text/html,application/xhtml+xml,application/xml;q=0.9");
-			}
-		});
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
 		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("FAMILY");
+		resource.addName().setFamily("FAMILY");
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		HashMap<String, String[]> params = new HashMap<String, String[]>();
+		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_PRETTY, new String[]{Constants.PARAM_PRETTY_VALUE_TRUE});
 		reqDetails.setParameters(params);
 		reqDetails.setServer(new RestfulServer(ourCtx));
@@ -576,23 +540,18 @@ public class ResponseHighlightingInterceptorTest {
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
-			@Override
-			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<String>("text/html,application/xhtml+xml,application/xml;q=0.9");
-			}
-		});
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
 		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("FAMILY");
+		resource.addName().setFamily("FAMILY");
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		reqDetails.setParameters(new HashMap<String, String[]>());
+		reqDetails.setParameters(new HashMap<>());
 		RestfulServer server = new RestfulServer(ourCtx);
 		server.setDefaultResponseEncoding(EncodingEnum.JSON);
 		reqDetails.setServer(server);
@@ -611,23 +570,18 @@ public class ResponseHighlightingInterceptorTest {
 
 		HttpServletRequest req = mock(HttpServletRequest.class);
 
-		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(new Answer<Enumeration<String>>() {
-			@Override
-			public Enumeration<String> answer(InvocationOnMock theInvocation) throws Throwable {
-				return new ArrayEnumeration<String>("text/html;q=0.8,application/xhtml+xml,application/xml;q=0.9");
-			}
-		});
+		when(req.getHeaders(Constants.HEADER_ACCEPT)).thenAnswer(theInvocation -> new ArrayEnumeration<>("text/html;q=0.8,application/xhtml+xml,application/xml;q=0.9"));
 
 		HttpServletResponse resp = mock(HttpServletResponse.class);
 		StringWriter sw = new StringWriter();
 		when(resp.getWriter()).thenReturn(new PrintWriter(sw));
 
 		Patient resource = new Patient();
-		resource.addName().addFamily("FAMILY");
+		resource.addName().setFamily("FAMILY");
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails();
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		reqDetails.setParameters(new HashMap<String, String[]>());
+		reqDetails.setParameters(new HashMap<>());
 		RestfulServer server = new RestfulServer(ourCtx);
 		server.setDefaultResponseEncoding(EncodingEnum.JSON);
 		reqDetails.setServer(server);
@@ -647,9 +601,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
 		httpGet.addHeader("Accept", "text/html");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "<div", "</pre>")));
@@ -665,9 +619,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=false");
 		httpGet.addHeader("Accept", "text/html");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, not(stringContainsInOrder("<body>", "<pre>", "\n", "</pre>")));
@@ -683,9 +637,9 @@ public class ResponseHighlightingInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_pretty=true");
 		httpGet.addHeader("Accept", "text/html");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, (stringContainsInOrder("<body>", "<pre>", "<div", "</pre>")));
@@ -697,7 +651,7 @@ public class ResponseHighlightingInterceptorTest {
 		httpGet.addHeader("Accept", "html");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 
 		ourLog.info("Resp: {}", responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -711,9 +665,9 @@ public class ResponseHighlightingInterceptorTest {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -728,9 +682,9 @@ public class ResponseHighlightingInterceptorTest {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -745,9 +699,9 @@ public class ResponseHighlightingInterceptorTest {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -761,9 +715,9 @@ public class ResponseHighlightingInterceptorTest {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_format=html/json");
 
-		HttpResponse status = ourClient.execute(httpGet);
+		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		status.close();
 		ourLog.info(responseContent);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
@@ -780,7 +734,7 @@ public class ResponseHighlightingInterceptorTest {
 	public static void beforeClass() throws Exception {
 		ourPort = PortUtil.findFreePort();
 		ourLog.info("Using port: {}", ourPort);
-		ourServer = new Server(ourPort);
+		Server ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
@@ -830,16 +784,21 @@ public class ResponseHighlightingInterceptorTest {
 	public static class DummyBinaryResourceProvider implements IResourceProvider {
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<Binary> getResourceType() {
 			return Binary.class;
 		}
 
 		@Read
-		public Binary read(@IdParam IdDt theId) {
+		public Binary read(@IdParam IdType theId) {
 			Binary retVal = new Binary();
-			retVal.setId("1");
-			retVal.setContent(new byte[]{1, 2, 3, 4});
-			retVal.setContentType(theId.getIdPart());
+			retVal.setId(theId);
+			if (theId.getIdPart().equals("html")) {
+				retVal.setContent("<html>DATA</html>".getBytes(Charsets.UTF_8));
+				retVal.setContentType("text/html");
+			}else {
+				retVal.setContent(new byte[]{1, 2, 3, 4});
+				retVal.setContentType(theId.getIdPart());
+			}
 			return retVal;
 		}
 
@@ -859,13 +818,13 @@ public class ResponseHighlightingInterceptorTest {
 		private Patient createPatient1() {
 			Patient patient = new Patient();
 			patient.addIdentifier();
-			patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-			patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+			patient.getIdentifier().get(0).setUse(Identifier.IdentifierUse.OFFICIAL);
+			patient.getIdentifier().get(0).setSystem("urn:hapitest:mrns");
 			patient.getIdentifier().get(0).setValue("00001");
 			patient.addName();
-			patient.getName().get(0).addFamily("Test");
+			patient.getName().get(0).setFamily("Test");
 			patient.getName().get(0).addGiven("PatientOne");
-			patient.getId().setValue("1");
+			patient.setId("1");
 			return patient;
 		}
 
@@ -889,22 +848,22 @@ public class ResponseHighlightingInterceptorTest {
 			return Collections.singletonList(p);
 		}
 
-		public Map<String, Patient> getIdToPatient() {
-			Map<String, Patient> idToPatient = new HashMap<String, Patient>();
+		Map<String, Patient> getIdToPatient() {
+			Map<String, Patient> idToPatient = new HashMap<>();
 			{
 				Patient patient = createPatient1();
 				idToPatient.put("1", patient);
 			}
 			{
 				Patient patient = new Patient();
-				patient.getIdentifier().add(new IdentifierDt());
-				patient.getIdentifier().get(0).setUse(IdentifierUseEnum.OFFICIAL);
-				patient.getIdentifier().get(0).setSystem(new UriDt("urn:hapitest:mrns"));
+				patient.getIdentifier().add(new Identifier());
+				patient.getIdentifier().get(0).setUse(Identifier.IdentifierUse.OFFICIAL);
+				patient.getIdentifier().get(0).setSystem("urn:hapitest:mrns");
 				patient.getIdentifier().get(0).setValue("00002");
-				patient.getName().add(new HumanNameDt());
-				patient.getName().get(0).addFamily("Test");
+				patient.getName().add(new HumanName());
+				patient.getName().get(0).setFamily("Test");
 				patient.getName().get(0).addGiven("PatientTwo");
-				patient.getId().setValue("2");
+				patient.setId("2");
 				idToPatient.put("2", patient);
 			}
 			return idToPatient;
@@ -917,10 +876,9 @@ public class ResponseHighlightingInterceptorTest {
 		 * @return The resource
 		 */
 		@Read()
-		public Patient getResourceById(@IdParam IdDt theId) {
+		public Patient getResourceById(@IdParam IdType theId) {
 			String key = theId.getIdPart();
-			Patient retVal = getIdToPatient().get(key);
-			return retVal;
+			return getIdToPatient().get(key);
 		}
 
 		/**
@@ -945,10 +903,10 @@ public class ResponseHighlightingInterceptorTest {
 		}
 
 		@Search(queryName = "searchWithWildcardRetVal")
-		public List<? extends IResource> searchWithWildcardRetVal() {
+		public List<IBaseResource> searchWithWildcardRetVal() {
 			Patient p = new Patient();
 			p.setId("1234");
-			p.addName().addFamily("searchWithWildcardRetVal");
+			p.addName().setFamily("searchWithWildcardRetVal");
 			return Collections.singletonList(p);
 		}
 

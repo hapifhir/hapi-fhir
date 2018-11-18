@@ -177,6 +177,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedCompositeStringUnique> myParamsCompositeStringUnique;
 
+	@IndexedEmbedded
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinks;

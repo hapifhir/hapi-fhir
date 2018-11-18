@@ -39,6 +39,13 @@
 				is not yet possible to specify individual resource security when
 				using GraphQL.
 			</action>
+			<action type="fix">
+				The ResponseHighlighterInterceptor now declines to handle Binary responses
+				provided as a response from extended operations. In other words if the 
+				operation $foo returns a Binary resource, the ResponseHighliterInterceptor will
+				not provide syntax highlighting on the response. This was previously the case for
+				the /Binary endpoint, but not for other binary responses.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
