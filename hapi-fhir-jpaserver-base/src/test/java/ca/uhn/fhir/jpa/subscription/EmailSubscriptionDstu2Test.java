@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.email.JavaMailEmailSender;
@@ -16,12 +17,12 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetup;
-import com.icegreen.greenmail.util.ServerSetupTest;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import javax.mail.internet.InternetAddress;
@@ -31,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -44,6 +45,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
 	@Autowired
+	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
 
 	@After
@@ -142,7 +144,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
-		waitForSize(2, 60000, new Callable<Number>(){
+		waitForSize(2, 60000, new Callable<Number>() {
 			@Override
 			public Number call() {
 				int length = ourTestSmtp.getReceivedMessages().length;
