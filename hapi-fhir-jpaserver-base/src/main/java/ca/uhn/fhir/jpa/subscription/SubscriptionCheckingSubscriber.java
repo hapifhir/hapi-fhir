@@ -1,16 +1,29 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import java.util.List;
-
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.dao.MatchUrlService;
+import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessagingException;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*-
  * #%L
@@ -21,9 +34,9 @@ import org.springframework.messaging.MessagingException;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,24 +45,18 @@ import org.springframework.messaging.MessagingException;
  * #L%
  */
 
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
+@Component
+@Scope("prototype")
 public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriber.class);
 
 	private final ISubscriptionMatcher mySubscriptionMatcher;
-	
-	public SubscriptionCheckingSubscriber(IFhirResourceDao theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor, ISubscriptionMatcher theSubscriptionMatcher) {
-		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
+
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+
+	public SubscriptionCheckingSubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor, ISubscriptionMatcher theSubscriptionMatcher) {
+		super(theChannelType, theSubscriptionInterceptor);
 		this.mySubscriptionMatcher = theSubscriptionMatcher;
 	}
 
@@ -77,11 +84,10 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 		IIdType id = msg.getId(getContext());
 		String resourceType = id.getResourceType();
-		String resourceId = id.getIdPart();
 
 		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getRegisteredSubscriptions();
 
-		ourLog.trace("Testing {} subscriptions for applicability");
+		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
 
 		for (CanonicalSubscription nextSubscription : subscriptions) {
 
@@ -112,7 +118,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				continue;
 			}
 
-			if (!mySubscriptionMatcher.match(nextCriteriaString, msg)) {
+			if (!mySubscriptionMatcher.match(nextCriteriaString, msg).matched()) {
 				continue;
 			}
 
@@ -148,7 +154,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 	 */
 	protected IBundleProvider performSearch(String theCriteria) {
 		RuntimeResourceDefinition responseResourceDef = getSubscriptionDao().validateCriteriaAndReturnResourceDefinition(theCriteria);
-		SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(getSubscriptionDao(), getSubscriptionDao().getContext(), theCriteria, responseResourceDef);
+		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
 
 		RequestDetails req = new ServletSubRequestDetails();
 		req.setSubRequest(true);

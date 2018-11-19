@@ -670,7 +670,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx20484M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC</argLine>
 					<forkCount>0.6C</forkCount>
 				</configuration>
 			</plugin>

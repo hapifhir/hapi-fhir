@@ -162,16 +162,16 @@ public class SubscriptionActivatingSubscriber {
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	public void handleMessage(ResourceModifiedMessage.OperationTypeEnum theOperationType, IIdType theId, final IBaseResource theSubscription) throws MessagingException {
-
+		if (!theId.getResourceType().equals("Subscription")) {
+			return;
+		}
 		switch (theOperationType) {
 			case DELETE:
 				mySubscriptionInterceptor.unregisterSubscription(theId);
-				return;
+				break;
 			case CREATE:
 			case UPDATE:
-				if (!theId.getResourceType().equals("Subscription")) {
-					return;
-				}
+				mySubscriptionInterceptor.validateCriteria(theSubscription);
 				activateAndRegisterSubscriptionIfRequiredInTransaction(theSubscription);
 				break;
 			default:

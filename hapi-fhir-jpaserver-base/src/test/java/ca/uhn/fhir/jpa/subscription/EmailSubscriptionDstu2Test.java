@@ -39,9 +39,10 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(EmailSubscriptionDstu2Test.class);
 	private static GreenMail ourTestSmtp;
 	private static int ourListenerPort;
-	private SubscriptionEmailInterceptor mySubscriber;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
+	@Autowired
+	private SubscriptionEmailInterceptor mySubscriber;
 	@Autowired
 	private List<IFhirResourceDao<?>> myResourceDaos;
 	@Autowired
@@ -70,7 +71,6 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		emailSender.setSmtpServerPort(ourListenerPort);
 		emailSender.start();
 
-		mySubscriber = new SubscriptionEmailInterceptor();
 		mySubscriber.setEmailSender(emailSender);
 		mySubscriber.setResourceDaos(myResourceDaos);
 		mySubscriber.setFhirContext(myFhirCtx);

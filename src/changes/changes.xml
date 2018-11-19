@@ -16,6 +16,20 @@
 					</ul>
 				]]>
 			</action>
+			<action type="add">
+				Changed subscription processing, if the subscription criteria are straightforward (i.e. no
+				chained references, qualifiers or prefixes) then attempt to match the incoming resource against
+				the criteria in-memory.  If the subscription criteria can't be matched in-memory, then the
+				server falls back to the original subscription matching process of querying the database.  The
+				in-memory matcher can be disabled by setting isEnableInMemorySubscriptionMatching to "false" in
+				DaoConfig (by default it is true).  If isEnableInMemorySubscriptionMatching is "false", then all
+				subscription matching will query the database as before.
+			</action>
+			<action type="add">
+				Changed behaviour of FHIR Server to reject subscriptions with invalid criteria.  If a Subscription
+				is submitted with invalid criteria, the server returns HTTP 422 "Unprocessable Entity" and the
+				Subscription is not persisted.
+			</action>
 			<action type="fix">
 				The JPA server $expunge operation could sometimes fail to expunge if
 				another resource linked to a resource that was being
@@ -56,6 +70,16 @@
 				<![CDATA[<code>returnMethodOutcome</code>]]> which can be
 				used to return a raw response. This is handy for invoking operations
 				that might return arbitrary binary content.
+			</action>
+			<action type="add">
+				Moved state and functionality out of BaseHapiFhirDao.java into new classes: LogicalReferenceHelper,
+				ResourceIndexedSearchParams, IdHelperService, SearcchParamExtractorService, and MatchUrlService.
+			</action>
+			<action type="add">
+				Replaced explicit @Bean construction in BaseConfig.java with @ComponentScan.  Beans with state are annotated with
+				@Component and stateless beans are annotated as @Service.  Also changed SearchBuilder.java and the
+				three Subscriber classes into @Scope("protoype") so their dependencies can be @Autowired injected
+				as opposed to constructor parameters.
 			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">

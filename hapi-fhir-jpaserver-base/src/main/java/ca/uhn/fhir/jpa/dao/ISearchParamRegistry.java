@@ -20,9 +20,11 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,4 +55,8 @@ public interface ISearchParamRegistry {
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
 	void requestRefresh();
+
+	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
+
+	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
 }

@@ -100,7 +100,11 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	@Override
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (getSystem() != null) {
-			return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
+			if (getValue() != null) {
+				return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
+			} else {
+				return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|';
+			}
 		}
 		return ParameterUtil.escape(getValue());
 	}

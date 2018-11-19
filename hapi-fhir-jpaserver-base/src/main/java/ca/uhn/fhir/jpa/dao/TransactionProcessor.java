@@ -43,7 +43,10 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -80,6 +83,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private FhirContext myContext;
 	@Autowired
 	private ITransactionProcessorVersionAdapter<BUNDLE, BUNDLEENTRY> myVersionAdapter;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -390,7 +395,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			requestDetails.setParameters(new HashMap<>());
 			if (qIndex != -1) {
 				String params = url.substring(qIndex);
-				List<NameValuePair> parameters = BaseHapiFhirDao.translateMatchUrl(params);
+				List<NameValuePair> parameters = myMatchUrlService.translateMatchUrl(params);
 				for (NameValuePair next : parameters) {
 					paramValues.put(next.getName(), next.getValue());
 				}
