@@ -94,4 +94,9 @@ public class OkHttpRestfulRequest implements IHttpRequest {
         return myRequestTypeEnum.name();
     }
 
+	@Override
+	public void removeHeaders(String theHeaderName) {
+    	myRequestBuilder.removeHeader(theHeaderName);
+	}
+
 }

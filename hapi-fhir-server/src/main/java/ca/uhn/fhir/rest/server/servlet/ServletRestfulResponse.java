@@ -50,6 +50,7 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		theHttpResponse.setStatus(stausCode);
 		theHttpResponse.setContentType(contentType);
+		theHttpResponse.setCharacterEncoding(null);
 		if (bin.getContent() == null || bin.getContent().length == 0) {
 			return theHttpResponse.getOutputStream();
 		}

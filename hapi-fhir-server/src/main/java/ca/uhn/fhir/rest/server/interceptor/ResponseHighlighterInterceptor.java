@@ -17,7 +17,8 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.servlet.ServletException;
@@ -371,7 +372,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		/*
 		 * Not binary
 		 */
-		if (!force && "Binary".equals(theRequestDetails.getResourceName())) {
+		if (!force && (theResponseObject.getResponseResource() instanceof IBaseBinary)) {
 			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 

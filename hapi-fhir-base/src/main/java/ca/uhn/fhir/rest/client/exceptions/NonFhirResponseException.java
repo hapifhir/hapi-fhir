@@ -19,15 +19,18 @@ package ca.uhn.fhir.rest.client.exceptions;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.io.IOException;
-import java.io.Reader;
-
-import org.apache.commons.io.IOUtils;
 
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.CoverageIgnore;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @CoverageIgnore
 public class NonFhirResponseException extends BaseServerResponseException {
@@ -36,16 +39,16 @@ public class NonFhirResponseException extends BaseServerResponseException {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theMessage
-	 *            The message
-	 * @param theResponseText
-	 * @param theStatusCode
-	 * @param theResponseReader
-	 * @param theContentType
+	 *
+	 * @param theMessage    The message
+	 * @param theStatusCode The HTTP status code
 	 */
 	NonFhirResponseException(int theStatusCode, String theMessage) {
 		super(theStatusCode, theMessage);
+	}
+
+	public static NonFhirResponseException newInstance(int theStatusCode, String theContentType, InputStream theInputStream) {
+		return newInstance(theStatusCode, theContentType, new InputStreamReader(theInputStream, Charsets.UTF_8));
 	}
 
 	public static NonFhirResponseException newInstance(int theStatusCode, String theContentType, Reader theReader) {
@@ -53,7 +56,13 @@ public class NonFhirResponseException extends BaseServerResponseException {
 		try {
 			responseBody = IOUtils.toString(theReader);
 		} catch (IOException e) {
-			IOUtils.closeQuietly(theReader);
+			// ignore
+		} finally {
+			try {
+				theReader.close();
+			} catch (IOException theE) {
+				// ignore
+			}
 		}
 
 		NonFhirResponseException retVal;

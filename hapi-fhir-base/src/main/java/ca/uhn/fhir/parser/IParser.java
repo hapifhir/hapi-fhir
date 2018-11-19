@@ -19,14 +19,23 @@ package ca.uhn.fhir.parser;
  * limitations under the License.
  * #L%
  */
-import java.io.*;
-import java.util.*;
 
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A parser, which can be used to convert between HAPI FHIR model/structure objects, and their respective String wire
@@ -129,6 +138,20 @@ public interface IParser {
 
 	/**
 	 * Parses a resource
+	 *
+	 * @param theResourceType
+	 *           The resource type to use. This can be used to explicitly specify a class which extends a built-in type
+	 *           (e.g. a custom type extending the default Patient class)
+	 * @param theInputStream
+	 *           The InputStream to parse input from, <b>with an implied charset of UTF-8</b>. Note that the InputStream will not be closed by the parser upon completion.
+	 * @return A parsed resource
+	 * @throws DataFormatException
+	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
+	 */
+	<T extends IBaseResource> T parseResource(Class<T> theResourceType, InputStream theInputStream) throws DataFormatException;
+
+	/**
+	 * Parses a resource
 	 * 
 	 * @param theResourceType
 	 *           The resource type to use. This can be used to explicitly specify a class which extends a built-in type
@@ -152,6 +175,19 @@ public interface IParser {
 	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
 	IBaseResource parseResource(Reader theReader) throws ConfigurationException, DataFormatException;
+
+	/**
+	 * Parses a resource
+	 *
+	 * @param theInputStream
+	 *           The InputStream to parse input from (charset is assumed to be UTF-8).
+	 *           Note that the stream will not be closed by the parser upon completion.
+	 * @return A parsed resource. Note that the returned object will be an instance of {@link IResource} or
+	 *         {@link IAnyResource} depending on the specific FhirContext which created this parser.
+	 * @throws DataFormatException
+	 *            If the resource can not be parsed because the data is not recognized or invalid for any reason
+	 */
+	IBaseResource parseResource(InputStream theInputStream) throws ConfigurationException, DataFormatException;
 
 	/**
 	 * Parses a resource

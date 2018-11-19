@@ -85,6 +85,11 @@ public class JaxRsHttpRequest implements IHttpRequest {
 		return myRequestType.name();
 	}
 
+	@Override
+	public void removeHeaders(String theHeaderName) {
+		myHeaders.remove(theHeaderName);
+	}
+
 	/**
 	 * Get the Request
 	 *

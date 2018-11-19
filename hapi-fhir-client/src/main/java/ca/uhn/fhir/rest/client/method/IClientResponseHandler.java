@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.client.method;
  */
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 public interface IClientResponseHandler<T> {
 
-	T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
+	T invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
 
 }
