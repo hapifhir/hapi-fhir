@@ -2,10 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -62,6 +59,23 @@ public class ResponseHighlightingInterceptorTest {
 	public void before() {
 		ourInterceptor.setShowRequestHeaders(new ResponseHighlighterInterceptor().isShowRequestHeaders());
 		ourInterceptor.setShowResponseHeaders(new ResponseHighlighterInterceptor().isShowResponseHeaders());
+	}
+
+	/**
+	 * Return a Binary response type - Client accepts text/html but is not a browser
+	 */
+	@Test
+	public void testBinaryOperationHtmlResponseFromProvider() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/html/$binaryOp");
+		httpGet.addHeader("Accept", "text/html");
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("text/html", status.getFirstHeader("content-type").getValue());
+		assertEquals("<html>DATA</html>", responseContent);
+		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
 	}
 
 	@Test
@@ -847,6 +861,21 @@ public class ResponseHighlightingInterceptorTest {
 			p.addIdentifier().setSystem("foo");
 			return Collections.singletonList(p);
 		}
+
+		@Operation(name="binaryOp", idempotent = true)
+		public Binary binaryOp(@IdParam IdType theId) {
+			Binary retVal = new Binary();
+			retVal.setId(theId);
+			if (theId.getIdPart().equals("html")) {
+				retVal.setContent("<html>DATA</html>".getBytes(Charsets.UTF_8));
+				retVal.setContentType("text/html");
+			}else {
+				retVal.setContent(new byte[]{1, 2, 3, 4});
+				retVal.setContentType(theId.getIdPart());
+			}
+			return retVal;
+		}
+
 
 		Map<String, Patient> getIdToPatient() {
 			Map<String, Patient> idToPatient = new HashMap<>();
