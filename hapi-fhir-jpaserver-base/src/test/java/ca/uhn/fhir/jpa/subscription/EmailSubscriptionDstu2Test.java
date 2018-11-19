@@ -144,7 +144,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
-		waitForSize(2, 60000, new Callable<Number>(){
+		waitForSize(2, 60000, new Callable<Number>() {
 			@Override
 			public Number call() {
 				int length = ourTestSmtp.getReceivedMessages().length;

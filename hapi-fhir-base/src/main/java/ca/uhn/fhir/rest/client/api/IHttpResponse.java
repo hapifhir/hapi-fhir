@@ -70,7 +70,7 @@ public interface IHttpResponse {
 	void close();
 
 	/**
-	 * Returna reader for the response entity
+	 * Returns a reader for the response entity
 	 */
 	Reader createReader() throws IOException;
 

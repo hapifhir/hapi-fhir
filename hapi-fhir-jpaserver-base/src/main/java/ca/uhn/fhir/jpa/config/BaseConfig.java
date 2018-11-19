@@ -24,7 +24,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ScheduledExecutorService;
 
 /*
  * #%L
@@ -85,11 +84,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	public abstract FhirContext fhirContext();
 
 	@Bean()
-	public ScheduledExecutorService scheduledExecutorService() {
+	public ScheduledExecutorFactoryBean scheduledExecutorService() {
 		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
 		b.setPoolSize(5);
 		b.afterPropertiesSet();
-		return b.getObject();
+		return b;
 	}
 
 	@Bean(name = "mySubscriptionTriggeringProvider")
@@ -101,16 +100,16 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Bean()
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-		retVal.setConcurrentExecutor(scheduledExecutorService());
-		retVal.setScheduledExecutor(scheduledExecutorService());
+		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
+		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
 		return retVal;
 	}
 
 	@Bean(name = TASK_EXECUTOR_NAME)
 	public AsyncTaskExecutor taskExecutor() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-		retVal.setConcurrentExecutor(scheduledExecutorService());
-		retVal.setScheduledExecutor(scheduledExecutorService());
+		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
+		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
 		return retVal;
 	}
 

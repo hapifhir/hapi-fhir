@@ -20,12 +20,11 @@ package ca.uhn.fhir.rest.client.apache;
  * #L%
  */
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.*;
-
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -34,13 +33,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  * A Http Request based on Apache. This is an adapter around the class
  * {@link org.apache.http.client.methods.HttpRequestBase HttpRequestBase}
- * 
+ *
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 public class ApacheHttpRequest implements IHttpRequest {
@@ -79,6 +79,7 @@ public class ApacheHttpRequest implements IHttpRequest {
 
 	/**
 	 * Get the ApacheRequest
+	 *
 	 * @return the ApacheRequest
 	 */
 	public HttpRequestBase getApacheRequest() {
@@ -88,6 +89,12 @@ public class ApacheHttpRequest implements IHttpRequest {
 	@Override
 	public String getHttpVerbName() {
 		return myRequest.getMethod();
+	}
+
+	@Override
+	public void removeHeaders(String theHeaderName) {
+		Validate.notBlank(theHeaderName, "theHeaderName must not be null or blank");
+		myRequest.removeHeaders(theHeaderName);
 	}
 
 	@Override
