@@ -339,7 +339,7 @@ public abstract class BaseClient implements IRestfulClient {
 				IClientResponseHandlerHandlesBinary<T> handlesBinary = (IClientResponseHandlerHandlesBinary<T>) binding;
 				if (handlesBinary.isBinary()) {
 					try (InputStream reader = response.readEntity()) {
-						return handlesBinary.invokeClient(mimeType, reader, response.getStatus(), headers);
+						return handlesBinary.invokeClientForBinary(mimeType, reader, response.getStatus(), headers);
 					}
 				}
 			}
