@@ -2,10 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
@@ -79,6 +76,16 @@ public class SearchParamExtractorDstu3Test {
 			@Override
 			public void requestRefresh() {
 				// nothing
+			}
+
+			@Override
+			public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
+				return null;
+			}
+
+			@Override
+			public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
+				return null;
 			}
 		};
 

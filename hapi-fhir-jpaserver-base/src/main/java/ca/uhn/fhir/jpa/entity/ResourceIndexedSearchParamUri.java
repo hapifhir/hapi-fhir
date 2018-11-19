@@ -179,4 +179,13 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return hash(theResourceType, theParamName, theUri);
 	}
 
+	@Override
+	public boolean matches(IQueryParameterType theParam) {
+		if (!(theParam instanceof UriParam)) {
+			return false;
+		}
+		UriParam uri = (UriParam)theParam;
+		return getUri().equalsIgnoreCase(uri.getValueNotNull());
+	}
+
 }

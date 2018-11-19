@@ -26,11 +26,15 @@ import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Optional;
 
+@Component
+@Lazy
 public class SubscriptionWebsocketInterceptor extends BaseSubscriptionInterceptor {
 
 	@Autowired

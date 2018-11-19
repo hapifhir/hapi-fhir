@@ -20,21 +20,19 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
+import org.springframework.stereotype.Component;
 
 public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptionSubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriber.class);
 
-	public BaseSubscriptionDeliverySubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
-		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
+	public BaseSubscriptionDeliverySubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+		super(theChannelType, theSubscriptionInterceptor);
 	}
 
 	@Override
@@ -58,21 +56,6 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 			if (!subscriptionTypeApplies(msg.getSubscription())) {
 				return;
 			}
-
-			// Load the resource
-			IIdType payloadId = msg.getPayloadId(getContext());
-			Class type = getContext().getResourceDefinition(payloadId.getResourceType()).getImplementingClass();
-			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(type);
-			IBaseResource loadedPayload;
-			try {
-				loadedPayload = dao.read(payloadId);
-			} catch (ResourceNotFoundException e) {
-				// This can happen if a last minute failure happens when saving a resource,
-				// eg a constraint causes the transaction to roll back on commit
-				ourLog.warn("Unable to find resource {} - Aborting delivery", payloadId.getValue());
-				return;
-			}
-			msg.setPayload(getContext(), loadedPayload);
 
 			handleMessage(msg);
 		} catch (Exception e) {

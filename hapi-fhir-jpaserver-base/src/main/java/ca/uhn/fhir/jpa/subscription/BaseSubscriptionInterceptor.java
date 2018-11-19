@@ -1,42 +1,27 @@
 package ca.uhn.fhir.jpa.subscription;
 
-/*-
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2018 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.jpa.dao.MatchUrlService;
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherCompositeInMemoryDatabase;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -52,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -73,6 +59,26 @@ import javax.annotation.PreDestroy;
 import java.util.*;
 import java.util.concurrent.*;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2018 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> extends ServerOperationInterceptorAdapter {
 
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
@@ -91,9 +97,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
 	private ThreadPoolExecutor myDeliveryExecutor;
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
-	private IFhirResourceDao<?> mySubscriptionDao;
-	@Autowired
-	private List<IFhirResourceDao<?>> myResourceDaos;
+
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired(required = false)
@@ -104,7 +108,16 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired
 	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
-	private Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> myResourceTypeToDao;
+	@Autowired
+	private SubscriptionMatcherCompositeInMemoryDatabase mySubscriptionMatcherCompositeInMemoryDatabase;
+	@Autowired
+	private SubscriptionMatcherDatabase mySubscriptionMatcherDatabase;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private BeanFactory beanFactory;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
 	/**
@@ -286,26 +299,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	public abstract Subscription.SubscriptionChannelType getChannelType();
 
-	// TODO KHS move out
-	@SuppressWarnings("unchecked")
-	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
-		if (myResourceTypeToDao == null) {
-			Map<Class<? extends IBaseResource>, IFhirResourceDao<?>> theResourceTypeToDao = new HashMap<>();
-			for (IFhirResourceDao<?> next : myResourceDaos) {
-				theResourceTypeToDao.put(next.getResourceType(), next);
-			}
-
-			if (this instanceof IFhirResourceDao<?>) {
-				IFhirResourceDao<?> thiz = (IFhirResourceDao<?>) this;
-				theResourceTypeToDao.put(thiz.getResourceType(), thiz);
-			}
-
-			myResourceTypeToDao = theResourceTypeToDao;
-		}
-
-		return (IFhirResourceDao<R>) myResourceTypeToDao.get(theType);
-	}
-
 	protected MessageChannel getDeliveryChannel(CanonicalSubscription theSubscription) {
 		return mySubscribableChannel.get(theSubscription.getIdElement(myCtx).getIdPart());
 	}
@@ -335,9 +328,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		myProcessingChannel = theProcessingChannel;
 	}
 
-	protected IFhirResourceDao<?> getSubscriptionDao() {
-		return mySubscriptionDao;
-	}
 
 	public List<CanonicalSubscription> getRegisteredSubscriptions() {
 		return new ArrayList<>(myIdToSubscription.values());
@@ -378,7 +368,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			RequestDetails req = new ServletSubRequestDetails();
 			req.setSubRequest(true);
 
-			IBundleProvider subscriptionBundleList = getSubscriptionDao().search(map, req);
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			IBundleProvider subscriptionBundleList = subscriptionDao.search(map, req);
 			if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
 				ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
 			}
@@ -436,8 +427,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	protected void registerSubscriptionCheckingSubscriber() {
 		if (mySubscriptionCheckingSubscriber == null) {
-			ISubscriptionMatcher subscriptionMatcher = new SubscriptionMatcherDatabase(getSubscriptionDao(), this);
-			mySubscriptionCheckingSubscriber = new SubscriptionCheckingSubscriber(getSubscriptionDao(), getChannelType(), this, subscriptionMatcher );
+			mySubscriptionCheckingSubscriber = beanFactory.getBean(SubscriptionCheckingSubscriber.class, getChannelType(), this, mySubscriptionMatcherCompositeInMemoryDatabase);
 		}
 		getProcessingChannel().subscribe(mySubscriptionCheckingSubscriber);
 	}
@@ -501,9 +491,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		myCtx = theCtx;
 	}
 
-	public void setResourceDaos(List<IFhirResourceDao<?>> theResourceDaos) {
-		myResourceDaos = theResourceDaos;
-	}
 
 	@VisibleForTesting
 	public void setTxManager(PlatformTransactionManager theTxManager) {
@@ -512,15 +499,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	@PostConstruct
 	public void start() {
-		for (IFhirResourceDao<?> next : myResourceDaos) {
-			if (next.getResourceType() != null) {
-				if (myCtx.getResourceDefinition(next.getResourceType()).getName().equals("Subscription")) {
-					mySubscriptionDao = next;
-				}
-			}
-		}
-		Validate.notNull(mySubscriptionDao);
-
 		if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4) {
 			Validate.notNull(myEventDefinitionDaoR4);
 		}
@@ -555,7 +533,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(getSubscriptionDao(), getChannelType(), this, myTxManager, myAsyncTaskExecutor);
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(subscriptionDao, getChannelType(), this, myTxManager, myAsyncTaskExecutor);
 		}
 
 		registerSubscriptionCheckingSubscriber();
@@ -620,4 +599,26 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 
+	public IFhirResourceDao<?> getSubscriptionDao() {
+		return myDaoRegistry.getResourceDao("Subscription");
+	}
+
+	public IFhirResourceDao getDao(Class type) {
+		return myDaoRegistry.getResourceDao(type);
+	}
+	
+	public void setResourceDaos(List<IFhirResourceDao> theResourceDaos) {
+		myDaoRegistry.setResourceDaos(theResourceDaos);
+	}
+
+	public void validateCriteria(final S theResource) {
+		CanonicalSubscription subscription = canonicalize(theResource);
+		String criteria = subscription.getCriteriaString();
+		try {
+			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myCtx, criteria);
+			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
+		} catch (InvalidRequestException e) {
+			throw new UnprocessableEntityException("Invalid subscription criteria submitted: "+criteria+" "+e.getMessage());
+		}
+	}
 }

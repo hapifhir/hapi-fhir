@@ -149,4 +149,13 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		b.append("value", getValue());
 		return b.build();
 	}
+
+	@Override
+	public boolean matches(IQueryParameterType theParam) {
+		if (!(theParam instanceof NumberParam)) {
+			return false;
+		}
+		NumberParam number = (NumberParam)theParam;
+		return getValue().equals(number.getValue());
+	}
 }

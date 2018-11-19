@@ -159,12 +159,6 @@ public class JpaServerDemo extends RestfulServer {
 		if (fhirVersion == FhirVersionEnum.DSTU3) {
 			 registerProvider(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
 		}
-
-		// Enable various subscription types
-		registerInterceptor(myAppCtx.getBean(SubscriptionWebsocketInterceptor.class));
-		registerInterceptor(myAppCtx.getBean(SubscriptionRestHookInterceptor.class));
-		registerInterceptor(myAppCtx.getBean(SubscriptionEmailInterceptor.class));
-
 	}
 
 }
