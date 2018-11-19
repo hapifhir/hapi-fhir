@@ -348,9 +348,11 @@ public abstract class BaseClient implements IRestfulClient {
 				InputStream inputStreamToReturn = inputStream;
 
 				if (ourLog.isTraceEnabled() || myKeepResponses || theLogRequestAndResponse) {
-					String responseString = IOUtils.toString(inputStream, Charsets.UTF_8);
-					keepResponseAndLogIt(theLogRequestAndResponse, response, responseString);
-					inputStreamToReturn = new ByteArrayInputStream(responseString.getBytes(Charsets.UTF_8));
+					if (inputStream != null) {
+						String responseString = IOUtils.toString(inputStream, Charsets.UTF_8);
+						keepResponseAndLogIt(theLogRequestAndResponse, response, responseString);
+						inputStreamToReturn = new ByteArrayInputStream(responseString.getBytes(Charsets.UTF_8));
+					}
 				}
 
 				return binding.invokeClient(mimeType, inputStreamToReturn, response.getStatus(), headers);

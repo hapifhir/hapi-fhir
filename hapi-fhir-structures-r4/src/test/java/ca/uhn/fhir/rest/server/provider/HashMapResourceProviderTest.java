@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -89,7 +90,14 @@ public class HashMapResourceProviderTest {
 
 		assertEquals(0, myPatientResourceProvider.getCountDelete());
 
-		ourClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
+		IDeleteTyped iDeleteTyped = ourClient.delete().resourceById(id.toUnqualifiedVersionless());
+		ourLog.info("About to execute");
+		try {
+			iDeleteTyped.execute();
+		} catch (NullPointerException e) {
+			ourLog.error("NPE", e);
+			fail(e.toString());
+		}
 
 		assertEquals(1, myPatientResourceProvider.getCountDelete());
 
