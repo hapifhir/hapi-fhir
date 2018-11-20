@@ -557,11 +557,12 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		createUniqueIndexCoverageBeneficiary();
 
-		myResourceReindexingSvc.markAllResourcesForReindexing();
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.markAllResourcesForReindexing("Coverage");
+		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
+		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+		ourLog.info("** Uniques: {}", uniques);
 		assertEquals(uniques.toString(), 1, uniques.size());
 		assertEquals("Coverage/" + id3.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Coverage?beneficiary=Patient%2F" + id2.getIdPart() + "&identifier=urn%3Afoo%3Abar%7C123", uniques.get(0).getIndexString());
