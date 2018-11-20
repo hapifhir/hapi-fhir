@@ -30,6 +30,7 @@ import org.hl7.fhir.dstu3.model.Contributor.ContributorType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.ExpansionProfile.DesignationIncludeDesignationComponent;
 import org.hl7.fhir.dstu3.model.ExpansionProfile.SystemVersionProcessingMode;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Expression.ExpressionLanguage;
 import org.hl7.fhir.r4.model.Questionnaire.EnableWhenBehavior;
@@ -16202,6 +16203,9 @@ public class VersionConvertor_30_40 {
       tgt.addInitial().setValue(convertType(src.getInitial()));
     for (org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent t : src.getItem())
       tgt.addItem(convertQuestionnaireItemComponent(t));
+    for (org.hl7.fhir.dstu3.model.Extension t : src.getModifierExtension()) {
+    	tgt.addModifierExtension(convertExtension(t));
+    }
     return tgt;
   }
 
