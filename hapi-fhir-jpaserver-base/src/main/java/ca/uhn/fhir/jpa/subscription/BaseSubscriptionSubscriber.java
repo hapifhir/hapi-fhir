@@ -25,20 +25,16 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
-	@Autowired
-	DaoRegistry myDaoRegistry;
-
 	private final Subscription.SubscriptionChannelType myChannelType;
 	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
-
+	@Autowired
+	DaoRegistry myDaoRegistry;
 	private IFhirResourceDao<?> mySubscriptionDao;
 
 	/**
@@ -47,6 +43,11 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	public BaseSubscriptionSubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		myChannelType = theChannelType;
 		mySubscriptionInterceptor = theSubscriptionInterceptor;
+	}
+
+	@SuppressWarnings("unused") // Don't delete, used in Smile
+	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
 	}
 
 	@PostConstruct
@@ -85,7 +86,7 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	 */
 	static boolean subscriptionTypeApplies(String theSubscriptionChannelTypeCode, Subscription.SubscriptionChannelType theChannelType) {
 		boolean subscriptionTypeApplies = false;
- 		if (theSubscriptionChannelTypeCode != null) {
+		if (theSubscriptionChannelTypeCode != null) {
 			if (theChannelType.toCode().equals(theSubscriptionChannelTypeCode)) {
 				subscriptionTypeApplies = true;
 			}

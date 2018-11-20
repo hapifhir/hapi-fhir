@@ -160,6 +160,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
 	protected IResourceSearchViewDao myResourceViewDao;
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired(required = true)
 	private DaoConfig myConfig;
 	private FhirContext myContext;
@@ -171,8 +173,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
-	@Autowired
-	protected ISearchParamRegistry mySearchParamRegistry;
 	//@Autowired
 	//private ISearchResultDao mySearchResultDao;
 	@Autowired
@@ -188,11 +188,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	private ApplicationContext myApplicationContext;
 
-	public static void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
-		if (theRequestDetails != null) {
-			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
-		}
-	}
 	/**
 	 * Returns the newly created forced ID. If the entity already had a forced ID, or if
 	 * none was created, returns null.
@@ -454,7 +449,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
-
 	private void extractTagsHapi(IResource theResource, ResourceTable theEntity, Set<ResourceTag> allDefs) {
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
@@ -553,6 +547,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 		}
 	}
+
 	protected void flushJpaSession() {
 		SessionImpl session = (SessionImpl) myEntityManager.unwrap(Session.class);
 		int insertionCount = session.getActionQueue().numberOfInsertions();
@@ -751,12 +746,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return LogicalReferenceHelper.isLogicalReference(myConfig, theId);
 	}
 
-	public static void markRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
-		if (theRequestDetails != null) {
-			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
-		}
-	}
-
 	@Override
 	public SearchBuilder newSearchBuilder() {
 		return beanFactory.getBean(SearchBuilder.class, this);
@@ -776,33 +765,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		List<IServerInterceptor> interceptors = getConfig().getInterceptors();
 		for (IServerInterceptor next : interceptors) {
 			next.incomingRequestPreHandled(theOperationType, theRequestDetails);
-		}
-	}
-
-	public String parseContentTextIntoWords(IBaseResource theResource) {
-		StringBuilder retVal = new StringBuilder();
-		@SuppressWarnings("rawtypes")
-		List<IPrimitiveType> childElements = getContext().newTerser().getAllPopulatedChildElementsOfType(theResource, IPrimitiveType.class);
-		for (@SuppressWarnings("rawtypes")
-			IPrimitiveType nextType : childElements) {
-			if (nextType instanceof StringDt || nextType.getClass().getSimpleName().equals("StringType")) {
-				String nextValue = nextType.getValueAsString();
-				if (isNotBlank(nextValue)) {
-					retVal.append(nextValue.replace("\n", " ").replace("\r", " "));
-					retVal.append("\n");
-				}
-			}
-		}
-		return retVal.toString();
-	}
-
-	public void populateFullTextFields(final IBaseResource theResource, ResourceTable theEntity) {
-		if (theEntity.getDeleted() != null) {
-			theEntity.setNarrativeTextParsedIntoWords(null);
-			theEntity.setContentTextParsedIntoWords(null);
-		} else {
-			theEntity.setNarrativeTextParsedIntoWords(parseNarrativeTextIntoWords(theResource));
-			theEntity.setContentTextParsedIntoWords(parseContentTextIntoWords(theResource));
 		}
 	}
 
@@ -1098,7 +1060,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
-
 	/**
 	 * This method is called when an update to an existing resource detects that the resource supplied for update is missing a tag/profile/security label that the currently persisted resource holds.
 	 * <p>
@@ -1312,7 +1273,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		EncodedResource changed;
 		if (theDeletedTimestampOrNull != null) {
-			
+
 			newParams = new ResourceIndexedSearchParams();
 
 			theEntity.setDeleted(theDeletedTimestampOrNull);
@@ -1340,10 +1301,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				} else {
 					theEntity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
 				}
-				
+
 				newParams.setParamsOn(theEntity);
 				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
-				populateFullTextFields(theResource, theEntity);
+				populateFullTextFields(myContext, theResource, theEntity);
 			} else {
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, false);
@@ -1634,6 +1595,50 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	}
 
+	@Override
+	public ISearchParamRegistry getSearchParamRegistry() {
+		return mySearchParamRegistry;
+	}
+
+	public static void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
+		}
+	}
+
+	public static void markRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
+		}
+	}
+
+	public static String parseContentTextIntoWords(FhirContext theContext, IBaseResource theResource) {
+		StringBuilder retVal = new StringBuilder();
+		@SuppressWarnings("rawtypes")
+		List<IPrimitiveType> childElements = theContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IPrimitiveType.class);
+		for (@SuppressWarnings("rawtypes")
+			IPrimitiveType nextType : childElements) {
+			if (nextType instanceof StringDt || nextType.getClass().getSimpleName().equals("StringType")) {
+				String nextValue = nextType.getValueAsString();
+				if (isNotBlank(nextValue)) {
+					retVal.append(nextValue.replace("\n", " ").replace("\r", " "));
+					retVal.append("\n");
+				}
+			}
+		}
+		return retVal.toString();
+	}
+
+	public static void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity) {
+		if (theEntity.getDeleted() != null) {
+			theEntity.setNarrativeTextParsedIntoWords(null);
+			theEntity.setContentTextParsedIntoWords(null);
+		} else {
+			theEntity.setNarrativeTextParsedIntoWords(parseNarrativeTextIntoWords(theResource));
+			theEntity.setContentTextParsedIntoWords(parseContentTextIntoWords(theContext, theResource));
+		}
+	}
+
 	public static String decodeResource(byte[] theResourceBytes, ResourceEncodingEnum theResourceEncoding) {
 		String resourceText = null;
 		switch (theResourceEncoding) {
@@ -1760,9 +1765,5 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			throw new ResourceNotFoundException(
 				"Resource with ID " + theEntity.getIdDt().getIdPart() + " exists but it is not of type " + theResourceName + ", found resource of type " + theEntity.getResourceType());
 		}
-	}
-
-	public ISearchParamRegistry getSearchParamRegistry() {
-		return mySearchParamRegistry;
 	}
 }

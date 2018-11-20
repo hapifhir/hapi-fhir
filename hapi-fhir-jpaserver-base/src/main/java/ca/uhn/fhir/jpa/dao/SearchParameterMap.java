@@ -298,7 +298,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	 * This method creates a URL query string representation of the parameters in this
 	 * object, excluding the part before the parameters, e.g.
 	 * <p>
-	 * <code>?name=smith&_sort=Patient:family</code>
+	 * <code>?name=smith&amp;_sort=Patient:family</code>
 	 * </p>
 	 * <p>
 	 * This method <b>excludes</b> the <code>_count</code> parameter,

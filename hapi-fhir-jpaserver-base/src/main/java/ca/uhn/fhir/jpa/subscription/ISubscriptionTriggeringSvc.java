@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.websocket;
+package ca.uhn.fhir.jpa.subscription;
 
 /*-
  * #%L
@@ -20,24 +20,14 @@ package ca.uhn.fhir.jpa.subscription.websocket;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
-import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
-import org.hl7.fhir.r4.model.Subscription;
-import org.springframework.messaging.MessageHandler;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Optional;
+import java.util.List;
 
-public class SubscriptionWebsocketInterceptor extends BaseSubscriptionInterceptor {
-
-	@Override
-	protected Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
-		return Optional.empty();
-	}
-
-	@Override
-	public Subscription.SubscriptionChannelType getChannelType() {
-		return Subscription.SubscriptionChannelType.WEBSOCKET;
-	}
-
-
+public interface ISubscriptionTriggeringSvc {
+	IBaseParameters triggerSubscription(List<UriParam> theResourceIds, List<StringParam> theSearchUrls, @IdParam IIdType theSubscriptionId);
 }

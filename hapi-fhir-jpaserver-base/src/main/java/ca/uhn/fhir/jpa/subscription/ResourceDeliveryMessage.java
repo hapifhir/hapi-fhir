@@ -37,6 +37,8 @@ public class ResourceDeliveryMessage {
 	private transient CanonicalSubscription mySubscription;
 	@JsonProperty("subscription")
 	private String mySubscriptionString;
+	@JsonProperty("payload")
+	private String myPayloadString;
 	@JsonIgnore
 	private transient IBaseResource myPayload;
 	@JsonProperty("payloadId")
@@ -60,8 +62,13 @@ public class ResourceDeliveryMessage {
 	}
 
 	public IBaseResource getPayload(FhirContext theCtx) {
-		Validate.notNull(myPayload);
-		return myPayload;
+		Validate.notNull(myPayloadString);
+		IBaseResource retVal = myPayload;
+		if (retVal == null) {
+			retVal = theCtx.newJsonParser().parseResource(myPayloadString);
+			myPayload = retVal;
+		}
+		return retVal;
 	}
 
 	public IIdType getPayloadId(FhirContext theCtx) {
@@ -88,6 +95,7 @@ public class ResourceDeliveryMessage {
 
 	public void setPayload(FhirContext theCtx, IBaseResource thePayload) {
 		myPayload = thePayload;
+		myPayloadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
 	}
 
 	public void setPayloadId(IIdType thePayloadId) {

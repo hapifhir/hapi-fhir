@@ -4,8 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
+import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
+import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
+import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +39,9 @@ import javax.annotation.Nonnull;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -116,6 +121,34 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Bean
 	public IResourceReindexingSvc resourceReindexingSvc() {
 		return new ResourceReindexingSvcImpl();
+	}
+
+	@Bean
+	public IStaleSearchDeletingSvc staleSearchDeletingSvc() {
+		return new StaleSearchDeletingSvcImpl();
+	}
+
+	/**
+	 * Note: If you're going to use this, you need to provide a bean
+	 * of type {@link ca.uhn.fhir.jpa.subscription.email.IEmailSender}
+	 * in your own Spring config
+	 */
+	@Bean
+	@Lazy
+	public SubscriptionEmailInterceptor subscriptionEmailInterceptor() {
+		return new SubscriptionEmailInterceptor();
+	}
+
+	@Bean
+	@Lazy
+	public SubscriptionRestHookInterceptor subscriptionRestHookInterceptor() {
+		return new SubscriptionRestHookInterceptor();
+	}
+
+	@Bean
+	@Lazy
+	public SubscriptionWebsocketInterceptor subscriptionWebsocketInterceptor() {
+		return new SubscriptionWebsocketInterceptor();
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {

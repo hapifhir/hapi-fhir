@@ -22,21 +22,13 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component
-@Lazy
 public class SubscriptionRestHookInterceptor extends BaseSubscriptionInterceptor {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRestHookInterceptor.class);
-
 	@Autowired
 	BeanFactory myBeanFactory;
 

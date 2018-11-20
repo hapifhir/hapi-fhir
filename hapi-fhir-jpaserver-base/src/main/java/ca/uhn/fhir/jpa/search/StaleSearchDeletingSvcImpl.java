@@ -44,7 +44,11 @@ import java.util.Date;
 /**
  * Deletes old searches
  */
-@Service
+//
+// NOTE: This is not a @Service because we manually instantiate
+// it in BaseConfig. This is so that we can override the definition
+// in Smile.
+//
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	public static final long DEFAULT_CUTOFF_SLACK = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);

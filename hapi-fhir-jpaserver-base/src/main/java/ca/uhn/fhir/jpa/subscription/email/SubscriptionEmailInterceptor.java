@@ -36,9 +36,6 @@ import java.util.Optional;
  * of type {@link ca.uhn.fhir.jpa.subscription.email.IEmailSender}
  * in your own Spring config
  */
-
-@Component
-@Lazy
 public class SubscriptionEmailInterceptor extends BaseSubscriptionInterceptor {
 
 	/**

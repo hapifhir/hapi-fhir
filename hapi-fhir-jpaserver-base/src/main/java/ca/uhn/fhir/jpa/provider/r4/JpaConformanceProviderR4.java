@@ -66,9 +66,13 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
-		mySearchParamRegistry = theSystemDao.getSearchParamRegistry();
 		super.setCache(false);
 		setIncludeResourceCounts(true);
+		setSearchParamRegistry(theSystemDao.getSearchParamRegistry());
+	}
+
+	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
 	@Override
