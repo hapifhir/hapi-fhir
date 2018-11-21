@@ -1197,7 +1197,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		int sleep = 100;
 
 		long start = System.currentTimeMillis();
-		Thread.sleep(sleep);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(sleep);
 
 		IIdType id1a;
 		{
@@ -1216,7 +1216,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		ourLog.info("Res 2: {}", myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 		ourLog.info("Res 3: {}", myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 
-		Thread.sleep(sleep);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(sleep);
 		long end = System.currentTimeMillis();
 
 		SearchParameterMap map;
