@@ -35,6 +35,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.context.*;
@@ -89,7 +90,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	}
 
 	/**
-	 * Constructor allowing the description, servername and server to be set
+	 * Constructor allowing the description, server name, and server version to be set
 	 * 
 	 * @param ctx
 	 *           the {@link FhirContext} instance.
@@ -106,6 +107,25 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		serverConfiguration.setImplementationDescription(StringUtils.defaultIfEmpty(implementationDescription, ""));
 		serverConfiguration.setServerName(StringUtils.defaultIfEmpty(serverName, ""));
 		serverConfiguration.setServerVersion(StringUtils.defaultIfEmpty(serverVersion, ""));
+	}
+
+	/**
+	 * Constructor allowing the description, server name, server version, and conformance date to be set
+	 *
+	 * @param ctx
+	 *           the {@link FhirContext} instance.
+	 * @param implementationDescription
+	 *           the implementation description. If null, "" is used
+	 * @param serverName
+	 *           the server name. If null, "" is used
+	 * @param serverVersion
+	 *           the server version. If null, "" is used
+	 * @param conformanceDate
+	 *           the conformance date.
+	 */
+	protected AbstractJaxRsConformanceProvider(FhirContext ctx, String implementationDescription, String serverName, String serverVersion, IPrimitiveType<Date> conformanceDate) {
+		this(ctx, implementationDescription, serverName, serverVersion);
+		serverConfiguration.setConformanceDate(conformanceDate);
 	}
 
 	/**
