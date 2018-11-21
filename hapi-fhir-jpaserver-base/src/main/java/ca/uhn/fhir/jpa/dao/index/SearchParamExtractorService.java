@@ -214,7 +214,8 @@ public class SearchParamExtractorService {
 
 	private void extractCompositeStringUniques(ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
 
-		List<JpaRuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(theEntity.getResourceType());
+		String resourceType = theEntity.getResourceType();
+		List<JpaRuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(resourceType);
 
 		for (JpaRuntimeSearchParam next : uniqueSearchParams) {
 
@@ -282,7 +283,7 @@ public class SearchParamExtractorService {
 				}
 			}
 
-			Set<String> queryStringsToPopulate = theParams.extractCompositeStringUniquesValueChains(theEntity.getResourceType(), partsChoices);
+			Set<String> queryStringsToPopulate = theParams.extractCompositeStringUniquesValueChains(resourceType, partsChoices);
 
 			for (String nextQueryString : queryStringsToPopulate) {
 				if (isNotBlank(nextQueryString)) {

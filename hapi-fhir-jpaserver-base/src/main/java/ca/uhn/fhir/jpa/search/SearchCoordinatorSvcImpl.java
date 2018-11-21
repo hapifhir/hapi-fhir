@@ -245,8 +245,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			});
 		} catch (Exception e) {
 			ourLog.warn("Failed to activate search: {}", e.toString());
-			// FIXME: aaaaa
-			ourLog.info("Failed to activate search", e);
+			ourLog.trace("Failed to activate search", e);
 			return Optional.empty();
 		}
 	}
@@ -518,10 +517,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 								 * user has requested resources 0-60, then they would get 0-50 back but the search
 								 * coordinator would then stop searching.SearchCoordinatorSvcImplTest
 								 */
-								// FIXME: aaaaaaaa
-//								List<Long> remainingResources = SearchCoordinatorSvcImpl.this.getResources(mySearch.getUuid(), mySyncedPids.size(), theToIndex);
-//								ourLog.debug("Adding {} resources to the existing {} synced resource IDs", remainingResources.size(), mySyncedPids.size());
-//								mySyncedPids.addAll(remainingResources);
 								keepWaiting = false;
 								break;
 							case FAILED:

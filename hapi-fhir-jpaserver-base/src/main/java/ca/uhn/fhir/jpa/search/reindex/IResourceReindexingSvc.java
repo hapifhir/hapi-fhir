@@ -20,6 +20,11 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #L%
  */
 
+import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import javax.transaction.Transactional;
+
 public interface IResourceReindexingSvc {
 
 	/**
@@ -34,7 +39,10 @@ public interface IResourceReindexingSvc {
 
 	/**
 	 * Called automatically by the job scheduler
-	 *
+	 */
+	void scheduleReindexingPass();
+
+	/**
 	 * @return Returns null if the system did not attempt to perform a pass because one was
 	 * already proceeding. Otherwise, returns the number of resources affected.
 	 */

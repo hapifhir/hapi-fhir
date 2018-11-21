@@ -81,6 +81,11 @@
 				three Subscriber classes into @Scope("protoype") so their dependencies can be @Autowired injected
 				as opposed to constructor parameters.
 			</action>
+			<action type="fix">
+				A bug in the JPA resource reindexer was fixed: In many cases the reindexer would 
+				mark reindexing jobs as deleted before they had actually completed, leading to 
+				some resources not actually being reindexed.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

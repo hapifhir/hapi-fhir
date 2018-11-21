@@ -90,21 +90,52 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	}
 
 	@Test
-	public void testMarkJobsPastThresholdAsDeleted() {
+	public void testReindexPassOnlyReturnsValuesAtLowThreshold() {
 		mockNothingToExpunge();
 		mockSingleReindexingJob(null);
-		mockFourResourcesNeedReindexing();
 		mockFetchFourResources();
+		mockFinalResourceNeedsReindexing();
 
-		mySingleJob.setThresholdHigh(DateUtils.addMinutes(new Date(), -1));
+		mySingleJob.setThresholdLow(new Date(40 * DateUtils.MILLIS_PER_DAY));
+		Date highThreshold = DateUtils.addMinutes(new Date(), -1);
+		mySingleJob.setThresholdHigh(highThreshold);
 
+		// Run the second pass, which should index no resources (meaning it's time to mark as deleted)
 		mySvc.forceReindexingPass();
-
-		verify(myResourceTableDao, never()).findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any());
 		verify(myResourceTableDao, never()).findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any(), any());
-		verify(myReindexJobDao, times(1)).markAsDeletedById(myIdCaptor.capture());
+		verify(myReindexJobDao, never()).markAsDeletedById(any());
+		verify(myResourceTableDao, times(1)).findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture());
+		assertEquals(new Date(40 * DateUtils.MILLIS_PER_DAY), myLowCaptor.getAllValues().get(0));
+		assertEquals(highThreshold, myHighCaptor.getAllValues().get(0));
 
-		assertEquals(123L, myIdCaptor.getValue().longValue());
+		// Should mark the low threshold as 1 milli higher than the ne returned item
+		verify(myReindexJobDao, times(1)).setThresholdLow(eq(123L), eq(new Date((40 * DateUtils.MILLIS_PER_DAY)+1L)));
+	}
+
+	@Test
+	public void testMarkAsDeletedIfNothingIndexed() {
+		mockNothingToExpunge();
+		mockSingleReindexingJob(null);
+		mockFetchFourResources();
+		// Mock resource fetch
+		List<Long> values = Collections.emptyList();
+		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(),any(),any())).thenReturn(new SliceImpl<>(values));
+
+		mySingleJob.setThresholdLow(new Date(40 * DateUtils.MILLIS_PER_DAY));
+		Date highThreshold = DateUtils.addMinutes(new Date(), -1);
+		mySingleJob.setThresholdHigh(highThreshold);
+
+		// Run the second pass, which should index no resources (meaning it's time to mark as deleted)
+		mySvc.forceReindexingPass();
+		verify(myResourceTableDao, never()).findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any(), any());
+		verify(myResourceTableDao, times(1)).findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture());
+		assertEquals(new Date(40 * DateUtils.MILLIS_PER_DAY), myLowCaptor.getAllValues().get(0));
+		assertEquals(highThreshold, myHighCaptor.getAllValues().get(0));
+
+		// This time we shouldn't update the threshold
+		verify(myReindexJobDao, never()).setThresholdLow(any(),any());
+
+		verify(myReindexJobDao, times(1)).markAsDeletedById(eq(123L));
 	}
 
 	@Test
@@ -243,7 +274,13 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	private void mockFourResourcesNeedReindexing() {
 		// Mock resource fetch
 		List<Long> values = Arrays.asList(0L, 1L, 2L, 3L);
-		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture())).thenReturn(new SliceImpl<>(values));
+		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(),any(),any())).thenReturn(new SliceImpl<>(values));
+	}
+
+	private void mockFinalResourceNeedsReindexing() {
+		// Mock resource fetch
+		List<Long> values = Arrays.asList(2L); // the second-last one has the highest time
+		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(),any(),any())).thenReturn(new SliceImpl<>(values));
 	}
 
 	private void mockSingleReindexingJob(String theResourceType) {

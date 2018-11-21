@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search.reindex;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Stopwatch;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
@@ -71,8 +72,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
-	private static final Date BEGINNING_OF_TIME = new Date(0);
+	static final Date BEGINNING_OF_TIME = new Date(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceReindexingSvcImpl.class);
+	public static final int PASS_SIZE = 25000;
 	private final ReentrantLock myIndexingLock = new ReentrantLock();
 	@Autowired
 	private IResourceReindexJobDao myReindexJobDao;
@@ -176,6 +178,13 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
+	public void scheduleReindexingPass() {
+		runReindexingPass();
+	}
+
+
+	@Override
+	@Transactional(Transactional.TxType.NEVER)
 	public Integer runReindexingPass() {
 		if (myDaoConfig.isSchedulingDisabled()) {
 			return null;
@@ -223,10 +232,16 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		Collection<ResourceReindexJobEntity> jobs = myTxTemplate.execute(t -> myReindexJobDao.findAll(PageRequest.of(0, 10), false));
 		assert jobs != null;
 
+		if (jobs.size() > 0) {
+			ourLog.info("Running {} reindex jobs: {}", jobs.size(), jobs);
+		} else {
+			ourLog.debug("Running {} reindex jobs: {}", jobs.size(), jobs);
+		}
+
 		int count = 0;
 		for (ResourceReindexJobEntity next : jobs) {
 
-			if (next.getThresholdHigh().getTime() < System.currentTimeMillis()) {
+			if (next.getThresholdLow() != null && next.getThresholdLow().getTime() >= next.getThresholdHigh().getTime()) {
 				markJobAsDeleted(next);
 				continue;
 			}
@@ -236,9 +251,10 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		return count;
 	}
 
-	private void markJobAsDeleted(ResourceReindexJobEntity next) {
+	private void markJobAsDeleted(ResourceReindexJobEntity theJob) {
+		ourLog.info("Marking reindexing job ID[{}] as deleted", theJob.getId());
 		myTxTemplate.execute(t -> {
-			myReindexJobDao.markAsDeletedById(next.getId());
+			myReindexJobDao.markAsDeletedById(theJob.getId());
 			return null;
 		});
 	}
@@ -259,8 +275,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		Date high = theJob.getThresholdHigh();
 
 		// Query for resources within threshold
+		StopWatch pageSw = new StopWatch();
 		Slice<Long> range = myTxTemplate.execute(t -> {
-			PageRequest page = PageRequest.of(0, 10000);
+			PageRequest page = PageRequest.of(0, PASS_SIZE);
 			if (isNotBlank(theJob.getResourceType())) {
 				return myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(page, theJob.getResourceType(), low, high);
 			} else {
@@ -269,6 +286,13 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		});
 		Validate.notNull(range);
 		int count = range.getNumberOfElements();
+		ourLog.info("Loaded {} resources for reindexing in {}", count, pageSw.toString());
+
+		// If we didn't find any results at all, mark as deleted
+		if (count == 0) {
+			markJobAsDeleted(theJob);
+			return 0;
+		}
 
 		// Submit each resource requiring reindexing
 		List<Future<Date>> futures = range
@@ -304,18 +328,15 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			}
 		}
 
-		// Just in case we end up in some sort of infinite loop. This shouldn't happen, and couldn't really
-		// happen unless there were 10000 resources with the exact same update time down to the
-		// millisecond.
 		Date newLow;
-		if (latestDate == null) {
-			markJobAsDeleted(theJob);
-			return 0;
-		}
 		if (latestDate.getTime() == low.getTime()) {
-			ourLog.error("Final pass time for reindex JOB[{}] has same ending low value: {}", theJob.getId(), latestDate);
-			newLow = new Date(latestDate.getTime() + 1);
-		} else if (!haveMultipleDates) {
+			if (count == PASS_SIZE) {
+				// Just in case we end up in some sort of infinite loop. This shouldn't happen, and couldn't really
+				// happen unless there were 10000 resources with the exact same update time down to the
+				// millisecond.
+				ourLog.error("Final pass time for reindex JOB[{}] has same ending low value: {}", theJob.getId(), latestDate);
+			}
+
 			newLow = new Date(latestDate.getTime() + 1);
 		} else {
 			newLow = latestDate;
@@ -326,7 +347,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			return null;
 		});
 
-		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw.toString(), sw.formatThroughput(count, TimeUnit.SECONDS), theJob.getThresholdLow());
+		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw.toString(), sw.formatThroughput(count, TimeUnit.SECONDS), newLow);
 		return counter.get();
 	}
 
@@ -450,6 +471,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 						return e;
 					}
 				});
+
 			} catch (ResourceVersionConflictException e) {
 				/*
 				 * We reindex in multiple threads, so it's technically possible that two threads try

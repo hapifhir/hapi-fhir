@@ -27,6 +27,8 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ResourceDeliveryMessage {
@@ -62,9 +64,8 @@ public class ResourceDeliveryMessage {
 	}
 
 	public IBaseResource getPayload(FhirContext theCtx) {
-		Validate.notNull(myPayloadString);
 		IBaseResource retVal = myPayload;
-		if (retVal == null) {
+		if (retVal == null && isNotBlank(myPayloadString)) {
 			retVal = theCtx.newJsonParser().parseResource(myPayloadString);
 			myPayload = retVal;
 		}
