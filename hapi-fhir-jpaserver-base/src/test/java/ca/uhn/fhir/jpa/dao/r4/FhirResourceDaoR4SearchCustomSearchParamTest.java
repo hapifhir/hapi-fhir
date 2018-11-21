@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConfig;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
@@ -37,7 +38,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Test
@@ -246,7 +247,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	@Test
 	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingDisabled() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(false);
+		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(false);
 
 		SearchParameter memberSp = new SearchParameter();
 		memberSp.setCode("member");
@@ -286,7 +287,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	@Test
 	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingEnabled() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(true);
 
 		SearchParameter memberSp = new SearchParameter();
 		memberSp.setCode("member");

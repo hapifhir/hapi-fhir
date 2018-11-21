@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.dstu3;
+package ca.uhn.fhir.jpa.searchparam;
 
 /*
  * #%L
@@ -21,17 +21,13 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
-import ca.uhn.fhir.jpa.dao.BaseSearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
-import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.DatatypeUtil;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,12 +38,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry<SearchParameter> {
 
-	@Autowired
-	private IFhirResourceDao<SearchParameter> mySpDao;
-
-	@Override
-	public IFhirResourceDao<SearchParameter> getSearchParameterDao() {
-		return mySpDao;
+	public SearchParamRegistryDstu3(ISearchParamProvider theSearchParamProvider) {
+		super(theSearchParamProvider);
 	}
 
 	@Override
@@ -116,7 +108,7 @@ public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry<SearchPara
 		String uri = "";
 		boolean unique = false;
 
-		List<Extension> uniqueExts = theNextSp.getExtensionsByUrl(JpaConstants.EXT_SP_UNIQUE);
+		List<Extension> uniqueExts = theNextSp.getExtensionsByUrl(SearchParamConstants.EXT_SP_UNIQUE);
 		if (uniqueExts.size() > 0) {
 			IPrimitiveType<?> uniqueExtsValuePrimitive = uniqueExts.get(0).getValueAsPrimitive();
 			if (uniqueExtsValuePrimitive != null) {

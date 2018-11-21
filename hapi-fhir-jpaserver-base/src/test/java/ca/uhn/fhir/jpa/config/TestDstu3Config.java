@@ -9,10 +9,7 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -28,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.*;
 
 @Configuration
+@Import(TestJPAConfig.class)
 @EnableTransactionManagement()
 public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
@@ -100,11 +98,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	}
 
 	@Bean()
-	public DaoConfig daoConfig() {
-		return new DaoConfig();
-	}
-
-	@Bean()
 	@Primary()
 	public DataSource dataSource() {
 
@@ -164,18 +157,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		requestValidator.addValidatorModule(instanceValidatorDstu3());
 
 		return requestValidator;
-	}
-
-	@Bean()
-	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-		JpaTransactionManager retVal = new JpaTransactionManager();
-		retVal.setEntityManagerFactory(entityManagerFactory);
-		return retVal;
-	}
-
-	@Bean
-	public UnregisterScheduledProcessor unregisterScheduledProcessor(Environment theEnv) {
-		return new UnregisterScheduledProcessor(theEnv);
 	}
 
 	/**

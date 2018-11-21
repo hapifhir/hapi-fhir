@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConfig;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -39,12 +40,12 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 
 	@After
 	public void after() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Before
 	public void before() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(true);
 	}
 
 	private void createUniqueBirthdateAndGenderSps() {

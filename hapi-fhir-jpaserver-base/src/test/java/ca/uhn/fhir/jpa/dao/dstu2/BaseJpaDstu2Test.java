@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConfig;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -75,6 +76,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
+	@Autowired
+	protected SearchParamConfig mySearchParamConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
 	protected IFhirResourceDao<Device> myDeviceDao;

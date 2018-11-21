@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.*;
 
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConfig;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -40,7 +41,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamConfig().isDefaultSearchParamsCanBeOverridden());
 		mySearchParamRegsitry.forceRefresh();
 	}
 
@@ -90,7 +91,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 	@Test
 	public void testConformanceOverrideAllowed() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(true);
 
 		CapabilityStatement conformance = ourClient
 				.fetchConformance()
@@ -160,7 +161,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 	@Test
 	public void testConformanceOverrideNotAllowed() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(false);
+		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(false);
 
 		CapabilityStatement conformance = ourClient
 				.fetchConformance()

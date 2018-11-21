@@ -134,7 +134,7 @@ public class BaseR4Config extends BaseConfig {
 
 	@Bean
 	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryR4();
+		return new SearchParamRegistryR4(searchParamProvider());
 	}
 
 	@Bean(name = "mySystemDaoR4", autowire = Autowire.BY_NAME)

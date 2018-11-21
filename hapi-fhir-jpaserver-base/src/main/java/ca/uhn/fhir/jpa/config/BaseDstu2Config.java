@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.searchparam.SearchParamRegistryDstu2;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -111,7 +112,7 @@ public class BaseDstu2Config extends BaseConfig {
 
 	@Bean
 	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryDstu2();
+		return new SearchParamRegistryDstu2(searchParamProvider());
 	}
 
 	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)

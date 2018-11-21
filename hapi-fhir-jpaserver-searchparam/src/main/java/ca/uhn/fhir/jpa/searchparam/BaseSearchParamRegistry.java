@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.searchparam;
 
 /*
  * #%L
@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -37,8 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -54,16 +54,16 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
 	@Autowired
 	private FhirContext myCtx;
-	private Collection<IFhirResourceDao<?>> myResourceDaos;
 	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private SearchParamConfig mySearchParamConfig;
 	private volatile long myLastRefresh;
 	private ApplicationContext myApplicationContext;
-	@Autowired
-	private PlatformTransactionManager myTxManager;
-	public BaseSearchParamRegistry() {
+	private ISearchParamProvider mySearchParamProvider;
+
+	public BaseSearchParamRegistry(ISearchParamProvider theSearchParamProvider) {
 		super();
+		mySearchParamProvider = theSearchParamProvider;
 	}
 
 	@Override
@@ -136,8 +136,6 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		}
 		return retVal;
 	}
-
-	public abstract IFhirResourceDao<SP> getSearchParameterDao();
 
 	private void populateActiveSearchParams(Map<String, Map<String, RuntimeSearchParam>> theActiveSearchParams) {
 		Map<String, List<JpaRuntimeSearchParam>> activeUniqueSearchParams = new HashMap<>();
@@ -218,14 +216,10 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	public void postConstruct() {
 		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
 
-		myResourceDaos = new ArrayList<>();
-		Map<String, IFhirResourceDao> daos = myApplicationContext.getBeansOfType(IFhirResourceDao.class, false, false);
-		for (IFhirResourceDao next : daos.values()) {
-			myResourceDaos.add(next);
-		}
+		Set<String> resourceNames = myCtx.getResourceNames();
 
-		for (IFhirResourceDao<?> nextDao : myResourceDaos) {
-			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(nextDao.getResourceType());
+		for (String resourceName : resourceNames) {
+			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
 			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
 			resourceNameToSearchParams.put(nextResourceName, nameToParam);
@@ -245,16 +239,12 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		long refreshInterval = 60 * DateUtils.MILLIS_PER_MINUTE;
 		if (System.currentTimeMillis() - refreshInterval > myLastRefresh) {
 			synchronized (this) {
-				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-				txTemplate.execute(t->{
-					doRefresh(refreshInterval);
-					return null;
-				});
+				mySearchParamProvider.refreshCache(this, refreshInterval);
 			}
 		}
 	}
 
-	private void doRefresh(long theRefreshInterval) {
+	public void doRefresh(long theRefreshInterval) {
 		if (System.currentTimeMillis() - theRefreshInterval > myLastRefresh) {
 			StopWatch sw = new StopWatch();
 
@@ -269,7 +259,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
 
-			IBundleProvider allSearchParamsBp = getSearchParameterDao().search(params);
+			IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
 			int size = allSearchParamsBp.size();
 
 			// Just in case..
@@ -297,7 +287,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 					Map<String, RuntimeSearchParam> searchParamMap = getSearchParamMap(searchParams, nextBaseName);
 					String name = runtimeSp.getName();
-					if (myDaoConfig.isDefaultSearchParamsCanBeOverridden() || !searchParamMap.containsKey(name)) {
+					if (mySearchParamConfig.isDefaultSearchParamsCanBeOverridden() || !searchParamMap.containsKey(name)) {
 						searchParamMap.put(name, runtimeSp);
 					}
 

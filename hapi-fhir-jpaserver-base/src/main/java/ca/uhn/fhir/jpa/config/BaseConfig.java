@@ -2,12 +2,14 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.jpa.dao.DatabaseSearchParamProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
@@ -128,6 +130,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		return new StaleSearchDeletingSvcImpl();
 	}
 
+	@Bean
+	protected ISearchParamProvider searchParamProvider() {
+		return new DatabaseSearchParamProvider();
+	}
+
 	/**
 	 * Note: If you're going to use this, you need to provide a bean
 	 * of type {@link ca.uhn.fhir.jpa.subscription.email.IEmailSender}
@@ -150,6 +157,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	public SubscriptionWebsocketInterceptor subscriptionWebsocketInterceptor() {
 		return new SubscriptionWebsocketInterceptor();
 	}
+
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));

@@ -54,14 +54,12 @@ public class MatchUrlService {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private MatchUrlService myMatchUrlService;
-	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 
 	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
 
-		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
+		SearchParameterMap paramMap = translateMatchUrl(theMatchUrl, resourceDef);
 		paramMap.setLoadSynchronous(true);
 
 		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
