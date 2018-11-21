@@ -2627,12 +2627,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       sdTime = sdTime + (System.nanoTime() - t);
       if (warning(errors, IssueType.REQUIRED, q.line(), q.col(), stack.getLiteralPath(), qsrc != null, "The questionnaire could not be resolved, so no validation can be performed against the base questionnaire")) {
         boolean inProgress = "in-progress".equals(element.getNamedChildValue("status"));
-        validateQuestionannaireResponseItems(qsrc, qsrc.getItem(), errors, element, stack, inProgress);
+        validateQuestionannaireResponseItems(qsrc, qsrc.getItem(), errors, element, stack, inProgress, element);
       }
     }
   }
 
-  private void validateQuestionannaireResponseItem(Questionnaire qsrc, QuestionnaireItemComponent qItem, List<ValidationMessage> errors, Element element, NodeStack stack, boolean inProgress) {
+  private void validateQuestionannaireResponseItem(Questionnaire qsrc, QuestionnaireItemComponent qItem, List<ValidationMessage> errors, Element element, NodeStack stack, boolean inProgress, Element questionnaireResponseRoot) {
     String text = element.getNamedChildValue("text");
     rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), Utilities.noString(text) || text.equals(qItem.getText()), "If text exists, it must match the questionnaire definition for linkId "+qItem.getLinkId());
 
@@ -2716,7 +2716,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 				// no validation
 				break;
       }
-      validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, answer, stack, inProgress);
+      validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, answer, stack, inProgress, questionnaireResponseRoot);
     }
     if (qItem.getType() == null) {
       fail(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), false, "Definition for item "+qItem.getLinkId() + " does not contain a type");
@@ -2725,16 +2725,16 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       element.getNamedChildren("item", items);
       rule(errors, IssueType.STRUCTURE, element.line(), element.col(), stack.getLiteralPath(), items.isEmpty(), "Items not of type DISPLAY should not have items - linkId {0}", qItem.getLinkId());
     } else {
-      validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, element, stack, inProgress);
+      validateQuestionannaireResponseItems(qsrc, qItem.getItem(), errors, element, stack, inProgress, questionnaireResponseRoot);
     }
   }
 
-  private void validateQuestionannaireResponseItem(Questionnaire qsrc, QuestionnaireItemComponent qItem, List<ValidationMessage> errors, List<Element> elements, NodeStack stack, boolean inProgress) {
+  private void validateQuestionannaireResponseItem(Questionnaire qsrc, QuestionnaireItemComponent qItem, List<ValidationMessage> errors, List<Element> elements, NodeStack stack, boolean inProgress, Element questionnaireResponseRoot) {
     if (elements.size() > 1)
       rule(errors, IssueType.INVALID, elements.get(1).line(), elements.get(1).col(), stack.getLiteralPath(), qItem.getRepeats(), "Only one response item with this linkId allowed - " + qItem.getLinkId());
     for (Element element : elements) {
       NodeStack ns = stack.push(element, -1, null, null);
-      validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns, inProgress);
+      validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns, inProgress, questionnaireResponseRoot);
     }
   }
 
@@ -2746,7 +2746,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     return -1;
   }
 
-  private void validateQuestionannaireResponseItems(Questionnaire qsrc, List<QuestionnaireItemComponent> qItems, List<ValidationMessage> errors, Element element, NodeStack stack, boolean inProgress) {
+  private void validateQuestionannaireResponseItems(Questionnaire qsrc, List<QuestionnaireItemComponent> qItems, List<ValidationMessage> errors, Element element, NodeStack stack, boolean inProgress, Element questionnaireResponseRoot) {
     List<Element> items = new ArrayList<Element>();
     element.getNamedChildren("item", items);
     // now, sort into stacks
@@ -2761,7 +2761,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           if (qItem != null) {
             rule(errors, IssueType.STRUCTURE, item.line(), item.col(), stack.getLiteralPath(), index > -1, "Structural Error: item is in the wrong place");
             NodeStack ns = stack.push(item, -1, null, null);
-            validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns, inProgress);
+            validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns, inProgress, null);
           }
           else
             rule(errors, IssueType.NOTFOUND, item.line(), item.col(), stack.getLiteralPath(), index > -1, "LinkId \""+linkId+"\" not found in questionnaire");
@@ -2784,11 +2784,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     for (QuestionnaireItemComponent qItem : qItems) {
       List<Element> mapItem = map.get(qItem.getLinkId());
       if (mapItem != null){
-    	  rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), myEnableWhenEvaluator.isQuestionEnabled(qItem, element), "Item has answer, even though it is not enabled "+qItem.getLinkId());
-        validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack, inProgress);
+    	  rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), myEnableWhenEvaluator.isQuestionEnabled(qItem, questionnaireResponseRoot), "Item has answer, even though it is not enabled "+qItem.getLinkId());
+        validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack, inProgress, null);
       } else { 
     	//item is missing, is the question enabled?
-    	if (myEnableWhenEvaluator.isQuestionEnabled(qItem, element)) {    	  
+    	if (myEnableWhenEvaluator.isQuestionEnabled(qItem, questionnaireResponseRoot)) {    	  
     	  rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), !qItem.getRequired(), "No response found for required item "+qItem.getLinkId());
     	}
       }
