@@ -146,6 +146,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParameterDao.create(fooSp, mySrd);
 
 		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
+		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
 		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
 	}

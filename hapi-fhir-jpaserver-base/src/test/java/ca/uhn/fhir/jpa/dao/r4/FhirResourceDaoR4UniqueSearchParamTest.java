@@ -571,7 +571,11 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		createUniqueIndexCoverageBeneficiary();
 
 		myResourceReindexingSvc.markAllResourcesForReindexing("Coverage");
+		// The first pass as a low of EPOCH
 		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
+		// The second pass has a low of Coverage.lastUpdated
+		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
+		// The third pass has a low of (Coverage.lastUpdated + 1ms)
 		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();

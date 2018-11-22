@@ -36,7 +36,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Stopwatch;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
@@ -72,9 +71,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
-	static final Date BEGINNING_OF_TIME = new Date(0);
+	private static final Date BEGINNING_OF_TIME = new Date(0);
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceReindexingSvcImpl.class);
-	public static final int PASS_SIZE = 25000;
+	private static final int PASS_SIZE = 25000;
 	private final ReentrantLock myIndexingLock = new ReentrantLock();
 	@Autowired
 	private IResourceReindexJobDao myReindexJobDao;
@@ -301,7 +300,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			.collect(Collectors.toList());
 
 		Date latestDate = null;
-		boolean haveMultipleDates = false;
 		for (Future<Date> next : futures) {
 			Date nextDate;
 			try {
@@ -317,17 +315,13 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			}
 
 			if (nextDate != null) {
-				if (latestDate != null) {
-					if (latestDate.getTime() != nextDate.getTime()) {
-						haveMultipleDates = true;
-					}
-				}
 				if (latestDate == null || latestDate.getTime() < nextDate.getTime()) {
 					latestDate = new Date(nextDate.getTime());
 				}
 			}
 		}
 
+		Validate.notNull(latestDate);
 		Date newLow;
 		if (latestDate.getTime() == low.getTime()) {
 			if (count == PASS_SIZE) {
