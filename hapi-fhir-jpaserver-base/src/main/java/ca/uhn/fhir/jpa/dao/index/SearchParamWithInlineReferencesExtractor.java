@@ -52,6 +52,10 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
+	ResourceLinkExtractor myResourceLinkExtractor;
+	@Autowired
+	DatabaseResourceLinkResolver myDatabaseResourceLinkResolver;
+	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 
 
@@ -70,7 +74,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		extractInlineReferences(theResource);
 
-		mySearchParamExtractorService.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, true);
+		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDatabaseResourceLinkResolver);
 
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
@@ -228,12 +232,12 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		// Store composite string uniques
 		if (myDaoConfig.isUniqueIndexesEnabled()) {
-			for (ResourceIndexedCompositeStringUnique next : mySearchParamExtractorService.removeCommon(existingParams.compositeStringUniques, theParams.compositeStringUniques)) {
+			for (ResourceIndexedCompositeStringUnique next : mySearchParamExtractorService.synchronizeSearchParamsToDatabase(existingParams.compositeStringUniques, theParams.compositeStringUniques)) {
 				ourLog.debug("Removing unique index: {}", next);
 				myEntityManager.remove(next);
 				theEntity.getParamsCompositeStringUnique().remove(next);
 			}
-			for (ResourceIndexedCompositeStringUnique next : mySearchParamExtractorService.removeCommon(theParams.compositeStringUniques, existingParams.compositeStringUniques)) {
+			for (ResourceIndexedCompositeStringUnique next : mySearchParamExtractorService.synchronizeSearchParamsToDatabase(theParams.compositeStringUniques, existingParams.compositeStringUniques)) {
 				if (myDaoConfig.isUniqueIndexesCheckedBeforeSave()) {
 					ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 					if (existing != null) {

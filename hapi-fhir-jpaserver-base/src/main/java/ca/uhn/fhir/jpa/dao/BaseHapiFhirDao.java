@@ -1399,7 +1399,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 * Indexing
 		 */
 		if (thePerformIndexing) {
-			mySearchParamExtractorService.removeCommon(newParams, theEntity, existingParams);
+			mySearchParamExtractorService.synchronizeSearchParamsToDatabase(newParams, theEntity, existingParams);
 			mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, theEntity, existingParams);
 		} // if thePerformIndexing
 
