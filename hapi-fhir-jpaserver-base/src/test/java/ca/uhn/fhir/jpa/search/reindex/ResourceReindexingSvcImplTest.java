@@ -109,7 +109,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		assertEquals(highThreshold, myHighCaptor.getAllValues().get(0));
 
 		// Should mark the low threshold as 1 milli higher than the ne returned item
-		verify(myReindexJobDao, times(1)).setThresholdLow(eq(123L), eq(new Date((40 * DateUtils.MILLIS_PER_DAY)+1L)));
+		verify(myReindexJobDao, times(1)).setThresholdLow(eq(123L), eq(new Date((40 * DateUtils.MILLIS_PER_DAY) + 1L)));
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		mockFetchFourResources();
 		// Mock resource fetch
 		List<Long> values = Collections.emptyList();
-		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(),any(),any())).thenReturn(new SliceImpl<>(values));
+		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any())).thenReturn(new SliceImpl<>(values));
 
 		mySingleJob.setThresholdLow(new Date(40 * DateUtils.MILLIS_PER_DAY));
 		Date highThreshold = DateUtils.addMinutes(new Date(), -1);
@@ -133,7 +133,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		assertEquals(highThreshold, myHighCaptor.getAllValues().get(0));
 
 		// This time we shouldn't update the threshold
-		verify(myReindexJobDao, never()).setThresholdLow(any(),any());
+		verify(myReindexJobDao, never()).setThresholdLow(any(), any());
 
 		verify(myReindexJobDao, times(1)).markAsDeletedById(eq(123L));
 	}
@@ -171,6 +171,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		// Make sure we didn't do anything unexpected
 		verify(myReindexJobDao, times(1)).findAll(any(), eq(false));
 		verify(myReindexJobDao, times(1)).findAll(any(), eq(true));
+		verify(myReindexJobDao, times(1)).getReindexCount(any());
+		verify(myReindexJobDao, times(1)).setReindexCount(any(), anyInt());
 		verifyNoMoreInteractions(myReindexJobDao);
 	}
 
@@ -225,6 +227,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		// Make sure we didn't do anything unexpected
 		verify(myReindexJobDao, times(1)).findAll(any(), eq(false));
 		verify(myReindexJobDao, times(1)).findAll(any(), eq(true));
+		verify(myReindexJobDao, times(1)).getReindexCount(any());
+		verify(myReindexJobDao, times(1)).setReindexCount(any(), anyInt());
 		verifyNoMoreInteractions(myReindexJobDao);
 	}
 
@@ -274,13 +278,13 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	private void mockFourResourcesNeedReindexing() {
 		// Mock resource fetch
 		List<Long> values = Arrays.asList(0L, 1L, 2L, 3L);
-		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(),any(),any())).thenReturn(new SliceImpl<>(values));
+		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any())).thenReturn(new SliceImpl<>(values));
 	}
 
 	private void mockFinalResourceNeedsReindexing() {
 		// Mock resource fetch
 		List<Long> values = Arrays.asList(2L); // the second-last one has the highest time
-		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(),any(),any())).thenReturn(new SliceImpl<>(values));
+		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any())).thenReturn(new SliceImpl<>(values));
 	}
 
 	private void mockSingleReindexingJob(String theResourceType) {
