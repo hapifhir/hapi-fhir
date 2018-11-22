@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.dao.index.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -45,7 +46,11 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 
 	@Override
 	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {
-		return match(criteria, msg.getNewPayload(myContext));
+		try {
+			return match(criteria, msg.getNewPayload(myContext));
+		} catch (Exception e) {
+			throw new InternalErrorException("Failure processing resource ID[" + msg.getId(myContext) + "] for subscription ID[" + msg.getSubscriptionId() + "]: " + e.getMessage(), e);
+		}
 	}
 
 	SubscriptionMatchResult match(String criteria, IBaseResource resource) {

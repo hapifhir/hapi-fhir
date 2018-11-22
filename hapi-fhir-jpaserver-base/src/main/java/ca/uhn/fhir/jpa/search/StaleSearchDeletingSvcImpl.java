@@ -56,8 +56,10 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	 * DELETE FROM foo WHERE params IN (aaaa)
 	 * type query and this can fail if we have 1000s of params
 	 */
-	public static int ourMaximumResultsToDeleteInOneStatement = 500;
-	public static int ourMaximumResultsToDeleteInOnePass = 20000;
+	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;
+	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 20000;
+	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
+	private static int ourMaximumResultsToDeleteInOnePass = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
 	private static Long ourNowForUnitTests;
 	/*
 	 * We give a bit of extra leeway just to avoid race conditions where a query result
@@ -164,6 +166,11 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@VisibleForTesting
 	public void setCutoffSlackForUnitTest(long theCutoffSlack) {
 		myCutoffSlack = theCutoffSlack;
+	}
+
+	@VisibleForTesting
+	public static void setMaximumResultsToDeleteInOnePassForUnitTest(int theMaximumResultsToDeleteInOnePass) {
+		ourMaximumResultsToDeleteInOnePass = theMaximumResultsToDeleteInOnePass;
 	}
 
 	@VisibleForTesting
