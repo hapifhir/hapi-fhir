@@ -1,6 +1,6 @@
-package ca.uhn.fhir.jpa.searchparam;
+package ca.uhn.fhir.jpa.searchparam.registry;
 
-public class SearchParamConfig {
+public class SearchParamRegistryConfig {
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
 
 	/**

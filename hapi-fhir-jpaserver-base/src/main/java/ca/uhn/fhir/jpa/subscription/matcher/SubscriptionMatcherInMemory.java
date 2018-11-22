@@ -32,6 +32,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+// FIXME KHS move into subscription package once dependencies resolved
 @Service
 @Lazy
 public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
@@ -54,7 +55,7 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
 		mySearchParamExtractorService.extractFromResource(searchParams, entity, resource);
-		mySearchParamExtractorService.extractInlineReferences(resource);
+//		mySearchParamExtractorService.extractInlineReferences(resource);
 		mySearchParamExtractorService.extractResourceLinks(searchParams, entity, resource, resource.getMeta().getLastUpdated(), false);
 		RuntimeResourceDefinition resourceDefinition = myContext.getResourceDefinition(resource);
 		return myCriteriaResourceMatcher.match(criteria, resourceDefinition, searchParams);

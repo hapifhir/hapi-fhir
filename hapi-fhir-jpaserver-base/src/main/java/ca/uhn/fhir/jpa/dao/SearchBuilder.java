@@ -27,8 +27,11 @@ import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
@@ -125,6 +128,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
+	@Autowired
+	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -243,7 +248,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			Class<? extends IBaseResource> resourceType = targetResourceDefinition.getImplementingClass();
-			Set<Long> match = myMatchUrlService.processMatchUrl(matchUrl, resourceType);
+			Set<Long> match = myMatchResourceUrlService.processMatchUrl(matchUrl, resourceType);
 			if (match.isEmpty()) {
 				// Pick a PID that can never match
 				match = Collections.singleton(-1L);

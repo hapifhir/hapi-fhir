@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConfig;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -17,8 +17,8 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public SearchParamConfig searchParamConfig() {
-		return new SearchParamConfig();
+	public SearchParamRegistryConfig searchParamConfig() {
+		return new SearchParamRegistryConfig();
 	}
 
 	@Bean

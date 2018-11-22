@@ -13,7 +13,8 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConfig;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryConfig;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -117,7 +118,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
-	protected SearchParamConfig mySearchParamConfig;
+	protected SearchParamRegistryConfig mySearchParamRegistryConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoR4")
 	protected IFhirResourceDao<Device> myDeviceDao;

@@ -1,13 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConfig;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryConfig;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -38,7 +37,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamRegistryConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamRegistryConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Test
@@ -247,7 +246,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	@Test
 	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingDisabled() {
-		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(false);
+		mySearchParamRegistryConfig.setDefaultSearchParamsCanBeOverridden(false);
 
 		SearchParameter memberSp = new SearchParameter();
 		memberSp.setCode("member");
@@ -287,7 +286,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	@Test
 	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingEnabled() {
-		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(true);
+		mySearchParamRegistryConfig.setDefaultSearchParamsCanBeOverridden(true);
 
 		SearchParameter memberSp = new SearchParameter();
 		memberSp.setCode("member");

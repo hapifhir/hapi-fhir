@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.searchparam.BaseSearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.ISearchParamProvider;
+import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;

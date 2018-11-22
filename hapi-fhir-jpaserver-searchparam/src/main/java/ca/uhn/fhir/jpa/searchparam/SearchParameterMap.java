@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
@@ -41,6 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
+// TODO KHS isa -> hasa
 public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
 
@@ -264,7 +265,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	/**
 	 * This will only return true if all parameters have no modifier of any kind
 	 */
-	boolean isAllParametersHaveNoModifier() {
+	public boolean isAllParametersHaveNoModifier() {
 		for (List<List<? extends IQueryParameterType>> nextParamName : values()) {
 			for (List<? extends IQueryParameterType> nextAnd : nextParamName) {
 				for (IQueryParameterType nextOr : nextAnd) {

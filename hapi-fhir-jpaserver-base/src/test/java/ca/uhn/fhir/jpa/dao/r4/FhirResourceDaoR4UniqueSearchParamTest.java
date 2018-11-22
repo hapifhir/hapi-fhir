@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedCompositeStringUnique;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConfig;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryConfig;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -45,14 +45,14 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 	@After
 	public void after() {
-		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamRegistryConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamRegistryConfig().isDefaultSearchParamsCanBeOverridden());
 		myDaoConfig.setUniqueIndexesCheckedBeforeSave(new DaoConfig().isUniqueIndexesCheckedBeforeSave());
 		myDaoConfig.setSchedulingDisabled(new DaoConfig().isSchedulingDisabled());
 	}
 
 	@Before
 	public void before() {
-		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(true);
+		mySearchParamRegistryConfig.setDefaultSearchParamsCanBeOverridden(true);
 		myDaoConfig.setSchedulingDisabled(true);
 		SearchBuilder.resetLastHandlerMechanismForUnitTest();
 	}

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.searchparam;
+package ca.uhn.fhir.jpa.searchparam.registry;
 
 /*
  * #%L
@@ -23,9 +23,8 @@ package ca.uhn.fhir.jpa.searchparam;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -56,7 +55,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	private FhirContext myCtx;
 	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
 	@Autowired
-	private SearchParamConfig mySearchParamConfig;
+	private SearchParamRegistryConfig mySearchParamRegistryConfig;
 	private volatile long myLastRefresh;
 	private ApplicationContext myApplicationContext;
 	private ISearchParamProvider mySearchParamProvider;
@@ -287,7 +286,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 					Map<String, RuntimeSearchParam> searchParamMap = getSearchParamMap(searchParams, nextBaseName);
 					String name = runtimeSp.getName();
-					if (mySearchParamConfig.isDefaultSearchParamsCanBeOverridden() || !searchParamMap.containsKey(name)) {
+					if (mySearchParamRegistryConfig.isDefaultSearchParamsCanBeOverridden() || !searchParamMap.containsKey(name)) {
 						searchParamMap.put(name, runtimeSp);
 					}
 

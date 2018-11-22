@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -36,12 +38,10 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -52,27 +52,7 @@ public class MatchUrlService {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-
-	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
-		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
-
-		SearchParameterMap paramMap = translateMatchUrl(theMatchUrl, resourceDef);
-		paramMap.setLoadSynchronous(true);
-
-		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
-			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
-		}
-
-		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
-		if (dao == null) {
-			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
-		}
-
-		return dao.searchForIds(paramMap);
-	}
 
 	public SearchParameterMap translateMatchUrl(String
 																  theMatchUrl, RuntimeResourceDefinition resourceDef) {

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.searchparam;
+package ca.uhn.fhir.jpa.searchparam.registry;
 
 /*
  * #%L
@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.searchparam;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam.RuntimeSearchParamStatusEnum;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.DatatypeUtil;
 import org.hl7.fhir.dstu3.model.Extension;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.search;
+package ca.uhn.fhir.jpa.searchparam;
 
 /*-
  * #%L

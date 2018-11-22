@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.util.*;
 
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
-import ca.uhn.fhir.jpa.searchparam.SearchParamConfig;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryConfig;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -41,7 +42,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void after() throws Exception {
 		super.after();
 
-		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamRegistryConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamRegistryConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Override
@@ -54,7 +55,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
-		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamConfig().isDefaultSearchParamsCanBeOverridden());
+		mySearchParamRegistryConfig.setDefaultSearchParamsCanBeOverridden(new SearchParamRegistryConfig().isDefaultSearchParamsCanBeOverridden());
 		mySearchParamRegsitry.forceRefresh();
 	}
 
@@ -91,7 +92,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 	@Test
 	public void testConformanceOverrideAllowed() {
-		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(true);
+		mySearchParamRegistryConfig.setDefaultSearchParamsCanBeOverridden(true);
 
 		CapabilityStatement conformance = ourClient
 				.fetchConformance()
@@ -161,7 +162,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 	@Test
 	public void testConformanceOverrideNotAllowed() {
-		mySearchParamConfig.setDefaultSearchParamsCanBeOverridden(false);
+		mySearchParamRegistryConfig.setDefaultSearchParamsCanBeOverridden(false);
 
 		CapabilityStatement conformance = ourClient
 				.fetchConformance()

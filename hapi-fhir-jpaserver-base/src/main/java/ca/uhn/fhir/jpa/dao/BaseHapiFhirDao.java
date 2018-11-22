@@ -5,9 +5,11 @@ import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.dao.index.SearchParamExtractorService;
+import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
@@ -185,6 +187,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
+	@Autowired
+	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 
 	private ApplicationContext myApplicationContext;
 
@@ -1291,7 +1295,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			if (thePerformIndexing) {
 
 				newParams = new ResourceIndexedSearchParams();
-				mySearchParamExtractorService.populateFromResource(newParams, this, theUpdateTime, theEntity, theResource, existingParams);
+				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, this, theUpdateTime, theEntity, theResource, existingParams);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 
@@ -1396,6 +1400,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 */
 		if (thePerformIndexing) {
 			mySearchParamExtractorService.removeCommon(newParams, theEntity, existingParams);
+			mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, theEntity, existingParams);
 		} // if thePerformIndexing
 
 		if (theResource != null) {

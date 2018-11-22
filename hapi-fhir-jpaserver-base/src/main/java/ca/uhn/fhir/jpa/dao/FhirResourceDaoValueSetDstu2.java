@@ -27,6 +27,7 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;

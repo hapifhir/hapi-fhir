@@ -20,11 +20,10 @@ package ca.uhn.fhir.jpa.subscription.matcher;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.dao.MatchUrlService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -43,8 +42,6 @@ import java.util.function.Predicate;
 @Service
 public class CriteriaResourceMatcher {
 
-	@Autowired
-	private FhirContext myContext;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
