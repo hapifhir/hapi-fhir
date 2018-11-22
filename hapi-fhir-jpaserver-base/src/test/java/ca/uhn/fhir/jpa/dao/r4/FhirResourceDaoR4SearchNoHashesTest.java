@@ -1350,7 +1350,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		String methodName = "testSearchLastUpdatedParam";
 
 		int sleep = 100;
-		Thread.sleep(sleep);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(sleep);
 
 		DateTimeType beforeAny = new DateTimeType(new Date(), TemporalPrecisionEnum.MILLI);
 		IIdType id1a;
@@ -1368,9 +1368,9 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		Thread.sleep(1100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1100);
 		DateTimeType beforeR2 = new DateTimeType(new Date(), TemporalPrecisionEnum.MILLI);
-		Thread.sleep(1100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1100);
 
 		IIdType id2;
 		{
@@ -1444,7 +1444,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		int sleep = 100;
 
 		long start = System.currentTimeMillis();
-		Thread.sleep(sleep);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(sleep);
 
 		IIdType id1a;
 		{
@@ -1463,7 +1463,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		ourLog.info("Res 2: {}", myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 		ourLog.info("Res 3: {}", myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 
-		Thread.sleep(sleep);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(sleep);
 		long end = System.currentTimeMillis();
 
 		SearchParameterMap map;
@@ -1860,14 +1860,14 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		IIdType obsId01 = myObservationDao.create(obs01, mySrd).getId().toUnqualifiedVersionless();
 
 		Date between = new Date();
-		Thread.sleep(10);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(10);
 
 		Observation obs02 = new Observation();
 		obs02.setEffective(new DateTimeType(new Date()));
 		obs02.setSubject(new Reference(locId01));
 		IIdType obsId02 = myObservationDao.create(obs02, mySrd).getId().toUnqualifiedVersionless();
 
-		Thread.sleep(10);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(10);
 		Date after = new Date();
 
 		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]", patientId01, locId01, obsId01, obsId02);
@@ -1991,14 +1991,14 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 		Date between = new Date();
-		Thread.sleep(10);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(10);
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().setFamily("Tester_testSearchStringParam").addGiven("John");
 			pid2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		Thread.sleep(10);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(10);
 		Date after = new Date();
 
 		SearchParameterMap params;
