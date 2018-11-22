@@ -528,7 +528,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
-		myResourceReindexingSvc.markAllResourcesForReindexing();
+		Long jobId = myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
 		entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
@@ -536,6 +536,17 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Just make sure this doesn't cause a choke
 		myResourceReindexingSvc.forceReindexingPass();
+
+		/*
+		 * We expect a final reindex count of 3 because there are 2 resources to
+		 * reindex and the final pass uses the most recent time as the low threshold,
+		 * so it indexes the newest resource one more time. It wouldn't be a big deal
+		 * if this ever got fixed so that it ends up with 2 instead of 3.
+		 */
+		runInTransaction(()->{
+			Optional<Integer> reindexCount = myResourceReindexJobDao.getReindexCount(jobId);
+			assertEquals(3, reindexCount.orElseThrow(()->new NullPointerException("No job " + jobId)).intValue());
+		});
 
 		// Try making the resource unparseable
 

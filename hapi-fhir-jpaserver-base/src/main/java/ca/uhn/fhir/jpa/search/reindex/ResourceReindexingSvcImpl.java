@@ -150,13 +150,13 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 	@Override
 	@Transactional(Transactional.TxType.REQUIRED)
-	public void markAllResourcesForReindexing() {
-		markAllResourcesForReindexing(null);
+	public Long markAllResourcesForReindexing() {
+		return markAllResourcesForReindexing(null);
 	}
 
 	@Override
 	@Transactional(Transactional.TxType.REQUIRED)
-	public void markAllResourcesForReindexing(String theType) {
+	public Long markAllResourcesForReindexing(String theType) {
 		String typeDesc;
 		if (isNotBlank(theType)) {
 			myReindexJobDao.markAllOfTypeAsDeleted(theType);
@@ -172,6 +172,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		job = myReindexJobDao.saveAndFlush(job);
 
 		ourLog.info("Marking all resources of type {} for reindexing - Got job ID[{}]", typeDesc, job.getId());
+		return job.getId();
 	}
 
 	@Override
@@ -338,6 +339,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 		myTxTemplate.execute(t -> {
 			myReindexJobDao.setThresholdLow(theJob.getId(), newLow);
+			Integer existingCount = myReindexJobDao.getReindexCount(theJob.getId()).orElse(0);
+			int newCount = existingCount + counter.get();
+			myReindexJobDao.setReindexCount(theJob.getId(), newCount);
 			return null;
 		});
 

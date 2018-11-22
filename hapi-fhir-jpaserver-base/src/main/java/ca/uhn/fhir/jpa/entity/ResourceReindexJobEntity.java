@@ -55,6 +55,16 @@ public class ResourceReindexJobEntity implements Serializable {
 	@Column(name = "SUSPENDED_UNTIL", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date mySuspendedUntil;
+	@Column(name = "REINDEX_COUNT", nullable = true)
+	private Integer myReindexCount;
+
+	public Integer getReindexCount() {
+		return myReindexCount;
+	}
+
+	public void setReindexCount(Integer theReindexCount) {
+		myReindexCount = theReindexCount;
+	}
 
 	public Date getSuspendedUntil() {
 		return mySuspendedUntil;

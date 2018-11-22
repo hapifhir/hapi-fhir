@@ -487,10 +487,12 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	}
 
 
-	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(ServletRequestDetails theRequestDetails, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
+	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(final ServletRequestDetails theRequestDetails, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
 																								Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, BUNDLE theResponse, IdentityHashMap<BUNDLEENTRY, Integer> theOriginalRequestOrder, List<BUNDLEENTRY> theEntries, StopWatch theTransactionStopWatch) {
 
-		theRequestDetails.startDeferredOperationCallback();
+		if (theRequestDetails != null) {
+			theRequestDetails.startDeferredOperationCallback();
+		}
 		try {
 
 			Set<String> deletedResources = new HashSet<>();
@@ -771,7 +773,9 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			return entriesToProcess;
 
 		} finally {
-			theRequestDetails.stopDeferredRequestOperationCallbackAndRunDeferredItems();
+			if (theRequestDetails != null) {
+				theRequestDetails.stopDeferredRequestOperationCallbackAndRunDeferredItems();
+			}
 		}
 	}
 
