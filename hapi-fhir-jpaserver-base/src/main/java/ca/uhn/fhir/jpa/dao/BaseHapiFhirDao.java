@@ -2,10 +2,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.*;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.dao.index.SearchParamExtractorService;
-import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
+import ca.uhn.fhir.jpa.dao.index.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -184,11 +181,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private MatchUrlService myMatchUrlService;
-	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
+	@Autowired
+	private DatabaseSearchParamSynchronizer myDatabaseSearchParamSynchronizer;
 
 	private ApplicationContext myApplicationContext;
 
@@ -1399,7 +1396,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 * Indexing
 		 */
 		if (thePerformIndexing) {
-			mySearchParamExtractorService.synchronizeSearchParamsToDatabase(newParams, theEntity, existingParams);
+			myDatabaseSearchParamSynchronizer.synchronizeSearchParamsToDatabase(newParams, theEntity, existingParams);
 			mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, theEntity, existingParams);
 		} // if thePerformIndexing
 

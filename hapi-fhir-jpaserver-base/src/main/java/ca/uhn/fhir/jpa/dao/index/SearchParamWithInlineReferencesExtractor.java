@@ -56,6 +56,8 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	DatabaseResourceLinkResolver myDatabaseResourceLinkResolver;
 	@Autowired
+	DatabaseSearchParamSynchronizer myDatabaseSearchParamSynchronizer;
+	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 
 
@@ -232,12 +234,12 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		// Store composite string uniques
 		if (myDaoConfig.isUniqueIndexesEnabled()) {
-			for (ResourceIndexedCompositeStringUnique next : mySearchParamExtractorService.synchronizeSearchParamsToDatabase(existingParams.compositeStringUniques, theParams.compositeStringUniques)) {
+			for (ResourceIndexedCompositeStringUnique next : myDatabaseSearchParamSynchronizer.synchronizeSearchParamsToDatabase(existingParams.compositeStringUniques, theParams.compositeStringUniques)) {
 				ourLog.debug("Removing unique index: {}", next);
 				myEntityManager.remove(next);
 				theEntity.getParamsCompositeStringUnique().remove(next);
 			}
-			for (ResourceIndexedCompositeStringUnique next : mySearchParamExtractorService.synchronizeSearchParamsToDatabase(theParams.compositeStringUniques, existingParams.compositeStringUniques)) {
+			for (ResourceIndexedCompositeStringUnique next : myDatabaseSearchParamSynchronizer.synchronizeSearchParamsToDatabase(theParams.compositeStringUniques, existingParams.compositeStringUniques)) {
 				if (myDaoConfig.isUniqueIndexesCheckedBeforeSave()) {
 					ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 					if (existing != null) {

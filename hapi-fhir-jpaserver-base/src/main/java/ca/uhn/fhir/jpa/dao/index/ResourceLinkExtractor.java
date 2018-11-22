@@ -185,7 +185,7 @@ public class ResourceLinkExtractor {
 			throw new InvalidRequestException("Invalid resource reference found at path[" + theNextPathsUnsplit + "] - Does not contain resource ID - " + nextId.getValue());
 		}
 
-		myDaoRegistry.getDaoOrThrowException(type);
+		theResourceLinkResolver.validateTypeOrThrowException(type);
 		ResourceLink resourceLink = createResourceLink(theEntity, theUpdateTime, theResourceLinkResolver, nextSpDef, theNextPathsUnsplit, nextPathAndRef, nextId, typeString, type, id);
 		if (resourceLink == null) return;
 		theParams.links.add(resourceLink);
@@ -201,9 +201,5 @@ public class ResourceLinkExtractor {
 
 	public String toResourceName(Class<? extends IBaseResource> theResourceType) {
 		return myContext.getResourceDefinition(theResourceType).getName();
-	}
-
-	public void extractResourceLinks(ResourceIndexedSearchParams theSearchParams, ResourceTable theEntity, IBaseResource theResource, Date theLastUpdated) {
-		extractResourceLinks(theSearchParams, theEntity, theResource, theLastUpdated, new InlineResourceLinkResolver());
 	}
 }

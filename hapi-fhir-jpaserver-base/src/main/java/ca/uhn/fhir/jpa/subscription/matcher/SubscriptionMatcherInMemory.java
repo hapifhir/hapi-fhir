@@ -22,10 +22,7 @@ package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.index.InlineResourceLinkResolver;
-import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.dao.index.ResourceLinkExtractor;
-import ca.uhn.fhir.jpa.dao.index.SearchParamExtractorService;
+import ca.uhn.fhir.jpa.dao.index.*;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,6 +44,9 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
 	private ResourceLinkExtractor myResourceLinkExtractor;
+	@Autowired
+	private InlineResourceLinkResolver myInlineResourceLinkResolver;
+
 
 	@Override
 	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {
@@ -59,7 +59,7 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
 		mySearchParamExtractorService.extractFromResource(searchParams, entity, resource);
-		myResourceLinkExtractor.extractResourceLinks(searchParams, entity, resource, resource.getMeta().getLastUpdated());
+		myResourceLinkExtractor.extractResourceLinks(searchParams, entity, resource, resource.getMeta().getLastUpdated(), myInlineResourceLinkResolver);
 		RuntimeResourceDefinition resourceDefinition = myContext.getResourceDefinition(resource);
 		return myCriteriaResourceMatcher.match(criteria, resourceDefinition, searchParams);
 	}

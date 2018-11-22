@@ -5,8 +5,11 @@ import ca.uhn.fhir.jpa.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.stereotype.Service;
 
+@Service
 public class InlineResourceLinkResolver implements IResourceLinkResolver {
+
 	@Override
 	public ResourceTable findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId) {
 		ResourceTable target;
@@ -20,5 +23,10 @@ public class InlineResourceLinkResolver implements IResourceLinkResolver {
 			target.setForcedId(forcedId);
 		}
 		return target;
+	}
+
+	@Override
+	public void validateTypeOrThrowException(Class<? extends IBaseResource> theType) {
+		// When resolving reference in-memory for a single resource, there's nothing to validate
 	}
 }

@@ -80,4 +80,9 @@ public class DatabaseResourceLinkResolver implements IResourceLinkResolver {
 		}
 		return target;
 	}
+
+	@Override
+	public void validateTypeOrThrowException(Class<? extends IBaseResource> theType) {
+		myDaoRegistry.getDaoOrThrowException(theType);
+	}
 }
