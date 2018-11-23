@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.subscription.FhirClientSearchParamProvider;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -40,4 +42,9 @@ public class BaseSubscriptionDstu3Config extends BaseSubscriptionConfig {
 		return new SearchParamExtractorDstu3();
 	}
 
+	@Primary
+	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainDstu3")
+	public IValidationSupport validationSupportChainDstu3() {
+		return new DefaultProfileValidationSupport();
+	}
 }
