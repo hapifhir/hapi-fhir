@@ -22,14 +22,12 @@ package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.index.*;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +46,6 @@ public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 	private ResourceLinkExtractor myResourceLinkExtractor;
 	@Autowired
 	private InlineResourceLinkResolver myInlineResourceLinkResolver;
-
 
 	@Override
 	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {

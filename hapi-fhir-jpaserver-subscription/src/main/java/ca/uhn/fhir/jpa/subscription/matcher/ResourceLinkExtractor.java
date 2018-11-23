@@ -1,13 +1,13 @@
-package ca.uhn.fhir.jpa.dao.index;
+package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -170,8 +170,10 @@ public class ResourceLinkExtractor {
 
 		if (isNotBlank(baseUrl)) {
 			if (!myModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myModelConfig.isAllowExternalReferences()) {
-				String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalReferenceNotAllowed", nextId.getValue());
-				throw new InvalidRequestException(msg);
+				// FIXME KHS localization
+//				String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalReferenceNotAllowed", nextId.getValue());
+//				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException("External Reference Not Allowed");
 			} else {
 				ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
 				if (theParams.links.add(resourceLink)) {

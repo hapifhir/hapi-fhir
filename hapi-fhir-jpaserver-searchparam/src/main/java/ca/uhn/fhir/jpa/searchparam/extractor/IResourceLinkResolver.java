@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.index;
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;

@@ -1,8 +1,9 @@
-package ca.uhn.fhir.jpa.dao.index;
+package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.stereotype.Service;

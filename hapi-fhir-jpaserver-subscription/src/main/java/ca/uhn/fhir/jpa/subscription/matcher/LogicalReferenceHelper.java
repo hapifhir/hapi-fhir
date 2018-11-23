@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.subscription.matcher;
 
 /*-
  * #%L

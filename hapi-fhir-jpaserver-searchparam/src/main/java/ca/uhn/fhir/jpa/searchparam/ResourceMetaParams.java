@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.searchparam;
 
 /*-
  * #%L
@@ -31,11 +31,11 @@ import java.util.*;
 
 public class ResourceMetaParams {
 	/**
-	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(SearchParameterMap)}
+	 * These are parameters which are supported by searches
 	 */
 	public static final Map<String, Class<? extends IQueryParameterAnd<?>>> RESOURCE_META_AND_PARAMS;
 	/**
-	 * These are parameters which are supported by {@link BaseHapiFhirResourceDao#searchForIds(SearchParameterMap)}
+	 * These are parameters which are supported by searches
 	 */
 	public static final Map<String, Class<? extends IQueryParameterType>> RESOURCE_META_PARAMS;
 	public static final Set<String> EXCLUDE_ELEMENTS_IN_ENCODED;
