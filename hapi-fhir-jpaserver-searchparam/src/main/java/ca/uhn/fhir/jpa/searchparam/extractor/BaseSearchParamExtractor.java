@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 /*
  * #%L
@@ -46,18 +46,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+
+	// Can't autowire because we need at bean initialization time
+	private ModelConfig myModelConfig;
 
 	public BaseSearchParamExtractor() {
 		super();
 	}
 
-	public BaseSearchParamExtractor(DaoConfig theDaoConfig, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	// FIXME KHS confirm we can't autowire modelconfig
+	public BaseSearchParamExtractor(ModelConfig theModelConfig, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
-		myDaoConfig = theDaoConfig;
+		myModelConfig = theModelConfig;
 	}
 
 	@Override
@@ -82,12 +84,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return myContext;
 	}
 
-	protected DaoConfig getDaoConfig() {
-		return myDaoConfig;
-	}
-
 	protected ModelConfig getModelConfig() {
-		return myDaoConfig.getModelConfig();
+		return myModelConfig;
 	}
 
 	public Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 /*
  * #%L
@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * 
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,34 +21,35 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.api.IPrimitiveDatatype;
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+import ca.uhn.fhir.model.base.composite.BaseHumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.*;
+import ca.uhn.fhir.model.dstu2.resource.Conformance.RestSecurity;
+import ca.uhn.fhir.model.dstu2.resource.Location;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.Patient.Communication;
+import ca.uhn.fhir.model.dstu2.resource.Questionnaire;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
+import ca.uhn.fhir.model.dstu2.valueset.RestfulSecurityServiceEnum;
+import ca.uhn.fhir.model.primitive.*;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.annotations.VisibleForTesting;
+import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.exceptions.PathEngineException;
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.context.IWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestSecurityComponent;
-import org.hl7.fhir.r4.model.Enumeration;
-import org.hl7.fhir.r4.model.Location.LocationPositionComponent;
-import org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 import java.math.BigDecimal;
@@ -57,34 +58,9 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements ISearchParamExtractor {
+public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorR4.class);
-	@Autowired
-	private org.hl7.fhir.r4.hapi.ctx.IValidationSupport myValidationSupport;
-
-	/**
-	 * Constructor
-	 */
-	public SearchParamExtractorR4() {
-		super();
-	}
-
-	public SearchParamExtractorR4(DaoConfig theDaoConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theDaoConfig, theCtx, theSearchParamRegistry);
-		myValidationSupport = theValidationSupport;
-	}
-
-	private void addQuantity(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Quantity nextValue) {
-		if (!nextValue.getValueElement().isEmpty()) {
-			BigDecimal nextValueValue = nextValue.getValueElement().getValue();
-			String nextValueString = nextValue.getSystemElement().getValueAsString();
-			String nextValueCode = nextValue.getCode();
-			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValueValue, nextValueString, nextValueCode);
-			nextEntity.setResource(theEntity);
-			retVal.add(nextEntity);
-		}
-	}
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorDstu2.class);
 
 	private void addSearchTerm(ResourceTable theEntity, Set<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
 		if (isBlank(searchTerm)) {
@@ -109,24 +85,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	}
 
 	@Override
-	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
-		ArrayList<PathAndRef> retVal = new ArrayList<>();
-
-		String[] nextPathsSplit = SPLIT_R4.split(theNextSpDef.getPath());
-		for (String path : nextPathsSplit) {
-			path = path.trim();
-			if (isNotBlank(path)) {
-
-				for (Object next : extractValues(path, theResource)) {
-					retVal.add(new PathAndRef(path, next));
-				}
-			}
-		}
-
-		return retVal;
-	}
-
-	@Override
 	public Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
 		// TODO: implement
 		return Collections.emptySet();
@@ -135,7 +93,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamDates(ca.uhn.fhir.jpa.entity.ResourceTable, ca.uhn.fhir.model.api.IBaseResource)
+	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamDates(ca.uhn.fhir.jpa.entity.ResourceTable,
+	 * ca.uhn.fhir.model.api.IResource)
 	 */
 	@Override
 	public Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
@@ -163,41 +122,18 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				}
 
 				ResourceIndexedSearchParamDate nextEntity;
-				if (nextObject instanceof BaseDateTimeType) {
-					BaseDateTimeType nextValue = (BaseDateTimeType) nextObject;
+				if (nextObject instanceof BaseDateTimeDt) {
+					BaseDateTimeDt nextValue = (BaseDateTimeDt) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
 					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getValue(), nextValue.getValue(), nextValue.getValueAsString());
-				} else if (nextObject instanceof Period) {
-					Period nextValue = (Period) nextObject;
+				} else if (nextObject instanceof PeriodDt) {
+					PeriodDt nextValue = (PeriodDt) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
 					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), nextValue.getStart(), nextValue.getEnd(), nextValue.getStartElement().getValueAsString());
-				} else if (nextObject instanceof Timing) {
-					Timing nextValue = (Timing) nextObject;
-					if (nextValue.isEmpty()) {
-						continue;
-					}
-					TreeSet<Date> dates = new TreeSet<>();
-					String firstValue = null;
-					for (DateTimeType nextEvent : nextValue.getEvent()) {
-						if (nextEvent.getValue() != null) {
-							dates.add(nextEvent.getValue());
-							if (firstValue == null) {
-								firstValue = nextEvent.getValueAsString();
-							}
-						}
-					}
-					if (dates.isEmpty()) {
-						continue;
-					}
-
-					nextEntity = new ResourceIndexedSearchParamDate(nextSpDef.getName(), dates.first(), dates.last(), firstValue);
-				} else if (nextObject instanceof StringType) {
-					// CarePlan.activitydate can be a string
-					continue;
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
@@ -218,11 +154,12 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamNumber(ca.uhn.fhir.jpa.entity.ResourceTable, ca.uhn.fhir.model.api.IBaseResource)
+	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamNumber(ca.uhn.fhir.jpa.entity.ResourceTable,
+	 * ca.uhn.fhir.model.api.IResource)
 	 */
 	@Override
 	public HashSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamNumber> retVal = new HashSet<>();
+		HashSet<ResourceIndexedSearchParamNumber> retVal = new HashSet<ResourceIndexedSearchParamNumber>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -236,7 +173,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			}
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null || ((IBase) nextObject).isEmpty()) {
+				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
 					continue;
 				}
 
@@ -246,31 +183,36 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					multiType = true;
 				}
 
-				if (nextObject instanceof Duration) {
-					Duration nextValue = (Duration) nextObject;
+				if (nextObject instanceof DurationDt) {
+					DurationDt nextValue = (DurationDt) nextObject;
 					if (nextValue.getValueElement().isEmpty()) {
 						continue;
 					}
 
-					if (BaseHapiFhirDao.UCUM_NS.equals(nextValue.getSystem())) {
+					if (new UriDt(SearchParamConstants.UCUM_NS).equals(nextValue.getSystemElement())) {
 						if (isNotBlank(nextValue.getCode())) {
 
-							Unit<? extends javax.measure.quantity.Quantity> unit = Unit.valueOf(nextValue.getCode());
+							Unit<? extends Quantity> unit = Unit.valueOf(nextValue.getCode());
 							javax.measure.converter.UnitConverter dayConverter = unit.getConverterTo(NonSI.DAY);
 							double dayValue = dayConverter.convert(nextValue.getValue().doubleValue());
-							Duration newValue = new Duration();
-							newValue.setSystem(BaseHapiFhirDao.UCUM_NS);
+							DurationDt newValue = new DurationDt();
+							newValue.setSystem(SearchParamConstants.UCUM_NS);
 							newValue.setCode(NonSI.DAY.toString());
 							newValue.setValue(dayValue);
 							nextValue = newValue;
 
 							/*
-							 * @SuppressWarnings("unchecked") PhysicsUnit<? extends org.unitsofmeasurement.quantity.Quantity<?>> unit = (PhysicsUnit<? extends org.unitsofmeasurement.quantity.Quantity<?>>)
-							 * UCUMFormat.getCaseInsensitiveInstance().parse(nextValue.getCode().getValue(), null); if (unit.isCompatible(UCUM.DAY)) {
+							 * @SuppressWarnings("unchecked") PhysicsUnit<? extends
+							 * org.unitsofmeasurement.quantity.Quantity<?>> unit = (PhysicsUnit<? extends
+							 * org.unitsofmeasurement.quantity.Quantity<?>>)
+							 * UCUMFormat.getCaseInsensitiveInstance().parse(nextValue.getCode().getValue(), null); if
+							 * (unit.isCompatible(UCUM.DAY)) {
 							 *
-							 * @SuppressWarnings("unchecked") PhysicsUnit<org.unitsofmeasurement.quantity.Time> timeUnit = (PhysicsUnit<Time>) unit; UnitConverter conv = timeUnit.getConverterTo(UCUM.DAY);
-							 * double dayValue = conv.convert(nextValue.getValue().getValue().doubleValue()); Duration newValue = new Duration(); newValue.setSystem(UCUM_NS);
-							 * newValue.setCode(UCUM.DAY.getSymbol()); newValue.setValue(dayValue); nextValue=newValue; }
+							 * @SuppressWarnings("unchecked") PhysicsUnit<org.unitsofmeasurement.quantity.Time> timeUnit =
+							 * (PhysicsUnit<Time>) unit; UnitConverter conv = timeUnit.getConverterTo(UCUM.DAY); double
+							 * dayValue = conv.convert(nextValue.getValue().getValue().doubleValue()); DurationDt newValue =
+							 * new DurationDt(); newValue.setSystem(UCUM_NS); newValue.setCode(UCUM.DAY.getSymbol());
+							 * newValue.setValue(dayValue); nextValue=newValue; }
 							 */
 						}
 					}
@@ -278,8 +220,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
-				} else if (nextObject instanceof Quantity) {
-					Quantity nextValue = (Quantity) nextObject;
+				} else if (nextObject instanceof QuantityDt) {
+					QuantityDt nextValue = (QuantityDt) nextObject;
 					if (nextValue.getValueElement().isEmpty()) {
 						continue;
 					}
@@ -287,8 +229,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, nextValue.getValue());
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
-				} else if (nextObject instanceof IntegerType) {
-					IntegerType nextValue = (IntegerType) nextObject;
+				} else if (nextObject instanceof IntegerDt) {
+					IntegerDt nextValue = (IntegerDt) nextObject;
 					if (nextValue.getValue() == null) {
 						continue;
 					}
@@ -296,8 +238,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(resourceName, new BigDecimal(nextValue.getValue()));
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
-				} else if (nextObject instanceof DecimalType) {
-					DecimalType nextValue = (DecimalType) nextObject;
+				} else if (nextObject instanceof DecimalDt) {
+					DecimalDt nextValue = (DecimalDt) nextObject;
 					if (nextValue.getValue() == null) {
 						continue;
 					}
@@ -321,11 +263,12 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamQuantity(ca.uhn.fhir.jpa.entity.ResourceTable, ca.uhn.fhir.model.api.IBaseResource)
+	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamQuantity(ca.uhn.fhir.jpa.entity.ResourceTable,
+	 * ca.uhn.fhir.model.api.IResource)
 	 */
 	@Override
 	public Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamQuantity> retVal = new HashSet<>();
+		HashSet<ResourceIndexedSearchParamQuantity> retVal = new HashSet<ResourceIndexedSearchParamQuantity>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -339,7 +282,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			}
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null || ((IBase) nextObject).isEmpty()) {
+				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
 					continue;
 				}
 
@@ -349,15 +292,15 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					multiType = true;
 				}
 
-				if (nextObject instanceof Quantity) {
-					Quantity nextValue = (Quantity) nextObject;
-					addQuantity(theEntity, retVal, resourceName, nextValue);
-				} else if (nextObject instanceof Range) {
-					Range nextValue = (Range) nextObject;
-					addQuantity(theEntity, retVal, resourceName, nextValue.getLow());
-					addQuantity(theEntity, retVal, resourceName, nextValue.getHigh());
-				} else if (nextObject instanceof LocationPositionComponent) {
-					continue;
+				if (nextObject instanceof QuantityDt) {
+					QuantityDt nextValue = (QuantityDt) nextObject;
+					if (nextValue.getValueElement().isEmpty()) {
+						continue;
+					}
+
+					ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValue.getValueElement().getValue(), nextValue.getSystemElement().getValueAsString(), nextValue.getCode());
+					nextEntity.setResource(theEntity);
+					retVal.add(nextEntity);
 				} else {
 					if (!multiType) {
 						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
@@ -374,11 +317,12 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamStrings(ca.uhn.fhir.jpa.entity.ResourceTable, ca.uhn.fhir.model.api.IBaseResource)
+	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamStrings(ca.uhn.fhir.jpa.entity.ResourceTable,
+	 * ca.uhn.fhir.model.api.IResource)
 	 */
 	@Override
 	public Set<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamString> retVal = new HashSet<>();
+		HashSet<ResourceIndexedSearchParamString> retVal = new HashSet<ResourceIndexedSearchParamString>();
 
 		String resourceName = getContext().getResourceDefinition(theResource).getName();
 
@@ -393,20 +337,18 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 			if (isBlank(nextPath)) {
 
-				// // TODO: implement phonetic, and any others that have no path
-				//
-				// // TODO: do we still need this check?
-				// if ("Questionnaire".equals(nextSpName) && nextSpDef.getName().equals("title")) {
-				// Questionnaire q = (Questionnaire) theResource;
-				// String title = "";// q.getGroup().getTitle();
-				// addSearchTerm(theEntity, retVal, nextSpName, title);
-				// }
+				// TODO: implement phonetic, and any others that have no path
 
+				if ("Questionnaire".equals(resourceName) && nextSpDef.getName().equals("title")) {
+					Questionnaire q = (Questionnaire) theResource;
+					String title = q.getGroup().getTitle();
+					addSearchTerm(theEntity, retVal, nextSpName, title);
+				}
 				continue;
 			}
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null || ((IBase) nextObject).isEmpty()) {
+				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
 					continue;
 				}
 
@@ -415,49 +357,34 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					multiType = true;
 				}
 
-				if (nextObject instanceof IPrimitiveType<?>) {
-					IPrimitiveType<?> nextValue = (IPrimitiveType<?>) nextObject;
+				if (nextObject instanceof IPrimitiveDatatype<?>) {
+					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
 					String searchTerm = nextValue.getValueAsString();
 					addSearchTerm(theEntity, retVal, nextSpName, searchTerm);
 				} else {
-					if (nextObject instanceof HumanName) {
-						ArrayList<StringType> allNames = new ArrayList<>();
-						HumanName nextHumanName = (HumanName) nextObject;
-						if (isNotBlank(nextHumanName.getFamily())) {
-							allNames.add(nextHumanName.getFamilyElement());
-						}
+					if (nextObject instanceof BaseHumanNameDt) {
+						ArrayList<StringDt> allNames = new ArrayList<StringDt>();
+						HumanNameDt nextHumanName = (HumanNameDt) nextObject;
+						allNames.addAll(nextHumanName.getFamily());
 						allNames.addAll(nextHumanName.getGiven());
-						for (StringType nextName : allNames) {
+						for (StringDt nextName : allNames) {
 							addSearchTerm(theEntity, retVal, nextSpName, nextName.getValue());
 						}
-					} else if (nextObject instanceof Address) {
-						ArrayList<StringType> allNames = new ArrayList<>();
-						Address nextAddress = (Address) nextObject;
+					} else if (nextObject instanceof AddressDt) {
+						ArrayList<StringDt> allNames = new ArrayList<StringDt>();
+						AddressDt nextAddress = (AddressDt) nextObject;
 						allNames.addAll(nextAddress.getLine());
 						allNames.add(nextAddress.getCityElement());
 						allNames.add(nextAddress.getStateElement());
 						allNames.add(nextAddress.getCountryElement());
 						allNames.add(nextAddress.getPostalCodeElement());
-						for (StringType nextName : allNames) {
+						for (StringDt nextName : allNames) {
 							addSearchTerm(theEntity, retVal, nextSpName, nextName.getValue());
 						}
-					} else if (nextObject instanceof ContactPoint) {
-						ContactPoint nextContact = (ContactPoint) nextObject;
+					} else if (nextObject instanceof ContactPointDt) {
+						ContactPointDt nextContact = (ContactPointDt) nextObject;
 						if (nextContact.getValueElement().isEmpty() == false) {
 							addSearchTerm(theEntity, retVal, nextSpName, nextContact.getValue());
-						}
-					} else if (nextObject instanceof Quantity) {
-						BigDecimal value = ((Quantity) nextObject).getValue();
-						if (value != null) {
-							addSearchTerm(theEntity, retVal, nextSpName, value.toPlainString());
-						}
-					} else if (nextObject instanceof Range) {
-						Quantity low = ((Range) nextObject).getLow();
-						if (low != null) {
-							BigDecimal value = low.getValue();
-							if (value != null) {
-								addSearchTerm(theEntity, retVal, nextSpName, value.toPlainString());
-							}
 						}
 					} else {
 						if (!multiType) {
@@ -474,16 +401,17 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamTokens(ca.uhn.fhir.jpa.entity.ResourceTable, ca.uhn.fhir.model.api.IBaseResource)
+	 * @see ca.uhn.fhir.jpa.dao.ISearchParamExtractor#extractSearchParamTokens(ca.uhn.fhir.jpa.entity.ResourceTable,
+	 * ca.uhn.fhir.model.api.IResource)
 	 */
 	@Override
 	public Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<BaseResourceIndexedSearchParam> retVal = new HashSet<>();
+		HashSet<BaseResourceIndexedSearchParam> retVal = new HashSet<BaseResourceIndexedSearchParam>();
 
 		String useSystem = null;
-		if (theResource instanceof CodeSystem) {
-			CodeSystem cs = (CodeSystem) theResource;
-			useSystem = cs.getUrl();
+		if (theResource instanceof ValueSet) {
+			ValueSet vs = (ValueSet) theResource;
+			useSystem = vs.getCodeSystem().getSystem();
 		}
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
@@ -492,7 +420,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				continue;
 			}
 
-			String resourceType = theEntity.getResourceType();
 			String nextPath = nextSpDef.getPath();
 			if (isBlank(nextPath)) {
 				continue;
@@ -503,23 +430,29 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				multiType = true;
 			}
 
-			List<String> systems = new ArrayList<>();
-			List<String> codes = new ArrayList<>();
+			List<String> systems = new ArrayList<String>();
+			List<String> codes = new ArrayList<String>();
+
+			String needContactPointSystem = null;
+			if (nextPath.endsWith("(system=phone)")) {
+				nextPath = nextPath.substring(0, nextPath.length() - "(system=phone)".length());
+				needContactPointSystem = "phone";
+			}
+			if (nextPath.endsWith("(system=email)")) {
+				nextPath = nextPath.substring(0, nextPath.length() - "(system=email)".length());
+				needContactPointSystem = "email";
+			}
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 
-				if (nextObject == null) {
-					continue;
-				}
-
 				// Patient:language
-				if (nextObject instanceof PatientCommunicationComponent) {
-					PatientCommunicationComponent nextValue = (PatientCommunicationComponent) nextObject;
+				if (nextObject instanceof Patient.Communication) {
+					Communication nextValue = (Patient.Communication) nextObject;
 					nextObject = nextValue.getLanguage();
 				}
 
-				if (nextObject instanceof Identifier) {
-					Identifier nextValue = (Identifier) nextObject;
+				if (nextObject instanceof IdentifierDt) {
+					IdentifierDt nextValue = (IdentifierDt) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
@@ -534,61 +467,60 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 						addStringParam(theEntity, retVal, nextSpDef, nextValue.getType().getText());
 					}
 
-				} else if (nextObject instanceof ContactPoint) {
-					ContactPoint nextValue = (ContactPoint) nextObject;
+				} else if (nextObject instanceof ContactPointDt) {
+					ContactPointDt nextValue = (ContactPointDt) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
+					if (isNotBlank(needContactPointSystem)) {
+						if (!needContactPointSystem.equals(nextValue.getSystemElement().getValueAsString())) {
+							continue;
+						}
+					}
 					systems.add(nextValue.getSystemElement().getValueAsString());
 					codes.add(nextValue.getValueElement().getValue());
-				} else if (nextObject instanceof Enumeration<?>) {
-					Enumeration<?> obj = (Enumeration<?>) nextObject;
+				} else if (nextObject instanceof BoundCodeDt) {
+					BoundCodeDt<?> obj = (BoundCodeDt<?>) nextObject;
 					String system = extractSystem(obj);
-					String code = obj.getValueAsString();
+					String code = obj.getValue();
 					if (isNotBlank(code)) {
 						systems.add(system);
 						codes.add(code);
 					}
-				} else if (nextObject instanceof IPrimitiveType<?>) {
-					IPrimitiveType<?> nextValue = (IPrimitiveType<?>) nextObject;
+				} else if (nextObject instanceof IPrimitiveDatatype<?>) {
+					IPrimitiveDatatype<?> nextValue = (IPrimitiveDatatype<?>) nextObject;
 					if (nextValue.isEmpty()) {
 						continue;
 					}
-					if ("CodeSystem.concept.code".equals(nextPath)) {
+					if ("ValueSet.codeSystem.concept.code".equals(nextPath)) {
 						systems.add(useSystem);
 					} else {
 						systems.add(null);
 					}
 					codes.add(nextValue.getValueAsString());
-				} else if (nextObject instanceof Coding) {
-					Coding nextValue = (Coding) nextObject;
+				} else if (nextObject instanceof CodingDt) {
+					CodingDt nextValue = (CodingDt) nextObject;
 					extractTokensFromCoding(systems, codes, theEntity, retVal, nextSpDef, nextValue);
-				} else if (nextObject instanceof CodeableConcept) {
-					CodeableConcept nextCC = (CodeableConcept) nextObject;
+				} else if (nextObject instanceof CodeableConceptDt) {
+					CodeableConceptDt nextCC = (CodeableConceptDt) nextObject;
 					if (!nextCC.getTextElement().isEmpty()) {
 						addStringParam(theEntity, retVal, nextSpDef, nextCC.getTextElement().getValue());
 					}
 
 					extractTokensFromCodeableConcept(systems, codes, nextCC, theEntity, retVal, nextSpDef);
-				} else if (nextObject instanceof CapabilityStatementRestSecurityComponent) {
+				} else if (nextObject instanceof RestSecurity) {
 					// Conformance.security search param points to something kind of useless right now - This should probably
 					// be fixed.
-					CapabilityStatementRestSecurityComponent sec = (CapabilityStatementRestSecurityComponent) nextObject;
-					for (CodeableConcept nextCC : sec.getService()) {
+					RestSecurity sec = (RestSecurity) nextObject;
+					for (BoundCodeableConceptDt<RestfulSecurityServiceEnum> nextCC : sec.getService()) {
 						extractTokensFromCodeableConcept(systems, codes, nextCC, theEntity, retVal, nextSpDef);
 					}
-				} else if (nextObject instanceof LocationPositionComponent) {
+				} else if (nextObject instanceof Location.Position) {
 					ourLog.warn("Position search not currently supported, not indexing location");
-					continue;
-				} else if (nextObject instanceof StructureDefinition.StructureDefinitionContextComponent) {
-					ourLog.warn("StructureDefinition context indexing not currently supported"); // TODO: implement this
-					continue;
-				} else if (resourceType.equals("Consent") && nextPath.equals("Consent.source")) {
-					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
 					continue;
 				} else {
 					if (!multiType) {
-						throw new ConfigurationException("Search param " + nextSpDef.getName() + " with path " + nextPath + " is of unexpected datatype: " + nextObject.getClass());
+						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
 					} else {
 						continue;
 					}
@@ -597,7 +529,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 			assert systems.size() == codes.size() : "Systems contains " + systems + ", codes contains: " + codes;
 
-			Set<Pair<String, String>> haveValues = new HashSet<>();
+			Set<Pair<String, String>> haveValues = new HashSet<Pair<String, String>>();
 			for (int i = 0; i < systems.size(); i++) {
 				String system = systems.get(i);
 				String code = codes.get(i);
@@ -632,7 +564,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 	@Override
 	public Set<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IBaseResource theResource) {
-		HashSet<ResourceIndexedSearchParamUri> retVal = new HashSet<>();
+		HashSet<ResourceIndexedSearchParamUri> retVal = new HashSet<ResourceIndexedSearchParamUri>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -646,7 +578,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			}
 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null || ((IBase) nextObject).isEmpty()) {
+				if (nextObject == null || ((IDatatype) nextObject).isEmpty()) {
 					continue;
 				}
 
@@ -656,8 +588,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					multiType = true;
 				}
 
-				if (nextObject instanceof UriType) {
-					UriType nextValue = (UriType) nextObject;
+				if (nextObject instanceof UriDt) {
+					UriDt nextValue = (UriDt) nextObject;
 					if (isBlank(nextValue.getValue())) {
 						continue;
 					}
@@ -681,15 +613,14 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		return retVal;
 	}
 
-	private void extractTokensFromCodeableConcept(List<String> theSystems, List<String> theCodes, CodeableConcept theCodeableConcept, ResourceTable theEntity,
-																 Set<BaseResourceIndexedSearchParam> theListToPopulate, RuntimeSearchParam theParameterDef) {
-		for (Coding nextCoding : theCodeableConcept.getCoding()) {
+
+	private void extractTokensFromCodeableConcept(List<String> theSystems, List<String> theCodes, CodeableConceptDt theCodeableConcept, ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> theListToPopulate, RuntimeSearchParam theParameterDef) {
+		for (CodingDt nextCoding : theCodeableConcept.getCoding()) {
 			extractTokensFromCoding(theSystems, theCodes, theEntity, theListToPopulate, theParameterDef, nextCoding);
 		}
 	}
 
-	private void extractTokensFromCoding(List<String> theSystems, List<String> theCodes, ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> theListToPopulate,
-													 RuntimeSearchParam theParameterDef, Coding nextCoding) {
+	private void extractTokensFromCoding(List<String> theSystems, List<String> theCodes, ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> theListToPopulate, RuntimeSearchParam theParameterDef, CodingDt nextCoding) {
 		if (nextCoding != null && !nextCoding.isEmpty()) {
 
 			String nextSystem = nextCoding.getSystemElement().getValueAsString();
@@ -706,136 +637,41 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		}
 	}
 
-	/**
-	 * Override parent because we're using FHIRPath here
-	 */
 	@Override
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
-		IWorkerContext worker = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
-		FHIRPathEngine fp = new FHIRPathEngine(worker);
-		fp.setHostServices(new SearchParamExtractorR4HostServices());
-
 		List<Object> values = new ArrayList<>();
-		String[] nextPathsSplit = SPLIT_R4.split(thePaths);
+		String[] nextPathsSplit = SPLIT.split(thePaths);
+		FhirTerser t = getContext().newTerser();
 		for (String nextPath : nextPathsSplit) {
-			List<Base> allValues;
+			String nextPathTrimmed = nextPath.trim();
+			List<Object> allValues;
 			try {
-				allValues = fp.evaluate((Base) theResource, nextPath);
-			} catch (FHIRException e) {
+				allValues = t.getValues(theResource, nextPathTrimmed);
+			} catch (Exception e) {
 				String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
 				throw new InternalErrorException(msg, e);
 			}
-			if (allValues.isEmpty() == false) {
-				values.addAll(allValues);
+			for (Object next : allValues) {
+				if (next instanceof IBaseExtension) {
+					IBaseDatatype value = ((IBaseExtension) next).getValue();
+					if (value != null) {
+						values.add(value);
+					}
+				} else {
+					values.add(next);
+				}
 			}
 		}
-
-		for (int i = 0; i < values.size(); i++) {
-			Object nextObject = values.get(i);
-			if (nextObject instanceof Extension) {
-				Extension nextExtension = (Extension) nextObject;
-				nextObject = nextExtension.getValue();
-				values.set(i, nextObject);
-			}
-		}
-
 		return values;
 	}
 
-	@VisibleForTesting
-	void setValidationSupportForTesting(org.hl7.fhir.r4.hapi.ctx.IValidationSupport theValidationSupport) {
-		myValidationSupport = theValidationSupport;
-	}
 
-	private static <T extends Enum<?>> String extractSystem(Enumeration<T> theBoundCode) {
-		if (theBoundCode.getValue() != null) {
-			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
+	private static <T extends Enum<?>> String extractSystem(BoundCodeDt<T> theBoundCode) {
+		if (theBoundCode.getValueAsEnum() != null) {
+			IValueSetEnumBinder<T> binder = theBoundCode.getBinder();
+			return binder.toSystemString(theBoundCode.getValueAsEnum());
 		}
 		return null;
-	}
-
-
-	private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
-		@Override
-		public Base resolveConstant(Object appContext, String name) throws PathEngineException {
-			return null;
-		}
-
-		@Override
-		public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
-			return null;
-		}
-
-		@Override
-		public boolean log(String argument, List<Base> focus) {
-			return false;
-		}
-
-		@Override
-		public FunctionDetails resolveFunction(String functionName) {
-			return null;
-		}
-
-		@Override
-		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
-			return null;
-		}
-
-		@Override
-		public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters) {
-			return null;
-		}
-
-		private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
-
-		@Override
-		public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
-
-			/*
-			 * When we're doing resolution within the SearchParamExtractor, if we want
-			 * to do a resolve() it's just to check the type, so there is no point
-			 * going through the heavyweight test. We can just return a stub and
-			 * that's good enough since we're just doing something like
-			 *    Encounter.patient.where(resolve() is Patient)
-			 */
-			IdType url = new IdType(theUrl);
-			Base retVal = null;
-			if (isNotBlank(url.getResourceType())) {
-
-				retVal = myResourceTypeToStub.get(url.getResourceType());
-				if (retVal != null) {
-					return retVal;
-				}
-
-				ResourceType resourceType = ResourceType.fromCode(url.getResourceType());
-				if (resourceType != null) {
-					retVal = new Resource(){
-						@Override
-						public Resource copy() {
-							return this;
-						}
-
-						@Override
-						public ResourceType getResourceType() {
-							return resourceType;
-						}
-
-						@Override
-						public String fhirType() {
-							return url.getResourceType();
-						}
-
-					};
-					myResourceTypeToStub.put(url.getResourceType(), retVal);
-				}
-			}
-			return retVal;
-		}
-
-		@Override
-		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
-			return false;
-		}
 	}
 
 }
