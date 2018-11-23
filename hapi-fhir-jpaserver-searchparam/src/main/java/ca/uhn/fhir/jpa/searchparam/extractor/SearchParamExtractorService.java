@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.index;
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 /*-
  * #%L
@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.model.entity.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;

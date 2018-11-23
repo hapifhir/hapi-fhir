@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.index;
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 /*-
  * #%L
@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -38,18 +37,18 @@ import static org.apache.commons.lang3.StringUtils.*;
 public class ResourceIndexedSearchParams {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceIndexedSearchParams.class);
 
-	final Collection<ResourceIndexedSearchParamString> stringParams = new ArrayList<>();
-	final Collection<ResourceIndexedSearchParamToken> tokenParams = new HashSet<>();
-	final Collection<ResourceIndexedSearchParamNumber> numberParams = new ArrayList<>();
-	final Collection<ResourceIndexedSearchParamQuantity> quantityParams = new ArrayList<>();
-	final Collection<ResourceIndexedSearchParamDate> dateParams = new ArrayList<>();
-	final Collection<ResourceIndexedSearchParamUri> uriParams = new ArrayList<>();
-	final Collection<ResourceIndexedSearchParamCoords> coordsParams = new ArrayList<>();
+	// TODO KHS Chqnge to private with accessors?
+	final public Collection<ResourceIndexedSearchParamString> stringParams = new ArrayList<>();
+	final public Collection<ResourceIndexedSearchParamToken> tokenParams = new HashSet<>();
+	final public Collection<ResourceIndexedSearchParamNumber> numberParams = new ArrayList<>();
+	final public Collection<ResourceIndexedSearchParamQuantity> quantityParams = new ArrayList<>();
+	final public Collection<ResourceIndexedSearchParamDate> dateParams = new ArrayList<>();
+	final public Collection<ResourceIndexedSearchParamUri> uriParams = new ArrayList<>();
+	final public Collection<ResourceIndexedSearchParamCoords> coordsParams = new ArrayList<>();
 
-	final Collection<ResourceIndexedCompositeStringUnique> compositeStringUniques = new HashSet<>();
-	final Collection<ResourceLink> links = new HashSet<>();
-	final Set<String> populatedResourceLinkParameters = new HashSet<>();
-
+	final public Collection<ResourceIndexedCompositeStringUnique> compositeStringUniques = new HashSet<>();
+	final public Collection<ResourceLink> links = new HashSet<>();
+	final public Set<String> populatedResourceLinkParameters = new HashSet<>();
 
 	public ResourceIndexedSearchParams() {
 	}
@@ -210,7 +209,7 @@ public class ResourceIndexedSearchParams {
 
 
 
-	void calculateHashes(Collection<? extends BaseResourceIndexedSearchParam> theStringParams) {
+	public void calculateHashes(Collection<? extends BaseResourceIndexedSearchParam> theStringParams) {
 		for (BaseResourceIndexedSearchParam next : theStringParams) {
 			next.calculateHashes();
 		}
@@ -307,17 +306,17 @@ public class ResourceIndexedSearchParams {
 			'}';
 	}
 
-	void findMissingSearchParams(DaoConfig theDaoConfig, ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> theActiveSearchParams) {
-		findMissingSearchParams(theDaoConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, stringParams);
-		findMissingSearchParams(theDaoConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, numberParams);
-		findMissingSearchParams(theDaoConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, quantityParams);
-		findMissingSearchParams(theDaoConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.DATE, dateParams);
-		findMissingSearchParams(theDaoConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, uriParams);
-		findMissingSearchParams(theDaoConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.TOKEN, tokenParams);
+	public void findMissingSearchParams(ModelConfig theModelConfig, ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> theActiveSearchParams) {
+		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, stringParams);
+		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, numberParams);
+		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, quantityParams);
+		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.DATE, dateParams);
+		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, uriParams);
+		findMissingSearchParams(theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.TOKEN, tokenParams);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(DaoConfig theDaoConfig, ResourceTable theEntity, Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
+	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(ModelConfig theModelConfig, ResourceTable theEntity, Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams, RestSearchParameterTypeEnum type,
 																												Collection<RT> paramCollection) {
 		for (Map.Entry<String, RuntimeSearchParam> nextEntry : activeSearchParams) {
 			String nextParamName = nextEntry.getKey();
@@ -344,7 +343,7 @@ public class ResourceIndexedSearchParams {
 							break;
 						case STRING:
 							param = new ResourceIndexedSearchParamString()
-								.setModelConfig(theDaoConfig.getModelConfig());
+								.setModelConfig(theModelConfig);
 							break;
 						case TOKEN:
 							param = new ResourceIndexedSearchParamToken();
