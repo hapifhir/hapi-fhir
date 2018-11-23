@@ -1,20 +1,36 @@
 package ca.uhn.fhir.jpa.subscription.matcher;
 
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionDstu3Test;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionTest;
+import ca.uhn.fhir.jpa.subscription.SubscriptionApplication;
+import ca.uhn.fhir.jpa.subscription.config.MockSearchParamProvider;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.codesystems.MedicationRequestCategory;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@SpringBootTest(classes = SubscriptionApplication.class)
 public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test {
 	@Autowired
 	SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
+
+	@Autowired
+	ISearchParamProvider mySearchParamProvider;
+
+	@Autowired
+	ISearchParamRegistry mySearchParamRegistry;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(mySubscriptionMatcherInMemory.match(criteria, resource).supported());
@@ -311,9 +327,13 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		// FIXME KHS add searchparam to local registry
-//		mySearchParameterDao.create(sp);
-//		mySearchParamRegsitry.forceRefresh();
+		// FIXME KHS continue here
+		List<IBaseResource> list = new ArrayList<>();
+		list.add(sp);
+		IBundleProvider bundle = new SimpleBundleProvider(list, "uuid");
+
+		((MockSearchParamProvider)mySearchParamProvider).setBundleProvider(bundle);
+		mySearchParamRegistry.forceRefresh();
 
 		{
 			BodySite bodySite = new BodySite();

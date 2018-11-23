@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-// FIXME KHS move into subscription package once dependencies resolved
 @Service
 @Lazy
 public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
