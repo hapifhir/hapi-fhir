@@ -152,6 +152,96 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 
 	@Test
+	public void testReadWhenCurrentVersionExpunged() {
+		Patient p = new Patient();
+		p.addName().setFamily("FAM1");
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("FAM2");
+		myPatientDao.update(p);
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("FAM3");
+		myPatientDao.update(p);
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("FAM4");
+		IIdType id4 = myPatientDao.update(p).getId();
+		assertEquals("4", id4.getVersionIdPart());
+
+		// Expunge versions 3 and 4
+		runInTransaction(()->{
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 3);
+			assertNotNull(history);
+			myResourceHistoryTableDao.delete(history);
+		});
+		runInTransaction(()->{
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 4);
+			assertNotNull(history);
+			myResourceHistoryTableDao.delete(history);
+		});
+
+		p = myPatientDao.read(id.toUnqualifiedVersionless());
+		assertEquals("FAM2", p.getName().get(0).getFamily());
+
+	}
+
+	@Test
+	public void testReadWhenAllVersionsExpunged() {
+		Patient p = new Patient();
+		p.addName().setFamily("FAM1");
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("FAM2");
+		myPatientDao.update(p);
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("FAM3");
+		myPatientDao.update(p);
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("FAM4");
+		IIdType id4 = myPatientDao.update(p).getId();
+		assertEquals("4", id4.getVersionIdPart());
+
+		// Expunge all versions
+		runInTransaction(()->{
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 1);
+			assertNotNull(history);
+			myResourceHistoryTableDao.delete(history);
+		});
+		runInTransaction(()->{
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 2);
+			assertNotNull(history);
+			myResourceHistoryTableDao.delete(history);
+		});
+		runInTransaction(()->{
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 3);
+			assertNotNull(history);
+			myResourceHistoryTableDao.delete(history);
+		});
+		runInTransaction(()->{
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 4);
+			assertNotNull(history);
+			myResourceHistoryTableDao.delete(history);
+		});
+
+		try {
+			myPatientDao.read(id.toUnqualifiedVersionless());fail();
+		} catch (ResourceGoneException e) {
+			assertEquals("No versions currently exist for resource Patient/" + id.getIdPart(), e.getMessage());
+		}
+	}
+
+	@Test
 	public void testDeletedResourcesAreReindexed() {
 		myDaoConfig.setSchedulingDisabled(true);
 
@@ -230,7 +320,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), not(greaterThan(0)));
 		});
 

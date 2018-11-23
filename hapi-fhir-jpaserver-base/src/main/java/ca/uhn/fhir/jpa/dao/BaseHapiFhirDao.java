@@ -1140,7 +1140,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			ResourceTable resource = (ResourceTable) theEntity;
 			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
 			if (history == null) {
-				return null;
+				history = myResourceHistoryTableDao.findMostRecentVersionForId(theEntity.getId());
+				if (history == null) {
+					throw new ResourceGoneException("No versions currently exist for resource " + theEntity.getIdDt().toVersionless().getValue());
+				} else {
+					ourLog.info("Returning version {} for resource {} because current version is missing", history.getVersion(), theEntity.getIdDt().getValue());
+				}
 			}
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();

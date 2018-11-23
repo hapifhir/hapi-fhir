@@ -91,6 +91,12 @@
 				larger batches (20000 instead of 500) in order to reduce the amount of noise
 				in the logs.
 			</action>
+			<action type="add">
+				JPA server reads now work correctly even if the most recent version of the resource
+				has been expunged from the database (e.g. because it was deemed to be a privacy issue). 
+				In this case, the most recent version that was not expunged will be returned instead.
+				Note that this applies only to non-versioned reads, not vreads.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
