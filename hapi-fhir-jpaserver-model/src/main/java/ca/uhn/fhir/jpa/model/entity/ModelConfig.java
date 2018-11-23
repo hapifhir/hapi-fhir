@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 
+import javax.xml.ws.ServiceMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
