@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
@@ -129,12 +130,14 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
 		IBaseResource payloadResource = theMsg.getPayload(getContext());
 
-		if (theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
-			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(payloadResource.getClass());
+		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
+			IIdType payloadId = theMsg.getPayloadId(getContext());
+			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(payloadId.getResourceType());
+			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(resourceDef.getImplementingClass());
 			try {
-				payloadResource = dao.read(payloadResource.getIdElement().toVersionless());
+				payloadResource = dao.read(payloadId.toVersionless());
 			} catch (ResourceGoneException e) {
-				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadResource.getIdElement(), theSubscription.getIdElement(getContext()));
+				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(getContext()));
 				return null;
 			}
 		}

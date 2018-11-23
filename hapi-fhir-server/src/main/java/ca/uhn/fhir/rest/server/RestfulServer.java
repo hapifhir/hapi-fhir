@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -346,20 +346,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		handleRequest(RequestTypeEnum.PUT, request, response);
 	}
 
-	/**
-	 * Count length of URL string, but treating unescaped sequences (e.g. ' ') as their unescaped equivalent (%20)
-	 */
-	protected static int escapedLength(String theServletPath) {
-		int delta = 0;
-		for (int i = 0; i < theServletPath.length(); i++) {
-			char next = theServletPath.charAt(i);
-			if (next == ' ') {
-				delta = delta + 2;
-			}
-		}
-		return theServletPath.length() + delta;
-	}
-
 	private void findResourceMethods(Object theProvider) {
 
 		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
@@ -567,6 +553,18 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets (or clears) the list of interceptors
 	 *
+	 * @param theList The list of interceptors (may be null)
+	 */
+	public void setInterceptors(List<IServerInterceptor> theList) {
+		myInterceptors.clear();
+		if (theList != null) {
+			myInterceptors.addAll(theList);
+		}
+	}
+
+	/**
+	 * Sets (or clears) the list of interceptors
+	 *
 	 * @param theInterceptors The list of interceptors (may be null)
 	 */
 	public void setInterceptors(IServerInterceptor... theInterceptors) {
@@ -575,18 +573,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myInterceptors.clear();
 		if (theInterceptors != null) {
 			myInterceptors.addAll(Arrays.asList(theInterceptors));
-		}
-	}
-
-	/**
-	 * Sets (or clears) the list of interceptors
-	 *
-	 * @param theList The list of interceptors (may be null)
-	 */
-	public void setInterceptors(List<IServerInterceptor> theList) {
-		myInterceptors.clear();
-		if (theList != null) {
-			myInterceptors.addAll(theList);
 		}
 	}
 
@@ -616,13 +602,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Collection<Object> theProviders) {
-		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
-
-		myPlainProviders.clear();
-		if (theProviders != null) {
-			myPlainProviders.addAll(theProviders);
-		}
+	public void setPlainProviders(Object... theProv) {
+		setPlainProviders(Arrays.asList(theProv));
 	}
 
 	/**
@@ -630,8 +611,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Object... theProv) {
-		setPlainProviders(Arrays.asList(theProv));
+	public void setPlainProviders(Collection<Object> theProviders) {
+		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
+
+		myPlainProviders.clear();
+		if (theProviders != null) {
+			myPlainProviders.addAll(theProviders);
+		}
 	}
 
 	/**
@@ -643,7 +629,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * @param servletPath        the servelet path
 	 * @return created resource path
 	 */
-	protected static String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {
+	// NOTE: Don't make this a static method!! People want to override it
+	protected String getRequestPath(String requestFullPath, String servletContextPath, String servletPath) {
 		return requestFullPath.substring(escapedLength(servletContextPath) + escapedLength(servletPath));
 	}
 
@@ -661,22 +648,22 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(Collection<IResourceProvider> theProviders) {
-		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
-
+	public void setResourceProviders(IResourceProvider... theResourceProviders) {
 		myResourceProviders.clear();
-		if (theProviders != null) {
-			myResourceProviders.addAll(theProviders);
+		if (theResourceProviders != null) {
+			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
 		}
 	}
 
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(IResourceProvider... theResourceProviders) {
+	public void setResourceProviders(Collection<IResourceProvider> theProviders) {
+		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
+
 		myResourceProviders.clear();
-		if (theResourceProviders != null) {
-			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
+		if (theProviders != null) {
+			myResourceProviders.addAll(theProviders);
 		}
 	}
 
@@ -1646,6 +1633,20 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		theResponse.setContentType("text/plain");
 		theResponse.setCharacterEncoding("UTF-8");
 		theResponse.getWriter().write(theException.getMessage());
+	}
+
+	/**
+	 * Count length of URL string, but treating unescaped sequences (e.g. ' ') as their unescaped equivalent (%20)
+	 */
+	protected static int escapedLength(String theServletPath) {
+		int delta = 0;
+		for (int i = 0; i < theServletPath.length(); i++) {
+			char next = theServletPath.charAt(i);
+			if (next == ' ') {
+				delta = delta + 2;
+			}
+		}
+		return theServletPath.length() + delta;
 	}
 
 	public static void throwUnknownFhirOperationException(RequestDetails requestDetails, String requestPath, RequestTypeEnum theRequestType, FhirContext theFhirContext) {

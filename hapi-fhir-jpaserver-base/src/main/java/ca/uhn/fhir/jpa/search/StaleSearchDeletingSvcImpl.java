@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,21 +25,20 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Deletes old searches
@@ -57,7 +56,10 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	 * DELETE FROM foo WHERE params IN (aaaa)
 	 * type query and this can fail if we have 1000s of params
 	 */
-	public static int ourMaximumResultsToDelete = 500;
+	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;
+	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 20000;
+	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
+	private static int ourMaximumResultsToDeleteInOnePass = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
 	private static Long ourNowForUnitTests;
 	/*
 	 * We give a bit of extra leeway just to avoid race conditions where a query result
@@ -75,8 +77,6 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	private ISearchResultDao mySearchResultDao;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
-	@PersistenceContext()
-	private EntityManager myEntityManager;
 
 	private void deleteSearch(final Long theSearchPid) {
 		mySearchDao.findById(theSearchPid).ifPresent(searchToDelete -> {
@@ -90,10 +90,14 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 			 * huge deal to be only partially deleting search results. They'll get deleted
 			 * eventually
 			 */
-			int max = ourMaximumResultsToDelete;
+			int max = ourMaximumResultsToDeleteInOnePass;
 			Slice<Long> resultPids = mySearchResultDao.findForSearch(PageRequest.of(0, max), searchToDelete.getId());
 			if (resultPids.hasContent()) {
-				mySearchResultDao.deleteByIds(resultPids.getContent());
+				List<List<Long>> partitions = Lists.partition(resultPids.getContent(), ourMaximumResultsToDeleteInOneStatement);
+				for (List<Long> nextPartition : partitions) {
+					mySearchResultDao.deleteByIds(nextPartition);
+				}
+
 			}
 
 			// Only delete if we don't have results left in this search
@@ -165,8 +169,13 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	}
 
 	@VisibleForTesting
+	public static void setMaximumResultsToDeleteInOnePassForUnitTest(int theMaximumResultsToDeleteInOnePass) {
+		ourMaximumResultsToDeleteInOnePass = theMaximumResultsToDeleteInOnePass;
+	}
+
+	@VisibleForTesting
 	public static void setMaximumResultsToDeleteForUnitTest(int theMaximumResultsToDelete) {
-		ourMaximumResultsToDelete = theMaximumResultsToDelete;
+		ourMaximumResultsToDeleteInOneStatement = theMaximumResultsToDelete;
 	}
 
 	private static long now() {

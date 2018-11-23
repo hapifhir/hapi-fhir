@@ -33,7 +33,8 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		super.after();
 		StaleSearchDeletingSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(myStaleSearchDeletingSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(StaleSearchDeletingSvcImpl.DEFAULT_CUTOFF_SLACK);
-		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteForUnitTest(10000);
+		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteForUnitTest(StaleSearchDeletingSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT);
+		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(StaleSearchDeletingSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS);
 	}
 
 	@Override
@@ -95,6 +96,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testDeleteVeryLargeSearch() {
 		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
+		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(10);
 
 		runInTransaction(() -> {
 			Search search = new Search();

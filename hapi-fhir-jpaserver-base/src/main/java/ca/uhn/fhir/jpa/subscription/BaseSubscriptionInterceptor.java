@@ -7,10 +7,10 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherCompositeInMemoryDatabase;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.util.JpaConstants;
@@ -68,9 +68,9 @@ import java.util.concurrent.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -84,6 +84,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
+	private static boolean ourForcePayloadEncodeAndDecodeForUnitTests;
 	private final Object myInitSubscriptionsLock = new Object();
 	private SubscribableChannel myProcessingChannel;
 	private Map<String, SubscribableChannel> myDeliveryChannel;
@@ -97,7 +98,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
 	private ThreadPoolExecutor myDeliveryExecutor;
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
-
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired(required = false)
@@ -328,7 +328,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		myProcessingChannel = theProcessingChannel;
 	}
 
-
 	public List<CanonicalSubscription> getRegisteredSubscriptions() {
 		return new ArrayList<>(myIdToSubscription.values());
 	}
@@ -434,11 +433,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
-		msg.setId(theResource.getIdElement());
-		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
-		msg.setNewPayload(myCtx, theResource);
-		submitResourceModified(msg);
+		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 	}
 
 	@Override
@@ -455,10 +450,17 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	void submitResourceModifiedForUpdate(IBaseResource theNewResource) {
+		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+	}
+
+	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage();
 		msg.setId(theNewResource.getIdElement());
-		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+		msg.setOperationType(theOperationType);
 		msg.setNewPayload(myCtx, theNewResource);
+		if (ourForcePayloadEncodeAndDecodeForUnitTests) {
+			msg.clearPayloadDecoded();
+		}
 		submitResourceModified(msg);
 	}
 
@@ -490,7 +492,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	public void setFhirContext(FhirContext theCtx) {
 		myCtx = theCtx;
 	}
-
 
 	@VisibleForTesting
 	public void setTxManager(PlatformTransactionManager theTxManager) {
@@ -598,7 +599,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		return myIdToSubscription.remove(subscriptionId);
 	}
 
-
 	public IFhirResourceDao<?> getSubscriptionDao() {
 		return myDaoRegistry.getResourceDao("Subscription");
 	}
@@ -606,7 +606,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	public IFhirResourceDao getDao(Class type) {
 		return myDaoRegistry.getResourceDao(type);
 	}
-	
+
 	public void setResourceDaos(List<IFhirResourceDao> theResourceDaos) {
 		myDaoRegistry.setResourceDaos(theResourceDaos);
 	}
@@ -618,7 +618,12 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myCtx, criteria);
 			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
 		} catch (InvalidRequestException e) {
-			throw new UnprocessableEntityException("Invalid subscription criteria submitted: "+criteria+" "+e.getMessage());
+			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
 		}
+	}
+
+	@VisibleForTesting
+	public static void setForcePayloadEncodeAndDecodeForUnitTests(boolean theForcePayloadEncodeAndDecodeForUnitTests) {
+		ourForcePayloadEncodeAndDecodeForUnitTests = theForcePayloadEncodeAndDecodeForUnitTests;
 	}
 }

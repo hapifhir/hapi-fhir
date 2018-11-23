@@ -864,8 +864,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		if (relCount > 0) {
-			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({}ms / code)",
-				relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount));
+			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({}ms / entry)",
+				relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(relCount));
 		}
 
 		if ((myDeferredConcepts.size() + myConceptLinksToSaveLater.size()) == 0) {
