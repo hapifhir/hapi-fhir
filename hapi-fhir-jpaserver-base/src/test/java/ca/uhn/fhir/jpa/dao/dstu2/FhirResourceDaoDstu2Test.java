@@ -23,8 +23,8 @@ import org.mockito.ArgumentCaptor;
 
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3Test;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.*;

@@ -22,7 +22,8 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IValueSetEnumBinder;
@@ -66,7 +67,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		}
 
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getDaoConfig(), resourceName, BaseHapiFhirDao.normalizeString(searchTerm), searchTerm);
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), resourceName, StringNormalizer.normalizeString(searchTerm), searchTerm);
 		nextEntity.setResource(theEntity);
 		retVal.add(nextEntity);
 	}
@@ -75,7 +76,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
 			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		}
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getDaoConfig(), nextSpDef.getName(), BaseHapiFhirDao.normalizeString(value), value);
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), nextSpDef.getName(), StringNormalizer.normalizeString(value), value);
 		nextEntity.setResource(theEntity);
 		retVal.add(nextEntity);
 	}

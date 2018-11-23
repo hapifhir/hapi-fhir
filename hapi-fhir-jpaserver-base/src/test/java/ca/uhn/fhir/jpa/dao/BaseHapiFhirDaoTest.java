@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
@@ -60,9 +61,9 @@ public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 	
 	@Test
 	public void testNormalizeString() {
-		assertEquals("TEST TEST", BaseHapiFhirDao.normalizeString("TEST teSt"));
-		assertEquals("AEIØU", BaseHapiFhirDao.normalizeString("åéîøü"));
-		assertEquals("杨浩", BaseHapiFhirDao.normalizeString("杨浩"));
+		assertEquals("TEST TEST", StringNormalizer.normalizeString("TEST teSt"));
+		assertEquals("AEIØU", StringNormalizer.normalizeString("åéîøü"));
+		assertEquals("杨浩", StringNormalizer.normalizeString("杨浩"));
 	}
 
 

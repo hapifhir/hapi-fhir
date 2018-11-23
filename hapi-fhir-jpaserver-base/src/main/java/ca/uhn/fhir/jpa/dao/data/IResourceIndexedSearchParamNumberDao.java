@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 
 public interface IResourceIndexedSearchParamNumberDao extends JpaRepository<ResourceIndexedSearchParamNumber, Long> {
 	// nothing yet

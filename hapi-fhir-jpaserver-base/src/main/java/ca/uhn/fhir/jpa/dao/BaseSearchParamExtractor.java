@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
@@ -79,8 +80,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return myContext;
 	}
 
+	// TODO KHS make this protected
 	public DaoConfig getDaoConfig() {
 		return myDaoConfig;
+	}
+
+	protected ModelConfig getModelConfig() {
+		return myDaoConfig.getModelConfig();
 	}
 
 	public Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {

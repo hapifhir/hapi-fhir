@@ -10,6 +10,7 @@
 	<modules>
 		<module>hapi-fhir-jpaserver-subscription</module>
 		<module>hapi-fhir-jpaserver-searchparam</module>
+		<module>hapi-fhir-jpa-model</module>
 	</modules>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>

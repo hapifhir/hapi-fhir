@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.collect.Sets;
@@ -86,6 +88,13 @@ public class DaoConfig {
 	)));
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
+
+	/**
+	 * Child Configurations
+	 */
+
+	private ModelConfig myModelConfig = new ModelConfig();
+
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -94,10 +103,6 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowExternalReferences = false;
-	/**
-	 * update setter javadoc if default changes
-	 */
-	private boolean myAllowContainsSearches = false;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -856,42 +861,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If enabled, the server will support the use of :contains searches,
-	 * which are helpful but can have adverse effects on performance.
-	 * <p>
-	 * Default is <code>false</code> (Note that prior to HAPI FHIR
-	 * 3.5.0 the default was <code>true</code>)
-	 * </p>
-	 * <p>
-	 * Note: If you change this value after data already has
-	 * already been stored in the database, you must for a reindexing
-	 * of all data in the database or resources may not be
-	 * searchable.
-	 * </p>
-	 */
-	public boolean isAllowContainsSearches() {
-		return myAllowContainsSearches;
-	}
-
-	/**
-	 * If enabled, the server will support the use of :contains searches,
-	 * which are helpful but can have adverse effects on performance.
-	 * <p>
-	 * Default is <code>false</code> (Note that prior to HAPI FHIR
-	 * 3.5.0 the default was <code>true</code>)
-	 * </p>
-	 * <p>
-	 * Note: If you change this value after data already has
-	 * already been stored in the database, you must for a reindexing
-	 * of all data in the database or resources may not be
-	 * searchable.
-	 * </p>
-	 */
-	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
-		this.myAllowContainsSearches = theAllowContainsSearches;
-	}
-
-	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the server will allow
 	 * resources to have references to external servers. For example if this server is
 	 * running at <code>http://example.com/fhir</code> and this setting is set to
@@ -1458,6 +1427,46 @@ public class DaoConfig {
 
 	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
 		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
+	}
+
+	public ModelConfig getModelConfig() {
+		return myModelConfig;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :contains searches,
+	 * which are helpful but can have adverse effects on performance.
+	 * <p>
+	 * Default is <code>false</code> (Note that prior to HAPI FHIR
+	 * 3.5.0 the default was <code>true</code>)
+	 * </p>
+	 * <p>
+	 * Note: If you change this value after data already has
+	 * already been stored in the database, you must for a reindexing
+	 * of all data in the database or resources may not be
+	 * searchable.
+	 * </p>
+	 */
+	public boolean isAllowContainsSearches() {
+		return this.myModelConfig.isAllowContainsSearches();
+	}
+
+	/**
+	 * If enabled, the server will support the use of :contains searches,
+	 * which are helpful but can have adverse effects on performance.
+	 * <p>
+	 * Default is <code>false</code> (Note that prior to HAPI FHIR
+	 * 3.5.0 the default was <code>true</code>)
+	 * </p>
+	 * <p>
+	 * Note: If you change this value after data already has
+	 * already been stored in the database, you must for a reindexing
+	 * of all data in the database or resources may not be
+	 * searchable.
+	 * </p>
+	 */
+	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
+		this.myModelConfig.setAllowContainsSearches(theAllowContainsSearches);
 	}
 
 	public enum IndexEnabledEnum {

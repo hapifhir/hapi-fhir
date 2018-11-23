@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +22,7 @@ public class DatabaseSearchParamSynchronizer {
 	public void synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
 		theParams.calculateHashes(theParams.stringParams);
 		for (ResourceIndexedSearchParamString next : synchronizeSearchParamsToDatabase(existingParams.stringParams, theParams.stringParams)) {
-			next.setDaoConfig(myDaoConfig);
+			next.setModelConfig(myDaoConfig.getModelConfig());
 			myEntityManager.remove(next);
 			theEntity.getParamsString().remove(next);
 		}

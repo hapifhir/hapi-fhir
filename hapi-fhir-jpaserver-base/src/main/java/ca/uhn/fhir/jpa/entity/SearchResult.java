@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+
 import java.io.Serializable;
 
 import javax.persistence.Column;
