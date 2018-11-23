@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.matcher;
+package ca.uhn.fhir.jpa.searchparam.extractor;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;

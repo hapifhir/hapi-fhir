@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;

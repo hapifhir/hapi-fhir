@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;

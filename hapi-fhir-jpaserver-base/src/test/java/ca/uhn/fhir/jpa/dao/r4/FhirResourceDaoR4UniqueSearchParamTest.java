@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryConfig;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
