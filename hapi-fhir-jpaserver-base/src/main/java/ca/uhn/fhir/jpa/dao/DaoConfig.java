@@ -39,21 +39,6 @@ import java.util.*;
 public class DaoConfig {
 
 	/**
-	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
-	 * values:
-	 * <ul>
-	 * <li><code>"http://hl7.org/fhir/valueset-*"</code></li>
-	 * <li><code>"http://hl7.org/fhir/codesystem-*"</code></li>
-	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
-	 * </ul>
-	 */
-	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-		"http://hl7.org/fhir/ValueSet/*",
-		"http://hl7.org/fhir/CodeSystem/*",
-		"http://hl7.org/fhir/valueset-*",
-		"http://hl7.org/fhir/codesystem-*",
-		"http://hl7.org/fhir/StructureDefinition/*")));
-	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
 	 */
 	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
@@ -102,10 +87,6 @@ public class DaoConfig {
 	/**
 	 * update setter javadoc if default changes
 	 */
-	private boolean myAllowExternalReferences = false;
-	/**
-	 * update setter javadoc if default changes
-	 */
 	private boolean myAllowInlineMatchUrlReferences = true;
 	private boolean myAllowMultipleDelete;
 	/**
@@ -145,8 +126,6 @@ public class DaoConfig {
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
 	private boolean mySuppressUpdatesWithNoChange = true;
-	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
-	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
@@ -228,12 +207,7 @@ public class DaoConfig {
 	 * @see #setTreatReferencesAsLogical(Set)
 	 */
 	public void addTreatReferencesAsLogical(String theTreatReferencesAsLogical) {
-		validateTreatBaseUrlsAsLocal(theTreatReferencesAsLogical);
-
-		if (myTreatReferencesAsLogical == null) {
-			myTreatReferencesAsLogical = new HashSet<>();
-		}
-		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
+		myModelConfig.addTreatReferencesAsLogical(theTreatReferencesAsLogical);
 	}
 
 	/**
@@ -760,57 +734,6 @@ public class DaoConfig {
 
 	/**
 	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be replaced with
-	 * simple local references.
-	 * <p>
-	 * For example, if the set contains the value <code>http://example.com/base/</code>
-	 * and a resource is submitted to the server that contains a reference to
-	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
-	 * convert this reference to <code>Patient/1</code>
-	 * </p>
-	 * <p>
-	 * Note that this property has different behaviour from {@link DaoConfig#getTreatReferencesAsLogical()}
-	 * </p>
-	 *
-	 * @see #getTreatReferencesAsLogical()
-	 */
-	public Set<String> getTreatBaseUrlsAsLocal() {
-		return myTreatBaseUrlsAsLocal;
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be replaced with
-	 * simple local references.
-	 * <p>
-	 * For example, if the set contains the value <code>http://example.com/base/</code>
-	 * and a resource is submitted to the server that contains a reference to
-	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
-	 * convert this reference to <code>Patient/1</code>
-	 * </p>
-	 *
-	 * @param theTreatBaseUrlsAsLocal The set of base URLs. May be <code>null</code>, which
-	 *                                means no references will be treated as external
-	 */
-	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
-		if (theTreatBaseUrlsAsLocal != null) {
-			for (String next : theTreatBaseUrlsAsLocal) {
-				validateTreatBaseUrlsAsLocal(next);
-			}
-		}
-
-		HashSet<String> treatBaseUrlsAsLocal = new HashSet<String>();
-		for (String next : ObjectUtils.defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
-			while (next.endsWith("/")) {
-				next = next.substring(0, next.length() - 1);
-			}
-			treatBaseUrlsAsLocal.add(next);
-		}
-		myTreatBaseUrlsAsLocal = treatBaseUrlsAsLocal;
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
 	 * resources that have any of the base URLs given here will be treated as logical
 	 * references instead of being treated as real references.
 	 * <p>
@@ -831,7 +754,7 @@ public class DaoConfig {
 	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
 	public Set<String> getTreatReferencesAsLogical() {
-		return myTreatReferencesAsLogical;
+		return myModelConfig.getTreatReferencesAsLogical();
 	}
 
 	/**
@@ -856,7 +779,7 @@ public class DaoConfig {
 	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
 	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
-		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
+		myModelConfig.setTreatReferencesAsLogical(theTreatReferencesAsLogical);
 		return this;
 	}
 
@@ -886,7 +809,7 @@ public class DaoConfig {
 	 * @see #setAllowExternalReferences(boolean)
 	 */
 	public boolean isAllowExternalReferences() {
-		return myAllowExternalReferences;
+		return myModelConfig.isAllowExternalReferences();
 	}
 
 	/**
@@ -915,7 +838,7 @@ public class DaoConfig {
 	 * @see #setAllowExternalReferences(boolean)
 	 */
 	public void setAllowExternalReferences(boolean theAllowExternalReferences) {
-		myAllowExternalReferences = theAllowExternalReferences;
+		myModelConfig.setAllowExternalReferences(theAllowExternalReferences);
 	}
 
 	/**
@@ -1469,6 +1392,44 @@ public class DaoConfig {
 		this.myModelConfig.setAllowContainsSearches(theAllowContainsSearches);
 	}
 
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be replaced with
+	 * simple local references.
+	 * <p>
+	 * For example, if the set contains the value <code>http://example.com/base/</code>
+	 * and a resource is submitted to the server that contains a reference to
+	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
+	 * convert this reference to <code>Patient/1</code>
+	 * </p>
+	 * <p>
+	 * Note that this property has different behaviour from {@link DaoConfig#getTreatReferencesAsLogical()}
+	 * </p>
+	 *
+	 * @see #getTreatReferencesAsLogical()
+	 */
+	public Set<String> getTreatBaseUrlsAsLocal() {
+		return myModelConfig.getTreatBaseUrlsAsLocal();
+	}
+
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be replaced with
+	 * simple local references.
+	 * <p>
+	 * For example, if the set contains the value <code>http://example.com/base/</code>
+	 * and a resource is submitted to the server that contains a reference to
+	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
+	 * convert this reference to <code>Patient/1</code>
+	 * </p>
+	 *
+	 * @param theTreatBaseUrlsAsLocal The set of base URLs. May be <code>null</code>, which
+	 *                                means no references will be treated as external
+	 */
+	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
+		myModelConfig.setTreatBaseUrlsAsLocal(theTreatBaseUrlsAsLocal);
+	}
+
 	public enum IndexEnabledEnum {
 		ENABLED,
 		DISABLED
@@ -1515,17 +1476,4 @@ public class DaoConfig {
 		 */
 		ANY
 	}
-
-	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
-		Validate.notBlank(theUrl, "Base URL must not be null or empty");
-
-		int starIdx = theUrl.indexOf('*');
-		if (starIdx != -1) {
-			if (starIdx != theUrl.length() - 1) {
-				throw new IllegalArgumentException("Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
-			}
-		}
-
-	}
-
 }

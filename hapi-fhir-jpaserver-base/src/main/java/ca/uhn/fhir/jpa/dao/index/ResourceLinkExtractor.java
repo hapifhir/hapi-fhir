@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -36,13 +37,11 @@ public class ResourceLinkExtractor {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceLinkExtractor.class);
 
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private ModelConfig myModelConfig;
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
@@ -148,7 +147,7 @@ public class ResourceLinkExtractor {
 
 		theParams.populatedResourceLinkParameters.add(nextSpDef.getName());
 
-		if (LogicalReferenceHelper.isLogicalReference(myDaoConfig, nextId)) {
+		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId)) {
 			ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
 			if (theParams.links.add(resourceLink)) {
 				ourLog.debug("Indexing remote resource reference URL: {}", nextId);
@@ -170,7 +169,7 @@ public class ResourceLinkExtractor {
 		}
 
 		if (isNotBlank(baseUrl)) {
-			if (!myDaoConfig.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myDaoConfig.isAllowExternalReferences()) {
+			if (!myModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myModelConfig.isAllowExternalReferences()) {
 				String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalReferenceNotAllowed", nextId.getValue());
 				throw new InvalidRequestException(msg);
 			} else {

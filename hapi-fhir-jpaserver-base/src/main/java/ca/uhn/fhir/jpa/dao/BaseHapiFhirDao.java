@@ -748,7 +748,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	public boolean isLogicalReference(IIdType theId) {
-		return LogicalReferenceHelper.isLogicalReference(myConfig, theId);
+		return LogicalReferenceHelper.isLogicalReference(myConfig.getModelConfig(), theId);
 	}
 
 	@Override

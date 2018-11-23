@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
@@ -28,7 +29,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LogicalReferenceHelper {
 
-	public static boolean isLogicalReference(DaoConfig myConfig, IIdType theId) {
+	public static boolean isLogicalReference(ModelConfig myConfig, IIdType theId) {
 		Set<String> treatReferencesAsLogical = myConfig.getTreatReferencesAsLogical();
 		if (treatReferencesAsLogical != null) {
 			for (String nextLogicalRef : treatReferencesAsLogical) {
