@@ -20,8 +20,12 @@ package ca.uhn.fhir.jpa.subscription.matcher;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +41,20 @@ public class SubscriptionMatcherCompositeInMemoryDatabase implements ISubscripti
 	SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
 	@Autowired
 	DaoConfig myDaoConfig;
+	@Autowired
+	DaoRegistry myDaoRegistry;
+	@Autowired
+	FhirContext myFhirContext;
 
 	@Override
 	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {
 		SubscriptionMatchResult result;
+
+		IBaseResource payload = msg.getNewPayload(myFhirContext);
+		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(payload.getClass());
+		payload = dao.read(payload.getIdElement().toUnqualifiedVersionless());
+		msg.setNewPayload(myFhirContext, payload);
+
 		if (myDaoConfig.isEnableInMemorySubscriptionMatching()) {
 			result = mySubscriptionMatcherInMemory.match(criteria, msg);
 			if (!result.supported()) {
