@@ -539,8 +539,8 @@
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.25</slf4j_version>
 		<spring_version>5.0.8.RELEASE</spring_version>
-		<spring_boot_version>2.0.4.RELEASE</spring_boot_version>
 		<spring_data_version>2.0.7.RELEASE</spring_data_version>
+		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
