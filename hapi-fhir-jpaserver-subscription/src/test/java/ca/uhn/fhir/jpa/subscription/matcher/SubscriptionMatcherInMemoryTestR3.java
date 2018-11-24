@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionDstu3Test;
-import ca.uhn.fhir.jpa.subscription.SubscriptionApplication;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.*;
@@ -10,14 +9,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.codesystems.MedicationRequestCategory;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@SpringBootTest(classes = SubscriptionApplication.class)
 public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test {
 	@Autowired
 	SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;

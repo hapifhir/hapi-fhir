@@ -542,7 +542,6 @@
 		<spring_boot_version>2.0.4.RELEASE</spring_boot_version>
 		<spring_data_version>2.0.7.RELEASE</spring_data_version>
 
-		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
@@ -1243,16 +1242,6 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-websocket</artifactId>
 				<version>${spring_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-autoconfigure</artifactId>
-				<version>${spring_boot_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-test</artifactId>
-				<version>${spring_boot_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
