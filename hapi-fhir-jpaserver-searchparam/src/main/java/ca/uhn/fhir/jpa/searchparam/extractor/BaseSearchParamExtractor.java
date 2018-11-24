@@ -47,8 +47,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private FhirContext myContext;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-
-	// Can't autowire because we need at bean initialization time
+	@Autowired
 	private ModelConfig myModelConfig;
 
 	public BaseSearchParamExtractor() {

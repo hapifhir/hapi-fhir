@@ -57,7 +57,6 @@ import javax.annotation.Nonnull;
 @Configuration
 @EnableScheduling
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
-@Import(BaseSubscriptionConfig.class)
 @ComponentScan(basePackages = "ca.uhn.fhir.jpa", excludeFilters={
 		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=BaseConfig.class),
 		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=WebSocketConfigurer.class)})
