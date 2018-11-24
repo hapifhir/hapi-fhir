@@ -1,10 +1,25 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.subscription.config.MockSearchParamProvider;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.junit.runner.RunWith;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@ActiveProfiles("test")
 @RunWith(SpringJUnit4ClassRunner.class)
 public class BaseSubscriptionTest {
+
+	@Autowired
+	ISearchParamProvider mySearchParamProvider;
+
+	@Autowired
+	ISearchParamRegistry mySearchParamRegistry;
+
+	public void setSearchParamBundleResponse(IBundleProvider theBundleProvider) {
+		((MockSearchParamProvider)mySearchParamProvider).setBundleProvider(theBundleProvider);
+		mySearchParamRegistry.forceRefresh();
+	}
 }

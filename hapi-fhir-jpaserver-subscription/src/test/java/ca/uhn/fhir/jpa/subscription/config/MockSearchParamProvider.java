@@ -8,12 +8,12 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 public class MockSearchParamProvider extends FhirClientSearchParamProvider {
 	private IBundleProvider myBundleProvider = new SimpleBundleProvider();
 
+	public void setBundleProvider(IBundleProvider theBundleProvider) {
+		myBundleProvider = theBundleProvider;
+	}
+
 	@Override
 	public IBundleProvider search(SearchParameterMap theParams) {
 		return myBundleProvider;
-	}
-
-	public void setBundleProvider(IBundleProvider theBundleProvider) {
-		myBundleProvider = theBundleProvider;
 	}
 }

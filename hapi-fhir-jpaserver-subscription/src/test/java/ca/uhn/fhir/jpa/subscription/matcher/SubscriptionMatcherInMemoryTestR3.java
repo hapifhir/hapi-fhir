@@ -1,10 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.matcher;
 
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionApplication;
-import ca.uhn.fhir.jpa.subscription.config.MockSearchParamProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.*;
@@ -15,8 +12,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -26,26 +22,20 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test
 	@Autowired
 	SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
 
-	@Autowired
-	ISearchParamProvider mySearchParamProvider;
-
-	@Autowired
-	ISearchParamRegistry mySearchParamRegistry;
-
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(mySubscriptionMatcherInMemory.match(criteria, resource).supported());
 	}
 
 	private void assertMatched(IBaseResource resource, String criteria) {
 		SubscriptionMatchResult result = mySubscriptionMatcherInMemory.match(criteria, resource);
-		;
+
 		assertTrue(result.supported());
 		assertTrue(result.matched());
 	}
 
 	private void assertNotMatched(IBaseResource resource, String criteria) {
 		SubscriptionMatchResult result = mySubscriptionMatcherInMemory.match(criteria, resource);
-		;
+
 		assertTrue(result.supported());
 		assertFalse(result.matched());
 	}
@@ -294,9 +284,8 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		// FIXME KHS add searchparam to local registry
-//		mySearchParameterDao.create(sp);
-//		mySearchParamRegsitry.forceRefresh();
+		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		setSearchParamBundleResponse(bundle);
 
 		{
 			Provenance prov = new Provenance();
@@ -327,13 +316,8 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		// FIXME KHS continue here
-		List<IBaseResource> list = new ArrayList<>();
-		list.add(sp);
-		IBundleProvider bundle = new SimpleBundleProvider(list, "uuid");
-
-		((MockSearchParamProvider)mySearchParamProvider).setBundleProvider(bundle);
-		mySearchParamRegistry.forceRefresh();
+		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		setSearchParamBundleResponse(bundle);
 
 		{
 			BodySite bodySite = new BodySite();
@@ -424,9 +408,8 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		// FIXME KHS add searchparam to local registry
-//		mySearchParameterDao.create(sp);
-//		mySearchParamRegsitry.forceRefresh();
+		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		setSearchParamBundleResponse(bundle);
 
 		{
 			ProcedureRequest pr = new ProcedureRequest();

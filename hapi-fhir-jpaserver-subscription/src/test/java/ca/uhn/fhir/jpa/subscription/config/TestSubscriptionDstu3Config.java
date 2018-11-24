@@ -3,22 +3,23 @@ package ca.uhn.fhir.jpa.subscription.config;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.springframework.context.annotation.*;
 
-@Profile("test")
 @Configuration
 @Import(TestSubscriptionConfig.class)
 public class TestSubscriptionDstu3Config extends BaseSubscriptionDstu3Config {
 	@Bean
-	@Primary
-	public ISearchParamProvider searchParamProviderMock() {
+	@Override
+	public ISearchParamProvider searchParamProvider() {
 		return new MockSearchParamProvider();
 	}
 
 	@Bean
-	@Primary
-	public ISearchParamRegistry searchParamRegistryMock() {
-		return new SearchParamRegistryDstu3(searchParamProviderMock());
+	@Override
+	public ISearchParamRegistry searchParamRegistry() {
+		return new SearchParamRegistryDstu3(searchParamProvider());
 	}
 
 }
