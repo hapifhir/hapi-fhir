@@ -2161,6 +2161,9 @@
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
+				<module>hapi-fhir-jpaserver-model</module>
+				<module>hapi-fhir-jpaserver-searchparam</module>
+				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<!-- <module>hapi-fhir-cobertura</module> -->
@@ -2211,6 +2214,9 @@
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-validation-resources-r4</module>
 				<module>hapi-fhir-igpacks</module>
+				<module>hapi-fhir-jpaserver-model</module>
+				<module>hapi-fhir-jpaserver-searchparam</module>
+				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
