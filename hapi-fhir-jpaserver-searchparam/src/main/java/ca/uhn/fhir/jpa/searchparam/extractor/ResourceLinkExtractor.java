@@ -171,9 +171,8 @@ public class ResourceLinkExtractor {
 		if (isNotBlank(baseUrl)) {
 			if (!myModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myModelConfig.isAllowExternalReferences()) {
 				// FIXME KHS localization
-//				String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalReferenceNotAllowed", nextId.getValue());
-//				throw new InvalidRequestException(msg);
-				throw new InvalidRequestException("External Reference Not Allowed");
+				String msg = myContext.getLocalizer().getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
+				throw new InvalidRequestException(msg);
 			} else {
 				ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
 				if (theParams.links.add(resourceLink)) {
