@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
@@ -18,13 +17,12 @@ public class TestJPAConfig implements ApplicationContextAware {
 
 	private ApplicationContext myApplicationContext;
 
-	@Bean("daoConfig")
+	@Bean
 	public DaoConfig daoConfig() {
 		return new DaoConfig();
 	}
 
 	@Bean
-	@DependsOn("daoConfig")
 	public ModelConfig modelConfig() {
 		return myApplicationContext.getBean(DaoConfig.class).getModelConfig();
 	}

@@ -5,12 +5,16 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -29,7 +33,9 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
  */
 @Configuration
 @EnableTransactionManagement()
-public class FhirServerConfig extends BaseJavaConfigDstu3 {
+public class FhirServerConfig extends BaseJavaConfigDstu3 implements ApplicationContextAware {
+
+	private ApplicationContext myApplicationContext;
 
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
@@ -39,6 +45,11 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setAllowMultipleDelete(true);
 		return retVal;
+	}
+
+	@Bean
+	public ModelConfig modelConfig() {
+		return myApplicationContext.getBean(DaoConfig.class).getModelConfig();
 	}
 
 	/**
@@ -121,4 +132,9 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		return retVal;
 	}
 
+
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
+	}
 }
