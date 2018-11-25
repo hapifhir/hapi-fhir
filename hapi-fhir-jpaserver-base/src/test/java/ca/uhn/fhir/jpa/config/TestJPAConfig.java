@@ -2,10 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryConfig;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -30,11 +27,6 @@ public class TestJPAConfig implements ApplicationContextAware {
 	@DependsOn("daoConfig")
 	public ModelConfig modelConfig() {
 		return myApplicationContext.getBean(DaoConfig.class).getModelConfig();
-	}
-
-	@Bean
-	public SearchParamRegistryConfig searchParamConfig() {
-		return new SearchParamRegistryConfig();
 	}
 
 	@Bean
