@@ -1280,6 +1280,14 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</pluginRepository>
+		<pluginRepository>
+			<id>maven2</id>
+			<name>Maven2</name>
+			<url>http://central.maven.org/maven2/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
 	</pluginRepositories>
 
 	<build>
@@ -1315,17 +1323,9 @@
 					<version>1.2.1</version>
 				</plugin>
 				<plugin>
-					<groupId>de.juplo</groupId>
-					<artifactId>hibernate-maven-plugin</artifactId>
-					<version>2.1.1</version>
-					<configuration>
-						<execute>false</execute>
-						<skip>false</skip>
-						<scanDependencies>false</scanDependencies>
-						<scanTestClasses>false</scanTestClasses>
-						<scanClasses>true</scanClasses>
-						<force>true</force>
-					</configuration>
+					<groupId>de.jpdigital</groupId>
+					<artifactId>hibernate52-ddl-maven-plugin</artifactId>
+					<version>2.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.felix</groupId>
