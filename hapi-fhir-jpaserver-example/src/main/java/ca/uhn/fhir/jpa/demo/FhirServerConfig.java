@@ -50,7 +50,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		new ModelConfig();
+		return new ModelConfig();
 	}
 
 	/**
