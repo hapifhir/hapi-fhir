@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -13,18 +14,19 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import javax.persistence.EntityManagerFactory;
 
 @Configuration
-public class TestJPAConfig implements ApplicationContextAware {
-
-	private ApplicationContext myApplicationContext;
+public class TestJPAConfig {
 
 	@Bean
-	public DaoConfig daoConfig() {
-		return new DaoConfig();
+	@Autowired
+	public DaoConfig daoConfig(ModelConfig theModelConfig) {
+		DaoConfig daoConfig = new DaoConfig();
+		daoConfig.setModelConfig(theModelConfig);
+		return daoConfig;
 	}
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return myApplicationContext.getBean(DaoConfig.class).getModelConfig();
+		return new ModelConfig();
 	}
 
 	@Bean
@@ -37,10 +39,5 @@ public class TestJPAConfig implements ApplicationContextAware {
 	@Bean
 	public UnregisterScheduledProcessor unregisterScheduledProcessor(Environment theEnv) {
 		return new UnregisterScheduledProcessor(theEnv);
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
-		myApplicationContext = theApplicationContext;
 	}
 }

@@ -13,6 +13,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -33,23 +34,23 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
  */
 @Configuration
 @EnableTransactionManagement()
-public class FhirServerConfig extends BaseJavaConfigDstu3 implements ApplicationContextAware {
-
-	private ApplicationContext myApplicationContext;
+public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
 	@Bean()
-	public DaoConfig daoConfig() {
+	@Autowired
+	public DaoConfig daoConfig(ModelConfig theModelConfig) {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setAllowMultipleDelete(true);
+		retVal.setModelConfig(theModelConfig);
 		return retVal;
 	}
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return myApplicationContext.getBean(DaoConfig.class).getModelConfig();
+		new ModelConfig();
 	}
 
 	/**
@@ -130,11 +131,5 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 implements Application
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
-	}
-
-
-	@Override
-	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
-		myApplicationContext = theApplicationContext;
 	}
 }

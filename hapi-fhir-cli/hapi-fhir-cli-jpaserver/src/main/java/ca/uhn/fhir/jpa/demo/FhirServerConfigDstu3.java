@@ -35,9 +35,7 @@ import java.util.Properties;
 @Configuration
 @EnableTransactionManagement()
 @Import(FhirDbConfig.class)
-public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 implements ApplicationContextAware {
-
-	private ApplicationContext myApplicationContext;
+public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 
 	@Autowired
 	private DataSource myDataSource;
@@ -49,18 +47,20 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 implements Applic
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
 	@Bean()
-	public DaoConfig daoConfig() {
+	@Autowired
+	public DaoConfig daoConfig(ModelConfig theModelConfig) {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
 		retVal.setSubscriptionPollDelay(5000);
 		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
+		retVal.setModelConfig(theModelConfig);
 		return retVal;
 	}
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return myApplicationContext.getBean(DaoConfig.class).getModelConfig();
+		return new ModelConfig();
 	}
 
 	@Override
@@ -106,10 +106,5 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 implements Applic
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
-		myApplicationContext = theApplicationContext;
 	}
 }

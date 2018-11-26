@@ -34,10 +34,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
@@ -45,7 +43,7 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implements ISearchParamRegistry, ApplicationContextAware {
+public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implements ISearchParamRegistry {
 
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
@@ -331,10 +329,6 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		refreshCacheIfNecessary();
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
-		myApplicationContext = theApplicationContext;
-	}
 
 	protected abstract RuntimeSearchParam toRuntimeSp(SP theNextSp);
 
