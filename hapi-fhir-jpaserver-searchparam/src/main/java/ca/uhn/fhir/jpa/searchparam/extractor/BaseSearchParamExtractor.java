@@ -24,8 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
@@ -55,10 +53,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	// FIXME KHS confirm we can't autowire modelconfig
-	public BaseSearchParamExtractor(ModelConfig theModelConfig, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	public BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
-		myModelConfig = theModelConfig;
 	}
 
 	@Override

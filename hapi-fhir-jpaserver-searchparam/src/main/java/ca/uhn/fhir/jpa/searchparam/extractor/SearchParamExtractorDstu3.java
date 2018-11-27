@@ -26,9 +26,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
-import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
-import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -74,7 +71,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	}
 
 	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theModelConfig, theCtx, theSearchParamRegistry);
+		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
 	}
 

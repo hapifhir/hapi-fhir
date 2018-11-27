@@ -69,7 +69,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	}
 
 	public SearchParamExtractorR4(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theModelConfig, theCtx, theSearchParamRegistry);
+		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
 	}
 
