@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
@@ -77,7 +78,7 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 			.setExpression("Patient")
 			.setDefinition(new Reference("SearchParameter/patient-birthdate"));
 		sp.addExtension()
-			.setUrl(JpaConstants.EXT_SP_UNIQUE)
+			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 
@@ -117,7 +118,7 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 			.setExpression("Coverage")
 			.setDefinition(new Reference("/SearchParameter/coverage-identifier"));
 		sp.addExtension()
-			.setUrl(JpaConstants.EXT_SP_UNIQUE)
+			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 		mySearchParamRegsitry.forceRefresh();
@@ -154,7 +155,7 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 			.setExpression("Patient")
 			.setDefinition(new Reference("SearchParameter/patient-organization"));
 		sp.addExtension()
-			.setUrl(JpaConstants.EXT_SP_UNIQUE)
+			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 

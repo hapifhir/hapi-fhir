@@ -751,7 +751,7 @@ public class DaoConfig {
 	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
 	 * </ul>
 	 *
-	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
+	 * @see ModelConfig#DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
 	public Set<String> getTreatReferencesAsLogical() {
 		return myModelConfig.getTreatReferencesAsLogical();
@@ -776,7 +776,7 @@ public class DaoConfig {
 	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
 	 * </ul>
 	 *
-	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
+	 * @see ModelConfig#DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
 	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
 		myModelConfig.setTreatReferencesAsLogical(theTreatReferencesAsLogical);
@@ -1132,7 +1132,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link JpaConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link SearchParamConstants#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -1143,7 +1143,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link JpaConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link SearchParamConstants#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.

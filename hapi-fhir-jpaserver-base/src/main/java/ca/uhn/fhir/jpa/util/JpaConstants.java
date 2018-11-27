@@ -24,8 +24,6 @@ import ca.uhn.fhir.rest.api.Constants;
 
 public class JpaConstants {
 
-	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
-
 	/**
 	 * <p>
 	 * This extension should be of type <code>string</code> and should be

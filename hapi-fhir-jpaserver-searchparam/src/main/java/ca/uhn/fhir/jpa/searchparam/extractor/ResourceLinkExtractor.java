@@ -170,7 +170,6 @@ public class ResourceLinkExtractor {
 
 		if (isNotBlank(baseUrl)) {
 			if (!myModelConfig.getTreatBaseUrlsAsLocal().contains(baseUrl) && !myModelConfig.isAllowExternalReferences()) {
-				// FIXME KHS localization
 				String msg = myContext.getLocalizer().getMessage(BaseSearchParamExtractor.class, "externalReferenceNotAllowed", nextId.getValue());
 				throw new InvalidRequestException(msg);
 			} else {
