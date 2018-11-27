@@ -347,7 +347,10 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@AfterClass
 	public static void afterClassClearContextBaseJpaDstu3Test() {
-		ourValueSetDao.purgeCaches();
+		// FIXME KHS why do I need this now?
+		if (ourValueSetDao != null) {
+			ourValueSetDao.purgeCaches();
+		}
 		ourJpaValidationSupportChainDstu3.flush();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
