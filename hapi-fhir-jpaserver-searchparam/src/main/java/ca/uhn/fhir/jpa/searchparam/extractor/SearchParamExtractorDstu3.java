@@ -70,6 +70,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		super();
 	}
 
+	// This constructor is used by tests
 	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;

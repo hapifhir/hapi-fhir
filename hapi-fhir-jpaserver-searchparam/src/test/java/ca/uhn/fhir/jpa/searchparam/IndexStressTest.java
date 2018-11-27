@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.stresstest;
+package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
