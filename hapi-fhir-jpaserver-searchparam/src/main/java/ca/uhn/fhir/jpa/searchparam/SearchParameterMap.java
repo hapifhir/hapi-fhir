@@ -16,6 +16,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -41,9 +42,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-// TODO KHS isa -> hasa
-public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
+public class SearchParameterMap implements Serializable {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
+
+	private final HashMap<String, List<List<? extends IQueryParameterType>>> mySearchParameterMap = new LinkedHashMap<>();
 
 	private static final long serialVersionUID = 1L;
 
@@ -109,7 +111,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		}
 	}
 
-	public void add(String theName, IQueryParameterOr<?> theOr) {
+		public void add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
 			return;
 		}
@@ -118,6 +120,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		}
 
 		get(theName).add(theOr.getValuesAsQueryTokens());
+	}
+
+	public Collection<List<List<? extends IQueryParameterType>>> values() {
+		return mySearchParameterMap.values();
 	}
 
 	public SearchParameterMap add(String theName, IQueryParameterType theParam) {
@@ -595,4 +601,33 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 		return retVal;
 	}
 
+	// Wrapper methods
+
+	public List<List<? extends IQueryParameterType>> get(String theName) {
+		return mySearchParameterMap.get(theName);
+	}
+
+	private void put(String theName, List<List<? extends IQueryParameterType>> theParams) {
+		mySearchParameterMap.put(theName, theParams);
+	}
+
+	public boolean containsKey(String theName) {
+		return mySearchParameterMap.containsKey(theName);
+	}
+
+	public Set<String> keySet() {
+		return mySearchParameterMap.keySet();
+	}
+
+	public boolean isEmpty() {
+		return mySearchParameterMap.isEmpty();
+	}
+
+	public Set<Map.Entry<String, List<List<? extends IQueryParameterType>>>> entrySet() {
+		return mySearchParameterMap.entrySet();
+	}
+
+	public List<List<? extends IQueryParameterType>> remove(String theName) {
+		return mySearchParameterMap.remove(theName);
+	}
 }
