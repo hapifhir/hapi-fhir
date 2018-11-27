@@ -70,7 +70,7 @@ public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 	 * Search based on a query criteria
 	 */
 	protected IBundleProvider performSearch(String theCriteria) {
-		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		RuntimeResourceDefinition responseResourceDef = subscriptionDao.validateCriteriaAndReturnResourceDefinition(theCriteria);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
 

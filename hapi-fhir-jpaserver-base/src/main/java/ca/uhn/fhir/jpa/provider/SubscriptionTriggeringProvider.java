@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -65,7 +66,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {
-		return myFhirContext.getResourceDefinition("Subscription").getImplementingClass();
+		return myFhirContext.getResourceDefinition(ResourceTypeEnum.SUBSCRIPTION.name()).getImplementingClass();
 	}
 
 }

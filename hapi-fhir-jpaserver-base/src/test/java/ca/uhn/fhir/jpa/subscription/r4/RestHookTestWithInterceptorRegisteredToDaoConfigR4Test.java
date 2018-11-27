@@ -4,6 +4,7 @@ package ca.uhn.fhir.jpa.subscription.r4;
 import java.util.Collections;
 import java.util.List;
 
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -142,7 +143,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdDt("Subscription", subscription2.getId())).execute();
+		ourClient.delete().resourceById(new IdDt(ResourceTypeEnum.SUBSCRIPTION.name(), subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 

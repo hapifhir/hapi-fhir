@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherCompositeInMemoryDatabase;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -367,7 +368,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 			RequestDetails req = new ServletSubRequestDetails();
 			req.setSubRequest(true);
 
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 			IBundleProvider subscriptionBundleList = subscriptionDao.search(map, req);
 			if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
 				ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
@@ -534,7 +535,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 
 		if (mySubscriptionActivatingSubscriber == null) {
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(subscriptionDao, getChannelType(), this, myTxManager, myAsyncTaskExecutor);
 		}
 
@@ -600,7 +601,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	public IFhirResourceDao<?> getSubscriptionDao() {
-		return myDaoRegistry.getResourceDao("Subscription");
+		return myDaoRegistry.getSubscriptionDao();
 	}
 
 	public IFhirResourceDao getDao(Class type) {

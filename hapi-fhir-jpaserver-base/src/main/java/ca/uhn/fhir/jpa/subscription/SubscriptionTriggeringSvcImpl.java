@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -95,10 +96,10 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		// Throw a 404 if the subscription doesn't exist
 		if (theSubscriptionId != null) {
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 			IIdType subscriptionId = theSubscriptionId;
 			if (subscriptionId.hasResourceType() == false) {
-				subscriptionId = subscriptionId.withResourceType("Subscription");
+				subscriptionId = subscriptionId.withResourceType(ResourceTypeEnum.SUBSCRIPTION.name());
 			}
 			subscriptionDao.read(subscriptionId);
 		}

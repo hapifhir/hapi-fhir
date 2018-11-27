@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
@@ -52,7 +53,7 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
 	@PostConstruct
 	public void setSubscriptionDao() {
-		mySubscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+		mySubscriptionDao = myDaoRegistry.getSubscriptionDao();
 	}
 
 	public Subscription.SubscriptionChannelType getChannelType() {
