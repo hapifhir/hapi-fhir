@@ -1,43 +1,61 @@
 
 package ca.uhn.fhir.jpa.demo;
 
-import java.util.Collection;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletException;
-
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.WebApplicationContext;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Properties;
+
+import javax.servlet.ServletException;
 
 public class JpaServerDemo extends RestfulServer {
 
 	private static final long serialVersionUID = 1L;
 
-	private WebApplicationContext myAppCtx;
+	public static WebApplicationContext myAppCtx;
+
+	private static Properties properties = null;
+	private static String validation = "false";
 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void initialize() throws ServletException {
 		super.initialize();
+
+		try {
+			properties = new Properties();
+			properties.load(new FileInputStream(FhirServerProperties.serverPropertiesFile));
+			validation = (properties.getProperty("validation") == null)
+				? validation : properties.getProperty("validation");
+		} catch (IOException e) {
+			throw new InternalErrorException(String.format("Error encountered loading %s file, info=%s",
+				FhirServerProperties.serverPropertiesFile,
+				e.getMessage()),
+				e);
+		}
 
 		/* 
 		 * We want to support FHIR DSTU2 format. This means that the server
@@ -94,8 +112,9 @@ public class JpaServerDemo extends RestfulServer {
 			setServerConformanceProvider(confProvider);
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
 			IFhirSystemDao<Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
-			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-			myAppCtx.getBean(DaoConfig.class));
+			EnhancedJpaConformanceProviderDstu3 confProvider = new EnhancedJpaConformanceProviderDstu3(this,
+				systemDao,
+				myAppCtx.getBean(DaoConfig.class));
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {
@@ -133,8 +152,31 @@ public class JpaServerDemo extends RestfulServer {
 		 */
 		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
 		for (IServerInterceptor interceptor : interceptorBeans) {
+			if ((interceptor instanceof RequestValidatingInterceptor) &&
+				 (validation.compareToIgnoreCase("true") != 0))
+			{
+				continue;
+			}
 			this.registerInterceptor(interceptor);
 		}
+
+//		FhirValidator validator = ctx.newValidator();
+//		ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(),
+//			new OcpValidationSupport());
+//		FhirInstanceValidator instanceValidator = new FhirInstanceValidator();
+//		instanceValidator.setValidationSupport(validationSupport);
+//		validator.registerValidatorModule(instanceValidator);
+
+		/*
+		 * ValidationSupportChain strings multiple instances of IValidationSupport together. The
+		 * code below is useful because it means that when the validator wants to load a
+		 * StructureDefinition or a ValueSet, it will first use DefaultProfileValidationSupport,
+		 * which loads the default HL7 versions. Any StructureDefinitions which are not found in
+		 * the built-in set are delegated to your custom implementation.
+		 */
+//		ValidationSupportChain support = new ValidationSupportChain(new OcpValidationSupport(),
+//			new DefaultProfileValidationSupport());
+//		instanceValidator.setValidationSupport(new OcpValidationSupport());
 
 		/*
 		 * If you are hosting this server at a specific DNS name, the server will try to 
