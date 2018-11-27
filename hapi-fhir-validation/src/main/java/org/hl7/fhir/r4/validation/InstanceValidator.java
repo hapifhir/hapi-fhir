@@ -2785,7 +2785,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       List<Element> mapItem = map.get(qItem.getLinkId());
       if (mapItem != null){
     	  rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), myEnableWhenEvaluator.isQuestionEnabled(qItem, questionnaireResponseRoot), "Item has answer, even though it is not enabled "+qItem.getLinkId());
-        validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack, inProgress, null);
+        validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack, inProgress, questionnaireResponseRoot);
       } else { 
     	//item is missing, is the question enabled?
     	if (myEnableWhenEvaluator.isQuestionEnabled(qItem, questionnaireResponseRoot)) {    	  
