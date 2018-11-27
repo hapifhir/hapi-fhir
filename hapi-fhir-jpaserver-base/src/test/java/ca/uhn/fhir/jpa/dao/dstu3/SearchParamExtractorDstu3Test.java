@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
@@ -88,7 +89,7 @@ public class SearchParamExtractorDstu3Test {
 			}
 		};
 
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(ourValidationSupport);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(new ResourceTable(), obs);
 		assertEquals(1, tokens.size());

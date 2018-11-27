@@ -48,6 +48,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Autowired
 	private ModelConfig myModelConfig;
 
+	public BaseSearchParamExtractor() {
+		super();
+	}
+
+	// FIXME KHS confirm we can't autowire modelconfig
+	public BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+		myContext = theCtx;
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
 	@Override
 	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
 		List<PathAndRef> refs = new ArrayList<PathAndRef>();
