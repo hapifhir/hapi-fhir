@@ -399,7 +399,28 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		
 		String reference = qr.getQuestionnaire().getReference();
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		
 		ValidationResult errors = myVal.validateWithResult(qr);
+		
+		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
+	}
+	
+	@Test
+	public void testGivenQuestionnaireResponseHasSiblingItemsWhenTheyShouldBeChildItems() throws Exception {
+		Questionnaire q = new Questionnaire();
+		QuestionnaireItemComponent item = q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.GROUP);
+		item.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
+		
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qr.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qr.addItem().setLinkId("link0").setText("Text");
+		qr.addItem().setLinkId("link1").addAnswer().setValue(new StringType("Answer"));
+		String reference = qr.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		
+		ValidationResult errors = myVal.validateWithResult(qr);
+		
 		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
 	}
 
