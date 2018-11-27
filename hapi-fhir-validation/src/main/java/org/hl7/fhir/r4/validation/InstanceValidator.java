@@ -2761,7 +2761,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
           if (qItem != null) {
             rule(errors, IssueType.STRUCTURE, item.line(), item.col(), stack.getLiteralPath(), index > -1, "Structural Error: item is in the wrong place");
             NodeStack ns = stack.push(item, -1, null, null);
-            validateQuestionannaireResponseItem(qsrc, qItem, errors, element, ns, inProgress, null);
+            validateQuestionannaireResponseItem(qsrc, qItem, errors, item, ns, inProgress, questionnaireResponseRoot);
           }
           else
             rule(errors, IssueType.NOTFOUND, item.line(), item.col(), stack.getLiteralPath(), index > -1, "LinkId \""+linkId+"\" not found in questionnaire");
