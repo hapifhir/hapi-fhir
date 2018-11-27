@@ -34,10 +34,9 @@ import java.util.function.Predicate;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-public class ResourceIndexedSearchParams {
+public final class ResourceIndexedSearchParams {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceIndexedSearchParams.class);
 
-	// TODO KHS Chqnge to private with accessors?
 	final public Collection<ResourceIndexedSearchParamString> stringParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamToken> tokenParams = new HashSet<>();
 	final public Collection<ResourceIndexedSearchParamNumber> numberParams = new ArrayList<>();

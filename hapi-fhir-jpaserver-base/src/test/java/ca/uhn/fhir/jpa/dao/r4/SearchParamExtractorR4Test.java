@@ -98,7 +98,7 @@ public class SearchParamExtractorR4Test {
 		Observation obs = new Observation();
 		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(ourValidationSupport);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(new ResourceTable(), obs);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
@@ -112,7 +112,7 @@ public class SearchParamExtractorR4Test {
 		Encounter enc = new Encounter();
 		enc.addLocation().setLocation(new Reference("Location/123"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(ourValidationSupport);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location");
 		assertNotNull(param);
 		List<PathAndRef> links = extractor.extractResourceLinks(enc, param);
@@ -126,7 +126,7 @@ public class SearchParamExtractorR4Test {
 		Consent consent = new Consent();
 		consent.setSource(new Reference().setReference("Consent/999"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(ourValidationSupport);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE);
 		assertNotNull(param);
 		List<PathAndRef> links = extractor.extractResourceLinks(consent, param);
@@ -145,7 +145,7 @@ public class SearchParamExtractorR4Test {
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code2")))
 			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(ourValidationSupport);
 		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(new ResourceTable(), o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
 		assertEquals(4, links.size());

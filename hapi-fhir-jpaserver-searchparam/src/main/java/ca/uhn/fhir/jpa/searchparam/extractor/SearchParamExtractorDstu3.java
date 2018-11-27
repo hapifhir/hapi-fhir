@@ -21,12 +21,10 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
@@ -63,17 +61,19 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 
 	private HapiWorkerContext myWorkerContext;
 
-	/**
-	 * Constructor
-	 */
 	public SearchParamExtractorDstu3() {
 		super();
 	}
 
-	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theCtx, theSearchParamRegistry);
+	// For testing
+	public SearchParamExtractorDstu3(IValidationSupport theValidationSupport) {
+		super();
 		myValidationSupport = theValidationSupport;
 	}
+
+	/**
+	 * Constructor
+	 */
 
 	private void addQuantity(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Quantity nextValue) {
 		if (!nextValue.getValueElement().isEmpty()) {

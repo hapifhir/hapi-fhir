@@ -21,12 +21,10 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
@@ -58,20 +56,23 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorR4.class);
+
 	@Autowired
 	private org.hl7.fhir.r4.hapi.ctx.IValidationSupport myValidationSupport;
 
-	/**
-	 * Constructor
-	 */
 	public SearchParamExtractorR4() {
 		super();
 	}
 
-	public SearchParamExtractorR4(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theCtx, theSearchParamRegistry);
+	// For testing
+	public SearchParamExtractorR4(IValidationSupport theValidationSupport) {
+		super();
 		myValidationSupport = theValidationSupport;
 	}
+
+	/**
+	 * Constructor
+	 */
 
 	private void addQuantity(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Quantity nextValue) {
 		if (!nextValue.getValueElement().isEmpty()) {
