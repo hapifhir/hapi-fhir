@@ -167,6 +167,20 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
+	public IBaseResource expandValueSet(IBaseResource theInput) {
+		ValueSet valueSetToExpand = (ValueSet) theInput;
+
+		try {
+			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(valueSetToExpandR4);
+			return VersionConvertor_30_40.convertValueSet(expandedR4);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
 		if (vs == null) {

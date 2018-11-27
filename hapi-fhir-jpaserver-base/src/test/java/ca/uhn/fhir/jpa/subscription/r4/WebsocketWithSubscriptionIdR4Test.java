@@ -47,6 +47,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 	private WebSocketClient myWebSocketClient;
 	private SocketImplementation mySocketImplementation;
 
+	@Override
 	@After
 	public void after() throws Exception {
 		super.after();
@@ -60,6 +61,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		myWebSocketClient.stop();
 	}
 
+	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
@@ -72,7 +74,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		 */
 
 		Patient patient = FhirR4Util.getPatient();
-		MethodOutcome methodOutcome = myClient.create().resource(patient).execute();
+		MethodOutcome methodOutcome = ourClient.create().resource(patient).execute();
 		myPatientId = methodOutcome.getId().getIdPart();
 
 		/*
@@ -89,7 +91,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		channel.setPayload("application/json");
 		subscription.setChannel(channel);
 
-		methodOutcome = myClient.create().resource(subscription).execute();
+		methodOutcome = ourClient.create().resource(subscription).execute();
 		mySubscriptionId = methodOutcome.getId().getIdPart();
 
 		/*
@@ -122,7 +124,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		observation.setSubject(reference);
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 
@@ -146,7 +148,7 @@ public class WebsocketWithSubscriptionIdR4Test extends BaseResourceProviderR4Tes
 		observation.setSubject(reference);
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome2 = myClient.create().resource(observation).execute();
+		MethodOutcome methodOutcome2 = ourClient.create().resource(observation).execute();
 		String observationId = methodOutcome2.getId().getIdPart();
 		observation.setId(observationId);
 

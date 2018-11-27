@@ -36,7 +36,7 @@ public class FifoMemoryPagingProvider extends BasePagingProvider implements IPag
 		Validate.isTrue(theSize > 0, "theSize must be greater than 0");
 
 		mySize = theSize;
-		myBundleProviders = new LinkedHashMap<String, IBundleProvider>(mySize);
+		myBundleProviders = new LinkedHashMap<>(mySize);
 	}
 
 	@Override

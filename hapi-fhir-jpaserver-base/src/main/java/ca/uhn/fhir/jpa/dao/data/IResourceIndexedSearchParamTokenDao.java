@@ -20,10 +20,14 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface IResourceIndexedSearchParamTokenDao extends JpaRepository<ResourceIndexedSearchParamToken, Long> {
-	// nothing yet
+
+	@Query("select count(*) from ResourceIndexedSearchParamToken t WHERE t.myResourcePid = :resid")
+	int countForResourceId(@Param("resid") Long theResourcePid);
+
 }

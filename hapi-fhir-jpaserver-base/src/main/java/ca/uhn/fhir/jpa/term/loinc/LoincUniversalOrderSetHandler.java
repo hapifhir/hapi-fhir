@@ -34,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class LoincUniversalOrderSetHandler extends BaseLoincHandler implements IRecordHandler {
 
 	public static final String VS_ID = "loinc-universal-order-set-vs";
-	public static final String VS_URI = "http://loinc.org/fhir/loinc-universal-order-set";
+	public static final String VS_URI = "http://loinc.org/vs/loinc-universal-order-set";
 	public static final String VS_NAME = "LOINC Universal Order Set";
 
 	public LoincUniversalOrderSetHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {

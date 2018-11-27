@@ -288,8 +288,6 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 					if (nextMethodBinding instanceof SearchMethodBinding) {
 						handleSearchMethodBinding(rest, resource, resourceName, def, includes, (SearchMethodBinding) nextMethodBinding);
-					} else if (nextMethodBinding instanceof DynamicSearchMethodBinding) {
-						handleDynamicSearchMethodBinding(resource, def, includes, (DynamicSearchMethodBinding) nextMethodBinding);
 					} else if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = myOperationBindingToName.get(methodBinding);
@@ -338,51 +336,6 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 
 		myConformance = retVal;
 		return retVal;
-	}
-
-	private void handleDynamicSearchMethodBinding(RestResource resource, RuntimeResourceDefinition def, TreeSet<String> includes, DynamicSearchMethodBinding searchMethodBinding) {
-		includes.addAll(searchMethodBinding.getIncludes());
-
-		List<RuntimeSearchParam> searchParameters = new ArrayList<RuntimeSearchParam>();
-		searchParameters.addAll(searchMethodBinding.getSearchParams());
-		sortRuntimeSearchParameters(searchParameters);
-
-		if (!searchParameters.isEmpty()) {
-
-			for (RuntimeSearchParam nextParameter : searchParameters) {
-
-				String nextParamName = nextParameter.getName();
-
-				// String chain = null;
-				String nextParamUnchainedName = nextParamName;
-				if (nextParamName.contains(".")) {
-					// chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
-					nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
-				}
-
-				String nextParamDescription = nextParameter.getDescription();
-
-				/*
-				 * If the parameter has no description, default to the one from the resource
-				 */
-				if (StringUtils.isBlank(nextParamDescription)) {
-					RuntimeSearchParam paramDef = def.getSearchParam(nextParamUnchainedName);
-					if (paramDef != null) {
-						nextParamDescription = paramDef.getDescription();
-					}
-				}
-
-				RestResourceSearchParam param;
-				param = resource.addSearchParam();
-
-				param.setName(nextParamName);
-				// if (StringUtils.isNotBlank(chain)) {
-				// param.addChain(chain);
-				// }
-				param.setDocumentation(nextParamDescription);
-				// param.setType(nextParameter.getParamType());
-			}
-		}
 	}
 
 	private void handleSearchMethodBinding(Rest rest, RestResource resource, String resourceName, RuntimeResourceDefinition def, TreeSet<String> includes, SearchMethodBinding searchMethodBinding) {

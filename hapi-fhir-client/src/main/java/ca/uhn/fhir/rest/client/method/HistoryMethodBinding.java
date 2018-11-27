@@ -26,6 +26,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Date;
 
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -96,7 +98,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		String historyId = id != null ? id.getIdPart() : null;
-		HttpGetClientInvocation retVal = createHistoryInvocation(getContext(), resourceName, historyId, null, null);
+		HttpGetClientInvocation retVal = createHistoryInvocation(getContext(), resourceName, historyId, null, null, null);
 
 		if (theArgs != null) {
 			for (int idx = 0; idx < theArgs.length; idx++) {
@@ -108,7 +110,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		return retVal;
 	}
 
-	public static HttpGetClientInvocation createHistoryInvocation(FhirContext theContext, String theResourceName, String theId, IPrimitiveType<Date> theSince, Integer theLimit) {
+	public static HttpGetClientInvocation createHistoryInvocation(FhirContext theContext, String theResourceName, String theId, IPrimitiveType<Date> theSince, Integer theLimit, DateRangeParam theAt) {
 		StringBuilder b = new StringBuilder();
 		if (theResourceName != null) {
 			b.append(theResourceName);
@@ -129,7 +131,17 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		if (theLimit != null) {
 			b.append(haveParam ? '&' : '?');
+			haveParam = true;
 			b.append(Constants.PARAM_COUNT).append('=').append(theLimit);
+		}
+		if (theAt != null) {
+			for (DateParam next : theAt.getValuesAsQueryTokens()) {
+				b.append(haveParam ? '&' : '?');
+				haveParam = true;
+				b.append(Constants.PARAM_AT);
+				b.append("=");
+				b.append(next.getValueAsQueryToken(theContext));
+			}
 		}
 
 		HttpGetClientInvocation retVal = new HttpGetClientInvocation(theContext, b.toString());

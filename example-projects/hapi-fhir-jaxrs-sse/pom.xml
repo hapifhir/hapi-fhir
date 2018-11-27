@@ -4,8 +4,8 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>2.3-SNAPSHOT</version>
-		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
+		<version>2.5-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>hapi-fhir-jaxrs-sse</artifactId>
 	<build>

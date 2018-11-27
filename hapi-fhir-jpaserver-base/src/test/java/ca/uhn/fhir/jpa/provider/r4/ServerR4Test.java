@@ -65,7 +65,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 	public void testMetadataIncludesResourceCounts() {
 		Patient p = new Patient();
 		p.setActive(true);
-		myClient.create().resource(p).execute();
+		ourClient.create().resource(p).execute();
 
 		/*
 		 * Initial fetch after a clear should return
@@ -73,7 +73,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		 */
 		ourResourceCountsCache.clear();
 
-		CapabilityStatement capabilityStatement = myClient
+		CapabilityStatement capabilityStatement = ourClient
 			.capabilities()
 			.ofType(CapabilityStatement.class)
 			.execute();
@@ -95,7 +95,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		 */
 		ourResourceCountsCache.update();
 
-		capabilityStatement = myClient
+		capabilityStatement = ourClient
 			.capabilities()
 			.ofType(CapabilityStatement.class)
 			.execute();

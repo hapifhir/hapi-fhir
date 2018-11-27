@@ -10,8 +10,11 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -72,7 +75,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	private void createLocalCsAndVs() {
-		//@formatter:off
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -86,10 +88,17 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			.addConcept().setCode("B").setDisplay("Code B")
 			.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
 			.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
-		//@formatter:on
 		myCodeSystemDao.create(codeSystem, mySrd);
+	}
 
-		createLocalVs(codeSystem);
+	private void createLocalVsWithIncludeConcept() {
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("AA");
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 
 	private void createLocalVs(CodeSystem codeSystem) {
@@ -97,7 +106,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
 		include.setSystem(codeSystem.getUrl());
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childAA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 
@@ -119,9 +128,9 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpandById() throws IOException {
+	public void testExpandById() {
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -149,10 +158,10 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpandByIdWithFilter() throws IOException {
+	public void testExpandByIdWithFilter() {
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
@@ -170,7 +179,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByUrl() {
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -190,7 +199,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	public void testExpandByValueSet() throws IOException {
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -208,12 +217,12 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 
 	@Test
-	public void testExpandInlineVsAgainstBuiltInCs() throws IOException {
+	public void testExpandInlineVsAgainstBuiltInCs() {
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -229,13 +238,13 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpandInlineVsAgainstExternalCs() throws IOException {
+	public void testExpandInlineVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalVs);
 		myLocalVs.setId("");
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -257,7 +266,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	public void testExpandInvalidParams() throws IOException {
 		//@formatter:off
 		try {
-			myClient
+			ourClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -272,7 +281,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		//@formatter:off
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case-r4.xml");
-			myClient
+			ourClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -288,7 +297,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		//@formatter:off
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/r4/extensional-case.xml");
-			myClient
+			ourClient
 				.operation()
 				.onInstance(myExtensionalVsId)
 				.named("expand")
@@ -304,12 +313,12 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpandLocalVsAgainstBuiltInCs() throws IOException {
+	public void testExpandLocalVsAgainstBuiltInCs() {
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myLocalValueSetId)
 			.named("expand")
@@ -325,12 +334,12 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpandLocalVsAgainstExternalCs() throws IOException {
+	public void testExpandLocalVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myLocalValueSetId)
 			.named("expand")
@@ -349,12 +358,12 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpandLocalVsCanonicalAgainstExternalCs() throws IOException {
+	public void testExpandLocalVsCanonicalAgainstExternalCs() {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
@@ -373,13 +382,13 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpandLocalVsWithUnknownCode() throws IOException {
+	public void testExpandLocalVsWithUnknownCode() {
 		createExternalCsAndLocalVsWithUnknownCode();
 		assertNotNull(myLocalValueSetId);
 
 		//@formatter:off
 		try {
-			myClient
+			ourClient
 				.operation()
 				.onInstance(myLocalValueSetId)
 				.named("expand")
@@ -400,8 +409,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		HttpPost post = new HttpPost(ourServerBase + "/ValueSet/%24expand");
 		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
 
-		CloseableHttpResponse resp = ourHttpClient.execute(post);
-		try {
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(respString);
@@ -411,22 +419,19 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 			assertThat(respString, containsString("Unknown FilterOperator code 'n'"));
 
-		} finally {
-			IOUtils.closeQuietly(resp);
 		}
 	}
 
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstance() {
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("validate-code")
 			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -435,16 +440,58 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnType() throws IOException {
+		createLocalCsAndVs();
+
+		String url = ourServerBase +
+			"/ValueSet/$validate-code?system=" +
+			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
+			"&code=AA";
+
+		HttpGet request = new HttpGet(url);
+		request.addHeader("Accept", "application/fhir+json");
+		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
+			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(respString);
+
+			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
+			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		}
+	}
+
+	@Test
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
+		createLocalCsAndVs();
+		createLocalVsWithIncludeConcept();
+
+		String url = ourServerBase +
+			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
+			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
+			"&code=AA";
+
+		ourLog.info("* Requesting: {}", url);
+
+		HttpGet request = new HttpGet(url);
+		request.addHeader("Accept", "application/fhir+json");
+		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
+			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(respString);
+
+			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
+			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		}
+	}
+
+	@Test
 	public void testValidateCodeOperationByCodeAndSystemType() {
 		//@formatter:off
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")
 			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -454,7 +501,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testValiedateCodeAgainstBuiltInSystem() {
-		Parameters respParam = myClient
+		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("validate-code")

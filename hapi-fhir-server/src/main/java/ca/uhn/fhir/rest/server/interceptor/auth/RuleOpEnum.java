@@ -29,5 +29,6 @@ enum RuleOpEnum {
 	METADATA, 
 	BATCH, 
 	DELETE, 
-	OPERATION
+	OPERATION,
+	PATCH
 }

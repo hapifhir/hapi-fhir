@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+<<<<<<< master
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+=======
+>>>>>>> master
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -31,21 +34,69 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+<<<<<<< master
+=======
+
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+>>>>>>> master
 
 public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ValidateTest.class);
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+	@Test
+	public void testValidateChangedQuestionnaire() {
+		Questionnaire q = new Questionnaire();
+		q.setId("QUEST");
+		q.addItem().setLinkId("A").setType(Questionnaire.QuestionnaireItemType.STRING).setRequired(true);
+		myQuestionnaireDao.update(q);
+
+		try {
+			QuestionnaireResponse qr = new QuestionnaireResponse();
+			qr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+			qr.getQuestionnaire().setReference("Questionnaire/QUEST");
+			qr.addItem().setLinkId("A").addAnswer().setValue(new StringType("AAA"));
+
+			MethodOutcome results = myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
+		} catch (PreconditionFailedException e) {
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail(e.toString());
+		}
+
+
+		q = new Questionnaire();
+		q.setId("QUEST");
+		q.addItem().setLinkId("B").setType(Questionnaire.QuestionnaireItemType.STRING).setRequired(true);
+		myQuestionnaireDao.update(q);
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qr.getQuestionnaire().setReference("Questionnaire/QUEST");
+		qr.addItem().setLinkId("A").addAnswer().setValue(new StringType("AAA"));
+
+		MethodOutcome results = myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
+
+		sleepAtLeast(2500);
+		try {
+			myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
+			fail();
+		} catch (PreconditionFailedException e) {
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			// good
+		}
+
 	}
 
 	@Test
 	public void testValidateStructureDefinition() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/sd-david-dhtest7.json"), StandardCharsets.UTF_8);
 		StructureDefinition sd = myFhirCtx.newJsonParser().parseResource(StructureDefinition.class, input);
-		
-		
+
+
 		ourLog.info("Starting validation");
 		try {
 			myStructureDefinitionDao.validate(sd, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
@@ -53,7 +104,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		ourLog.info("Done validation");
-		
+
 		StopWatch sw = new StopWatch();
 		ourLog.info("Starting validation");
 		try {
@@ -64,13 +115,13 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		ourLog.info("Done validation in {}ms", sw.getMillis());
 
 	}
-	
+
 	@Test
 	public void testValidateDocument() throws Exception {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/document-bundle-dstu3.json"), StandardCharsets.UTF_8);
 		Bundle document = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
-		
-		
+
+
 		ourLog.info("Starting validation");
 		try {
 			MethodOutcome outcome = myBundleDao.validate(document, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
@@ -78,7 +129,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		ourLog.info("Done validation");
-		
+
 //		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome()));
 	}
 
@@ -137,24 +188,24 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		MethodOutcome outcome = null;
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		switch (enc) {
-		case JSON:
-			encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
-			try {
-				myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-				fail();
-			} catch (PreconditionFailedException e) {
-				return (OperationOutcome) e.getOperationOutcome();
-			}
-			break;
-		case XML:
-			encoded = myFhirCtx.newXmlParser().encodeResourceToString(input);
-			try {
-				myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
-				fail();
-			} catch (PreconditionFailedException e) {
-				return (OperationOutcome) e.getOperationOutcome();
-			}
-			break;
+			case JSON:
+				encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
+				try {
+					myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+					fail();
+				} catch (PreconditionFailedException e) {
+					return (OperationOutcome) e.getOperationOutcome();
+				}
+				break;
+			case XML:
+				encoded = myFhirCtx.newXmlParser().encodeResourceToString(input);
+				try {
+					myObservationDao.validate(input, null, encoded, EncodingEnum.XML, mode, null, mySrd);
+					fail();
+				} catch (PreconditionFailedException e) {
+					return (OperationOutcome) e.getOperationOutcome();
+				}
+				break;
 		}
 
 		throw new IllegalStateException(); // shouldn't get here
@@ -295,23 +346,28 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		}
 		return retVal;
 	}
-	
+
 	/**
 	 * Format has changed, this is out of date
 	 */
 	@Test
 	@Ignore
 	public void testValidateNewQuestionnaireFormat() throws Exception {
-		String input =IOUtils.toString(FhirResourceDaoDstu3ValidateTest.class.getResourceAsStream("/questionnaire_dstu3.xml"));
+		String input = IOUtils.toString(FhirResourceDaoDstu3ValidateTest.class.getResourceAsStream("/questionnaire_dstu3.xml"));
 		try {
-		MethodOutcome results = myQuestionnaireDao.validate(null, null, input, EncodingEnum.XML, ValidationModeEnum.UPDATE, null, mySrd);
-		OperationOutcome oo = (OperationOutcome) results.getOperationOutcome();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			MethodOutcome results = myQuestionnaireDao.validate(null, null, input, EncodingEnum.XML, ValidationModeEnum.UPDATE, null, mySrd);
+			OperationOutcome oo = (OperationOutcome) results.getOperationOutcome();
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		} catch (PreconditionFailedException e) {
 			// this is a failure of the test
 			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			throw e;
 		}
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

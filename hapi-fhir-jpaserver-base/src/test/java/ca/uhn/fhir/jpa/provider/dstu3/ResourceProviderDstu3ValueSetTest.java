@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -10,8 +11,11 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -28,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_VALUE_SET;
@@ -92,6 +98,39 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalVs(codeSystem);
 	}
 
+
+	public void createLoincSystemWithSomeCodes() {
+		runInTransaction(() -> {
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CS_URL);
+			codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+			IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+			TermCodeSystemVersion cs = new TermCodeSystemVersion();
+			cs.setResource(table);
+
+			TermConcept code;
+			code = new TermConcept(cs, "50015-7");
+			code.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
+			cs.getConcepts().add(code);
+
+			code = new TermConcept(cs, "43343-3");
+			code.addPropertyString("SYSTEM", "Ser");
+			code.addPropertyString("HELLO", "12345-1");
+			cs.getConcepts().add(code);
+
+			code = new TermConcept(cs, "43343-4");
+			code.addPropertyString("SYSTEM", "Ser");
+			code.addPropertyString("HELLO", "12345-2");
+			cs.getConcepts().add(code);
+
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+		});
+	}
+
+
 	private void createLocalVs(CodeSystem codeSystem) {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
@@ -109,6 +148,16 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 
+	private void createLocalVsWithIncludeConcept() {
+		myLocalVs = new ValueSet();
+		myLocalVs.setUrl(URL_MY_VALUE_SET);
+		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("AA");
+		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
+	}
+
 	private void createLocalVsWithUnknownCode(CodeSystem codeSystem) {
 		myLocalVs = new ValueSet();
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
@@ -117,6 +166,71 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("childFOOOOOOO");
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
+
+
+	@Test
+	public void testExpandValueSetPropertySearchWithRegexExcludeUsingOr() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+
+
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+		exclude
+			.addFilter()
+			.setProperty("HELLO")
+			.setOp(ValueSet.FilterOperator.REGEX)
+			.setValue("12345-1|12345-2");
+
+		IIdType vsId = ourClient.create().resource(vs).execute().getId();
+		outcome = (ValueSet) ourClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		ourLog.info("** Got codes: {}", codes);
+		assertThat(codes, containsInAnyOrder("50015-7"));
+
+
+		assertEquals(1, outcome.getCompose().getInclude().size());
+		assertEquals(1, outcome.getCompose().getExclude().size());
+		assertEquals(1, outcome.getExpansion().getTotal());
+
+	}
+
+
+	@Test
+	public void testExpandValueSetPropertySearchWithRegexExcludeNoFilter() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+
+
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+
+		IIdType vsId = ourClient.create().resource(vs).execute().getId();
+		outcome = (ValueSet) ourClient.operation().onInstance(vsId).named("expand").withNoParameters(Parameters.class).execute().getParameter().get(0).getResource();
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, empty());
+	}
+
 
 	@Test
 	public void testExpandById() throws IOException {
@@ -172,7 +286,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	 * $expand?identifier=foo is legacy.. It's actually not valid in FHIR as of STU3
 	 * but we supported it for longer than we should have so I don't want to delete
 	 * it right now.
-	 *
+	 * <p>
 	 * https://groups.google.com/d/msgid/hapi-fhir/CAN2Cfy8kW%2BAOkgC6VjPsU3gRCpExCNZBmJdi-k5R_TWeyWH4tA%40mail.gmail.com?utm_medium=email&utm_source=footer
 	 */
 	@Test
@@ -463,6 +577,29 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
+		createLocalCsAndVs();
+		createLocalVsWithIncludeConcept();
+
+		String url = ourServerBase +
+			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
+			UrlUtil.escapeUrlParam(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM) +
+			"&code=AA";
+
+		ourLog.info("* Requesting: {}", url);
+
+		HttpGet request = new HttpGet(url);
+		request.addHeader("Accept", "application/fhir+json");
+		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
+			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(respString);
+
+			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
+			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		}
+	}
+
+	@Test
 	public void testValidateCodeOperationByCodeAndSystemType() {
 		//@formatter:off
 		Parameters respParam = ourClient
@@ -572,6 +709,17 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
 		return codeSystem;
+	}
+
+
+	public static List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+		List<String> retVal = new ArrayList<>();
+
+		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {
+			retVal.add(next.getCode());
+		}
+
+		return retVal;
 	}
 
 }

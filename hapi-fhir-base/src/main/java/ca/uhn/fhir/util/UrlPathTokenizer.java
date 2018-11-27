@@ -34,8 +34,17 @@ public class UrlPathTokenizer {
 		return myTok.hasMoreTokens();
 	}
 
-	public String nextToken() {
-		return UrlUtil.unescape(myTok.nextToken());
+	/**
+	 * Returns the next portion. Any URL-encoding is undone, but we will
+	 * HTML encode the &lt; and &quot; marks since they are both
+	 * not useful un URL paths in FHIR and potentially represent injection
+	 * attacks.
+	 *
+	 * @see UrlUtil#sanitizeUrlPart(String)
+	 * @see UrlUtil#unescape(String)
+	 */
+	public String nextTokenUnescapedAndSanitized() {
+		return UrlUtil.sanitizeUrlPart(UrlUtil.unescape(myTok.nextToken()));
 	}
 
 }

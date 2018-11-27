@@ -122,7 +122,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	private String myServerVersion = createPoweredByHeaderProductVersion();
 	private boolean myStarted;
-	private Map<String, IResourceProvider> myTypeToProvider = new HashMap<>();
 	private boolean myUncompressIncomingContents = true;
 	private boolean myUseBrowserFriendlyContentTypes;
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
@@ -301,7 +300,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		} else {
 			resourceBinding = myResourceNameToBinding.get(resourceName);
 			if (resourceBinding == null) {
-				throw new ResourceNotFoundException("Unknown resource type '" + resourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
+				throwUnknownResourceTypeException(resourceName);
 			}
 		}
 
@@ -317,7 +316,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			if (isBlank(requestPath)) {
 				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "rootRequest"));
 			}
-			throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", requestType.name(), requestPath, requestDetails.getParameters().keySet()));
+			throwUnknownFhirOperationException(requestDetails, requestPath, requestType);
 		}
 		return resourceMethod;
 	}
@@ -376,7 +375,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		try {
 			count += findResourceMethods(theProvider, clazz);
 		} catch (ConfigurationException e) {
-			throw new ConfigurationException("Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage());
+			throw new ConfigurationException("Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage(), e);
 		}
 		if (count == 0) {
 			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getCanonicalName());
@@ -570,10 +569,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param theList The list of interceptors (may be null)
 	 */
-	public void setInterceptors(IServerInterceptor... theList) {
+	public void setInterceptors(List<IServerInterceptor> theList) {
 		myInterceptors.clear();
 		if (theList != null) {
-			myInterceptors.addAll(Arrays.asList(theList));
+			myInterceptors.addAll(theList);
 		}
 	}
 
@@ -603,11 +602,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Collection<Object> theProviders) {
-		myPlainProviders.clear();
-		if (theProviders != null) {
-			myPlainProviders.addAll(theProviders);
-		}
+	public void setPlainProviders(Object... theProv) {
+		setPlainProviders(Arrays.asList(theProv));
 	}
 
 	/**
@@ -637,10 +633,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
+	public void setResourceProviders(IResourceProvider... theResourceProviders) {
 		myResourceProviders.clear();
 		if (theResourceProviders != null) {
-			myResourceProviders.addAll(theResourceProviders);
+			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
 		}
 	}
 
@@ -1246,7 +1242,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		String operation = null;
 		String compartment = null;
 		if (tok.hasMoreTokens()) {
-			resourceName = tok.nextToken();
+			resourceName = tok.nextTokenUnescapedAndSanitized();
 			if (partIsOperation(resourceName)) {
 				operation = resourceName;
 				resourceName = null;
@@ -1255,7 +1251,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		theRequestDetails.setResourceName(resourceName);
 
 		if (tok.hasMoreTokens()) {
-			String nextString = tok.nextToken();
+			String nextString = tok.nextTokenUnescapedAndSanitized();
 			if (partIsOperation(nextString)) {
 				operation = nextString;
 			} else {
@@ -1265,10 +1261,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 
 		if (tok.hasMoreTokens()) {
-			String nextString = tok.nextToken();
+			String nextString = tok.nextTokenUnescapedAndSanitized();
 			if (nextString.equals(Constants.PARAM_HISTORY)) {
 				if (tok.hasMoreTokens()) {
-					String versionString = tok.nextToken();
+					String versionString = tok.nextTokenUnescapedAndSanitized();
 					if (id == null) {
 						throw new InvalidRequestException("Don't know how to handle request path: " + theRequestPath);
 					}
@@ -1290,7 +1286,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		String secondaryOperation = null;
 
 		while (tok.hasMoreTokens()) {
-			String nextString = tok.nextToken();
+			String nextString = tok.nextTokenUnescapedAndSanitized();
 			if (operation == null) {
 				operation = nextString;
 			} else if (secondaryOperation == null) {
@@ -1365,14 +1361,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 						throw new NullPointerException("getResourceType() on class '" + rsrcProvider.getClass().getCanonicalName() + "' returned null");
 					}
 					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
-					if (myTypeToProvider.containsKey(resourceName)) {
-						throw new ConfigurationException("Multiple resource providers return resource type[" + resourceName + "]: First[" + myTypeToProvider.get(resourceName).getClass().getCanonicalName()
-							+ "] and Second[" + rsrcProvider.getClass().getCanonicalName() + "]");
-					}
 					if (!inInit) {
 						myResourceProviders.add(rsrcProvider);
 					}
-					myTypeToProvider.put(resourceName, rsrcProvider);
 					providedResourceScanner.scanForProvidedResources(rsrcProvider);
 					newResourceProviders.add(rsrcProvider);
 				} else {
@@ -1384,7 +1375,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			}
 			if (!newResourceProviders.isEmpty()) {
-				ourLog.info("Added {} resource provider(s). Total {}", newResourceProviders.size(), myTypeToProvider.size());
+				ourLog.info("Added {} resource provider(s). Total {}", newResourceProviders.size(), myResourceProviders.size());
 				for (IResourceProvider provider : newResourceProviders) {
 					assertProviderIsValid(provider);
 					findResourceMethods(provider);
@@ -1518,10 +1509,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @param theList The list of interceptors (may be null)
 	 */
-	public void setInterceptors(List<IServerInterceptor> theList) {
+	public void setInterceptors(IServerInterceptor... theList) {
 		myInterceptors.clear();
 		if (theList != null) {
-			myInterceptors.addAll(theList);
+			myInterceptors.addAll(Arrays.asList(theList));
 		}
 	}
 
@@ -1530,8 +1521,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see #setResourceProviders(Collection)
 	 */
-	public void setPlainProviders(Object... theProv) {
-		setPlainProviders(Arrays.asList(theProv));
+	public void setPlainProviders(Collection<Object> theProviders) {
+		myPlainProviders.clear();
+		if (theProviders != null) {
+			myPlainProviders.addAll(theProviders);
+		}
 	}
 
 	/**
@@ -1549,10 +1543,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	/**
 	 * Sets the resource providers for this server
 	 */
-	public void setResourceProviders(IResourceProvider... theResourceProviders) {
+	public void setResourceProviders(Collection<IResourceProvider> theResourceProviders) {
 		myResourceProviders.clear();
 		if (theResourceProviders != null) {
-			myResourceProviders.addAll(Arrays.asList(theResourceProviders));
+			myResourceProviders.addAll(theResourceProviders);
 		}
 	}
 
@@ -1563,6 +1557,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public void setTenantIdentificationStrategy(ITenantIdentificationStrategy theTenantIdentificationStrategy) {
 		myTenantIdentificationStrategy = theTenantIdentificationStrategy;
+	}
+
+	protected void throwUnknownFhirOperationException(RequestDetails requestDetails, String requestPath, RequestTypeEnum theRequestType) {
+		throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", theRequestType.name(), requestPath, requestDetails.getParameters().keySet()));
+	}
+
+	protected void throwUnknownResourceTypeException(String theResourceName) {
+		throw new ResourceNotFoundException("Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
 	}
 
 	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
@@ -1594,7 +1596,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					IResourceProvider rsrcProvider = (IResourceProvider) provider;
 					Class<? extends IBaseResource> resourceType = rsrcProvider.getResourceType();
 					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
-					myTypeToProvider.remove(resourceName);
 					providedResourceScanner.removeProvidedResources(rsrcProvider);
 				} else {
 					myPlainProviders.remove(provider);

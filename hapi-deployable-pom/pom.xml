@@ -171,6 +171,7 @@
 								<link>https://docs.oracle.com/javaee/7/api/</link>
 							</links>
 							<additionalparam>-Xdoclint:none</additionalparam>
+							<additionalJOption>-Xdoclint:none</additionalJOption>
 						</configuration>
 					</reportSet>
 				</reportSets>
@@ -194,6 +195,7 @@
 							<verbose>false</verbose>
 							<debug>false</debug>
 							<additionalparam>-Xdoclint:none</additionalparam>
+							<additionalJOption>-Xdoclint:none</additionalJOption>
 						</configuration>
 						<executions>
 							<execution>

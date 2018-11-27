@@ -20,28 +20,16 @@ package ca.uhn.fhir.jpa.sp;
  * #L%
  */
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import ca.uhn.fhir.jpa.dao.data.ISearchParamDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.SearchParam;
 import ca.uhn.fhir.jpa.entity.SearchParamPresent;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamPresenceSvcImpl.class);
-
-	private Map<Pair<String, String>, SearchParam> myResourceTypeToSearchParamToEntity = new ConcurrentHashMap<Pair<String, String>, SearchParam>();
-
-	@Autowired
-	private ISearchParamDao mySearchParamDao;
 
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
@@ -55,62 +43,48 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 			return;
 		}
 
-		Map<String, Boolean> presenceMap = new HashMap<String, Boolean>(theParamNameToPresence);
-		List<SearchParamPresent> entitiesToSave = new ArrayList<SearchParamPresent>();
-		List<SearchParamPresent> entitiesToDelete = new ArrayList<SearchParamPresent>();
+		Map<String, Boolean> presenceMap = new HashMap<>(theParamNameToPresence);
 
+		// Find existing entries
 		Collection<SearchParamPresent> existing;
 		existing = mySearchParamPresentDao.findAllForResource(theResource);
-
+		Map<Long, SearchParamPresent> existingHashToPresence = new HashMap<>();
 		for (SearchParamPresent nextExistingEntity : existing) {
-			String nextSearchParamName = nextExistingEntity.getSearchParam().getParamName();
-			Boolean existingValue = presenceMap.remove(nextSearchParamName);
-			if (existingValue == null) {
-				entitiesToDelete.add(nextExistingEntity);
-			} else if (existingValue.booleanValue() == nextExistingEntity.isPresent()) {
-				ourLog.trace("No change for search param {}", nextSearchParamName);
-			} else {
-				nextExistingEntity.setPresent(existingValue);
-				entitiesToSave.add(nextExistingEntity);
-			}
+			existingHashToPresence.put(nextExistingEntity.getHashPresence(), nextExistingEntity);
 		}
 
+		// Find newly wanted set of entries
+		Map<Long, SearchParamPresent> newHashToPresence = new HashMap<>();
 		for (Entry<String, Boolean> next : presenceMap.entrySet()) {
-			String resourceType = theResource.getResourceType();
 			String paramName = next.getKey();
-			Pair<String, String> key = Pair.of(resourceType, paramName);
-
-			SearchParam searchParam = myResourceTypeToSearchParamToEntity.get(key);
-			if (searchParam == null) {
-				searchParam = mySearchParamDao.findForResource(resourceType, paramName);
-				if (searchParam != null) {
-					myResourceTypeToSearchParamToEntity.put(key, searchParam);
-				} else {
-					searchParam = new SearchParam();
-					searchParam.setResourceName(resourceType);
-					searchParam.setParamName(paramName);
-					searchParam = mySearchParamDao.save(searchParam);
-					ourLog.info("Added search param {} with pid {}", paramName, searchParam.getId());
-					// Don't add the newly saved entity to the map in case the save fails
-				}
-			}
 
 			SearchParamPresent present = new SearchParamPresent();
 			present.setResource(theResource);
-			present.setSearchParam(searchParam);
+			present.setParamName(paramName);
 			present.setPresent(next.getValue());
-			entitiesToSave.add(present);
+			present.calculateHashes();
 
+			newHashToPresence.put(present.getHashPresence(), present);
 		}
 
-		mySearchParamPresentDao.deleteInBatch(entitiesToDelete);
-		mySearchParamPresentDao.saveAll(entitiesToSave);
+		// Delete any that should be deleted
+		List<SearchParamPresent> toDelete = new ArrayList<>();
+		for (Entry<Long, SearchParamPresent> nextEntry : existingHashToPresence.entrySet()) {
+			if (newHashToPresence.containsKey(nextEntry.getKey()) == false) {
+				toDelete.add(nextEntry.getValue());
+			}
+		}
+		mySearchParamPresentDao.deleteInBatch(toDelete);
 
-	}
+		// Add any that should be added
+		List<SearchParamPresent> toAdd = new ArrayList<>();
+		for (Entry<Long, SearchParamPresent> nextEntry : newHashToPresence.entrySet()) {
+			if (existingHashToPresence.containsKey(nextEntry.getKey()) == false) {
+				toAdd.add(nextEntry.getValue());
+			}
+		}
+		mySearchParamPresentDao.saveAll(toAdd);
 
-	@Override
-	public void flushCachesForUnitTest() {
-		myResourceTypeToSearchParamToEntity.clear();
 	}
 
 }

@@ -34,6 +34,8 @@ import javax.persistence.*;
 @Entity
 @Table(name = "HFJ_SPIDX_URI", indexes = {
 	@Index(name = "IDX_SP_URI", columnList = "RES_TYPE,SP_NAME,SP_URI"),
+	@Index(name = "IDX_SP_URI_HASH_IDENTITY", columnList = "HASH_IDENTITY,SP_URI"),
+	@Index(name = "IDX_SP_URI_HASH_URI", columnList = "HASH_URI"),
 	@Index(name = "IDX_SP_URI_RESTYPE_NAME", columnList = "RES_TYPE,SP_NAME"),
 	@Index(name = "IDX_SP_URI_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_URI_COORDS", columnList = "RES_ID")
@@ -59,11 +61,17 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	 */
 	@Column(name = "HASH_URI", nullable = true)
 	private Long myHashUri;
+	/**
+	 * @since 3.5.0 - At some point this should be made not-null
+	 */
+	@Column(name = "HASH_IDENTITY", nullable = true)
+	private Long myHashIdentity;
 
 	/**
 	 * Constructor
 	 */
 	public ResourceIndexedSearchParamUri() {
+		super();
 	}
 
 	/**
@@ -77,7 +85,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	@PrePersist
 	public void calculateHashes() {
 		if (myHashUri == null) {
-			setHashUri(hash(getResourceType(), getParamName(), getUri()));
+			String resourceType = getResourceType();
+			String paramName = getParamName();
+			String uri = getUri();
+			setHashIdentity(calculateHashIdentity(resourceType, paramName));
+			setHashUri(calculateHashUri(resourceType, paramName, uri));
 		}
 	}
 
@@ -103,7 +115,16 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append(getResource(), obj.getResource());
 		b.append(getUri(), obj.getUri());
 		b.append(getHashUri(), obj.getHashUri());
+		b.append(getHashIdentity(), obj.getHashIdentity());
 		return b.isEquals();
+	}
+
+	private Long getHashIdentity() {
+		return myHashIdentity;
+	}
+
+	private void setHashIdentity(long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashUri() {
@@ -151,6 +172,10 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		b.append("paramName", getParamName());
 		b.append("uri", myUri);
 		return b.toString();
+	}
+
+	public static long calculateHashUri(String theResourceType, String theParamName, String theUri) {
+		return hash(theResourceType, theParamName, theUri);
 	}
 
 }

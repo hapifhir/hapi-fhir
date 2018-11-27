@@ -44,9 +44,6 @@ import javax.servlet.http.HttpServletRequest;
 
 public class FhirResourceDaoPatientDstu3 extends FhirResourceDaoDstu3<Patient>implements IFhirResourceDaoPatient<Patient> {
 
-	@Autowired
-	private ISearchParamRegistry mySerarchParamRegistry;
-
 	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {

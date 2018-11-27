@@ -43,7 +43,7 @@ public class UrlBaseTenantIdentificationStrategy implements ITenantIdentificatio
 	public void extractTenant(UrlPathTokenizer theUrlPathTokenizer, RequestDetails theRequestDetails) {
 		String tenantId = null;
 		if (theUrlPathTokenizer.hasMoreTokens()) {
-			tenantId = defaultIfBlank(theUrlPathTokenizer.nextToken(), null);
+			tenantId = defaultIfBlank(theUrlPathTokenizer.nextTokenUnescapedAndSanitized(), null);
 			ourLog.trace("Found tenant ID {} in request string", tenantId);
 			theRequestDetails.setTenantId(tenantId);
 		}

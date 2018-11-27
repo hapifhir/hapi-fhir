@@ -2,6 +2,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.IValidationContext;
@@ -17,6 +18,7 @@ import com.google.gson.JsonObject;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
@@ -371,14 +373,24 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		private final HapiWorkerContext myWrap;
 		private final VersionConvertor_30_40 myConverter;
 		private volatile List<org.hl7.fhir.r4.model.StructureDefinition> myAllStructures;
-		private LoadingCache<ResourceKey, org.hl7.fhir.r4.model.Resource> myFetchResourceCache
-			= Caffeine.newBuilder()
-			.expireAfterWrite(10, TimeUnit.SECONDS)
+		private LoadingCache<ResourceKey, org.hl7.fhir.r4.model.Resource> myFetchResourceCache;
+
+		public WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
+			myWrap = theWorkerContext;
+			myConverter = new VersionConvertor_30_40();
+
+			long timeoutMillis = 10 * DateUtils.MILLIS_PER_SECOND;
+			if (System.getProperties().containsKey(ca.uhn.fhir.rest.api.Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS)) {
+				timeoutMillis = Long.parseLong(System.getProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS));
+			}
+
+			myFetchResourceCache = Caffeine.newBuilder()
+			.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
 			.maximumSize(10000)
 			.build(new CacheLoader<ResourceKey, org.hl7.fhir.r4.model.Resource>() {
 				@Override
-				public org.hl7.fhir.r4.model.Resource load(FhirInstanceValidator.ResourceKey key) throws Exception {
-					org.hl7.fhir.dstu3.model.Resource fetched;
+				public org.hl7.fhir.r4.model.Resource load(ResourceKey key) throws Exception {
+					Resource fetched;
 					switch (key.getResourceName()) {
 						case "StructureDefinition":
 							fetched = myWrap.fetchResource(StructureDefinition.class, key.getUri());
@@ -407,10 +419,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 					}
 				}
 			});
-
-		public WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
-			myWrap = theWorkerContext;
-			myConverter = new VersionConvertor_30_40();
 		}
 
 		@Override

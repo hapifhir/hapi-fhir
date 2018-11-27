@@ -38,6 +38,14 @@ public class TermConceptProperty implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "CONCEPT_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CONCEPT"))
 	private TermConcept myConcept;
+	/**
+	 * TODO: Make this non-null
+	 *
+	 * @since 3.5.0
+	 */
+	@ManyToOne
+	@JoinColumn(name = "CS_VER_PID", nullable = true, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTPROP_CSV"))
+	private TermCodeSystemVersion myCodeSystemVersion;
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PROP_PID", sequenceName = "SEQ_CONCEPT_PROP_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PROP_PID")
@@ -122,6 +130,11 @@ public class TermConceptProperty implements Serializable {
 	 */
 	public void setValue(String theValue) {
 		myValue = theValue;
+	}
+
+	public TermConceptProperty setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		myCodeSystemVersion = theCodeSystemVersion;
+		return this;
 	}
 
 	public void setConcept(TermConcept theConcept) {

@@ -32,6 +32,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -144,6 +145,24 @@ public class TestUtil {
 		}
 	}
 
+	/**
+	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
+	 * <p>
+	 * Wait for an atomicinteger to hit a given site and fail if it never does
+	 */
+	public static void waitForSize(int theTarget, Callable<Integer> theSource) throws Exception {
+		long start = System.currentTimeMillis();
+		while (theSource.call() != theTarget && (System.currentTimeMillis() - start) <= 15000) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if ((System.currentTimeMillis() - start) >= 15000) {
+			throw new IllegalStateException("Size " + theSource.call() + " is != target " + theTarget);
+		}
+	}
 
 	/**
 	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>

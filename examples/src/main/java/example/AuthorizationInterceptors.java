@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.List;
 
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -140,5 +141,21 @@ public class AuthorizationInterceptors {
 			}
 		};
 		//END SNIPPET: authorizeTenantAction
+
+
+		//START SNIPPET: patchAll
+		new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					// Authorize patch requests
+					.allow().patch().allRequests().andThen()
+					// Authorize actual writes that patch may perform
+					.allow().write().allResources().inCompartment("Patient", new IdType("Patient/123")).andThen()
+					.build();
+			}
+		};
+		//END SNIPPET: patchAll
+
 	}
 }

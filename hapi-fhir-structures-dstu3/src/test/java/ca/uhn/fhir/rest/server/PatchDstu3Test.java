@@ -48,6 +48,7 @@ public class PatchDstu3Test {
 	public void testPatchValidJson() throws Exception {
 		String requestContents = "[ { \"op\": \"add\", \"path\": \"/a/b/c\", \"value\": [ \"foo\", \"bar\" ] } ]";
 		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
+		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_JSON_PATCH)));
 		CloseableHttpResponse status = ourClient.execute(httpPatch);
 
@@ -70,6 +71,7 @@ public class PatchDstu3Test {
 	public void testPatchValidXml() throws Exception {
 		String requestContents = "<root/>";
 		HttpPatch httpPatch = new HttpPatch("http://localhost:" + ourPort + "/Patient/123");
+		httpPatch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 		httpPatch.setEntity(new StringEntity(requestContents, ContentType.parse(Constants.CT_XML_PATCH)));
 		CloseableHttpResponse status = ourClient.execute(httpPatch);
 

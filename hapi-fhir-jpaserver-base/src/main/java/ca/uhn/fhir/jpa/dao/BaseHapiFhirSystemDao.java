@@ -256,6 +256,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public Integer performReindexingPass(final Integer theCount) {
+		if (getConfig().isStatusBasedReindexingDisabled()) {
+			return -1;
+		}
 		if (!myReindexLock.tryLock()) {
 			return -1;
 		}
@@ -305,7 +308,8 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 							final IBaseResource resource = toResource(resourceTable, false);
 
-							@SuppressWarnings("rawtypes") final IFhirResourceDao dao = getDaoOrThrowException(resource.getClass());
+							Class<? extends IBaseResource> resourceClass = getContext().getResourceDefinition(resourceTable.getResourceType()).getImplementingClass();
+							@SuppressWarnings("rawtypes") final IFhirResourceDao dao = getDaoOrThrowException(resourceClass);
 							dao.reindex(resource, resourceTable);
 							return null;
 

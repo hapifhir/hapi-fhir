@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -16,6 +15,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -44,15 +44,14 @@ import org.springframework.web.servlet.DispatcherServlet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.junit.Assert.fail;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	protected static JpaValidationSupportChainR4 myValidationSupport;
-	protected IGenericClient myClient;
 	protected static CloseableHttpClient ourHttpClient;
 	protected static int ourPort;
 	protected static RestfulServer ourRestServer;
@@ -61,12 +60,14 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	private static Server ourServer;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
+	protected static SubscriptionRestHookInterceptor ourReskHookSubscriptionInterceptor;
+	private static Server ourServer;
+	protected IGenericClient ourClient;
+	protected ResourceCountCache ourResourceCountsCache;
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
-	protected ResourceCountCache ourResourceCountsCache;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -128,7 +129,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			subsServletHolder.setServlet(dispatcherServlet);
 			subsServletHolder.setInitParameter(
 				ContextLoader.CONFIG_LOCATION_PARAM,
-					WebsocketDispatcherConfig.class.getName());
+				WebsocketDispatcherConfig.class.getName());
 			proxyHandler.addServlet(subsServletHolder, "/*");
 
 			// Register a CORS filter
@@ -155,6 +156,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
+			ourReskHookSubscriptionInterceptor = wac.getBean(SubscriptionRestHookInterceptor.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 
@@ -169,9 +171,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 		ourRestServer.setPagingProvider(ourPagingProvider);
 
-		myClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
+		ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 		if (shouldLogClient()) {
-			myClient.registerInterceptor(new LoggingInterceptor());
+			ourClient.registerInterceptor(new LoggingInterceptor());
 		}
 	}
 
@@ -193,7 +195,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	}
 
 	protected List<String> toNameList(Bundle resp) {
-		List<String> names = new ArrayList<String>();
+		List<String> names = new ArrayList<>();
 		for (BundleEntryComponent next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
 			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamily() : "";
@@ -202,6 +204,24 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			}
 		}
 		return names;
+	}
+
+	protected void waitForRegisteredSubscriptionCount(int theSize) throws Exception {
+		for (int i = 0; ; i++) {
+			if (i == 10) {
+				fail("Failed to init subscriptions");
+			}
+			try {
+				getRestHookSubscriptionInterceptor().doInitSubscriptions();
+				break;
+			} catch (ResourceVersionConflictException e) {
+				Thread.sleep(250);
+			}
+		}
+
+		SubscriptionRestHookInterceptor interceptor = getRestHookSubscriptionInterceptor();
+		TestUtil.waitForSize(theSize, () -> interceptor.getRegisteredSubscriptions().size());
+		Thread.sleep(500);
 	}
 
 	@AfterClass
@@ -269,4 +289,5 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 		return false;
 	}
+
 }

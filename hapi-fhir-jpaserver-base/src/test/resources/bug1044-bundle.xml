@@ -1,0 +1,214 @@
+<Bundle>
+	<type value="transaction"/>
+	<entry>
+		<resource>
+		<StructureDefinition xmlns="http://hl7.org/fhir">
+			<meta>
+				<lastUpdated value="2017-10-20T11:01:15.167+02:00"/>
+			</meta>
+			<url value="http://fhir.de/StructureDefinition/organization-de-basis/0.2"/>
+			<version value="0.2-WORK"/>
+			<name value="organization-de-basis-0.2"/>
+			<title value="Organisation, deutsches Basisprofil (Version 0.2)"/>
+			<status value="draft"/>
+			<date value="2018-06-28"/>
+			<publisher value="HL7 Deutschland e.V. (Technisches Komitee FHIR)"/>
+			<contact>
+				<telecom>
+					<system value="other"/>
+					<value value="http://hl7.de/technische-komitees/fhir/"/>
+				</telecom>
+			</contact>
+			<description value="Basisprofil für die Verwendung der Organization Ressource in Deutschland."/>
+			<copyright value="HL7 Deutschland e.V."/>
+			<fhirVersion value="3.0.1"/>
+			<kind value="resource"/>
+			<abstract value="false"/>
+			<type value="Organization"/>
+			<baseDefinition value="http://hl7.org/fhir/StructureDefinition/Organization"/>
+			<differential>
+				<element id="Organization">
+					<path value="Organization"/>
+					<short value="Organisationen im deutschen Gesundheitswesen."/>
+					<definition
+						value="Basisprofil für die Repräsentation verschiedener Organisationen mit in Deutschland üblichen Identifiern."/>
+				</element>
+				<element id="Organization.extension">
+					<path value="Organization.extension"/>
+					<slicing>
+						<discriminator>
+							<type value="value"/>
+							<path value="url"/>
+						</discriminator>
+						<rules value="open"/>
+					</slicing>
+				</element>
+				<element id="Organization.extension:betriebsstaetten-hierarchie">
+					<path value="Organization.extension"/>
+					<sliceName value="betriebsstaetten-hierarchie"/>
+					<max value="1"/>
+					<type>
+						<code value="Extension"/>
+						<profile value="http://fhir.de/StructureDefinition/betriebsstaetten-hierarchie/0.2"/>
+					</type>
+				</element>
+				<element id="Organization.identifier">
+					<path value="Organization.identifier"/>
+					<slicing>
+						<discriminator>
+							<type value="value"/>
+							<path value="system"/>
+						</discriminator>
+						<discriminator>
+							<type value="value"/>
+							<path value="value"/>
+						</discriminator>
+						<rules value="open"/>
+					</slicing>
+					<short value="Identifiziert eine Organisation"/>
+					<definition
+						value="Identifikator für die Organisation, mit dem die Organisation über mehrere verschiedene Systeme hinweg identifiziert wird."/>
+				</element>
+				<element id="Organization.identifier.system">
+					<path value="Organization.identifier.system"/>
+					<min value="1"/>
+				</element>
+				<element id="Organization.identifier.value">
+					<path value="Organization.identifier.value"/>
+					<min value="1"/>
+				</element>
+				<element id="Organization.identifier:Betriebsstaettennummer">
+					<path value="Organization.identifier"/>
+					<sliceName value="Betriebsstaettennummer"/>
+					<short value="Betriebstättennummer (BSNR) vergeben durch die KBV."/>
+					<definition
+						value="Die Betriebsstättennummer (BSNR) entspricht der bis zum 30. Juni 2008 gültigen siebenstelligen KV-Abrechnungsnummer, ergänzt um zwei angehängte Nullen. Sie identifiziert die Arztpraxis als abrechnende Einheit und ermöglicht die Zuordnung ärztlicher Leistungen zum Ort der Leistungserbringung. Dabei umfasst der Begriff Arztpraxis auch Medizinische Versorgungszentren (MVZ), Institute, Notfallambulanzen sowie Ermächtigungen an Krankenhäusern. Stellen 1–2: KV-Landes- oder Bezirksstellenschlüssel[1] Stellen 3–7: eindeutige Identifikationsnummer der KV, in deren Bereich die Betriebsstätte liegt Stellen 8, 9: „00“"/>
+					<max value="1"/>
+				</element>
+				<element id="Organization.identifier:Betriebsstaettennummer.system">
+					<path value="Organization.identifier.system"/>
+					<short value="Namespace für Betriebsstättennnummern der KBV"/>
+					<definition value="Die URL dient als eindeutiger Name des BSNR-Nummernkreises."/>
+					<min value="1"/>
+					<fixedUri value="http://fhir.de/NamingSystem/kbv/bsnr"/>
+				</element>
+				<element id="Organization.identifier:Betriebsstaettennummer.value">
+					<path value="Organization.identifier.value"/>
+					<short value="Betriebsstättennummer der Organisation"/>
+					<definition value="Betriebsstättennummer der Organisation"/>
+					<min value="1"/>
+				</element>
+				<element id="Organization.identifier:Betriebsstaettennummer.period">
+					<path value="Organization.identifier.period"/>
+					<short value="Zeitraum in welchem der Identifikator gültig ist oder war."/>
+					<definition value="Zeitraum in welchem der Identifikator gültig ist oder war."/>
+				</element>
+				<element id="Organization.identifier:Betriebsstaettennummer.period.start">
+					<path value="Organization.identifier.period.start"/>
+					<short value="Beginn der BSNR Gültigkeit"/>
+					<definition value="Beginn der BSNR Gültigkeit"/>
+				</element>
+				<element id="Organization.identifier:Betriebsstaettennummer.period.end">
+					<path value="Organization.identifier.period.end"/>
+					<short value="Ende der BSNR Gültigkeit"/>
+					<definition value="Ende der BSNR Gültigkeit. leer, falls aktuell gültig."/>
+				</element>
+				<element id="Organization.identifier:Betriebsstaettennummer.assigner">
+					<path value="Organization.identifier.assigner"/>
+					<short value="Organisation welche den Identifikator vergeben hat."/>
+					<definition value="Organisation welche den Identifikator vergeben hat."/>
+				</element>
+				<element id="Organization.identifier:Betriebsstaettennummer.assigner.display">
+					<extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-translatable">
+						<valueBoolean value="true"/>
+					</extension>
+					<path value="Organization.identifier.assigner.display"/>
+					<short value="Name der zuständigen Kassenärztlichen Vereinigung (KV)"/>
+					<definition
+						value="Name der zuständigen Kassenärztlichen Vereinigung (KV). z.B.: &quot;KV Baden-Württemberg&quot;"/>
+				</element>
+				<element id="Organization.identifier:Institutionskennzeichen">
+					<path value="Organization.identifier"/>
+					<sliceName value="Institutionskennzeichen"/>
+					<short value="IK Nummer vergeben durch die Arbeitsgemeinschaft Institutionskennzeichen."/>
+					<definition
+						value="Die Institutionskennzeichen (kurz: IK) sind bundesweit eindeutige, neunstellige Zahlen vergeben durch die Arbeitsgemeinschaft Institutionskennzeichen, mit deren Hilfe Abrechnungen und Qualitätssicherungsmaßnahmen im Bereich der deutschen Sozialversicherung einrichtungsübergreifend abgewickelt werden können. "/>
+					<max value="1"/>
+				</element>
+				<element id="Organization.identifier:Institutionskennzeichen.system">
+					<path value="Organization.identifier.system"/>
+					<short value="Namespace für Instituskennzeichen."/>
+					<min value="1"/>
+					<fixedUri value=" http://fhir.de/NamingSystem/arge-ik/iknr"/>
+				</element>
+				<element id="Organization.identifier:Institutionskennzeichen.value">
+					<path value="Organization.identifier.value"/>
+					<short value="Institutskennzeichen der Organisation"/>
+					<definition value="Institutskennzeichen der Organisation"/>
+					<min value="1"/>
+				</element>
+				<element id="Organization.identifier:ASV-Teamnummer">
+					<path value="Organization.identifier"/>
+					<sliceName value="ASV-Teamnummer"/>
+					<short value="Die ASV-Teamnummer"/>
+					<definition value="ASV-Teamnummer. Wird nur für Organizations vom Typ ASV-Team vergeben."/>
+					<max value="1"/>
+				</element>
+				<element id="Organization.identifier:ASV-Teamnummer.system">
+					<path value="Organization.identifier.system"/>
+					<min value="1"/>
+					<fixedUri value="http://fhir.de/NamingSystem/asv/teamnummer"/>
+				</element>
+				<element id="Organization.identifier:ASV-Teamnummer.value">
+					<path value="Organization.identifier.value"/>
+					<min value="1"/>
+				</element>
+				<element id="Organization.type">
+					<path value="Organization.type"/>
+					<short value="Art(en) der Organisation"/>
+					<definition value="Art(en) der Organisation"/>
+					<binding>
+						<extension url="http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName">
+							<valueString value="OrganizationType"/>
+						</extension>
+						<strength value="extensible"/>
+						<valueSetUri value="http://fhir.de/ValueSet/arge-ik/klassifikation"/>
+					</binding>
+				</element>
+				<element id="Organization.type.coding">
+					<path value="Organization.type.coding"/>
+					<short value="IK Klassifikation der Organisation"/>
+					<definition value="IK Klassifikation der Organisation"/>
+				</element>
+				<element id="Organization.name">
+					<path value="Organization.name"/>
+					<short value="Name der Betriebsstätte"/>
+					<definition
+						value="Menschenlesbarer Name der Betriebsstätte, z.B.: &quot;Gemeinschaftspraxis Dr. Soundso&quot;"/>
+				</element>
+				<element id="Organization.address">
+					<path value="Organization.address"/>
+					<type>
+						<code value="Address"/>
+						<profile value="http://fhir.de/StructureDefinition/address-de-basis/0.2"/>
+					</type>
+				</element>
+				<element id="Organization.address.state">
+					<path value="Organization.address.state"/>
+					<definition value="Name (oder Kürzel) des Bundeslandes."/>
+				</element>
+				<element id="Organization.partOf">
+					<path value="Organization.partOf"/>
+					<type>
+						<code value="Reference"/>
+						<targetProfile value="http://fhir.de/StructureDefinition/organization-de-basis/0.2"/>
+					</type>
+				</element>
+			</differential>
+		</StructureDefinition>
+		</resource>
+		<request>
+			<method value="POST"/>
+		</request>
+	</entry>
+</Bundle>

@@ -47,7 +47,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
 
@@ -143,6 +143,124 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 
 		assertThat(ids, empty());
+	}
+
+	/**
+	 * See #1053
+	 */
+	@Test
+	public void testLastUpdateShouldntApplyToIncludes() {
+		SearchParameterMap map;
+		List<String> ids;
+
+		Date beforeAll = new Date();
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+
+		Organization org = new Organization();
+		org.setName("O1");
+		org.setId("O1");
+		myOrganizationDao.update(org);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+
+		Date beforePatient = new Date();
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+
+		Patient p = new Patient();
+		p.setId("P1");
+		p.setActive(true);
+		p.setManagingOrganization(new Reference("Organization/O1"));
+		myPatientDao.update(p);
+
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		Date afterAll = new Date();
+
+		// Search with between date (should still return Organization even though
+		// it was created before that date, since it's an include)
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setLowerBoundInclusive(beforePatient));
+		map.addInclude(Patient.INCLUDE_ORGANIZATION);
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/P1", "Organization/O1"));
+
+		// Search before everything
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setLowerBoundInclusive(beforeAll));
+		map.addInclude(Patient.INCLUDE_ORGANIZATION);
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, contains("Patient/P1", "Organization/O1"));
+
+		// Search after everything
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setLowerBoundInclusive(afterAll));
+		map.addInclude(Patient.INCLUDE_ORGANIZATION);
+		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		assertThat(ids, empty());
+
+	}
+
+	/**
+	 * See #1053
+	 *
+	 * Note that I don't know that _lastUpdate actually should apply to reverse includes. The
+	 * spec doesn't say one way or ther other, but it seems like sensible behaviour to me.
+	 *
+	 * Definitely the $everything operation depends on this behaviour, so if we change it
+	 * we need to account for the everything operation...
+	 */
+	@Test
+	public void testLastUpdateShouldApplyToReverseIncludes() {
+		SearchParameterMap map;
+		List<String> ids;
+
+		// This gets updated in a sec..
+		Organization org = new Organization();
+		org.setActive(false);
+		org.setId("O1");
+		myOrganizationDao.update(org);
+
+		Date beforeAll = new Date();
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+
+		Patient p = new Patient();
+		p.setId("P1");
+		p.setActive(true);
+		p.setManagingOrganization(new Reference("Organization/O1"));
+		myPatientDao.update(p);
+
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+
+		Date beforeOrg = new Date();
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+
+		org = new Organization();
+		org.setActive(true);
+		org.setId("O1");
+		myOrganizationDao.update(org);
+
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		Date afterAll = new Date();
+
+		// Everything should come back
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setLowerBoundInclusive(beforeAll));
+		map.addRevInclude(Patient.INCLUDE_ORGANIZATION);
+		ids = toUnqualifiedVersionlessIdValues(myOrganizationDao.search(map));
+		assertThat(ids, contains("Organization/O1", "Patient/P1"));
+
+		// Search before everything
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setLowerBoundInclusive(beforeOrg));
+		map.addInclude(Patient.INCLUDE_ORGANIZATION);
+		ids = toUnqualifiedVersionlessIdValues(myOrganizationDao.search(map));
+		assertThat(ids, contains("Organization/O1"));
+
+		// Search after everything
+		map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam().setLowerBoundInclusive(afterAll));
+		map.addInclude(Patient.INCLUDE_ORGANIZATION);
+		ids = toUnqualifiedVersionlessIdValues(myOrganizationDao.search(map));
+		assertThat(ids, empty());
+
 	}
 
 	@Test
@@ -485,11 +603,18 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 				Class<ResourceIndexedSearchParamNumber> type = ResourceIndexedSearchParamNumber.class;
 				List<ResourceIndexedSearchParamNumber> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
 				ourLog.info(toStringMultiline(results));
-				assertThat(results, containsInAnyOrder(
-					((ResourceIndexedSearchParamNumber) (new ResourceIndexedSearchParamNumber(ImmunizationRecommendation.SP_DOSE_SEQUENCE, null).setResource(resource).setMissing(true))),
-					((ResourceIndexedSearchParamNumber) (new ResourceIndexedSearchParamNumber(ImmunizationRecommendation.SP_DOSE_NUMBER, new BigDecimal("1.00")).setResource(resource))),
-					((ResourceIndexedSearchParamNumber) (new ResourceIndexedSearchParamNumber(ImmunizationRecommendation.SP_DOSE_NUMBER, new BigDecimal("2.00")).setResource(resource)))
-				));
+
+				ResourceIndexedSearchParamNumber expect0 = new ResourceIndexedSearchParamNumber(ImmunizationRecommendation.SP_DOSE_NUMBER, new BigDecimal("2.00"));
+				expect0.setResource(resource);
+				expect0.calculateHashes();
+				ResourceIndexedSearchParamNumber expect1 = new ResourceIndexedSearchParamNumber(ImmunizationRecommendation.SP_DOSE_SEQUENCE, null);
+				expect1.setResource(resource).setMissing(true);
+				expect1.calculateHashes();
+				ResourceIndexedSearchParamNumber expect2 = new ResourceIndexedSearchParamNumber(ImmunizationRecommendation.SP_DOSE_NUMBER, new BigDecimal("1.00"));
+				expect2.setResource(resource);
+				expect2.calculateHashes();
+
+				assertThat(results, containsInAnyOrder(expect0, expect1, expect2));
 			}
 		});
 	}
@@ -504,10 +629,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
-		Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
-		List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-		ourLog.info(toStringMultiline(results));
-		assertEquals(2, results.size());
+		runInTransaction(()->{
+			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
+			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+			ourLog.info(toStringMultiline(results));
+			assertEquals(2, results.size());
+		});
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, "http://foo", "UNIT"))));
@@ -2261,6 +2388,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithContains() {
+		myDaoConfig.setAllowContainsSearches(true);
 
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("ABCDEFGHIJK");

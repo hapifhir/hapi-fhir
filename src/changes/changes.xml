@@ -86,8 +86,221 @@
 				Resource loading logic for the JPA server has been optimized to
 				reduce the number of database round trips required when loading
 				search results where many of the entries have a "forced ID" (an alphanumeric
-				client-assigned reosurce ID). Thanks to Frank Tao for the pull
+				client-assigned resource ID). Thanks to Frank Tao for the pull
 				request!
+			</action>
+			<action type="add">
+				A new IValidationSupport implementation has been added, named CachingValidationSupport. This
+				module wraps another implementation and provides short-term caching. This can have a dramatic
+				performance improvement on servers that are validating or executing FHIRPath repeatedly
+				under load. This module is used by default in the JPA server.
+			</action>
+			<action type="fix">
+				An index in the JPA server on the HFJ_FORCED_ID table was incorrectly
+				not marked as unique. This meant that under heavy load it was possible to
+				create two resources with the same client-assigned ID.
+			</action>
+			<action type="fix">
+				The JPA server 
+				<![CDATA[<code>$expunge</code>]]>
+				operation deleted components of an individual resource record in 
+				separate database transactions, meaning that if an operation failed 
+				unexpectedly resources could be left in a weird state. This has been
+				corrected.
+			</action>
+			<action type="fix" issue="1015">
+				A bug was fixed in the JPA terminology uploader, where it was possible
+				in some cases for some ValueSets and ConceptMaps to not be saved because
+				of a premature short circuit during deferred uploading. Thanks to 
+				Joel Schneider for the pull request!
+			</action>
+			<action type="fix" issue="969">
+				A bug in the HAPI FHIR CLI was fixed, where uploading terminology for R4
+				could cause an error about the incorrect FHIR version. Thanks to 
+				Rob Hausam for the pull request!
+			</action>
+			<action type="add">
+				A new method has been added to AuthorizationInterceptor that can be used to
+				create rules allowing FHIR patch operations. See
+				<![CDATA[<a href="http://hapifhir.io/doc_rest_server_security.html#Authorizing_Patch_Operations">Authorizing Patch Operations</a>]]>
+				for more information.
+			</action>
+			<action type="add" issue="1018">
+				A new view has been added to the JPA server, reducing the number of database
+				calls required when reading resources back. This causes an improvement in performance.
+				Thanks to Frank Tao for the pull request!
+			</action>
+			<action type="fix">
+				A crash was fixed when deleting a ConceptMap resource in the
+				JPA server. This crash was a regression in HAPI FHIR 3.4.0.
+			</action>
+			<action type="fix">
+				A crash in the JPA server when performing a manual reindex of a deleted resource
+				was fixed.
+			</action>
+			<action type="fix">
+				Using the generic/fluent client, it is now possible to
+				invoke the $process-message method using a standard
+				client.operation() call. Previously this caused a strange
+				NullPointerException.
+			</action>
+			<action type="fix">
+				The REST Server now sanitizes URL path components and query parameter
+				names to escape several reserved characters (e.g. &quot; and &lt;)
+				in order to prevent HTML injection attacks via maliciously
+				crafted URLs.
+			</action>
+			<action type="add" issue="912">
+				The generic/fluent client now supports the :contains modifier on
+				string search params. Thanks to Clayton Bodendein for the pull
+				request!
+			</action>
+			<action type="fix" issue="996">
+				The HAPI FHIR Server has been updated to correctly reflect the current
+				FHIR specification behaviour for the Prefer header. This means that
+				the server will no longer return an OperationOutcome by default, but
+				that one may be requested via a Prefer header, using the newly implemented
+				"Repreentation: OperationOutcome" value.
+				Thanks to Ana Maria Radu for the pul request!
+			</action>
+			<action type="add">
+				The REST Server module now allows more than one Resource Provider
+				(i.e. more than one implementation of IResourceProvider) to be registered
+				to the RestfulServer for the same resource type. Previous versions of
+				HAPI FHIR have always limited support to a single resource provider, but
+				this limitation did not serve any purpose so it has been removed.
+			</action>
+			<action type="add">
+				The HashMapResourceProvider now supports the type and
+				instance history operations. In addition, the search method
+				for the
+				<![CDATA[<code>_id</code>]]> search parameter now has the
+				search parameter marked as "required". This means that additional
+				search methods can be added in subclasses without their intended
+				searches being routed to the searchById method. Also, the resource
+				map now uses a LinkedHashMap, so searches return a predictable
+				order for unit tests.
+			</action>
+			<action type="fix">
+				Fixed a bug when creating a custom search parameter in the JPA
+				server: if the	SearchParameter resource contained an invalid
+				expression, create/update operations for the given resource would
+				fail with a cryptic error. SearchParameter expressions are now
+				validated upon storage, and the SearchParameter will be rejected
+				if the expression can not be processed.
+			</action>
+			<action type="add">
+				The generic client history operations (history-instance, history-type,
+				and history-server) now support the
+				<![CDATA[<code>_at</code>]]> parameter.
+			</action>
+			<action type="add">
+				In the plain server, many resource provider method parameters may now
+				use a generic
+				<![CDATA[<code>IPrimitiveType&lt;String&gt;</code>]]>
+				or
+				<![CDATA[<code>IPrimitiveType&lt;Date&gt;</code>]]> at the
+				parameter type. This is handy if you are trying to write code
+				that works across versions of FHIR.
+			</action>
+			<action type="add">
+				Several convenience methods have been added to the fluent/generic
+				client interfaces. These methods allow the adding of a sort via a
+				SortSpec object, as well as specifying search parameters via a plain
+				Map of Strings.
+			</action>
+			<action type="add">
+				A new client interceptor called ThreadLocalCapturingInterceptor has been
+				added. This interceptor works the same way as CapturingInterceptor in that
+				it captures requests and responses for later processing, but it uses
+				a ThreadLocal object to store them in order to facilitate
+				use in multithreaded environments.
+			</action>
+			<action type="add">
+				A new constructor has been added to the client BasicAuthInterceptor
+				allowing credentials to be specified in the form
+				"username:password" as an alternate to specifying them as two
+				discrete strings.
+			</action>
+			<action type="add">
+				SimpleBundleProvider has been modified to optionally allow calling
+				code to specify a search UUID, and a field to allow the preferred
+				page size to be configured.
+			</action>
+			<action type="add">
+				The JPA server search UUID column has been reduced in length from
+				40 chars to 36, in order to align with the actual length of the
+				generated UUIDs.
+			</action>
+			<action type="add">
+				Plain servers using paging may now specify an ID/name for
+				individual pages being returned, avoiding the need to
+				respond to arbitrary offset/index requests from the server.
+				In this mode, page links in search result bundles simply
+				include the ID to the next page.
+			</action>
+			<action type="fix" issue="965">
+				An issue was fixed in BundleUtil#toListOfEntries, where sometimes
+				a resource could be associated with the wrong entry in the response.
+				Thanks to GitHub user @jbalbien for the pull request!
+			</action>
+			<action type="add">
+				JPA subscription delivery queues no longer store the resource body in the
+				queue (only the ID), which should reduce the memory/disk footprint of the queue
+				when it grows long.
+			</action>
+			<action type="fix" issue="1053">
+				A bug was fixed in JPA server searches: When performing a search with a _lastUpdate 
+				filter, the filter was applied to any _include values, which it should not have been.
+				Thanks to Deepak Garg for reporting!
+			<action type="add">
+				When performing a ConceptMap/$translate operation with reverse="true" in the arguments,
+				the equivalency flag is now set on the response just as it is for a non-reverse lookup.
+			</action>
+			<action type="add">
+				When executing a FHIR transaction in JPA server, if the request bundle contains
+				placeholder IDs references (i.e. "urn:uuid:*" references) that can not be resolved
+				anywhere else in the bundle, a user friendly error is now returned. Previously,
+				a cryptic error containing only the UUID was returned. As a part of this change,
+				transaction processing has now been consolidated into a single codebase for DSTU3
+				/ R4 (and future) versions of FHIR. This should greatly improve maintainability
+				and consistency for transaction processing.
+			</action>
+			<action type="add">
+				ResponseHighlighterInterceptor now displays the total size of the output and
+				an estimate of the transfer time at the bottom of the response.
+			</action>
+			<action type="add" issue="1022">
+				The Prefer header is now honoured for HTTP PATCH requests. Thanks to
+				Alin Leonard for the Pull Request!
+			</action>
+			<action type="add">
+				The <![CDATA[<code>Composition</code>]]> operation <![CDATA[<code>$document</code>]]> has been
+				implemented. Thanks to Patrick Werner for the Pull Request!
+			</action>
+			<action type="add">
+				HAPI FHIR CLI commands that allow Basic Auth credentials or a Bearer Token may now use 
+				a value of "PROMPT" to cause the CLI to prompt the user for credentials using an
+				interactive prompt.
+			</action>
+			<action type="remove">
+				The experimental "dynamic mode" for search parameter registration has been removed. This
+				mode was never published or documented and was labelled as experimental, so I am hoping it
+				was never depended on by anyone. Please post on the HAPI FHIR mailing list if this
+				change affects you.
+			</action>
+			<action type="fix">
+				A crash was fixed when using the ConceptMap/$translate operation to translate a mapping
+				where the equivalence was not specified.
+			</action>
+			<action type="add">
+				The maximum length for codes in the JPA server terminology service have been increased
+				to 500 in order to better accomodate code systems with very long codes.
+			</action>
+			<action type="fix">
+				A bug in the DSTU3 validator was fixed where validation resources such as StructureDefinitions
+				and Questionnaires were cached in a cache that never expired, leading to validations against
+				stale versions of resources.
 			</action>
 		</release>
 		<release version="3.4.0" date="2018-05-28">

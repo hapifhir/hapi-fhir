@@ -1769,6 +1769,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
+					.allow().patch().allRequests().andThen()
 					.allow("Rule 1").write().instance("Patient/900").andThen()
 					.build();
 			}
@@ -1785,16 +1786,9 @@ public class AuthorizationInterceptorDstu2Test {
 		httpPost.setEntity(new StringEntity(input, ContentType.parse("application/json-patch+json")));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
-		ourHitMethod = false;
-		httpPost = new HttpPatch("http://localhost:" + ourPort + "/Patient/999");
-		httpPost.setEntity(new StringEntity(input, ContentType.parse("application/json-patch+json")));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
 	}
 
 	@Test

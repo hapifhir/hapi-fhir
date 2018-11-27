@@ -31,6 +31,13 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
+	<!--
+	It's useful to have this log when uploading big terminologies
+	-->
+	<logger name="ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
 
 	<root level="warn">
 		<appender-ref ref="STDOUT" />

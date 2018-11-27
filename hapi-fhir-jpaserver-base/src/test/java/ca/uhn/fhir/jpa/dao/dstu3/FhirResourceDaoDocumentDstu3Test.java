@@ -26,6 +26,4 @@ public class FhirResourceDaoDocumentDstu3Test extends BaseJpaDstu3Test {
 		Bundle inputBundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, input);
 		DaoMethodOutcome responseBundle = myBundleDao.create(inputBundle, mySrd);
 	}
-	
-
 }

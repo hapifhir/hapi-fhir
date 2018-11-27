@@ -132,13 +132,15 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			// Register a CORS filter
 			CorsConfiguration config = new CorsConfiguration();
 			CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-			config.addAllowedHeader("x-fhir-starter");
-			config.addAllowedHeader("Origin");
 			config.addAllowedHeader("Accept");
-			config.addAllowedHeader("X-Requested-With");
-			config.addAllowedHeader("Content-Type");
-			config.addAllowedHeader("Access-Control-Request-Method");
 			config.addAllowedHeader("Access-Control-Request-Headers");
+			config.addAllowedHeader("Access-Control-Request-Method");
+			config.addAllowedHeader("Cache-Control");
+			config.addAllowedHeader("Content-Type");
+			config.addAllowedHeader("Origin");
+			config.addAllowedHeader("Prefer");
+			config.addAllowedHeader("x-fhir-starter");
+			config.addAllowedHeader("X-Requested-With");
 			config.addAllowedOrigin("*");
 			config.addExposedHeader("Location");
 			config.addExposedHeader("Content-Location");

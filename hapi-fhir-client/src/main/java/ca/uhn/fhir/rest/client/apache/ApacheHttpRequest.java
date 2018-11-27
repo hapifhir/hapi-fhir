@@ -22,10 +22,7 @@ package ca.uhn.fhir.rest.client.apache;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.IOUtils;
@@ -70,14 +67,14 @@ public class ApacheHttpRequest implements IHttpRequest {
 
 	@Override
 	public Map<String, List<String>> getAllHeaders() {
-		Map<String, List<String>> result = new HashMap<String, List<String>>();
+		Map<String, List<String>> result = new HashMap<>();
 		for (Header header : myRequest.getAllHeaders()) {
 			if (!result.containsKey(header.getName())) {
-				result.put(header.getName(), new LinkedList<String>());
+				result.put(header.getName(), new LinkedList<>());
 			}
 			result.get(header.getName()).add(header.getValue());
 		}
-		return result;
+		return Collections.unmodifiableMap(result);
 	}
 
 	/**

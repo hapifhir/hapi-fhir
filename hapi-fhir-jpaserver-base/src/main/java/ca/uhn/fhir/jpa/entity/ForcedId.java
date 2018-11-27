@@ -20,30 +20,22 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.hibernate.annotations.ColumnDefault;
 
-//@formatter:off
+import javax.persistence.*;
+
 @Entity()
 @Table(name = "HFJ_FORCED_ID", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"}),
-	@UniqueConstraint(name = "IDX_FORCEDID_TYPE_RESID", columnNames = {"RESOURCE_TYPE", "RESOURCE_PID"})
-}, indexes= {
-	@Index(name = "IDX_FORCEDID_TYPE_FORCEDID", columnList = "RESOURCE_TYPE,FORCED_ID"),
+	@UniqueConstraint(name = "IDX_FORCEDID_TYPE_FID", columnNames = {"RESOURCE_TYPE", "FORCED_ID"})
+}, indexes = {
+	/*
+	 * NB: We previously had indexes named
+	 * - IDX_FORCEDID_TYPE_FORCEDID
+	 * - IDX_FORCEDID_TYPE_RESID
+	 * so don't reuse these names
+	 */
 })
-//@formatter:on
 public class ForcedId {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;
@@ -57,11 +49,11 @@ public class ForcedId {
 	@Column(name = "PID")
 	private Long myId;
 
-	@JoinColumn(name = "RESOURCE_PID", nullable = false, updatable = false, foreignKey=@ForeignKey(name="FK_FORCEDID_RESOURCE"))
+	@JoinColumn(name = "RESOURCE_PID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_FORCEDID_RESOURCE"))
 	@OneToOne()
 	private ResourceTable myResource;
 
-	@Column(name = "RESOURCE_PID", nullable = false, updatable = false, insertable=false)
+	@Column(name = "RESOURCE_PID", nullable = false, updatable = false, insertable = false)
 	private Long myResourcePid;
 
 	// This is updatable=true because it was added in 1.6 and needs to be set.. At some
@@ -81,39 +73,39 @@ public class ForcedId {
 		return myForcedId;
 	}
 
-	public ResourceTable getResource() {
-		return myResource;
-	}
-	
-	public Long getResourcePid() {
-		if (myResourcePid==null) {
-			return myResource.getId();
-		}
-		return myResourcePid;
-	}
-
-	public String getResourceType() {
-		return myResourceType;
-	}
-
 	public void setForcedId(String theForcedId) {
 		myForcedId = theForcedId;
+	}
+
+	public ResourceTable getResource() {
+		return myResource;
 	}
 
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
 	}
 
-	public void setResourcePid(Long theResourcePid) {
-		myResourcePid = theResourcePid;
+	public Long getResourcePid() {
+		if (myResourcePid == null) {
+			return myResource.getId();
+		}
+		return myResourcePid;
 	}
 
 	public void setResourcePid(ResourceTable theResourcePid) {
 		myResource = theResourcePid;
 	}
 
+	public String getResourceType() {
+		return myResourceType;
+	}
+
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
+	}
+
+	public void setResourcePid(Long theResourcePid) {
+		myResourcePid = theResourcePid;
 	}
 
 }
