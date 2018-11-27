@@ -79,13 +79,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
-	@Autowired
-	private IResourceLinkDao myResourceLinkDao;
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
 

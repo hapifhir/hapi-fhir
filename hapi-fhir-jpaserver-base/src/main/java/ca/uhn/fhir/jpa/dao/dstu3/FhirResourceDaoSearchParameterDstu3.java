@@ -33,12 +33,6 @@ import java.util.List;
 
 public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-
-	@Autowired
-	private IFhirSystemDao<Bundle, Meta> mySystemDao;
-
 	protected void markAffectedResources(SearchParameter theResource) {
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
 		String expression = theResource != null ? theResource.getExpression() : null;
