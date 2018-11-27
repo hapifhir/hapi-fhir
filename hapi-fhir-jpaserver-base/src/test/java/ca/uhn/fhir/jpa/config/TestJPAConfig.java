@@ -17,16 +17,14 @@ import javax.persistence.EntityManagerFactory;
 public class TestJPAConfig {
 
 	@Bean
-	@Autowired
-	public DaoConfig daoConfig(ModelConfig theModelConfig) {
+	public DaoConfig daoConfig() {
 		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setModelConfig(theModelConfig);
 		return daoConfig;
 	}
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return new ModelConfig();
+		return daoConfig().getModelConfig();
 	}
 
 	@Bean

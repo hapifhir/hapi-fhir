@@ -159,10 +159,6 @@ public class DaoConfig {
 		}
 	}
 
-	public void setModelConfig(ModelConfig theModelConfig) {
-		myModelConfig = theModelConfig;
-	}
-
 	/**
 	 * Returns a set of searches that should be kept "warm", meaning that
 	 * searches will periodically be performed in the background to

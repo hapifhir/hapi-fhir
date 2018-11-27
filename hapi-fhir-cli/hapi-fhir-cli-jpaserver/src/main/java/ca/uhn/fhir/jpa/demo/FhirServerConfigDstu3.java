@@ -47,20 +47,18 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
 	@Bean()
-	@Autowired
-	public DaoConfig daoConfig(ModelConfig theModelConfig) {
+	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
 		retVal.setSubscriptionPollDelay(5000);
 		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
-		retVal.setModelConfig(theModelConfig);
 		return retVal;
 	}
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return new ModelConfig();
+		return daoConfig().getModelConfig();
 	}
 
 	@Override
