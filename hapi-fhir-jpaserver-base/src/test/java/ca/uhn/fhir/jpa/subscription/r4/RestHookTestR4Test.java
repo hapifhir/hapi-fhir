@@ -3,13 +3,10 @@ package ca.uhn.fhir.jpa.subscription.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -274,6 +271,86 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
+		String payload = "application/json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+
+		Subscription subscription1 = createSubscription(criteria1, payload);
+		Subscription subscription2 = createSubscription(criteria2, payload);
+		waitForRegisteredSubscriptionCount(2);
+
+		Observation observation1 = sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+
+		assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
+
+		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+		Assert.assertNotNull(subscriptionTemp);
+
+		subscriptionTemp.setCriteria(criteria1);
+		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+		waitForQueueToDrain();
+
+		Observation observation2 = sendObservation(code, "SNOMED-CT");
+		waitForQueueToDrain();
+
+		// Should see two subscription notifications
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(3, ourUpdatedObservations);
+
+		ourClient.delete().resourceById(new IdType("Subscription/" + subscription2.getId())).execute();
+		waitForQueueToDrain();
+
+		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
+		waitForQueueToDrain();
+
+		// Should see only one subscription notification
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
+
+		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		CodeableConcept codeableConcept = new CodeableConcept();
+		observation3.setCode(codeableConcept);
+		Coding coding = codeableConcept.addCoding();
+		coding.setCode(code + "111");
+		coding.setSystem("SNOMED-CT");
+		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+
+		// Should see no subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(4, ourUpdatedObservations);
+
+		Observation observation3a = ourClient.read(Observation.class, observationTemp3.getId());
+
+		CodeableConcept codeableConcept1 = new CodeableConcept();
+		observation3a.setCode(codeableConcept1);
+		Coding coding1 = codeableConcept1.addCoding();
+		coding1.setCode(code);
+		coding1.setSystem("SNOMED-CT");
+		ourClient.update().resource(observation3a).withId(observation3a.getIdElement()).execute();
+
+		// Should see only one subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(5, ourUpdatedObservations);
+
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
+	}
+
+	@Test
+	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
+		// Same test as above, but now run it using database matching
+		myDaoConfig.setEnableInMemorySubscriptionMatching(false);
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -647,6 +724,13 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		ourClient.create().resource(subscription).execute();
 	}
 
+	public void testCustomSearchParamBodySiteParam() {
+		String payload = "application/fhir+json";
+		String criteriabad = "BodySite?accessType=Catheter";
+		Subscription subscription = newSubscription(criteriabad, payload);
+		ourClient.create().resource(subscription).execute();
+	}
+
 	@Test
 	public void testGoodSubscriptionPersists() {
 		assertEquals(0, subsciptionCount());
@@ -675,6 +759,59 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		}
 		assertEquals(0, subsciptionCount());
 	}
+
+	// FIXME KHS
+	@Test
+	public void testCustomSearchParam() throws Exception {
+		String criteria = "Observation?accessType=Catheter,PD%20Catheter";
+
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Observation");
+		sp.setCode("accessType");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Observation.extension('Observation#accessType')");
+		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp);
+		mySearchParamRegsitry.forceRefresh();
+		createSubscription(criteria, "application/json");
+		waitForRegisteredSubscriptionCount(1);
+
+		{
+			Observation bodySite = new Observation();
+			bodySite.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("Catheter"));
+			MethodOutcome methodOutcome = ourClient.create().resource(bodySite).execute();
+			assertEquals(true, methodOutcome.getCreated());
+			waitForQueueToDrain();
+			waitForSize(1, ourUpdatedObservations);
+		}
+		{
+			Observation observation = new Observation();
+			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("PD Catheter"));
+			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			assertEquals(true, methodOutcome.getCreated());
+			waitForQueueToDrain();
+			waitForSize(2, ourUpdatedObservations);
+		}
+		{
+			Observation observation = new Observation();
+			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			assertEquals(true, methodOutcome.getCreated());
+			waitForQueueToDrain();
+			waitForSize(2, ourUpdatedObservations);
+		}
+		{
+			Observation observation = new Observation();
+			observation.addExtension().setUrl("Observation#accessType").setValue(new Coding().setCode("XXX"));
+			MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
+			assertEquals(true, methodOutcome.getCreated());
+			waitForQueueToDrain();
+			waitForSize(2, ourUpdatedObservations);
+		}
+
+	}
+
+
 
 	public static class ObservationListener implements IResourceProvider {
 

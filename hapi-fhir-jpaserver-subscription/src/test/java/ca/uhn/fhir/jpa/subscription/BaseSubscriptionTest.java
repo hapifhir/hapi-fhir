@@ -22,4 +22,6 @@ public abstract class BaseSubscriptionTest {
 		((MockSearchParamProvider)mySearchParamProvider).setBundleProvider(theBundleProvider);
 		mySearchParamRegistry.forceRefresh();
 	}
+
+
 }

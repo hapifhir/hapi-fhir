@@ -52,7 +52,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		super();
 	}
 
-	// FIXME KHS confirm we can't autowire modelconfig
 	public BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;

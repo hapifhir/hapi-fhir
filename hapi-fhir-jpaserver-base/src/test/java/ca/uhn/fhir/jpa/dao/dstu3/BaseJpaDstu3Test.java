@@ -347,7 +347,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@AfterClass
 	public static void afterClassClearContextBaseJpaDstu3Test() {
-		// FIXME KHS why do I need this now?
 		if (ourValueSetDao != null) {
 			ourValueSetDao.purgeCaches();
 		}
