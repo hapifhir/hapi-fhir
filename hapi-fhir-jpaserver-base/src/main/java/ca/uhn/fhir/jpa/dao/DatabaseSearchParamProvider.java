@@ -18,7 +18,7 @@ public class DatabaseSearchParamProvider implements ISearchParamProvider {
 
 	@Override
 	public IBundleProvider search(SearchParameterMap theParams) {
-		return myDaoRegistry.getSubscriptionDao().search(theParams);
+		return myDaoRegistry.getResourceDao(ResourceTypeEnum.SEARCHPARAMETER.getCode()).search(theParams);
 	}
 
 	@Override

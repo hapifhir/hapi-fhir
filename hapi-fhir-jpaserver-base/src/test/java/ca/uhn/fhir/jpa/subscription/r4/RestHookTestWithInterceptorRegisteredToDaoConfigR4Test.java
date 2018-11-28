@@ -143,7 +143,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(3, ourUpdatedObservations);
 
-		ourClient.delete().resourceById(new IdDt(ResourceTypeEnum.SUBSCRIPTION.name(), subscription2.getId())).execute();
+		ourClient.delete().resourceById(new IdDt(ResourceTypeEnum.SUBSCRIPTION.getCode(), subscription2.getId())).execute();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 

@@ -99,7 +99,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 			IIdType subscriptionId = theSubscriptionId;
 			if (subscriptionId.hasResourceType() == false) {
-				subscriptionId = subscriptionId.withResourceType(ResourceTypeEnum.SUBSCRIPTION.name());
+				subscriptionId = subscriptionId.withResourceType(ResourceTypeEnum.SUBSCRIPTION.getCode());
 			}
 			subscriptionDao.read(subscriptionId);
 		}

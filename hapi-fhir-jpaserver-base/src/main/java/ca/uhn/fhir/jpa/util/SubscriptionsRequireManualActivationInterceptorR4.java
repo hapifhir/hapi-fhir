@@ -48,14 +48,14 @@ public class SubscriptionsRequireManualActivationInterceptorR4 extends ServerOpe
 
 	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
-		if (myDao.getContext().getResourceDefinition(theResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.name())) {
+		if (myDao.getContext().getResourceDefinition(theResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.CREATE, null, theResource);
 		}
 	}
 
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-		if (myDao.getContext().getResourceDefinition(theNewResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.name())) {
+		if (myDao.getContext().getResourceDefinition(theNewResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.UPDATE, theOldResource, theNewResource);
 		}
 	}

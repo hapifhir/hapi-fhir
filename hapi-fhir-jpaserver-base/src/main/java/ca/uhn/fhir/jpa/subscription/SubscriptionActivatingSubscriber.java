@@ -163,7 +163,7 @@ public class SubscriptionActivatingSubscriber {
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	public void handleMessage(ResourceModifiedMessage.OperationTypeEnum theOperationType, IIdType theId, final IBaseResource theSubscription) throws MessagingException {
-		if (!theId.getResourceType().equals(ResourceTypeEnum.SUBSCRIPTION.name())) {
+		if (!theId.getResourceType().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			return;
 		}
 		switch (theOperationType) {

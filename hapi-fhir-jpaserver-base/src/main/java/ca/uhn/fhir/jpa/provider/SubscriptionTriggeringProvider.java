@@ -66,7 +66,7 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 
 	@Override
 	public Class<? extends IBaseResource> getResourceType() {
-		return myFhirContext.getResourceDefinition(ResourceTypeEnum.SUBSCRIPTION.name()).getImplementingClass();
+		return myFhirContext.getResourceDefinition(ResourceTypeEnum.SUBSCRIPTION.getCode()).getImplementingClass();
 	}
 
 }
