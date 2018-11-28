@@ -32,6 +32,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,6 +46,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private DocumentBuilderFactory myDocBuilderFactory;
 	private boolean myNoTerminologyChecks;
 	private StructureDefinition myStructureDefintion;
+	private List<String> extensionDomains = Collections.emptyList();
 
 	private IValidationSupport myValidationSupport;
 
@@ -66,6 +68,44 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		myDocBuilderFactory = DocumentBuilderFactory.newInstance();
 		myDocBuilderFactory.setNamespaceAware(true);
 		myValidationSupport = theValidationSupport;
+	}
+
+	/**
+	 * Every element in a resource or data type includes an optional <it>extension</it> child element
+	 * which is identified by it's {@code url attribute}. There exists a number of predefined
+	 * extension urls or extension domains:<ul>
+	 *  <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
+	 *  <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
+	 * </ul>
+	 * It is possible to extend this list of known extension by defining custom extensions:
+	 * Any url which starts which one of the elements in the list of custom extension domains is
+	 * considered as known.
+	 * <p>
+	 * Any unknown extension domain will result in an information message when validating a resource.
+	 * </p>
+	 */
+	public FhirInstanceValidator setCustomExtensionDomains(List<String> extensionDomains) {
+		this.extensionDomains = extensionDomains;
+		return this;
+	}
+
+	/**
+	 * Every element in a resource or data type includes an optional <it>extension</it> child element
+	 * which is identified by it's {@code url attribute}. There exists a number of predefined
+	 * extension urls or extension domains:<ul>
+	 *  <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
+	 *  <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
+	 * </ul>
+	 * It is possible to extend this list of known extension by defining custom extensions:
+	 * Any url which starts which one of the elements in the list of custom extension domains is
+	 * considered as known.
+	 * <p>
+	 * Any unknown extension domain will result in an information message when validating a resource.
+	 * </p>
+	 */
+	public FhirInstanceValidator setCustomExtensionDomains(String... extensionDomains) {
+		this.extensionDomains = Arrays.asList(extensionDomains);
+		return this;
 	}
 
 	private String determineResourceName(Document theDocument) {
@@ -211,6 +251,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
+		v.addExtensionDomains(extensionDomains);
 
 		List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
 

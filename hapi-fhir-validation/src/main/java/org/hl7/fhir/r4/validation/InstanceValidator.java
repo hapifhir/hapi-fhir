@@ -1956,6 +1956,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     return extensionDomains;
   }
 
+  public InstanceValidator addExtensionDomains(List<String> extensionDomains) {
+    this.extensionDomains.addAll(extensionDomains);
+    return this;
+  }
+
   private Element getFromBundle(Element bundle, String ref, String fullUrl, List<ValidationMessage> errors, String path) {
     String targetUrl = null;
     String version = "";
