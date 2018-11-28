@@ -2745,7 +2745,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     }
     return -1;
   }
-
+  
   private void validateQuestionannaireResponseItems(Questionnaire qsrc, List<QuestionnaireItemComponent> qItems, List<ValidationMessage> errors, Element element, NodeStack stack, boolean inProgress, Element questionnaireResponseRoot) {
     List<Element> items = new ArrayList<Element>();
     element.getNamedChildren("item", items);
@@ -2759,7 +2759,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         if (index == -1) {
           QuestionnaireItemComponent qItem = findQuestionnaireItem(qsrc, linkId);
           if (qItem != null) {
-            rule(errors, IssueType.STRUCTURE, item.line(), item.col(), stack.getLiteralPath(), index > -1, "Structural Error: item is in the wrong place");
+            rule(errors, IssueType.STRUCTURE, item.line(), item.col(), stack.getLiteralPath(), index > -1, misplacedItemError(qItem));
             NodeStack ns = stack.push(item, -1, null, null);
             validateQuestionannaireResponseItem(qsrc, qItem, errors, item, ns, inProgress, questionnaireResponseRoot);
           }
@@ -2770,11 +2770,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         {
           rule(errors, IssueType.STRUCTURE, item.line(), item.col(), stack.getLiteralPath(), index >= lastIndex, "Structural Error: items are out of order");
           lastIndex = index;
-          List<Element> mapItem = map.get(linkId);
-          if (mapItem == null) {
-            mapItem = new ArrayList<Element>();
-            map.put(linkId, mapItem);
-          }
+          
+          List<Element> mapItem = map.computeIfAbsent(linkId, key -> new ArrayList<>());
+          
           mapItem.add(item);
         }
       }
@@ -2794,6 +2792,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       }
     }
   }
+
+private String misplacedItemError(QuestionnaireItemComponent qItem) {
+	return qItem.hasLinkId() ? 
+			String.format("Structural Error: item with linkid %s is in the wrong place", qItem.getLinkId())
+			:
+			"Structural Error: item is in the wrong place";
+}
 
   private void validateQuestionnaireResponseItemQuantity( List<ValidationMessage> errors, Element answer, NodeStack stack)	{
 

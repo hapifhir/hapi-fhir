@@ -503,6 +503,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		
 		ValidationResult errors = myVal.validateWithResult(qr);
 		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
+		assertTrue("Must contain structural error about misplaced link1 item",
+				errors.getMessages().stream().filter(vm -> vm.getMessage().contains("Structural Error"))
+						.anyMatch(vm -> vm.getMessage().contains("link1")));
 	}
 
 	@Test
