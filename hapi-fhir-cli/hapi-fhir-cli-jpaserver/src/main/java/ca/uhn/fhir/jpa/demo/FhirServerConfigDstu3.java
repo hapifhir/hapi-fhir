@@ -46,7 +46,7 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
-	@Bean()
+	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
@@ -62,7 +62,7 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("HAPI_PU");
@@ -99,7 +99,7 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 		return retVal;
 	}
 
-	@Bean()
+	@Bean
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);

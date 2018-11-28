@@ -32,7 +32,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
 	private Exception myLastStackTrace;
 
-	@Bean()
+	@Bean
 	public BasicDataSource basicDataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
 
@@ -97,7 +97,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		return retVal;
 	}
 
-	@Bean()
+	@Bean
 	@Primary()
 	public DataSource dataSource() {
 
@@ -120,7 +120,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");

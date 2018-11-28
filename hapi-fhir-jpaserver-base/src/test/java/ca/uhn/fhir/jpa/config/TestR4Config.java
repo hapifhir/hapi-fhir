@@ -45,7 +45,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	private Exception myLastStackTrace;
 
-	@Bean()
+	@Bean
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
 
@@ -117,7 +117,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");

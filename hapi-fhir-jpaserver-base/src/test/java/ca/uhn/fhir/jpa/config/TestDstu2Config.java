@@ -46,7 +46,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	private Exception myLastStackTrace;
 	private String myLastStackTraceThreadName;
 
-	@Bean()
+	@Bean
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
 
@@ -115,7 +115,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");

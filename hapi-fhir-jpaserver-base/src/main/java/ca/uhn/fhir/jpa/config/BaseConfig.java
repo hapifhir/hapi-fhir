@@ -91,7 +91,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	public abstract FhirContext fhirContext();
 
-	@Bean()
+	@Bean
 	public ScheduledExecutorFactoryBean scheduledExecutorService() {
 		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
 		b.setPoolSize(5);
@@ -105,7 +105,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		return new SubscriptionTriggeringProvider();
 	}
 
-	@Bean()
+	@Bean
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
 		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
