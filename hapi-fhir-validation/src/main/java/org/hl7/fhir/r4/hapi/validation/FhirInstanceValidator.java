@@ -156,8 +156,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * reported at the ERROR level. If this setting is set to {@link BestPracticeWarningLevel#Ignore}, best practice
 	 * guielines will be ignored.
 	 * </p>
-	 *
-	 * @see {@link #setBestPracticeWarningLevel(BestPracticeWarningLevel)}
+	 * 
+	 * @see #setBestPracticeWarningLevel(BestPracticeWarningLevel)
 	 */
 	public BestPracticeWarningLevel getBestPracticeWarningLevel() {
 		return myBestPracticeWarningLevel;
@@ -249,7 +249,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
 		v.addExtensionDomains(extensionDomains);
 
-		List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
+		List<ValidationMessage> messages = new ArrayList<>();
 
 		if (theEncoding == EncodingEnum.XML) {
 			Document document;
@@ -349,7 +349,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	public static class NullEvaluationContext implements IEvaluationContext {
 
 		@Override
-		public TypeDetails checkFunction(Object theAppContext, String theFunctionName, List<TypeDetails> theParameters) throws PathEngineException {
+		public TypeDetails checkFunction(Object theAppContext, String theFunctionName, List<TypeDetails> theParameters) {
 			return null;
 		}
 
@@ -364,12 +364,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public Base resolveConstant(Object theAppContext, String theName) throws PathEngineException {
+		public Base resolveConstant(Object theAppContext, String theName) {
 			return null;
 		}
 
 		@Override
-		public TypeDetails resolveConstantType(Object theAppContext, String theName) throws PathEngineException {
+		public TypeDetails resolveConstantType(Object theAppContext, String theName) {
 			return null;
 		}
 

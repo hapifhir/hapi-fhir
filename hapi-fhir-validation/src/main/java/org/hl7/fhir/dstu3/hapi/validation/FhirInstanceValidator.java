@@ -173,7 +173,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * guielines will be ignored.
 	 * </p>
 	 *
-	 * @see {@link #setBestPracticeWarningLevel(BestPracticeWarningLevel)}
+	 * @see #setBestPracticeWarningLevel(BestPracticeWarningLevel)
 	 */
 	public BestPracticeWarningLevel getBestPracticeWarningLevel() {
 		return myBestPracticeWarningLevel;
@@ -379,7 +379,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		private LoadingCache<ResourceKey, org.hl7.fhir.r4.model.Resource> myFetchResourceCache;
 		private org.hl7.fhir.r4.model.Parameters myExpansionProfile;
 
-		public WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
+		WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
 			myWrap = theWorkerContext;
 			myConverter = new VersionConvertor_30_40();
 
@@ -460,7 +460,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public void cacheResource(org.hl7.fhir.r4.model.Resource res) throws FHIRException {
+		public void cacheResource(org.hl7.fhir.r4.model.Resource res) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -482,7 +482,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 		@Override
 		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r4.model.ValueSet source, boolean cacheOk, boolean heiarchical) {
-			ValueSet convertedSource = null;
+			ValueSet convertedSource;
 			try {
 				convertedSource = VersionConvertor_30_40.convertValueSet(source);
 			} catch (FHIRException e) {
@@ -506,7 +506,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heiarchical) throws FHIRException {
+		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heiarchical) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -673,7 +673,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public IResourceValidator newValidator() throws FHIRException {
+		public IResourceValidator newValidator() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -698,7 +698,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public boolean supportsSystem(String system) throws TerminologyServiceException {
+		public boolean supportsSystem(String system) {
 			return myWrap.supportsSystem(system);
 		}
 
@@ -715,6 +715,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public ValidationResult validateCode(String system, String code, String display) {
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display);
+			// TODO: converted code might be null -> NPE
 			return convertValidationResult(result);
 		}
 
@@ -765,6 +766,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				throw new InternalErrorException(e);
 			}
 
+			// TODO: converted code might be null -> NPE
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
 			return convertValidationResult(result);
 		}
@@ -785,6 +787,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				throw new InternalErrorException(e);
 			}
 
+			// TODO: converted code might be null -> NPE
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
 			return convertValidationResult(result);
 		}
