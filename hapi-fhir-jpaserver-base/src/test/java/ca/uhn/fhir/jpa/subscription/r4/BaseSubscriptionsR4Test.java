@@ -24,10 +24,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
@@ -38,7 +35,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-public class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test {
+@Ignore
+public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR4Test.class);
 
 

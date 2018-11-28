@@ -14,7 +14,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
 
-// FIXME KHS Test
 public class FhirClientSearchParamProvider implements ISearchParamProvider {
 
 	private final IGenericClient myClient;
