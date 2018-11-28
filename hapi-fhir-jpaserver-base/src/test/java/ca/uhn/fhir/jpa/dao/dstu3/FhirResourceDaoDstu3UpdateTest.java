@@ -306,6 +306,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		assertEquals("1", outcome.getId().getVersionIdPart());
 
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
 		Date now = new Date();
 		Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
 		InstantType updated = retrieved.getMeta().getLastUpdatedElement().copy();
