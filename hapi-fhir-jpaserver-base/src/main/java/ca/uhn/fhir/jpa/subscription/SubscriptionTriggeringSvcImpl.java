@@ -368,6 +368,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				try {
 					executorQueue.put(theRunnable);
 				} catch (InterruptedException theE) {
+					// Restore interrupted state...
+					Thread.currentThread().interrupt();
 					throw new RejectedExecutionException("Task " + theRunnable.toString() +
 						" rejected from " + theE.toString());
 				}
