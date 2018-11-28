@@ -52,7 +52,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		super();
 	}
 
-	public BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+	// Used for testing
+	protected BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
 	}

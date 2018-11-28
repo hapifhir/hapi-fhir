@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
@@ -25,15 +26,14 @@ public class FhirClientSearchParamProvider implements ISearchParamProvider {
 	@Override
 	public IBundleProvider search(SearchParameterMap theParams) {
 		FhirContext fhirContext = myClient.getFhirContext();
-		Class<? extends IBaseResource> searchParamType = fhirContext.getDefaultTypeForProfile(ResourceTypeEnum.SEARCHPARAMETER.getCode());
 
 		IBaseBundle bundle = myClient
 			.search()
-			.forResource(searchParamType)
+			.forResource(ResourceTypeEnum.SEARCHPARAMETER.getCode())
 			.cacheControl(new CacheControlDirective().setNoCache(true))
 			.execute();
 
-		return new SimpleBundleProvider(bundle);
+		return new SimpleBundleProvider(BundleUtil.toListOfResources(fhirContext, bundle));
 	}
 
 	@Override

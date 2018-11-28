@@ -69,6 +69,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	}
 
 	// This constructor is used by tests
+	@VisibleForTesting
 	public SearchParamExtractorR4(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
