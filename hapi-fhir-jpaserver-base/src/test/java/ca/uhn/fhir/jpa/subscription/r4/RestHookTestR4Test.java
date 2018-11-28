@@ -2,13 +2,18 @@ package ca.uhn.fhir.jpa.subscription.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
 import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -23,6 +28,7 @@ import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -62,6 +68,8 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	private SingleQueryCountHolder myCountHolder;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	private CountingInterceptor myCountingInterceptor;
 
@@ -121,8 +129,8 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		processingChannel.addInterceptor(myCountingInterceptor);
 	}
 
-	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
-		Subscription subscription = newSubscription(theCriteria, thePayload, theEndpoint);
+	private Subscription createSubscription(String theCriteria, String thePayload) throws InterruptedException {
+		Subscription subscription = newSubscription(theCriteria, thePayload);
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());
@@ -131,7 +139,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		return subscription;
 	}
 
-	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint) {
+	private Subscription newSubscription(String theCriteria, String thePayload) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -140,7 +148,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload(thePayload);
-		channel.setEndpoint(theEndpoint);
+		channel.setEndpoint(ourListenerServerBase);
 		return subscription;
 	}
 
@@ -170,8 +178,8 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		createSubscription(criteria1, payload, ourListenerServerBase);
-		createSubscription(criteria2, payload, ourListenerServerBase);
+		createSubscription(criteria1, payload);
+		createSubscription(criteria2, payload);
 		waitForRegisteredSubscriptionCount(2);
 
 		sendObservation(code, "SNOMED-CT");
@@ -187,7 +195,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	public void testActiveSubscriptionShouldntReActivate() throws Exception {
 		String criteria = "Observation?code=111111111&_format=xml";
 		String payload = "application/fhir+json";
-		createSubscription(criteria, payload, ourListenerServerBase);
+		createSubscription(criteria, payload);
 
 		waitForRegisteredSubscriptionCount(1);
 		for (int i = 0; i < 5; i++) {
@@ -204,8 +212,8 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		createSubscription(criteria1, payload, ourListenerServerBase);
-		createSubscription(criteria2, payload, ourListenerServerBase);
+		createSubscription(criteria1, payload);
+		createSubscription(criteria2, payload);
 		waitForRegisteredSubscriptionCount(2);
 
 		Observation obs = sendObservation(code, "SNOMED-CT");
@@ -237,7 +245,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		waitForRegisteredSubscriptionCount(0);
-		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
+		Subscription subscription1 = createSubscription(criteria1, payload);
 		waitForRegisteredSubscriptionCount(1);
 
 		int modCount = myCountingInterceptor.getSentCount();
@@ -272,8 +280,8 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
-		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+		Subscription subscription1 = createSubscription(criteria1, payload);
+		Subscription subscription2 = createSubscription(criteria2, payload);
 		waitForRegisteredSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -350,8 +358,8 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
-		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+		Subscription subscription1 = createSubscription(criteria1, payload);
+		Subscription subscription2 = createSubscription(criteria2, payload);
 		waitForRegisteredSubscriptionCount(2);
 
 		ourLog.info("** About to send obervation");
@@ -425,7 +433,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		createSubscription(criteria1, payload, ourListenerServerBase);
+		createSubscription(criteria1, payload);
 		waitForRegisteredSubscriptionCount(1);
 
 		ourLog.info("** About to send obervation");
@@ -478,7 +486,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("** About to create non-matching subscription");
 
-		Subscription subscription2 = createSubscription(criteriaBad, payload, ourListenerServerBase);
+		Subscription subscription2 = createSubscription(criteriaBad, payload);
 
 		ourLog.info("** About to send observation that wont match");
 
@@ -522,8 +530,8 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		Subscription subscription1 = createSubscription(criteria1, payload, ourListenerServerBase);
-		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
+		Subscription subscription1 = createSubscription(criteria1, payload);
+		Subscription subscription2 = createSubscription(criteria2, payload);
 		waitForRegisteredSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -544,7 +552,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String criteria1 = "Observation?codeeeee=SNOMED-CT";
 
 		try {
-			createSubscription(criteria1, payload, ourListenerServerBase);
+			createSubscription(criteria1, payload);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Invalid criteria: Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
@@ -559,7 +567,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		// Add some headers, and we'll also turn back to requested status for fun
-		Subscription subscription = createSubscription(criteria1, payload, ourListenerServerBase);
+		Subscription subscription = createSubscription(criteria1, payload);
 		waitForRegisteredSubscriptionCount(1);
 
 		subscription.getChannel().addHeader("X-Foo: FOO");
@@ -586,7 +594,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		Subscription subscription = createSubscription(criteria1, payload, ourListenerServerBase);
+		Subscription subscription = createSubscription(criteria1, payload);
 		waitForRegisteredSubscriptionCount(1);
 
 		sendObservation(code, "SNOMED-CT");
@@ -619,7 +627,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	public void testInvalidProvenanceParam() {
 		String payload = "application/fhir+json";
 		String criteriabad = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
-		Subscription subscription = newSubscription(criteriabad, payload, ourListenerServerBase);
+		Subscription subscription = newSubscription(criteriabad, payload);
 		ourClient.create().resource(subscription).execute();
 	}
 
@@ -627,7 +635,7 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	public void testInvalidProcedureRequestParam() {
 		String payload = "application/fhir+json";
 		String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
-		Subscription subscription = newSubscription(criteriabad, payload, ourListenerServerBase);
+		Subscription subscription = newSubscription(criteriabad, payload);
 		ourClient.create().resource(subscription).execute();
 	}
 
@@ -635,8 +643,37 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	public void testInvalidBodySiteParam() {
 		String payload = "application/fhir+json";
 		String criteriabad = "BodySite?accessType=Catheter";
-		Subscription subscription = newSubscription(criteriabad, payload, ourListenerServerBase);
+		Subscription subscription = newSubscription(criteriabad, payload);
 		ourClient.create().resource(subscription).execute();
+	}
+
+	@Test
+	public void testGoodSubscriptionPersists() {
+		assertEquals(0, subsciptionCount());
+		String payload = "application/fhir+json";
+		String criteriaGood = "Patient?gender=male";
+		Subscription subscription = newSubscription(criteriaGood, payload);
+		ourClient.create().resource(subscription).execute();
+		assertEquals(1, subsciptionCount());
+	}
+
+	private int subsciptionCount() {
+		IBaseBundle found = ourClient.search().forResource(Subscription.class).cacheControl(new CacheControlDirective().setNoCache(true)).execute();
+		return toUnqualifiedVersionlessIdValues(found).size();
+	}
+
+	@Test
+	public void testBadSubscriptionDoesntPersist() {
+		assertEquals(0, subsciptionCount());
+		String payload = "application/fhir+json";
+		String criteriaBad = "BodySite?accessType=Catheter";
+		Subscription subscription = newSubscription(criteriaBad, payload);
+		try {
+			ourClient.create().resource(subscription).execute();
+		} catch (UnprocessableEntityException e) {
+			ourLog.info("Expected exception", e);
+		}
+		assertEquals(0, subsciptionCount());
 	}
 
 	public static class ObservationListener implements IResourceProvider {
