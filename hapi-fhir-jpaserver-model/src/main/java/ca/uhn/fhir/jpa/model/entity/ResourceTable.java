@@ -29,8 +29,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.annotations.*;
 
-import javax.persistence.*;
 import javax.persistence.Index;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;

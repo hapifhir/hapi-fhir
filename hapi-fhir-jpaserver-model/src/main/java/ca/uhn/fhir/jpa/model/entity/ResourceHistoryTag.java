@@ -20,9 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import java.io.Serializable;
-
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Embeddable
 @Entity

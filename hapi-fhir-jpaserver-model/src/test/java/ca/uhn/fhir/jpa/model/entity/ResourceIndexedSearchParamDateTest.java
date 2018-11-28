@@ -1,17 +1,13 @@
 package ca.uhn.fhir.jpa.model.entity;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
-
 
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ResourceIndexedSearchParamDateTest {
 
