@@ -8,6 +8,8 @@ import org.hl7.fhir.r4.elementmodel.Element;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Questionnaire.*;
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+
 /**
  * Evaluates Questionnaire.item.enableWhen against a QuestionnaireResponse.
  * Ignores possible modifierExtensions and extensions.
@@ -52,7 +54,7 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         if (operator == QuestionnaireItemOperator.EXISTS){
             Type answer = enableCondition.getAnswer();
             if (!(answer instanceof BooleanType)){
-                throw new RuntimeException("Exists-operator requires answerBoolean");                
+                throw new UnprocessableEntityException("Exists-operator requires answerBoolean");                
             }
             return new EnableWhenResult(((BooleanType)answer).booleanValue() != answerItems.isEmpty(), 
                     linkId, enableCondition, questionnaireResponse);
@@ -68,43 +70,61 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         try {
             actualAnswer = answer.asType();
         } catch (FHIRException e) {
-            throw new RuntimeException("Unexpected answer type", e);
+            throw new UnprocessableEntityException("Unexpected answer type", e);
         }
         if (!actualAnswer.getClass().equals(expectedAnswer.getClass())) {
-            throw new RuntimeException("Expected answer and actual answer have incompatible types");
+            throw new UnprocessableEntityException("Expected answer and actual answer have incompatible types");
         }                
         if (expectedAnswer instanceof Coding) {
             return compareCodingAnswer((Coding)expectedAnswer, (Coding)actualAnswer, questionnaireItemOperator);
         } else if ((expectedAnswer instanceof PrimitiveType)) {
             return comparePrimitiveAnswer((PrimitiveType<?>)actualAnswer, (PrimitiveType<?>)expectedAnswer, questionnaireItemOperator);
+        } else if (expectedAnswer instanceof Quantity) {
+        	return compareQuantityAnswer((Quantity)expectedAnswer, (Quantity)actualAnswer, questionnaireItemOperator);
         }
-        // TODO: Quantity, Attachment, reference?
-        throw new RuntimeException("Unimplemented answer type: " + expectedAnswer.getClass());
+        // TODO: Attachment, reference?
+        throw new UnprocessableEntityException("Unimplemented answer type: " + expectedAnswer.getClass());
     }
-    private boolean comparePrimitiveAnswer(PrimitiveType<?> actualAnswer, PrimitiveType<?> expectedAnswer, QuestionnaireItemOperator questionnaireItemOperator) {                
+   
+
+	private boolean compareQuantityAnswer(Quantity actualAnswer, Quantity expectedAnswer, QuestionnaireItemOperator questionnaireItemOperator) {                
+           return compareComparable(actualAnswer.getValue(), expectedAnswer.getValue(), questionnaireItemOperator);
+    }
+
+    
+	private boolean comparePrimitiveAnswer(PrimitiveType<?> actualAnswer, PrimitiveType<?> expectedAnswer, QuestionnaireItemOperator questionnaireItemOperator) {                
         if (actualAnswer.getValue() instanceof Comparable){            
-            @SuppressWarnings({ "rawtypes", "unchecked" })
-            int result = ((Comparable)actualAnswer.getValue()).compareTo(expectedAnswer.getValue());
-            if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
-                return result == 0;
-            } else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
-                return result != 0;
-            } else if (questionnaireItemOperator == QuestionnaireItemOperator.GREATER_OR_EQUAL){
-                return result >= 0;
-            } else if (questionnaireItemOperator == QuestionnaireItemOperator.LESS_OR_EQUAL){
-                return result <= 0;
-            } else if (questionnaireItemOperator == QuestionnaireItemOperator.LESS_THAN){
-                return result < 0;
-            } else if (questionnaireItemOperator == QuestionnaireItemOperator.GREATER_THAN){
-                return result > 0;
-            }                  
+           return compareComparable((Comparable)actualAnswer.getValue(), (Comparable) expectedAnswer.getValue(), questionnaireItemOperator);                  
         } else if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
             return actualAnswer.equalsShallow(expectedAnswer);
         } else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
             return !actualAnswer.equalsShallow(expectedAnswer);
         }
-        throw new RuntimeException("Bad operator for PrimitiveType comparison");
+        throw new UnprocessableEntityException("Bad operator for PrimitiveType comparison");
     }
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private boolean compareComparable(Comparable actual, Comparable expected,
+			QuestionnaireItemOperator questionnaireItemOperator) {
+		int result = actual.compareTo(expected);
+		
+		if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
+		    return result == 0;
+		} else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
+		    return result != 0;
+		} else if (questionnaireItemOperator == QuestionnaireItemOperator.GREATER_OR_EQUAL){
+		    return result >= 0;
+		} else if (questionnaireItemOperator == QuestionnaireItemOperator.LESS_OR_EQUAL){
+		    return result <= 0;
+		} else if (questionnaireItemOperator == QuestionnaireItemOperator.LESS_THAN){
+		    return result < 0;
+		} else if (questionnaireItemOperator == QuestionnaireItemOperator.GREATER_THAN){
+		    return result > 0;
+		}
+		
+        throw new UnprocessableEntityException("Bad operator for PrimitiveType comparison");
+
+	}
 
     private List<Element> findQuestionAnswers(Element questionnaireResponse, String question) {
         List<Element> matchingItems = questionnaireResponse.getChildren(ITEM_ELEMENT)
@@ -132,7 +152,7 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         } else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
             return result == false;
         }
-        throw new RuntimeException("Bad operator for Coding comparison");
+        throw new UnprocessableEntityException("Bad operator for Coding comparison");
     }
 
     private boolean compareCodes(Coding expectedCoding, Coding value) {
