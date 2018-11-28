@@ -109,17 +109,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 
 	private String determineResourceName(Document theDocument) {
-		Element root = null;
-
 		NodeList list = theDocument.getChildNodes();
 		for (int i = 0; i < list.getLength(); i++) {
 			if (list.item(i) instanceof Element) {
-				root = (Element) list.item(i);
-				break;
+				return list.item(i).getLocalName();
 			}
 		}
-		root = theDocument.getDocumentElement();
-		return root.getLocalName();
+		return theDocument.getDocumentElement().getLocalName();
 	}
 
 	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
