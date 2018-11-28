@@ -126,6 +126,6 @@ public class DaoRegistry implements ApplicationContextAware {
 	}
 
 	public IFhirResourceDao getSubscriptionDao() {
-		return getResourceDao(ResourceTypeEnum.SUBSCRIPTION.name());
+		return getResourceDao(ResourceTypeEnum.SUBSCRIPTION.getCode());
 	}
 }
