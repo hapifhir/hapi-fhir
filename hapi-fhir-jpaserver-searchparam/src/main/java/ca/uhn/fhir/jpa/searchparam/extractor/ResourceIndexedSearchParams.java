@@ -32,7 +32,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.compare;
 
 public final class ResourceIndexedSearchParams {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceIndexedSearchParams.class);

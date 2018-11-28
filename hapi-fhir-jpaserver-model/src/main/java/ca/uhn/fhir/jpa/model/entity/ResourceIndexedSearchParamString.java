@@ -30,8 +30,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.annotations.*;
 
-import javax.persistence.*;
 import javax.persistence.Index;
+import javax.persistence.*;
 
 import static org.apache.commons.lang3.StringUtils.left;
 

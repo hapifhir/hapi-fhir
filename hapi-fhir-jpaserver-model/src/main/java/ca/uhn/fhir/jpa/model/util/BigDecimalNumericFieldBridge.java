@@ -20,12 +20,12 @@ package ca.uhn.fhir.jpa.model.util;
  * #L%
  */
 
-import java.math.BigDecimal;
-
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
 import org.hibernate.search.bridge.LuceneOptions;
 import org.hibernate.search.bridge.TwoWayFieldBridge;
+
+import java.math.BigDecimal;
 
 public class BigDecimalNumericFieldBridge implements TwoWayFieldBridge {
 	@Override
