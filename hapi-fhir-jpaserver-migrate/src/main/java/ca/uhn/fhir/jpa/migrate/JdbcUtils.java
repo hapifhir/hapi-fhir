@@ -50,7 +50,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(null, null, theTableName, false, true);
+					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), theTableName, false, true);
 
 					Set<String> indexNames = new HashSet<>();
 					while (indexes.next()) {
@@ -78,7 +78,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(null, null, theTableName, false, false);
+					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), theTableName, false, false);
 
 					while (indexes.next()) {
 						String indexName = indexes.getString("INDEX_NAME");
@@ -107,7 +107,9 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getColumns(null, null, null, null);
+					String catalog = connection.getCatalog();
+					String schema = connection.getSchema();
+					ResultSet indexes = metadata.getColumns(catalog, schema, theTableName, null);
 
 					while (indexes.next()) {
 
@@ -158,7 +160,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getCrossReference(null, null, theTableName, null, null, theForeignTable);
+					ResultSet indexes = metadata.getCrossReference(connection.getCatalog(), connection.getSchema(), theTableName, connection.getCatalog(), connection.getSchema(), theForeignTable);
 
 					Set<String> columnNames = new HashSet<>();
 					while (indexes.next()) {
@@ -194,7 +196,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getColumns(null, null, null, null);
+					ResultSet indexes = metadata.getColumns(connection.getCatalog(), connection.getSchema(), theTableName, null);
 
 					Set<String> columnNames = new HashSet<>();
 					while (indexes.next()) {
@@ -223,7 +225,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getTables(null, null, null, null);
+					ResultSet tables = metadata.getTables(connection.getCatalog(), connection.getSchema(), null, null);
 
 					Set<String> columnNames = new HashSet<>();
 					while (tables.next()) {
@@ -254,7 +256,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getColumns(null, null, null, null);
+					ResultSet tables = metadata.getColumns(connection.getCatalog(), connection.getSchema(), theTableName, theColumnName);
 
 					while (tables.next()) {
 						String tableName = toUpperCase(tables.getString("TABLE_NAME"), Locale.US);

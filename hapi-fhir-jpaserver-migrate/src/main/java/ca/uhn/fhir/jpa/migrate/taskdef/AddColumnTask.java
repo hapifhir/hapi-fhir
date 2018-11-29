@@ -46,9 +46,22 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 			nullable = "";
 		}
 
-		String sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + type + " " + nullable;
+		String sql = "";
+		switch (getDriverType()) {
+			case DERBY_EMBEDDED:
+			case MARIADB_10_1:
+			case MYSQL_5_7:
+			case POSTGRES_9_4:
+				sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + type + " " + nullable;
+				break;
+			case MSSQL_2012:
+			case ORACLE_12C:
+				sql = "alter table " + getTableName() + " add " + getColumnName() + " " + type + " " + nullable;
+				break;
+		}
+
 		ourLog.info("Adding column {} of type {} to table {}", getColumnName(), type, getTableName());
-		executeSql(sql);
+		executeSql(getTableName(), sql);
 	}
 
 }

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,11 +38,13 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
 	private final String myDescription;
+	private final String myTableName;
 	private List<Task> myTask = new ArrayList<>();
 	private int myBatchSize = 1000;
 	private String myExecuteOnlyIfTableExists;
 
-	public ArbitrarySqlTask(String theDescription) {
+	public ArbitrarySqlTask(String theTableName, String theDescription) {
+		myTableName = theTableName;
 		myDescription = theDescription;
 	}
 
@@ -104,7 +106,6 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 		@Override
 		public void execute() {
 			if (isDryRun()) {
-				logDryRunSql(mySql);
 				return;
 			}
 

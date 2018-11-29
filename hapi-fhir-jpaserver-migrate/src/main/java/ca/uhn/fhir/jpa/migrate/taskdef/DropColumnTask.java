@@ -42,7 +42,7 @@ public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
 
 		String sql = "alter table " + getTableName() + " drop column " + getColumnName();
 		ourLog.info("Dropping column {} on table {}", getColumnName(), getTableName());
-		executeSql(sql);
+		executeSql(getTableName(), sql);
 	}
 
 }

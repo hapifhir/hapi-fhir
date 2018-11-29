@@ -162,7 +162,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 
 					// Generate update SQL
 					StringBuilder sqlBuilder = new StringBuilder();
-					List<Long> arguments = new ArrayList<>();
+					List<Number> arguments = new ArrayList<>();
 					sqlBuilder.append("UPDATE ");
 					sqlBuilder.append(getTableName());
 					sqlBuilder.append(" SET ");
@@ -174,7 +174,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 						arguments.add(nextNewValueEntry.getValue());
 					}
 					sqlBuilder.append(" WHERE SP_ID = ?");
-					arguments.add((Long) nextRow.get("SP_ID"));
+					arguments.add((Number) nextRow.get("SP_ID"));
 
 					// Apply update SQL
 					newJdbcTemnplate().update(sqlBuilder.toString(), arguments.toArray());

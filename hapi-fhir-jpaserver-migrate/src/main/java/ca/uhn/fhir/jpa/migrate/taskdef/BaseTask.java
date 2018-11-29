@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class BaseTask<T extends BaseTask> {
 
@@ -37,6 +41,7 @@ public abstract class BaseTask<T extends BaseTask> {
 	private String myDescription;
 	private int myChangesCount;
 	private boolean myDryRun;
+	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
 
 	public boolean isDryRun() {
 		return myDryRun;
@@ -56,29 +61,36 @@ public abstract class BaseTask<T extends BaseTask> {
 		return (T) this;
 	}
 
+	public List<ExecutedStatement> getExecutedStatements() {
+		return myExecutedStatements;
+	}
+
 	public int getChangesCount() {
 		return myChangesCount;
 	}
 
-	public void executeSql(@Language("SQL") String theSql, Object... theArguments) {
-		if (isDryRun()) {
-			logDryRunSql(theSql);
-			return;
+	/**
+	 * @param theTableName This is only used for logging currently
+	 * @param theSql       The SQL statement
+	 * @param theArguments The SQL statement arguments
+	 */
+	public void executeSql(String theTableName, @Language("SQL") String theSql, Object... theArguments) {
+		if (isDryRun() == false) {
+			Integer changes = getConnectionProperties().getTxTemplate().execute(t -> {
+				JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
+				int changesCount = jdbcTemplate.update(theSql, theArguments);
+				ourLog.info("SQL \"{}\" returned {}", theSql, changesCount);
+				return changesCount;
+			});
+
+			myChangesCount += changes;
 		}
 
-		Integer changes = getConnectionProperties().getTxTemplate().execute(t -> {
-			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
-			int changesCount = jdbcTemplate.update(theSql, theArguments);
-			ourLog.info("SQL \"{}\" returned {}", theSql, changesCount);
-			return changesCount;
-		});
-
-		myChangesCount += changes;
-
+		captureExecutedStatement(theTableName, theSql, theArguments);
 	}
 
-	protected void logDryRunSql(@Language("SQL") String theSql) {
-		ourLog.info("WOULD EXECUTE SQL: {}", theSql);
+	protected void captureExecutedStatement(String theTableName, @Language("SQL") String theSql, Object[] theArguments) {
+		myExecutedStatements.add(new ExecutedStatement(theTableName, theSql, theArguments));
 	}
 
 	public DriverTypeEnum.ConnectionProperties getConnectionProperties() {
@@ -108,4 +120,28 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	public abstract void execute() throws SQLException;
+
+	public static class ExecutedStatement {
+		private final String mySql;
+		private final List<Object> myArguments;
+		private final String myTableName;
+
+		public ExecutedStatement(String theDescription, String theSql, Object[] theArguments) {
+			myTableName = theDescription;
+			mySql = theSql;
+			myArguments = theArguments != null ? Arrays.asList(theArguments) : Collections.emptyList();
+		}
+
+		public String getTableName() {
+			return myTableName;
+		}
+
+		public String getSql() {
+			return mySql;
+		}
+
+		public List<Object> getArguments() {
+			return myArguments;
+		}
+	}
 }

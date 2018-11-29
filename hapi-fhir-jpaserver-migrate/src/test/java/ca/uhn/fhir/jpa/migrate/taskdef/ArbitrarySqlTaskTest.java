@@ -19,7 +19,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		executeSql("insert into HFJ_RES_PARAM_PRESENT (PID, SP_ID, SP_PRESENT, HASH_PRESENT) values (100, 1, true, null)");
 		executeSql("insert into HFJ_RES_PARAM_PRESENT (PID, SP_ID, SP_PRESENT, HASH_PRESENT) values (101, 2, true, null)");
 
-		ArbitrarySqlTask task = new ArbitrarySqlTask("Consolidate search parameter presence indexes");
+		ArbitrarySqlTask task = new ArbitrarySqlTask("HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
 		task.setExecuteOnlyIfTableExists("hfj_search_parm");
 		task.setBatchSize(1);
 		String sql = "SELECT " +
@@ -34,7 +34,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
 			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);
-			task.executeSql("update HFJ_RES_PARAM_PRESENT set HASH_PRESENT = ? where PID = ?", hash, pid);
+			task.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENT = ? where PID = ?", hash, pid);
 		});
 
 		getMigrator().addTask(task);
@@ -53,11 +53,11 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 
 	@Test
 	public void testExecuteOnlyIfTableExists() {
-		ArbitrarySqlTask task = new ArbitrarySqlTask("Consolidate search parameter presence indexes");
+		ArbitrarySqlTask task = new ArbitrarySqlTask("HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
 		task.setBatchSize(1);
 		String sql = "SELECT * FROM HFJ_SEARCH_PARM";
 		task.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
-			task.executeSql("update HFJ_RES_PARAM_PRESENT set FOOFOOOFOO = null");
+			task.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set FOOFOOOFOO = null");
 		});
 		task.setExecuteOnlyIfTableExists("hfj_search_parm");
 
