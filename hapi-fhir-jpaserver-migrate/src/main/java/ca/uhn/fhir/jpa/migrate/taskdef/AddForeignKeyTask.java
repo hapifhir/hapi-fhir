@@ -83,7 +83,7 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 
 
 		try {
-			executeSql(sql);
+			executeSql(getTableName(), sql);
 		} catch (Exception e) {
 			if (e.toString().contains("already exists")) {
 				ourLog.warn("Index {} already exists", myConstraintName);

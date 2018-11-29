@@ -47,11 +47,15 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.AbstractPageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -68,6 +72,7 @@ import java.util.concurrent.*;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+@Component("mySearchCoordinatorSvc")
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 
@@ -240,8 +245,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			});
 		} catch (Exception e) {
 			ourLog.warn("Failed to activate search: {}", e.toString());
-			// FIXME: aaaaa
-			ourLog.info("Failed to activate search", e);
+			ourLog.trace("Failed to activate search", e);
 			return Optional.empty();
 		}
 	}
@@ -313,8 +317,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				 * individually for pages as we return them to clients
 				 */
 				final Set<Long> includedPids = new HashSet<>();
-				includedPids.addAll(sb.loadIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)"));
-				includedPids.addAll(sb.loadIncludes(theCallingDao, myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)"));
+				includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)"));
+				includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)"));
 
 				List<IBaseResource> resources = new ArrayList<>();
 				sb.loadResourcesByPid(pids, resources, includedPids, false, myEntityManager, myContext, theCallingDao);
@@ -513,10 +517,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 								 * user has requested resources 0-60, then they would get 0-50 back but the search
 								 * coordinator would then stop searching.SearchCoordinatorSvcImplTest
 								 */
-								// FIXME: aaaaaaaa
-//								List<Long> remainingResources = SearchCoordinatorSvcImpl.this.getResources(mySearch.getUuid(), mySyncedPids.size(), theToIndex);
-//								ourLog.debug("Adding {} resources to the existing {} synced resource IDs", remainingResources.size(), mySyncedPids.size());
-//								mySyncedPids.addAll(remainingResources);
 								keepWaiting = false;
 								break;
 							case FAILED:

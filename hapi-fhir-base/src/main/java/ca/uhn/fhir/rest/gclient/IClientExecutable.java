@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -28,12 +29,12 @@ import java.util.List;
  */
 
 
-public interface IClientExecutable<T extends IClientExecutable<?,Y>, Y> {
+public interface IClientExecutable<T extends IClientExecutable<?, Y>, Y> {
 
 	/**
 	 * If set to true, the client will log the request and response to the SLF4J logger. This can be useful for
 	 * debugging, but is generally not desirable in a production situation.
-	 * 
+	 *
 	 * @deprecated Use the client logging interceptor to log requests and responses instead. See <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_client.html#req_resp_logging">here</a> for more information.
 	 */
 	@Deprecated
@@ -46,16 +47,45 @@ public interface IClientExecutable<T extends IClientExecutable<?,Y>, Y> {
 	T cacheControl(CacheControlDirective theCacheControlDirective);
 
 	/**
-	 * Request that the server return subsetted resources, containing only the elements specified in the given parameters. 
+	 * Request that the server return subsetted resources, containing only the elements specified in the given parameters.
 	 * For example: <code>subsetElements("name", "identifier")</code> requests that the server only return
-	 * the "name" and "identifier" fields in the returned resource, and omit any others.  
+	 * the "name" and "identifier" fields in the returned resource, and omit any others.
 	 */
 	T elementsSubset(String... theElements);
 
+	/**
+	 * Request that the server respond with JSON via the Accept header and possibly also the
+	 * <code>_format</code> parameter if {@link ca.uhn.fhir.rest.client.api.IRestfulClient#setFormatParamStyle(RequestFormatParamStyleEnum) configured to do so}.
+	 * <p>
+	 * This method will have no effect if {@link #accept(String) a custom Accept header} is specified.
+	 * </p>
+	 *
+	 * @see #accept(String)
+	 */
 	T encoded(EncodingEnum theEncoding);
 
+	/**
+	 * Request that the server respond with JSON via the Accept header and possibly also the
+	 * <code>_format</code> parameter if {@link ca.uhn.fhir.rest.client.api.IRestfulClient#setFormatParamStyle(RequestFormatParamStyleEnum) configured to do so}.
+	 * <p>
+	 * This method will have no effect if {@link #accept(String) a custom Accept header} is specified.
+	 * </p>
+	 *
+	 * @see #accept(String)
+	 * @see #encoded(EncodingEnum)
+	 */
 	T encodedJson();
 
+	/**
+	 * Request that the server respond with JSON via the Accept header and possibly also the
+	 * <code>_format</code> parameter if {@link ca.uhn.fhir.rest.client.api.IRestfulClient#setFormatParamStyle(RequestFormatParamStyleEnum) configured to do so}.
+	 * <p>
+	 * This method will have no effect if {@link #accept(String) a custom Accept header} is specified.
+	 * </p>
+	 *
+	 * @see #accept(String)
+	 * @see #encoded(EncodingEnum)
+	 */
 	T encodedXml();
 
 	/**
@@ -84,11 +114,33 @@ public interface IClientExecutable<T extends IClientExecutable<?,Y>, Y> {
 	 */
 	T preferResponseTypes(List<Class<? extends IBaseResource>> theTypes);
 
+	/**
+	 * Request pretty-printed response via the <code>_pretty</code> parameter
+	 */
 	T prettyPrint();
 
 	/**
-	 * Request that the server modify the response using the <code>_summary</code> param 
+	 * Request that the server modify the response using the <code>_summary</code> param
 	 */
 	T summaryMode(SummaryEnum theSummary);
 
+	/**
+	 * Specifies a custom <code>Accept</code> header that should be supplied with the
+	 * request.
+	 * <p>
+	 * Note that this method overrides any encoding preferences specified with
+	 * {@link #encodedJson()} or {@link #encodedXml()}. It is generally easier to
+	 * just use those methods if you simply want to request a specific FHIR encoding.
+	 * </p>
+	 *
+	 * @param theHeaderValue The header value, e.g. "application/fhir+json". Constants such
+	 *                       as {@link ca.uhn.fhir.rest.api.Constants#CT_FHIR_XML_NEW} and
+	 *                       {@link ca.uhn.fhir.rest.api.Constants#CT_FHIR_JSON_NEW} may
+	 *                       be useful. If set to <code>null</code> or an empty string, the
+	 *                       default Accept header will be used.
+	 * @see #encoded(EncodingEnum)
+	 * @see #encodedJson()
+	 * @see #encodedXml()
+	 */
+	T accept(String theHeaderValue);
 }

@@ -8,6 +8,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.*;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -40,6 +42,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class SearchParameterMap extends LinkedHashMap<String, List<List<? extends IQueryParameterType>>> {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
 
 	private static final long serialVersionUID = 1L;
 
@@ -295,7 +298,7 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 	 * This method creates a URL query string representation of the parameters in this
 	 * object, excluding the part before the parameters, e.g.
 	 * <p>
-	 * <code>?name=smith&_sort=Patient:family</code>
+	 * <code>?name=smith&amp;_sort=Patient:family</code>
 	 * </p>
 	 * <p>
 	 * This method <b>excludes</b> the <code>_count</code> parameter,
@@ -335,6 +338,10 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 				addUrlParamSeparator(b);
 				IQueryParameterType firstValue = nextValuesAnd.get(0);
 				b.append(UrlUtil.escapeUrlParam(nextKey));
+
+				if (nextKey.equals(Constants.PARAM_HAS)) {
+					b.append(':');
+				}
 
 				if (firstValue.getMissing() != null) {
 					b.append(Constants.PARAMQUALIFIER_MISSING);
@@ -431,6 +438,47 @@ public class SearchParameterMap extends LinkedHashMap<String, List<List<? extend
 			b.append("includes", getIncludes());
 		}
 		return b.toString();
+	}
+
+	public void clean() {
+		for (Map.Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : this.entrySet()) {
+			String nextParamName = nextParamEntry.getKey();
+			List<List<? extends IQueryParameterType>> andOrParams = nextParamEntry.getValue();
+			clean(nextParamName, andOrParams);
+		}
+	}
+
+	/*
+	 * Filter out
+	 */
+	private void clean(String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
+		for (int andListIdx = 0; andListIdx < theAndOrParams.size(); andListIdx++) {
+			List<? extends IQueryParameterType> nextOrList = theAndOrParams.get(andListIdx);
+
+			for (int orListIdx = 0; orListIdx < nextOrList.size(); orListIdx++) {
+				IQueryParameterType nextOr = nextOrList.get(orListIdx);
+				boolean hasNoValue = false;
+				if (nextOr.getMissing() != null) {
+					continue;
+				}
+				if (nextOr instanceof QuantityParam) {
+					if (isBlank(((QuantityParam) nextOr).getValueAsString())) {
+						hasNoValue = true;
+					}
+				}
+
+				if (hasNoValue) {
+					ourLog.debug("Ignoring empty parameter: {}", theParamName);
+					nextOrList.remove(orListIdx);
+					orListIdx--;
+				}
+			}
+
+			if (nextOrList.isEmpty()) {
+				theAndOrParams.remove(andListIdx);
+				andListIdx--;
+			}
+		}
 	}
 
 	public enum EverythingModeEnum {

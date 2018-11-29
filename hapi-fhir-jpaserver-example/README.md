@@ -28,7 +28,7 @@ Run the configuration.
 - Select your server, and click the green triangle (or the bug if you want to debug)
 - Wait for the console output to stop
 
-Point your browser (or fiddler, or what have you) to `http://localhost:8080/hapi/base/Patient`
+Point your browser (or fiddler, or what have you) to `http://localhost:8080/hapi/baseDstu3/Patient`
 
 You should get an empty bundle back.
 
@@ -42,6 +42,9 @@ Use this command to start the container:
 
 Note: with this command data is persisted across container restarts, but not after removal of the container. Use a docker volume mapping on /var/lib/jetty/target to achieve this.
 
+After the docker container initial startup, point your browser (or fiddler, or what have you) to `http://localhost:8080/baseDstu3/Patient`
+
+You should get an empty bundle back.
 #### Using ElasticSearch as the search engine instead of the default Apache Lucene
 1. Install ElasticSearch server and the phonetic plugin
     * Download ElasticSearch from https://www.elastic.co/downloads/elasticsearch

@@ -60,7 +60,7 @@ public interface IQueryParameterType extends Serializable {
 	public String getValueAsQueryToken(FhirContext theContext);
 	
 	/**
-	 * This method will return any qualifier that should be appended to the parameter name (e.g ":exact")
+	 * This method will return any qualifier that should be appended to the parameter name (e.g ":exact").  Returns null if none are present.
 	 */
 	public String getQueryParameterQualifier();
 

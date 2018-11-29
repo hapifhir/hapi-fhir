@@ -252,6 +252,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 	@Autowired
 	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
+	@Autowired
+	protected ISearchParamRegistry mySearchParamRegistry;
 
 	@After()
 	public void afterCleanupDao() {

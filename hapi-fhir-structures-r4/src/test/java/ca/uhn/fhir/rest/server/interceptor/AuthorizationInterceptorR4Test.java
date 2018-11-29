@@ -15,9 +15,11 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -34,11 +36,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.springframework.util.Base64Utils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -47,12 +48,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static javax.print.DocFlavor.READER.TEXT_HTML;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class AuthorizationInterceptorR4Test {
 
@@ -66,6 +65,7 @@ public class AuthorizationInterceptorR4Test {
 	private static List<Resource> ourReturn;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
+	private static String ourLastAcceptHeader;
 
 	@Before
 	public void before() {
@@ -77,6 +77,7 @@ public class AuthorizationInterceptorR4Test {
 		ourReturn = null;
 		ourHitMethod = false;
 		ourConditionalCreateId = "1123";
+		ourLastAcceptHeader = null;
 	}
 
 	private Resource createCarePlan(Integer theId, String theSubjectId) {
@@ -501,7 +502,6 @@ public class AuthorizationInterceptorR4Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 
 
-
 	}
 
 	@Test
@@ -924,7 +924,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().withAnyName().onServer().andThen()
+					.allow("RULE 1").operation().withAnyName().onServer().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -950,7 +950,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").atAnyLevel().andThen()
+					.allow("RULE 1").operation().named("opName").atAnyLevel().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1006,7 +1006,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opNameBadOp").atAnyLevel().andThen()
+					.allow("RULE 1").operation().named("opNameBadOp").atAnyLevel().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1062,7 +1062,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class)
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization()
 					.build();
 			}
 		});
@@ -1092,12 +1092,13 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
+	@Ignore
 	public void testOperationByInstanceOfTypeWithInvalidReturnValue() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andThen()
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization().andThen()
 					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdType("Patient/1")).andThen()
 					.build();
 			}
@@ -1135,7 +1136,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class)
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization()
 					.build();
 			}
 		});
@@ -1169,7 +1170,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onInstance(new IdType("http://example.com/Patient/1/_history/2")).andThen()
+					.allow("RULE 1").operation().named("opName").onInstance(new IdType("http://example.com/Patient/1/_history/2")).andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1228,7 +1229,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onAnyInstance().andThen()
+					.allow("RULE 1").operation().named("opName").onAnyInstance().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1292,6 +1293,31 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
+	public void testOperationInstanceLevelWithHtmlResponse() throws IOException {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("RULE 1").operation().named("binaryop").onInstancesOfType(Patient.class).andAllowAllResponses().andThen()
+					.build();
+			}
+		});
+
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/2/$binaryop");
+		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			assertEquals("text/html", status.getEntity().getContentType().getValue());
+			assertEquals("<html>TAGS</html>", IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8));
+			assertEquals("text/html", ourLastAcceptHeader);
+		}
+
+	}
+
+
+	@Test
 	public void testOperationNotAllowedWithWritePermissiom() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -1348,12 +1374,12 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
-	public void testOperationServerLevel() throws Exception {
+	public void testOperationServerLevelAllowAllResponses() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onServer().andThen()
+					.allow("RULE 1").operation().named("opName").onServer().andAllowAllResponses().andThen()
 					.build();
 			}
 		});
@@ -1395,12 +1421,47 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
+	public void testOperationServerLevelRequireResponseAuthorization() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("RULE 1").operation().named("opName").onServer().andRequireExplicitResponseAuthorization().andThen()
+					.allow().read().instance("Observation/10").andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Server
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(createObservation(99, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/$opName");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
+
+	@Test
 	public void testOperationTypeLevel() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onType(Patient.class).andThen()
+					.allow("RULE 1").operation().named("opName").onType(Patient.class).andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1469,7 +1530,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onAnyType().andThen()
+					.allow("RULE 1").operation().named("opName").onAnyType().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1537,7 +1598,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onType(Organization.class).andThen()
+					.allow("RULE 1").operation().named("opName").onType(Organization.class).andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1596,7 +1657,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onType(Patient.class).forTenantIds("TENANTA").andThen()
+					.allow("RULE 1").operation().named("opName").onType(Patient.class).andRequireExplicitResponseAuthorization().forTenantIds("TENANTA").andThen()
 					.build();
 			}
 		});
@@ -1633,7 +1694,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("process-message").onType(MessageHeader.class).andThen()
+					.allow("RULE 1").operation().named("process-message").onType(MessageHeader.class).andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1672,7 +1733,7 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).withTester(new IAuthRuleTester() {
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization().withTester(new IAuthRuleTester() {
 						@Override
 						public boolean matches(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource) {
 							return theInputResourceId.getIdPart().equals("1");
@@ -1815,6 +1876,57 @@ public class AuthorizationInterceptorR4Test {
 		assertThat(response, containsString("Access denied by default policy (no applicable rules)"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
+
+	}
+
+
+	@Test
+	public void testReadWithGraphQL() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.allow("Rule 2").graphQL().any().andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Collections.singletonList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+	}
+
+	@Test
+	public void testReadWithGraphQLAllowAll() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.deny("Rule 1").read().resourcesOfType(Observation.class).withAnyId().andThen()
+					.allowAll()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Collections.singletonList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 	}
 
@@ -3032,45 +3144,6 @@ public class AuthorizationInterceptorR4Test {
 		assertTrue(ourHitMethod);
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
-		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
-		DummyOrganizationResourceProvider orgProv = new DummyOrganizationResourceProvider();
-		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
-		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
-		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
-		DummyMessageHeaderResourceProvider mshProv = new DummyMessageHeaderResourceProvider();
-		PlainProvider plainProvider = new PlainProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, mshProv);
-		ourServlet.setPlainProviders(plainProvider);
-		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
 	public static class DummyCarePlanResourceProvider implements IResourceProvider {
 
 		@Override
@@ -3141,7 +3214,7 @@ public class AuthorizationInterceptorR4Test {
 		}
 
 		@Operation(name = "process-message", idempotent = true)
-		public Parameters operation0(@OperationParam(name="content") Bundle theInput) {
+		public Parameters operation0(@OperationParam(name = "content") Bundle theInput) {
 			ourHitMethod = true;
 			return (Parameters) new Parameters().setId("1");
 		}
@@ -3254,6 +3327,7 @@ public class AuthorizationInterceptorR4Test {
 	@SuppressWarnings("unused")
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
+
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theResource, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 
@@ -3292,6 +3366,26 @@ public class AuthorizationInterceptorR4Test {
 			}
 			return retVal;
 		}
+
+		@Operation(name = "$binaryop", idempotent = true)
+		public Binary binaryOp(
+			@IdParam IIdType theId,
+			@OperationParam(name = "PARAM3", min = 0, max = 1) List<org.hl7.fhir.r4.model.StringType> theParam3,
+			HttpServletRequest theServletRequest
+		) {
+			ourLastAcceptHeader = theServletRequest.getHeader(ca.uhn.fhir.rest.api.Constants.HEADER_ACCEPT);
+
+			Binary retVal = new Binary();
+			if (ourLastAcceptHeader.contains("html")) {
+				retVal.setContentType("text/html");
+				retVal.setContent("<html>TAGS</html>".getBytes(Charsets.UTF_8));
+			} else {
+				retVal.setContentType("application/weird");
+				retVal.setContent(new byte[]{0,0,1,1,2,2,3,3,0,0});
+			}
+			return retVal;
+		}
+
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -3421,6 +3515,49 @@ public class AuthorizationInterceptorR4Test {
 			return (Bundle) ourReturn.get(0);
 		}
 
+		@GraphQL
+		public String graphql(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
+			return "{}";
+		}
+
 	}
 
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
+
+		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
+		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
+		DummyOrganizationResourceProvider orgProv = new DummyOrganizationResourceProvider();
+		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
+		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
+		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
+		DummyMessageHeaderResourceProvider mshProv = new DummyMessageHeaderResourceProvider();
+		PlainProvider plainProvider = new PlainProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setFhirContext(ourCtx);
+		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, mshProv);
+		ourServlet.setPlainProviders(plainProvider);
+		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
+	}
 }

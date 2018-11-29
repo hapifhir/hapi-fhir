@@ -52,6 +52,7 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -113,7 +114,7 @@ public class GenericClientR4Test {
 	}
 
 	@Test
-	public void testAcceptHeaderWithEncodingSpecified() throws Exception {
+	public void testAcceptHeaderCustom() throws Exception {
 		final String msg = "{\"resourceType\":\"Bundle\",\"id\":null,\"base\":\"http://localhost:57931/fhir/contextDev\",\"total\":1,\"link\":[{\"relation\":\"self\",\"url\":\"http://localhost:57931/fhir/contextDev/Patient?identifier=urn%3AMultiFhirVersionTest%7CtestSubmitPatient01&_format=json\"}],\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\",\"lastUpdated\":\"2014-12-20T18:41:29.706-05:00\"},\"identifier\":[{\"system\":\"urn:MultiFhirVersionTest\",\"value\":\"testSubmitPatient01\"}]}}]}";
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
@@ -130,26 +131,41 @@ public class GenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		int idx = 0;
 
-		client.setEncoding(EncodingEnum.JSON);
-		client.search()
-			.forResource("Device")
-			.returnBundle(Bundle.class)
-			.execute();
-
-		assertEquals("http://example.com/fhir/Device?_format=json", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("application/fhir+json;q=1.0, application/json+fhir;q=0.9", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
-		idx++;
+		// Custom accept value
 
 		client.setEncoding(EncodingEnum.XML);
 		client.search()
 			.forResource("Device")
 			.returnBundle(Bundle.class)
+			.accept("application/json")
 			.execute();
-
-		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertEquals("http://example.com/fhir/Device", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals("application/json", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
 		idx++;
 
+		// Empty accept value
+
+		client.setEncoding(EncodingEnum.XML);
+		client.search()
+			.forResource("Device")
+			.returnBundle(Bundle.class)
+			.accept("")
+			.execute();
+		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		idx++;
+
+		// Null accept value
+
+		client.setEncoding(EncodingEnum.XML);
+		client.search()
+			.forResource("Device")
+			.returnBundle(Bundle.class)
+			.accept(null)
+			.execute();
+		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		idx++;
 	}
 
 	@Test
@@ -217,7 +233,7 @@ public class GenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		Binary bin = new Binary();
-		bin.setContent(new byte[] {0, 1, 2, 3, 4});
+		bin.setContent(new byte[]{0, 1, 2, 3, 4});
 		client.create().resource(bin).execute();
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
@@ -227,7 +243,7 @@ public class GenericClientR4Test {
 
 		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
+		assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
 
 	}
 
@@ -306,7 +322,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] {new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
+				return new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
@@ -355,7 +371,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] {new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
+				return new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
@@ -878,6 +894,85 @@ public class GenericClientR4Test {
 		Parameters output = ourCtx.newXmlParser().parseResource(Parameters.class, extractBodyAsString(capt));
 		assertEquals("name", output.getParameterFirstRep().getName());
 		assertEquals("true", ((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString());
+	}
+
+	/**
+	 * Invoke an operation that returns HTML
+	 * as a response (a HAPI FHIR server could accomplish this by returning
+	 * a Binary resource)
+	 */
+	@Test
+	public void testOperationReturningArbitraryBinaryContentTextual() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inputParams = new Parameters();
+		inputParams.addParameter().setName("name").setValue(new BooleanType(true));
+
+		final String respString = "<html>VALUE</html>";
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "text/html"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> new ReaderInputStream(new StringReader(respString), Charset.forName("UTF-8")));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{
+			new BasicHeader("content-type", "text/html")
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		MethodOutcome result = client
+			.operation()
+			.onServer()
+			.named("opname")
+			.withParameters(inputParams)
+			.returnMethodOutcome()
+			.execute();
+
+		assertEquals(Binary.class, result.getResource().getClass());
+		Binary binary = (Binary) result.getResource();
+		assertEquals(respString, new String(binary.getContent(), Charsets.UTF_8));
+		assertEquals("text/html", binary.getContentType());
+
+		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+	}
+
+	/**
+	 * Invoke an operation that returns HTML
+	 * as a response (a HAPI FHIR server could accomplish this by returning
+	 * a Binary resource)
+	 */
+	@Test
+	public void testOperationReturningArbitraryBinaryContentNonTextual() throws Exception {
+		IParser p = ourCtx.newXmlParser();
+
+		Parameters inputParams = new Parameters();
+		inputParams.addParameter().setName("name").setValue(new BooleanType(true));
+
+		final byte[] respBytes = new byte[]{0,1,2,3,4,5,6,7,8,9,100};
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", "application/weird-numbers"));
+		when(myHttpResponse.getEntity().getContent()).thenAnswer(t -> new ByteArrayInputStream(respBytes));
+		when(myHttpResponse.getAllHeaders()).thenReturn(new Header[]{
+			new BasicHeader("content-Type", "application/weird-numbers")
+		});
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+
+		MethodOutcome result = client
+			.operation()
+			.onServer()
+			.named("opname")
+			.withParameters(inputParams)
+			.returnMethodOutcome()
+			.execute();
+
+		assertEquals(Binary.class, result.getResource().getClass());
+		Binary binary = (Binary) result.getResource();
+		assertEquals("application/weird-numbers", binary.getContentType());
+		assertArrayEquals(respBytes, binary.getContent());
+		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
 	@Test
@@ -2036,7 +2131,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] {new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
+				return new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
@@ -2084,7 +2179,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] {new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
+				return new Header[]{new BasicHeader(Constants.HEADER_LOCATION, "http://foo.com/base/Patient/222/_history/3")};
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));
@@ -2137,7 +2232,7 @@ public class GenericClientR4Test {
 
 		Binary bin = new Binary();
 		bin.setContentType("application/foo");
-		bin.setContent(new byte[] {0, 1, 2, 3, 4});
+		bin.setContent(new byte[]{0, 1, 2, 3, 4});
 		client.create().resource(bin).execute();
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
@@ -2147,7 +2242,7 @@ public class GenericClientR4Test {
 
 		assertEquals("application/foo", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue());
 		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		assertArrayEquals(new byte[] {0, 1, 2, 3, 4}, extractBodyAsByteArray(capt));
+		assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, extractBodyAsByteArray(capt));
 
 	}
 
@@ -2215,7 +2310,7 @@ public class GenericClientR4Test {
 		when(myHttpResponse.getAllHeaders()).thenAnswer(new Answer<Header[]>() {
 			@Override
 			public Header[] answer(InvocationOnMock theInvocation) {
-				return new Header[] {};
+				return new Header[]{};
 			}
 		});
 		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_FHIR_XML + "; charset=UTF-8"));

@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperationUntypedWithInput<T>, T> {
@@ -43,4 +44,9 @@ public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperat
 	 */
 	<R extends IBaseResource> IOperationUntypedWithInput<R> returnResourceType(Class<R> theReturnType);
 
+	/**
+	 * Request that the method chain returns a {@link MethodOutcome} object. This object
+	 * will contain details
+	 */
+	IOperationUntypedWithInput<MethodOutcome> returnMethodOutcome();
 }

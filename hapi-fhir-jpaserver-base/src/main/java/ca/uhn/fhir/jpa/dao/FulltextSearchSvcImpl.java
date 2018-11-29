@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -41,7 +42,6 @@ import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.dstu3.model.BaseResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,10 +65,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 
-	private Boolean ourDisabled;
-
 	@Autowired
 	private DaoConfig myDaoConfig;
+
+	@Autowired
+	private IdHelperService myIdHelperService;
+
+	private Boolean ourDisabled;
 
 	/**
 	 * Constructor
@@ -225,7 +228,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				StringParam idParm = (StringParam) idParam;
 				idParamValue = idParm.getValue();
 			}
-			pid = BaseHapiFhirDao.translateForcedIdToPid(myDaoConfig, theResourceName, idParamValue, myForcedIdDao);
+			pid = myIdHelperService.translateForcedIdToPid(theResourceName, idParamValue);
 		}
 
 		Long referencingPid = pid;
@@ -278,7 +281,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
-		Long pid = BaseHapiFhirDao.translateForcedIdToPid( myDaoConfig, contextParts[0], contextParts[1], myForcedIdDao);
+		Long pid = myIdHelperService.translateForcedIdToPid(contextParts[0], contextParts[1]);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 

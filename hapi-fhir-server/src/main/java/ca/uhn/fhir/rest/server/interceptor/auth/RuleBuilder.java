@@ -237,6 +237,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			return new RuleBuilderRuleOp();
 		}
 
+		@Override
+		public IAuthRuleBuilderGraphQL graphQL() {
+			return new RuleBuilderGraphQL();
+		}
+
 		private class RuleBuilderRuleConditional implements IAuthRuleBuilderRuleConditional {
 
 			private AppliesTypeEnum myAppliesTo;
@@ -411,6 +416,28 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			private class RuleBuilderRuleOperationNamed implements IAuthRuleBuilderOperationNamed {
 
+				private class RuleBuilderOperationNamedAndScoped implements IAuthRuleBuilderOperationNamedAndScoped {
+
+					private final OperationRule myRule;
+
+					public RuleBuilderOperationNamedAndScoped(OperationRule theRule) {
+						myRule = theRule;
+					}
+
+					@Override
+					public IAuthRuleBuilderRuleOpClassifierFinished andAllowAllResponses() {
+						myRule.allowAllResponses();
+						myRules.add(myRule);
+						return new RuleBuilderFinished(myRule);
+					}
+
+					@Override
+					public IAuthRuleBuilderRuleOpClassifierFinished andRequireExplicitResponseAuthorization() {
+						myRules.add(myRule);
+						return new RuleBuilderFinished(myRule);
+					}
+				}
+
 				private String myOperationName;
 
 				RuleBuilderRuleOperationNamed(String theOperationName) {
@@ -429,31 +456,28 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished onAnyInstance() {
+				public IAuthRuleBuilderOperationNamedAndScoped onAnyInstance() {
 					OperationRule rule = createRule();
 					rule.appliesToAnyInstance();
-					myRules.add(rule);
-					return new RuleBuilderFinished(rule);
+					return new RuleBuilderOperationNamedAndScoped(rule);
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished atAnyLevel() {
+				public IAuthRuleBuilderOperationNamedAndScoped atAnyLevel() {
 					OperationRule rule = createRule();
 					rule.appliesAtAnyLevel(true);
-					myRules.add(rule);
-					return new RuleBuilderFinished(rule);
+					return new RuleBuilderOperationNamedAndScoped(rule);
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished onAnyType() {
+				public IAuthRuleBuilderOperationNamedAndScoped onAnyType() {
 					OperationRule rule = createRule();
 					rule.appliesToAnyType();
-					myRules.add(rule);
-					return new RuleBuilderFinished(rule);
+					return new RuleBuilderOperationNamedAndScoped(rule);
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished onInstance(IIdType theInstanceId) {
+				public IAuthRuleBuilderOperationNamedAndScoped onInstance(IIdType theInstanceId) {
 					Validate.notNull(theInstanceId, "theInstanceId must not be null");
 					Validate.notBlank(theInstanceId.getResourceType(), "theInstanceId does not have a resource type");
 					Validate.notBlank(theInstanceId.getIdPart(), "theInstanceId does not have an ID part");
@@ -462,36 +486,32 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					ArrayList<IIdType> ids = new ArrayList<>();
 					ids.add(theInstanceId);
 					rule.appliesToInstances(ids);
-					myRules.add(rule);
-					return new RuleBuilderFinished(rule);
+					return new RuleBuilderOperationNamedAndScoped(rule);
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished onInstancesOfType(Class<? extends IBaseResource> theType) {
+				public IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(Class<? extends IBaseResource> theType) {
 					validateType(theType);
 
 					OperationRule rule = createRule();
 					rule.appliesToInstancesOfType(toTypeSet(theType));
-					myRules.add(rule);
-					return new RuleBuilderFinished(rule);
+					return new RuleBuilderOperationNamedAndScoped(rule);
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished onServer() {
+				public IAuthRuleBuilderOperationNamedAndScoped onServer() {
 					OperationRule rule = createRule();
 					rule.appliesToServer();
-					myRules.add(rule);
-					return new RuleBuilderFinished(rule);
+					return new RuleBuilderOperationNamedAndScoped(rule);
 				}
 
 				@Override
-				public IAuthRuleBuilderRuleOpClassifierFinished onType(Class<? extends IBaseResource> theType) {
+				public IAuthRuleBuilderOperationNamedAndScoped onType(Class<? extends IBaseResource> theType) {
 					validateType(theType);
 
 					OperationRule rule = createRule();
 					rule.appliesToTypes(toTypeSet(theType));
-					myRules.add(rule);
-					return new RuleBuilderFinished(rule);
+					return new RuleBuilderOperationNamedAndScoped(rule);
 				}
 
 				private HashSet<Class<? extends IBaseResource>> toTypeSet(Class<? extends IBaseResource> theType) {
@@ -539,6 +559,17 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				BaseRule rule = new RuleImplPatch(myRuleName)
 					.setAllRequests(true)
 					.setMode(myRuleMode);
+				myRules.add(rule);
+				return new RuleBuilderFinished(rule);
+			}
+		}
+
+		private class RuleBuilderGraphQL implements IAuthRuleBuilderGraphQL {
+			@Override
+			public IAuthRuleFinished any() {
+				RuleImplOp rule = new RuleImplOp(myRuleName);
+				rule.setOp(RuleOpEnum.GRAPHQL);
+				rule.setMode(myRuleMode);
 				myRules.add(rule);
 				return new RuleBuilderFinished(rule);
 			}

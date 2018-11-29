@@ -36,10 +36,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -531,7 +528,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
-		myResourceReindexingSvc.markAllResourcesForReindexing();
+		Long jobId = myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
 		entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
@@ -539,6 +536,17 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Just make sure this doesn't cause a choke
 		myResourceReindexingSvc.forceReindexingPass();
+
+		/*
+		 * We expect a final reindex count of 3 because there are 2 resources to
+		 * reindex and the final pass uses the most recent time as the low threshold,
+		 * so it indexes the newest resource one more time. It wouldn't be a big deal
+		 * if this ever got fixed so that it ends up with 2 instead of 3.
+		 */
+		runInTransaction(()->{
+			Optional<Integer> reindexCount = myResourceReindexJobDao.getReindexCount(jobId);
+			assertEquals(3, reindexCount.orElseThrow(()->new NullPointerException("No job " + jobId)).intValue());
+		});
 
 		// Try making the resource unparseable
 
@@ -812,6 +820,81 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 		assertEquals("1", o.getIdElement().getVersionIdPart());
+
+	}
+
+
+	@Test
+	public void testTransactionUpdatingManuallyDeletedResource() {
+
+		// Create an observation
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("urn:system").setValue("foo");
+		IIdType obId = myObservationDao.create(obs).getId();
+
+		// Manually mark it a deleted
+		runInTransaction(()->{
+			myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE SET RES_DELETED_AT = CURRENT_TIMESTAMP").executeUpdate();
+		});
+
+		runInTransaction(()->{
+			ResourceTable obsTable = myResourceTableDao.findById(obId.getIdPartAsLong()).get();
+			assertNotNull(obsTable.getDeleted());
+			assertEquals(1L, obsTable.getVersion());
+		});
+
+		// Now create a transaction
+
+		obs = new Observation();
+		obs.setId(IdType.newRandomUuid());
+		obs.addIdentifier().setSystem("urn:system").setValue("foo");
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId(IdType.newRandomUuid());
+		dr.addIdentifier().setSystem("urn:system").setValue("bar");
+		dr.addResult().setReference(obs.getId());
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry()
+			.setResource(obs)
+			.setFullUrl(obs.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=urn:system|foo");
+		bundle.addEntry()
+			.setResource(dr)
+			.setFullUrl(dr.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("DiagnosticReport?identifier=urn:system|bar");
+
+		Bundle resp = mySystemDao.transaction(mySrd, bundle);
+		assertEquals(2, resp.getEntry().size());
+
+		BundleEntryComponent respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/" + obId.getIdPart()));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/3"));
+		assertEquals("3", respEntry.getResponse().getEtag());
+
+		respEntry = resp.getEntry().get(1);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("DiagnosticReport/"));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		IdType drId = new IdType(respEntry.getResponse().getLocation());
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		runInTransaction(()->{
+			ResourceTable obsTable = myResourceTableDao.findById(obId.getIdPartAsLong()).get();
+			assertNull(obsTable.getDeleted());
+			assertEquals(3L, obsTable.getVersion());
+		});
+
+		runInTransaction(()->{
+			DiagnosticReport savedDr = myDiagnosticReportDao.read(drId);
+			assertEquals(obId.toUnqualifiedVersionless().getValue(), savedDr.getResult().get(0).getReference());
+		});
 
 	}
 

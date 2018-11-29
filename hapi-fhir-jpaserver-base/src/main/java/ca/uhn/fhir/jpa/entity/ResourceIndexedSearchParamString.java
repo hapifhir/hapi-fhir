@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -294,4 +295,13 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return hash(theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
 	}
 
+	@Override
+	public boolean matches(IQueryParameterType theParam) {
+		if (!(theParam instanceof StringParam)) {
+			return false;
+		}
+		StringParam string = (StringParam)theParam;
+		String normalizedString = BaseHapiFhirDao.normalizeString(string.getValue());
+		return getValueNormalized().startsWith(normalizedString);
+	}
 }

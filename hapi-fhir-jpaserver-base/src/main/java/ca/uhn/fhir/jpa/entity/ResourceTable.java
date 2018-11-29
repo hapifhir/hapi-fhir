@@ -87,10 +87,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Column(name = "RES_ID")
 	private Long myId;
 
-	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@OptimisticLock(excluded = true)
-	private Collection<ResourceLink> myIncomingResourceLinks;
-
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
 	@OptimisticLock(excluded = true)
 	private Long myIndexStatus;
@@ -181,30 +177,35 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedCompositeStringUnique> myParamsCompositeStringUnique;
 
+	@IndexedEmbedded
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-	@IndexedEmbedded()
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinks;
-
+	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceLink> myResourceLinksAsTarget;
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
 	@Field
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
-
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Collection<SearchParamPresent> mySearchParamPresents;
-
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Set<ResourceTag> myTags;
-
 	@Transient
 	private transient boolean myUnchangedInCurrentOperation;
-
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
+
+	public Collection<ResourceLink> getResourceLinksAsTarget() {
+		if (myResourceLinksAsTarget == null) {
+			myResourceLinksAsTarget = new ArrayList<>();
+		}
+		return myResourceLinksAsTarget;
+	}
 
 	@Override
 	public ResourceTag addTag(TagDefinition theTag) {

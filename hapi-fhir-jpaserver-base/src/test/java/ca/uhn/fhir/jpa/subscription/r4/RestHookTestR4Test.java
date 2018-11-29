@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -13,9 +14,12 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.PortUtil;
 import com.google.common.collect.Lists;
+import net.ttddyy.dsproxy.QueryCount;
+import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -23,8 +27,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,8 +39,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -50,11 +55,30 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	private static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
+	private static SingleQueryCountHolder ourCountHolder;
 	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
+
+	@Autowired
+	private SingleQueryCountHolder myCountHolder;
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	private CountingInterceptor myCountingInterceptor;
+
+	@PostConstruct
+	public void initializeOurCountHolder() {
+		ourCountHolder = myCountHolder;
+	}
+
+	@Before
+	public void enableInMemory() {
+		myDaoConfig.setEnableInMemorySubscriptionMatching(true);
+	}
 
 	@After
 	public void afterUnregisterRestHookListener() {
+		BaseSubscriptionInterceptor.setForcePayloadEncodeAndDecodeForUnitTests(false);
+
 		for (IIdType next : mySubscriptionIds) {
 			IIdType nextId = next.toUnqualifiedVersionless();
 			ourLog.info("Deleting: {}", nextId);
@@ -98,6 +122,16 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
+		Subscription subscription = newSubscription(theCriteria, thePayload, theEndpoint);
+
+		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		subscription.setId(methodOutcome.getId().getIdPart());
+		mySubscriptionIds.add(methodOutcome.getId());
+
+		return subscription;
+	}
+
+	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -107,11 +141,6 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload(thePayload);
 		channel.setEndpoint(theEndpoint);
-
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
-		subscription.setId(methodOutcome.getId().getIdPart());
-		mySubscriptionIds.add(methodOutcome.getId());
-
 		return subscription;
 	}
 
@@ -308,9 +337,9 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
 	}
 
 	@Test
@@ -382,9 +411,62 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
-		Assert.assertFalse(observation1.getId().isEmpty());
-		Assert.assertFalse(observation2.getId().isEmpty());
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
+		assertFalse(observation1.getId().isEmpty());
+		assertFalse(observation2.getId().isEmpty());
+	}
+
+	@Test
+	public void testSubscriptionTriggerViaSubscription() throws Exception {
+		BaseSubscriptionInterceptor.setForcePayloadEncodeAndDecodeForUnitTests(true);
+
+		String payload = "application/xml";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		createSubscription(criteria1, payload, ourListenerServerBase);
+		waitForRegisteredSubscriptionCount(1);
+
+		ourLog.info("** About to send obervation");
+
+		Observation observation = new Observation();
+		observation.addIdentifier().setSystem("foo").setValue("bar1");
+		observation.setId(IdType.newRandomUuid().getValue());
+		CodeableConcept codeableConcept = new CodeableConcept()
+			.addCoding(new Coding().setCode(code).setSystem("SNOMED-CT"));
+		observation.setCode(codeableConcept);
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("foo").setValue("bar2");
+		patient.setId(IdType.newRandomUuid().getValue());
+		patient.setActive(true);
+		observation.getSubject().setReference(patient.getId());
+
+		Bundle requestBundle = new Bundle();
+		requestBundle.setType(Bundle.BundleType.TRANSACTION);
+		requestBundle.addEntry()
+			.setResource(observation)
+			.setFullUrl(observation.getId())
+			.getRequest()
+			.setUrl("Obervation?identifier=foo|bar1")
+			.setMethod(Bundle.HTTPVerb.PUT);
+		requestBundle.addEntry()
+			.setResource(patient)
+			.setFullUrl(patient.getId())
+			.getRequest()
+			.setUrl("Patient?identifier=foo|bar2")
+			.setMethod(Bundle.HTTPVerb.PUT);
+		ourClient.transaction().withBundle(requestBundle).execute();
+
+		// Should see 1 subscription notification
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
+
+		Observation obs = ourUpdatedObservations.get(0);
+		ourLog.info("Observation content: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(obs));
 	}
 
 	@Test
@@ -533,6 +615,30 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 		RestHookTestDstu2Test.waitForQueueToDrain(getRestHookSubscriptionInterceptor());
 	}
 
+	@Test(expected = UnprocessableEntityException.class)
+	public void testInvalidProvenanceParam() {
+		String payload = "application/fhir+json";
+		String criteriabad = "Provenance?activity=http://hl7.org/fhir/v3/DocumentCompletion%7CAU";
+		Subscription subscription = newSubscription(criteriabad, payload, ourListenerServerBase);
+		ourClient.create().resource(subscription).execute();
+	}
+
+	@Test(expected = UnprocessableEntityException.class)
+	public void testInvalidProcedureRequestParam() {
+		String payload = "application/fhir+json";
+		String criteriabad = "ProcedureRequest?intent=instance-order&category=Laboratory";
+		Subscription subscription = newSubscription(criteriabad, payload, ourListenerServerBase);
+		ourClient.create().resource(subscription).execute();
+	}
+
+	@Test(expected = UnprocessableEntityException.class)
+	public void testInvalidBodySiteParam() {
+		String payload = "application/fhir+json";
+		String criteriabad = "BodySite?accessType=Catheter";
+		Subscription subscription = newSubscription(criteriabad, payload, ourListenerServerBase);
+		ourClient.create().resource(subscription).execute();
+	}
+
 	public static class ObservationListener implements IResourceProvider {
 
 		@Create
@@ -570,6 +676,15 @@ public class RestHookTestR4Test extends BaseResourceProviderR4Test {
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 
+	}
+
+	@AfterClass
+	public static void reportTotalSelects() {
+		ourLog.info("Total database select queries: {}", getQueryCount().getSelect());
+	}
+
+	private static QueryCount getQueryCount() {
+		return ourCountHolder.getQueryCountMap().get("");
 	}
 
 	@BeforeClass

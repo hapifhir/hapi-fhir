@@ -348,5 +348,16 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 	protected abstract RuntimeSearchParam toRuntimeSp(SP theNextSp);
 
+	@Override
+	public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
+		Map<String, RuntimeSearchParam> params = getActiveSearchParams(theResourceDef.getName());
+		return params.get(theParamName);
+	}
+
+	@Override
+	public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
+		return getActiveSearchParams(theResourceDef.getName()).values();
+	}
+
 
 }

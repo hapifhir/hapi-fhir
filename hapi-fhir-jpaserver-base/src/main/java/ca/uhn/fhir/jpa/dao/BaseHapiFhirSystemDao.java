@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
@@ -51,8 +50,6 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
-	@Autowired
-	private IForcedIdDao myForcedIdDao;
 	private ReentrantLock myReindexLock = new ReentrantLock(false);
 	@Autowired
 	private ITermConceptDao myTermConceptDao;
@@ -60,12 +57,9 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
-	@Autowired
-	private IResourceTableDao myResourceTableDao;
-
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
+	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
 		return doExpunge(null, null, null, theExpungeOptions);
 	}

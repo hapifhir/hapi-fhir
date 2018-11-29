@@ -25,5 +25,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 
 public interface IResourceLinkDao  extends JpaRepository<ResourceLink, Long> {
-	// nothing
+
+
+
 }

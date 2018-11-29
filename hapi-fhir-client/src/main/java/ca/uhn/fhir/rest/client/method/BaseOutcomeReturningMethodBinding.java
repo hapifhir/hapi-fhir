@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -68,15 +69,15 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	protected abstract String getMatchingOperation();
 
 	@Override
-	public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+	public MethodOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 		if (theResponseStatusCode >= 200 && theResponseStatusCode < 300) {
 			if (myReturnVoid) {
 				return null;
 			}
-			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
+			MethodOutcome retVal = MethodUtil.process2xxResponse(getContext(), theResponseStatusCode, theResponseMimeType, theResponseInputStream, theHeaders);
 			return retVal;
 		}
-		throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseReader);
+		throw processNon2xxResponseAndReturnExceptionToThrow(theResponseStatusCode, theResponseMimeType, theResponseInputStream);
 	}
 
 	public boolean isReturnVoid() {

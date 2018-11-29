@@ -235,4 +235,37 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return hash(theResourceType, theParamName, theUnits);
 	}
 
+	@Override
+	public boolean matches(IQueryParameterType theParam) {
+		if (!(theParam instanceof QuantityParam)) {
+			return false;
+		}
+		QuantityParam quantity = (QuantityParam)theParam;
+		boolean retval = false;
+
+		// Only match on system if it wasn't specified
+		if (quantity.getSystem() == null && quantity.getUnits() == null) {
+			if (getValue().equals(quantity.getValue())) {
+				retval = true;
+			}
+		} else if (quantity.getSystem() == null) {
+			if (getUnits().equalsIgnoreCase(quantity.getUnits()) &&
+				getValue().equals(quantity.getValue())) {
+				retval = true;
+			}
+		} else if (quantity.getUnits() == null) {
+			if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
+				getValue().equals(quantity.getValue())) {
+				retval = true;
+			}
+		} else {
+			if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
+				getUnits().equalsIgnoreCase(quantity.getUnits()) &&
+				getValue().equals(quantity.getValue())) {
+				retval = true;
+			}
+		}
+		return retval;
+	}
+
 }

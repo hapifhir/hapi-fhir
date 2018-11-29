@@ -21,8 +21,12 @@ package ca.uhn.fhir.jpa.subscription.resthook;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.*;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionDeliverySubscriber;
+import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
+import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.*;
@@ -35,7 +39,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.MessagingException;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,11 +51,13 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@Component
+@Scope("prototype")
 public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDeliverySubscriber {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 
-	public SubscriptionDeliveringRestHookSubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
-		super(theSubscriptionDao, theChannelType, theSubscriptionInterceptor);
+	public SubscriptionDeliveringRestHookSubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
+		super(theChannelType, theSubscriptionInterceptor);
 	}
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
@@ -122,12 +130,14 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
 		IBaseResource payloadResource = theMsg.getPayload(getContext());
 
-		if (theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
-			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(payloadResource.getClass());
+		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
+			IIdType payloadId = theMsg.getPayloadId(getContext());
+			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(payloadId.getResourceType());
+			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(resourceDef.getImplementingClass());
 			try {
-				payloadResource = dao.read(payloadResource.getIdElement().toVersionless());
+				payloadResource = dao.read(payloadId.toVersionless());
 			} catch (ResourceGoneException e) {
-				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadResource.getIdElement(), theSubscription.getIdElement(getContext()));
+				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(getContext()));
 				return null;
 			}
 		}

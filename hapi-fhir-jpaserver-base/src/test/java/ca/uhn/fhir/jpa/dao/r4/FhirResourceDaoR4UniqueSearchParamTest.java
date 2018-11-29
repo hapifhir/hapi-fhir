@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.ResourceIndexedCompositeStringUnique;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -19,6 +21,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -47,12 +50,14 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
 		myDaoConfig.setUniqueIndexesCheckedBeforeSave(new DaoConfig().isUniqueIndexesCheckedBeforeSave());
 		myDaoConfig.setSchedulingDisabled(new DaoConfig().isSchedulingDisabled());
+		myDaoConfig.setUniqueIndexesEnabled(new DaoConfig().isUniqueIndexesEnabled());
 	}
 
 	@Before
 	public void before() {
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
 		myDaoConfig.setSchedulingDisabled(true);
+		myDaoConfig.setUniqueIndexesEnabled(true);
 		SearchBuilder.resetLastHandlerMechanismForUnitTest();
 	}
 
@@ -419,6 +424,10 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 	}
 
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+
+
 	@Test
 	public void testDuplicateUniqueValuesAreReIndexed() {
 		myDaoConfig.setSchedulingDisabled(true);
@@ -448,6 +457,10 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		ourLog.info("ID1: {}  - ID2: {}  - ID3: {}", id1, id2, id3);
 
 		createUniqueObservationSubjectDateCode();
+
+		List<JpaRuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams("Observation");
+		assertEquals(1, uniqueSearchParams.size());
+		assertEquals(3, uniqueSearchParams.get(0).getComponents().size());
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
@@ -557,11 +570,16 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		createUniqueIndexCoverageBeneficiary();
 
-		myResourceReindexingSvc.markAllResourcesForReindexing();
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.markAllResourcesForReindexing("Coverage");
+		// The first pass as a low of EPOCH
+		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
+		// The second pass has a low of Coverage.lastUpdated
+		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
+		// The third pass has a low of (Coverage.lastUpdated + 1ms)
+		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+		ourLog.info("** Uniques: {}", uniques);
 		assertEquals(uniques.toString(), 1, uniques.size());
 		assertEquals("Coverage/" + id3.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Coverage?beneficiary=Patient%2F" + id2.getIdPart() + "&identifier=urn%3Afoo%3Abar%7C123", uniques.get(0).getIndexString());
