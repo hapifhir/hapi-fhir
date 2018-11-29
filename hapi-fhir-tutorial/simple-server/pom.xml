@@ -14,7 +14,7 @@
 	
 	<groupId>ca.uhn.hapi.example</groupId>
 	<artifactId>hapi-fhir-example-simple-server</artifactId>
-	<version>0.7</version>
+	<version>0.8</version>
 	<packaging>war</packaging>
 
 	<name>HAPI FHIR Example - Simple Server</name>
@@ -35,12 +35,12 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>1.2-SNAPSHOT</version>
+			<version>1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu</artifactId>
-			<version>1.2-SNAPSHOT</version>
+			<version>1.6</version>
 		</dependency>
 
 		<!-- 
