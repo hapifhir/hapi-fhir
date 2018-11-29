@@ -126,7 +126,11 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 
 	@Override
 	public ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) throws FHIRException {
-		return null;
+		IIdType refId = getContext().getVersion().newIdType();
+		refId.setValue(reference.getReference());
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(refId.getResourceType());
+		BaseHasResource id = dao.readEntity(refId);
+		return new ReferenceResolution(context, (Resource) toResource(id, false));
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
