@@ -601,13 +601,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourClient.create().resource(subscription).execute();
 	}
 
-	public void testCustomSearchParamBodySiteParam() {
-		String payload = "application/fhir+json";
-		String criteriabad = "BodySite?accessType=Catheter";
-		Subscription subscription = newSubscription(criteriabad, payload);
-		ourClient.create().resource(subscription).execute();
-	}
-
 	@Test
 	public void testGoodSubscriptionPersists() {
 		assertEquals(0, subsciptionCount());
