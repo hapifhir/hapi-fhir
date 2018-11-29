@@ -11,7 +11,7 @@ jdk:
   - oraclejdk9
 env:
   global:
-    - MAVEN_OPTS="-Xmx1024m"
+    - MAVEN_OPTS="-Xmx10244M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=1024M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
 
 cache:
   directories:
