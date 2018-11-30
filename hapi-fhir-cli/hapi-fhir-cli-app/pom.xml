@@ -43,6 +43,14 @@
 			<classifier>classes</classifier>
 		</dependency>
 
+		<!--
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojbc8g</artifactId>
+			<version>12.2.0.1</version>
+		</dependency>
+		-->
+
 	</dependencies>
 
 	<build>

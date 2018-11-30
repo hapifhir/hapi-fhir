@@ -95,12 +95,12 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 
 		ourLog.info("Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
 		if (sql != null) {
-			executeSql(sql);
+			executeSql(getTableName(), sql);
 		}
 
 		if (sqlNotNull != null) {
 			ourLog.info("Updating column {} on table {} to not null", getColumnName(), getTableName());
-			executeSql(sqlNotNull);
+			executeSql(getTableName(), sqlNotNull);
 		}
 	}
 

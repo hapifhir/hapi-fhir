@@ -97,6 +97,11 @@
 				including support for either allowing the operation response to proceed unchallenged,
 				or authorizing the contents of the response.
 			</action>
+			<action type="add">
+				An invalid SQL syntax issue has been fixed when running the CLI JPA Migrator tool against 
+				Oracle or SQL Server. In addition, when using the "Dry Run" option, all generated SQL
+				statements will be logged at the end of the run.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

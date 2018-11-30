@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Migrator {
 
@@ -40,6 +41,7 @@ public class Migrator {
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private int myChangesCount;
 	private boolean myDryRun;
+	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
 
 	public int getChangesCount() {
 		return myChangesCount;
@@ -74,7 +76,7 @@ public class Migrator {
 
 		myConnectionProperties = myDriverType.newConnectionProperties(myConnectionUrl, myUsername, myPassword);
 		try {
-			for (BaseTask next : myTasks) {
+			for (BaseTask<?> next : myTasks) {
 				next.setDriverType(myDriverType);
 				next.setConnectionProperties(myConnectionProperties);
 				next.setDryRun(myDryRun);
@@ -85,12 +87,33 @@ public class Migrator {
 				}
 
 				myChangesCount += next.getChangesCount();
+				myExecutedStatements.addAll(next.getExecutedStatements());
 			}
 		} finally {
 			myConnectionProperties.close();
 		}
 
 		ourLog.info("Finished migration of {} tasks", myTasks.size());
+
+		if (myDryRun) {
+			StringBuilder statementBuilder = new StringBuilder();
+			String lastTable = null;
+			for (BaseTask.ExecutedStatement next : myExecutedStatements) {
+				if (!Objects.equals(lastTable, next.getTableName())) {
+					statementBuilder.append("\n\n-- Table: ").append(next.getTableName()).append("\n");
+					lastTable = next.getTableName();
+				}
+
+				statementBuilder.append(next.getSql()).append(";\n");
+
+				for (Object nextArg : next.getArguments()) {
+					statementBuilder.append("  -- Arg: ").append(nextArg).append("\n");
+				}
+			}
+
+			ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
+		}
+
 	}
 
 }
