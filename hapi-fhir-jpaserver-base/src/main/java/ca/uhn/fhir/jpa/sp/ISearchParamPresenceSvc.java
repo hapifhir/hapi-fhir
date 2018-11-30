@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.sp;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
 import java.util.Map;
 

@@ -1,11 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.TestUtil;
 import net.ttddyy.dsproxy.QueryCount;
-import net.ttddyy.dsproxy.QueryCountHolder;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DateTimeType;

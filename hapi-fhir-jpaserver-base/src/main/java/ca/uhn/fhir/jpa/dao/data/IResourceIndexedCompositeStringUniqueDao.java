@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;

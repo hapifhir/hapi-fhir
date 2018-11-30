@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.apache.commons.lang3.SerializationUtils;

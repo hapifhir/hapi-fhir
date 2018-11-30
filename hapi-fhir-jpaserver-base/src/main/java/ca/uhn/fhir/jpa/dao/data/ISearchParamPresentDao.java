@@ -27,8 +27,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 
 public interface ISearchParamPresentDao extends JpaRepository<SearchParamPresent, Long> {
 

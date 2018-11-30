@@ -3,14 +3,11 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.dao.PathAndRef;
-import ca.uhn.fhir.jpa.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -101,7 +98,7 @@ public class SearchParamExtractorR4Test {
 		Observation obs = new Observation();
 		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new DaoConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(new ResourceTable(), obs);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
@@ -115,7 +112,7 @@ public class SearchParamExtractorR4Test {
 		Encounter enc = new Encounter();
 		enc.addLocation().setLocation(new Reference("Location/123"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new DaoConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location");
 		assertNotNull(param);
 		List<PathAndRef> links = extractor.extractResourceLinks(enc, param);
@@ -129,7 +126,7 @@ public class SearchParamExtractorR4Test {
 		Consent consent = new Consent();
 		consent.setSource(new Reference().setReference("Consent/999"));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new DaoConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE);
 		assertNotNull(param);
 		List<PathAndRef> links = extractor.extractResourceLinks(consent, param);
@@ -148,7 +145,7 @@ public class SearchParamExtractorR4Test {
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code2")))
 			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new DaoConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(new ResourceTable(), o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
 		assertEquals(4, links.size());

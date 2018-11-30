@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTag;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /*

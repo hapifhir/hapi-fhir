@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+
 import javax.persistence.*;
 import java.util.Date;
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 import javax.persistence.*;

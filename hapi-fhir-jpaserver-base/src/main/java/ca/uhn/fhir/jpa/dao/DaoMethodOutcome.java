@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

@@ -1,8 +1,15 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -3065,17 +3072,17 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("foo").setValue(methodName);
-		e1.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);
+		e1.getLength().setSystem(SearchParamConstants.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);
 		IIdType id1 = myEncounterDao.create(e1, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter e3 = new Encounter();
 		e3.addIdentifier().setSystem("foo").setValue(methodName);
-		e3.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("year").setValue(3.0);
+		e3.getLength().setSystem(SearchParamConstants.UCUM_NS).setCode("year").setValue(3.0);
 		IIdType id3 = myEncounterDao.create(e3, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter e2 = new Encounter();
 		e2.addIdentifier().setSystem("foo").setValue(methodName);
-		e2.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("year").setValue(2.0);
+		e2.getLength().setSystem(SearchParamConstants.UCUM_NS).setCode("year").setValue(2.0);
 		IIdType id2 = myEncounterDao.create(e2, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;

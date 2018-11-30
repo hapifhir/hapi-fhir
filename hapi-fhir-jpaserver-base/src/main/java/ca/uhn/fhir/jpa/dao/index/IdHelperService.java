@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;

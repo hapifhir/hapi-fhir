@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 
 /*
  * #%L

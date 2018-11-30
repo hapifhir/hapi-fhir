@@ -26,7 +26,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.ResourceTag;
+import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 
 public interface IResourceTagDao extends JpaRepository<ResourceTag, Long> {
 	@Query("" + 

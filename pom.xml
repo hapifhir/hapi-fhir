@@ -540,8 +540,8 @@
 		<slf4j_version>1.7.25</slf4j_version>
 		<spring_version>5.0.8.RELEASE</spring_version>
 		<spring_data_version>2.0.7.RELEASE</spring_data_version>
-
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
+
 		<stax2_api_version>3.1.4</stax2_api_version>
 		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
@@ -1280,6 +1280,14 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</pluginRepository>
+		<pluginRepository>
+			<id>maven2</id>
+			<name>Maven2</name>
+			<url>http://central.maven.org/maven2/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
 	</pluginRepositories>
 
 	<build>
@@ -1315,17 +1323,9 @@
 					<version>1.2.1</version>
 				</plugin>
 				<plugin>
-					<groupId>de.juplo</groupId>
-					<artifactId>hibernate-maven-plugin</artifactId>
-					<version>2.1.1</version>
-					<configuration>
-						<execute>false</execute>
-						<skip>false</skip>
-						<scanDependencies>false</scanDependencies>
-						<scanTestClasses>false</scanTestClasses>
-						<scanClasses>true</scanClasses>
-						<force>true</force>
-					</configuration>
+					<groupId>de.jpdigital</groupId>
+					<artifactId>hibernate52-ddl-maven-plugin</artifactId>
+					<version>2.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.felix</groupId>
@@ -2150,6 +2150,9 @@
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
+				<module>hapi-fhir-jpaserver-model</module>
+				<module>hapi-fhir-jpaserver-searchparam</module>
+				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<!-- <module>hapi-fhir-cobertura</module> -->
@@ -2200,6 +2203,9 @@
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-validation-resources-r4</module>
 				<module>hapi-fhir-igpacks</module>
+				<module>hapi-fhir-jpaserver-model</module>
+				<module>hapi-fhir-jpaserver-searchparam</module>
+				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>

@@ -25,10 +25,13 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
@@ -76,15 +79,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
-	@Autowired
-	private IResourceLinkDao myResourceLinkDao;
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
 	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private MatchUrlService myMatchUrlService;
+	private MatchResourceUrlService myMatchResourceUrlService;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -271,7 +270,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 
-		Set<Long> resource = myMatchUrlService.processMatchUrl(theUrl, myResourceType);
+		Set<Long> resource = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType);
 		if (resource.size() > 1) {
 			if (myDaoConfig.isAllowMultipleDelete() == false) {
 				throw new PreconditionFailedException(getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resource.size()));
@@ -371,7 +370,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setResourceType(toResourceName(theResource));
 
 		if (isNotBlank(theIfNoneExist)) {
-			Set<Long> match = myMatchUrlService.processMatchUrl(theIfNoneExist, myResourceType);
+			Set<Long> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
 				throw new PreconditionFailedException(msg);
@@ -848,7 +847,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public Set<Long> processMatchUrl(String theMatchUrl) {
-		return myMatchUrlService.processMatchUrl(theMatchUrl, getResourceType());
+		return myMatchResourceUrlService.processMatchUrl(theMatchUrl, getResourceType());
 	}
 
 	@Override
@@ -1231,7 +1230,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IIdType resourceId;
 		if (isNotBlank(theMatchUrl)) {
 			StopWatch sw = new StopWatch();
-			Set<Long> match = myMatchUrlService.processMatchUrl(theMatchUrl, myResourceType);
+			Set<Long> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(msg);

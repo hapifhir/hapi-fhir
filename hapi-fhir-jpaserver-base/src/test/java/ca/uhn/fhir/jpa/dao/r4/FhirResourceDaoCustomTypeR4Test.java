@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
 @SuppressWarnings({ })

@@ -9,6 +9,7 @@ import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.fail;
 
 @Configuration
+@Import(TestJPAConfig.class)
 @EnableTransactionManagement()
 public class TestR4Config extends BaseJavaConfigR4 {
 
@@ -43,12 +45,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	private Exception myLastStackTrace;
 
-	@Bean()
-	public DaoConfig daoConfig() {
-		return new DaoConfig();
-	}
-
-	@Bean()
+	@Bean
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource() {
 
@@ -105,7 +102,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 //			.countQuery(new ThreadQueryCountHolder())
 			.countQuery(singleQueryCountHolder())
@@ -120,7 +117,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
@@ -156,18 +153,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		requestValidator.addValidatorModule(instanceValidatorR4());
 
 		return requestValidator;
-	}
-
-	@Bean()
-	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-		JpaTransactionManager retVal = new JpaTransactionManager();
-		retVal.setEntityManagerFactory(entityManagerFactory);
-		return retVal;
-	}
-
-	@Bean
-	public UnregisterScheduledProcessor unregisterScheduledProcessor(Environment theEnv) {
-		return new UnregisterScheduledProcessor(theEnv);
 	}
 
 	public static int getMaxThreads() {

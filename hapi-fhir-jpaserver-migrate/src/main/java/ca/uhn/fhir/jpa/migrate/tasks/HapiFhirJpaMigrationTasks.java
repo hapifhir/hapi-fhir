@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
@@ -228,7 +228,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxString
 				.addTask(new CalculateHashesTask()
 					.setColumnName("HASH_NORM_PREFIX")
-					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new DaoConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
+					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new ModelConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
 					.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
 				);
 		}

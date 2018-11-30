@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.*;
 
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -23,7 +25,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
@@ -40,7 +42,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Override
@@ -53,7 +55,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 	public void beforeResetConfig() {
 		super.beforeResetConfig();
 
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 		mySearchParamRegsitry.forceRefresh();
 	}
 
@@ -90,7 +92,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 	@Test
 	public void testConformanceOverrideAllowed() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 
 		CapabilityStatement conformance = ourClient
 				.fetchConformance()
@@ -160,7 +162,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 	@Test
 	public void testConformanceOverrideNotAllowed() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(false);
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
 
 		CapabilityStatement conformance = ourClient
 				.fetchConformance()

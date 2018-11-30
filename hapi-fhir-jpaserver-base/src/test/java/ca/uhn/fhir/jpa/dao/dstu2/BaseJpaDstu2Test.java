@@ -7,12 +7,14 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -75,6 +77,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IFhirResourceDao<ConceptMap> myConceptMapDao;
 	@Autowired
 	protected DaoConfig myDaoConfig;
+	@Autowired
+	protected ModelConfig myModelConfig;
 	@Autowired
 	@Qualifier("myDeviceDaoDstu2")
 	protected IFhirResourceDao<Device> myDeviceDao;

@@ -24,9 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.dao.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -70,7 +70,7 @@ public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 	 * Search based on a query criteria
 	 */
 	protected IBundleProvider performSearch(String theCriteria) {
-		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		RuntimeResourceDefinition responseResourceDef = subscriptionDao.validateCriteriaAndReturnResourceDefinition(theCriteria);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
 

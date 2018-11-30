@@ -76,6 +76,7 @@ public class ExampleServerIT {
 		ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
+
 	}
 
 	public static void main(String[] theArgs) throws Exception {

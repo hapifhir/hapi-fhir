@@ -25,7 +25,7 @@ public class TestR4WithoutLuceneConfig extends TestR4Config {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setDataSource(dataSource());

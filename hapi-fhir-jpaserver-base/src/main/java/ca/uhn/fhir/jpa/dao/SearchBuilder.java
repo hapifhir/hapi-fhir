@@ -26,9 +26,16 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.entity.ResourceSearchView;
+import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.util.StringNormalizer;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
@@ -125,6 +132,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
+	@Autowired
+	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -243,7 +252,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			Class<? extends IBaseResource> resourceType = targetResourceDefinition.getImplementingClass();
-			Set<Long> match = myMatchUrlService.processMatchUrl(matchUrl, resourceType);
+			Set<Long> match = myMatchResourceUrlService.processMatchUrl(matchUrl, resourceType);
 			if (match.isEmpty()) {
 				// Pick a PID that can never match
 				match = Collections.singleton(-1L);
@@ -1201,7 +1210,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		if (myDontUseHashesForSearch) {
-			String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
+			String likeExpression = StringNormalizer.normalizeString(rawSearchTerm);
 			if (myDaoConfig.isAllowContainsSearches()) {
 				if (theParameter instanceof StringParam) {
 					if (((StringParam) theParameter).isContains()) {
@@ -1237,7 +1246,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			// Normalized Match
 
-			String normalizedString = BaseHapiFhirDao.normalizeString(rawSearchTerm);
+			String normalizedString = StringNormalizer.normalizeString(rawSearchTerm);
 			String likeExpression;
 			if (theParameter instanceof StringParam &&
 				((StringParam) theParameter).isContains() &&
@@ -1247,7 +1256,7 @@ public class SearchBuilder implements ISearchBuilder {
 				likeExpression = createLeftMatchLikeExpression(normalizedString);
 			}
 
-			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig, theResourceName, theParamName, normalizedString);
+			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 			Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
 			Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 			return theBuilder.and(hashCode, singleCode);

@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

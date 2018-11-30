@@ -3,12 +3,16 @@ package ca.uhn.fhir.jpa.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.dao.r4.SearchParamExtractorR4;
-import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
+import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
+import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
@@ -134,7 +138,7 @@ public class BaseR4Config extends BaseConfig {
 
 	@Bean
 	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryR4();
+		return new SearchParamRegistryR4(searchParamProvider());
 	}
 
 	@Bean(name = "mySystemDaoR4", autowire = Autowire.BY_NAME)

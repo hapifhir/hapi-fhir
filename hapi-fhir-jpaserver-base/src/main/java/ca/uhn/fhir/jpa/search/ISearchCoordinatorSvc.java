@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.search;
  */
 
 import ca.uhn.fhir.jpa.dao.IDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 
