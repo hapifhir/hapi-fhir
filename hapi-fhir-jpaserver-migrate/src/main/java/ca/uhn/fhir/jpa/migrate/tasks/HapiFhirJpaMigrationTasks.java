@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"UnstableApiUsage", "SqlNoDataSourceInspection", "SpellCheckingInspection"})
+@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	private final Set<FlagEnum> myFlags;
@@ -90,10 +90,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Forced ID changes
 		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
 		version.startSectionWithMessage("Starting work on table: " + forcedId.getTableName());
+
 		forcedId
 			.dropIndex("IDX_FORCEDID_TYPE_FORCEDID");
 		forcedId
 			.dropIndex("IDX_FORCEDID_TYPE_RESID");
+
 		forcedId
 			.addIndex("IDX_FORCEDID_TYPE_FID")
 			.unique(true)
@@ -332,9 +334,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			"from HFJ_RES_PARAM_PRESENT " +
 			"join HFJ_SEARCH_PARM ON (HFJ_SEARCH_PARM.PID = HFJ_RES_PARAM_PRESENT.SP_ID) " +
 			"where HFJ_RES_PARAM_PRESENT.HASH_PRESENCE is null";
+		consolidateSearchParamPresenceIndexesTask.addExecuteOnlyIfColumnExists("HFJ_RES_PARAM_PRESENT", "SP_ID");
 		consolidateSearchParamPresenceIndexesTask.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
-			Long pid = (Long) t.get("PID");
-			Boolean present = (Boolean) t.get("SP_PRESENT");
+			Number pid = (Number) t.get("PID");
+			Boolean present = columnToBoolean(t.get("SP_PRESENT"));
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
 			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);
@@ -494,6 +497,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addSql(DriverTypeEnum.MSSQL_2012, "alter table TRM_CONCEPT_MAP_GRP_ELM_TGT add constraint FK_TCMGETARGET_ELEMENT foreign key (CONCEPT_MAP_GRP_ELM_PID) references TRM_CONCEPT_MAP_GRP_ELEMENT");
 	}
 
+	private Boolean columnToBoolean(Object theValue) {
+		if (theValue == null) {
+			return null;
+		}
+		if (theValue instanceof Boolean) {
+			return (Boolean) theValue;
+		}
+
+		long longValue = ((Number) theValue).longValue();
+		return longValue == 1L;
+	}
+
 	private void init340() {
 		Builder version = forVersion(VersionEnum.V3_4_0);
 
@@ -535,10 +550,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		FlagEnum(String theCommandLineValue) {
 			myCommandLineValue = theCommandLineValue;
-		}
-
-		public String getCommandLineValue() {
-			return myCommandLineValue;
 		}
 
 		public static FlagEnum fromCommandLineValue(String theCommandLineValue) {

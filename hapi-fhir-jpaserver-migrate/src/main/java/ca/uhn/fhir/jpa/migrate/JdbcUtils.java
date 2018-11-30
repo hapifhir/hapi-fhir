@@ -127,7 +127,9 @@ public class JdbcUtils {
 						switch (dataType) {
 							case Types.VARCHAR:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.STRING.getDescriptor(length);
+							case Types.NUMERIC:
 							case Types.BIGINT:
+							case Types.DECIMAL:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.LONG.getDescriptor(null);
 							case Types.INTEGER:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.INT.getDescriptor(null);
@@ -135,7 +137,7 @@ public class JdbcUtils {
 							case Types.TIMESTAMP_WITH_TIMEZONE:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP.getDescriptor(null);
 							default:
-								throw new IllegalArgumentException("Don't know how to handle datatype: " + dataType);
+								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 						}
 
 					}

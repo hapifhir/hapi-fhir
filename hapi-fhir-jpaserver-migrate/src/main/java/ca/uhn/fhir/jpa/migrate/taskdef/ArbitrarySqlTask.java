@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,6 +42,7 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	private List<Task> myTask = new ArrayList<>();
 	private int myBatchSize = 1000;
 	private String myExecuteOnlyIfTableExists;
+	private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
 
 	public ArbitrarySqlTask(String theTableName, String theDescription) {
 		myTableName = theTableName;
@@ -69,6 +70,14 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 			}
 		}
 
+		for (TableAndColumn next : myConditionalOnExistenceOf) {
+			String columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
+			if (columnType == null) {
+				ourLog.info("Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
+				return;
+			}
+		}
+
 		for (Task next : myTask) {
 			next.execute();
 		}
@@ -81,6 +90,13 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 	public void setExecuteOnlyIfTableExists(String theExecuteOnlyIfTableExists) {
 		myExecuteOnlyIfTableExists = theExecuteOnlyIfTableExists;
+	}
+
+	/**
+	 * This task will only execute if the following column exists
+	 */
+	public void addExecuteOnlyIfColumnExists(String theTableName, String theColumnName) {
+		myConditionalOnExistenceOf.add(new TableAndColumn(theTableName, theColumnName));
 	}
 
 	public enum QueryModeEnum {
@@ -127,6 +143,24 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 					return null;
 				});
 			} while (rows.size() > 0);
+		}
+	}
+
+	private static class TableAndColumn {
+		private final String myTable;
+		private final String myColumn;
+
+		private TableAndColumn(String theTable, String theColumn) {
+			myTable = theTable;
+			myColumn = theColumn;
+		}
+
+		public String getTable() {
+			return myTable;
+		}
+
+		public String getColumn() {
+			return myColumn;
 		}
 	}
 }
