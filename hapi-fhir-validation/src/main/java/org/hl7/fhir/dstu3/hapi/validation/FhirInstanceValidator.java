@@ -637,7 +637,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 		@Override
 		public boolean isNoTerminologyServer() {
-			return true;
+			return myWrap.isNoTerminologyServer();
 		}
 
 		@Override
