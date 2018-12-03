@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.searchparam;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Search Parameters
  * %%
  * Copyright (C) 2014 - 2018 University Health Network
  * %%

@@ -24,7 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Search Parameters
  * %%
  * Copyright (C) 2014 - 2018 University Health Network
  * %%

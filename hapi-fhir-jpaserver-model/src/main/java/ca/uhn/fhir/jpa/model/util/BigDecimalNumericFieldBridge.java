@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.util;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2018 University Health Network
  * %%
