@@ -102,6 +102,16 @@
 				Oracle or SQL Server. In addition, when using the "Dry Run" option, all generated SQL
 				statements will be logged at the end of the run.
 			</action>
+			<action type="add">
+				In the JPA server, when performing a chained reference search on a search parameter with
+				a target type of
+				<![CDATA[<code>Reference(Any)</code>]]>, the search failed with an incomprehensible
+				error. This has been corrected to return an error message indicating that the chain
+				must be qualified with a resource type for such a field. For example,
+				<![CDATA[<code>QuestionnaireResponse?subject:Patient.name=smith</code>]]>
+				instead of
+				<![CDATA[<code>QuestionnaireResponse?subject.name=smith</code>]]>.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

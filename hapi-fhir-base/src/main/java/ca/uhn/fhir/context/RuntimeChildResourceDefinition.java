@@ -49,9 +49,8 @@ public class RuntimeChildResourceDefinition extends BaseRuntimeDeclaredChildDefi
 		myResourceTypes = theResourceTypes;
 
 		if (theResourceTypes == null || theResourceTypes.isEmpty()) {
-			myResourceTypes = new ArrayList<Class<? extends IBaseResource>>();
+			myResourceTypes = new ArrayList<>();
 			myResourceTypes.add(IBaseResource.class);
-//			throw new ConfigurationException("Field '" + theField.getName() + "' on type '" + theField.getDeclaringClass().getCanonicalName() + "' has no resource types noted");
 		}
 	}
 

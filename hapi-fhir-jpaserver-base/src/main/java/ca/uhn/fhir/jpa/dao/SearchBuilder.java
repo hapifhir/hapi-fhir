@@ -462,6 +462,11 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (def instanceof RuntimeChildResourceDefinition) {
 								RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
 								resourceTypes.addAll(resDef.getResourceTypes());
+								if (resourceTypes.size() == 1) {
+									if (resourceTypes.get(0).isInterface()) {
+										throw new InvalidRequestException("Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
+									}
+								}
 							} else {
 								throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
 							}
@@ -479,10 +484,14 @@ public class SearchBuilder implements ISearchBuilder {
 						resourceId = ref.getValue();
 
 					} else {
-						RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
-						resourceTypes = new ArrayList<>(1);
-						resourceTypes.add(resDef.getImplementingClass());
-						resourceId = ref.getIdPart();
+						try {
+							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
+							resourceTypes = new ArrayList<>(1);
+							resourceTypes.add(resDef.getImplementingClass());
+							resourceId = ref.getIdPart();
+						} catch (DataFormatException e) {
+							throw new InvalidRequestException("Invalid resource type: " + ref.getResourceType());
+						}
 					}
 
 					boolean foundChainMatch = false;
