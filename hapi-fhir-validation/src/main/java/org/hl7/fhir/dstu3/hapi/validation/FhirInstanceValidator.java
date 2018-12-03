@@ -249,6 +249,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
 		v.setMyEnableWhenEvaluator(enableWhenEvaluatorSupplier.apply(wrappedWorkerContext));
+		v.setErrorForUnknownProfiles(true); // TODO must be configurable instead of hardcoded to be always true
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
