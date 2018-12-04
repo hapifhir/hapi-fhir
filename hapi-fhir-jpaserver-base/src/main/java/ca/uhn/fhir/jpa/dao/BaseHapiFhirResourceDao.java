@@ -896,7 +896,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		T retVal = toResource(myResourceType, entity, null, false);
 
-		if (theForHistory == false) {
+		if (theDeletedOk == false) {
 			if (entity.getDeleted() != null) {
 				throw new ResourceGoneException("Resource was deleted at " + new InstantType(entity.getDeleted()).getValueAsString());
 			}
