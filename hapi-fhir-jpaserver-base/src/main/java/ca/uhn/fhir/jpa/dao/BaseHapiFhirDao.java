@@ -895,7 +895,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IResource res) {
+	private <R extends IBaseResource> R populateResourceMetadataHapi(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IResource res, Long theVersion) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
 			res = (IResource) myContext.getResourceDefinition(theResourceType).newInstance();
@@ -917,7 +917,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 		}
 
-		res.setId(theEntity.getIdDt());
+		res.setId(theEntity.getIdDt().withVersion(theVersion.toString()));
 
 		ResourceMetadataKeyEnum.VERSION.put(res, Long.toString(theEntity.getVersion()));
 		ResourceMetadataKeyEnum.PUBLISHED.put(res, theEntity.getPublished());
@@ -961,7 +961,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends IBaseResource> R populateResourceMetadataRi(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IAnyResource res) {
+	private <R extends IBaseResource> R populateResourceMetadataRi(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<? extends BaseTag> theTagList, boolean theForHistoryOperation, IAnyResource res, Long theVersion) {
 		R retVal = (R) res;
 		if (theEntity.getDeleted() != null) {
 			res = (IAnyResource) myContext.getResourceDefinition(theResourceType).newInstance();
@@ -990,6 +990,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		res.getMeta().setVersionId(null);
 
 		populateResourceIdFromEntity(theEntity, res);
+		res.setId(res.getIdElement().withVersion(theVersion.toString()));
 
 		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
 		IDao.RESOURCE_PID.put(res, theEntity.getId());
@@ -1136,26 +1137,36 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		byte[] resourceBytes = null;
 		ResourceEncodingEnum resourceEncoding = null;
 		Collection<? extends BaseTag> myTagList = null;
+		Long version = null;
 
 		if (theEntity instanceof ResourceHistoryTable) {
 			ResourceHistoryTable history = (ResourceHistoryTable) theEntity;
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
 			myTagList = history.getTags();
+			version = history.getVersion();
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
-			if (history == null) {
-				return null;
+			version = theEntity.getVersion();
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), version);
+			while (history == null) {
+				if (version > 1L) {
+					version--;
+					history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), version);
+				} else {
+					return null;
+				}
 			}
 			resourceBytes = history.getResource();
 			resourceEncoding = history.getEncoding();
 			myTagList = resource.getTags();
+			version = history.getVersion();
 		} else if (theEntity instanceof ResourceSearchView) {
 			// This is the search View
 			ResourceSearchView myView = (ResourceSearchView) theEntity;
 			resourceBytes = myView.getResource();
 			resourceEncoding = myView.getEncoding();
+			version = myView.getVersion();
 			if (theTagList == null)
 				myTagList = new HashSet<>();
 			else
@@ -1220,10 +1231,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		// 5. fill MetaData
 		if (retVal instanceof IResource) {
 			IResource res = (IResource) retVal;
-			retVal = populateResourceMetadataHapi(resourceType, theEntity, myTagList, theForHistoryOperation, res);
+			retVal = populateResourceMetadataHapi(resourceType, theEntity, myTagList, theForHistoryOperation, res, version);
 		} else {
 			IAnyResource res = (IAnyResource) retVal;
-			retVal = populateResourceMetadataRi(resourceType, theEntity, myTagList, theForHistoryOperation, res);
+			retVal = populateResourceMetadataRi(resourceType, theEntity, myTagList, theForHistoryOperation, res, version);
 		}
 
 		return retVal;

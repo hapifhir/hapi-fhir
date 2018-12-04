@@ -115,8 +115,9 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return myNullable;
 	}
 
-	public void setNullable(boolean theNullable) {
+	public T setNullable(boolean theNullable) {
 		myNullable = theNullable;
+		return (T) this;
 	}
 
 	protected String getSqlNotNull() {
@@ -127,8 +128,9 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return myColumnLength;
 	}
 
-	public void setColumnLength(int theColumnLength) {
+	public BaseTableColumnTypeTask<T> setColumnLength(int theColumnLength) {
 		myColumnLength = (long) theColumnLength;
+		return this;
 	}
 
 

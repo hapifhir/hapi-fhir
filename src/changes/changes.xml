@@ -112,6 +112,16 @@
 				instead of
 				<![CDATA[<code>QuestionnaireResponse?subject.name=smith</code>]]>.
 			</action>
+			<action type="add">
+				The LOINC uploader has been updated to suport the LOINC 2.65 release
+				file format.
+			</action>
+			<action type="add">
+				The resource reindexer can now detect when a resource's current version no longer
+				exists in the database (e.g. because it was manually expunged), and can automatically 
+				adjust the most recent version to
+				account for this.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

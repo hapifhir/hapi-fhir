@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -86,6 +87,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	private ThreadPoolExecutor myTaskExecutor;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
+	@Autowired
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -456,10 +459,18 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 						}
 
 						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceTable.getResourceType());
-						IBaseResource resource = dao.toResource(resourceTable, false);
+						long expectedVersion = resourceTable.getVersion();
+						IBaseResource resource = dao.read(resourceTable.getIdDt().toVersionless());
 						if (resource == null) {
 							throw new InternalErrorException("Could not find resource version " + resourceTable.getIdDt().toUnqualified().getValue() + " in database");
 						}
+
+						Long actualVersion = resource.getIdElement().getVersionIdPartAsLong();
+						if (actualVersion < expectedVersion) {
+							ourLog.warn("Resource {} version {} does not exist, renumbering version {}", resource.getIdElement().toUnqualifiedVersionless().getValue(), resource.getIdElement().getVersionIdPart(), expectedVersion);
+							myResourceHistoryTableDao.updateVersion(resourceTable.getId(), actualVersion, expectedVersion);
+						}
+
 						doReindex(resourceTable, resource);
 						return null;
 

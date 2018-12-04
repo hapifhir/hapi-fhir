@@ -116,4 +116,7 @@ public class Migrator {
 
 	}
 
+	public void addTasks(List<BaseTask<?>> theTasks) {
+		theTasks.forEach(this::addTask);
+	}
 }

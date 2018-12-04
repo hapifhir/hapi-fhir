@@ -21,8 +21,11 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
+import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -188,9 +191,9 @@ public class JdbcUtils {
 		}
 	}
 
-		/**
-        * Retrieve all index names
-        */
+	/**
+	 * Retrieve all index names
+	 */
 	public static Set<String> getColumnNames(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		try (Connection connection = dataSource.getConnection()) {
@@ -214,6 +217,43 @@ public class JdbcUtils {
 
 					return columnNames;
 				} catch (SQLException e) {
+					throw new InternalErrorException(e);
+				}
+			});
+		}
+	}
+
+	public static Set<String> getSequenceNames(DriverTypeEnum.ConnectionProperties theConnectionProperties) throws SQLException {
+		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+		try (Connection connection = dataSource.getConnection()) {
+			return theConnectionProperties.getTxTemplate().execute(t -> {
+				try {
+					DialectResolver dialectResolver = new StandardDialectResolver();
+					Dialect dialect = dialectResolver.resolveDialect(new DatabaseMetaDataDialectResolutionInfoAdapter(connection.getMetaData()));
+
+					Set<String> sequenceNames = new HashSet<>();
+					if (dialect.supportsSequences()) {
+						String sql = dialect.getQuerySequencesString();
+						if (sql != null) {
+
+							Statement statement = null;
+							ResultSet rs = null;
+							try {
+								statement = connection.createStatement();
+								rs = statement.executeQuery(sql);
+
+								while (rs.next()) {
+									sequenceNames.add(rs.getString(1).toUpperCase());
+								}
+							} finally {
+								if (rs != null) rs.close();
+								if (statement != null) statement.close();
+							}
+
+						}
+					}
+					return sequenceNames;
+				} catch (SQLException e ) {
 					throw new InternalErrorException(e);
 				}
 			});

@@ -67,7 +67,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink.csv";
 	public static final String LOINC_DOCUMENT_ONTOLOGY_FILE = "DocumentOntology.csv";
 	public static final String LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
-	public static final String LOINC_FILE = "Loinc.csv";
+	public static final String LOINC_FILE = "LoincTable/Loinc.csv";
 	public static final String LOINC_HIERARCHY_FILE = "MultiAxialHierarchy.csv";
 	public static final String LOINC_PART_FILE = "Part.csv";
 	public static final String LOINC_PART_LINK_FILE = "LoincPartLink.csv";
@@ -135,6 +135,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			} else {
 				matches = nextFilename.endsWith("/" + theFileNamePart) || nextFilename.equals(theFileNamePart);
 			}
+
 			if (matches) {
 				ourLog.info("Processing file {}", nextFilename);
 				foundMatch = true;

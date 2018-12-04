@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
@@ -576,6 +577,50 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(Long.valueOf(2), entity.getIndexStatus());
 
 	}
+
+	@Test
+	public void testReindexingCurrentVersionDeleted() {
+		Patient p = new Patient();
+		p.addName().setFamily("family1");
+		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("family1");
+		p.addName().setFamily("family2");
+		myPatientDao.update(p);
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("family1");
+		p.addName().setFamily("family2");
+		p.addName().setFamily("family3");
+		myPatientDao.update(p);
+
+		SearchParameterMap searchParamMap = new SearchParameterMap();
+		searchParamMap.setLoadSynchronous(true);
+		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family2"));
+		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+
+		runInTransaction(()->{
+			ResourceHistoryTable historyEntry = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 3);
+			assertNotNull(historyEntry);
+			myResourceHistoryTableDao.delete(historyEntry);
+		});
+
+		Long jobId = myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+
+		searchParamMap = new SearchParameterMap();
+		searchParamMap.setLoadSynchronous(true);
+		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family2"));
+		IBundleProvider search = myPatientDao.search(searchParamMap);
+		assertEquals(1, search.size().intValue());
+		p = (Patient) search.getResources(0, 1).get(0);
+		assertEquals("3", p.getIdElement().getVersionIdPart());
+	}
+
+
 
 	@Test
 	public void testSystemMetaOperation() {

@@ -31,9 +31,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.SQLException;
 import java.util.*;
 
-public class AddTableTask extends BaseTableTask<AddTableTask> {
+public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AddTableTask.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(AddTableRawSqlTask.class);
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
 
 	public void addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {
