@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -460,7 +461,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceTable.getResourceType());
 						long expectedVersion = resourceTable.getVersion();
-						IBaseResource resource = dao.read(resourceTable.getIdDt().toVersionless());
+						IBaseResource resource = dao.read(resourceTable.getIdDt().toVersionless(), null,true);
 						if (resource == null) {
 							throw new InternalErrorException("Could not find resource version " + resourceTable.getIdDt().toUnqualified().getValue() + " in database");
 						}

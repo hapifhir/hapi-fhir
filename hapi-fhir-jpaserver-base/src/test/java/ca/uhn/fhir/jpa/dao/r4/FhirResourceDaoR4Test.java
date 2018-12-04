@@ -237,7 +237,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), not(greaterThan(0)));
 		});
 

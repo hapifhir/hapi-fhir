@@ -876,6 +876,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public T read(IIdType theId, RequestDetails theRequestDetails) {
+		return read(theId, theRequestDetails, false);
+	}
+
+		@Override
+	public T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk) {
 		validateResourceTypeAndThrowIllegalArgumentException(theId);
 
 		// Notify interceptors
@@ -891,9 +896,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		T retVal = toResource(myResourceType, entity, null, false);
 
-		if (entity.getDeleted() != null) {
-			throw new ResourceGoneException("Resource was deleted at " + new InstantType(entity.getDeleted()).getValueAsString());
+		if (theForHistory == false) {
+			if (entity.getDeleted() != null) {
+				throw new ResourceGoneException("Resource was deleted at " + new InstantType(entity.getDeleted()).getValueAsString());
+			}
 		}
+
 
 		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;

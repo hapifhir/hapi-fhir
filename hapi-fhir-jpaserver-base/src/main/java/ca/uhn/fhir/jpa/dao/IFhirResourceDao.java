@@ -171,6 +171,12 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails);
 
+	/**
+	 * Should deleted resources be returned successfully. This should be false for
+	 * a normal FHIR read.
+	 */
+	T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk);
+
 	BaseHasResource readEntity(IIdType theId);
 
 	/**
