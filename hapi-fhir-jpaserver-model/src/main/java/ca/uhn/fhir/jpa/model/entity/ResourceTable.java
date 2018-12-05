@@ -32,10 +32,7 @@ import org.hibernate.search.annotations.*;
 import javax.persistence.Index;
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -611,7 +608,15 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@PreUpdate
 	public void preSave() {
 		if (myHasLinks) {
-			myResourceLinksField = getResourceLinks().stream().map(ResourceLink::getTargetResourcePid).map(t->t.toString()).collect(Collectors.joining(" "));
+			myResourceLinksField = getResourceLinks()
+				.stream()
+				.map(t->{
+					Long retVal = t.getTargetResourcePid();
+					return retVal;
+				})
+				.filter(Objects::nonNull)
+				.map(t->t.toString())
+				.collect(Collectors.joining(" "));
 		} else {
 			myResourceLinksField = null;
 		}
