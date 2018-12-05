@@ -83,7 +83,7 @@
     <sch:rule context="f:DeviceDefinition/f:physicalCharacteristics/f:image">
       <sch:assert test="not(exists(f:data)) or exists(f:contentType)">att-1: If the Attachment has data, it SHALL have a contentType</sch:assert>
     </sch:rule>
-    <sch:rule context="f:DeviceDefinition/f:property/f:valueQuanity">
+    <sch:rule context="f:DeviceDefinition/f:property/f:valueQuantity">
       <sch:assert test="not(exists(f:code)) or exists(f:system)">qty-3: If a code for the unit is present, the system SHALL also be present</sch:assert>
     </sch:rule>
     <sch:rule context="f:DeviceDefinition/f:owner">

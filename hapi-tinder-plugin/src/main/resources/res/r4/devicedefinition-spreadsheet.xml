@@ -1723,7 +1723,7 @@
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="31">
-    <Cell ss:StyleID="s89"><Data ss:Type="String">DeviceDefinition.property.valueQuanity</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">DeviceDefinition.property.valueQuantity</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s100"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5" ss:StyleID="s100"><Data ss:Type="String">Quantity</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
