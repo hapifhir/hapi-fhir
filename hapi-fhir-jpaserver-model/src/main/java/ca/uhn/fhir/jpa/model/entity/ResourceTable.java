@@ -607,7 +607,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@PrePersist
 	@PreUpdate
 	public void preSave() {
-		if (myHasLinks) {
+		if (myHasLinks && myResourceLinks != null) {
 			myResourceLinksField = getResourceLinks()
 				.stream()
 				.map(t->{
