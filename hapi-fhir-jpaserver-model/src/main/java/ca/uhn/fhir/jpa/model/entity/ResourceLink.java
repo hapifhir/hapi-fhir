@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,6 @@ import org.hibernate.search.annotations.Field;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
 
 @Entity
@@ -36,11 +35,10 @@ import java.util.Date;
 	@Index(name = "IDX_RL_SRC", columnList = "SRC_RESOURCE_ID"),
 	@Index(name = "IDX_RL_DEST", columnList = "TARGET_RESOURCE_ID")
 })
-public class ResourceLink implements Serializable {
+public class ResourceLink extends BaseResourceIndex {
 
-	private static final long serialVersionUID = 1L;
 	public static final int SRC_PATH_LENGTH = 200;
-
+	private static final long serialVersionUID = 1L;
 	@SequenceGenerator(name = "SEQ_RESLINK_ID", sequenceName = "SEQ_RESLINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
 	@Id
@@ -122,12 +120,38 @@ public class ResourceLink implements Serializable {
 		return b.isEquals();
 	}
 
+	@Override
+	public void populateFrom(BaseResourceIndex theBaseResourceIndex) {
+		ResourceLink from = (ResourceLink) theBaseResourceIndex;
+		mySourceResource = from.mySourceResource;
+		mySourcePath = from.mySourcePath;
+		mySourceResourcePid = from.mySourceResourcePid;
+		mySourceResourceType = from.mySourceResourceType;
+
+		myTargetResource = from.myTargetResource;
+		myTargetResourcePid = from.myTargetResourcePid;
+		myTargetResourceType = from.myTargetResourceType;
+		myTargetResourceUrl = from.myTargetResourceUrl;
+
+		myUpdated = from.myUpdated;
+	}
+
 	public String getSourcePath() {
 		return mySourcePath;
 	}
 
+	public void setSourcePath(String theSourcePath) {
+		mySourcePath = theSourcePath;
+	}
+
 	public ResourceTable getSourceResource() {
 		return mySourceResource;
+	}
+
+	public void setSourceResource(ResourceTable theSourceResource) {
+		mySourceResource = theSourceResource;
+		mySourceResourcePid = theSourceResource.getId();
+		mySourceResourceType = theSourceResource.getResourceType();
 	}
 
 	public Long getSourceResourcePid() {
@@ -138,43 +162,19 @@ public class ResourceLink implements Serializable {
 		return myTargetResource;
 	}
 
+	public void setTargetResource(ResourceTable theTargetResource) {
+		Validate.notNull(theTargetResource);
+		myTargetResource = theTargetResource;
+		myTargetResourcePid = theTargetResource.getId();
+		myTargetResourceType = theTargetResource.getResourceType();
+	}
+
 	public Long getTargetResourcePid() {
 		return myTargetResourcePid;
 	}
 
 	public String getTargetResourceUrl() {
 		return myTargetResourceUrl;
-	}
-
-	public Date getUpdated() {
-		return myUpdated;
-	}
-
-	@Override
-	public int hashCode() {
-		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(mySourcePath);
-		b.append(mySourceResource);
-		b.append(myTargetResourcePid);
-		b.append(myTargetResourceUrl);
-		return b.toHashCode();
-	}
-
-	public void setSourcePath(String theSourcePath) {
-		mySourcePath = theSourcePath;
-	}
-
-	public void setSourceResource(ResourceTable theSourceResource) {
-		mySourceResource = theSourceResource;
-		mySourceResourcePid = theSourceResource.getId();
-		mySourceResourceType = theSourceResource.getResourceType();
-	}
-
-	public void setTargetResource(ResourceTable theTargetResource) {
-		Validate.notNull(theTargetResource);
-		myTargetResource = theTargetResource;
-		myTargetResourcePid = theTargetResource.getId();
-		myTargetResourceType = theTargetResource.getResourceType();
 	}
 
 	public void setTargetResourceUrl(IIdType theTargetResourceUrl) {
@@ -194,8 +194,22 @@ public class ResourceLink implements Serializable {
 		myTargetResourceUrl = theTargetResourceUrl.getValue();
 	}
 
+	public Date getUpdated() {
+		return myUpdated;
+	}
+
 	public void setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(mySourcePath);
+		b.append(mySourceResource);
+		b.append(myTargetResourcePid);
+		b.append(myTargetResourceUrl);
+		return b.toHashCode();
 	}
 
 	@Override

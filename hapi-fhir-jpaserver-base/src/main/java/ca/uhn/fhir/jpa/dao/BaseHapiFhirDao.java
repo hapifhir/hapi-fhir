@@ -1414,7 +1414,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		if (thePerformIndexing) {
 			myDatabaseSearchParamSynchronizer.synchronizeSearchParamsToDatabase(newParams, theEntity, existingParams);
 			mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, theEntity, existingParams);
-		} // if thePerformIndexing
+		}
 
 		if (theResource != null) {
 			populateResourceIdFromEntity(theEntity, theResource);

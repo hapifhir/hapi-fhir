@@ -156,4 +156,14 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		b.append("lon", getLongitude());
 		return b.build();
 	}
+
+	@Override
+	public void populateFrom(BaseResourceIndex theBaseResourceIndex) {
+		ResourceIndexedSearchParamCoords from = (ResourceIndexedSearchParamCoords) theBaseResourceIndex;
+		super.populateFromBaseResourceIndexedSearchParamValues(from);
+		myLatitude = from.myLatitude;
+		myLongitude = from.myLongitude;
+		myHashIdentity = from.myHashIdentity;
+	}
+
 }

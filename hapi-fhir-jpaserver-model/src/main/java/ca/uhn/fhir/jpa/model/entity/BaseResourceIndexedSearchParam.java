@@ -35,7 +35,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseResourceIndexedSearchParam implements Serializable {
+public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	static final int MAX_SP_NAME = 100;
 	/**
 	 * Don't change this without careful consideration. You will break existing hashes!
@@ -130,6 +130,15 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	public abstract IQueryParameterType toQueryParameterType();
 
 	public abstract void calculateHashes();
+
+	/**
+	 * @see BaseResourceIndex#populateFrom(BaseResourceIndex)
+	 */
+	void populateFromBaseResourceIndexedSearchParamValues(BaseResourceIndexedSearchParam theFrom) {
+		myUpdated = theFrom.myUpdated;
+		myMissing = theFrom.myMissing;
+		myParamName = theFrom.myParamName;
+	}
 
 	public static long calculateHashIdentity(String theResourceType, String theParamName) {
 		return hash(theResourceType, theParamName);

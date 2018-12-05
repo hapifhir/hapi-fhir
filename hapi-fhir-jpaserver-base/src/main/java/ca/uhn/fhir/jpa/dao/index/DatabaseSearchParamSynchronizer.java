@@ -31,6 +31,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 public class DatabaseSearchParamSynchronizer {
@@ -41,79 +42,124 @@ public class DatabaseSearchParamSynchronizer {
 	protected EntityManager myEntityManager;
 
 	public void synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
+
+		/*
+		 * Strings
+		 */
 		theParams.calculateHashes(theParams.stringParams);
-		for (ResourceIndexedSearchParamString next : synchronizeSearchParamsToDatabase(existingParams.stringParams, theParams.stringParams)) {
+		List<ResourceIndexedSearchParamString> stringsToRemove = subtract(existingParams.stringParams, theParams.stringParams);
+		List<ResourceIndexedSearchParamString> stringsToAdd = subtract(theParams.stringParams, existingParams.stringParams);
+		tryToReuseIndexEntities(stringsToRemove, stringsToAdd);
+		for (ResourceIndexedSearchParamString next : stringsToRemove) {
 			next.setModelConfig(myDaoConfig.getModelConfig());
 			myEntityManager.remove(next);
 			theEntity.getParamsString().remove(next);
 		}
-		for (ResourceIndexedSearchParamString next : synchronizeSearchParamsToDatabase(theParams.stringParams, existingParams.stringParams)) {
+		for (ResourceIndexedSearchParamString next : stringsToAdd) {
 			myEntityManager.persist(next);
 		}
 
+		/*
+		 * Tokens
+		 */
 		theParams.calculateHashes(theParams.tokenParams);
-		for (ResourceIndexedSearchParamToken next : synchronizeSearchParamsToDatabase(existingParams.tokenParams, theParams.tokenParams)) {
+		List<ResourceIndexedSearchParamToken> tokensToRemove = subtract(existingParams.tokenParams, theParams.tokenParams);
+		List<ResourceIndexedSearchParamToken> tokensToAdd = subtract(theParams.tokenParams, existingParams.tokenParams);
+		tryToReuseIndexEntities(tokensToRemove, tokensToAdd);
+		for (ResourceIndexedSearchParamToken next : tokensToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsToken().remove(next);
 		}
-		for (ResourceIndexedSearchParamToken next : synchronizeSearchParamsToDatabase(theParams.tokenParams, existingParams.tokenParams)) {
+		for (ResourceIndexedSearchParamToken next : tokensToAdd) {
 			myEntityManager.persist(next);
 		}
 
+		/*
+		 * Numbers
+		 */
 		theParams.calculateHashes(theParams.numberParams);
-		for (ResourceIndexedSearchParamNumber next : synchronizeSearchParamsToDatabase(existingParams.numberParams, theParams.numberParams)) {
+		List<ResourceIndexedSearchParamNumber> numbersToRemove = subtract(existingParams.numberParams, theParams.numberParams);
+		List<ResourceIndexedSearchParamNumber> numbersToAdd = subtract(theParams.numberParams, existingParams.numberParams);
+		tryToReuseIndexEntities(numbersToRemove, numbersToAdd);
+		for (ResourceIndexedSearchParamNumber next : numbersToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsNumber().remove(next);
 		}
-		for (ResourceIndexedSearchParamNumber next : synchronizeSearchParamsToDatabase(theParams.numberParams, existingParams.numberParams)) {
+		for (ResourceIndexedSearchParamNumber next : numbersToAdd) {
 			myEntityManager.persist(next);
 		}
 
+		/*
+		 * Quantities
+		 */
 		theParams.calculateHashes(theParams.quantityParams);
-		for (ResourceIndexedSearchParamQuantity next : synchronizeSearchParamsToDatabase(existingParams.quantityParams, theParams.quantityParams)) {
+		List<ResourceIndexedSearchParamQuantity> quantitiesToRemove = subtract(existingParams.quantityParams, theParams.quantityParams);
+		List<ResourceIndexedSearchParamQuantity> quantitiesToAdd = subtract(theParams.quantityParams, existingParams.quantityParams);
+		tryToReuseIndexEntities(quantitiesToRemove, quantitiesToAdd);
+		for (ResourceIndexedSearchParamQuantity next : quantitiesToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsQuantity().remove(next);
 		}
-		for (ResourceIndexedSearchParamQuantity next : synchronizeSearchParamsToDatabase(theParams.quantityParams, existingParams.quantityParams)) {
+		for (ResourceIndexedSearchParamQuantity next : quantitiesToAdd) {
 			myEntityManager.persist(next);
 		}
 
-		// Store date SP's
+		/*
+		 * Dates
+		 */
 		theParams.calculateHashes(theParams.dateParams);
-		for (ResourceIndexedSearchParamDate next : synchronizeSearchParamsToDatabase(existingParams.dateParams, theParams.dateParams)) {
+		List<ResourceIndexedSearchParamDate> datesToRemove = subtract(existingParams.dateParams, theParams.dateParams);
+		List<ResourceIndexedSearchParamDate> datesToAdd = subtract(theParams.dateParams, existingParams.dateParams);
+		tryToReuseIndexEntities(datesToRemove, datesToAdd);
+		for (ResourceIndexedSearchParamDate next : datesToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsDate().remove(next);
 		}
-		for (ResourceIndexedSearchParamDate next : synchronizeSearchParamsToDatabase(theParams.dateParams, existingParams.dateParams)) {
+		for (ResourceIndexedSearchParamDate next : datesToAdd) {
 			myEntityManager.persist(next);
 		}
 
-		// Store URI SP's
+		/*
+		 * URIs
+		 */
 		theParams.calculateHashes(theParams.uriParams);
-		for (ResourceIndexedSearchParamUri next : synchronizeSearchParamsToDatabase(existingParams.uriParams, theParams.uriParams)) {
+		List<ResourceIndexedSearchParamUri> urisToRemove = subtract(existingParams.uriParams, theParams.uriParams);
+		List<ResourceIndexedSearchParamUri> urisToAdd = subtract(theParams.uriParams, existingParams.uriParams);
+		tryToReuseIndexEntities(urisToRemove, urisToAdd);
+		for (ResourceIndexedSearchParamUri next : urisToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsUri().remove(next);
 		}
-		for (ResourceIndexedSearchParamUri next : synchronizeSearchParamsToDatabase(theParams.uriParams, existingParams.uriParams)) {
+		for (ResourceIndexedSearchParamUri next : urisToAdd) {
 			myEntityManager.persist(next);
 		}
 
-		// Store Coords SP's
+		/*
+		 * Coords
+		 */
 		theParams.calculateHashes(theParams.coordsParams);
-		for (ResourceIndexedSearchParamCoords next : synchronizeSearchParamsToDatabase(existingParams.coordsParams, theParams.coordsParams)) {
+		List<ResourceIndexedSearchParamCoords> coordsToRemove = subtract(existingParams.coordsParams, theParams.coordsParams);
+		List<ResourceIndexedSearchParamCoords> coordsToAdd = subtract(theParams.coordsParams, existingParams.coordsParams);
+		tryToReuseIndexEntities(coordsToRemove, coordsToAdd);
+		for (ResourceIndexedSearchParamCoords next : coordsToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsCoords().remove(next);
 		}
-		for (ResourceIndexedSearchParamCoords next : synchronizeSearchParamsToDatabase(theParams.coordsParams, existingParams.coordsParams)) {
+		for (ResourceIndexedSearchParamCoords next : coordsToAdd) {
 			myEntityManager.persist(next);
 		}
 
-		// Store resource links
-		for (ResourceLink next : synchronizeSearchParamsToDatabase(existingParams.links, theParams.links)) {
+		/*
+		 * Resource links
+		 */
+		List<ResourceLink> resourceLinksToRemove = subtract(existingParams.links, theParams.links);
+		List<ResourceLink> resourceLinksToAdd = subtract(theParams.links, existingParams.links);
+		tryToReuseIndexEntities(resourceLinksToRemove, resourceLinksToAdd);
+		for (ResourceLink next : resourceLinksToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getResourceLinks().remove(next);
 		}
-		for (ResourceLink next : synchronizeSearchParamsToDatabase(theParams.links, existingParams.links)) {
+		for (ResourceLink next : resourceLinksToAdd) {
 			myEntityManager.persist(next);
 		}
 
@@ -121,15 +167,37 @@ public class DatabaseSearchParamSynchronizer {
 		theEntity.setResourceLinks(theParams.links);
 	}
 
-	public <T> Collection<T> synchronizeSearchParamsToDatabase(Collection<T> theInput, Collection<T> theToRemove) {
-		assert theInput != theToRemove;
+	/**
+	 * The logic here is that often times when we update a resource we are dropping
+	 * one index row and adding another. This method tries to reuse rows that would otherwise
+	 * have been deleted by updating them with the contents of rows that would have
+	 * otherwise been added. In other words, we're trying to replace
+	 * "one delete + one insert" with "one update"
+	 *
+	 * @param theIndexesToRemove The rows that would be removed
+	 * @param theIndexesToAdd The rows that would be added
+	 */
+	private <T extends BaseResourceIndex> void tryToReuseIndexEntities(List<T> theIndexesToRemove, List<T> theIndexesToAdd) {
+		for (int addIndex = 0; addIndex < theIndexesToAdd.size(); addIndex++) {
+			if (theIndexesToRemove.isEmpty()) {
+				break;
+			}
 
-		if (theInput.isEmpty()) {
-			return theInput;
+			T entityToReuse = theIndexesToRemove.remove(theIndexesToRemove.size() - 1);
+			entityToReuse.populateFrom(theIndexesToAdd.get(addIndex));
+			theIndexesToAdd.set(addIndex, entityToReuse);
+		}
+	}
+
+	<T> List<T> subtract(Collection<T> theSubtractFrom, Collection<T> theToSubtract) {
+		assert theSubtractFrom != theToSubtract;
+
+		if (theSubtractFrom.isEmpty()) {
+			return new ArrayList<>();
 		}
 
-		ArrayList<T> retVal = new ArrayList<>(theInput);
-		retVal.removeAll(theToRemove);
+		ArrayList<T> retVal = new ArrayList<>(theSubtractFrom);
+		retVal.removeAll(theToSubtract);
 		return retVal;
 	}
 }
