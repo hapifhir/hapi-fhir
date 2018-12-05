@@ -31,7 +31,6 @@ import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
 
 @MappedSuperclass
@@ -80,7 +79,8 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		// nothing
 	}
 
-	protected abstract Long getId();
+	@Override
+	public abstract Long getId();
 
 	public String getParamName() {
 		return myParamName;
@@ -128,17 +128,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public abstract IQueryParameterType toQueryParameterType();
-
-	public abstract void calculateHashes();
-
-	/**
-	 * @see BaseResourceIndex#populateFrom(BaseResourceIndex)
-	 */
-	void populateFromBaseResourceIndexedSearchParamValues(BaseResourceIndexedSearchParam theFrom) {
-		myUpdated = theFrom.myUpdated;
-		myMissing = theFrom.myMissing;
-		myParamName = theFrom.myParamName;
-	}
 
 	public static long calculateHashIdentity(String theResourceType, String theParamName) {
 		return hash(theResourceType, theParamName);

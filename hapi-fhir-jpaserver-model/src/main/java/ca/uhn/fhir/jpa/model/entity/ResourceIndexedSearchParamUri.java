@@ -138,9 +138,15 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	}
 
 	@Override
-	protected Long getId() {
+	public Long getId() {
 		return myId;
 	}
+
+	@Override
+	public void setId(Long theId) {
+		myId =theId;
+	}
+
 
 	public String getUri() {
 		return myUri;
@@ -182,16 +188,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		}
 		UriParam uri = (UriParam) theParam;
 		return getUri().equalsIgnoreCase(uri.getValueNotNull());
-	}
-
-	@Override
-	public void populateFrom(BaseResourceIndex theBaseResourceIndex) {
-		ResourceIndexedSearchParamUri from = (ResourceIndexedSearchParamUri) theBaseResourceIndex;
-		super.populateFromBaseResourceIndexedSearchParamValues(from);
-		myUri = from.myUri;
-
-		myHashIdentity = from.myHashIdentity;
-		myHashUri = from.myHashUri;
 	}
 
 	public static long calculateHashUri(String theResourceType, String theParamName, String theUri) {

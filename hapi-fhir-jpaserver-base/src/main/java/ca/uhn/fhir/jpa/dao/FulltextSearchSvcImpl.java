@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -42,7 +42,7 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
-import org.hl7.fhir.dstu3.model.BaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -181,7 +181,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		addTextSearch(qb, bool, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
 
 		if (theReferencingPid != null) {
-			bool.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(theReferencingPid).createQuery());
+			bool.must(qb.keyword().onField("myResourceLinksField").matching(theReferencingPid.toString()).createQuery());
 		}
 
 		if (bool.isEmpty()) {
@@ -201,13 +201,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		// execute search
 		List<?> result = jpaQuery.getResultList();
 
-		HashSet<Long> pidsSet = pids != null ? new HashSet<Long>(pids) : null;
-
-		ArrayList<Long> retVal = new ArrayList<Long>();
+		ArrayList<Long> retVal = new ArrayList<>();
 		for (Object object : result) {
 			Object[] nextArray = (Object[]) object;
 			Long next = (Long) nextArray[0];
-			if (next != null && (pidsSet == null || pidsSet.contains(next))) {
+			if (next != null) {
 				retVal.add(next);
 			}
 		}
@@ -219,9 +217,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public List<Long> everything(String theResourceName, SearchParameterMap theParams) {
 
 		Long pid = null;
-		if (theParams.get(BaseResource.SP_RES_ID) != null) {
+		if (theParams.get(IAnyResource.SP_RES_ID) != null) {
 			String idParamValue;
-			IQueryParameterType idParam = theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
+			IQueryParameterType idParam = theParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
 			if (idParam instanceof TokenParam) {
 				TokenParam idParm = (TokenParam) idParam;
 				idParamValue = idParm.getValue();
@@ -298,7 +296,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.sentence(theText.toLowerCase()).createQuery();
 
 		Query query = qb.bool()
-			.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(pid).createQuery())
+//			.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(pid).createQuery())
+			.must(qb.keyword().onField("myResourceLinksField").matching(pid.toString()).createQuery())
 			.must(textQuery)
 			.createQuery();
 
@@ -345,7 +344,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		long delay = System.currentTimeMillis() - start;
-		ourLog.info("Provided {} suggestions for term {} in {} ms", new Object[]{terms.size(), theText, delay});
+		ourLog.info("Provided {} suggestions for term {} in {} ms", terms.size(), theText, delay);
 
 		return suggestions;
 	}
@@ -358,14 +357,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		private ArrayList<Float> myPartialMatchScores;
 		private String myOriginalSearch;
 
-		public MySuggestionFormatter(String theOriginalSearch, List<Suggestion> theSuggestions) {
+		MySuggestionFormatter(String theOriginalSearch, List<Suggestion> theSuggestions) {
 			myOriginalSearch = theOriginalSearch;
 			mySuggestions = theSuggestions;
 		}
 
 		@Override
 		public String highlightTerm(String theOriginalText, TokenGroup theTokenGroup) {
-			ourLog.debug("{} Found {} with score {}", new Object[]{myAnalyzer, theOriginalText, theTokenGroup.getTotalScore()});
+			ourLog.debug("{} Found {} with score {}", myAnalyzer, theOriginalText, theTokenGroup.getTotalScore());
 			if (theTokenGroup.getTotalScore() > 0) {
 				float score = theTokenGroup.getTotalScore();
 				if (theOriginalText.equalsIgnoreCase(myOriginalSearch)) {
@@ -385,13 +384,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			return null;
 		}
 
-		public void setAnalyzer(String theString) {
+		void setAnalyzer(String theString) {
 			myAnalyzer = theString;
 		}
 
-		public void setFindPhrasesWith() {
-			myPartialMatchPhrases = new ArrayList<String>();
-			myPartialMatchScores = new ArrayList<Float>();
+		void setFindPhrasesWith() {
+			myPartialMatchPhrases = new ArrayList<>();
+			myPartialMatchScores = new ArrayList<>();
 
 			for (Suggestion next : mySuggestions) {
 				myPartialMatchPhrases.add(' ' + next.myTerm);
@@ -408,7 +407,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		private String myTerm;
 		private float myScore;
 
-		public Suggestion(String theTerm, float theScore) {
+		Suggestion(String theTerm, float theScore) {
 			myTerm = theTerm;
 			myScore = theScore;
 		}

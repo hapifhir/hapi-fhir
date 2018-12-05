@@ -192,8 +192,13 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	@Override
-	protected Long getId() {
+	public Long getId() {
 		return myId;
+	}
+
+	@Override
+	public void setId(Long theId) {
+		myId =theId;
 	}
 
 	public String getSystem() {
@@ -263,19 +268,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			}
 		}
 		return retval;
-	}
-
-	@Override
-	public void populateFrom(BaseResourceIndex theBaseResourceIndex) {
-		ResourceIndexedSearchParamToken from = (ResourceIndexedSearchParamToken) theBaseResourceIndex;
-		super.populateFromBaseResourceIndexedSearchParamValues(from);
-		mySystem = from.mySystem;
-		myValue = from.myValue;
-
-		myHashIdentity = from.myHashIdentity;
-		myHashSystem = from.myHashSystem;
-		myHashSystemAndValue = from.myHashSystemAndValue;
-		myHashValue = from.myHashValue;
 	}
 
 	public static long calculateHashSystem(String theResourceType, String theParamName, String theSystem) {

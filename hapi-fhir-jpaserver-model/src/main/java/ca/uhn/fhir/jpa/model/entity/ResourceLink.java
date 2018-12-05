@@ -120,22 +120,6 @@ public class ResourceLink extends BaseResourceIndex {
 		return b.isEquals();
 	}
 
-	@Override
-	public void populateFrom(BaseResourceIndex theBaseResourceIndex) {
-		ResourceLink from = (ResourceLink) theBaseResourceIndex;
-		mySourceResource = from.mySourceResource;
-		mySourcePath = from.mySourcePath;
-		mySourceResourcePid = from.mySourceResourcePid;
-		mySourceResourceType = from.mySourceResourceType;
-
-		myTargetResource = from.myTargetResource;
-		myTargetResourcePid = from.myTargetResourcePid;
-		myTargetResourceType = from.myTargetResourceType;
-		myTargetResourceUrl = from.myTargetResourceUrl;
-
-		myUpdated = from.myUpdated;
-	}
-
 	public String getSourcePath() {
 		return mySourcePath;
 	}
@@ -200,6 +184,21 @@ public class ResourceLink extends BaseResourceIndex {
 
 	public void setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
+	}
+
+	@Override
+	public Long getId() {
+		return myId;
+	}
+
+	@Override
+	public void setId(Long theId) {
+		myId = theId;
+	}
+
+	@Override
+	public void calculateHashes() {
+		// nothing right now
 	}
 
 	@Override

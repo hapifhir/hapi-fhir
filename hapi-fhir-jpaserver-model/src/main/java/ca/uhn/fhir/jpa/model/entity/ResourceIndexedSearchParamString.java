@@ -202,17 +202,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return b.isEquals();
 	}
 
-	@Override
-	public void populateFrom(BaseResourceIndex theBaseResourceIndex) {
-		ResourceIndexedSearchParamString from = (ResourceIndexedSearchParamString) theBaseResourceIndex;
-		super.populateFromBaseResourceIndexedSearchParamValues(from);
-		myHashExact = from.myHashExact;
-		myHashIdentity = from.myHashIdentity;
-		myHashNormalizedPrefix = from.myHashNormalizedPrefix;
-		myValueExact = from.myValueExact;
-		myValueNormalized = from.myValueNormalized;
-	}
-
 	public Long getHashExact() {
 		calculateHashes();
 		return myHashExact;
@@ -232,9 +221,15 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	@Override
-	protected Long getId() {
+	public Long getId() {
 		return myId;
 	}
+
+	@Override
+	public void setId(Long theId) {
+		myId =theId;
+	}
+
 
 	public String getValueExact() {
 		return myValueExact;

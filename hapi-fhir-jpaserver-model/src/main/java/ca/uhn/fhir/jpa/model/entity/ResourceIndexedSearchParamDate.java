@@ -130,8 +130,13 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	@Override
-	protected Long getId() {
+	public Long getId() {
 		return myId;
+	}
+
+	@Override
+	public void setId(Long theId) {
+		myId =theId;
 	}
 
 	protected Long getTimeFromDate(Date date) {
@@ -212,16 +217,5 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		return result;
 	}
-
-	@Override
-	public void populateFrom(BaseResourceIndex theBaseResourceIndex) {
-		ResourceIndexedSearchParamDate from = (ResourceIndexedSearchParamDate) theBaseResourceIndex;
-		super.populateFromBaseResourceIndexedSearchParamValues(from);
-		myValueHigh = from.myValueHigh;
-		myValueLow = from.myValueLow;
-		myOriginalValue = from.myOriginalValue;
-		myHashIdentity = from.myHashIdentity;
-	}
-
 
 }

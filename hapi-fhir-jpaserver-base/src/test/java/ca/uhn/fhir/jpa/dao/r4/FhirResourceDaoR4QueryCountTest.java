@@ -133,7 +133,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		p.getPhotoFirstRep().setCreationElement(new DateTimeType("2012")); // non-indexed field
 		myPatientDao.update(p).getId().toUnqualifiedVersionless();
 
-		assertEquals(5, getQueryCount().getSelect());
+		assertEquals(4, getQueryCount().getSelect());
 		assertEquals(1, getQueryCount().getInsert());
 		assertEquals(0, getQueryCount().getDelete());
 		assertEquals(1, getQueryCount().getUpdate());
@@ -190,8 +190,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		pt.addName().setFamily("FAMILY1").addGiven("GIVEN1A").addGiven("GIVEN1B");
 		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 
-		ourLog.info("Now have {} deleted", getQueryCount().getDelete());
-		ourLog.info("Now have {} inserts", getQueryCount().getInsert());
 		myCountHolder.clear();
 
 		ourLog.info("** About to update");
@@ -200,8 +198,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		pt.getNameFirstRep().addGiven("GIVEN1C");
 		myPatientDao.update(pt);
 
-		ourLog.info("Now have {} deleted", getQueryCount().getDelete());
-		ourLog.info("Now have {} inserts", getQueryCount().getInsert());
 		assertEquals(0, getQueryCount().getDelete());
 		assertEquals(2, getQueryCount().getInsert());
 	}
@@ -219,8 +215,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		pt.addName().setFamily("FAMILY1");
 		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 
-		ourLog.info("Now have {} deleted", getQueryCount().getDelete());
-		ourLog.info("Now have {} inserts", getQueryCount().getInsert());
 		myCountHolder.clear();
 
 		assertEquals(1, myPatientDao.search(m1).size().intValue());
@@ -233,9 +227,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		pt.addName().setFamily("FAMILY2");
 		myPatientDao.update(pt);
 
-		ourLog.info("Now have {} deletes", getQueryCount().getDelete());
-		ourLog.info("Now have {} inserts", getQueryCount().getInsert());
-		ourLog.info("Now have {} updates", getQueryCount().getUpdate());
 		assertEquals(0, getQueryCount().getDelete());
 		assertEquals(1, getQueryCount().getInsert()); // Add an entry to HFJ_RES_VER
 		assertEquals(2, getQueryCount().getUpdate()); // Update SPIDX_STRING and HFJ_RESOURCE
@@ -257,10 +248,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		pt.setGender(Enumerations.AdministrativeGender.MALE);
 		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 
-		ourLog.info("Now have {} deleted", getQueryCount().getDelete());
-		ourLog.info("Now have {} inserts", getQueryCount().getInsert());
-		myCountHolder.clear();
-
+		assertEquals(0, getQueryCount().getSelect());
+		assertEquals(0, getQueryCount().getDelete());
+		assertEquals(3, getQueryCount().getInsert());
+		assertEquals(0, getQueryCount().getUpdate());
 		assertEquals(1, myPatientDao.search(m1).size().intValue());
 		assertEquals(0, myPatientDao.search(m2).size().intValue());
 
@@ -269,15 +260,20 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		 */
 
 		ourLog.info("** About to update");
+		myCountHolder.clear();
 
 		pt = new Patient();
 		pt.setId(id);
 		pt.setGender(Enumerations.AdministrativeGender.FEMALE);
 		myPatientDao.update(pt);
 
-		ourLog.info("Now have {} deletes", getQueryCount().getDelete());
-		ourLog.info("Now have {} inserts", getQueryCount().getInsert());
-		ourLog.info("Now have {} updates", getQueryCount().getUpdate());
+		/*
+		 * Current SELECTs:
+		 *   Select the resource from HFJ_RESOURCE
+		 *   Select the version from HFJ_RES_VER
+		 *   Select the current token indexes
+		 */
+		assertEquals(3, getQueryCount().getSelect());
 		assertEquals(0, getQueryCount().getDelete());
 		assertEquals(1, getQueryCount().getInsert()); // Add an entry to HFJ_RES_VER
 		assertEquals(2, getQueryCount().getUpdate()); // Update SPIDX_STRING and HFJ_RESOURCE
@@ -296,9 +292,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		pt.setId(id);
 		myPatientDao.update(pt);
 
-		ourLog.info("Now have {} deletes", getQueryCount().getDelete());
-		ourLog.info("Now have {} inserts", getQueryCount().getInsert());
-		ourLog.info("Now have {} updates", getQueryCount().getUpdate());
 		assertEquals(1, getQueryCount().getDelete());
 		assertEquals(1, getQueryCount().getInsert());
 		assertEquals(1, getQueryCount().getUpdate());
@@ -327,8 +320,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		pt.getManagingOrganization().setReference(orgId1.getValue());
 		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 
-		ourLog.info("Now have {} deleted", getQueryCount().getDelete());
-		ourLog.info("Now have {} inserts", getQueryCount().getInsert());
 		myCountHolder.clear();
 
 		assertEquals(1, myPatientDao.search(m1).size().intValue());
@@ -341,9 +332,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseJpaR4Test {
 		pt.getManagingOrganization().setReference(orgId2.getValue());
 		myPatientDao.update(pt);
 
-		ourLog.info("Now have {} deletes", getQueryCount().getDelete());
-		ourLog.info("Now have {} inserts", getQueryCount().getInsert());
-		ourLog.info("Now have {} updates", getQueryCount().getUpdate());
 		assertEquals(0, getQueryCount().getDelete());
 		assertEquals(1, getQueryCount().getInsert()); // Add an entry to HFJ_RES_VER
 		assertEquals(2, getQueryCount().getUpdate()); // Update SPIDX_STRING and HFJ_RESOURCE

@@ -112,9 +112,15 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	}
 
 	@Override
-	protected Long getId() {
+	public Long getId() {
 		return myId;
 	}
+
+	@Override
+	public void setId(Long theId) {
+		myId =theId;
+	}
+
 
 	public double getLatitude() {
 		return myLatitude;
@@ -155,15 +161,6 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		b.append("lat", getLatitude());
 		b.append("lon", getLongitude());
 		return b.build();
-	}
-
-	@Override
-	public void populateFrom(BaseResourceIndex theBaseResourceIndex) {
-		ResourceIndexedSearchParamCoords from = (ResourceIndexedSearchParamCoords) theBaseResourceIndex;
-		super.populateFromBaseResourceIndexedSearchParamValues(from);
-		myLatitude = from.myLatitude;
-		myLongitude = from.myLongitude;
-		myHashIdentity = from.myHashIdentity;
 	}
 
 }

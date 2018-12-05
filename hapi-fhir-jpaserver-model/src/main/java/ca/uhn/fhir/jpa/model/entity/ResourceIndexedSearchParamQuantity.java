@@ -166,8 +166,13 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	@Override
-	protected Long getId() {
+	public Long getId() {
 		return myId;
+	}
+
+	@Override
+	public void setId(Long theId) {
+		myId =theId;
 	}
 
 	public String getSystem() {
@@ -258,19 +263,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 			}
 		}
 		return retval;
-	}
-
-	@Override
-	public void populateFrom(BaseResourceIndex theBaseResourceIndex) {
-		ResourceIndexedSearchParamQuantity from = (ResourceIndexedSearchParamQuantity) theBaseResourceIndex;
-		super.populateFromBaseResourceIndexedSearchParamValues(from);
-		mySystem = from.mySystem;
-		myUnits = from.myUnits;
-		myValue = from.myValue;
-
-		myHashIdentity = from.myHashIdentity;
-		myHashIdentityAndUnits = from.myHashIdentityAndUnits;
-		myHashIdentitySystemAndUnits = from.myHashIdentitySystemAndUnits;
 	}
 
 	public static long calculateHashSystemAndUnits(String theResourceType, String theParamName, String theSystem, String theUnits) {
