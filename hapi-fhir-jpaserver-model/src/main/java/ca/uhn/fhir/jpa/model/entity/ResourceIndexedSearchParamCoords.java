@@ -104,6 +104,7 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	}
 
 	public Long getHashIdentity() {
+		calculateHashes();
 		return myHashIdentity;
 	}
 

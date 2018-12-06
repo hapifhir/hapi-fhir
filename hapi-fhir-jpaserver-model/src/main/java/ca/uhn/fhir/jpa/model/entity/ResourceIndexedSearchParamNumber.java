@@ -106,6 +106,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	}
 
 	public Long getHashIdentity() {
+		calculateHashes();
 		return myHashIdentity;
 	}
 

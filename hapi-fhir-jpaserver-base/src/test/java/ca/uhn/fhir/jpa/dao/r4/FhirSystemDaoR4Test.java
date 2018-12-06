@@ -625,6 +625,69 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 
+	@Test
+	public void testReindexingSingleStringHashValueIsDeleted() {
+		Patient p = new Patient();
+		p.addName().setFamily("family1");
+		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap searchParamMap = new SearchParameterMap();
+		searchParamMap.setLoadSynchronous(true);
+		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family1"));
+		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+
+		runInTransaction(()->{
+			myEntityManager
+				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashNormalizedPrefix = null")
+				.executeUpdate();
+		});
+
+		assertEquals(0, myPatientDao.search(searchParamMap).size().intValue());
+
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+
+		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+	}
+
+	@Test
+	public void testReindexingSingleStringHashIdentityValueIsDeleted() {
+		Patient p = new Patient();
+		p.addName().setFamily("family1");
+		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap searchParamMap = new SearchParameterMap();
+		searchParamMap.setLoadSynchronous(true);
+		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family1"));
+		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+
+		runInTransaction(()->{
+			Long i = myEntityManager
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.getSingleResult();
+			assertEquals(0L, i.longValue());
+
+			myEntityManager
+				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashIdentity = null")
+				.executeUpdate();
+
+			i = myEntityManager
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.getSingleResult();
+			assertThat(i, greaterThan(1L));
+
+		});
+
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+
+		runInTransaction(()->{
+			Long i = myEntityManager
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.getSingleResult();
+			assertEquals(0L, i.longValue());
+		});
+	}
 
 	@Test
 	public void testSystemMetaOperation() {

@@ -158,6 +158,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	private Long getHashIdentitySystemAndUnits() {
+		calculateHashes();
 		return myHashIdentitySystemAndUnits;
 	}
 
