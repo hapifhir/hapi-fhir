@@ -1310,17 +1310,17 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>false</code> (default is true) the server will not use
-	 * in-memory subscription searching and instead use the database matcher for all subscription
+	 * in-memory subscription searching and instead use the database dbmatcher for all subscription
 	 * criteria matching.
 	 * <p>
 	 * When there are subscriptions registered
 	 * on the server, the default behaviour is to compare the changed resource to the
 	 * subscription criteria directly in-memory without going out to the database.
 	 * Certain types of subscription criteria, e.g. chained references of queries with
-	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
-	 * to a database matcher.
+	 * qualifiers or prefixes, are not supported by the in-memory dbmatcher and will fall back
+	 * to a database dbmatcher.
 	 * <p>
-	 * The database matcher performs a query against the
+	 * The database dbmatcher performs a query against the
 	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
 	 *
 	 * @since 3.6.1
@@ -1332,17 +1332,17 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>false</code> (default is true) the server will not use
-	 * in-memory subscription searching and instead use the database matcher for all subscription
+	 * in-memory subscription searching and instead use the database dbmatcher for all subscription
 	 * criteria matching.
 	 * <p>
 	 * When there are subscriptions registered
 	 * on the server, the default behaviour is to compare the changed resource to the
 	 * subscription criteria directly in-memory without going out to the database.
 	 * Certain types of subscription criteria, e.g. chained references of queries with
-	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
-	 * to a database matcher.
+	 * qualifiers or prefixes, are not supported by the in-memory dbmatcher and will fall back
+	 * to a database dbmatcher.
 	 * <p>
-	 * The database matcher performs a query against the
+	 * The database dbmatcher performs a query against the
 	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
 	 *
 	 * @since 3.6.1

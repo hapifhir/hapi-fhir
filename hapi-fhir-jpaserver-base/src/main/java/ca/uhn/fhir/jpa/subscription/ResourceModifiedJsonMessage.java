@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifiedMessage> {
 
-	@JsonProperty("headers")
+	@JsonProperty("payload")
 	private ResourceModifiedMessage myPayload;
 
 	/**

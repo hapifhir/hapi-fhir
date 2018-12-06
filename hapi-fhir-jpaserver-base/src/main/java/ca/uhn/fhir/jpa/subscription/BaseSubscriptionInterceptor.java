@@ -11,10 +11,9 @@ import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherCompositeInMemoryDatabase;
-import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherDatabase;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherCompositeInMemoryDatabase;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -439,15 +438,12 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	@Override
 	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
-		msg.setId(theResource.getIdElement());
-		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.DELETE);
-		submitResourceModified(msg);
+		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
 	}
 
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-		submitResourceModifiedForUpdate(theNewResource);
+		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
 	void submitResourceModifiedForUpdate(IBaseResource theNewResource) {
@@ -455,10 +451,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
-		msg.setId(theNewResource.getIdElement());
-		msg.setOperationType(theOperationType);
-		msg.setNewPayload(myCtx, theNewResource);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(myCtx, theNewResource, theOperationType);
 		if (ourForcePayloadEncodeAndDecodeForUnitTests) {
 			msg.clearPayloadDecoded();
 		}

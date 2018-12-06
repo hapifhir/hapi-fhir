@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import(TestSubscriptionConfig.class)
-public class TestSubscriptionDstu3Config extends BaseSubscriptionDstu3Config {
+public class TestSubscriptionDstu3Config extends SubscriptionDstu3Config {
 	@Bean
 	@Override
 	public ISearchParamProvider searchParamProvider() {

@@ -155,6 +155,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public boolean matches(IQueryParameterType theParam) {
-		throw new UnsupportedOperationException("No parameter matcher for "+theParam);
+		throw new UnsupportedOperationException("No parameter dbmatcher for "+theParam);
 	}
 }

@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
-// FIXME KHS
+// FIXME KHS Wait for Chris Schuler to fix the external jar this project depends on
 @Ignore
 public class CdsExampleTests {
 	private static IGenericClient ourClient;

@@ -293,11 +293,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		ourLog.info("Submitting resource {} to subscription {}", theResourceToTrigger.getIdElement().toUnqualifiedVersionless().getValue(), theSubscriptionId);
 
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
-		msg.setId(theResourceToTrigger.getIdElement());
-		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theResourceToTrigger, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 		msg.setSubscriptionId(new IdType(theSubscriptionId).toUnqualifiedVersionless().getValue());
-		msg.setNewPayload(myFhirContext, theResourceToTrigger);
 
 		return myExecutorService.submit(() -> {
 			for (int i = 0; ; i++) {

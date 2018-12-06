@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.matcher;
+package ca.uhn.fhir.jpa.subscription.dbmatcher;
 
 /*-
  * #%L

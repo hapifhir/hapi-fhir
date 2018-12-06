@@ -30,7 +30,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = "ca.uhn.fhir.jpa")
+@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam", "ca.uhn.fhir.jpa.subscription.matcher"})
 public abstract class BaseSubscriptionConfig {
 	@Autowired
 	IGenericClient myClient;

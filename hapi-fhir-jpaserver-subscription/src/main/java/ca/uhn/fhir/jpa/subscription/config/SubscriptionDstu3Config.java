@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 // From BaseDstu3Config
-public class BaseSubscriptionDstu3Config extends BaseSubscriptionConfig {
+public class SubscriptionDstu3Config extends BaseSubscriptionConfig {
 	@Override
 	public FhirContext fhirContext() {
 		return fhirContextDstu3();

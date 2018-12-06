@@ -61,9 +61,6 @@ public class ResourceLinkExtractor {
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
-
 	public void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver) {
 		String resourceType = theEntity.getResourceType();
 

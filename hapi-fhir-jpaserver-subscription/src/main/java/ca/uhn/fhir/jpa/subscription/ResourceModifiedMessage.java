@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.utilities.graphql.Operation;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -52,6 +54,18 @@ public class ResourceModifiedMessage {
 	private String myPayloadId;
 	@JsonIgnore
 	private transient IBaseResource myPayloadDecoded;
+
+	// For JSON
+	public ResourceModifiedMessage() {
+	}
+
+	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
+		setId(theResource.getIdElement());
+		setOperationType(theOperationType);
+		if (theOperationType != OperationTypeEnum.DELETE) {
+			setNewPayload(theFhirContext, theResource);
+		}
+	}
 
 	public String getPayloadId() {
 		return myPayloadId;
