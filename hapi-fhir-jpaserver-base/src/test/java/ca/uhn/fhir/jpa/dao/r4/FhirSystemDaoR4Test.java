@@ -517,15 +517,19 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testReindexing() {
+	public void testReindexing() throws InterruptedException {
 		Patient p = new Patient();
 		p.addName().setFamily("family");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualified();
+
+		sleepUntilTimeChanges();
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://foo");
 		myValueSetDao.create(vs, mySrd);
 
+		sleepUntilTimeChanges();
+		
 		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
