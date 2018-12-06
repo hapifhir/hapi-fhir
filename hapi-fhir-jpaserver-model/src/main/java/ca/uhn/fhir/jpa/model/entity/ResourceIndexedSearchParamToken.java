@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -159,6 +159,10 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return myHashSystem;
 	}
 
+	private void setHashSystem(Long theHashSystem) {
+		myHashSystem = theHashSystem;
+	}
+
 	private Long getHashIdentity() {
 		calculateHashes();
 		return myHashIdentity;
@@ -166,10 +170,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	private void setHashIdentity(Long theHashIdentity) {
 		myHashIdentity = theHashIdentity;
-	}
-
-	private void setHashSystem(Long theHashSystem) {
-		myHashSystem = theHashSystem;
 	}
 
 	Long getHashSystemAndValue() {
@@ -192,8 +192,13 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	@Override
-	protected Long getId() {
+	public Long getId() {
 		return myId;
+	}
+
+	@Override
+	public void setId(Long theId) {
+		myId =theId;
 	}
 
 	public String getSystem() {
@@ -240,24 +245,12 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return b.build();
 	}
 
-	public static long calculateHashSystem(String theResourceType, String theParamName, String theSystem) {
-		return hash(theResourceType, theParamName, trim(theSystem));
-	}
-
-	public static long calculateHashSystemAndValue(String theResourceType, String theParamName, String theSystem, String theValue) {
-		return hash(theResourceType, theParamName, defaultString(trim(theSystem)), trim(theValue));
-	}
-
-	public static long calculateHashValue(String theResourceType, String theParamName, String theValue) {
-		return hash(theResourceType, theParamName, trim(theValue));
-	}
-
 	@Override
 	public boolean matches(IQueryParameterType theParam) {
 		if (!(theParam instanceof TokenParam)) {
 			return false;
 		}
-		TokenParam token = (TokenParam)theParam;
+		TokenParam token = (TokenParam) theParam;
 		boolean retval = false;
 		// Only match on system if it wasn't specified
 		if (token.getSystem() == null || token.getSystem().isEmpty()) {
@@ -276,4 +269,17 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		}
 		return retval;
 	}
+
+	public static long calculateHashSystem(String theResourceType, String theParamName, String theSystem) {
+		return hash(theResourceType, theParamName, trim(theSystem));
+	}
+
+	public static long calculateHashSystemAndValue(String theResourceType, String theParamName, String theSystem, String theValue) {
+		return hash(theResourceType, theParamName, defaultString(trim(theSystem)), trim(theValue));
+	}
+
+	public static long calculateHashValue(String theResourceType, String theParamName, String theValue) {
+		return hash(theResourceType, theParamName, trim(theValue));
+	}
+
 }

@@ -208,8 +208,8 @@ public final class ResourceIndexedSearchParams {
 
 
 
-	public void calculateHashes(Collection<? extends BaseResourceIndexedSearchParam> theStringParams) {
-		for (BaseResourceIndexedSearchParam next : theStringParams) {
+	public void calculateHashes(Collection<? extends BaseResourceIndex> theStringParams) {
+		for (BaseResourceIndex next : theStringParams) {
 			next.calculateHashes();
 		}
 	}
@@ -353,6 +353,7 @@ public final class ResourceIndexedSearchParams {
 						case COMPOSITE:
 						case HAS:
 						case REFERENCE:
+						case SPECIAL:
 						default:
 							continue;
 					}

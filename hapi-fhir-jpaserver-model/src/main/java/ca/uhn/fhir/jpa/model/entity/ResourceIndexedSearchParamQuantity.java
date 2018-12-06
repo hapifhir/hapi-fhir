@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -166,8 +166,13 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	@Override
-	protected Long getId() {
+	public Long getId() {
 		return myId;
+	}
+
+	@Override
+	public void setId(Long theId) {
+		myId =theId;
 	}
 
 	public String getSystem() {
@@ -227,20 +232,12 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return b.build();
 	}
 
-	public static long calculateHashSystemAndUnits(String theResourceType, String theParamName, String theSystem, String theUnits) {
-		return hash(theResourceType, theParamName, theSystem, theUnits);
-	}
-
-	public static long calculateHashUnits(String theResourceType, String theParamName, String theUnits) {
-		return hash(theResourceType, theParamName, theUnits);
-	}
-
 	@Override
 	public boolean matches(IQueryParameterType theParam) {
 		if (!(theParam instanceof QuantityParam)) {
 			return false;
 		}
-		QuantityParam quantity = (QuantityParam)theParam;
+		QuantityParam quantity = (QuantityParam) theParam;
 		boolean retval = false;
 
 		// Only match on system if it wasn't specified
@@ -267,5 +264,14 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		}
 		return retval;
 	}
+
+	public static long calculateHashSystemAndUnits(String theResourceType, String theParamName, String theSystem, String theUnits) {
+		return hash(theResourceType, theParamName, theSystem, theUnits);
+	}
+
+	public static long calculateHashUnits(String theResourceType, String theParamName, String theUnits) {
+		return hash(theResourceType, theParamName, theUnits);
+	}
+
 
 }

@@ -112,9 +112,15 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	}
 
 	@Override
-	protected Long getId() {
+	public Long getId() {
 		return myId;
 	}
+
+	@Override
+	public void setId(Long theId) {
+		myId =theId;
+	}
+
 
 	public double getLatitude() {
 		return myLatitude;
@@ -156,4 +162,5 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		b.append("lon", getLongitude());
 		return b.build();
 	}
+
 }
