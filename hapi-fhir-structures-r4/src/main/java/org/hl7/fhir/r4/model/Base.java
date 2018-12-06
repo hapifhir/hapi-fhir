@@ -318,6 +318,8 @@ private Map<String, Object> userData;
 	public InstantType castToInstant(Base b) throws FHIRException {
 		if (b instanceof InstantType)
 			return (InstantType) b;
+      else if (b.hasPrimitiveValue())
+          return new InstantType(b.primitiveValue());
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Instant");
 	}
