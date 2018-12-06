@@ -40,7 +40,7 @@ Most often this will be used to generate a secure password for an attribute. In 
 
 ```ruby
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-node.set_unless[:my_password] = secure_password
+node.default_unless[:my_password] = secure_password
 ```
 
 To use the `openssl::upgrade` recipe, set the attributes as mentioned above. For example, we have a "stats_collector" service that uses openssl. It has a recipe that looks like this:

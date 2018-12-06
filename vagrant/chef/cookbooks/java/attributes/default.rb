@@ -19,7 +19,12 @@
 
 # default jdk attributes
 default['java']['jdk_version'] = '6'
-default['java']['arch'] = kernel['machine'] =~ /x86_64/ ? "x86_64" : "i586"
+default['java']['arch'] = if node['kernel']['machine'].match?(/x86_64/)
+                             "x86_64"
+                          else
+                             "i586"
+                          end
+#default['java']['arch'] = kernel['machine'] =~ /x86_64/ ?
 default['java']['openjdk_packages'] = []
 default['java']['openjdk_version'] = nil
 default['java']['accept_license_agreement'] = false
