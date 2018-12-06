@@ -31,11 +31,10 @@ import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
 
 @MappedSuperclass
-public abstract class BaseResourceIndexedSearchParam implements Serializable {
+public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	static final int MAX_SP_NAME = 100;
 	/**
 	 * Don't change this without careful consideration. You will break existing hashes!
@@ -80,7 +79,8 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 		// nothing
 	}
 
-	protected abstract Long getId();
+	@Override
+	public abstract Long getId();
 
 	public String getParamName() {
 		return myParamName;
@@ -128,8 +128,6 @@ public abstract class BaseResourceIndexedSearchParam implements Serializable {
 	}
 
 	public abstract IQueryParameterType toQueryParameterType();
-
-	public abstract void calculateHashes();
 
 	public static long calculateHashIdentity(String theResourceType, String theParamName) {
 		return hash(theResourceType, theParamName);

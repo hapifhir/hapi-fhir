@@ -4,11 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.r4.*;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -411,6 +414,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 			myPatientDao.read(new IdType("Patient/Patient1063259"));
 
+
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("subject", new ReferenceParam("Patient1063259"));
+			params.setLoadSynchronous(true);
+			IBundleProvider result = myDiagnosticReportDao.search(params);
+			assertEquals(1, result.size().intValue());
+
 			deleteAllOfType("Binary");
 			deleteAllOfType("Location");
 			deleteAllOfType("DiagnosticReport");
@@ -426,6 +436,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			} catch (ResourceGoneException e) {
 				// good
 			}
+
+			result = myDiagnosticReportDao.search(params);
+			assertEquals(0, result.size().intValue());
 
 		}
 

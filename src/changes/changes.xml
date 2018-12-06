@@ -122,6 +122,12 @@
 				adjust the most recent version to
 				account for this.
 			</action>
+			<action type="add">
+				When updating existing resources, the JPA server will now attempt to reuse/update
+				rows in the index tables if one row is being removed and one row is being added (e.g.
+				because a Patient's name is changing from "A" to "B"). This has the net effect
+				of reducing the number
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

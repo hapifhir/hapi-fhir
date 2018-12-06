@@ -32,10 +32,8 @@ import org.hibernate.search.annotations.*;
 import javax.persistence.Index;
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -177,10 +175,27 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceIndexedCompositeStringUnique> myParamsCompositeStringUnique;
 
-	@IndexedEmbedded
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinks;
+
+	/**
+	 * This is a clone of {@link #myResourceLinks} but without the hibernate annotations.
+	 * Before we persist we copy the contents of {@link #myResourceLinks} into this field. We
+	 * have this separate because that way we can only populate this field if
+	 * {@link #myHasLinks} is true, meaning that there are actually resource links present
+	 * right now. This avoids Hibernate Search triggering a select on the resource link
+	 * table.
+	 *
+	 * This field is used by FulltextSearchSvcImpl
+	 *
+	 * You can test that any changes don't cause extra queries by running
+	 * FhirResourceDaoR4QueryCountTest
+	 */
+	@Field
+	@Transient
+	private String myResourceLinksField;
+
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
@@ -587,6 +602,24 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		b.append("resourceType", myResourceType);
 		b.append("pid", myId);
 		return b.build();
+	}
+
+	@PrePersist
+	@PreUpdate
+	public void preSave() {
+		if (myHasLinks && myResourceLinks != null) {
+			myResourceLinksField = getResourceLinks()
+				.stream()
+				.map(t->{
+					Long retVal = t.getTargetResourcePid();
+					return retVal;
+				})
+				.filter(Objects::nonNull)
+				.map(t->t.toString())
+				.collect(Collectors.joining(" "));
+		} else {
+			myResourceLinksField = null;
+		}
 	}
 
 }
