@@ -584,10 +584,24 @@ public class DaoConfig {
 		myReindexThreadCount = Math.max(myReindexThreadCount, 1); // Minimum of 1
 	}
 
+	/**
+	 * This setting controls the encoding of the resource.
+	 * <p>
+	 * The default value is JSONC (gzip-compressed json). To store uncompressed
+	 * json, set the resource encoding to <code>ResourceEncodingEnum.JSON</code>
+	 * </p>
+	 */
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
 	}
 
+	/**
+	 * This setting controls the encoding of the resource.
+	 * <p>
+	 * The default value is JSONC (gzip-compressed json). To store uncompressed
+	 * json, set the resource encoding to <code>ResourceEncodingEnum.JSON</code>
+	 * </p>
+	 */
 	public void setResourceEncoding(ResourceEncodingEnum theResourceEncoding) {
 		myResourceEncoding = theResourceEncoding;
 	}
