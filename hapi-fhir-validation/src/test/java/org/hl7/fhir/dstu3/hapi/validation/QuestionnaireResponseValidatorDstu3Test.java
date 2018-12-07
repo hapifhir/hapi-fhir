@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemC
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -41,16 +42,22 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 public class QuestionnaireResponseValidatorDstu3Test {
+	private static final String QUESTIONNAIRE_URL = "http://example.com/Questionnaire/q1";
 	public static final IdType ID_ICC_QUESTIONNAIRE_SETUP = new IdType("Questionnaire/profile");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorDstu3Test.class);
 	private static final String CODE_ICC_SCHOOLTYPE_PT = "PT";
 	private static final IdType ID_VS_SCHOOLTYPE = new IdType("ValueSet/schooltype");
 	private static final String SYSTEMURI_ICC_SCHOOLTYPE = "http://ehealthinnovation/icc/ns/schooltype";
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx;
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 	private IValidationSupport myValSupport;
+	
+	@BeforeClass
+	public static void beforeClass() {
+		ourCtx = FhirContext.forDstu3();
+	}
 	
 	@Before
 	public void before() {
@@ -123,7 +130,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		answerValues[11] = new Coding().setSystem("http://codesystems.com/system").setCode("code0");
 		answerValues[12] = new StringType("some value");
 		answerValues[13] = new Attachment().setData("some data".getBytes()).setContentType("txt");
-		answerValues[14] = new Reference("http://example.com/Questionnaire/q1");
+		answerValues[14] = new Reference(QUESTIONNAIRE_URL);
 		answerValues[15] = new Quantity(42);
 
 		for (int i = 0; i < itemCnt; i++) {
@@ -133,7 +140,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			reset(myValSupport);
 			Questionnaire q = new Questionnaire();
 			when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class),
-				eq("http://example.com/Questionnaire/q1"))).thenReturn(q);
+				eq(QUESTIONNAIRE_URL))).thenReturn(q);
 			when(myValSupport.fetchCodeSystem(any(FhirContext.class), eq("http://codesystems.com/system"))).thenReturn(codeSystem);
 			when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 			myInstanceVal.flushCaches();
@@ -150,7 +157,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 			QuestionnaireResponse qa = new QuestionnaireResponse();
 			qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
-			qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+			qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 			qa.addItem().setLinkId(linkId).addAnswer().setValue(answerValues[i]);
 
 			ValidationResult errors = myVal.validateWithResult(qa);
@@ -166,7 +173,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
@@ -179,11 +186,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 	@Test
 	public void testCodedAnswer() {
-		String questionnaireRef = "http://example.com/Questionnaire/q1";
+		String questionnaireRef = QUESTIONNAIRE_URL;
 
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setOptions(new Reference("http://somevalueset"));
-		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq("http://example.com/Questionnaire/q1"))).thenReturn(q);
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -247,7 +254,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		QuestionnaireResponseItemComponent qaGroup = qa.addItem();
 		qaGroup.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 
@@ -256,6 +263,43 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("No LinkId, so can't be validated"));
+	}
+	
+	@Test
+	public void testMissingAnswerInNestedStructureIsReported() throws Exception {
+		Questionnaire q = new Questionnaire();
+		q.addItem().setType(QuestionnaireItemType.GROUP).setRequired(true)
+		 .addItem().setType(QuestionnaireItemType.GROUP).setRequired(true)
+		 .addItem().setType(QuestionnaireItemType.BOOLEAN).setLinkId("link0").setRequired(true);
+		
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+		
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		
+		ValidationResult errors = myVal.validateWithResult(qa);
+		
+		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
+	}
+	
+	@Test
+	public void testGroupMarkedAsRequiredIsOk() throws Exception {
+		Questionnaire q = new Questionnaire();
+		q.addItem().setType(QuestionnaireItemType.GROUP).setRequired(true).setLinkId("link1")
+		 .addItem().setType(QuestionnaireItemType.BOOLEAN).setLinkId("link0").setRequired(true);
+		
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+		qa.addItem().setLinkId("link1")
+		  .addItem().setLinkId("link0").addAnswer().setValue(new BooleanType(true));
+		
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
+		
+		ValidationResult errors = myVal.validateWithResult(qa);
+		
+		assertThat(errors.toString(), containsString("No issues"));
 	}
 
 	@Test
@@ -267,7 +311,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		QuestionnaireResponseItemComponent qaGroup = qa.addItem().setLinkId("link0");
 		qaGroup.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 
@@ -288,7 +332,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 
 		String reference = qa.getQuestionnaire().getReference();
@@ -317,8 +361,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 
 		String reference = qa.getQuestionnaire().getReference();
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
@@ -343,11 +387,9 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		enable.setQuestion("link0");
 		enable.setHasAnswer(true);
 
-		
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
-		//qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 
 		String reference = qa.getQuestionnaire().getReference();
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
@@ -357,6 +399,54 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertThat(errors.toString(), containsString("No issues"));
 	}
 	
+	@Test
+	public void testRequiredQuestionQuantityWithEnableWhenHidesQuestionValue() {
+
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.QUANTITY);
+		
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Quantity().setValue(1L));
+
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
+	@Test
+	public void testRequiredQuestionQuantityWithEnableWhenEnablesQuestionValue() {
+
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.QUANTITY);
+		
+		//link1 question is enabled when link0 has answer
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1").setRequired(true);
+		q.addItem(item1);
+		QuestionnaireItemEnableWhenComponent enable = new QuestionnaireItemEnableWhenComponent();
+		item1.addEnableWhen(enable);
+		enable.setQuestion("link0");
+		enable.setAnswer(new Quantity().setValue(1L));
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Quantity().setValue(1L));
+
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No response found for required item link1"));
+	}
+
 	@Test
 	public void testRequiredQuestionWithEnableWhenHasAnswerTrueWithAnswer() {
 
@@ -374,7 +464,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("BAR"));
 
@@ -404,7 +494,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		
 		// link1 should be disabled, because the enableWhen enables it when link0 doesn't haven an answer
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("FOO"));
@@ -425,7 +515,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qr.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qr.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		
 		qr.addItem().setLinkId("link2").addAnswer().setValue(new StringType("FOO"));
 		
@@ -445,7 +535,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		
 		QuestionnaireResponse qr = new QuestionnaireResponse();
 		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qr.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qr.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qr.addItem().setLinkId("link0").setText("Text");
 		qr.addItem().setLinkId("link1").addAnswer().setValue(new StringType("Answer"));
 		String reference = qr.getQuestionnaire().getReference();
@@ -461,7 +551,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 	@Test
 	public void testEmbeddedItemInChoice() {
-		String questionnaireRef = "http://example.com/Questionnaire/q1";
+		String questionnaireRef = QUESTIONNAIRE_URL;
 		String valueSetRef = "http://somevalueset";
 		String codeSystemUrl = "http://codesystems.com/system";
 		String codeValue = "code0";
@@ -517,7 +607,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 	@Test
 	public void testEmbeddedItemInOpenChoice() {
-		String questionnaireRef = "http://example.com/Questionnaire/q1";
+		String questionnaireRef = QUESTIONNAIRE_URL;
 		String valueSetRef = "http://somevalueset";
 		String codeSystemUrl = "http://codesystems.com/system";
 		String codeValue = "code0";
@@ -573,7 +663,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 	@Test
 	public void testEmbeddedItemInString() {
-		String questionnaireRef = "http://example.com/Questionnaire/q1";
+		String questionnaireRef = QUESTIONNAIRE_URL;
 
 		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
@@ -674,7 +764,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 			.setType(QuestionnaireItemType.STRING)
 			.setRequired(true);
 
-		String reference = "http://example.com/Questionnaire/q1";
+		String reference = QUESTIONNAIRE_URL;
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference)))
 			.thenReturn(q);
 
@@ -698,7 +788,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 	@Test
 	public void testOpenchoiceAnswer() {
-		String questionnaireRef = "http://example.com/Questionnaire/q1";
+		String questionnaireRef = QUESTIONNAIRE_URL;
 
 		Questionnaire q = new Questionnaire();
 		QuestionnaireItemComponent item = q.addItem();
@@ -821,7 +911,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
 
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
@@ -839,7 +929,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaire().setReference("http://example.com/Questionnaire/q1");
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link1").addItem().setLinkId("link2");
 
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire().getReference()))).thenReturn(q);
