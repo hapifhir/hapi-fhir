@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.websocket;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -38,12 +39,14 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.util.Map;
 
 public class SubscriptionWebsocketHandler extends TextWebSocketHandler implements ISubscriptionWebsocketHandler {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
 	@Autowired
 	private SubscriptionWebsocketInterceptor mySubscriptionWebsocketInterceptor;
+	@Autowired
+	protected SubscriptionRegistry mySubscriptionRegistry;
+
 	@Autowired
 	private FhirContext myCtx;
 
@@ -110,13 +113,13 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			mySubscription = theSubscription;
 
 			String subscriptionId = mySubscription.getIdElement(myCtx).getIdPart();
-			mySubscriptionWebsocketInterceptor.registerHandler(subscriptionId, this);
+			mySubscriptionRegistry.registerHandler(subscriptionId, this);
 		}
 
 		@Override
 		public void closing() {
 			String subscriptionId = mySubscription.getIdElement(myCtx).getIdPart();
-			mySubscriptionWebsocketInterceptor.unregisterHandler(subscriptionId, this);
+			mySubscriptionRegistry.unregisterHandler(subscriptionId, this);
 		}
 
 		private void deliver() {
@@ -177,8 +180,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			}
 
 			try {
-				Map<String, CanonicalSubscription> idToSubscription = mySubscriptionWebsocketInterceptor.getIdToSubscription();
-				CanonicalSubscription subscription = idToSubscription.get(id.getIdPart());
+				CanonicalSubscription subscription = mySubscriptionRegistry.get(id.getIdPart());
 				myState = new BoundStaticSubscipriptionState( theSession, subscription);
 			} catch (ResourceNotFoundException e) {
 				try {

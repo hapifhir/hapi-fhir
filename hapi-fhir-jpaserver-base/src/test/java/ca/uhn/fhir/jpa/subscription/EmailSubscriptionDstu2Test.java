@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
+import ca.uhn.fhir.jpa.subscription.dbcache.SubscriptionLoaderDatabase;
 import ca.uhn.fhir.jpa.subscription.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
@@ -48,6 +49,8 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	@Autowired
 	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
+	@Autowired
+	private SubscriptionLoaderDatabase mySubscriptionLoaderDatabase;
 
 	@After
 	public void after() throws Exception {
@@ -75,7 +78,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriber.setResourceDaos(myResourceDaos);
 		mySubscriber.setFhirContext(myFhirCtx);
 		mySubscriber.setTxManager(ourTxManager);
-		mySubscriber.setAsyncTaskExecutorForUnitTest(myAsyncTaskExecutor);
+		mySubscriptionLoaderDatabase.setAsyncTaskExecutorForUnitTest(myAsyncTaskExecutor);
 		mySubscriber.start();
 		ourRestServer.registerInterceptor(mySubscriber);
 

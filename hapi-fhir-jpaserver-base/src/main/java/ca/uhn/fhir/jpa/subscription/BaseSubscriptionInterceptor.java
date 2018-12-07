@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
@@ -11,38 +9,31 @@ import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.cache.IDeliveryHandlerCreator;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionCannonicalizer;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherCompositeInMemoryDatabase;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherDatabase;
-import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
@@ -79,35 +70,21 @@ import java.util.concurrent.*;
  * #L%
  */
 
-public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> extends ServerOperationInterceptorAdapter {
+public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> extends ServerOperationInterceptorAdapter implements IDeliveryHandlerCreator {
 
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
-	private static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
 	private static boolean ourForcePayloadEncodeAndDecodeForUnitTests;
-	private final Object myInitSubscriptionsLock = new Object();
 	private SubscribableChannel myProcessingChannel;
-	private Map<String, SubscribableChannel> myDeliveryChannel;
 	private ExecutorService myProcessingExecutor;
-	private int myExecutorThreadCount;
-	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 	private MessageHandler mySubscriptionCheckingSubscriber;
-	private ConcurrentHashMap<String, CanonicalSubscription> myIdToSubscription = new ConcurrentHashMap<>();
-	private ConcurrentHashMap<String, SubscribableChannel> mySubscribableChannel = new ConcurrentHashMap<>();
-	private Multimap<String, MessageHandler> myIdToDeliveryHandler = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
 	private ThreadPoolExecutor myDeliveryExecutor;
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
 	@Autowired
-	private FhirContext myCtx;
-	@Autowired(required = false)
-	@Qualifier("myEventDefinitionDaoR4")
-	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDaoR4;
+	private FhirContext myFhirContext;
 	@Autowired()
 	private PlatformTransactionManager myTxManager;
-	@Autowired
-	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
-	private AsyncTaskExecutor myAsyncTaskExecutor;
 	@Autowired
 	private SubscriptionMatcherCompositeInMemoryDatabase mySubscriptionMatcherCompositeInMemoryDatabase;
 	@Autowired
@@ -118,310 +95,78 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private BeanFactory beanFactory;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
-	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
+	@Autowired
+	private SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	SubscriptionCannonicalizer mySubscriptionCannonicalizer;
+	@Autowired
+	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
+	private AsyncTaskExecutor myAsyncTaskExecutor;
+
+	// KHS FIXME state
+	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 
 	/**
 	 * Constructor
 	 */
 	public BaseSubscriptionInterceptor() {
 		super();
-		setExecutorThreadCount(5);
 	}
 
-	protected CanonicalSubscription canonicalize(S theSubscription) {
-		switch (myCtx.getVersion().getVersion()) {
-			case DSTU2:
-				return canonicalizeDstu2(theSubscription);
-			case DSTU3:
-				return canonicalizeDstu3(theSubscription);
-			case R4:
-				return canonicalizeR4(theSubscription);
-			default:
-				throw new ConfigurationException("Subscription not supported for version: " + myCtx.getVersion().getVersion());
-		}
-	}
+	@PostConstruct
+	public void start() {
+		// FIXME KHS
+// 		if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
+//			Validate.notNull(myEventDefinitionDaoR4);
+//		}
 
-	protected CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
-		ca.uhn.fhir.model.dstu2.resource.Subscription subscription = (ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription;
-
-		CanonicalSubscription retVal = new CanonicalSubscription();
-		try {
-			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus()));
-			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType()));
-			retVal.setCriteriaString(subscription.getCriteria());
-			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
-			retVal.setHeaders(subscription.getChannel().getHeader());
-			retVal.setIdElement(subscription.getIdElement());
-			retVal.setPayloadString(subscription.getChannel().getPayload());
-		} catch (FHIRException theE) {
-			throw new InternalErrorException(theE);
-		}
-		return retVal;
-	}
-
-	protected CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
-		org.hl7.fhir.dstu3.model.Subscription subscription = (org.hl7.fhir.dstu3.model.Subscription) theSubscription;
-
-		CanonicalSubscription retVal = new CanonicalSubscription();
-		try {
-			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
-			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
-			retVal.setCriteriaString(subscription.getCriteria());
-			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
-			retVal.setHeaders(subscription.getChannel().getHeader());
-			retVal.setIdElement(subscription.getIdElement());
-			retVal.setPayloadString(subscription.getChannel().getPayload());
-
-			if (retVal.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
-				String from;
-				String subjectTemplate;
-				String bodyTemplate;
-				try {
-					from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
-					subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
-				} catch (FHIRException theE) {
-					throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
-				}
-				retVal.getEmailDetails().setFrom(from);
-				retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
-			}
-
-			if (retVal.getChannelType() == Subscription.SubscriptionChannelType.RESTHOOK) {
-				String stripVersionIds;
-				String deliverLatestVersion;
-				try {
-					stripVersionIds = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
-					deliverLatestVersion = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
-				} catch (FHIRException theE) {
-					throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
-				}
-				retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
-				retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
-			}
-
-		} catch (FHIRException theE) {
-			throw new InternalErrorException(theE);
-		}
-		return retVal;
-	}
-
-	protected CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
-		org.hl7.fhir.r4.model.Subscription subscription = (org.hl7.fhir.r4.model.Subscription) theSubscription;
-
-		CanonicalSubscription retVal = new CanonicalSubscription();
-		retVal.setStatus(subscription.getStatus());
-		retVal.setChannelType(subscription.getChannel().getType());
-		retVal.setCriteriaString(subscription.getCriteria());
-		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
-		retVal.setHeaders(subscription.getChannel().getHeader());
-		retVal.setIdElement(subscription.getIdElement());
-		retVal.setPayloadString(subscription.getChannel().getPayload());
-
-		if (retVal.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
-			String from;
-			String subjectTemplate;
-			try {
-				from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
-				subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
-			} catch (FHIRException theE) {
-				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
-			}
-			retVal.getEmailDetails().setFrom(from);
-			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
-		}
-
-		if (retVal.getChannelType() == Subscription.SubscriptionChannelType.RESTHOOK) {
-			String stripVersionIds;
-			String deliverLatestVersion;
-			try {
-				stripVersionIds = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
-				deliverLatestVersion = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
-			} catch (FHIRException theE) {
-				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
-			}
-			retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
-			retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
-		}
-
-		List<org.hl7.fhir.r4.model.Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
-		if (topicExts.size() > 0) {
-			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
-			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
-				throw new PreconditionFailedException("Topic reference must be an EventDefinition");
-			}
-
-			org.hl7.fhir.r4.model.EventDefinition def = myEventDefinitionDaoR4.read(ref.getReferenceElement());
-			retVal.addTrigger(new CanonicalSubscription.CanonicalEventDefinition(def));
-		}
-
-		return retVal;
-	}
-
-	protected SubscribableChannel createDeliveryChannel(CanonicalSubscription theSubscription) {
-		String subscriptionId = theSubscription.getIdElement(myCtx).getIdPart();
-
-		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
-		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern("subscription-delivery-" + subscriptionId + "-%d")
-			.daemon(false)
-			.priority(Thread.NORM_PRIORITY)
-			.build();
-		RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
-			@Override
-			public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
-				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
+		if (getProcessingChannel() == null) {
+			myProcessingExecutorQueue = new LinkedBlockingQueue<>(1000);
+			RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
+				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myProcessingExecutorQueue.size());
 				StopWatch sw = new StopWatch();
 				try {
-					executorQueue.put(theRunnable);
+					myProcessingExecutorQueue.put(theRunnable);
 				} catch (InterruptedException theE) {
 					throw new RejectedExecutionException("Task " + theRunnable.toString() +
 						" rejected from " + theE.toString());
 				}
 				ourLog.info("Slot become available after {}ms", sw.getMillis());
-			}
-		};
-		ThreadPoolExecutor deliveryExecutor = new ThreadPoolExecutor(
-			1,
-			getExecutorThreadCount(),
-			0L,
-			TimeUnit.MILLISECONDS,
-			executorQueue,
-			threadFactory,
-			rejectedExecutionHandler);
+			};
+			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
+				.namingPattern("subscription-proc-%d")
+				.daemon(false)
+				.priority(Thread.NORM_PRIORITY)
+				.build();
+			myProcessingExecutor = new ThreadPoolExecutor(
+				1,
+				SubscriptionConstants.EXECUTOR_THREAD_COUNT,
+				0L,
+				TimeUnit.MILLISECONDS,
+				myProcessingExecutorQueue,
+				threadFactory,
+				rejectedExecutionHandler);
+			setProcessingChannel(new ExecutorSubscribableChannel(myProcessingExecutor));
 
-		return new ExecutorSubscribableChannel(deliveryExecutor);
-	}
+			registerSubscriptionCheckingSubscriber();
 
-	/**
-	 * Returns an empty handler if the interceptor will manually handle registration and unregistration
-	 */
-	protected abstract Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription);
-
-	public abstract Subscription.SubscriptionChannelType getChannelType();
-
-	protected MessageChannel getDeliveryChannel(CanonicalSubscription theSubscription) {
-		return mySubscribableChannel.get(theSubscription.getIdElement(myCtx).getIdPart());
-	}
-
-	public int getExecutorQueueSizeForUnitTests() {
-		return myProcessingExecutorQueue.size();
-	}
-
-	public int getExecutorThreadCount() {
-		return myExecutorThreadCount;
-	}
-
-	public void setExecutorThreadCount(int theExecutorThreadCount) {
-		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theExecutorThreadCount);
-		myExecutorThreadCount = theExecutorThreadCount;
-	}
-
-	public Map<String, CanonicalSubscription> getIdToSubscription() {
-		return Collections.unmodifiableMap(myIdToSubscription);
-	}
-
-	public SubscribableChannel getProcessingChannel() {
-		return myProcessingChannel;
-	}
-
-	public void setProcessingChannel(SubscribableChannel theProcessingChannel) {
-		myProcessingChannel = theProcessingChannel;
-	}
-
-	public List<CanonicalSubscription> getRegisteredSubscriptions() {
-		return new ArrayList<>(myIdToSubscription.values());
-	}
-
-	public CanonicalSubscription hasSubscription(IIdType theId) {
-		Validate.notNull(theId);
-		Validate.notBlank(theId.getIdPart());
-		return myIdToSubscription.get(theId.getIdPart());
-	}
-
-	/**
-	 * Read the existing subscriptions from the database
-	 */
-	@SuppressWarnings("unused")
-	@Scheduled(fixedDelay = 60000)
-	public void initSubscriptions() {
-		if (!myInitSubscriptionsSemaphore.tryAcquire()) {
-			return;
 		}
-		try {
-			doInitSubscriptions();
-		} finally {
-			myInitSubscriptionsSemaphore.release();
-		}
-	}
-
-	public Integer doInitSubscriptions() {
-		synchronized (myInitSubscriptionsLock) {
-			ourLog.debug("Starting init subscriptions");
-			SearchParameterMap map = new SearchParameterMap();
-			map.add(Subscription.SP_TYPE, new TokenParam(null, getChannelType().toCode()));
-			map.add(Subscription.SP_STATUS, new TokenOrListParam()
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
-			map.setLoadSynchronousUpTo(MAX_SUBSCRIPTION_RESULTS);
-
-			RequestDetails req = new ServletSubRequestDetails();
-			req.setSubRequest(true);
-
+		if (mySubscriptionActivatingSubscriber == null) {
 			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
-			IBundleProvider subscriptionBundleList = subscriptionDao.search(map, req);
-			if (subscriptionBundleList.size() >= MAX_SUBSCRIPTION_RESULTS) {
-				ourLog.error("Currently over " + MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
-			}
-
-			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
-
-			Set<String> allIds = new HashSet<>();
-			int changesCount = 0;
-			for (IBaseResource resource : resourceList) {
-				String nextId = resource.getIdElement().getIdPart();
-				allIds.add(nextId);
-				boolean changed = mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
-				if (changed) {
-					changesCount++;
-				}
-			}
-
-			unregisterAllSubscriptionsNotInCollection(allIds);
-			ourLog.trace("Finished init subscriptions - found {}", resourceList.size());
-
-			return changesCount;
+			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(subscriptionDao,  this, myTxManager, myAsyncTaskExecutor, mySubscriptionRegistry, mySubscriptionCannonicalizer);
 		}
+
+
+
+
+
+
 	}
 
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void preDestroy() {
 		getProcessingChannel().unsubscribe(mySubscriptionCheckingSubscriber);
-		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
-	}
-
-	public void registerHandler(String theSubscriptionId, MessageHandler theHandler) {
-		mySubscribableChannel.get(theSubscriptionId).subscribe(theHandler);
-		myIdToDeliveryHandler.put(theSubscriptionId, theHandler);
-	}
-
-	@SuppressWarnings("UnusedReturnValue")
-	public CanonicalSubscription registerSubscription(IIdType theId, S theSubscription) {
-		Validate.notNull(theId);
-		String subscriptionId = theId.getIdPart();
-		Validate.notBlank(subscriptionId);
-		Validate.notNull(theSubscription);
-
-		CanonicalSubscription canonicalized = canonicalize(theSubscription);
-		SubscribableChannel deliveryChannel = createDeliveryChannel(canonicalized);
-		Optional<MessageHandler> deliveryHandler = createDeliveryHandler(canonicalized);
-
-		mySubscribableChannel.put(subscriptionId, deliveryChannel);
-		myIdToSubscription.put(subscriptionId, canonicalized);
-
-		deliveryHandler.ifPresent(handler -> registerHandler(subscriptionId, handler));
-
-		return canonicalized;
 	}
 
 	protected void registerSubscriptionCheckingSubscriber() {
@@ -451,7 +196,7 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
-		ResourceModifiedMessage msg = new ResourceModifiedMessage(myCtx, theNewResource, theOperationType);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
 		if (ourForcePayloadEncodeAndDecodeForUnitTests) {
 			msg.clearPayloadDecoded();
 		}
@@ -478,13 +223,8 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		}
 	}
 
-	@VisibleForTesting
-	public void setAsyncTaskExecutorForUnitTest(AsyncTaskExecutor theAsyncTaskExecutor) {
-		myAsyncTaskExecutor = theAsyncTaskExecutor;
-	}
-
 	public void setFhirContext(FhirContext theCtx) {
-		myCtx = theCtx;
+		myFhirContext = theCtx;
 	}
 
 	@VisibleForTesting
@@ -492,107 +232,14 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		myTxManager = theTxManager;
 	}
 
-	@PostConstruct
-	public void start() {
-		if (myCtx.getVersion().getVersion() == FhirVersionEnum.R4) {
-			Validate.notNull(myEventDefinitionDaoR4);
-		}
-
-		if (getProcessingChannel() == null) {
-			myProcessingExecutorQueue = new LinkedBlockingQueue<>(1000);
-			RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
-				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myProcessingExecutorQueue.size());
-				StopWatch sw = new StopWatch();
-				try {
-					myProcessingExecutorQueue.put(theRunnable);
-				} catch (InterruptedException theE) {
-					throw new RejectedExecutionException("Task " + theRunnable.toString() +
-						" rejected from " + theE.toString());
-				}
-				ourLog.info("Slot become available after {}ms", sw.getMillis());
-			};
-			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
-				.namingPattern("subscription-proc-%d")
-				.daemon(false)
-				.priority(Thread.NORM_PRIORITY)
-				.build();
-			myProcessingExecutor = new ThreadPoolExecutor(
-				1,
-				getExecutorThreadCount(),
-				0L,
-				TimeUnit.MILLISECONDS,
-				myProcessingExecutorQueue,
-				threadFactory,
-				rejectedExecutionHandler);
-			setProcessingChannel(new ExecutorSubscribableChannel(myProcessingExecutor));
-		}
-
-		if (mySubscriptionActivatingSubscriber == null) {
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(subscriptionDao, getChannelType(), this, myTxManager, myAsyncTaskExecutor);
-		}
-
-		registerSubscriptionCheckingSubscriber();
-
-		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
-		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				initSubscriptions();
-			}
-		});
-	}
 
 	/**
 	 * This is an internal API - Use with caution!
 	 */
 	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
-		mySubscriptionActivatingSubscriber.handleMessage(theMsg.getOperationType(), theMsg.getId(myCtx), theMsg.getNewPayload(myCtx));
+		mySubscriptionActivatingSubscriber.handleMessage(theMsg.getOperationType(), theMsg.getId(myFhirContext), theMsg.getNewPayload(myFhirContext));
 		sendToProcessingChannel(theMsg);
 	}
-
-	private void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
-		for (String next : new ArrayList<>(myIdToSubscription.keySet())) {
-			if (!theAllIds.contains(next)) {
-				ourLog.info("Unregistering Subscription/{}", next);
-				CanonicalSubscription subscription = myIdToSubscription.get(next);
-				unregisterSubscription(subscription.getIdElement(myCtx));
-			}
-		}
-	}
-
-	public void unregisterHandler(String theSubscriptionId, MessageHandler theMessageHandler) {
-		SubscribableChannel channel = mySubscribableChannel.get(theSubscriptionId);
-		if (channel != null) {
-			channel.unsubscribe(theMessageHandler);
-			if (channel instanceof DisposableBean) {
-				try {
-					((DisposableBean) channel).destroy();
-				} catch (Exception e) {
-					ourLog.error("Failed to destroy channel bean", e);
-				}
-			}
-		}
-
-		mySubscribableChannel.remove(theSubscriptionId);
-	}
-
-	@SuppressWarnings("UnusedReturnValue")
-	public CanonicalSubscription unregisterSubscription(IIdType theId) {
-		Validate.notNull(theId);
-
-		String subscriptionId = theId.getIdPart();
-		Validate.notBlank(subscriptionId);
-
-		for (MessageHandler next : new ArrayList<>(myIdToDeliveryHandler.get(subscriptionId))) {
-			unregisterHandler(subscriptionId, next);
-		}
-
-		mySubscribableChannel.remove(subscriptionId);
-
-		return myIdToSubscription.remove(subscriptionId);
-	}
-
 	public IFhirResourceDao<?> getSubscriptionDao() {
 		return myDaoRegistry.getSubscriptionDao();
 	}
@@ -606,10 +253,10 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	}
 
 	public void validateCriteria(final S theResource) {
-		CanonicalSubscription subscription = canonicalize(theResource);
+		CanonicalSubscription subscription = mySubscriptionCannonicalizer.canonicalize(theResource);
 		String criteria = subscription.getCriteriaString();
 		try {
-			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myCtx, criteria);
+			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myFhirContext, criteria);
 			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
 		} catch (InvalidRequestException e) {
 			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
@@ -620,4 +267,19 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	public static void setForcePayloadEncodeAndDecodeForUnitTests(boolean theForcePayloadEncodeAndDecodeForUnitTests) {
 		ourForcePayloadEncodeAndDecodeForUnitTests = theForcePayloadEncodeAndDecodeForUnitTests;
 	}
+
+	public abstract Subscription.SubscriptionChannelType getChannelType();
+
+	public int getExecutorQueueSizeForUnitTests() {
+		return myProcessingExecutorQueue.size();
+	}
+
+	public SubscribableChannel getProcessingChannel() {
+		return myProcessingChannel;
+	}
+
+	public void setProcessingChannel(SubscribableChannel theProcessingChannel) {
+		myProcessingChannel = theProcessingChannel;
+	}
+
 }

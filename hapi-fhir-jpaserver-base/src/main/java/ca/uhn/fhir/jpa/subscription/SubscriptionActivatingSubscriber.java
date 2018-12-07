@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionCannonicalizer;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
@@ -45,28 +47,33 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+// FIXME KHS this needs to be a prototype bean
 @SuppressWarnings("unchecked")
 public class SubscriptionActivatingSubscriber {
 	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
+
 	private final IFhirResourceDao mySubscriptionDao;
 	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
 	private final PlatformTransactionManager myTransactionManager;
 	private final AsyncTaskExecutor myTaskExecutor;
+	private final SubscriptionRegistry mySubscriptionRegistry;
+	private final SubscriptionCannonicalizer mySubscriptionCanonicalizer;
+
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
 	private FhirContext myCtx;
-	private Subscription.SubscriptionChannelType myChannelType;
-
 
 	/**
 	 * Constructor
 	 */
-	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor, PlatformTransactionManager theTransactionManager, AsyncTaskExecutor theTaskExecutor) {
+	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, BaseSubscriptionInterceptor theSubscriptionInterceptor, PlatformTransactionManager theTransactionManager, AsyncTaskExecutor theTaskExecutor, SubscriptionRegistry theSubscriptionRegistry, SubscriptionCannonicalizer theSubscriptionCannonicalizer) {
 		mySubscriptionDao = theSubscriptionDao;
+		// FIXME KHS do we still need this?
 		mySubscriptionInterceptor = theSubscriptionInterceptor;
-		myChannelType = theChannelType;
 		myCtx = theSubscriptionDao.getContext();
 		myTransactionManager = theTransactionManager;
 		myTaskExecutor = theTaskExecutor;
+		mySubscriptionRegistry = theSubscriptionRegistry;
+		mySubscriptionCanonicalizer = theSubscriptionCannonicalizer;
 		Validate.notNull(theTaskExecutor);
 	}
 
@@ -77,10 +84,6 @@ public class SubscriptionActivatingSubscriber {
 			.newTerser()
 			.getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class)
 			.getValueAsString();
-		boolean subscriptionTypeApplies = BaseSubscriptionSubscriber.subscriptionTypeApplies(subscriptionChannelType, myChannelType);
-		if (subscriptionTypeApplies == false) {
-			return false;
-		}
 
 		final IPrimitiveType<?> status = myCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
 		String statusString = status.getValueAsString();
@@ -134,9 +137,9 @@ public class SubscriptionActivatingSubscriber {
 	}
 
 	protected boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
-		if (mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement()) != null) {
+		if (mySubscriptionRegistry.hasSubscription(theSubscription.getIdElement()) != null) {
 			ourLog.info("Removing {} subscription {}", theStatusString, theSubscription.getIdElement().toUnqualified().getValue());
-			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
+			mySubscriptionRegistry.unregisterSubscription(theSubscription.getIdElement());
 			return true;
 		}
 		return false;
@@ -145,7 +148,7 @@ public class SubscriptionActivatingSubscriber {
 	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IBaseResource subscription = mySubscriptionDao.read(theSubscription.getIdElement());
 
-		ourLog.info("Activating subscription {} from status {} to {} for channel {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus, myChannelType);
+		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
 		try {
 			SubscriptionUtil.setStatus(myCtx, subscription, theActiveStatus);
 			subscription = mySubscriptionDao.update(subscription).getResource();
@@ -168,7 +171,7 @@ public class SubscriptionActivatingSubscriber {
 		}
 		switch (theOperationType) {
 			case DELETE:
-				mySubscriptionInterceptor.unregisterSubscription(theId);
+				mySubscriptionRegistry.unregisterSubscription(theId);
 				break;
 			case CREATE:
 			case UPDATE:
@@ -192,8 +195,8 @@ public class SubscriptionActivatingSubscriber {
 	}
 
 	protected synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
-		CanonicalSubscription existingSubscription = mySubscriptionInterceptor.hasSubscription(theSubscription.getIdElement());
-		CanonicalSubscription newSubscription = mySubscriptionInterceptor.canonicalize(theSubscription);
+		CanonicalSubscription existingSubscription = mySubscriptionRegistry.hasSubscription(theSubscription.getIdElement());
+		CanonicalSubscription newSubscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 
 		if (existingSubscription != null) {
 			if (newSubscription.equals(existingSubscription)) {
@@ -204,11 +207,11 @@ public class SubscriptionActivatingSubscriber {
 
 		if (existingSubscription != null) {
 			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
-			mySubscriptionInterceptor.unregisterSubscription(theSubscription.getIdElement());
+			mySubscriptionRegistry.unregisterSubscription(theSubscription.getIdElement());
 		} else {
 			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 		}
-		mySubscriptionInterceptor.registerSubscription(theSubscription.getIdElement(), theSubscription);
+		mySubscriptionRegistry.registerSubscription(theSubscription.getIdElement(), theSubscription, mySubscriptionInterceptor);
 		return true;
 	}
 

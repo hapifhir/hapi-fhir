@@ -130,16 +130,17 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
 		IBaseResource payloadResource = theMsg.getPayload(getContext());
 
+		// FIXME KHS restore
 		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
-			IIdType payloadId = theMsg.getPayloadId(getContext());
-			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(payloadId.getResourceType());
-			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(resourceDef.getImplementingClass());
-			try {
-				payloadResource = dao.read(payloadId.toVersionless());
-			} catch (ResourceGoneException e) {
-				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(getContext()));
-				return null;
-			}
+//			IIdType payloadId = theMsg.getPayloadId(getContext());
+//			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(payloadId.getResourceType());
+//			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(resourceDef.getImplementingClass());
+//			try {
+//				payloadResource = dao.read(payloadId.toVersionless());
+//			} catch (ResourceGoneException e) {
+//				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(getContext()));
+//				return null;
+//			}
 		}
 
 		IIdType resourceId = payloadResource.getIdElement();

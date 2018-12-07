@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.dbmatcher;
+package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestR4Config;

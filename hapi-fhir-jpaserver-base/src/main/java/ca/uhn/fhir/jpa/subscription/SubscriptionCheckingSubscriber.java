@@ -5,7 +5,8 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.subscription.dbmatcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -54,6 +55,8 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private SubscriptionRegistry mySubscriptionRegistry;
 
 	public SubscriptionCheckingSubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor, ISubscriptionMatcher theSubscriptionMatcher) {
 		super(theChannelType, theSubscriptionInterceptor);
@@ -85,7 +88,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		IIdType id = msg.getId(getContext());
 		String resourceType = id.getResourceType();
 
-		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getRegisteredSubscriptions();
+		Collection<CanonicalSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
 		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
 
@@ -131,7 +134,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			deliveryMsg.setPayloadId(msg.getId(getContext()));
 
 			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
-			MessageChannel deliveryChannel = getSubscriptionInterceptor().getDeliveryChannel(nextSubscription);
+			MessageChannel deliveryChannel = mySubscriptionRegistry.getDeliveryChannel(nextSubscription);
 			if (deliveryChannel != null) {
 				deliveryChannel.send(wrappedMsg);
 			} else {
@@ -149,21 +152,22 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 		return theCriteria;
 	}
 
-	/**
-	 * Search based on a query criteria
-	 */
-	protected IBundleProvider performSearch(String theCriteria) {
-		RuntimeResourceDefinition responseResourceDef = getSubscriptionDao().validateCriteriaAndReturnResourceDefinition(theCriteria);
-		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
-
-		RequestDetails req = new ServletSubRequestDetails();
-		req.setSubRequest(true);
-
-		IFhirResourceDao<? extends IBaseResource> responseDao = getSubscriptionInterceptor().getDao(responseResourceDef.getImplementingClass());
-		responseCriteriaUrl.setLoadSynchronousUpTo(1);
-
-		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);
-		return responseResults;
-	}
+	// FIXME KHS did anyone use this?
+//	/**
+//	 * Search based on a query criteria
+//	 */
+//	protected IBundleProvider performSearch(String theCriteria) {
+//		RuntimeResourceDefinition responseResourceDef = getSubscriptionDao().validateCriteriaAndReturnResourceDefinition(theCriteria);
+//		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
+//
+//		RequestDetails req = new ServletSubRequestDetails();
+//		req.setSubRequest(true);
+//
+//		IFhirResourceDao<? extends IBaseResource> responseDao = getSubscriptionInterceptor().getDao(responseResourceDef.getImplementingClass());
+//		responseCriteriaUrl.setLoadSynchronousUpTo(1);
+//
+//		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);
+//		return responseResults;
+//	}
 
 }

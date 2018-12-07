@@ -49,7 +49,7 @@ public class SubscriptionEmailInterceptor extends BaseSubscriptionInterceptor {
 	private String myDefaultFromAddress = "noreply@unknown.com";
 
 	@Override
-	protected Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
+	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
 		return Optional.of(myBeanFactory.getBean(SubscriptionDeliveringEmailSubscriber.class, getChannelType(), this));
 	}
 

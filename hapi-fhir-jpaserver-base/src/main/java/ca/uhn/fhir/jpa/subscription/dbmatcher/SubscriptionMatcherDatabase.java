@@ -28,6 +28,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatchResult;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;

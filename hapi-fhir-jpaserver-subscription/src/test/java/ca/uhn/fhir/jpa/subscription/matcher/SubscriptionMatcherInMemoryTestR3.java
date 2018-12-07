@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.dbmatcher;
+package ca.uhn.fhir.jpa.subscription.matcher;
 
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;

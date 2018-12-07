@@ -21,12 +21,18 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionCannonicalizer;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.PostConstruct;
 
@@ -68,7 +74,8 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 		return mySubscriptionDao;
 	}
 
-	public BaseSubscriptionInterceptor getSubscriptionInterceptor() {
+	// FIXME KHS do we need this?
+	private BaseSubscriptionInterceptor getSubscriptionInterceptor() {
 		return mySubscriptionInterceptor;
 	}
 

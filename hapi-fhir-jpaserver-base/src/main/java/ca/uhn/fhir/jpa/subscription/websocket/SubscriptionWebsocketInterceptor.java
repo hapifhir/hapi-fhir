@@ -30,7 +30,7 @@ import java.util.Optional;
 public class SubscriptionWebsocketInterceptor extends BaseSubscriptionInterceptor {
 
 	@Override
-	protected Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
+	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
 		return Optional.empty();
 	}
 

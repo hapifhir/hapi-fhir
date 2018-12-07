@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -77,8 +78,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForRegisteredSubscriptionCount(1);
 		for (int i = 0; i < 5; i++) {
-			Integer changes = ourReskHookSubscriptionInterceptor.doInitSubscriptions();
-			assertEquals(0, changes.intValue());
+			int changes = mySubscriptionLoader.doInitSubscriptions();
+			assertEquals(0, changes);
 		}
 	}
 
@@ -129,10 +130,10 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		int modCount = myCountingInterceptor.getSentCount();
 		subscription1
 			.getChannel()
-			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
+			.addExtension(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
 		subscription1
 			.getChannel()
-			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
+			.addExtension(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
 		ourLog.info("** About to update subscription");
 		ourClient.update().resource(subscription1).execute();
 		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount());

@@ -3,9 +3,10 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
+import ca.uhn.fhir.jpa.subscription.cache.ISubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
@@ -33,6 +34,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -68,6 +70,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
+
+	@Autowired
+	protected ISubscriptionLoader mySubscriptionLoader;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -212,7 +217,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				fail("Failed to init subscriptions");
 			}
 			try {
-				getRestHookSubscriptionInterceptor().doInitSubscriptions();
+				mySubscriptionLoader.initSubscriptions();
 				break;
 			} catch (ResourceVersionConflictException e) {
 				Thread.sleep(250);
@@ -220,7 +225,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		SubscriptionRestHookInterceptor interceptor = getRestHookSubscriptionInterceptor();
-		TestUtil.waitForSize(theSize, () -> interceptor.getRegisteredSubscriptions().size());
+		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
 		Thread.sleep(500);
 	}
 

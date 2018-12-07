@@ -33,7 +33,7 @@ public class SubscriptionRestHookInterceptor extends BaseSubscriptionInterceptor
 	BeanFactory myBeanFactory;
 
 	@Override
-	protected Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
+	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
 		SubscriptionDeliveringRestHookSubscriber value = myBeanFactory.getBean(SubscriptionDeliveringRestHookSubscriber.class, getChannelType(), this);
 		return Optional.of(value);
 	}

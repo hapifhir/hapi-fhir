@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.subscription.cache.ISubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -181,6 +182,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	protected ISubscriptionLoader mySubscriptionLoader;
 
 	@Before
 	public void beforeCreateInterceptor() {

@@ -20,16 +20,19 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
-import org.springframework.stereotype.Component;
 
 public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptionSubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriber.class);
+
+	@Autowired
+	SubscriptionRegistry mySubscriptionRegistry;
 
 	public BaseSubscriptionDeliverySubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		super(theChannelType, theSubscriptionInterceptor);
@@ -48,7 +51,7 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
 			subscriptionId = msg.getSubscription().getIdElement(getContext()).getValue();
 
-			CanonicalSubscription updatedSubscription = (CanonicalSubscription) getSubscriptionInterceptor().getIdToSubscription().get(msg.getSubscription().getIdElement(getContext()).getIdPart());
+			CanonicalSubscription updatedSubscription = mySubscriptionRegistry.get(msg.getSubscription().getIdElement(getContext()).getIdPart());
 			if (updatedSubscription != null) {
 				msg.setSubscription(updatedSubscription);
 			}
