@@ -128,6 +128,10 @@
 				because a Patient's name is changing from "A" to "B"). This has the net effect
 				of reducing the number
 			</action>
+			<action type="fix">
+				An issue was corrected with the JPA reindexer, where String index columns do not always
+				get reindexed if they did not have an identity hash value in the HASH_IDENTITY column.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

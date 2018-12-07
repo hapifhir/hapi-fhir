@@ -121,6 +121,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	}
 
 	private Long getHashIdentity() {
+		calculateHashes();
 		return myHashIdentity;
 	}
 

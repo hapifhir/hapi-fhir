@@ -122,6 +122,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	public Long getHashIdentity() {
+		calculateHashes();
 		return myHashIdentity;
 	}
 
