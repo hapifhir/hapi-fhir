@@ -11,6 +11,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 
 import java.util.List;
+import java.util.Optional;
 
 public class FluentPathDstu3 implements IFluentPath {
 
@@ -42,5 +43,10 @@ public class FluentPathDstu3 implements IFluentPath {
 		
 		return (List<T>) result;
 	}
+
+  @Override
+  public <T extends IBase> Optional<T> evaluateFirst(IBase theInput, String thePath, Class<T> theReturnType) {
+    return evaluate(theInput, thePath, theReturnType).stream().findFirst();
+  }
 
 }

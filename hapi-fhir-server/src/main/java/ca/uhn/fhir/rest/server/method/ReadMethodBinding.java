@@ -110,7 +110,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 		for (String next : theRequest.getParameters().keySet()) {
-			if (!ALLOWED_PARAMS.contains(next)) {
+			if (!next.startsWith("_")) {
 				return false;
 			}
 		}

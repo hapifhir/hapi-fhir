@@ -132,6 +132,16 @@
 				An issue was corrected with the JPA reindexer, where String index columns do not always
 				get reindexed if they did not have an identity hash value in the HASH_IDENTITY column.
 			</action>
+			<action type="add">
+				Plain Server ResourceProvider classes are no longer required to be public classes. This
+				limitation has always been enforced, but did not actually serve any real purpose so it
+				has been removed.
+			</action>
+			<action type="add">
+				A new interceptor called ServeMediaResourceRawInterceptor has been added. This interceptor
+				causes Media resources to be served as raw content if the client explicitly requests
+				the correct content type cia the Accept header.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

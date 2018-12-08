@@ -76,27 +76,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		/*
-		 * Check for parameter combinations and names that are invalid
-		 */
-		List<IParameter> parameters = getParameters();
-		for (int i = 0; i < parameters.size(); i++) {
-			IParameter next = parameters.get(i);
-			if (!(next instanceof SearchParameter)) {
-				continue;
-			}
-
-			SearchParameter sp = (SearchParameter) next;
-			if (sp.getName().startsWith("_")) {
-				if (ALLOWED_PARAMS.contains(sp.getName())) {
-					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(),
-							sp.getName());
-					throw new ConfigurationException(msg);
-				}
-			}
-
-		}
-
-		/*
 		 * Only compartment searching methods may have an ID parameter
 		 */
 		if (isBlank(myCompartmentName) && myIdParamIndex != null) {
@@ -232,7 +211,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		for (String next : theRequest.getParameters().keySet()) {
-			if (ALLOWED_PARAMS.contains(next)) {
+			if (next.startsWith("_")) {
 				methodParamsTemp.add(next);
 			}
 		}
