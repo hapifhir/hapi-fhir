@@ -1,5 +1,15 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchParameterMap;
@@ -13,8 +23,20 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -24,13 +46,11 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import javax.annotation.Nonnull;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 @TestPropertySource(properties = {
@@ -755,7 +775,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		params.add("birthdate", new DateParam("2011-01-01"));
 		IBundleProvider results = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1.getValue()));
-		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
+		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest().toString(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
 	}
 
 
@@ -780,7 +800,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		IBundleProvider results = myPatientDao.search(params);
 		String searchId = results.getUuid();
 		assertThat(toUnqualifiedVersionlessIdValues(results), containsInAnyOrder(id1));
-		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
+		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest().toString(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
 
 		// Other order
 		SearchBuilder.resetLastHandlerMechanismForUnitTest();
@@ -799,14 +819,14 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		params.add("birthdate", new DateParam("2011-01-03"));
 		results = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(results), empty());
-		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
+		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest().toString(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
 
 		SearchBuilder.resetLastHandlerMechanismForUnitTest();
 		params = new SearchParameterMap();
 		params.add("birthdate", new DateParam("2011-01-03"));
 		results = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(results), empty());
-		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest(), SearchBuilder.HandlerTypeEnum.STANDARD_QUERY, SearchBuilder.getLastHandlerMechanismForUnitTest());
+		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest().toString(), SearchBuilder.HandlerTypeEnum.STANDARD_QUERY, SearchBuilder.getLastHandlerMechanismForUnitTest());
 
 	}
 
@@ -872,7 +892,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		SearchBuilder.resetLastHandlerMechanismForUnitTest();
 		IIdType id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG").getId().toUnqualifiedVersionless();
-		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
+		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest().toString(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(1, uniques.size());
 		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
@@ -886,7 +906,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		SearchBuilder.resetLastHandlerMechanismForUnitTest();
 		id1 = myPatientDao.update(pt1, "Patient?name=FAMILY1&organization:Organization=ORG").getId().toUnqualifiedVersionless();
-		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
+		assertEquals(SearchBuilder.getLastHandlerParamsForUnitTest().toString(), SearchBuilder.HandlerTypeEnum.UNIQUE_INDEX, SearchBuilder.getLastHandlerMechanismForUnitTest());
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(1, uniques.size());
 		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());

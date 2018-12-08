@@ -288,7 +288,8 @@ public class SearchFilterParser {
 				result = FilterLexType.fsltEnded;
 			} else {
 				if (((original.charAt(cursor) >= 'a') && (original.charAt(cursor) <= 'z')) ||
-					((original.charAt(cursor) >= 'A') && (original.charAt(cursor) <= 'Z'))) {
+					((original.charAt(cursor) >= 'A') && (original.charAt(cursor) <= 'Z')) ||
+					(original.charAt(cursor) == '_')) {
 					result = FilterLexType.fsltName;
 				} else if ((original.charAt(cursor) >= '0') && (original.charAt(cursor) <= '9')) {
 					result = FilterLexType.fsltNumber;

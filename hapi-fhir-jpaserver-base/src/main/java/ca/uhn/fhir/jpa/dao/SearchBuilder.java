@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.entity.ResourceLink;
 import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.ResourceTag;
-import ca.uhn.fhir.jpa.entity.SearchParam;
 import ca.uhn.fhir.jpa.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.entity.TagDefinition;
 import ca.uhn.fhir.jpa.entity.TagTypeEnum;
@@ -360,33 +359,50 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		List<Predicate> codePredicates = new ArrayList<Predicate>();
-		if ((operation == null) ||
-			(operation == SearchFilterParser.CompareOperation.eq)) {
-			for (IQueryParameterType nextOr : theList) {
-				IQueryParameterType params = nextOr;
+		for (IQueryParameterType nextOr : theList) {
+			IQueryParameterType params = nextOr;
 
-				if (params instanceof NumberParam) {
-					NumberParam param = (NumberParam) params;
+			if (params instanceof NumberParam) {
+				NumberParam param = (NumberParam) params;
 
-					BigDecimal value = param.getValue();
-					if (value == null) {
-						continue;
-					}
-
-					final Expression<BigDecimal> fromObj = join.get("myValue");
-					ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
-					String invalidMessageName = "invalidNumberPrefix";
-
-					Predicate num = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName);
-					codePredicates.add(num);
-
-				} else {
-					throw new IllegalArgumentException("Invalid token type: " + params.getClass());
+				BigDecimal value = param.getValue();
+				if (value == null) {
+					continue;
 				}
 
+				final Expression<BigDecimal> fromObj = join.get("myValue");
+				ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
+				if (operation == SearchFilterParser.CompareOperation.ne) {
+					prefix = ParamPrefixEnum.NOT_EQUAL;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.lt) {
+					prefix = ParamPrefixEnum.LESSTHAN;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.le) {
+					prefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.gt) {
+					prefix = ParamPrefixEnum.GREATERTHAN;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.ge) {
+					prefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.eq) {
+					prefix = ParamPrefixEnum.EQUAL;
+				}
+				else if (operation != null) {
+					throw new IllegalArgumentException("Invalid operator specified for number type");
+				}
+
+
+				String invalidMessageName = "invalidNumberPrefix";
+
+				Predicate num = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, params, prefix, value, fromObj, invalidMessageName);
+				codePredicates.add(num);
+
+			} else {
+				throw new IllegalArgumentException("Invalid token type: " + params.getClass());
 			}
-		}
-		else if (operation == SearchFilterParser.CompareOperation.ne) {
 
 		}
 
@@ -397,11 +413,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing) {
 		Join<ResourceTable, SearchParamPresent> paramPresentJoin = myResourceTableRoot.join("mySearchParamPresents", JoinType.LEFT);
-		Join<SearchParamPresent, SearchParam> paramJoin = paramPresentJoin.join("mySearchParam", JoinType.LEFT);
 
-		myPredicates.add(myBuilder.equal(paramJoin.get("myResourceName"), theResourceName));
-		myPredicates.add(myBuilder.equal(paramJoin.get("myParamName"), theParamName));
-		myPredicates.add(myBuilder.equal(paramPresentJoin.get("myPresent"), !theMissing));
+		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
+		Long hash = SearchParamPresent.calculateHashPresence(theResourceName, theParamName, !theMissing);
+		myPredicates.add(myBuilder.equal(hashPresence, hash));
 	}
 
 	private void addPredicateParamMissing(String theResourceName, String theParamName, boolean theMissing, Join<ResourceTable, ? extends BaseResourceIndexedSearchParam> theJoin) {
@@ -2146,7 +2161,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (forcedId != null)
 				next.setForcedId(forcedId);
 			
-			IBaseResource resource = theDao.toResource(resourceType, next, historyMap.get(next.getId()), tagMap.get(next.getId()), theForHistoryOperation);
+			IBaseResource resource = theDao.toResource(resourceType, historyMap.get(next.getId()), tagMap.get(next.getId()), theForHistoryOperation);
 			if (resource == null) {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
 				continue;
@@ -2289,7 +2304,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @param theLastUpdated
 	 */
 	@Override
-	public HashSet<Long> loadReverseIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
+	public HashSet<Long> loadIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
 														  boolean theReverseMode, DateRangeParam theLastUpdated) {
 		if (theMatches.size() == 0) {
 			return new HashSet<Long>();
@@ -2436,7 +2451,48 @@ public class SearchBuilder implements ISearchBuilder {
 
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName,
 			((SearchFilterParser.FilterParameter) filter).getParamPath().getName());
-		if (searchParam != null) {
+
+		if (searchParam.getName().equals(BaseResource.SP_RES_ID)) {
+			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
+				TokenParam param = new TokenParam();
+				param.setValueAsQueryToken(null,
+					null,
+					null,
+					((SearchFilterParser.FilterParameter) filter).getValue());
+				addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)));
+			}
+			else {
+				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
+			}
+		} else if (searchParam.getName().equals(BaseResource.SP_RES_LANGUAGE)) {
+			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
+				addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(((SearchFilterParser.FilterParameter) filter).getValue()))));
+			}
+			else {
+				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
+			}
+		} else if (searchParam.getName().equals(Constants.PARAM_HAS)) {
+			HasParam param = new HasParam();
+			param.setValueAsQueryToken(null,
+				null,
+				null,
+				((SearchFilterParser.FilterParameter) filter).getValue());
+			addPredicateHas(Collections.singletonList(Collections.singletonList(param)));
+		} else if ((searchParam.getName().equals(Constants.PARAM_TAG)) ||
+			(searchParam.equals(Constants.PARAM_SECURITY))) {
+			TokenParam param = new TokenParam();
+			param.setValueAsQueryToken(null,
+				null,
+				null,
+				((SearchFilterParser.FilterParameter) filter).getValue());
+			addPredicateTag(Collections.singletonList(Collections.singletonList(param)),
+				searchParam.getName());
+		}
+		else if (searchParam.equals(Constants.PARAM_PROFILE)) {
+			addPredicateTag(Collections.singletonList(Collections.singletonList(new UriParam(((SearchFilterParser.FilterParameter) filter).getValue()))),
+				searchParam.getName());
+		}
+		else if (searchParam != null) {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
 				return addPredicateUri(theResourceName,
@@ -2860,7 +2916,7 @@ public class SearchBuilder implements ISearchBuilder {
 					myCurrentOffset = end;
 					Collection<Long> pidsToScan = myCurrentPids.subList(start, end);
 					Set<Include> includes = Collections.singleton(new Include("*", true));
-					Set<Long> newPids = loadReverseIncludes(myCallingDao, myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated());
+					Set<Long> newPids = loadIncludes(myCallingDao, myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated());
 					myCurrentIterator = newPids.iterator();
 				}
 
