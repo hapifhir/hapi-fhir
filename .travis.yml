@@ -8,7 +8,7 @@ dist: trusty
 
 language: java
 jdk:
-  - oraclejdk9
+  - openjdk11
 env:
   global:
     - MAVEN_OPTS="-Xmx10244M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=1024M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"

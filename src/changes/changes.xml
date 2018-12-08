@@ -12,6 +12,8 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>
+						<li>Spring (JPA): 5.0.8 -&gt; 5.1.3</li>
+						<li>Spring Data (JPA): 2.0.7 -&gt; 2.1.3</li>
 						<li>thymeleaf-spring4 (Testpage Overlay) has been replaced with thymeleaf-spring5</li>
 					</ul>
 				]]>
