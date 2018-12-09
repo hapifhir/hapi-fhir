@@ -23,12 +23,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -52,11 +50,19 @@ import javax.annotation.Nonnull;
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
+	private static final Set<String> SPECIAL_SEARCH_PARAMS;
 	private String myCompartmentName;
 	private String myDescription;
 	private Integer myIdParamIndex;
 	private String myQueryName;
 	private boolean myAllowUnknownParams;
+
+	static {
+		HashSet<String> specialSearchParams = new HashSet<>();
+		specialSearchParams.add(IAnyResource.SP_RES_ID);
+		specialSearchParams.add(IAnyResource.SP_RES_LANGUAGE);
+		SPECIAL_SEARCH_PARAMS = Collections.unmodifiableSet(specialSearchParams);
+	}
 
 	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
@@ -211,7 +217,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		for (String next : theRequest.getParameters().keySet()) {
-			if (next.startsWith("_")) {
+			if (next.startsWith("_") && !SPECIAL_SEARCH_PARAMS.contains(next)) {
 				methodParamsTemp.add(next);
 			}
 		}
