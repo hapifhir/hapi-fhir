@@ -14,7 +14,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -30,6 +33,15 @@ public class ServeMediaResourceRawInterceptor extends InterceptorAdapter {
 
 	public static final String MEDIA_CONTENT_CONTENT_TYPE_OPT = "Media.content.contentType";
 
+	private static final Set<RestOperationTypeEnum> RESPOND_TO_OPERATION_TYPES;
+
+	static {
+		Set<RestOperationTypeEnum> respondToOperationTypes = new HashSet<>();
+		respondToOperationTypes.add(RestOperationTypeEnum.READ);
+		respondToOperationTypes.add(RestOperationTypeEnum.VREAD);
+		RESPOND_TO_OPERATION_TYPES = Collections.unmodifiableSet(respondToOperationTypes);
+	}
+
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 		if (theResponseObject == null) {
@@ -41,7 +53,7 @@ public class ServeMediaResourceRawInterceptor extends InterceptorAdapter {
 		String resourceName = context.getResourceDefinition(theResponseObject).getName();
 
 		// Are we serving a FHIR read request on the Media resource type
-		if (!"Media".equals(resourceName) || theRequestDetails.getRestOperationType() != RestOperationTypeEnum.READ) {
+		if (!"Media".equals(resourceName) || !RESPOND_TO_OPERATION_TYPES.contains(theRequestDetails.getRestOperationType())) {
 			return true;
 		}
 
