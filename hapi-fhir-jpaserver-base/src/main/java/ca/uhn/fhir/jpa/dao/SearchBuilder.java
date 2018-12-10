@@ -714,7 +714,13 @@ public class SearchBuilder implements ISearchBuilder {
 		return retVal;
 	}
 
-	private void addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues) {
+	private Predicate addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues) {
+		return addPredicateResourceId(theValues,
+			null);
+	}
+
+	private Predicate addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues,
+														  SearchFilterParser.CompareOperation operation) {
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
 			Set<Long> orPids = new HashSet<Long>();
 			for (IQueryParameterType next : nextValue) {
@@ -743,16 +749,27 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 			}
 
+			Predicate nextPredicate = null;
 			if (orPids.size() > 0) {
-				Predicate nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids);
+				if ((operation == null) ||
+					(operation == SearchFilterParser.CompareOperation.eq)) {
+					nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids);
+				}
+				else if (operation == SearchFilterParser.CompareOperation.ne) {
+					nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids).not();
+				}
 				myPredicates.add(nextPredicate);
 			} else {
 				// This will never match
-				Predicate nextPredicate = myBuilder.equal(myResourceTableRoot.get("myId").as(Long.class), -1);
+				nextPredicate = myBuilder.equal(myResourceTableRoot.get("myId").as(Long.class), -1);
 				myPredicates.add(nextPredicate);
 			}
 
+			if (operation != null) {
+				return nextPredicate;
+			}
 		}
+		return null;
 	}
 
 	private Predicate addPredicateString(String theResourceName,
@@ -2459,7 +2476,8 @@ public class SearchBuilder implements ISearchBuilder {
 					null,
 					null,
 					((SearchFilterParser.FilterParameter) filter).getValue());
-				addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)));
+				return addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)),
+					filter.getOperation());
 			}
 			else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
