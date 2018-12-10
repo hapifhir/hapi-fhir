@@ -10,10 +10,7 @@ import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
-import ca.uhn.fhir.jpa.subscription.config.BaseSubscriptionConfig;
-import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
-import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
-import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
+import ca.uhn.fhir.jpa.subscription.subscriber.email.IEmailSender;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,30 +132,6 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	protected ISearchParamProvider searchParamProvider() {
 		return new DatabaseSearchParamProvider();
 	}
-
-	/**
-	 * Note: If you're going to use this, you need to provide a bean
-	 * of type {@link ca.uhn.fhir.jpa.subscription.email.IEmailSender}
-	 * in your own Spring config
-	 */
-	@Bean
-	@Lazy
-	public SubscriptionEmailInterceptor subscriptionEmailInterceptor() {
-		return new SubscriptionEmailInterceptor();
-	}
-
-	@Bean
-	@Lazy
-	public SubscriptionRestHookInterceptor subscriptionRestHookInterceptor() {
-		return new SubscriptionRestHookInterceptor();
-	}
-
-	@Bean
-	@Lazy
-	public SubscriptionWebsocketInterceptor subscriptionWebsocketInterceptor() {
-		return new SubscriptionWebsocketInterceptor();
-	}
-
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));

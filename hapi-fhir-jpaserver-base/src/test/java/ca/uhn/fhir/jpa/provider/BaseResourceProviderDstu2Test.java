@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
+import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -46,7 +46,6 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	protected static Server ourServer;
 	protected static String ourServerBase;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
-	protected static SubscriptionRestHookInterceptor ourRestHookSubscriptionInterceptor;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static PlatformTransactionManager ourTxManager;
 	protected static Integer ourConnectionPoolSize;
@@ -101,7 +100,6 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			ourWebApplicationContext.setParent(myAppCtx);
 			ourWebApplicationContext.refresh();
 
-			ourRestHookSubscriptionInterceptor = ourWebApplicationContext.getBean(SubscriptionRestHookInterceptor.class);
 			ourTxManager = ourWebApplicationContext.getBean(PlatformTransactionManager.class);
 
 			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);

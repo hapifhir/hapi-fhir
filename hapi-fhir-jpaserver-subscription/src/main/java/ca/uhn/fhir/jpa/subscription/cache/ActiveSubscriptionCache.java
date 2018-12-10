@@ -4,10 +4,7 @@ import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.springframework.messaging.MessageHandler;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ActiveSubscriptionCache {
@@ -20,7 +17,7 @@ public class ActiveSubscriptionCache {
 	}
 
 	public Collection<ActiveSubscription> getAll() {
-		return myCache.values();
+		return Collections.unmodifiableCollection(myCache.values());
 	}
 
 	public int size() {
@@ -42,17 +39,6 @@ public class ActiveSubscriptionCache {
 		activeSubscription.unregisterAll();
 		myCache.remove(theSubscriptionId);
 	}
-
-	// FIXME KHS remove
-	public Set<String> keySet() {
-		return myCache.keySet();
-	}
-
-	// FIXME KHS remove?
-	public void registerHandler(String theSubscriptionId, MessageHandler theHandler) {
-		get(theSubscriptionId).register(theHandler);
-	}
-
 
 	public void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
 		for (String next : new ArrayList<>(myCache.keySet())) {

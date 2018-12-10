@@ -50,6 +50,7 @@ public class SubscriptionConstants {
 	// FIXME KHS document
 	public static final int EXECUTOR_THREAD_COUNT = 5;
 
-	public static final Integer MAX_SUBSCRIPTION_RESULTS = 1000;
+	public static final int MAX_SUBSCRIPTION_RESULTS = 1000;
 
+	public static final int PROCESSING_EXECUTOR_QUEUE_SIZE = 1000;
 }

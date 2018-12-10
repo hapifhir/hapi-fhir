@@ -79,7 +79,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private FhirContext myFhirContext;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	private List<BaseSubscriptionInterceptor<?>> mySubscriptionInterceptorList;
+	private List<SubscriptionMatcherInterceptor> mySubscriptionInterceptorList;
 	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
@@ -299,7 +299,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		return myExecutorService.submit(() -> {
 			for (int i = 0; ; i++) {
 				try {
-					for (BaseSubscriptionInterceptor<?> next : mySubscriptionInterceptorList) {
+					for (SubscriptionMatcherInterceptor next : mySubscriptionInterceptorList) {
 						next.submitResourceModified(msg);
 					}
 					break;
@@ -346,8 +346,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	public void start() {
 		mySubscriptionInterceptorList = ObjectUtils.defaultIfNull(mySubscriptionInterceptorList, Collections.emptyList());
 		mySubscriptionInterceptorList = new ArrayList<>();
-		Collection values1 = myAppCtx.getBeansOfType(BaseSubscriptionInterceptor.class).values();
-		Collection<BaseSubscriptionInterceptor<?>> values = (Collection<BaseSubscriptionInterceptor<?>>) values1;
+		Collection values1 = myAppCtx.getBeansOfType(SubscriptionMatcherInterceptor.class).values();
+		Collection<SubscriptionMatcherInterceptor> values = (Collection<SubscriptionMatcherInterceptor>) values1;
 		mySubscriptionInterceptorList.addAll(values);
 
 

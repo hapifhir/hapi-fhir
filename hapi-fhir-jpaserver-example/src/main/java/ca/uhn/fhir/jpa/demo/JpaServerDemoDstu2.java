@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.springframework.web.context.ContextLoaderListener;
@@ -128,12 +129,10 @@ public class JpaServerDemoDstu2 extends RestfulServer {
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
 		/*
-		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)
+		 * Register interceptors for the server based on DaoConfig.getSupportedSubscriptionTypes()
 		 */
-		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
-		for (IServerInterceptor interceptor : interceptorBeans) {
-			this.registerInterceptor(interceptor);
-		}
+		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
+		subscriptionInterceptorLoader.registerInterceptors(this);
 
 		/*
 		 * If you are hosting this server at a specific DNS name, the server will try to 

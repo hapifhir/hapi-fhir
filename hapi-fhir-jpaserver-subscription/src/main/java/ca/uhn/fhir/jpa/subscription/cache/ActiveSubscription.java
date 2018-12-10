@@ -32,11 +32,6 @@ public class ActiveSubscription {
 		return mySubscribableChannel;
 	}
 
-	// FIXME KHS remove?
-	public Collection<MessageHandler> getDeliveryHandlers() {
-		return new ArrayList<>(myDeliveryHandlerSet);
-	}
-
 	public void register(MessageHandler theHandler) {
 		mySubscribableChannel.subscribe(theHandler);
 		myDeliveryHandlerSet.add(theHandler);

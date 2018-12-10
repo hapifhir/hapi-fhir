@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
@@ -225,15 +226,6 @@ public class TestRestfulServer extends RestfulServer {
 		 * Spool results to the database
 		 */
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
-
-		/*
-		 * Load interceptors for the server from Spring
-		 */
-		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
-		for (IServerInterceptor interceptor : interceptorBeans) {
-			this.registerInterceptor(interceptor);
-		}
-
 	}
 
 	/**

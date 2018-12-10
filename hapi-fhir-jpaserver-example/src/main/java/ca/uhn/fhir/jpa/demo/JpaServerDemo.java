@@ -1,15 +1,10 @@
 
 package ca.uhn.fhir.jpa.demo;
 
-import java.util.Collection;
 import java.util.List;
 
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
-import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
-import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
-import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 
 import javax.servlet.ServletException;
 
@@ -31,7 +26,6 @@ import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 
 public class JpaServerDemo extends RestfulServer {
 
@@ -134,12 +128,10 @@ public class JpaServerDemo extends RestfulServer {
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
 		/*
-		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)
+		 * Register interceptors for the server based on DaoConfig.getSupportedSubscriptionTypes()
 		 */
-		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
-		for (IServerInterceptor interceptor : interceptorBeans) {
-			this.registerInterceptor(interceptor);
-		}
+		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
+		subscriptionInterceptorLoader.registerInterceptors(this);
 
 		/*
 		 * If you are hosting this server at a specific DNS name, the server will try to 

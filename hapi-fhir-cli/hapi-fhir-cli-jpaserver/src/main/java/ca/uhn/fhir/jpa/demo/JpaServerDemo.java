@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -143,19 +144,14 @@ public class JpaServerDemo extends RestfulServer {
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
 		registerInterceptor(corsInterceptor);
 
-		/*
-		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)
-		 */
-		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
-		for (IServerInterceptor interceptor : interceptorBeans) {
-			this.registerInterceptor(interceptor);
-		}
-
 		DaoConfig daoConfig = myAppCtx.getBean(DaoConfig.class);
 		daoConfig.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
 		daoConfig.setEnforceReferentialIntegrityOnDelete(!ContextHolder.isDisableReferentialIntegrity());
 		daoConfig.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
 		daoConfig.setReuseCachedSearchResultsForMillis(ContextHolder.getReuseCachedSearchResultsForMillis());
+
+		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
+		subscriptionInterceptorLoader.registerInterceptors(this);
 	}
 
 }

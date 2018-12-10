@@ -13,11 +13,9 @@ public class SubscriptionLoaderFhirClient implements ISubscriptionLoader {
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
 	@PostConstruct
-
 	public void start() {
 		initSubscriptions();
 	}
-
 
 	@SuppressWarnings("unused")
 	@Scheduled(fixedDelay = 60000)

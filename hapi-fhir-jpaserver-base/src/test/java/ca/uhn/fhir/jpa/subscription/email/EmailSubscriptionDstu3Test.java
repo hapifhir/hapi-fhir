@@ -2,10 +2,11 @@ package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
-import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
+import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.subscriber.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.subscriber.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
-import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Lists;
 import com.icegreen.greenmail.store.FolderException;
@@ -14,6 +15,7 @@ import com.icegreen.greenmail.util.ServerSetup;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -30,11 +32,16 @@ import static org.junit.Assert.*;
 public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(EmailSubscriptionDstu3Test.class);
+
+	@Autowired
+	private SubscriptionTestUtil mySubscriptionTestUtil;
+
 	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
 	private static List<String> ourContentTypes = new ArrayList<>();
 	private static GreenMail ourTestSmtp;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
+
 
 	@After
 	public void afterUnregisterEmailListener() {
@@ -52,23 +59,22 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
-		ourRestServer.unregisterInterceptor(ourEmailSubscriptionInterceptor);
-
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor(ourRestServer);
 	}
 
 	@Before
 	public void beforeRegisterEmailListener() throws FolderException {
 		ourTestSmtp.purgeEmailFromAllMailboxes();
-		;
-		ourRestServer.registerInterceptor(ourEmailSubscriptionInterceptor);
+		mySubscriptionTestUtil.registerEmailInterceptor(ourRestServer);
 
 		JavaMailEmailSender emailSender = new JavaMailEmailSender();
 		emailSender.setSmtpServerHostname("localhost");
 		emailSender.setSmtpServerPort(ourListenerPort);
 		emailSender.start();
 
-		ourEmailSubscriptionInterceptor.setEmailSender(emailSender);
-		ourEmailSubscriptionInterceptor.setDefaultFromAddress("123@hapifhir.io");
+		SubscriptionDeliveringEmailSubscriber emailSubscriber = mySubscriptionTestUtil.createSubscriptionDeliveringEmailSubscriber();
+		emailSubscriber.setEmailSender(emailSender);
+		myDaoConfig.setEmailFromAddress("123@hapifhir.io");
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload) throws InterruptedException {
@@ -239,7 +245,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		RestHookTestDstu2Test.waitForQueueToDrain(ourEmailSubscriptionInterceptor);
+		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
 	@AfterClass

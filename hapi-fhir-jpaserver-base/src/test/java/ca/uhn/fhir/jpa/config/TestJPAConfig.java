@@ -2,12 +2,10 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 
@@ -37,5 +35,11 @@ public class TestJPAConfig {
 	@Bean
 	public UnregisterScheduledProcessor unregisterScheduledProcessor(Environment theEnv) {
 		return new UnregisterScheduledProcessor(theEnv);
+	}
+
+	@Lazy
+	@Bean
+	public SubscriptionTestUtil subscriptionInterceptorRegistrationUtil() {
+		return new SubscriptionTestUtil();
 	}
 }

@@ -34,12 +34,10 @@ public class SubscriptionRegistry {
 	SubscriptionCannonicalizer mySubscriptionCannonicalizer;
 	@Autowired
 	DeliveryChannelCreator myDeliveryChannelCreator;
+	@Autowired
+	DeliveryHandlerCreator myDeliveryHandlerCreator;
 
 	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
-	// FIXME KHS
-//	private final SubscriptionCache mySubscriptionCache = new SubscriptionCache();
-//	private final SubscriptionChannelCache mySubscriptionChannelCache = new SubscriptionChannelCache();
-//	private final SubscriptionDeliveryHandlerCache mySubscriptionDeliveryChanelCache = new SubscriptionDeliveryHandlerCache();
 
 	public ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
@@ -49,24 +47,14 @@ public class SubscriptionRegistry {
 		return myActiveSubscriptionCache.getAll();
 	}
 
-// FIXME KHS
-	//	public SubscribableChannel getDeliveryChannel(CanonicalSubscription theSubscription) {
-//		return myActiveSubscriptionCache.get(theSubscription.getIdElement(myFhirContext).getIdPart()).getSubscribableChannel();
-//	}
-
 	public CanonicalSubscription hasSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
 		return myActiveSubscriptionCache.get(theId.getIdPart()).getSubscription();
 	}
 
-	// FIXME KHS remove?
-	public void registerHandler(String theSubscriptionId, MessageHandler theHandler) {
-		myActiveSubscriptionCache.registerHandler(theSubscriptionId, theHandler);
-	}
-
 	@SuppressWarnings("UnusedReturnValue")
-	public CanonicalSubscription registerSubscription(IIdType theId, IBaseResource theSubscription, IDeliveryHandlerCreator theIDeliveryHandlerCreator) {
+	public CanonicalSubscription registerSubscription(IIdType theId, IBaseResource theSubscription) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
 		Validate.notBlank(subscriptionId);
@@ -74,7 +62,7 @@ public class SubscriptionRegistry {
 
 		CanonicalSubscription canonicalized = mySubscriptionCannonicalizer.canonicalize(theSubscription);
 		SubscribableChannel deliveryChannel = myDeliveryChannelCreator.createDeliveryChannel(canonicalized);
-		Optional<MessageHandler> deliveryHandler = theIDeliveryHandlerCreator.createDeliveryHandler(canonicalized);
+		Optional<MessageHandler> deliveryHandler = myDeliveryHandlerCreator.createDeliveryHandler(canonicalized);
 
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, deliveryChannel);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
@@ -82,17 +70,6 @@ public class SubscriptionRegistry {
 		deliveryHandler.ifPresent(handler -> activeSubscription.register(handler));
 
 		return canonicalized;
-	}
-
-	// FIXME KHS remove?
-	public void unregisterHandler(String theSubscriptionId, MessageHandler theMessageHandler) {
-		ActiveSubscription activeSubscription = myActiveSubscriptionCache.get(theSubscriptionId);
-		if (activeSubscription != null) {
-			activeSubscription.unregister(theMessageHandler);
-		}
-
-		// FIXME KHS this should happen by caller
-//		mySubscriptionChannelCache.remove(theSubscriptionId);
 	}
 
 	public void unregisterSubscription(IIdType theId) {

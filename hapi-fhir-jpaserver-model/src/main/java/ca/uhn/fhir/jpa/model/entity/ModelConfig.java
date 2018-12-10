@@ -20,13 +20,12 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.Subscription;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class ModelConfig {
 	/**
@@ -53,6 +52,8 @@ public class ModelConfig {
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
+	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
+	private String myEmailFromAddress = "noreply@unknown.com";
 
 	/**
 	 * If set to {@code true} the default search params (i.e. the search parameters that are
@@ -297,6 +298,46 @@ public class ModelConfig {
 		return this;
 	}
 
+	/**
+	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
+	 * to the server matching these types will be activated.
+	 *
+	 */
+	public ModelConfig addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
+		mySupportedSubscriptionTypes.add(theSubscriptionChannelType);
+		return this;
+	}
+
+	/**
+	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
+	 * to the server matching these types will be activated.
+	 *
+	 */
+	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
+		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
+	}
+
+	@VisibleForTesting
+	public void clearSupportedSubscriptionTypes() {
+		mySupportedSubscriptionTypes.clear();
+	}
+
+	/**
+	 * If e-mail subscriptions are supported, the From address used when sending e-mails
+	 */
+
+	public String getEmailFromAddress() {
+		return myEmailFromAddress;
+	}
+
+	/**
+	 * If e-mail subscriptions are supported, the From address used when sending e-mails
+	 */
+
+	public void setEmailFromAddress(String theEmailFromAddress) {
+		myEmailFromAddress = theEmailFromAddress;
+	}
+
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
@@ -308,6 +349,5 @@ public class ModelConfig {
 		}
 
 	}
-
 
 }

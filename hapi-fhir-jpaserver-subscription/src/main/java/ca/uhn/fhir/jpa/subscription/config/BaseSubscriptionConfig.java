@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.subscription.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
-import ca.uhn.fhir.jpa.subscription.FhirClientSearchParamProvider;
+import ca.uhn.fhir.jpa.searchparam.FhirClientSearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.cache.ISubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionLoaderFhirClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;

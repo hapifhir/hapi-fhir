@@ -6,8 +6,8 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
-import ca.uhn.fhir.jpa.subscription.cache.ISubscriptionLoader;
-import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
+import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.dbcache.SubscriptionLoaderDatabase;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -63,7 +63,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
-	protected static SubscriptionRestHookInterceptor ourReskHookSubscriptionInterceptor;
+	protected static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
 	private static Server ourServer;
 	protected IGenericClient ourClient;
 	protected ResourceCountCache ourResourceCountsCache;
@@ -72,7 +72,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	private boolean ourRestHookSubscriptionInterceptorRequested;
 
 	@Autowired
-	protected ISubscriptionLoader mySubscriptionLoader;
+	protected SubscriptionLoaderDatabase mySubscriptionLoaderDatabase;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -161,7 +161,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
-			ourReskHookSubscriptionInterceptor = wac.getBean(SubscriptionRestHookInterceptor.class);
+			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 
@@ -182,14 +182,15 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	/**
-	 * This is lazy created so we only ask for it if its needed
-	 */
-	protected SubscriptionRestHookInterceptor getRestHookSubscriptionInterceptor() {
-		SubscriptionRestHookInterceptor retVal = ourWebApplicationContext.getBean(SubscriptionRestHookInterceptor.class);
-		ourRestHookSubscriptionInterceptorRequested = true;
-		return retVal;
-	}
+// FIXME KHS
+	//	/**
+//	 * This is lazy created so we only ask for it if its needed
+//	 */
+//	protected SubscriptionRestHookMatcherInterceptor getRestHookSubscriptionInterceptor() {
+//		SubscriptionRestHookMatcherInterceptor retVal = ourWebApplicationContext.getBean(SubscriptionRestHookMatcherInterceptor.class);
+//		ourRestHookSubscriptionInterceptorRequested = true;
+//		return retVal;
+//	}
 
 	protected boolean hasRestHookSubscriptionInterceptor() {
 		return ourRestHookSubscriptionInterceptorRequested;
@@ -217,14 +218,13 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				fail("Failed to init subscriptions");
 			}
 			try {
-				mySubscriptionLoader.initSubscriptions();
+				mySubscriptionLoaderDatabase.initSubscriptions();
 				break;
 			} catch (ResourceVersionConflictException e) {
 				Thread.sleep(250);
 			}
 		}
 
-		SubscriptionRestHookInterceptor interceptor = getRestHookSubscriptionInterceptor();
 		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
 		Thread.sleep(500);
 	}

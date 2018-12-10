@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.cache.ISubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
@@ -48,6 +48,8 @@ public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
 	@Autowired
 	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myAsyncTaskExecutor;
+	@Autowired
+	private SubscriptionActivatingInterceptor mySubscriptionActivatingInterceptor;
 
 	// TODO KHS change
 	private final Object myInitSubscriptionsLock = new Object();
@@ -108,7 +110,7 @@ public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
 			for (IBaseResource resource : resourceList) {
 				String nextId = resource.getIdElement().getIdPart();
 				allIds.add(nextId);
-				boolean changed = mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
+				boolean changed = mySubscriptionActivatingInterceptor.activateOrRegisterSubscriptionIfRequired(resource);
 				if (changed) {
 					changesCount++;
 				}
