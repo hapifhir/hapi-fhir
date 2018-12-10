@@ -27,6 +27,8 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ResourceDeliveryMessage {
@@ -37,6 +39,8 @@ public class ResourceDeliveryMessage {
 	private transient CanonicalSubscription mySubscription;
 	@JsonProperty("subscription")
 	private String mySubscriptionString;
+	@JsonProperty("payload")
+	private String myPayloadString;
 	@JsonIgnore
 	private transient IBaseResource myPayload;
 	@JsonProperty("payloadId")
@@ -60,8 +64,12 @@ public class ResourceDeliveryMessage {
 	}
 
 	public IBaseResource getPayload(FhirContext theCtx) {
-		Validate.notNull(myPayload);
-		return myPayload;
+		IBaseResource retVal = myPayload;
+		if (retVal == null && isNotBlank(myPayloadString)) {
+			retVal = theCtx.newJsonParser().parseResource(myPayloadString);
+			myPayload = retVal;
+		}
+		return retVal;
 	}
 
 	public IIdType getPayloadId(FhirContext theCtx) {
@@ -88,6 +96,7 @@ public class ResourceDeliveryMessage {
 
 	public void setPayload(FhirContext theCtx, IBaseResource thePayload) {
 		myPayload = thePayload;
+		myPayloadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
 	}
 
 	public void setPayloadId(IIdType thePayloadId) {

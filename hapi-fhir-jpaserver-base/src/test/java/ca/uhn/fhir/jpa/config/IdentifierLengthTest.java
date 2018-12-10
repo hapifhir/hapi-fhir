@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import org.junit.Test;
 
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.TestUtil;
 
 public class IdentifierLengthTest {

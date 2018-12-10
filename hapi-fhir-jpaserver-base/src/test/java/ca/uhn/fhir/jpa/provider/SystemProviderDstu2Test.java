@@ -1,12 +1,25 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
+import ca.uhn.fhir.jpa.rp.dstu2.*;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.model.dstu2.resource.*;
+import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
+import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
+import ca.uhn.fhir.model.primitive.DecimalDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -17,45 +30,31 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
-import ca.uhn.fhir.jpa.rp.dstu2.*;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.util.TestUtil;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderDstu2Test.class);
 	private static RestfulServer myRestServer;
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
 	private static CloseableHttpClient ourHttpClient;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderDstu2Test.class);
 	private static Server ourServer;
 	private static String ourServerBase;
-
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Before
 	public void beforeStartServer() throws Exception {
@@ -72,9 +71,23 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			OrganizationResourceProvider organizationRp = new OrganizationResourceProvider();
 			organizationRp.setDao(myOrganizationDao);
 
+			LocationResourceProvider locationRp = new LocationResourceProvider();
+			locationRp.setDao(myLocationDao);
+
+			BinaryResourceProvider binaryRp = new BinaryResourceProvider();
+			binaryRp.setDao(myBinaryDao);
+
+			DiagnosticReportResourceProvider diagnosticReportRp = new DiagnosticReportResourceProvider();
+			diagnosticReportRp.setDao(myDiagnosticReportDao);
+			DiagnosticOrderResourceProvider diagnosticOrderRp = new DiagnosticOrderResourceProvider();
+			diagnosticOrderRp.setDao(myDiagnosticOrderDao);
+			PractitionerResourceProvider practitionerRp = new PractitionerResourceProvider();
+			practitionerRp.setDao(myPractitionerDao);
+
+
 			RestfulServer restServer = new RestfulServer(ourCtx);
 			restServer.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(10));
-			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp);
+			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, binaryRp, locationRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp);
 
 			restServer.setPlainProviders(mySystemProvider);
 
@@ -157,10 +170,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			ourLog.info(response);
 			assertThat(response, not(containsString("_format")));
 			assertEquals(200, http.getStatusLine().getStatusCode());
-			
+
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 			assertEquals(BundleTypeEnum.SEARCH_RESULTS, responseBundle.getTypeElement().getValueAsEnum());
-			
+
 		} finally {
 			http.close();
 		}
@@ -179,10 +192,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	@Transactional(propagation=Propagation.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	@Test
 	public void testSuggestKeywords() throws Exception {
-		
+
 		Patient patient = new Patient();
 		patient.addName().addFamily("testSuggest");
 		IIdType ptId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
@@ -197,21 +210,21 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		obs.getSubject().setReference(ptId);
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
 		myObservationDao.update(obs, mySrd);
-		
+
 		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
 			assertEquals(200, http.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
-			
+
 			Parameters parameters = ourCtx.newXmlParser().parseResource(Parameters.class, output);
 			assertEquals(2, parameters.getParameter().size());
 			assertEquals("keyword", parameters.getParameter().get(0).getPart().get(0).getName());
 			assertEquals(new StringDt("ZXCVBNM"), parameters.getParameter().get(0).getPart().get(0).getValue());
 			assertEquals("score", parameters.getParameter().get(0).getPart().get(1).getName());
 			assertEquals(new DecimalDt("1.0"), parameters.getParameter().get(0).getPart().get(1).getValue());
-			
+
 		} finally {
 			http.close();
 		}
@@ -227,7 +240,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		obs.getSubject().setReference(ptId);
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
 		myObservationDao.create(obs, mySrd);
-		
+
 		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
@@ -238,7 +251,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		} finally {
 			http.close();
 		}
-		
+
 		get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything");
 		http = ourHttpClient.execute(get);
 		try {
@@ -267,6 +280,44 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	public void testGetOperationDefinition() {
 		OperationDefinition op = ourClient.read(OperationDefinition.class, "-s-get-resource-counts");
 		assertEquals("get-resource-counts", op.getCode());
+	}
+
+	@Test
+	public void testTransactionReSavesPreviouslyDeletedResources() throws IOException {
+
+		for (int i = 0; i < 10; i++) {
+			ourLog.info("** Beginning pass {}", i);
+
+			Bundle input = myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/dstu2/createdeletebundle.json"), Charsets.UTF_8));
+			ourClient.transaction().withBundle(input).execute();
+
+			myPatientDao.read(new IdType("Patient/Patient1063259"));
+
+			deleteAllOfType("Binary");
+			deleteAllOfType("Location");
+			deleteAllOfType("DiagnosticReport");
+			deleteAllOfType("Observation");
+			deleteAllOfType("DiagnosticOrder");
+			deleteAllOfType("Practitioner");
+			deleteAllOfType("Patient");
+			deleteAllOfType("Organization");
+
+			try {
+				myPatientDao.read(new IdType("Patient/Patient1063259"));
+				fail();
+			} catch (ResourceGoneException e) {
+				// good
+			}
+
+		}
+
+	}
+
+	private void deleteAllOfType(String theType) {
+		BundleUtil.toListOfResources(myFhirCtx, ourClient.search().forResource(theType).execute())
+			.forEach(t -> {
+				ourClient.delete().resourceById(t.getIdElement()).execute();
+			});
 	}
 
 	@Test
@@ -372,20 +423,20 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testTransactionSearch() throws Exception {
-		for (int i = 0; i < 20; i ++) {
+		for (int i = 0; i < 20; i++) {
 			Patient p = new Patient();
 			p.addName().addFamily("PATIENT_" + i);
 			myPatientDao.create(p, mySrd);
 		}
-		
+
 		Bundle req = new Bundle();
 		req.setType(BundleTypeEnum.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?");
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
-		
+
 		assertEquals(1, resp.getEntry().size());
-		Bundle respSub = (Bundle)resp.getEntry().get(0).getResource();
+		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals("self", respSub.getLink().get(0).getRelation());
 		assertEquals(ourServerBase + "/Patient", respSub.getLink().get(0).getUrl());
 		assertEquals("next", respSub.getLink().get(1).getRelation());
@@ -396,20 +447,20 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testTransactionCount() throws Exception {
-		for (int i = 0; i < 20; i ++) {
+		for (int i = 0; i < 20; i++) {
 			Patient p = new Patient();
 			p.addName().addFamily("PATIENT_" + i);
 			myPatientDao.create(p, mySrd);
 		}
-		
+
 		Bundle req = new Bundle();
 		req.setType(BundleTypeEnum.TRANSACTION);
 		req.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?_summary=count");
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
-		
+
 		assertEquals(1, resp.getEntry().size());
-		Bundle respSub = (Bundle)resp.getEntry().get(0).getResource();
+		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(20, respSub.getTotal().intValue());
 		assertEquals(0, respSub.getEntry().size());
 	}
@@ -423,8 +474,15 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			ourLog.info(output);
 			assertEquals(200, http.getStatusLine().getStatusCode());
 		} finally {
-			IOUtils.closeQuietly(http);;
+			IOUtils.closeQuietly(http);
+			;
 		}
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

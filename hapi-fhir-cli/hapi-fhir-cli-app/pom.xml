@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir-cli</artifactId>
-		<version>3.6.0-SNAPSHOT</version>
+		<version>3.7.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -42,6 +42,14 @@
 			<version>${project.version}</version>
 			<classifier>classes</classifier>
 		</dependency>
+
+		<!--
+		<dependency>
+			<groupId>com.oracle</groupId>
+			<artifactId>ojbc8g</artifactId>
+			<version>12.2.0.1</version>
+		</dependency>
+		-->
 
 	</dependencies>
 

@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
@@ -65,6 +66,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -134,6 +136,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
 	private ApplicationContext myApplicationContext;
+	private TransactionTemplate myTxTemplate;
 
 	/**
 	 * @param theAdd         If true, add the code. If false, remove the code.
@@ -365,6 +368,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
+
 	@Override
 	@Transactional
 	public void deleteConceptMapAndChildren(ResourceTable theResourceTable) {
@@ -383,7 +389,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				break;
 			}
 
-			theDao.deleteInBatch(link);
+			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+			txTemplate.execute(t->{
+				theDao.deleteInBatch(link);
+				return null;
+			});
 
 			count += link.getNumberOfElements();
 			ourLog.info(" * {} {} deleted - {}/sec - ETA: {}", count, theDescriptor, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
@@ -863,8 +874,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		if (relCount > 0) {
-			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({}ms / code)",
-				relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount));
+			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({}ms / entry)",
+				relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(relCount));
 		}
 
 		if ((myDeferredConcepts.size() + myConceptLinksToSaveLater.size()) == 0) {
@@ -888,7 +899,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
-		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		tt.execute(new TransactionCallbackWithoutResult() {
 			private void createParentsString(StringBuilder theParentsBuilder, Long theConceptPid) {
 				Validate.notNull(theConceptPid, "theConceptPid must not be null");
@@ -1015,7 +1026,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
-		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		if (!myDeferredConcepts.isEmpty() || !myConceptLinksToSaveLater.isEmpty()) {
 			tt.execute(t -> {
 				processDeferredConcepts();
@@ -1051,6 +1062,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@PostConstruct
 	public void start() {
 		myCodeSystemResourceDao = myApplicationContext.getBean(IFhirResourceDaoCodeSystem.class);
+		myTxTemplate = new TransactionTemplate(myTransactionManager);
 	}
 
 	@Override
@@ -1063,8 +1075,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		// Grab the existing versions so we can delete them later
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
-
-//		verifyNoDuplicates(theCodeSystemVersion.getConcepts(), new HashSet<String>());
 
 		/*
 		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions

@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestR4WithoutLuceneConfig;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -89,11 +92,13 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+	@Autowired
+	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, mySearchParamPresenceSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
 	@Before

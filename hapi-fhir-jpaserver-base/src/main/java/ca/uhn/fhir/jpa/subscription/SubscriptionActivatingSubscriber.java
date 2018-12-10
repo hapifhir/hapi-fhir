@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -162,16 +163,16 @@ public class SubscriptionActivatingSubscriber {
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	public void handleMessage(ResourceModifiedMessage.OperationTypeEnum theOperationType, IIdType theId, final IBaseResource theSubscription) throws MessagingException {
-
+		if (!theId.getResourceType().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
+			return;
+		}
 		switch (theOperationType) {
 			case DELETE:
 				mySubscriptionInterceptor.unregisterSubscription(theId);
-				return;
+				break;
 			case CREATE:
 			case UPDATE:
-				if (!theId.getResourceType().equals("Subscription")) {
-					return;
-				}
+				mySubscriptionInterceptor.validateCriteria(theSubscription);
 				activateAndRegisterSubscriptionIfRequiredInTransaction(theSubscription);
 				break;
 			default:

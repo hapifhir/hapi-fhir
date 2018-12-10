@@ -140,7 +140,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 					if (statusCode < 500) {
 						ourLog.warn("Failure during REST processing: {}", theException.toString());
 					} else {
-						ourLog.warn("Failure during REST processing: {}", theException);
+						ourLog.warn("Failure during REST processing", theException);
 					}
 					
 					BaseServerResponseException baseServerResponseException = (BaseServerResponseException) theException;

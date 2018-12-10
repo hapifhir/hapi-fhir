@@ -21,9 +21,10 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -68,7 +69,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.TypedQuery;
@@ -81,6 +81,10 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	private Bundle batch(final RequestDetails theRequestDetails, Bundle theRequest) {
 		ourLog.info("Beginning batch with {} resources", theRequest.getEntry().size());
@@ -241,7 +245,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			requestDetails.setParameters(new HashMap<String, String[]>());
 			if (qIndex != -1) {
 				String params = url.substring(qIndex);
-				List<NameValuePair> parameters = translateMatchUrl(params);
+				List<NameValuePair> parameters = myMatchUrlService.translateMatchUrl(params);
 				for (NameValuePair next : parameters) {
 					paramValues.put(next.getName(), next.getValue());
 				}
@@ -363,7 +367,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				case POST: {
 					// CREATE
 					@SuppressWarnings("rawtypes")
-					IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
+					IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(res.getClass());
 					res.setId((String) null);
 					DaoMethodOutcome outcome;
 					outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theRequestDetails);
@@ -403,7 +407,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				case PUT: {
 					// UPDATE
 					@SuppressWarnings("rawtypes")
-					IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
+					IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(res.getClass());
 
 					DaoMethodOutcome outcome;
 

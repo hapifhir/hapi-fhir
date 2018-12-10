@@ -22,20 +22,29 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+@Component("myDaoRegistry")
 public class DaoRegistry implements ApplicationContextAware {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
-	private FhirContext myCtx;
+	private FhirContext myContext;
+
 	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
 
@@ -44,8 +53,8 @@ public class DaoRegistry implements ApplicationContextAware {
 		myAppCtx = theApplicationContext;
 	}
 
-	public IFhirSystemDao<?, ?> getSystemDao() {
-		IFhirSystemDao<?, ?> retVal = mySystemDao;
+	public IFhirSystemDao getSystemDao() {
+		IFhirSystemDao retVal = mySystemDao;
 		if (retVal == null) {
 			retVal = myAppCtx.getBean(IFhirSystemDao.class);
 			mySystemDao = retVal;
@@ -53,25 +62,70 @@ public class DaoRegistry implements ApplicationContextAware {
 		return retVal;
 	}
 
-	public IFhirResourceDao<?> getResourceDao(String theResourceName) {
-		IFhirResourceDao<?> retVal = getResourceNameToResourceDao().get(theResourceName);
-		Validate.notNull(retVal, "No DAO exists for resource type %s - Have: %s", theResourceName, myResourceNameToResourceDao);
-		return retVal;
-
-	}
-
-	private Map<String, IFhirResourceDao<?>> getResourceNameToResourceDao() {
-		Map<String, IFhirResourceDao<?>> retVal = myResourceNameToResourceDao;
-		if (retVal == null || retVal.isEmpty()) {
-			retVal = new HashMap<>();
-			Map<String, IFhirResourceDao> resourceDaos = myAppCtx.getBeansOfType(IFhirResourceDao.class);
-			for (IFhirResourceDao nextResourceDao : resourceDaos.values()) {
-				RuntimeResourceDefinition nextResourceDef = myCtx.getResourceDefinition(nextResourceDao.getResourceType());
-				retVal.put(nextResourceDef.getName(), nextResourceDao);
-			}
-			myResourceNameToResourceDao = retVal;
+	public IFhirResourceDao getResourceDao(String theResourceName) {
+		init();
+		IFhirResourceDao retVal = myResourceNameToResourceDao.get(theResourceName);
+		if (retVal == null) {
+			List<String> supportedResourceTypes = myResourceNameToResourceDao
+				.keySet()
+				.stream()
+				.sorted()
+				.collect(Collectors.toList());
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + theResourceName + " - Can handle: " + supportedResourceTypes);
 		}
 		return retVal;
 	}
 
+	public <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theResourceType) {
+		IFhirResourceDao<R> retVal = getResourceDaoIfExists(theResourceType);
+		Validate.notNull(retVal, "No DAO exists for resource type %s - Have: %s", theResourceType, myResourceNameToResourceDao);
+		return retVal;
+	}
+
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(Class<T> theResourceType) {
+		String resourceName = myContext.getResourceDefinition(theResourceType).getName();
+		return (IFhirResourceDao<T>) getResourceDao(resourceName);
+	}
+
+	private void init() {
+		if (myResourceNameToResourceDao != null && !myResourceNameToResourceDao.isEmpty()) {
+			return;
+		}
+
+		Map<String, IFhirResourceDao> resourceDaos = myAppCtx.getBeansOfType(IFhirResourceDao.class);
+
+		initializeMaps(resourceDaos.values());
+	}
+
+	private void initializeMaps(Collection<IFhirResourceDao> theResourceDaos) {
+
+		myResourceNameToResourceDao = new HashMap<>();
+
+		for (IFhirResourceDao nextResourceDao : theResourceDaos) {
+			RuntimeResourceDefinition nextResourceDef = myContext.getResourceDefinition(nextResourceDao.getResourceType());
+			myResourceNameToResourceDao.put(nextResourceDef.getName(), nextResourceDao);
+		}
+	}
+
+	public IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
+		IFhirResourceDao retVal = getResourceDao(theClass);
+		if (retVal == null) {
+			List<String> supportedResourceNames = myResourceNameToResourceDao
+				.keySet()
+				.stream()
+				.map(t -> myContext.getResourceDefinition(t).getName())
+				.sorted()
+				.collect(Collectors.toList());
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + myContext.getResourceDefinition(theClass).getName() + " - Can handle: " + supportedResourceNames);
+		}
+		return retVal;
+	}
+
+	public void setResourceDaos(Collection<IFhirResourceDao> theResourceDaos) {
+		initializeMaps(theResourceDaos);
+	}
+
+	public IFhirResourceDao getSubscriptionDao() {
+		return getResourceDao(ResourceTypeEnum.SUBSCRIPTION.getCode());
+	}
 }

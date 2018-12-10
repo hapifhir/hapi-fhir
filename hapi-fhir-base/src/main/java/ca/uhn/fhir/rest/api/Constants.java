@@ -42,8 +42,14 @@ public class Constants {
 	 */
 	public static final Set<String> CORS_ALLWED_METHODS;
 	public static final String CT_FHIR_JSON = "application/json+fhir";
+	/**
+	 * The FHIR MimeType for JSON encoding in FHIR DSTU3+
+	 */
 	public static final String CT_FHIR_JSON_NEW = "application/fhir+json";
 	public static final String CT_FHIR_XML = "application/xml+fhir";
+	/**
+	 * The FHIR MimeType for XML encoding in FHIR DSTU3+
+	 */
 	public static final String CT_FHIR_XML_NEW = "application/fhir+xml";
 	public static final String CT_HTML = "text/html";
 	public static final String CT_HTML_WITH_UTF8 = "text/html" + CHARSET_UTF8_CTSUFFIX;
@@ -86,6 +92,7 @@ public class Constants {
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
 	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
 	public static final String HEADER_CONTENT_TYPE = "Content-Type";
+	public static final String HEADER_CONTENT_TYPE_LC = HEADER_CONTENT_TYPE.toLowerCase();
 	public static final String HEADER_COOKIE = "Cookie";
 	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";

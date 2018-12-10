@@ -87,7 +87,7 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 			return;
 		}
 
-		handleDeny(decision);
+		handleDeny(theRequestDetails, decision);
 	}
 
 	@Override
@@ -185,6 +185,9 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 				// Nothing yet
 				return OperationExamineDirection.NONE;
 
+			case GRAPHQL_REQUEST:
+				return OperationExamineDirection.IN;
+
 			default:
 				// Should not happen
 				throw new IllegalStateException("Unable to apply security to event of type " + theOperation);
@@ -224,6 +227,19 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 	 * applied. By default no flags are applied.
 	 *
 	 * @param theFlags The flags (must not be null)
+	 * @see #setFlags(AuthorizationFlagsEnum...)
+	 */
+	public AuthorizationInterceptor setFlags(Collection<AuthorizationFlagsEnum> theFlags) {
+		Validate.notNull(theFlags, "theFlags must not be null");
+		myFlags = new HashSet<>(theFlags);
+		return this;
+	}
+
+	/**
+	 * This property configures any flags affecting how authorization is
+	 * applied. By default no flags are applied.
+	 *
+	 * @param theFlags The flags (must not be null)
 	 * @see #setFlags(Collection)
 	 */
 	public AuthorizationInterceptor setFlags(AuthorizationFlagsEnum... theFlags) {
@@ -238,6 +254,17 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 	 * throw {@link ForbiddenOperationException} (HTTP 403) with error message citing the
 	 * rule name which trigered failure
 	 * </p>
+	 *
+	 * @since HAPI FHIR 3.6.0
+	 */
+	protected void handleDeny(RequestDetails theRequestDetails, Verdict decision) {
+		handleDeny(decision);
+	}
+
+	/**
+	 * This method should not be overridden. As of HAPI FHIR 3.6.0, you
+	 * should override {@link #handleDeny(RequestDetails, Verdict)} instead. This
+	 * method will be removed in the future.
 	 */
 	protected void handleDeny(Verdict decision) {
 		if (decision.getDecidingRule() != null) {
@@ -350,51 +377,6 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 		handleUserOperation(theRequest, theNewResource, RestOperationTypeEnum.UPDATE);
 	}
 
-	/**
-	 * This property configures any flags affecting how authorization is
-	 * applied. By default no flags are applied.
-	 *
-	 * @param theFlags The flags (must not be null)
-	 * @see #setFlags(AuthorizationFlagsEnum...)
-	 */
-	public AuthorizationInterceptor setFlags(Collection<AuthorizationFlagsEnum> theFlags) {
-		Validate.notNull(theFlags, "theFlags must not be null");
-		myFlags = new HashSet<>(theFlags);
-		return this;
-	}
-
-	private static UnsupportedOperationException failForDstu1() {
-		return new UnsupportedOperationException("Use of this interceptor on DSTU1 servers is not supportd");
-	}
-
-	static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
-		if (theResponseObject == null) {
-			return Collections.emptyList();
-		}
-
-		List<IBaseResource> retVal;
-
-		boolean isContainer = false;
-		if (theResponseObject instanceof IBaseBundle) {
-			isContainer = true;
-		} else if (theResponseObject instanceof IBaseParameters) {
-			isContainer = true;
-		}
-
-		if (!isContainer) {
-			return Collections.singletonList(theResponseObject);
-		}
-
-		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
-
-		// Exclude the container
-		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
-			retVal = retVal.subList(1, retVal.size());
-		}
-
-		return retVal;
-	}
-
 	private enum OperationExamineDirection {
 		BOTH,
 		IN,
@@ -430,6 +412,38 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 			return b.build();
 		}
 
+	}
+
+	private static UnsupportedOperationException failForDstu1() {
+		return new UnsupportedOperationException("Use of this interceptor on DSTU1 servers is not supportd");
+	}
+
+	static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
+		if (theResponseObject == null) {
+			return Collections.emptyList();
+		}
+
+		List<IBaseResource> retVal;
+
+		boolean isContainer = false;
+		if (theResponseObject instanceof IBaseBundle) {
+			isContainer = true;
+		} else if (theResponseObject instanceof IBaseParameters) {
+			isContainer = true;
+		}
+
+		if (!isContainer) {
+			return Collections.singletonList(theResponseObject);
+		}
+
+		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
+
+		// Exclude the container
+		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
+			retVal = retVal.subList(1, retVal.size());
+		}
+
+		return retVal;
 	}
 
 }

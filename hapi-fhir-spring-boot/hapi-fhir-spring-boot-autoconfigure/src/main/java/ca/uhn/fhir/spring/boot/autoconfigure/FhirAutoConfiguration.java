@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
@@ -180,7 +181,7 @@ public class FhirAutoConfiguration {
 		}
 
 		@Configuration
-		@EntityScan("ca.uhn.fhir.jpa.entity")
+		@EntityScan(basePackages = {"ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.jpa.model.entity"})
 		@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 		static class FhirJpaDaoConfiguration {
 
@@ -192,6 +193,12 @@ public class FhirAutoConfiguration {
 				return fhirDaoConfig;
 			}
 
+			@Bean
+			@ConditionalOnMissingBean
+			@ConfigurationProperties("hapi.fhir.jpa")
+			public ModelConfig fhirModelConfig() {
+				return fhirDaoConfig().getModelConfig();
+			}
 		}
 
 		@Configuration

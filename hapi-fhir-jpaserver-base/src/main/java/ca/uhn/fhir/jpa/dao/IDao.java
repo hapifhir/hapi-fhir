@@ -1,18 +1,14 @@
 package ca.uhn.fhir.jpa.dao;
 
-import java.util.Collection;
-import java.util.Set;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.model.entity.ResourceTag;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.IBaseResourceEntity;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.ResourceTag;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import java.util.Collection;
 
 /*
  * #%L
@@ -42,10 +38,6 @@ public interface IDao {
 
 	FhirContext getContext();
 
-	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
-
-	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
-
 	/**
 	 * Populate all of the runtime dependencies that a bundle provider requires in order to work
 	 */
@@ -53,12 +45,9 @@ public interface IDao {
 
 	ISearchBuilder newSearchBuilder();
 
-	void populateFullTextFields(IBaseResource theResource, ResourceTable theEntity);
-
-	<R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType);
-
 	IBaseResource toResource(BaseHasResource theEntity, boolean theForHistoryOperation);
 
 	<R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation);
 
+	ISearchParamRegistry getSearchParamRegistry();
 }

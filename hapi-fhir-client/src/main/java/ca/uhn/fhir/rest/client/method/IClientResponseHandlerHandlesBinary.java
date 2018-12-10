@@ -35,6 +35,6 @@ public interface IClientResponseHandlerHandlesBinary<T> extends IClientResponseH
 	 */
 	boolean isBinary();
 	
-	T invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
+	T invokeClientForBinary(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException;
 
 }

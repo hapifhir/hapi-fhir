@@ -23,6 +23,7 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CapabilityStatement.*;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
@@ -41,6 +42,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 
 	private volatile CapabilityStatement myCachedValue;
 	private DaoConfig myDaoConfig;
+	private ISearchParamRegistry mySearchParamRegistry;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
@@ -66,6 +68,11 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 		myDaoConfig = theDaoConfig;
 		super.setCache(false);
 		setIncludeResourceCounts(true);
+		setSearchParamRegistry(theSystemDao.getSearchParamRegistry());
+	}
+
+	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
 	@Override
@@ -99,7 +106,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 				nextResource.getSearchParam().clear();
 				String resourceName = nextResource.getType();
 				RuntimeResourceDefinition resourceDef = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
-				Collection<RuntimeSearchParam> searchParams = mySystemDao.getSearchParamsByResourceType(resourceDef);
+				Collection<RuntimeSearchParam> searchParams =  mySearchParamRegistry.getSearchParamsByResourceType(resourceDef);
 				for (RuntimeSearchParam runtimeSp : searchParams) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 

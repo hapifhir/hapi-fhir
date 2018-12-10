@@ -255,7 +255,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	public Date getLowerBoundAsInstant() {
-		if (myLowerBound == null) {
+		if (myLowerBound == null || myLowerBound.getValue() == null) {
 			return null;
 		}
 		Date retVal = myLowerBound.getValue();
@@ -310,7 +310,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 	}
 
 	public Date getUpperBoundAsInstant() {
-		if (myUpperBound == null) {
+		if (myUpperBound == null || myUpperBound.getValue() == null) {
 			return null;
 		}
 

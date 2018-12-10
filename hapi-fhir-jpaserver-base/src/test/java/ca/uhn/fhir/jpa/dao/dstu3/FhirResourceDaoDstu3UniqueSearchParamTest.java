@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedCompositeStringUnique;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -20,7 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -39,12 +39,12 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 
 	@After
 	public void after() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@Before
 	public void before() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 	}
 
 	private void createUniqueBirthdateAndGenderSps() {
@@ -78,7 +78,7 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 			.setExpression("Patient")
 			.setDefinition(new Reference("SearchParameter/patient-birthdate"));
 		sp.addExtension()
-			.setUrl(JpaConstants.EXT_SP_UNIQUE)
+			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 
@@ -118,7 +118,7 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 			.setExpression("Coverage")
 			.setDefinition(new Reference("/SearchParameter/coverage-identifier"));
 		sp.addExtension()
-			.setUrl(JpaConstants.EXT_SP_UNIQUE)
+			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 		mySearchParamRegsitry.forceRefresh();
@@ -155,7 +155,7 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 			.setExpression("Patient")
 			.setDefinition(new Reference("SearchParameter/patient-organization"));
 		sp.addExtension()
-			.setUrl(JpaConstants.EXT_SP_UNIQUE)
+			.setUrl(SearchParamConstants.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.update(sp);
 
@@ -205,141 +205,6 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 		} catch (PreconditionFailedException e) {
 			// good
 		}
-
-	}
-
-	@Test
-	public void testIndexTransactionWithMatchUrl() {
-		Patient pt2 = new Patient();
-		pt2.setGender(Enumerations.AdministrativeGender.MALE);
-		pt2.setBirthDateElement(new DateType("2011-01-02"));
-		IIdType id2 = myPatientDao.create(pt2).getId().toUnqualifiedVersionless();
-
-		Coverage cov = new Coverage();
-		cov.getBeneficiary().setReference(id2.getValue());
-		cov.addIdentifier().setSystem("urn:foo:bar").setValue("123");
-		IIdType id3 = myCoverageDao.create(cov).getId().toUnqualifiedVersionless();
-
-		createUniqueIndexCoverageBeneficiary();
-
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(1000);
-
-		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		assertEquals(uniques.toString(), 1, uniques.size());
-		assertEquals("Coverage/" + id3.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-		assertEquals("Coverage?beneficiary=Patient%2F" + id2.getIdPart() + "&identifier=urn%3Afoo%3Abar%7C123", uniques.get(0).getIndexString());
-
-
-	}
-
-	@Test
-	public void testIndexTransactionWithMatchUrl2() {
-		createUniqueIndexCoverageBeneficiary();
-
-		String input = "{\n" +
-			"  \"resourceType\": \"Bundle\",\n" +
-			"  \"type\": \"transaction\",\n" +
-			"  \"entry\": [\n" +
-			"    {\n" +
-			"      \"fullUrl\": \"urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3\",\n" +
-			"      \"resource\": {\n" +
-			"        \"resourceType\": \"Patient\",\n" +
-			"        \"identifier\": [\n" +
-			"          {\n" +
-			"            \"use\": \"official\",\n" +
-			"            \"type\": {\n" +
-			"              \"coding\": [\n" +
-			"                {\n" +
-			"                  \"system\": \"http://hl7.org/fhir/v2/0203\",\n" +
-			"                  \"code\": \"MR\"\n" +
-			"                }\n" +
-			"              ]\n" +
-			"            },\n" +
-			"            \"system\": \"FOOORG:FOOSITE:patientid:MR:R\",\n" +
-			"            \"value\": \"007811959\"\n" +
-			"          }\n" +
-			"        ]\n" +
-			"      },\n" +
-			"      \"request\": {\n" +
-			"        \"method\": \"PUT\",\n" +
-			"        \"url\": \"/Patient?identifier=FOOORG%3AFOOSITE%3Apatientid%3AMR%3AR%7C007811959%2CFOOORG%3AFOOSITE%3Apatientid%3AMR%3AB%7C000929990%2CFOOORG%3AFOOSITE%3Apatientid%3API%3APH%7C00589363%2Chttp%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-ssn%7C657-01-8133\"\n" +
-			"      }\n" +
-			"    },\n" +
-			"    {\n" +
-			"      \"fullUrl\": \"urn:uuid:b58ff639-11d1-4dac-942f-abf4f9a625d7\",\n" +
-			"      \"resource\": {\n" +
-			"        \"resourceType\": \"Coverage\",\n" +
-			"        \"identifier\": [\n" +
-			"          {\n" +
-			"            \"system\": \"FOOORG:FOOSITE:coverage:planId\",\n" +
-			"            \"value\": \"0403-010101\"\n" +
-			"          }\n" +
-			"        ],\n" +
-			"        \"beneficiary\": {\n" +
-			"          \"reference\": \"urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3\"\n" +
-			"        }\n" +
-			"      },\n" +
-			"      \"request\": {\n" +
-			"        \"method\": \"PUT\",\n" +
-			"        \"url\": \"/Coverage?beneficiary=urn%3Auuid%3Ad2a46176-8e15-405d-bbda-baea1a9dc7f3&identifier=FOOORG%3AFOOSITE%3Acoverage%3AplanId%7C0403-010101\"\n" +
-			"      }\n" +
-			"    },\n" +
-			"    {\n" +
-			"      \"fullUrl\": \"urn:uuid:13f5da1a-6601-4c1a-82c9-41527be23fa0\",\n" +
-			"      \"resource\": {\n" +
-			"        \"resourceType\": \"Coverage\",\n" +
-			"        \"contained\": [\n" +
-			"          {\n" +
-			"            \"resourceType\": \"RelatedPerson\",\n" +
-			"            \"id\": \"1\",\n" +
-			"            \"name\": [\n" +
-			"              {\n" +
-			"                \"family\": \"SMITH\",\n" +
-			"                \"given\": [\n" +
-			"                  \"FAKER\"\n" +
-			"                ]\n" +
-			"              }\n" +
-			"            ]\n" +
-			"          },\n" +
-			"          {\n" +
-			"            \"resourceType\": \"Organization\",\n" +
-			"            \"id\": \"2\",\n" +
-			"            \"name\": \"MEDICAID\"\n" +
-			"          }\n" +
-			"        ],\n" +
-			"        \"identifier\": [\n" +
-			"          {\n" +
-			"            \"system\": \"FOOORG:FOOSITE:coverage:planId\",\n" +
-			"            \"value\": \"0404-010101\"\n" +
-			"          }\n" +
-			"        ],\n" +
-			"        \"policyHolder\": {\n" +
-			"          \"reference\": \"#1\"\n" +
-			"        },\n" +
-			"        \"beneficiary\": {\n" +
-			"          \"reference\": \"urn:uuid:d2a46176-8e15-405d-bbda-baea1a9dc7f3\"\n" +
-			"        },\n" +
-			"        \"payor\": [\n" +
-			"          {\n" +
-			"            \"reference\": \"#2\"\n" +
-			"          }\n" +
-			"        ]\n" +
-			"      },\n" +
-			"      \"request\": {\n" +
-			"        \"method\": \"PUT\",\n" +
-			"        \"url\": \"/Coverage?beneficiary=urn%3Auuid%3Ad2a46176-8e15-405d-bbda-baea1a9dc7f3&identifier=FOOORG%3AFOOSITE%3Acoverage%3AplanId%7C0404-010101\"\n" +
-			"      }\n" +
-			"    }\n" +
-			"  ]\n" +
-			"}";
-
-		Bundle inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputBundle));
-		mySystemDao.transaction(mySrd, inputBundle);
-
-		inputBundle = myFhirCtx.newJsonParser().parseResource(Bundle.class, input);
-		mySystemDao.transaction(mySrd, inputBundle);
 
 	}
 
@@ -470,38 +335,6 @@ public class FhirResourceDaoDstu3UniqueSearchParamTest extends BaseJpaDstu3Test 
 		assertEquals(1, uniques.size());
 		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
 		assertEquals("Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale", uniques.get(0).getIndexString());
-	}
-
-	@Test
-	public void testUniqueValuesAreIndexed_StringAndReference() {
-		createUniqueNameAndManagingOrganizationSps();
-
-		Organization org = new Organization();
-		org.setId("Organization/ORG");
-		org.setName("ORG");
-		myOrganizationDao.update(org);
-
-		Patient pt1 = new Patient();
-		pt1.addName()
-			.setFamily("FAMILY1")
-			.addGiven("GIVEN1")
-			.addGiven("GIVEN2")
-			.addGiven("GIVEN2"); // GIVEN2 happens twice
-		pt1.setManagingOrganization(new Reference("Organization/ORG"));
-		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
-
-		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		Collections.sort(uniques);
-
-		assertEquals(3, uniques.size());
-		assertEquals("Patient/" + id1.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-		assertEquals("Patient?name=FAMILY1&organization=Organization%2FORG", uniques.get(0).getIndexString());
-
-		assertEquals("Patient/" + id1.getIdPart(), uniques.get(1).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-		assertEquals("Patient?name=GIVEN1&organization=Organization%2FORG", uniques.get(1).getIndexString());
-
-		assertEquals("Patient/" + id1.getIdPart(), uniques.get(2).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-		assertEquals("Patient?name=GIVEN2&organization=Organization%2FORG", uniques.get(2).getIndexString());
 	}
 
 	@AfterClass

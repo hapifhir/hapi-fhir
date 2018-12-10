@@ -8,11 +8,12 @@ import javax.persistence.TemporalType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 
 /*
  * #%L
@@ -91,4 +92,8 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		"INNER JOIN ResourceTable r ON (r.myId = h.myResourceId and r.myVersion = h.myResourceVersion) " + 
 		"WHERE r.myId in (:pids)")
 	Collection<ResourceHistoryTable> findByResourceIds(@Param("pids") Collection<Long> pids);
+
+	@Modifying
+	@Query("UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceId = :id AND r.myResourceVersion = :oldVersion")
+	void updateVersion(@Param("id") long theId, @Param("oldVersion") long theOldVersion, @Param("newVersion") long theNewVersion);
 }

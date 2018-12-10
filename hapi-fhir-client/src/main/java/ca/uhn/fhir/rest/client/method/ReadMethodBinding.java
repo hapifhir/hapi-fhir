@@ -106,7 +106,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding implem
 	}
 
 	@Override
-	public Object invokeClient(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+	public Object invokeClientForBinary(String theResponseMimeType, InputStream theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
 			throws IOException, BaseServerResponseException {
 		byte[] contents = IOUtils.toByteArray(theResponseReader);
 

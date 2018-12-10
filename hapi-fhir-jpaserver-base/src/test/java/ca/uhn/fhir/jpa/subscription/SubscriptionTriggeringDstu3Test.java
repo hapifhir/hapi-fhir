@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -23,6 +22,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -30,9 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -70,11 +68,14 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 		ourRestServer.unregisterInterceptor(ourRestHookSubscriptionInterceptor);
 
-		ourSubscriptionTriggeringProvider.cancelAll();
-		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(null);
+		mySubscriptionTriggeringSvc.cancelAll();
+		mySubscriptionTriggeringSvc.setMaxSubmitPerPass(null);
 
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
+
+	@Autowired
+	private SubscriptionTriggeringSvcImpl mySubscriptionTriggeringSvc;
 
 	@Before
 	public void beforeRegisterRestHookListener() {
@@ -196,7 +197,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(50, ourUpdatedPatients);
 		beforeReset();
 
-		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(33);
+		mySubscriptionTriggeringSvc.setMaxSubmitPerPass(33);
 
 		Parameters response = ourClient
 			.operation()
@@ -252,7 +253,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(50, ourUpdatedPatients);
 		beforeReset();
 
-		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(33);
+		mySubscriptionTriggeringSvc.setMaxSubmitPerPass(33);
 
 		Parameters response = ourClient
 			.operation()
@@ -315,7 +316,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForSize(0, ourUpdatedPatients);
 		beforeReset();
 
-		ourSubscriptionTriggeringProvider.setMaxSubmitPerPass(50);
+		mySubscriptionTriggeringSvc.setMaxSubmitPerPass(50);
 
 		Parameters response = ourClient
 			.operation()

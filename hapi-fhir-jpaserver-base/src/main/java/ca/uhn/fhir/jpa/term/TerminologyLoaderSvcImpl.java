@@ -67,7 +67,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink.csv";
 	public static final String LOINC_DOCUMENT_ONTOLOGY_FILE = "DocumentOntology.csv";
 	public static final String LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
-	public static final String LOINC_FILE = "Loinc.csv";
+	public static final String LOINC_FILE = "LoincTable/Loinc.csv";
 	public static final String LOINC_HIERARCHY_FILE = "MultiAxialHierarchy.csv";
 	public static final String LOINC_PART_FILE = "Part.csv";
 	public static final String LOINC_PART_LINK_FILE = "LoincPartLink.csv";
@@ -135,6 +135,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			} else {
 				matches = nextFilename.endsWith("/" + theFileNamePart) || nextFilename.equals(theFileNamePart);
 			}
+
 			if (matches) {
 				ourLog.info("Processing file {}", nextFilename);
 				foundMatch = true;
@@ -188,48 +189,50 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 	@Override
 	public UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles);
-		List<String> mandatoryFilenameFragments = Arrays.asList(
-			LOINC_FILE,
-			LOINC_HIERARCHY_FILE,
-			LOINC_UPLOAD_PROPERTIES_FILE,
-			LOINC_ANSWERLIST_FILE,
-			LOINC_ANSWERLIST_LINK_FILE,
-			LOINC_PART_FILE,
-			LOINC_PART_LINK_FILE,
-			LOINC_PART_RELATED_CODE_MAPPING_FILE,
-			LOINC_DOCUMENT_ONTOLOGY_FILE,
-			LOINC_RSNA_PLAYBOOK_FILE,
-			LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE,
-			LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE,
-			LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE,
-			LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV,
-			LOINC_IMAGING_DOCUMENT_CODES_FILE
-		);
+		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+			List<String> mandatoryFilenameFragments = Arrays.asList(
+				LOINC_FILE,
+				LOINC_HIERARCHY_FILE,
+				LOINC_UPLOAD_PROPERTIES_FILE,
+				LOINC_ANSWERLIST_FILE,
+				LOINC_ANSWERLIST_LINK_FILE,
+				LOINC_PART_FILE,
+				LOINC_PART_LINK_FILE,
+				LOINC_PART_RELATED_CODE_MAPPING_FILE,
+				LOINC_DOCUMENT_ONTOLOGY_FILE,
+				LOINC_RSNA_PLAYBOOK_FILE,
+				LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE,
+				LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE,
+				LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE,
+				LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV,
+				LOINC_IMAGING_DOCUMENT_CODES_FILE
+			);
 		descriptors.verifyMandatoryFilesExist(mandatoryFilenameFragments);
 
-		List<String> optionalFilenameFragments = Arrays.asList(
-		);
+			List<String> optionalFilenameFragments = Arrays.asList(
+			);
 		descriptors.verifyOptionalFilesExist(optionalFilenameFragments);
 
 		ourLog.info("Beginning LOINC processing");
 
 		return processLoincFiles(descriptors, theRequestDetails);
+		}
 	}
 
 	@Override
 	public UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles);
+		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
 
-		List<String> expectedFilenameFragments = Arrays.asList(
-			SCT_FILE_DESCRIPTION,
-			SCT_FILE_RELATIONSHIP,
-			SCT_FILE_CONCEPT);
-		descriptors.verifyMandatoryFilesExist(expectedFilenameFragments);
+			List<String> expectedFilenameFragments = Arrays.asList(
+				SCT_FILE_DESCRIPTION,
+				SCT_FILE_RELATIONSHIP,
+				SCT_FILE_CONCEPT);
+			descriptors.verifyMandatoryFilesExist(expectedFilenameFragments);
 
-		ourLog.info("Beginning SNOMED CT processing");
+			ourLog.info("Beginning SNOMED CT processing");
 
-		return processSnomedCtFiles(descriptors, theRequestDetails);
+			return processSnomedCtFiles(descriptors, theRequestDetails);
+		}
 	}
 
 	UploadStatistics processLoincFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {

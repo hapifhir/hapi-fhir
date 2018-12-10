@@ -11,7 +11,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.PortUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
@@ -24,6 +24,7 @@ import org.junit.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -35,14 +36,14 @@ import static org.junit.Assert.fail;
 public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestDstu3Test.class);
-	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
+	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
-	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
-	private static List<String> ourContentTypes = new ArrayList<>();
-	private List<IIdType> mySubscriptionIds = new ArrayList<>();
+	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
+	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -330,9 +331,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourUpdatedObservations);
 	}
 
-	// TODO: Reenable this
 	@Test
-	@Ignore
 	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
 		String payload = "application/xml";
 
@@ -341,8 +340,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		try {
 			createSubscription(criteria1, payload, ourListenerServerBase);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid criteria: Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+		} catch (UnprocessableEntityException e) {
+			assertEquals("HTTP 422 Unprocessable Entity: Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 

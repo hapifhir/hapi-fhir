@@ -46,19 +46,19 @@ import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * @author James Agnew
@@ -98,7 +98,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private <T extends IBaseResource> T doReadOrVRead(final Class<T> theType, IIdType theId, boolean theVRead, ICallable<T> theNotModifiedHandler, String theIfVersionMatches, Boolean thePrettyPrint,
-																	  SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements) {
+																	  SummaryEnum theSummary, EncodingEnum theEncoding, Set<String> theSubsetElements, String theCustomAcceptHeaderValue) {
 		String resName = toResourceName(theType);
 		IIdType id = theId;
 		if (!id.hasBaseUrl()) {
@@ -120,7 +120,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 		}
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(theCustomAcceptHeaderValue), getEncoding(), isPrettyPrint());
 		}
 
 		if (theIfVersionMatches != null) {
@@ -131,10 +131,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<>(theType, (Class<? extends IBaseResource>) null, id, allowHtmlResponse);
 
 		if (theNotModifiedHandler == null) {
-			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null);
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null, theCustomAcceptHeaderValue);
 		}
 		try {
-			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null);
+			return invokeClient(myContext, binding, invocation, theEncoding, thePrettyPrint, myLogRequestAndResponse, theSummary, theSubsetElements, null, theCustomAcceptHeaderValue);
 		} catch (NotModifiedException e) {
 			return theNotModifiedHandler.call();
 		}
@@ -228,7 +228,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public <T extends IBaseResource> T read(final Class<T> theType, UriDt theUrl) {
 		IdDt id = theUrl instanceof IdDt ? ((IdDt) theUrl) : new IdDt(theUrl);
-		return doReadOrVRead(theType, id, false, null, null, false, null, null, null);
+		return doReadOrVRead(theType, id, false, null, null, false, null, null, null, null);
 	}
 
 	@Override
@@ -269,7 +269,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	public MethodOutcome update(IdDt theIdDt, IBaseResource theResource) {
 		BaseHttpClientInvocation invocation = MethodUtil.createUpdateInvocation(theResource, null, theIdDt, myContext);
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(null), getEncoding(), isPrettyPrint());
 		}
 
 		OutcomeResponseHandler binding = new OutcomeResponseHandler();
@@ -293,7 +293,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		invocation = ValidateMethodBindingDstu2Plus.createValidateInvocation(myContext, theResource);
 
 		if (isKeepResponses()) {
-			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(), getEncoding(), isPrettyPrint());
+			myLastRequest = invocation.asHttpRequest(getServerBase(), createExtraParams(null), getEncoding(), isPrettyPrint());
 		}
 
 		OutcomeResponseHandler binding = new OutcomeResponseHandler();
@@ -306,56 +306,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		if (theId.hasVersionIdPart() == false) {
 			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
 		}
-		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null);
+		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null, null);
 	}
 
 	@Override
 	public <T extends IBaseResource> T vread(Class<T> theType, String theId, String theVersionId) {
 		IdDt resId = new IdDt(toResourceName(theType), theId, theVersionId);
 		return vread(theType, resId);
-	}
-
-	private static void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
-		if (!params.containsKey(parameterName)) {
-			params.put(parameterName, new ArrayList<>());
-		}
-		params.get(parameterName).add(parameterValue);
-	}
-
-	private static void addPreferHeader(PreferReturnEnum thePrefer, BaseHttpClientInvocation theInvocation) {
-		if (thePrefer != null) {
-			theInvocation.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + thePrefer.getHeaderValue());
-		}
-	}
-
-	private static String validateAndEscapeConditionalUrl(String theSearchUrl) {
-		Validate.notBlank(theSearchUrl, "Conditional URL can not be blank/null");
-		StringBuilder b = new StringBuilder();
-		boolean haveHadQuestionMark = false;
-		for (int i = 0; i < theSearchUrl.length(); i++) {
-			char nextChar = theSearchUrl.charAt(i);
-			if (!haveHadQuestionMark) {
-				if (nextChar == '?') {
-					haveHadQuestionMark = true;
-				} else if (!Character.isLetter(nextChar)) {
-					throw new IllegalArgumentException("Conditional URL must be in the format \"[ResourceType]?[Params]\" and must not have a base URL - Found: " + theSearchUrl);
-				}
-				b.append(nextChar);
-			} else {
-				switch (nextChar) {
-					case '|':
-					case '?':
-					case '$':
-					case ':':
-						b.append(UrlUtil.escapeUrlParam(Character.toString(nextChar)));
-						break;
-					default:
-						b.append(nextChar);
-						break;
-				}
-			}
-		}
-		return b.toString();
 	}
 
 	private enum MetaOperation {
@@ -366,13 +323,24 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	private abstract class BaseClientExecutable<T extends IClientExecutable<?, Y>, Y> implements IClientExecutable<T, Y> {
 
-		protected EncodingEnum myParamEncoding;
-		protected Boolean myPrettyPrint;
-		protected SummaryEnum mySummaryMode;
-		protected CacheControlDirective myCacheControlDirective;
+		EncodingEnum myParamEncoding;
+		Boolean myPrettyPrint;
+		SummaryEnum mySummaryMode;
+		CacheControlDirective myCacheControlDirective;
+		private String myCustomAcceptHeaderValue;
 		private List<Class<? extends IBaseResource>> myPreferResponseTypes;
 		private boolean myQueryLogRequestAndResponse;
 		private HashSet<String> mySubsetElements;
+
+		public String getCustomAcceptHeaderValue() {
+			return myCustomAcceptHeaderValue;
+		}
+
+		@Override
+		public T accept(String theHeaderValue) {
+			myCustomAcceptHeaderValue = theHeaderValue;
+			return (T) this;
+		}
 
 		@Deprecated // override deprecated method
 		@SuppressWarnings("unchecked")
@@ -392,7 +360,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public T elementsSubset(String... theElements) {
 			if (theElements != null && theElements.length > 0) {
-				mySubsetElements = new HashSet<String>(Arrays.asList(theElements));
+				mySubsetElements = new HashSet<>(Arrays.asList(theElements));
 			} else {
 				mySubsetElements = null;
 			}
@@ -444,7 +412,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				myLastRequest = theInvocation.asHttpRequest(getServerBase(), theParams, getEncoding(), myPrettyPrint);
 			}
 
-			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements, myCacheControlDirective);
+			Z resp = invokeClient(myContext, theHandler, theInvocation, myParamEncoding, myPrettyPrint, myQueryLogRequestAndResponse || myLogRequestAndResponse, mySummaryMode, mySubsetElements, myCacheControlDirective, myCustomAcceptHeaderValue);
 			return resp;
 		}
 
@@ -461,7 +429,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public T preferResponseType(Class<? extends IBaseResource> theClass) {
 			myPreferResponseTypes = null;
 			if (theClass != null) {
-				myPreferResponseTypes = new ArrayList<Class<? extends IBaseResource>>();
+				myPreferResponseTypes = new ArrayList<>();
 				myPreferResponseTypes.add(theClass);
 			}
 			return (T) this;
@@ -1021,14 +989,14 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public T invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+		public T invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
-				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+				throw NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseInputStream);
 			}
 			IParser parser = respType.newParser(myContext);
 			RuntimeResourceDefinition type = myContext.getResourceDefinition("Parameters");
-			IBaseResource retVal = parser.parseResource(type.getImplementingClass(), theResponseReader);
+			IBaseResource retVal = parser.parseResource(type.getImplementingClass(), theResponseInputStream);
 
 			BaseRuntimeChildDefinition paramChild = type.getChildByName("parameter");
 			BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
@@ -1061,6 +1029,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private Class myReturnResourceType;
 		private Class<? extends IBaseResource> myType;
 		private boolean myUseHttpGet;
+		private boolean myReturnMethodOutcome;
 
 		@SuppressWarnings("unchecked")
 		private void addParam(String theName, IBase theValue) {
@@ -1170,11 +1139,19 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				Object retVal = invoke(null, handler, invocation);
 				return retVal;
 			}
-			ResourceResponseHandler handler;
-			handler = new ResourceResponseHandler();
-			handler.setPreferResponseTypes(getPreferResponseTypes(myType));
+			IClientResponseHandler handler = new ResourceOrBinaryResponseHandler()
+					.setPreferResponseTypes(getPreferResponseTypes(myType));
+
+			if (myReturnMethodOutcome) {
+				handler = new MethodOutcomeResponseHandler(handler);
+			}
 
 			Object retVal = invoke(null, handler, invocation);
+
+			if (myReturnMethodOutcome) {
+				return retVal;
+			}
+
 			if (myContext.getResourceDefinition((IBaseResource) retVal).getName().equals("Parameters")) {
 				return retVal;
 			}
@@ -1236,6 +1213,12 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return this;
 		}
 
+		@Override
+		public IOperationUntypedWithInput returnMethodOutcome() {
+			myReturnMethodOutcome = true;
+			return this;
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public IOperationProcessMsgMode setMessageBundle(IBaseBundle theMsgBundle) {
@@ -1276,7 +1259,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public <T extends IBaseParameters> IOperationUntypedWithInput<T> withNoParameters(Class<T> theOutputParameterType) {
+		public <T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withNoParameters(Class<T> theOutputParameterType) {
 			Validate.notNull(theOutputParameterType, "theOutputParameterType may not be null");
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(theOutputParameterType);
 			if (def == null) {
@@ -1307,9 +1290,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings({"unchecked"})
 		@Override
-		public IOperationUntypedWithInput withParameters(IBaseParameters theParameters) {
+		public IOperationUntypedWithInputAndPartialOutput withParameters(IBaseParameters theParameters) {
 			Validate.notNull(theParameters, "theParameters can not be null");
 			myParameters = theParameters;
+			myParametersDef = myContext.getResourceDefinition(theParameters.getClass());
 			return this;
 		}
 
@@ -1330,10 +1314,30 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 	}
 
+
+	private final class MethodOutcomeResponseHandler  implements IClientResponseHandler<MethodOutcome> {
+		private final IClientResponseHandler<? extends IBaseResource> myWrap;
+
+		private MethodOutcomeResponseHandler(IClientResponseHandler<? extends IBaseResource> theWrap) {
+			myWrap = theWrap;
+		}
+
+		@Override
+		public MethodOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws IOException, BaseServerResponseException {
+			IBaseResource response = myWrap.invokeClient(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
+
+			MethodOutcome retVal = new MethodOutcome();
+			retVal.setResource(response);
+			retVal.setCreatedUsingStatusCode(theResponseStatusCode);
+			retVal.setResponseHeaders(theHeaders);
+			return retVal;
+		}
+	}
+
 	private final class OperationOutcomeResponseHandler implements IClientResponseHandler<IBaseOperationOutcome> {
 
 		@Override
-		public IBaseOperationOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+		public IBaseOperationOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders)
 			throws BaseServerResponseException {
 			EncodingEnum respType = EncodingEnum.forContentType(theResponseMimeType);
 			if (respType == null) {
@@ -1343,7 +1347,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			IBaseOperationOutcome retVal;
 			try {
 				// TODO: handle if something else than OO comes back
-				retVal = (IBaseOperationOutcome) parser.parseResource(theResponseReader);
+				retVal = (IBaseOperationOutcome) parser.parseResource(theResponseInputStream);
 			} catch (DataFormatException e) {
 				ourLog.warn("Failed to parse OperationOutcome response", e);
 				return null;
@@ -1367,11 +1371,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public MethodOutcome invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
-			MethodOutcome response = MethodUtil.process2xxResponse(myContext, theResponseStatusCode, theResponseMimeType, theResponseReader, theHeaders);
-			if (theResponseStatusCode == Constants.STATUS_HTTP_201_CREATED) {
-				response.setCreated(true);
-			}
+		public MethodOutcome invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders) throws BaseServerResponseException {
+			MethodOutcome response = MethodUtil.process2xxResponse(myContext, theResponseStatusCode, theResponseMimeType, theResponseInputStream, theHeaders);
+			response.setCreatedUsingStatusCode(theResponseStatusCode);
 
 			if (myPrefer == PreferReturnEnum.REPRESENTATION) {
 				if (response.getResource() == null) {
@@ -1382,6 +1384,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					}
 				}
 			}
+
+			response.setResponseHeaders(theHeaders);
 
 			return response;
 		}
@@ -1445,7 +1449,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
 
-			Map<String, List<String>> params = new HashMap<String, List<String>>();
+			Map<String, List<String>> params = new HashMap<>();
 			return invoke(params, binding, invocation);
 
 		}
@@ -1510,9 +1514,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public Object execute() {// AAA
 			if (myId.hasVersionIdPart()) {
-				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
+				return doReadOrVRead(myType.getImplementingClass(), myId, true, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue());
 			}
-			return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements());
+			return doReadOrVRead(myType.getImplementingClass(), myId, false, myNotModifiedHandler, myIfVersionMatches, myPrettyPrint, mySummaryMode, myParamEncoding, getSubsetElements(), getCustomAcceptHeaderValue());
 		}
 
 		@Override
@@ -1635,11 +1639,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public List<IBaseResource> invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+		public List<IBaseResource> invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders)
 			throws BaseServerResponseException {
 			Class<? extends IBaseResource> bundleType = myContext.getResourceDefinition("Bundle").getImplementingClass();
-			ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<IBaseResource>((Class<IBaseResource>) bundleType);
-			IBaseResource response = handler.invokeClient(theResponseMimeType, theResponseReader, theResponseStatusCode, theHeaders);
+			ResourceResponseHandler<IBaseResource> handler = new ResourceResponseHandler<>((Class<IBaseResource>) bundleType);
+			IBaseResource response = handler.invokeClient(theResponseMimeType, theResponseInputStream, theResponseStatusCode, theHeaders);
 			IVersionSpecificBundleFactory bundleFactory = myContext.newBundleFactory();
 			bundleFactory.initializeWithBundleResource(response);
 			return bundleFactory.toListOfResources();
@@ -1936,9 +1940,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private final class StringResponseHandler implements IClientResponseHandler<String> {
 
 		@Override
-		public String invokeClient(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, Map<String, List<String>> theHeaders)
+		public String invokeClient(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, Map<String, List<String>> theHeaders)
 			throws IOException, BaseServerResponseException {
-			return IOUtils.toString(theResponseReader);
+			return IOUtils.toString(theResponseInputStream, Charsets.UTF_8);
 		}
 	}
 
@@ -2248,6 +2252,49 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return myParamValue;
 		}
 
+	}
+
+	private static void addParam(Map<String, List<String>> params, String parameterName, String parameterValue) {
+		if (!params.containsKey(parameterName)) {
+			params.put(parameterName, new ArrayList<>());
+		}
+		params.get(parameterName).add(parameterValue);
+	}
+
+	private static void addPreferHeader(PreferReturnEnum thePrefer, BaseHttpClientInvocation theInvocation) {
+		if (thePrefer != null) {
+			theInvocation.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + thePrefer.getHeaderValue());
+		}
+	}
+
+	private static String validateAndEscapeConditionalUrl(String theSearchUrl) {
+		Validate.notBlank(theSearchUrl, "Conditional URL can not be blank/null");
+		StringBuilder b = new StringBuilder();
+		boolean haveHadQuestionMark = false;
+		for (int i = 0; i < theSearchUrl.length(); i++) {
+			char nextChar = theSearchUrl.charAt(i);
+			if (!haveHadQuestionMark) {
+				if (nextChar == '?') {
+					haveHadQuestionMark = true;
+				} else if (!Character.isLetter(nextChar)) {
+					throw new IllegalArgumentException("Conditional URL must be in the format \"[ResourceType]?[Params]\" and must not have a base URL - Found: " + theSearchUrl);
+				}
+				b.append(nextChar);
+			} else {
+				switch (nextChar) {
+					case '|':
+					case '?':
+					case '$':
+					case ':':
+						b.append(UrlUtil.escapeUrlParam(Character.toString(nextChar)));
+						break;
+					default:
+						b.append(nextChar);
+						break;
+				}
+			}
+		}
+		return b.toString();
 	}
 
 }

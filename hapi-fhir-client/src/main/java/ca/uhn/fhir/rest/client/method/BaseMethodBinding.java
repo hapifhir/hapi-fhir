@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.client.method;
  */
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -71,11 +72,11 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	}
 
-	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
+	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
 		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
 		if (encoding == null) {
-			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
-			populateException(ex, theResponseReader);
+			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseInputStream);
+			populateException(ex, theResponseInputStream);
 			throw ex;
 		}
 
@@ -139,7 +140,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return mySupportsConditionalMultiple;
 	}
 
-	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, Reader theResponseReader) {
+	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, InputStream theResponseInputStream) {
 		BaseServerResponseException ex;
 		switch (theStatusCode) {
 		case Constants.STATUS_HTTP_400_BAD_REQUEST:
@@ -158,9 +159,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			ex = new PreconditionFailedException("Server responded with HTTP 412");
 			break;
 		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
-			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode, null);
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseInputStream, theStatusCode, null);
 			// TODO: handle if something other than OO comes back
-			BaseOperationOutcome operationOutcome = (BaseOperationOutcome) parser.parseResource(theResponseReader);
+			BaseOperationOutcome operationOutcome = (BaseOperationOutcome) parser.parseResource(theResponseInputStream);
 			ex = new UnprocessableEntityException(myContext, operationOutcome);
 			break;
 		default:
@@ -168,7 +169,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			break;
 		}
 
-		populateException(ex, theResponseReader);
+		populateException(ex, theResponseInputStream);
 		return ex;
 	}
 
@@ -322,9 +323,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class);
 	}
 
-	private static void populateException(BaseServerResponseException theEx, Reader theResponseReader) {
+	private static void populateException(BaseServerResponseException theEx, InputStream theResponseInputStream) {
 		try {
-			String responseText = IOUtils.toString(theResponseReader);
+			String responseText = IOUtils.toString(theResponseInputStream);
 			theEx.setResponseBody(responseText);
 		} catch (IOException e) {
 			ourLog.debug("Failed to read response", e);

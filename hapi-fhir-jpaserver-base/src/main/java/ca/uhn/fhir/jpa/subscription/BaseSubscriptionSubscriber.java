@@ -21,23 +21,39 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import org.hl7.fhir.r4.model.Subscription;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
+
+import javax.annotation.PostConstruct;
 
 public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 
-	private final IFhirResourceDao<?> mySubscriptionDao;
 	private final Subscription.SubscriptionChannelType myChannelType;
 	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
+	@Autowired
+	DaoRegistry myDaoRegistry;
+	private IFhirResourceDao<?> mySubscriptionDao;
 
 	/**
 	 * Constructor
 	 */
-	public BaseSubscriptionSubscriber(IFhirResourceDao<?> theSubscriptionDao, Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
-		mySubscriptionDao = theSubscriptionDao;
+	public BaseSubscriptionSubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		myChannelType = theChannelType;
 		mySubscriptionInterceptor = theSubscriptionInterceptor;
+	}
+
+	@SuppressWarnings("unused") // Don't delete, used in Smile
+	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
+	@PostConstruct
+	public void setSubscriptionDao() {
+		mySubscriptionDao = myDaoRegistry.getSubscriptionDao();
 	}
 
 	public Subscription.SubscriptionChannelType getChannelType() {
@@ -71,7 +87,7 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	 */
 	static boolean subscriptionTypeApplies(String theSubscriptionChannelTypeCode, Subscription.SubscriptionChannelType theChannelType) {
 		boolean subscriptionTypeApplies = false;
- 		if (theSubscriptionChannelTypeCode != null) {
+		if (theSubscriptionChannelTypeCode != null) {
 			if (theChannelType.toCode().equals(theSubscriptionChannelTypeCode)) {
 				subscriptionTypeApplies = true;
 			}

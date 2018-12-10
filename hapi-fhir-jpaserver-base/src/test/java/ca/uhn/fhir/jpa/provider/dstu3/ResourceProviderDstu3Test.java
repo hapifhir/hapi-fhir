@@ -75,11 +75,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3Test.class);
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	@Override
 	@After
 	public void after() throws Exception {
@@ -238,6 +233,59 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Unable to store a Bundle resource on this server with a Bundle.type value of: transaction"));
 		}
+	}
+
+	@Test
+	public void testSearchChainedReference() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("SMITH");
+		IIdType pid = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.getSubject().setReference(pid.getValue());
+		ourClient.create().resource(qr).execute();
+
+		Subscription subs = new Subscription();
+		subs.setStatus(SubscriptionStatus.ACTIVE);
+		subs.getChannel().setType(SubscriptionChannelType.WEBSOCKET);
+		subs.setCriteria("Observation?");
+		IIdType id = ourClient.create().resource(subs).execute().getId().toUnqualifiedVersionless();
+
+		// Unqualified (doesn't work because QuestionnaireRespone.subject is a Refercence(Any))
+		try {
+			ourClient
+				.search()
+				.forResource(QuestionnaireResponse.class)
+				.where(QuestionnaireResponse.SUBJECT.hasChainedProperty(Patient.FAMILY.matches().value("SMITH")))
+				.returnBundle(Bundle.class)
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Unable to perform search for unqualified chain 'subject' as this SearchParameter does not declare any target types. Add a qualifier of the form 'subject:[ResourceType]' to perform this search.", e.getMessage());
+		}
+
+		// Qualified
+		Bundle resp = ourClient
+			.search()
+			.forResource(QuestionnaireResponse.class)
+			.where(QuestionnaireResponse.SUBJECT.hasChainedProperty("Patient", Patient.FAMILY.matches().value("SMITH")))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(1, resp.getEntry().size());
+
+		// Qualified With an invalid name
+		try {
+			ourClient
+				.search()
+				.forResource(QuestionnaireResponse.class)
+				.where(QuestionnaireResponse.SUBJECT.hasChainedProperty("FOO", Patient.FAMILY.matches().value("SMITH")))
+				.returnBundle(Bundle.class)
+				.execute();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Invalid resource type: FOO", e.getMessage());
+		}
+
 	}
 
 	@Test
@@ -1588,6 +1636,25 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(77, ids.size());
 	}
 
+	@Test
+	public void testEverythingWithOnlyPatient() {
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		myFhirCtx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
+
+		Bundle response = ourClient
+			.operation()
+			.onInstance(id)
+			.named("everything")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(Bundle.class)
+			.execute();
+
+		assertEquals(1, response.getEntry().size());
+	}
+
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {
 	// Bundle resources;
 	// do {
@@ -1612,25 +1679,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	// ourClient.delete().resource(next).execute();
 	// }
 	// }
-
-	@Test
-	public void testEverythingWithOnlyPatient() {
-		Patient p = new Patient();
-		p.setActive(true);
-		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
-
-		myFhirCtx.getRestfulClientFactory().setSocketTimeout(300 * 1000);
-
-		Bundle response = ourClient
-			.operation()
-			.onInstance(id)
-			.named("everything")
-			.withNoParameters(Parameters.class)
-			.returnResourceType(Bundle.class)
-			.execute();
-
-		assertEquals(1, response.getEntry().size());
-	}
 
 	@SuppressWarnings("unused")
 	@Test
@@ -4291,6 +4339,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

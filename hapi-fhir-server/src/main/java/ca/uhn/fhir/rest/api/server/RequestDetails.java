@@ -20,7 +20,6 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -55,7 +54,7 @@ public abstract class RequestDetails {
 	private String myOperation;
 	private Map<String, String[]> myParameters;
 	private byte[] myRequestContents;
-	private IRequestOperationCallback myRequestOperationCallback = new RequestOperationCallback();
+	private IRequestOperationCallback myRequestOperationCallback;
 	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
@@ -66,6 +65,13 @@ public abstract class RequestDetails {
 	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 	private Map<Object, Object> myUserData;
+
+	/**
+	 * Constructor
+	 */
+	public RequestDetails() {
+		myRequestOperationCallback = new RequestOperationCallback();
+	}
 
 	public void addParameter(String theName, String[] theValues) {
 		getParameters();
@@ -406,6 +412,94 @@ public abstract class RequestDetails {
 		myRequestContents = theRequestContents;
 	}
 
+	/**
+	 * Sets the {@link #getRequestOperationCallback() requestOperationCallback} handler in
+	 * deferred mode, meaning that any notifications will be queued up for delivery, but
+	 * won't be delivered until {@link #stopDeferredRequestOperationCallbackAndRunDeferredItems()}
+	 * is called.
+	 */
+	public void startDeferredOperationCallback() {
+		myRequestOperationCallback = new DeferredOperationCallback(myRequestOperationCallback);
+	}
+
+	/**
+	 * @see #startDeferredOperationCallback()
+	 */
+	public void stopDeferredRequestOperationCallbackAndRunDeferredItems() {
+		DeferredOperationCallback deferredCallback = (DeferredOperationCallback) myRequestOperationCallback;
+		deferredCallback.playDeferredActions();
+		myRequestOperationCallback = deferredCallback.getWrap();
+	}
+
+
+	private class DeferredOperationCallback implements IRequestOperationCallback {
+
+		private final IRequestOperationCallback myWrap;
+		private final List<Runnable> myDeferredTasks = new ArrayList<>();
+
+		private DeferredOperationCallback(IRequestOperationCallback theWrap) {
+			myWrap = theWrap;
+		}
+
+		@Override
+		public void resourceCreated(IBaseResource theResource) {
+			myDeferredTasks.add(()-> myWrap.resourceCreated(theResource));
+		}
+
+		@Override
+		public void resourceDeleted(IBaseResource theResource) {
+			myDeferredTasks.add(()-> myWrap.resourceDeleted(theResource));
+		}
+
+		@Override
+		public void resourcePreCreate(IBaseResource theResource) {
+			myWrap.resourcePreCreate(theResource);
+		}
+
+		@Override
+		public void resourcePreDelete(IBaseResource theResource) {
+			myWrap.resourcePreDelete(theResource);
+		}
+
+		@Override
+		public void resourcePreUpdate(IBaseResource theOldResource, IBaseResource theNewResource) {
+			myWrap.resourcePreUpdate(theOldResource, theNewResource);
+		}
+
+		@Override
+		public void resourceUpdated(IBaseResource theResource) {
+			myDeferredTasks.add(()-> myWrap.resourceUpdated(theResource));
+		}
+
+		@Override
+		public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
+			myDeferredTasks.add(()-> myWrap.resourceUpdated(theOldResource, theNewResource));
+		}
+
+		@Override
+		public void resourcesCreated(Collection<? extends IBaseResource> theResource) {
+			myDeferredTasks.add(()-> myWrap.resourcesCreated(theResource));
+		}
+
+		@Override
+		public void resourcesDeleted(Collection<? extends IBaseResource> theResource) {
+			myDeferredTasks.add(()-> myWrap.resourcesDeleted(theResource));
+		}
+
+		@Override
+		public void resourcesUpdated(Collection<? extends IBaseResource> theResource) {
+			myDeferredTasks.add(()-> myWrap.resourcesUpdated(theResource));
+		}
+
+		void playDeferredActions() {
+			myDeferredTasks.forEach(Runnable::run);
+		}
+
+		IRequestOperationCallback getWrap() {
+			return myWrap;
+		}
+	}
+
 	private class RequestOperationCallback implements IRequestOperationCallback {
 
 		private List<IServerInterceptor> getInterceptors() {
@@ -499,6 +593,7 @@ public abstract class RequestDetails {
 		/**
 		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
 		 */
+		@Override
 		@Deprecated
 		public void resourcesUpdated(Collection<? extends IBaseResource> theResource) {
 			for (IBaseResource next : theResource) {

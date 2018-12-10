@@ -22,8 +22,9 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -83,17 +84,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private FhirContext myContext;
 	@Autowired
 	private ITransactionProcessorVersionAdapter<BUNDLE, BUNDLEENTRY> myVersionAdapter;
-
-	public static boolean isPlaceholder(IIdType theId) {
-		if (theId != null && theId.getValue() != null) {
-			return theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:");
-		}
-		return false;
-	}
-
-	private static String toStatusString(int theStatusCode) {
-		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
-	}
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	private void populateEntryWithOperationOutcome(BaseServerResponseException caughtEx, BUNDLEENTRY nextEntry) {
 		myVersionAdapter.populateEntryWithOperationOutcome(caughtEx, nextEntry);
@@ -162,7 +156,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		return defaultString(theId.getValue()).startsWith(URN_PREFIX);
 	}
 
-
 	public void setDao(BaseHapiFhirDao theDao) {
 		myDao = theDao;
 	}
@@ -184,6 +177,40 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		} finally {
 			BaseHapiFhirDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
+	}
+
+	public BUNDLE collection(final RequestDetails theRequestDetails, BUNDLE theRequest) {
+		String transactionType = myVersionAdapter.getBundleType(theRequest);
+
+		if (!org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION.toCode().equals(transactionType)) {
+			throw new InvalidRequestException("Can not process collection Bundle of type: " + transactionType);
+		}
+
+		ourLog.info("Beginning storing collection with {} resources", myVersionAdapter.getEntries(theRequest).size());
+		long start = System.currentTimeMillis();
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		BUNDLE resp = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
+
+		List<IBaseResource> resources = new ArrayList<>();
+		for (final BUNDLEENTRY nextRequestEntry : myVersionAdapter.getEntries(theRequest)) {
+			IBaseResource resource = myVersionAdapter.getResource(nextRequestEntry);
+			resources.add(resource);
+		}
+
+		BUNDLE transactionBundle = myVersionAdapter.createBundle("transaction");
+		for (IBaseResource next : resources) {
+			BUNDLEENTRY entry = myVersionAdapter.addEntry(transactionBundle);
+			myVersionAdapter.setResource(entry, next);
+			myVersionAdapter.setRequestVerb(entry, "PUT");
+			myVersionAdapter.setRequestUrl(entry, next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+		transaction(theRequestDetails, transactionBundle);
+
+		return resp;
 	}
 
 	private BUNDLE batch(final RequestDetails theRequestDetails, BUNDLE theRequest) {
@@ -253,6 +280,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		validateDependencies();
 
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
+
 		if (org.hl7.fhir.r4.model.Bundle.BundleType.BATCH.toCode().equals(transactionType)) {
 			return batch(theRequestDetails, theRequest);
 		}
@@ -368,7 +396,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			requestDetails.setParameters(new HashMap<>());
 			if (qIndex != -1) {
 				String params = url.substring(qIndex);
-				List<NameValuePair> parameters = BaseHapiFhirDao.translateMatchUrl(params);
+				List<NameValuePair> parameters = myMatchUrlService.translateMatchUrl(params);
 				for (NameValuePair next : parameters) {
 					paramValues.put(next.getName(), next.getValue());
 				}
@@ -459,284 +487,297 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		return myContext.getVersion().newIdType().setValue(theValue);
 	}
 
-	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(ServletRequestDetails theRequestDetails, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
+
+	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(final ServletRequestDetails theRequestDetails, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
 																								Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, BUNDLE theResponse, IdentityHashMap<BUNDLEENTRY, Integer> theOriginalRequestOrder, List<BUNDLEENTRY> theEntries, StopWatch theTransactionStopWatch) {
-		Set<String> deletedResources = new HashSet<>();
-		List<DeleteConflict> deleteConflicts = new ArrayList<>();
-		Map<BUNDLEENTRY, ResourceTable> entriesToProcess = new IdentityHashMap<>();
-		Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
-		Set<ResourceTable> updatedEntities = new HashSet<>();
-		Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 
-		/*
-		 * Loop through the request and process any entries of type
-		 * PUT, POST or DELETE
-		 */
-		for (int i = 0; i < theEntries.size(); i++) {
+		if (theRequestDetails != null) {
+			theRequestDetails.startDeferredOperationCallback();
+		}
+		try {
 
-			if (i % 100 == 0) {
-				ourLog.debug("Processed {} non-GET entries out of {}", i, theEntries.size());
-			}
+			Set<String> deletedResources = new HashSet<>();
+			List<DeleteConflict> deleteConflicts = new ArrayList<>();
+			Map<BUNDLEENTRY, ResourceTable> entriesToProcess = new IdentityHashMap<>();
+			Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
+			Set<ResourceTable> updatedEntities = new HashSet<>();
+			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 
-			BUNDLEENTRY nextReqEntry = theEntries.get(i);
-			IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
-			IIdType nextResourceId = null;
-			if (res != null) {
+			/*
+			 * Loop through the request and process any entries of type
+			 * PUT, POST or DELETE
+			 */
+			for (int i = 0; i < theEntries.size(); i++) {
 
-				nextResourceId = res.getIdElement();
-
-				if (!nextResourceId.hasIdPart()) {
-					if (isNotBlank(myVersionAdapter.getFullUrl(nextReqEntry))) {
-						nextResourceId = newIdType(myVersionAdapter.getFullUrl(nextReqEntry));
-					}
+				if (i % 100 == 0) {
+					ourLog.debug("Processed {} non-GET entries out of {}", i, theEntries.size());
 				}
 
-				if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+\\:.*") && !isPlaceholder(nextResourceId)) {
-					throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
-				}
+				BUNDLEENTRY nextReqEntry = theEntries.get(i);
+				IBaseResource res = myVersionAdapter.getResource(nextReqEntry);
+				IIdType nextResourceId = null;
+				if (res != null) {
 
-				if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
-					nextResourceId = newIdType(toResourceName(res.getClass()), nextResourceId.getIdPart());
-					res.setId(nextResourceId);
-				}
+					nextResourceId = res.getIdElement();
 
-				/*
-				 * Ensure that the bundle doesn't have any duplicates, since this causes all kinds of weirdness
-				 */
-				if (isPlaceholder(nextResourceId)) {
-					if (!theAllIds.add(nextResourceId)) {
-						throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
-					}
-				} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
-					IIdType nextId = nextResourceId.toUnqualifiedVersionless();
-					if (!theAllIds.add(nextId)) {
-						throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
-					}
-				}
-
-			}
-
-			String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
-			String resourceType = res != null ? myContext.getResourceDefinition(res).getName() : null;
-			Integer order = theOriginalRequestOrder.get(nextReqEntry);
-			BUNDLEENTRY nextRespEntry = myVersionAdapter.getEntries(theResponse).get(order);
-
-			theTransactionStopWatch.startTask("Bundle.entry[" + i + "]: " + verb + " " + defaultString(resourceType));
-
-			switch (verb) {
-				case "POST": {
-					// CREATE
-					@SuppressWarnings("rawtypes")
-					IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
-					res.setId((String) null);
-					DaoMethodOutcome outcome;
-					String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
-					matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-					outcome = resourceDao.create(res, matchUrl, false, theRequestDetails);
-					if (nextResourceId != null) {
-						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
-					}
-					entriesToProcess.put(nextRespEntry, outcome.getEntity());
-					if (outcome.getCreated() == false) {
-						nonUpdatedEntities.add(outcome.getEntity());
-					} else {
-						if (isNotBlank(matchUrl)) {
-							conditionalRequestUrls.put(matchUrl, res.getClass());
+					if (!nextResourceId.hasIdPart()) {
+						if (isNotBlank(myVersionAdapter.getFullUrl(nextReqEntry))) {
+							nextResourceId = newIdType(myVersionAdapter.getFullUrl(nextReqEntry));
 						}
 					}
 
-					break;
+					if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+\\:.*") && !isPlaceholder(nextResourceId)) {
+						throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
+					}
+
+					if (nextResourceId.hasIdPart() && !nextResourceId.hasResourceType() && !isPlaceholder(nextResourceId)) {
+						nextResourceId = newIdType(toResourceName(res.getClass()), nextResourceId.getIdPart());
+						res.setId(nextResourceId);
+					}
+
+					/*
+					 * Ensure that the bundle doesn't have any duplicates, since this causes all kinds of weirdness
+					 */
+					if (isPlaceholder(nextResourceId)) {
+						if (!theAllIds.add(nextResourceId)) {
+							throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextResourceId));
+						}
+					} else if (nextResourceId.hasResourceType() && nextResourceId.hasIdPart()) {
+						IIdType nextId = nextResourceId.toUnqualifiedVersionless();
+						if (!theAllIds.add(nextId)) {
+							throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirSystemDao.class, "transactionContainsMultipleWithDuplicateId", nextId));
+						}
+					}
+
 				}
-				case "DELETE": {
-					// DELETE
-					String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
-					UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
-					ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
-					int status = Constants.STATUS_HTTP_204_NO_CONTENT;
-					if (parts.getResourceId() != null) {
-						IIdType deleteId = newIdType(parts.getResourceType(), parts.getResourceId());
-						if (!deletedResources.contains(deleteId.getValueAsString())) {
-							DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequestDetails);
-							if (outcome.getEntity() != null) {
-								deletedResources.add(deleteId.getValueAsString());
-								entriesToProcess.put(nextRespEntry, outcome.getEntity());
+
+				String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
+				String resourceType = res != null ? myContext.getResourceDefinition(res).getName() : null;
+				Integer order = theOriginalRequestOrder.get(nextReqEntry);
+				BUNDLEENTRY nextRespEntry = myVersionAdapter.getEntries(theResponse).get(order);
+
+				theTransactionStopWatch.startTask("Bundle.entry[" + i + "]: " + verb + " " + defaultString(resourceType));
+
+				switch (verb) {
+					case "POST": {
+						// CREATE
+						@SuppressWarnings("rawtypes")
+						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
+						res.setId((String) null);
+						DaoMethodOutcome outcome;
+						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
+						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
+						outcome = resourceDao.create(res, matchUrl, false, theRequestDetails);
+						if (nextResourceId != null) {
+							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
+						}
+						entriesToProcess.put(nextRespEntry, outcome.getEntity());
+						if (outcome.getCreated() == false) {
+							nonUpdatedEntities.add(outcome.getEntity());
+						} else {
+							if (isNotBlank(matchUrl)) {
+								conditionalRequestUrls.put(matchUrl, res.getClass());
 							}
 						}
-					} else {
-						String matchUrl = parts.getResourceType() + '?' + parts.getParams();
-						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-						DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequestDetails);
-						List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
-						for (ResourceTable deleted : allDeleted) {
-							deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
-						}
-						if (allDeleted.isEmpty()) {
-							status = Constants.STATUS_HTTP_204_NO_CONTENT;
-						}
 
-						myVersionAdapter.setResponseOutcome(nextRespEntry, deleteOutcome.getOperationOutcome());
+						break;
 					}
-
-					myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(status));
-
-					break;
-				}
-				case "PUT": {
-					// UPDATE
-					@SuppressWarnings("rawtypes")
-					IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
-
-					String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
-
-					DaoMethodOutcome outcome;
-					UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
-					if (isNotBlank(parts.getResourceId())) {
-						String version = null;
-						if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry))) {
-							version = ParameterUtil.parseETagValue(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
-						}
-						res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
-						outcome = resourceDao.update(res, null, false, theRequestDetails);
-					} else {
-						res.setId((String) null);
-						String matchUrl;
-						if (isNotBlank(parts.getParams())) {
-							matchUrl = parts.getResourceType() + '?' + parts.getParams();
+					case "DELETE": {
+						// DELETE
+						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+						ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
+						int status = Constants.STATUS_HTTP_204_NO_CONTENT;
+						if (parts.getResourceId() != null) {
+							IIdType deleteId = newIdType(parts.getResourceType(), parts.getResourceId());
+							if (!deletedResources.contains(deleteId.getValueAsString())) {
+								DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequestDetails);
+								if (outcome.getEntity() != null) {
+									deletedResources.add(deleteId.getValueAsString());
+									entriesToProcess.put(nextRespEntry, outcome.getEntity());
+								}
+							}
 						} else {
-							matchUrl = parts.getResourceType();
-						}
-						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-						outcome = resourceDao.update(res, matchUrl, false, theRequestDetails);
-						if (Boolean.TRUE.equals(outcome.getCreated())) {
-							conditionalRequestUrls.put(matchUrl, res.getClass());
-						}
-					}
+							String matchUrl = parts.getResourceType() + '?' + parts.getParams();
+							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
+							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequestDetails);
+							List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
+							for (ResourceTable deleted : allDeleted) {
+								deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
+							}
+							if (allDeleted.isEmpty()) {
+								status = Constants.STATUS_HTTP_204_NO_CONTENT;
+							}
 
-					if (outcome.getCreated() == Boolean.FALSE) {
-						updatedEntities.add(outcome.getEntity());
-					}
+							myVersionAdapter.setResponseOutcome(nextRespEntry, deleteOutcome.getOperationOutcome());
+						}
 
-					handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
-					entriesToProcess.put(nextRespEntry, outcome.getEntity());
-					break;
+						myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(status));
+
+						break;
+					}
+					case "PUT": {
+						// UPDATE
+						@SuppressWarnings("rawtypes")
+						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
+
+						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+
+						DaoMethodOutcome outcome;
+						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+						if (isNotBlank(parts.getResourceId())) {
+							String version = null;
+							if (isNotBlank(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry))) {
+								version = ParameterUtil.parseETagValue(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
+							}
+							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
+							outcome = resourceDao.update(res, null, false, theRequestDetails);
+						} else {
+							res.setId((String) null);
+							String matchUrl;
+							if (isNotBlank(parts.getParams())) {
+								matchUrl = parts.getResourceType() + '?' + parts.getParams();
+							} else {
+								matchUrl = parts.getResourceType();
+							}
+							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
+							outcome = resourceDao.update(res, matchUrl, false, theRequestDetails);
+							if (Boolean.TRUE.equals(outcome.getCreated())) {
+								conditionalRequestUrls.put(matchUrl, res.getClass());
+							}
+						}
+
+						if (outcome.getCreated() == Boolean.FALSE) {
+							updatedEntities.add(outcome.getEntity());
+						}
+
+						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
+						entriesToProcess.put(nextRespEntry, outcome.getEntity());
+						break;
+					}
+					case "GET":
+					default:
+						break;
+
 				}
-				case "GET":
-				default:
-					break;
 
+				theTransactionStopWatch.endCurrentTask();
+			}
+
+
+			/*
+			 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
+			 * if something else has a reference to it.. Unless the thing that has a reference to it
+			 * was also deleted as a part of this transaction, which is why we check this now at the
+			 * end.
+			 */
+
+			deleteConflicts.removeIf(next ->
+				deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue()));
+			myDao.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+
+			/*
+			 * Perform ID substitutions and then index each resource we have saved
+			 */
+
+			FhirTerser terser = myContext.newTerser();
+			theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
+			for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
+				IBaseResource nextResource = nextOutcome.getResource();
+				if (nextResource == null) {
+					continue;
+				}
+
+				// References
+				List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(nextResource);
+				for (ResourceReferenceInfo nextRef : allRefs) {
+					IIdType nextId = nextRef.getResourceReference().getReferenceElement();
+					if (!nextId.hasIdPart()) {
+						continue;
+					}
+					if (theIdSubstitutions.containsKey(nextId)) {
+						IIdType newId = theIdSubstitutions.get(nextId);
+						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
+						nextRef.getResourceReference().setReference(newId.getValue());
+					} else if (nextId.getValue().startsWith("urn:")) {
+						throw new InvalidRequestException("Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
+					} else {
+						ourLog.debug(" * Reference [{}] does not exist in bundle", nextId);
+					}
+				}
+
+				// URIs
+				Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>) myContext.getElementDefinition("uri").getImplementingClass();
+				List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(nextResource, uriType);
+				for (IPrimitiveType<?> nextRef : allUris) {
+					if (nextRef instanceof IIdType) {
+						continue; // No substitution on the resource ID itself!
+					}
+					IIdType nextUriString = newIdType(nextRef.getValueAsString());
+					if (theIdSubstitutions.containsKey(nextUriString)) {
+						IIdType newId = theIdSubstitutions.get(nextUriString);
+						ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
+						nextRef.setValueAsString(newId.getValue());
+					} else {
+						ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+					}
+				}
+
+				IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
+				Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
+
+				if (updatedEntities.contains(nextOutcome.getEntity())) {
+					myDao.updateInternal(theRequestDetails, nextResource, true, false, theRequestDetails, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
+				} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
+					myDao.updateEntity(theRequestDetails, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
+				}
 			}
 
 			theTransactionStopWatch.endCurrentTask();
-		}
+			theTransactionStopWatch.startTask("Flush writes to database");
 
+			flushJpaSession();
 
-		/*
-		 * Make sure that there are no conflicts from deletions. E.g. we can't delete something
-		 * if something else has a reference to it.. Unless the thing that has a reference to it
-		 * was also deleted as a part of this transaction, which is why we check this now at the
-		 * end.
-		 */
-
-		deleteConflicts.removeIf(next ->
-			deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue()));
-		myDao.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
-
-		/*
-		 * Perform ID substitutions and then index each resource we have saved
-		 */
-
-		FhirTerser terser = myContext.newTerser();
-		theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
-		for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
-			IBaseResource nextResource = nextOutcome.getResource();
-			if (nextResource == null) {
-				continue;
+			theTransactionStopWatch.endCurrentTask();
+			if (conditionalRequestUrls.size() > 0) {
+				theTransactionStopWatch.startTask("Check for conflicts in conditional resources");
 			}
 
-			// References
-			List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(nextResource);
-			for (ResourceReferenceInfo nextRef : allRefs) {
-				IIdType nextId = nextRef.getResourceReference().getReferenceElement();
-				if (!nextId.hasIdPart()) {
+			/*
+			 * Double check we didn't allow any duplicates we shouldn't have
+			 */
+			for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
+				String matchUrl = nextEntry.getKey();
+				Class<? extends IBaseResource> resType = nextEntry.getValue();
+				if (isNotBlank(matchUrl)) {
+					IFhirResourceDao<?> resourceDao = myDao.getDao(resType);
+					Set<Long> val = resourceDao.processMatchUrl(matchUrl);
+					if (val.size() > 1) {
+						throw new InvalidRequestException(
+							"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
+					}
+				}
+			}
+
+			theTransactionStopWatch.endCurrentTask();
+
+			for (IIdType next : theAllIds) {
+				IIdType replacement = theIdSubstitutions.get(next);
+				if (replacement == null) {
 					continue;
 				}
-				if (theIdSubstitutions.containsKey(nextId)) {
-					IIdType newId = theIdSubstitutions.get(nextId);
-					ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
-					nextRef.getResourceReference().setReference(newId.getValue());
-				} else if (nextId.getValue().startsWith("urn:")) {
-					throw new InvalidRequestException("Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
-				} else {
-					ourLog.debug(" * Reference [{}] does not exist in bundle", nextId);
+				if (replacement.equals(next)) {
+					continue;
 				}
+				ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 			}
+			return entriesToProcess;
 
-			// URIs
-			Class<? extends IPrimitiveType<?>> uriType = (Class<? extends IPrimitiveType<?>>) myContext.getElementDefinition("uri").getImplementingClass();
-			List<? extends IPrimitiveType<?>> allUris = terser.getAllPopulatedChildElementsOfType(nextResource, uriType);
-			for (IPrimitiveType<?> nextRef : allUris) {
-				if (nextRef instanceof IIdType) {
-					continue; // No substitution on the resource ID itself!
-				}
-				IIdType nextUriString = newIdType(nextRef.getValueAsString());
-				if (theIdSubstitutions.containsKey(nextUriString)) {
-					IIdType newId = theIdSubstitutions.get(nextUriString);
-					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
-					nextRef.setValueAsString(newId.getValue());
-				} else {
-					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
-				}
-			}
-
-			IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
-			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
-
-			if (updatedEntities.contains(nextOutcome.getEntity())) {
-				myDao.updateInternal(theRequestDetails, nextResource, true, false, theRequestDetails, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
-			} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
-				myDao.updateEntity(theRequestDetails, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
+		} finally {
+			if (theRequestDetails != null) {
+				theRequestDetails.stopDeferredRequestOperationCallbackAndRunDeferredItems();
 			}
 		}
-
-		theTransactionStopWatch.endCurrentTask();
-		theTransactionStopWatch.startTask("Flush writes to database");
-
-		flushJpaSession();
-
-		theTransactionStopWatch.endCurrentTask();
-		if (conditionalRequestUrls.size() > 0) {
-			theTransactionStopWatch.startTask("Check for conflicts in conditional resources");
-		}
-
-		/*
-		 * Double check we didn't allow any duplicates we shouldn't have
-		 */
-		for (Map.Entry<String, Class<? extends IBaseResource>> nextEntry : conditionalRequestUrls.entrySet()) {
-			String matchUrl = nextEntry.getKey();
-			Class<? extends IBaseResource> resType = nextEntry.getValue();
-			if (isNotBlank(matchUrl)) {
-				IFhirResourceDao<?> resourceDao = myDao.getDao(resType);
-				Set<Long> val = resourceDao.processMatchUrl(matchUrl);
-				if (val.size() > 1) {
-					throw new InvalidRequestException(
-						"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
-				}
-			}
-		}
-
-		theTransactionStopWatch.endCurrentTask();
-
-		for (IIdType next : theAllIds) {
-			IIdType replacement = theIdSubstitutions.get(next);
-			if (replacement == null) {
-				continue;
-			}
-			if (replacement.equals(next)) {
-				continue;
-			}
-			ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
-		}
-		return entriesToProcess;
 	}
 
 	private IIdType newIdType(String theResourceType, String theResourceId, String theVersion) {
@@ -749,7 +790,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	}
 
 	private IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
-		return myDao.getDaoOrThrowException(theClass);
+		return myDaoRegistry.getResourceDao(theClass);
 	}
 
 	protected void flushJpaSession() {
@@ -844,18 +885,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		String getEntryRequestIfNoneMatch(BUNDLEENTRY theEntry);
 
 		void setResponseOutcome(BUNDLEENTRY theEntry, IBaseOperationOutcome theOperationOutcome);
-	}
 
-	private static class BaseServerResponseExceptionHolder {
-		private BaseServerResponseException myException;
+		void setRequestVerb(BUNDLEENTRY theEntry, String theVerb);
 
-		public BaseServerResponseException getException() {
-			return myException;
-		}
-
-		public void setException(BaseServerResponseException myException) {
-			this.myException = myException;
-		}
+		void setRequestUrl(BUNDLEENTRY theEntry, String theUrl);
 	}
 
 	/**
@@ -959,6 +992,29 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			return o1;
 		}
 
+	}
+
+	private static class BaseServerResponseExceptionHolder {
+		private BaseServerResponseException myException;
+
+		public BaseServerResponseException getException() {
+			return myException;
+		}
+
+		public void setException(BaseServerResponseException myException) {
+			this.myException = myException;
+		}
+	}
+
+	public static boolean isPlaceholder(IIdType theId) {
+		if (theId != null && theId.getValue() != null) {
+			return theId.getValue().startsWith("urn:oid:") || theId.getValue().startsWith("urn:uuid:");
+		}
+		return false;
+	}
+
+	private static String toStatusString(int theStatusCode) {
+		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
 }

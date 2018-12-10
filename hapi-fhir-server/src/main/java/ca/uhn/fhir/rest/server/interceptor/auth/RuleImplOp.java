@@ -174,6 +174,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					return null;
 				}
 				break;
+			case GRAPHQL:
+				if (theOperation == RestOperationTypeEnum.GRAPHQL_REQUEST) {
+					return newVerdict();
+				} else {
+					return null;
+				}
 			case TRANSACTION:
 				if (!(theOperation == RestOperationTypeEnum.TRANSACTION)) {
 					return null;

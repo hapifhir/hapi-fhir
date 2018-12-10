@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 

@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.6.0-SNAPSHOT</version>
+		<version>3.7.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -76,8 +76,23 @@
 			<artifactId>hapi-fhir-client-okhttp</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-subscription</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-searchparam</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-model</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
-      <dependency>
+		<dependency>
          <groupId>javax.mail</groupId>
          <artifactId>javax.mail-api</artifactId>
       </dependency>
@@ -303,6 +318,9 @@
 										<include>hapi-fhir-structures-hl7org-dstu2/target/jacoco.exec</include>
 										<include>hapi-fhir-structures-dstu3/target/jacoco.exec</include>
 										<include>hapi-fhir-structures-r4/target/jacoco.exec</include>
+										<include>hapi-fhir-jpaserver-model/target/jacoco.exec</include>
+										<include>hapi-fhir-jpaserver-searchparam/target/jacoco.exec</include>
+										<include>hapi-fhir-jpaserver-subscription/target/jacoco.exec</include>
 										<include>hapi-fhir-jpaserver-base/target/jacoco.exec</include>
 										<include>hapi-fhir-client-okhttp/target/jacoco.exec</include>
 										<include>hapi-fhir-android/target/jacoco.exec</include>
@@ -341,6 +359,9 @@
 						<sourceDirectory>../hapi-fhir-structures-hl7org-dstu2/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-dstu3/src/test/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-structures-r4/src/test/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-jpaserver-model/src/main/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-jpaserver-searchparam/src/main/java</sourceDirectory>
+						<sourceDirectory>../hapi-fhir-jpaserver-subscription/src/main/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-jpaserver-base/src/main/java</sourceDirectory>
 						<sourceDirectory>../hapi-fhir-client-okhttp/src/main/java</sourceDirectory>
 					</sourceDirectories>
@@ -368,6 +389,9 @@
 								<source>../hapi-fhir-base/src/main/java</source>
 								<source>../hapi-fhir-client/src/main/java</source>
 								<source>../hapi-fhir-server/src/main/java</source>
+								<source>../hapi-fhir-jpaserver-model/src/main/java</source>
+								<source>../hapi-fhir-jpaserver-searchparam/src/main/java</source>
+								<source>../hapi-fhir-jpaserver-subscription/src/main/java</source>
 								<source>../hapi-fhir-jpaserver-base/src/main/java</source>
 							</sources>
 						</configuration>
@@ -394,6 +418,15 @@
 		<testResources>
 			<testResource>
 				<directory>../hapi-fhir-base/src/test/resources</directory>
+			</testResource>
+			<testResource>
+				<directory>../hapi-fhir-jpaserver-model/src/test/resources</directory>
+			</testResource>
+			<testResource>
+				<directory>../hapi-fhir-jpaserver-searchparam/src/test/resources</directory>
+			</testResource>
+			<testResource>
+				<directory>../hapi-fhir-jpaserver-subscription/src/test/resources</directory>
 			</testResource>
 			<testResource>
 				<directory>../hapi-fhir-jpaserver-base/src/test/resources</directory>

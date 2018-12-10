@@ -24,8 +24,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
@@ -64,7 +64,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 
 		for (Argument nextArgument : theSearchParams) {
 
-			RuntimeSearchParam searchParam = getSearchParamByName(typeDef, nextArgument.getName());
+			RuntimeSearchParam searchParam = mySearchParamRegistry.getSearchParamByName(typeDef, nextArgument.getName());
 
 			for (Value nextValue : nextArgument.getValues()) {
 				String value = nextValue.getValue();

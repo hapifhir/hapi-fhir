@@ -108,5 +108,4 @@ abstract class BaseRule implements IAuthRule {
 	Verdict newVerdict() {
 		return new Verdict(myMode, this);
 	}
-
 }

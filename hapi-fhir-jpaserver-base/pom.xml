@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.6.0-SNAPSHOT</version>
+		<version>3.7.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -68,6 +68,21 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-subscription</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-searchparam</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -163,7 +178,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf-spring4</artifactId>
+			<artifactId>thymeleaf-spring5</artifactId>
 		</dependency>
 
 		<!-- For UCUM: TODO we should replace this with org.fhir UCUM -->
@@ -550,74 +565,29 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>de.juplo</groupId>
-				<artifactId>hibernate-maven-plugin</artifactId>
+				<groupId>de.jpdigital</groupId>
+				<artifactId>hibernate52-ddl-maven-plugin</artifactId>
+				<configuration>
+					<dialects>
+						<param>derby_10_7</param>
+						<param>postgresql92</param>
+						<param>mysql57</param>
+						<param>mariadb</param>
+						<param>oracle12c</param>
+						<param>sqlserver2012</param>
+					</dialects>
+					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
+					<packages>
+						<param>ca.uhn.fhir.jpa.entity</param>
+						<param>ca.uhn.fhir.jpa.model.entity</param>
+					</packages>
+				</configuration>
 				<executions>
 					<execution>
-						<id>derby107</id>
 						<phase>process-classes</phase>
 						<goals>
-							<goal>create</goal>
+							<goal>gen-ddl</goal>
 						</goals>
-						<configuration>
-							<dialect>org.hibernate.dialect.DerbyTenSevenDialect</dialect>
-							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_derby107.sql</outputFile>
-						</configuration>
-					</execution>
-					<execution>
-						<id>postgres94</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-						<configuration>
-							<dialect>org.hibernate.dialect.PostgreSQL94Dialect</dialect>
-							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_postgres94.sql</outputFile>	
-						</configuration>
-					</execution>
-					<execution>
-						<id>mysql57</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-						<configuration>
-							<dialect>org.hibernate.dialect.MySQL57Dialect</dialect>
-							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_mysql57.sql</outputFile>	
-						</configuration>
-					</execution>
-					<execution>
-						<id>mariadb103</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-						<configuration>
-							<dialect>org.hibernate.dialect.MariaDB103Dialect</dialect>
-							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_mariadb103.sql</outputFile>	
-						</configuration>
-					</execution>
-					<execution>
-						<id>oracle12c</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-						<configuration>
-							<dialect>org.hibernate.dialect.Oracle12cDialect</dialect>
-							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_oracle12c.sql</outputFile>	
-						</configuration>
-					</execution>
-					<execution>
-						<id>sqlserver2012</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-						<configuration>
-							<dialect>org.hibernate.dialect.SQLServer2012Dialect</dialect>
-							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_sqlserver2012.sql</outputFile>	
-						</configuration>
 					</execution>
 				</executions>
 				<dependencies>
@@ -670,7 +640,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx20484M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC</argLine>
 					<forkCount>0.6C</forkCount>
 				</configuration>
 			</plugin>

@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhirtest.config.*;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -147,6 +148,7 @@ public class TestRestfulServer extends RestfulServer {
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
+				plainProviders.add(myAppCtx.getBean(GraphQLProvider.class));
 				break;
 			}
 			default:

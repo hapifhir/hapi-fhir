@@ -572,7 +572,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().withAnyName().onServer().andThen()
+					.allow("RULE 1").operation().withAnyName().onServer().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -598,7 +598,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class)
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization()
 					.build();
 			}
 		});
@@ -633,7 +633,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andThen()
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization().andThen()
 					.allow("Rule 2").read().allResources().inCompartment("Patient", new IdDt("Patient/1")).andThen()
 					.build();
 			}
@@ -671,7 +671,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class)
+					.allow("Rule 1").operation().named("everything").onInstancesOfType(Patient.class).andRequireExplicitResponseAuthorization()
 					.build();
 			}
 		});
@@ -705,7 +705,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onInstance(new IdDt("http://example.com/Patient/1/_history/2")).andThen()
+					.allow("RULE 1").operation().named("opName").onInstance(new IdDt("http://example.com/Patient/1/_history/2")).andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -764,7 +764,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-						.allow("RULE 1").operation().named("opName").onAnyInstance().andThen()
+						.allow("RULE 1").operation().named("opName").onAnyInstance().andRequireExplicitResponseAuthorization().andThen()
 						.build();
 			}
 		});
@@ -890,7 +890,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onServer().andThen()
+					.allow("RULE 1").operation().named("opName").onServer().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -937,7 +937,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onType(Patient.class).andThen()
+					.allow("RULE 1").operation().named("opName").onType(Patient.class).andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1006,7 +1006,7 @@ public class AuthorizationInterceptorDstu2Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("opName").onAnyType().andThen()
+					.allow("RULE 1").operation().named("opName").onAnyType().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});

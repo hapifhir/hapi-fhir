@@ -45,7 +45,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	@Value(FHIR_LUCENE_LOCATION_R4)
 	private String myFhirLuceneLocation;
 
-	@Bean()
+	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
@@ -88,7 +88,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
@@ -140,7 +140,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return new PublicSecurityInterceptor();
 	}
 
-	@Bean()
+	@Bean
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
@@ -154,4 +154,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
+
+
+
 }

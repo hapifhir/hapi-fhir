@@ -21,9 +21,10 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
@@ -169,6 +170,12 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @throws ResourceNotFoundException If the ID is not known to the server
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails);
+
+	/**
+	 * Should deleted resources be returned successfully. This should be false for
+	 * a normal FHIR read.
+	 */
+	T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk);
 
 	BaseHasResource readEntity(IIdType theId);
 

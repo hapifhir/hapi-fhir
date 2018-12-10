@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -550,14 +550,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("D1V", concept.getDesignation().get(0).getValue());
 	}
 
-	@Test
-	public void testReindexTerminology() {
-		IIdType id = createCodeSystem();
-
-		assertThat(mySystemDao.markAllResourcesForReindexing(), greaterThan(0));
-
-		assertThat(mySystemDao.performReindexingPass(100), greaterThan(0));
-	}
 
 	@Test
 	public void testStoreCodeSystemInvalidCyclicLoop() {

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.provider;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.annotation.At;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,9 +44,15 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
 	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
 
 	private IFhirSystemDao<T, MT> myDao;
+	@Autowired
+	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	public BaseJpaSystemProvider() {
 		// nothing
+	}
+
+	protected IResourceReindexingSvc getResourceReindexingSvc() {
+		return myResourceReindexingSvc;
 	}
 
 	protected Parameters doExpunge(IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {

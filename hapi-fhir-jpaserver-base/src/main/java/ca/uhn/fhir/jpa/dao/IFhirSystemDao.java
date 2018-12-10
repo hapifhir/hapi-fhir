@@ -54,20 +54,11 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	IBundleProvider history(Date theDate, Date theUntil, RequestDetails theRequestDetails);
 
 	/**
-	 * Marks all indexes as needing fresh indexing
-	 *
-	 * @return Returns the number of affected rows
-	 */
-	int markAllResourcesForReindexing();
-
-	/**
 	 * Not supported for DSTU1
 	 *
 	 * @param theRequestDetails TODO
 	 */
 	MT metaGetOperation(RequestDetails theRequestDetails);
-
-	Integer performReindexingPass(Integer theCount);
 
 	T transaction(RequestDetails theRequestDetails, T theResources);
 

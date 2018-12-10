@@ -25,7 +25,7 @@ public class TestDstu3WithoutLuceneConfig extends TestDstu3Config {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setJpaProperties(jpaProperties());

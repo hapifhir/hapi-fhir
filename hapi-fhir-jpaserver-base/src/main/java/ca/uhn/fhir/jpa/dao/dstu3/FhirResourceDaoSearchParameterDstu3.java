@@ -3,9 +3,9 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hl7.fhir.dstu3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,12 +32,6 @@ import java.util.List;
  */
 
 public class FhirResourceDaoSearchParameterDstu3 extends FhirResourceDaoDstu3<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
-
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-
-	@Autowired
-	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	protected void markAffectedResources(SearchParameter theResource) {
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;

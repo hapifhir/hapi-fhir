@@ -1,8 +1,9 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -32,7 +33,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new ModelConfig().isDefaultSearchParamsCanBeOverridden());
 	}
 
 	@After
@@ -244,7 +245,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 
 	@Test
 	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingDisabled() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(false);
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(false);
 
 		SearchParameter memberSp = new SearchParameter();
 		memberSp.setCode("member");
@@ -286,7 +287,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 
 	@Test
 	public void testOverrideAndDisableBuiltInSearchParametersWithOverridingEnabled() {
-		myDaoConfig.setDefaultSearchParamsCanBeOverridden(true);
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
 
 		SearchParameter memberSp = new SearchParameter();
 		memberSp.setCode("member");
@@ -988,7 +989,9 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		mySearchParameterDao.delete(spId, mySrd);
 
 		mySearchParamRegsitry.forceRefresh();
-		mySystemDao.performReindexingPass(100);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 
 		// Try with custom gender SP
 		map = new SearchParameterMap();

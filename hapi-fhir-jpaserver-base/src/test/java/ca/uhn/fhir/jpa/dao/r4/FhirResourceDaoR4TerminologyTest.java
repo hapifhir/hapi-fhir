@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -539,10 +539,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		createExternalCsAndLocalVs();
 
-		mySystemDao.markAllResourcesForReindexing();
-
-		mySystemDao.performReindexingPass(100);
-		mySystemDao.performReindexingPass(100);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 		myHapiTerminologySvc.saveDeferred();
 		myHapiTerminologySvc.saveDeferred();
 		myHapiTerminologySvc.saveDeferred();
@@ -851,17 +850,17 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		include.setSystem(URL_MY_CODE_SYSTEM);
 		include.addConcept().setCode("ZZZZ");
 
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(null);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 		myTermSvc.saveDeferred();
-		mySystemDao.performReindexingPass(null);
 		myTermSvc.saveDeferred();
 
 		// Again
-		mySystemDao.markAllResourcesForReindexing();
-		mySystemDao.performReindexingPass(null);
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
 		myTermSvc.saveDeferred();
-		mySystemDao.performReindexingPass(null);
 		myTermSvc.saveDeferred();
 
 	}

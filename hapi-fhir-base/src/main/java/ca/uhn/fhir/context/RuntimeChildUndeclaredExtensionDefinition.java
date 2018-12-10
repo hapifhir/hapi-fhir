@@ -149,9 +149,9 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	
 	@Override
 	void sealAndInitialize(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
-		myDatatypeToAttributeName = new HashMap<Class<? extends IBase>, String>();
-		myDatatypeToDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
+		Map<String, BaseRuntimeElementDefinition<?>> datatypeAttributeNameToDefinition = new HashMap<>();
+		myDatatypeToAttributeName = new HashMap<>();
+		myDatatypeToDefinition = new HashMap<>();
 
 		for (BaseRuntimeElementDefinition<?> next : theClassToElementDefinitions.values()) {
 			if (next instanceof IRuntimeDatatypeDefinition) {

@@ -54,7 +54,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return new PublicSecurityInterceptor();
 	}
 
-	@Bean()
+	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
@@ -86,7 +86,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
-	@Bean()
+	@Bean
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
@@ -94,7 +94,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");

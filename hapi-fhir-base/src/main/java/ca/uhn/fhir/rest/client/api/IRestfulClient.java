@@ -1,5 +1,11 @@
 package ca.uhn.fhir.rest.client.api;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.util.List;
 
 /*
@@ -22,23 +28,15 @@ import java.util.List;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-
 public interface IRestfulClient {
 
 	/**
 	 * Retrieve the contents at the given URL and parse them as a resource. This
 	 * method could be used as a low level implementation of a read/vread/search
 	 * operation.
-	 * 
-	 * @param theResourceType
-	 *           The resource type to parse
-	 * @param theUrl
-	 *           The URL to load
+	 *
+	 * @param theResourceType The resource type to parse
+	 * @param theUrl          The URL to load
 	 * @return The parsed resource
 	 */
 	<T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl);
@@ -48,6 +46,17 @@ public interface IRestfulClient {
 	 * explicitly request an encoding. (This is standard behaviour according to the FHIR specification)
 	 */
 	EncodingEnum getEncoding();
+
+	/**
+	 * Specifies that the client should use the given encoding to do its
+	 * queries. This means that the client will append the "_format" param
+	 * to GET methods (read/search/etc), and will add an appropriate header for
+	 * write methods.
+	 *
+	 * @param theEncoding The encoding to use in the request, or <code>null</code> not specify
+	 *                    an encoding (which generally implies the use of XML). The default is <code>null</code>.
+	 */
+	void setEncoding(EncodingEnum theEncoding);
 
 	/**
 	 * Returns the FHIR context associated with this client
@@ -77,24 +86,11 @@ public interface IRestfulClient {
 	void registerInterceptor(IClientInterceptor theInterceptor);
 
 	/**
-	 * Specifies that the client should use the given encoding to do its
-	 * queries. This means that the client will append the "_format" param
-	 * to GET methods (read/search/etc), and will add an appropriate header for
-	 * write methods.
-	 * 
-	 * @param theEncoding
-	 *           The encoding to use in the request, or <code>null</code> not specify
-	 *           an encoding (which generally implies the use of XML). The default is <code>null</code>.
-	 */
-	void setEncoding(EncodingEnum theEncoding);
-
-	/**
 	 * Specifies that the client should request that the server respond with "pretty printing"
 	 * enabled. Note that this is a non-standard parameter, not all servers will
 	 * support it.
-	 * 
-	 * @param thePrettyPrint
-	 *           The pretty print flag to use in the request (default is <code>false</code>)
+	 *
+	 * @param thePrettyPrint The pretty print flag to use in the request (default is <code>false</code>)
 	 */
 	void setPrettyPrint(Boolean thePrettyPrint);
 
@@ -109,4 +105,8 @@ public interface IRestfulClient {
 	 */
 	void unregisterInterceptor(IClientInterceptor theInterceptor);
 
+	/**
+	 * Configures what style of _format parameter should be used in requests
+	 */
+	void setFormatParamStyle(RequestFormatParamStyleEnum theRequestFormatParamStyle);
 }

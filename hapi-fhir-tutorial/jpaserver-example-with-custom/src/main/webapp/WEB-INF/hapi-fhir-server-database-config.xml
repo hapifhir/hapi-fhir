@@ -41,6 +41,7 @@
 		<property name="packagesToScan">
 			<array>
 				<value type="java.lang.String">ca.uhn.fhir.jpa.entity</value>
+				<value type="java.lang.String">ca.uhn.fhir.jpa.model.entity</value>
 				<value type="java.lang.String">ca.uhn.fhir.jpa.demo.entity</value>
 			</array>
 		</property>

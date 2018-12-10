@@ -6,13 +6,152 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.6.0" date="TBD">
+		<release version="3.7.0" date="TBD" description="Gale">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+					<ul>
+						<li>thymeleaf-spring4 (Testpage Overlay) has been replaced with thymeleaf-spring5</li>
+					</ul>
+				]]>
+			</action>
+			<action type="add">
+				Changed subscription processing, if the subscription criteria are straightforward (i.e. no
+				chained references, qualifiers or prefixes) then attempt to match the incoming resource against
+				the criteria in-memory. If the subscription criteria can't be matched in-memory, then the
+				server falls back to the original subscription matching process of querying the database. The
+				in-memory matcher can be disabled by setting isEnableInMemorySubscriptionMatching to "false" in
+				DaoConfig (by default it is true). If isEnableInMemorySubscriptionMatching is "false", then all
+				subscription matching will query the database as before.
+			</action>
+			<action type="add">
+				Changed behaviour of FHIR Server to reject subscriptions with invalid criteria. If a Subscription
+				is submitted with invalid criteria, the server returns HTTP 422 "Unprocessable Entity" and the
+				Subscription is not persisted.
+			</action>
+			<action type="fix">
+				The JPA server $expunge operation could sometimes fail to expunge if
+				another resource linked to a resource that was being
+				expunged. This has been corrected. In addition, the $expunge operation
+				has been refactored to use smaller chunks of work
+				within a single DB transaction. This improves performance and reduces contention when
+				performing large expunge workloads.
+			</action>
+			<action type="add" issue="1117">
+				A badly formatted log message when handing exceptions was cleaned up. Thanks to
+				Magnus Watn for the pull request!
+			</action>
+			<action type="fix" issue="944">
+				A NullPointerException has been fixed when using custom resource classes that
+				have a @Block class as a child element. Thanks to Lars Gram Mathiasen for
+				reporting and providing a test case!
+			</action>
+			<action type="add">
+				AuthorizationInterceptor now allows the GraphQL operation to be
+				authorized. Note that this is an all-or-nothing grant for now, it
+				is not yet possible to specify individual resource security when
+				using GraphQL.
+			</action>
+			<action type="fix">
+				The ResponseHighlighterInterceptor now declines to handle Binary responses
+				provided as a response from extended operations. In other words if the
+				operation $foo returns a Binary resource, the ResponseHighliterInterceptor will
+				not provide syntax highlighting on the response. This was previously the case for
+				the /Binary endpoint, but not for other binary responses.
+			</action>
+			<action type="add">
+				FHIR Parser now has an additional overload of the
+				<![CDATA[<code>parseResource</code>]]> method that accepts
+				an InputStream instead of a Reader as the source.
+			</action>
+			<action type="add">
+				FHIR Fluent/Generic Client now has a new return option called
+				<![CDATA[<code>returnMethodOutcome</code>]]> which can be
+				used to return a raw response. This is handy for invoking operations
+				that might return arbitrary binary content.
+			</action>
+			<action type="add">
+				Moved state and functionality out of BaseHapiFhirDao.java into new classes: LogicalReferenceHelper,
+				ResourceIndexedSearchParams, IdHelperService, SearcchParamExtractorService, and MatchUrlService.
+			</action>
+			<action type="add">
+				Replaced explicit @Bean construction in BaseConfig.java with @ComponentScan. Beans with state are annotated
+				with
+				@Component and stateless beans are annotated as @Service. Also changed SearchBuilder.java and the
+				three Subscriber classes into @Scope("protoype") so their dependencies can be @Autowired injected
+				as opposed to constructor parameters.
+			</action>
+			<action type="fix">
+				A bug in the JPA resource reindexer was fixed: In many cases the reindexer would
+				mark reindexing jobs as deleted before they had actually completed, leading to
+				some resources not actually being reindexed.
+			</action>
+			<action type="change">
+				The JPA stale search deletion service now deletes cached search results in much
+				larger batches (20000 instead of 500) in order to reduce the amount of noise
+				in the logs.
+			</action>
+			<action type="add">
+				AuthorizationInterceptor now allows arbitrary FHIR $operations to be authorized,
+				including support for either allowing the operation response to proceed unchallenged,
+				or authorizing the contents of the response.
+			</action>
+			<action type="add">
+				An invalid SQL syntax issue has been fixed when running the CLI JPA Migrator tool against 
+				Oracle or SQL Server. In addition, when using the "Dry Run" option, all generated SQL
+				statements will be logged at the end of the run.
+			</action>
+			<action type="add">
+				In the JPA server, when performing a chained reference search on a search parameter with
+				a target type of
+				<![CDATA[<code>Reference(Any)</code>]]>, the search failed with an incomprehensible
+				error. This has been corrected to return an error message indicating that the chain
+				must be qualified with a resource type for such a field. For example,
+				<![CDATA[<code>QuestionnaireResponse?subject:Patient.name=smith</code>]]>
+				instead of
+				<![CDATA[<code>QuestionnaireResponse?subject.name=smith</code>]]>.
+			</action>
+			<action type="add">
+				The LOINC uploader has been updated to suport the LOINC 2.65 release
+				file format.
+			</action>
+			<action type="add">
+				The resource reindexer can now detect when a resource's current version no longer
+				exists in the database (e.g. because it was manually expunged), and can automatically 
+				adjust the most recent version to
+				account for this.
+			</action>
+			<action type="add">
+				When updating existing resources, the JPA server will now attempt to reuse/update
+				rows in the index tables if one row is being removed and one row is being added (e.g.
+				because a Patient's name is changing from "A" to "B"). This has the net effect
+				of reducing the number
+			</action>
+			<action type="fix">
+				An issue was corrected with the JPA reindexer, where String index columns do not always
+				get reindexed if they did not have an identity hash value in the HASH_IDENTITY column.
+			</action>
+			<action type="add">
+				Plain Server ResourceProvider classes are no longer required to be public classes. This
+				limitation has always been enforced, but did not actually serve any real purpose so it
+				has been removed.
+			</action>
+			<action type="add">
+				A new interceptor called ServeMediaResourceRawInterceptor has been added. This interceptor
+				causes Media resources to be served as raw content if the client explicitly requests
+				the correct content type cia the Accept header.
+			</action>
+		</release>
+		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 					<ul>
 						<li>Karaf (OSGi): 4.1.4 -&gt; 4.1.6</li>
+						<li>Commons-Compress (JPA): 1.14 -&gt; 1.18</li>
+						<li>Jackson (JPA): 2.9.2 -&gt; 2.9.7</li>
 					</ul>
 				]]>
 			</action>
@@ -27,14 +166,15 @@
 				has been streamlined to generate more predictable IDs in some cases.
 			</action>
 			<action type="fix">
-				An issue in the HAPI FHIR CLI database mogrator command has been resolved, where
+				An issue in the HAPI FHIR CLI database migrator command has been resolved, where
 				some database drivers did not automatically register and had to be manually added to
 				the classpath.
 			</action>
 			<action type="add">
 				The module which deletes stale searches has been modified so that it deletes very large
 				searches (searches with 10000+ results in the query cache) in smaller batches, in order
-				to avoid having very long running delete operations running.
+				to avoid having very long running delete operations occupying database connections for a
+				long time or timing out.
 			</action>
 			<action type="fix">
 				When invoking an operation using the fluent client on an instance, the operation would
@@ -45,6 +185,11 @@
 				A new operation has been added to the JPA server called
 				<![CDATA[<code>$trigger-subscription</code>]]>. This can
 				be used to cause a transaction to redeliver a resource that previously triggered.
+				See
+				<![CDATA[<a href="https://smilecdr.com/docs/current/fhir_repository/subscription.html#manually-triggering-subscriptions">this link</a>]]>
+				for a description of how this feature works. Note that you must add the
+				SubscriptionRetriggeringProvider as shown in the sample project
+				<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir-jpaserver-starter/blob/master/src/main/java/ca/uhn/fhir/jpa/demo/JpaServerDemo.java">here</a>.]]>
 			</action>
 			<action type="add">
 				When operating in R4 mode, the HAPI FHIR server will now populate Bundle.entry.response
@@ -100,11 +245,6 @@
 				permission is granted. This has been corrected so that transaction() allows both
 				batch and transaction requests to proceed.
 			</action>
-			<action type="fix">
-				The AuthorizationInterceptor was previously not able to authorize the FHIR
-				batch operation. As of this version, when authorizing a transaction operation
-				(via the transaction() rule), both batch and transaction will be allowed.
-			</action>
 			<action type="add">
 				The JPA server now automatically supplies several appropriate hibernate performance
 				settings as long as the JPA EntityManagerFactory was created using HAPI FHIR's
@@ -125,6 +265,7 @@
 			<action type="fix">
 				The FhirTerser <![CDATA[<code>getValues(...)</code>]]> methods were not properly handling modifier
 				extensions for verions of FHIR prior to DSTU3. This has been corrected.
+			</action>
 			<action type="fix">
 				When updating resources in the JPA server, a bug caused index table entries to be refreshed
 				sometimes even though the index value hadn't changed. This issue did not cause incorrect search
@@ -141,6 +282,48 @@
 				When using an @Operation method in the Plain Server, it is now possible
 				to use a parameter annotated with @ResourceParam to receive the Parameters
 				(or other) resource supplied by the client as the request body.
+			</action>
+			<action type="add">
+				The JPA server version migrator tool now runs in a multithreaded way, allowing it to
+				upgrade th database faster when migration tasks require data updates.
+			</action>
+			<action type="fix">
+				A bug in the JPA server was fixed: When a resource was previously deleted,
+				a transaction could not be posted that both restored the deleted resource but
+				also contained references to the now-restored resource.
+			</action>
+			<action type="fix">
+				The $expunge operation could sometimes fail to delete resources if a resource
+				to be deleted had recently been returned in a search result. This has been
+				corrected.
+			</action>
+			<action type="add">
+				A new setting has been added to the JPA Server DopConfig that controls the
+				behaviour when a client-assigned ID is encountered (i.e. the client performs
+				an HTTP PUT to a resource ID that doesn't already exist on the server). It is
+				now possible to disallow this action, to only allow alphanumeric IDs (the default
+				and only option previously) or allow any IDs including alphanumeric.
+			</action>
+			<action type="add" issue="1103" dev="ruthakm">
+				It is now possible to use your own IMessageResolver instance in the narrative
+				generator. Thanks to Ruth Alkema for the pull request!
+			</action>
+			<action type="fix" issue="1071" dev="volsch">
+				When restful reponses tried to return multiple instances of the same response header,
+				some instances were discarded. Thanks to Volker Schmidt for the pull request!
+			</action>
+			<action type="add">
+				The REST client now allows for configurable behaviour as to whether a
+				<![CDATA[<code>_format</code>]]>
+				parameter should be included in requests.
+			</action>
+			<action type="add">
+				JPA server R4 SearchParameter custom expression validation is now done using the
+				actual FHIRPath evaluator, meaning it is more rigorous in what it can find.
+			</action>
+			<action type="fix" issue="1047">
+				A NullPointerException in DateRangeParam when a client URL conrtained a malformed
+				date was corrected. Thanks Heinz-Dieter Conradi for the Pull Request!
 			</action>
 		</release>
 

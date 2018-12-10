@@ -1,25 +1,26 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
+import java.util.Date;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4CreateTest.class);
@@ -27,6 +28,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@After
 	public void afterResetDao() {
 		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
+		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 	}
 
 	@Test
@@ -73,6 +75,134 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testCreateWithClientAssignedIdDisallowed() {
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
+
+		Patient p = new Patient();
+		p.setId("AAA");
+		p.addName().setFamily("FAM");
+		try {
+			myPatientDao.update(p);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testCreateWithClientAssignedIdPureNumeric() {
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.SEQUENTIAL_NUMERIC);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+
+		// Create a server assigned ID
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id0 = myPatientDao.create(p).getId();
+		long firstClientAssignedId = id0.getIdPartAsLong();
+		long newId = firstClientAssignedId + 2L;
+
+		// Read it back
+		p = myPatientDao.read(new IdType("Patient/" + firstClientAssignedId));
+		assertEquals(true, p.getActive());
+
+		// Not create a client assigned numeric ID
+		p = new Patient();
+		p.setId("Patient/" + newId);
+		p.addName().setFamily("FAM");
+		IIdType id1 = myPatientDao.update(p).getId();
+
+		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals("1", id1.getVersionIdPart());
+
+		p = myPatientDao.read(id1);
+		assertEquals("FAM", p.getNameFirstRep().getFamily());
+
+		// Update it
+		p = new Patient();
+		p.setId("Patient/" + newId);
+		p.addName().setFamily("FAM2");
+		id1 = myPatientDao.update(p).getId();
+
+		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals("2", id1.getVersionIdPart());
+
+		p = myPatientDao.read(id1);
+		assertEquals("FAM2", p.getNameFirstRep().getFamily());
+
+		// Try to create another server-assigned. This should fail since we have a
+		// a conflict.
+		p = new Patient();
+		p.setActive(false);
+		try {
+			myPatientDao.create(p).getId();
+			fail();
+		} catch (DataIntegrityViolationException e) {
+			// good
+		}
+
+		ourLog.info("ID0: {}", id0);
+		ourLog.info("ID1: {}", id1);
+	}
+
+	@Test
+	public void testCreateWithClientAssignedIdPureNumericServerIdUuid() {
+		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+
+		// Create a server assigned ID
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id0 = myPatientDao.create(p).getId();
+
+		// Read it back
+		p = myPatientDao.read(id0.toUnqualifiedVersionless());
+		assertEquals(true, p.getActive());
+
+		// Pick an ID that was already used as an internal PID
+		Long newId = runInTransaction(() -> myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
+			PageRequest.of(0, 1),
+			DateUtils.addDays(new Date(), -1),
+			DateUtils.addDays(new Date(), 1)
+		).getContent().get(0));
+
+		// Not create a client assigned numeric ID
+		p = new Patient();
+		p.setId("Patient/" + newId);
+		p.addName().setFamily("FAM");
+		IIdType id1 = myPatientDao.update(p).getId();
+
+		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals("1", id1.getVersionIdPart());
+
+		// Read it back
+		p = myPatientDao.read(id1);
+		assertEquals("FAM", p.getNameFirstRep().getFamily());
+
+		// Update it
+		p = new Patient();
+		p.setId("Patient/" + newId);
+		p.addName().setFamily("FAM2");
+		id1 = myPatientDao.update(p).getId();
+
+		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals("2", id1.getVersionIdPart());
+
+		p = myPatientDao.read(id1);
+		assertEquals("FAM2", p.getNameFirstRep().getFamily());
+
+		// Try to create another server-assigned. This should fail since we have a
+		// a conflict.
+		p = new Patient();
+		p.setActive(false);
+		IIdType id2 = myPatientDao.create(p).getId();
+
+		ourLog.info("ID0: {}", id0);
+		ourLog.info("ID1: {}", id1);
+		ourLog.info("ID2: {}", id2);
+	}
+
+
+	@Test
 	public void testTransactionCreateWithUuidResourceStrategy() {
 		myDaoConfig.setResourceServerIdStrategy(DaoConfig.IdStrategyEnum.UUID);
 
@@ -83,6 +213,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Patient p = new Patient();
 		p.setId(IdType.newRandomUuid());
 		p.addName().setFamily("FAM");
+		p.setActive(true);
+		p.setBirthDateElement(new DateType("2011-01-01"));
 		p.getManagingOrganization().setReference(org.getId());
 
 		Bundle input = new Bundle();

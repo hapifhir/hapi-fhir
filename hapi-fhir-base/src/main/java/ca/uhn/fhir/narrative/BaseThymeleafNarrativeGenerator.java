@@ -34,6 +34,7 @@ import org.thymeleaf.cache.ICacheEntryValidity;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.context.ITemplateContext;
 import org.thymeleaf.engine.AttributeName;
+import org.thymeleaf.messageresolver.IMessageResolver;
 import org.thymeleaf.model.IProcessableElementTag;
 import org.thymeleaf.processor.IProcessor;
 import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
@@ -64,6 +65,8 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 	private volatile boolean myInitialized;
 	private HashMap<String, String> myNameToNarrativeTemplate;
 	private TemplateEngine myProfileTemplateEngine;
+
+	private IMessageResolver resolver;
 
 	/**
 	 * Constructor
@@ -166,9 +169,19 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 
 			};
 			myProfileTemplateEngine.setDialect(dialect);
+			if (this.resolver != null) {
+				myProfileTemplateEngine.setMessageResolver(this.resolver);
+			}
 		}
 
 		myInitialized = true;
+	}
+
+	public void setMessageResolver(IMessageResolver resolver) {
+		this.resolver = resolver;
+		if (myProfileTemplateEngine != null && resolver != null) {
+			myProfileTemplateEngine.setMessageResolver(resolver);
+		}
 	}
 
 	/**

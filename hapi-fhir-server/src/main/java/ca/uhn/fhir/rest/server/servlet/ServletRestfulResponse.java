@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
@@ -49,6 +50,7 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		theHttpResponse.setStatus(stausCode);
 		theHttpResponse.setContentType(contentType);
+		theHttpResponse.setCharacterEncoding(null);
 		if (bin.getContent() == null || bin.getContent().length == 0) {
 			return theHttpResponse.getOutputStream();
 		}
@@ -75,8 +77,18 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 	private void addHeaders() {
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		getRequestDetails().getServer().addHeadersToResponse(theHttpResponse);
-		for (Entry<String, String> header : getHeaders().entrySet()) {
-			theHttpResponse.setHeader(header.getKey(), header.getValue());
+		for (Entry<String, List<String>> header : getHeaders().entrySet()) {
+			final String key = header.getKey();
+			boolean first = true;
+			for (String value : header.getValue()) {
+				// existing headers should be overridden
+				if (first) {
+					theHttpResponse.setHeader(key, value);
+					first = false;
+				} else {
+					theHttpResponse.addHeader(key, value);
+				}
+			}
 		}
 	}
 

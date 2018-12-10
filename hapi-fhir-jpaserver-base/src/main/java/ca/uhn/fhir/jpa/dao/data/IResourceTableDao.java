@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -43,17 +43,19 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myId = :resid AND t.myResourceType = :restype AND t.myDeleted IS NOT NULL")
 	Slice<Long> findIdsOfDeletedResourcesOfType(Pageable thePageable, @Param("resid") Long theResourceId, @Param("restype") String theResourceName);
 
-	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myIndexStatus IS NULL")
-	Slice<Long> findIdsOfResourcesRequiringReindexing(Pageable thePageable);
-
-	@Query("SELECT t.myResourceType as type, COUNT(*) as count FROM ResourceTable t GROUP BY t.myResourceType")
+	@Query("SELECT t.myResourceType as type, COUNT(t.myResourceType) as count FROM ResourceTable t GROUP BY t.myResourceType")
 	List<Map<?, ?>> getResourceCounts();
 
-	@Modifying
-	@Query("UPDATE ResourceTable r SET r.myIndexStatus = null WHERE r.myResourceType = :restype")
-	int markResourcesOfTypeAsRequiringReindexing(@Param("restype") String theResourceType);
+	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated DESC")
+	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
+
+	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high ORDER BY t.myUpdated ASC")
+	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(Pageable thePage, @Param("low") Date theLow, @Param("high") Date theHigh);
+
+	@Query("SELECT t.myId FROM ResourceTable t WHERE t.myUpdated >= :low AND t.myUpdated <= :high AND t.myResourceType = :restype ORDER BY t.myUpdated ASC")
+	Slice<Long> findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(Pageable thePage, @Param("restype") String theResourceType, @Param("low") Date theLow, @Param("high") Date theHigh);
 
 	@Modifying
-	@Query("UPDATE ResourceTable r SET r.myIndexStatus = " + BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED + " WHERE r.myId = :resid")
-	void updateStatusToErrored(@Param("resid") Long theId);
+	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id")
+	void updateIndexStatus(@Param("id") Long theId, @Param("status") Long theIndexStatus);
 }

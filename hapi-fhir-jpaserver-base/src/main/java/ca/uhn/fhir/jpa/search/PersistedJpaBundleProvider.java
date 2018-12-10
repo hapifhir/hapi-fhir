@@ -24,8 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -276,8 +276,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	protected List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
 		Set<Long> includedPids = new HashSet<>();
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			includedPids.addAll(sb.loadIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated()));
-			includedPids.addAll(sb.loadIncludes(myDao, myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated()));
+			includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid));
+			includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid));
 		}
 
 		// Execute the query and make sure we return distinct results
