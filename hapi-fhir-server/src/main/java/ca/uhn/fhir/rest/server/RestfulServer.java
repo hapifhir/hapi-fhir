@@ -180,12 +180,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	}
 
-	private void assertProviderIsValid(Object theNext) throws ConfigurationException {
-		if (Modifier.isPublic(theNext.getClass().getModifiers()) == false) {
-			throw new ConfigurationException("Can not use provider '" + theNext.getClass() + "' - Class must be public");
-		}
-	}
-
 	public RestulfulServerConfiguration createConfiguration() {
 		RestulfulServerConfiguration result = new RestulfulServerConfiguration();
 		result.setResourceBindings(getResourceBindings());
@@ -1421,14 +1415,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			if (!newResourceProviders.isEmpty()) {
 				ourLog.info("Added {} resource provider(s). Total {}", newResourceProviders.size(), myResourceProviders.size());
 				for (IResourceProvider provider : newResourceProviders) {
-					assertProviderIsValid(provider);
 					findResourceMethods(provider);
 				}
 			}
 			if (!newPlainProviders.isEmpty()) {
 				ourLog.info("Added {} plain provider(s). Total {}", newPlainProviders.size(), myPlainProviders.size());
 				for (Object provider : newPlainProviders) {
-					assertProviderIsValid(provider);
 					findResourceMethods(provider);
 				}
 			}

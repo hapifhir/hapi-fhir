@@ -19,7 +19,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -57,27 +56,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
-	protected static final Set<String> ALLOWED_PARAMS;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
-
-	static {
-		HashSet<String> set = new HashSet<String>();
-		set.add(Constants.PARAM_FORMAT);
-		set.add(Constants.PARAM_NARRATIVE);
-		set.add(Constants.PARAM_PRETTY);
-		set.add(Constants.PARAM_SORT);
-		set.add(Constants.PARAM_SORT_ASC);
-		set.add(Constants.PARAM_SORT_DESC);
-		set.add(Constants.PARAM_COUNT);
-		set.add(Constants.PARAM_SUMMARY);
-		set.add(Constants.PARAM_ELEMENTS);
-		set.add(ResponseHighlighterInterceptor.PARAM_RAW);
-		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
-	}
 
 	private MethodReturnTypeEnum myMethodReturnType;
 	private String myResourceName;
-	private Class<? extends IBaseResource> myResourceType;
 
 	@SuppressWarnings("unchecked")
 	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
@@ -112,11 +94,12 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		if (theReturnResourceType != null) {
 			if (IBaseResource.class.isAssignableFrom(theReturnResourceType)) {
-				if (Modifier.isAbstract(theReturnResourceType.getModifiers()) || Modifier.isInterface(theReturnResourceType.getModifiers())) {
-					// If we're returning an abstract type, that's ok
-				} else {
-					myResourceType = (Class<? extends IResource>) theReturnResourceType;
-					myResourceName = theContext.getResourceDefinition(myResourceType).getName();
+
+				// If we're returning an abstract type, that's ok, but if we know the resource
+				// type let's grab it
+				if (!Modifier.isAbstract(theReturnResourceType.getModifiers()) && !Modifier.isInterface(theReturnResourceType.getModifiers())) {
+					Class<? extends IBaseResource> resourceType = (Class<? extends IResource>) theReturnResourceType;
+					myResourceName = theContext.getResourceDefinition(resourceType).getName();
 				}
 			}
 		}

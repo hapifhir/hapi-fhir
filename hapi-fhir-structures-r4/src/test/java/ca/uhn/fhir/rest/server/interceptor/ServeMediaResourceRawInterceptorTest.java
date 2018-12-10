@@ -1,0 +1,160 @@
+package ca.uhn.fhir.rest.server.interceptor;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Media;
+import org.junit.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
+
+public class ServeMediaResourceRawInterceptorTest {
+
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ServeMediaResourceRawInterceptorTest.class);
+	private static int ourPort;
+	private static RestfulServer ourServlet;
+	private static FhirContext ourCtx = FhirContext.forR4();
+	private static CloseableHttpClient ourClient;
+	private static Media ourNextResponse;
+	private static String ourReadUrl;
+	private ServeMediaResourceRawInterceptor myInterceptor;
+
+	@Before
+	public void before() {
+		myInterceptor = new ServeMediaResourceRawInterceptor();
+		ourServlet.registerInterceptor(myInterceptor);
+	}
+
+	@After
+	public void after() {
+		ourNextResponse = null;
+		ourServlet.unregisterInterceptor(myInterceptor);
+	}
+
+	@Test
+	public void testMediaHasImageRequestHasNoAcceptHeader() throws IOException {
+		ourNextResponse = new Media();
+		ourNextResponse.getContent().setContentType("image/png");
+		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
+
+		HttpGet get = new HttpGet(ourReadUrl);
+		try (CloseableHttpResponse response = ourClient.execute(get)) {
+			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
+			String contents = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			assertThat(contents, containsString("\"resourceType\""));
+		}
+	}
+
+	@Test
+	public void testMediaHasImageRequestHasMatchingAcceptHeader() throws IOException {
+		ourNextResponse = new Media();
+		ourNextResponse.getContent().setContentType("image/png");
+		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
+
+		HttpGet get = new HttpGet(ourReadUrl);
+		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
+		try (CloseableHttpResponse response = ourClient.execute(get)) {
+			assertEquals("image/png", response.getEntity().getContentType().getValue());
+			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
+			assertArrayEquals(new byte[]{2, 3, 4, 5, 6, 7, 8}, contents);
+		}
+	}
+
+	@Test
+	public void testMediaHasNoContentType() throws IOException {
+		ourNextResponse = new Media();
+		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
+
+		HttpGet get = new HttpGet(ourReadUrl);
+		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
+		try (CloseableHttpResponse response = ourClient.execute(get)) {
+			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
+		}
+	}
+
+	@Test
+	public void testMediaHasImageRequestHasNonMatchingAcceptHeaderOutputRaw() throws IOException {
+		ourNextResponse = new Media();
+		ourNextResponse.getContent().setContentType("image/png");
+		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
+
+		HttpGet get = new HttpGet(ourReadUrl + "?_output=data");
+		try (CloseableHttpResponse response = ourClient.execute(get)) {
+			assertEquals("image/png", response.getEntity().getContentType().getValue());
+			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
+			assertArrayEquals(new byte[]{2, 3, 4, 5, 6, 7, 8}, contents);
+		}
+	}
+
+	private static class MyMediaResourceProvider implements IResourceProvider {
+
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Media.class;
+		}
+
+		@Read
+		public Media read(@IdParam IIdType theId) {
+			return ourNextResponse;
+		}
+
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws IOException {
+		ourClient.close();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourPort = PortUtil.findFreePort();
+
+		// Create server
+		ourLog.info("Using port: {}", ourPort);
+		Server ourServer = new Server(ourPort);
+		ServletHandler proxyHandler = new ServletHandler();
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ourServlet.setResourceProviders(new MyMediaResourceProvider());
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
+
+		// Create client
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
+		ourReadUrl = "http://localhost:" + ourPort + "/Media/123";
+	}
+
+}

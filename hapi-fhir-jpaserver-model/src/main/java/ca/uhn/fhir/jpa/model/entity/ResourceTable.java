@@ -610,12 +610,9 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		if (myHasLinks && myResourceLinks != null) {
 			myResourceLinksField = getResourceLinks()
 				.stream()
-				.map(t->{
-					Long retVal = t.getTargetResourcePid();
-					return retVal;
-				})
+				.map(ResourceLink::getTargetResourcePid)
 				.filter(Objects::nonNull)
-				.map(t->t.toString())
+				.map(Object::toString)
 				.collect(Collectors.joining(" "));
 		} else {
 			myResourceLinksField = null;
