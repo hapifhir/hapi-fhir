@@ -79,8 +79,9 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	private ExecutorService myProcessingExecutor;
 	private MessageHandler mySubscriptionCheckingSubscriber;
 	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionInterceptor.class);
-	private ThreadPoolExecutor myDeliveryExecutor;
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
+	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
+
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired()
@@ -88,23 +89,9 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 	@Autowired
 	private SubscriptionMatcherCompositeInMemoryDatabase mySubscriptionMatcherCompositeInMemoryDatabase;
 	@Autowired
-	private SubscriptionMatcherDatabase mySubscriptionMatcherDatabase;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private BeanFactory beanFactory;
-	@Autowired
-	private MatchUrlService myMatchUrlService;
-	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	SubscriptionCannonicalizer mySubscriptionCannonicalizer;
-	@Autowired
-	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
-	private AsyncTaskExecutor myAsyncTaskExecutor;
-
-	// KHS FIXME state
-	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 
 	/**
 	 * Constructor
@@ -147,20 +134,13 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 				threadFactory,
 				rejectedExecutionHandler);
 			setProcessingChannel(new ExecutorSubscribableChannel(myProcessingExecutor));
-
-			registerSubscriptionCheckingSubscriber();
-
 		}
 		if (mySubscriptionActivatingSubscriber == null) {
 			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
-			mySubscriptionActivatingSubscriber = new SubscriptionActivatingSubscriber(subscriptionDao,  this, myTxManager, myAsyncTaskExecutor, mySubscriptionRegistry, mySubscriptionCannonicalizer);
+			mySubscriptionActivatingSubscriber = beanFactory.getBean(SubscriptionActivatingSubscriber.class, this);
 		}
 
-
-
-
-
-
+		registerSubscriptionCheckingSubscriber();
 	}
 
 	@SuppressWarnings("unused")
@@ -232,16 +212,12 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		myTxManager = theTxManager;
 	}
 
-
 	/**
 	 * This is an internal API - Use with caution!
 	 */
 	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		mySubscriptionActivatingSubscriber.handleMessage(theMsg.getOperationType(), theMsg.getId(myFhirContext), theMsg.getNewPayload(myFhirContext));
 		sendToProcessingChannel(theMsg);
-	}
-	public IFhirResourceDao<?> getSubscriptionDao() {
-		return myDaoRegistry.getSubscriptionDao();
 	}
 
 	public IFhirResourceDao getDao(Class type) {
@@ -250,17 +226,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 
 	public void setResourceDaos(List<IFhirResourceDao> theResourceDaos) {
 		myDaoRegistry.setResourceDaos(theResourceDaos);
-	}
-
-	public void validateCriteria(final S theResource) {
-		CanonicalSubscription subscription = mySubscriptionCannonicalizer.canonicalize(theResource);
-		String criteria = subscription.getCriteriaString();
-		try {
-			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myFhirContext, criteria);
-			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
-		} catch (InvalidRequestException e) {
-			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
-		}
 	}
 
 	@VisibleForTesting

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.websocket;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -105,26 +106,24 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 
 	private class BoundStaticSubscipriptionState implements IState, MessageHandler {
 
-		private WebSocketSession mySession;
-		private CanonicalSubscription mySubscription;
+		private final WebSocketSession mySession;
+		private final ActiveSubscription myActiveSubscription;
 
-		public BoundStaticSubscipriptionState(WebSocketSession theSession, CanonicalSubscription theSubscription) {
+		public BoundStaticSubscipriptionState(WebSocketSession theSession, ActiveSubscription theActiveSubscription) {
 			mySession = theSession;
-			mySubscription = theSubscription;
+			myActiveSubscription = theActiveSubscription;
 
-			String subscriptionId = mySubscription.getIdElement(myCtx).getIdPart();
-			mySubscriptionRegistry.registerHandler(subscriptionId, this);
+			theActiveSubscription.register(this);
 		}
 
 		@Override
 		public void closing() {
-			String subscriptionId = mySubscription.getIdElement(myCtx).getIdPart();
-			mySubscriptionRegistry.unregisterHandler(subscriptionId, this);
+			myActiveSubscription.unregister(this);
 		}
 
 		private void deliver() {
 			try {
-				String payload = "ping " + mySubscription.getIdElement(myCtx).getIdPart();
+				String payload = "ping " + myActiveSubscription.getIdElement(myCtx).getIdPart();
 				ourLog.info("Sending WebSocket message: {}", payload);
 				mySession.sendMessage(new TextMessage(payload));
 			} catch (IOException e) {
@@ -139,7 +138,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			}
 			try {
 				ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-				if (mySubscription.equals(msg.getSubscription())) {
+				if (myActiveSubscription.getSubscription().equals(msg.getSubscription())) {
 					deliver();
 				}
 			} catch (Exception e) {
@@ -180,8 +179,8 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			}
 
 			try {
-				CanonicalSubscription subscription = mySubscriptionRegistry.get(id.getIdPart());
-				myState = new BoundStaticSubscipriptionState( theSession, subscription);
+				ActiveSubscription activeSubscription = mySubscriptionRegistry.get(id.getIdPart());
+				myState = new BoundStaticSubscipriptionState( theSession, activeSubscription);
 			} catch (ResourceNotFoundException e) {
 				try {
 					String message = "Invalid bind request - Unknown subscription: " + id.getValue();

@@ -41,8 +41,11 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 	private final Subscription.SubscriptionChannelType myChannelType;
 	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
 	@Autowired
-	DaoRegistry myDaoRegistry;
-	private IFhirResourceDao<?> mySubscriptionDao;
+	protected DaoRegistry myDaoRegistry;
+	@Autowired
+	protected FhirContext myFhirContext;
+	@Autowired
+	protected SubscriptionRegistry mySubscriptionRegistry;
 
 	/**
 	 * Constructor
@@ -57,28 +60,9 @@ public abstract class BaseSubscriptionSubscriber implements MessageHandler {
 		myDaoRegistry = theDaoRegistry;
 	}
 
-	@PostConstruct
-	public void setSubscriptionDao() {
-		mySubscriptionDao = myDaoRegistry.getSubscriptionDao();
-	}
-
 	public Subscription.SubscriptionChannelType getChannelType() {
 		return myChannelType;
 	}
-
-	public FhirContext getContext() {
-		return getSubscriptionDao().getContext();
-	}
-
-	public IFhirResourceDao getSubscriptionDao() {
-		return mySubscriptionDao;
-	}
-
-	// FIXME KHS do we need this?
-	private BaseSubscriptionInterceptor getSubscriptionInterceptor() {
-		return mySubscriptionInterceptor;
-	}
-
 
 	/**
 	 * Does this subscription type (e.g. rest hook, websocket, etc) apply to this interceptor?

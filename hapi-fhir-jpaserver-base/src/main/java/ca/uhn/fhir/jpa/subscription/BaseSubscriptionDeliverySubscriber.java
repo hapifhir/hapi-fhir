@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
@@ -30,9 +32,6 @@ import org.springframework.messaging.MessagingException;
 
 public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptionSubscriber {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriber.class);
-
-	@Autowired
-	SubscriptionRegistry mySubscriptionRegistry;
 
 	public BaseSubscriptionDeliverySubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		super(theChannelType, theSubscriptionInterceptor);
@@ -49,11 +48,11 @@ public abstract class BaseSubscriptionDeliverySubscriber extends BaseSubscriptio
 
 		try {
 			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-			subscriptionId = msg.getSubscription().getIdElement(getContext()).getValue();
+			subscriptionId = msg.getSubscription().getIdElement(myFhirContext).getValue();
 
-			CanonicalSubscription updatedSubscription = mySubscriptionRegistry.get(msg.getSubscription().getIdElement(getContext()).getIdPart());
+			ActiveSubscription updatedSubscription = mySubscriptionRegistry.get(msg.getSubscription().getIdElement(myFhirContext).getIdPart());
 			if (updatedSubscription != null) {
-				msg.setSubscription(updatedSubscription);
+				msg.setSubscription(updatedSubscription.getSubscription());
 			}
 
 			if (!subscriptionTypeApplies(msg.getSubscription())) {

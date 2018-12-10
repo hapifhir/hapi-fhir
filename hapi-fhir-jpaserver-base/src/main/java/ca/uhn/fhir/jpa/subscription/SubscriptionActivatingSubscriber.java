@@ -21,22 +21,29 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionCannonicalizer;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.messaging.MessagingException;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -47,45 +54,52 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-// FIXME KHS this needs to be a prototype bean
-@SuppressWarnings("unchecked")
+/**
+ * Responsible for transitioning subscription resources from REQUESTED to ACTIVE
+ * Once activated, the subscription is added to the SubscriptionRegistry.
+ *
+ * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
+ */
+@Component
+// FIXME KHS remove prototype
+@Scope("prototype")
 public class SubscriptionActivatingSubscriber {
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
+
 	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
 
-	private final IFhirResourceDao mySubscriptionDao;
-	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
-	private final PlatformTransactionManager myTransactionManager;
-	private final AsyncTaskExecutor myTaskExecutor;
-	private final SubscriptionRegistry mySubscriptionRegistry;
-	private final SubscriptionCannonicalizer mySubscriptionCanonicalizer;
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
+	@Autowired
+	private AsyncTaskExecutor myTaskExecutor;
+	@Autowired
+	private SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	private SubscriptionCannonicalizer mySubscriptionCanonicalizer;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
+	private SubscriptionCannonicalizer mySubscriptionCannonicalizer;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
-	private FhirContext myCtx;
+//	private final BaseSubscriptionInterceptor mySubscriptionInterceptor;
 
-	/**
-	 * Constructor
-	 */
-	public SubscriptionActivatingSubscriber(IFhirResourceDao<? extends IBaseResource> theSubscriptionDao, BaseSubscriptionInterceptor theSubscriptionInterceptor, PlatformTransactionManager theTransactionManager, AsyncTaskExecutor theTaskExecutor, SubscriptionRegistry theSubscriptionRegistry, SubscriptionCannonicalizer theSubscriptionCannonicalizer) {
-		mySubscriptionDao = theSubscriptionDao;
-		// FIXME KHS do we still need this?
+	public SubscriptionActivatingSubscriber(BaseSubscriptionInterceptor theSubscriptionInterceptor) {
 		mySubscriptionInterceptor = theSubscriptionInterceptor;
-		myCtx = theSubscriptionDao.getContext();
-		myTransactionManager = theTransactionManager;
-		myTaskExecutor = theTaskExecutor;
-		mySubscriptionRegistry = theSubscriptionRegistry;
-		mySubscriptionCanonicalizer = theSubscriptionCannonicalizer;
-		Validate.notNull(theTaskExecutor);
 	}
 
 	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
-		String subscriptionChannelType = myCtx
+		String subscriptionChannelType = myFhirContext
 			.newTerser()
 			.getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class)
 			.getValueAsString();
 
-		final IPrimitiveType<?> status = myCtx.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
+		final IPrimitiveType<?> status = myFhirContext.newTerser().getSingleValueOrNull(theSubscription, BaseSubscriptionInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
 		String statusString = status.getValueAsString();
 
 		final String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
@@ -146,22 +160,22 @@ public class SubscriptionActivatingSubscriber {
 	}
 
 	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
-		IBaseResource subscription = mySubscriptionDao.read(theSubscription.getIdElement());
+		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
+		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement());
 
 		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
 		try {
-			SubscriptionUtil.setStatus(myCtx, subscription, theActiveStatus);
-			subscription = mySubscriptionDao.update(subscription).getResource();
+			SubscriptionUtil.setStatus(myFhirContext, subscription, theActiveStatus);
+			subscription = subscriptionDao.update(subscription).getResource();
 			mySubscriptionInterceptor.submitResourceModifiedForUpdate(subscription);
 			return true;
 		} catch (final UnprocessableEntityException e) {
 			ourLog.info("Changing status of {} to ERROR", subscription.getIdElement());
-			SubscriptionUtil.setStatus(myCtx, subscription, "error");
-			SubscriptionUtil.setReason(myCtx, subscription, e.getMessage());
-			mySubscriptionDao.update(subscription);
+			SubscriptionUtil.setStatus(myFhirContext, subscription, "error");
+			SubscriptionUtil.setReason(myFhirContext, subscription, e.getMessage());
+			subscriptionDao.update(subscription);
 			return false;
 		}
-
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
@@ -175,14 +189,26 @@ public class SubscriptionActivatingSubscriber {
 				break;
 			case CREATE:
 			case UPDATE:
-				mySubscriptionInterceptor.validateCriteria(theSubscription);
+				validateCriteria(theSubscription);
 				activateAndRegisterSubscriptionIfRequiredInTransaction(theSubscription);
 				break;
 			default:
 				break;
 		}
-
 	}
+
+	public void validateCriteria(final IBaseResource theResource) {
+		CanonicalSubscription subscription = mySubscriptionCannonicalizer.canonicalize(theResource);
+		String criteria = subscription.getCriteriaString();
+		try {
+			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myFhirContext, criteria);
+			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
+		} catch (InvalidRequestException e) {
+			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
+		}
+	}
+
+
 
 	private void activateAndRegisterSubscriptionIfRequiredInTransaction(IBaseResource theSubscription) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);

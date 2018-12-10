@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
@@ -18,8 +17,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
+/**
+ *
+ * Cache of active subscriptions.  When a new subscription is added to the cache, a new Spring Channel is created
+ * and a new MessageHandler for that subscription is subscribed to that channel.  These subscriptions, channels, and
+ * handlers are all caches in this registry so they can be removed it the subscription is deleted.
+ */
+
 @Component
-public class SubscriptionRegistry<S extends IBaseResource> {
+public class SubscriptionRegistry {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
 
 	@Autowired
@@ -29,35 +35,38 @@ public class SubscriptionRegistry<S extends IBaseResource> {
 	@Autowired
 	DeliveryChannelCreator myDeliveryChannelCreator;
 
-	private final SubscriptionCache mySubscriptionCache = new SubscriptionCache();
-	private final SubscriptionChannelCache mySubscriptionChannelCache = new SubscriptionChannelCache();
-	private final SubscriptionDeliveryHandlerCache mySubscriptionDeliveryChanelCache = new SubscriptionDeliveryHandlerCache();
+	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
+	// FIXME KHS
+//	private final SubscriptionCache mySubscriptionCache = new SubscriptionCache();
+//	private final SubscriptionChannelCache mySubscriptionChannelCache = new SubscriptionChannelCache();
+//	private final SubscriptionDeliveryHandlerCache mySubscriptionDeliveryChanelCache = new SubscriptionDeliveryHandlerCache();
 
-	public CanonicalSubscription get(String theIdPart) {
-		return mySubscriptionCache.get(theIdPart);
+	public ActiveSubscription get(String theIdPart) {
+		return myActiveSubscriptionCache.get(theIdPart);
 	}
 
-	public Collection<CanonicalSubscription> getAll() {
-		return mySubscriptionCache.getAll();
+	public Collection<ActiveSubscription> getAll() {
+		return myActiveSubscriptionCache.getAll();
 	}
 
-	public SubscribableChannel getDeliveryChannel(CanonicalSubscription theSubscription) {
-		return mySubscriptionChannelCache.get(theSubscription.getIdElement(myFhirContext).getIdPart());
-	}
+// FIXME KHS
+	//	public SubscribableChannel getDeliveryChannel(CanonicalSubscription theSubscription) {
+//		return myActiveSubscriptionCache.get(theSubscription.getIdElement(myFhirContext).getIdPart()).getSubscribableChannel();
+//	}
 
 	public CanonicalSubscription hasSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
-		return mySubscriptionCache.get(theId.getIdPart());
+		return myActiveSubscriptionCache.get(theId.getIdPart()).getSubscription();
 	}
 
+	// FIXME KHS remove?
 	public void registerHandler(String theSubscriptionId, MessageHandler theHandler) {
-		mySubscriptionChannelCache.get(theSubscriptionId).subscribe(theHandler);
-		mySubscriptionDeliveryChanelCache.put(theSubscriptionId, theHandler);
+		myActiveSubscriptionCache.registerHandler(theSubscriptionId, theHandler);
 	}
 
 	@SuppressWarnings("UnusedReturnValue")
-	public CanonicalSubscription registerSubscription(IIdType theId, S theSubscription, IDeliveryHandlerCreator theIDeliveryHandlerCreator) {
+	public CanonicalSubscription registerSubscription(IIdType theId, IBaseResource theSubscription, IDeliveryHandlerCreator theIDeliveryHandlerCreator) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
 		Validate.notBlank(subscriptionId);
@@ -67,44 +76,29 @@ public class SubscriptionRegistry<S extends IBaseResource> {
 		SubscribableChannel deliveryChannel = myDeliveryChannelCreator.createDeliveryChannel(canonicalized);
 		Optional<MessageHandler> deliveryHandler = theIDeliveryHandlerCreator.createDeliveryHandler(canonicalized);
 
-		mySubscriptionChannelCache.put(subscriptionId, deliveryChannel);
-		mySubscriptionCache.put(subscriptionId, canonicalized);
+		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, deliveryChannel);
+		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
-		deliveryHandler.ifPresent(handler -> registerHandler(subscriptionId, handler));
+		deliveryHandler.ifPresent(handler -> activeSubscription.register(handler));
 
 		return canonicalized;
 	}
 
+	// FIXME KHS remove?
 	public void unregisterHandler(String theSubscriptionId, MessageHandler theMessageHandler) {
-		SubscribableChannel channel = mySubscriptionChannelCache.get(theSubscriptionId);
-		if (channel != null) {
-			channel.unsubscribe(theMessageHandler);
-			if (channel instanceof DisposableBean) {
-				try {
-					((DisposableBean) channel).destroy();
-				} catch (Exception e) {
-					ourLog.error("Failed to destroy channel bean", e);
-				}
-			}
+		ActiveSubscription activeSubscription = myActiveSubscriptionCache.get(theSubscriptionId);
+		if (activeSubscription != null) {
+			activeSubscription.unregister(theMessageHandler);
 		}
 
-		mySubscriptionChannelCache.remove(theSubscriptionId);
+		// FIXME KHS this should happen by caller
+//		mySubscriptionChannelCache.remove(theSubscriptionId);
 	}
 
-	@SuppressWarnings("UnusedReturnValue")
-	public CanonicalSubscription unregisterSubscription(IIdType theId) {
+	public void unregisterSubscription(IIdType theId) {
 		Validate.notNull(theId);
-
 		String subscriptionId = theId.getIdPart();
-		Validate.notBlank(subscriptionId);
-
-		for (MessageHandler next : mySubscriptionDeliveryChanelCache.getCollection(subscriptionId)) {
-			unregisterHandler(subscriptionId, next);
-		}
-
-		mySubscriptionChannelCache.remove(subscriptionId);
-
-		return mySubscriptionCache.remove(subscriptionId);
+		myActiveSubscriptionCache.remove(subscriptionId);
 	}
 
 	@PreDestroy
@@ -113,17 +107,10 @@ public class SubscriptionRegistry<S extends IBaseResource> {
 	}
 
 	public void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
-		for (String next : new ArrayList<>(mySubscriptionCache.keySet())) {
-			if (!theAllIds.contains(next)) {
-				ourLog.info("Unregistering Subscription/{}", next);
-				CanonicalSubscription subscription = mySubscriptionCache.get(next);
-				unregisterSubscription(subscription.getIdElement(myFhirContext));
-			}
-		}
+		myActiveSubscriptionCache.unregisterAllSubscriptionsNotInCollection(theAllIds);
 	}
 
-
 	public int size() {
-		return mySubscriptionCache.size();
+		return myActiveSubscriptionCache.size();
 	}
 }

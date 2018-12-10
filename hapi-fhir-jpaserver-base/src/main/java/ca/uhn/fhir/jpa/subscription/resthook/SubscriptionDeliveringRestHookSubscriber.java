@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
@@ -105,7 +106,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 				}
 				break;
 			case DELETE:
-				operation = theClient.delete().resourceById(theMsg.getPayloadId(getContext()));
+				operation = theClient.delete().resourceById(theMsg.getPayloadId(myFhirContext));
 				break;
 			default:
 				ourLog.warn("Ignoring delivery message of type: {}", theMsg.getOperationType());
@@ -116,7 +117,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			operation.encoded(thePayloadType);
 		}
 
-		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), thePayloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue());
+		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), thePayloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 
 		try {
 			operation.execute();
@@ -128,7 +129,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	}
 
 	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
-		IBaseResource payloadResource = theMsg.getPayload(getContext());
+		IBaseResource payloadResource = theMsg.getPayload(myFhirContext);
 
 		// FIXME KHS restore
 		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
@@ -170,10 +171,10 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			}
 
 			// Create the client request
-			getContext().getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+			myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 			IGenericClient client = null;
 			if (isNotBlank(endpointUrl)) {
-				client = getContext().newRestfulGenericClient(endpointUrl);
+				client = myFhirContext.newRestfulGenericClient(endpointUrl);
 
 				// Additional headers specified in the subscription
 				List<String> headers = subscription.getHeaders();
@@ -192,12 +193,11 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	 * @param theMsg
 	 */
 	protected void sendNotification(ResourceDeliveryMessage theMsg) {
-		FhirContext context= getContext();
 		Map<String, List<String>> params = new HashMap();
 		List<Header> headers = new ArrayList<>();
 		StringBuilder url = new StringBuilder(theMsg.getSubscription().getEndpointUrl());
-		IHttpClient client = context.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
-		IHttpRequest request = client.createParamRequest(context, params, null);
+		IHttpClient client = myFhirContext.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
+		IHttpRequest request = client.createParamRequest(myFhirContext, params, null);
 		try {
 			IHttpResponse response = request.execute();
 		} catch (IOException e) {

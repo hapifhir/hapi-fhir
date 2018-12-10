@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingSubscriber;
 import ca.uhn.fhir.jpa.subscription.cache.ISubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
@@ -107,11 +108,10 @@ public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
 			for (IBaseResource resource : resourceList) {
 				String nextId = resource.getIdElement().getIdPart();
 				allIds.add(nextId);
-// FIXME KHS
-				//				boolean changed = mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
-//				if (changed) {
-//					changesCount++;
-//				}
+				boolean changed = mySubscriptionActivatingSubscriber.activateOrRegisterSubscriptionIfRequired(resource);
+				if (changed) {
+					changesCount++;
+				}
 			}
 
 			mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);

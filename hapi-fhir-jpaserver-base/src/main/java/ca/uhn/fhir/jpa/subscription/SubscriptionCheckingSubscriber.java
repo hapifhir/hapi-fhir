@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.subscription.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -53,11 +54,6 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 	private final ISubscriptionMatcher mySubscriptionMatcher;
 
-	@Autowired
-	private MatchUrlService myMatchUrlService;
-	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
-
 	public SubscriptionCheckingSubscriber(Subscription.SubscriptionChannelType theChannelType, BaseSubscriptionInterceptor theSubscriptionInterceptor, ISubscriptionMatcher theSubscriptionMatcher) {
 		super(theChannelType, theSubscriptionInterceptor);
 		this.mySubscriptionMatcher = theSubscriptionMatcher;
@@ -85,17 +81,17 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				return;
 		}
 
-		IIdType id = msg.getId(getContext());
+		IIdType id = msg.getId(myFhirContext);
 		String resourceType = id.getResourceType();
 
-		Collection<CanonicalSubscription> subscriptions = mySubscriptionRegistry.getAll();
+		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
 		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
 
-		for (CanonicalSubscription nextSubscription : subscriptions) {
+		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 
-			String nextSubscriptionId = nextSubscription.getIdElement(getContext()).toUnqualifiedVersionless().getValue();
-			String nextCriteriaString = nextSubscription.getCriteriaString();
+			String nextSubscriptionId = nextActiveSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue();
+			String nextCriteriaString = nextActiveSubscription.getCriteriaString();
 
 			if (isNotBlank(msg.getSubscriptionId())) {
 				if (!msg.getSubscriptionId().equals(nextSubscriptionId)) {
@@ -128,17 +124,17 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			ourLog.debug("Found match: queueing rest-hook notification for resource: {}", id.toUnqualifiedVersionless().getValue());
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-			deliveryMsg.setPayload(getContext(), msg.getNewPayload(getContext()));
-			deliveryMsg.setSubscription(nextSubscription);
+			deliveryMsg.setPayload(myFhirContext, msg.getNewPayload(myFhirContext));
+			deliveryMsg.setSubscription(nextActiveSubscription.getSubscription());
 			deliveryMsg.setOperationType(msg.getOperationType());
-			deliveryMsg.setPayloadId(msg.getId(getContext()));
+			deliveryMsg.setPayloadId(msg.getId(myFhirContext));
 
 			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
-			MessageChannel deliveryChannel = mySubscriptionRegistry.getDeliveryChannel(nextSubscription);
+			MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
 			if (deliveryChannel != null) {
 				deliveryChannel.send(wrappedMsg);
 			} else {
-				ourLog.warn("Do not have deliovery channel for subscription {}", nextSubscription.getIdElement(getContext()));
+				ourLog.warn("Do not have deliovery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
 			}
 		}
 
