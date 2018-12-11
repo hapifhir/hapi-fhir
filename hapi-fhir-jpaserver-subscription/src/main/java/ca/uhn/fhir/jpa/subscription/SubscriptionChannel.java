@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,10 +64,12 @@ public class SubscriptionChannel implements SubscribableChannel {
 		return mySubscribableChannel.send(message, timeout);
 	}
 
+	@VisibleForTesting
 	public void clearInterceptors() {
 		mySubscribableChannel.setInterceptors(new ArrayList<>());
 	}
 
+	@VisibleForTesting
 	public void addInterceptor(ChannelInterceptor theInterceptor) {
 		mySubscribableChannel.addInterceptor(theInterceptor);
 	}

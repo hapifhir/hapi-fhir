@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.subscriber;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,20 @@ package ca.uhn.fhir.jpa.subscription.subscriber;
  * #L%
  */
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
@@ -45,8 +48,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
-public class BaseSubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDeliverySubscriber {
-	private Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliveringRestHookSubscriber.class);
+public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDeliverySubscriber {
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
+
+	@Autowired
+	IResourceProvider myResourceProvider;
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
 		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
@@ -118,17 +124,14 @@ public class BaseSubscriptionDeliveringRestHookSubscriber extends BaseSubscripti
 	protected IBaseResource getAndMassagePayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription) {
 		IBaseResource payloadResource = theMsg.getPayload(myFhirContext);
 
-		// FIXME KHS restore
 		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
-//			IIdType payloadId = theMsg.getPayloadId(getContext());
-//			RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(payloadId.getResourceType());
-//			IFhirResourceDao dao = getSubscriptionInterceptor().getDao(resourceDef.getImplementingClass());
-//			try {
-//				payloadResource = dao.read(payloadId.toVersionless());
-//			} catch (ResourceGoneException e) {
-//				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(getContext()));
-//				return null;
-//			}
+			IIdType payloadId = theMsg.getPayloadId(myFhirContext);
+			try {
+				payloadResource = myResourceProvider.getResource(payloadId.toVersionless());
+			} catch (ResourceGoneException e) {
+				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(myFhirContext));
+				return null;
+			}
 		}
 
 		IIdType resourceId = payloadResource.getIdElement();

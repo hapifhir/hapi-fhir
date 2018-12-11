@@ -96,7 +96,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		for (IBaseResource next : BundleUtil.toListOfResources(myFhirCtx, allSubscriptions)) {
 			ourClient.delete().resource(next).execute();
 		}
-		waitForRegisteredSubscriptionCount(0);
+		waitForActivatedSubscriptionCount(0);
 
 		SubscriptionChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannel();
 		processingChannel.clearInterceptors();
@@ -151,8 +151,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
 
-		String observationId = methodOutcome.getId().getIdPart();
-		observation.setId(observationId);
+		observation.setId(methodOutcome.getId());
 
 		return observation;
 	}

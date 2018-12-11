@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
@@ -12,7 +14,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class ActiveSubscription {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ActiveSubscription.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
 	private final CanonicalSubscription mySubscription;
 	private final SubscribableChannel mySubscribableChannel;

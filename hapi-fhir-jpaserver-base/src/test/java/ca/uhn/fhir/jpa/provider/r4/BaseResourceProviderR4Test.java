@@ -198,7 +198,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		return names;
 	}
 
-	protected void waitForRegisteredSubscriptionCount(int theSize) throws Exception {
+	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
 		for (int i = 0; ; i++) {
 			if (i == 10) {
 				fail("Failed to init subscriptions");

@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
+import ca.uhn.fhir.jpa.subscription.CountingInterceptor;
+import ca.uhn.fhir.jpa.subscription.SubscriptionChannel;
 import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -10,9 +13,19 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.*;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.ChannelInterceptor;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -22,7 +35,17 @@ import static org.junit.Assert.*;
  * Test the rest-hook subscriptions
  */
 public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookTestR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
+
+	@Autowired
+	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
+
+	@After
+	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(false);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+	}
 
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {
@@ -34,7 +57,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		createSubscription(criteria1, payload);
 		createSubscription(criteria2, payload);
-		waitForRegisteredSubscriptionCount(2);
+		waitForActivatedSubscriptionCount(2);
 
 		sendObservation(code, "SNOMED-CT");
 
@@ -51,7 +74,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		String payload = "application/fhir+json";
 		createSubscription(criteria, payload);
 
-		waitForRegisteredSubscriptionCount(1);
+		waitForActivatedSubscriptionCount(1);
 		for (int i = 0; i < 5; i++) {
 			int changes = this.mySubscriptionLoaderDatabase.doInitSubscriptions();
 			assertEquals(0, changes);
@@ -68,7 +91,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		createSubscription(criteria1, payload);
 		createSubscription(criteria2, payload);
-		waitForRegisteredSubscriptionCount(2);
+		waitForActivatedSubscriptionCount(2);
 
 		Observation obs = sendObservation(code, "SNOMED-CT");
 
@@ -98,32 +121,139 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		waitForRegisteredSubscriptionCount(0);
+		waitForActivatedSubscriptionCount(0);
 		Subscription subscription1 = createSubscription(criteria1, payload);
-		waitForRegisteredSubscriptionCount(1);
+		waitForActivatedSubscriptionCount(1);
 
-		int modCount = myCountingInterceptor.getSentCount();
-		subscription1
-			.getChannel()
-			.addExtension(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
-		subscription1
-			.getChannel()
-			.addExtension(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
-		ourLog.info("** About to update subscription");
-		ourClient.update().resource(subscription1).execute();
-		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount());
 
 		ourLog.info("** About to send observation");
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
-		// Should see 1 subscription notification
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 
-		assertEquals(observation1.getIdElement().getIdPart(), ourUpdatedObservations.get(0).getIdElement().getIdPart());
-		assertEquals(null, ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
+		IdType idElement = ourUpdatedObservations.get(0).getIdElement();
+		assertEquals(observation1.getIdElement().getIdPart(), idElement.getIdPart());
+		// VersionId is present
+		assertEquals(observation1.getIdElement().getVersionIdPart(), idElement.getVersionIdPart());
+
+		subscription1
+			.getChannel()
+			.addExtension(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
+		ourLog.info("** About to update subscription");
+
+		int modCount = myCountingInterceptor.getSentCount();
+		ourClient.update().resource(subscription1).execute();
+		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount());
+
+		ourLog.info("** About to send observation");
+		Observation observation2 = sendObservation(code, "SNOMED-CT");
+
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(2, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(1));
+
+		idElement = ourUpdatedObservations.get(1).getIdElement();
+		assertEquals(observation2.getIdElement().getIdPart(), idElement.getIdPart());
+		// Now VersionId is stripped
+		assertEquals(null, idElement.getVersionIdPart());
+	}
+
+	@Test
+	public void testRestHookSubscriptionDoesntGetLatestVersionByDefault() throws Exception {
+		String payload = "application/json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		waitForActivatedSubscriptionCount(0);
+		createSubscription(criteria1, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(true);
+		final CountDownLatch countDownLatch = new CountDownLatch(1);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+
+		ourLog.info("** About to send observation");
+		Observation observation = sendObservation(code, "SNOMED-CT");
+		assertEquals("1", observation.getIdElement().getVersionIdPart());
+		assertNull(observation.getComment());
+
+		observation.setComment("changed");
+		MethodOutcome methodOutcome = ourClient.update().resource(observation).execute();
+		assertEquals("2", methodOutcome.getId().getVersionIdPart());
+		assertEquals("changed", observation.getComment());
+
+		// Wait for our two delivery channel threads to be paused
+		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
+		// Open the floodgates!
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(false);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+
+
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(2, ourUpdatedObservations);
+
+		Observation observation1 = ourUpdatedObservations.get(0);
+		Observation observation2 = ourUpdatedObservations.get(1);
+
+		assertEquals("1", observation1.getIdElement().getVersionIdPart());
+		assertNull(observation1.getComment());
+		assertEquals("2", observation2.getIdElement().getVersionIdPart());
+		assertEquals("changed", observation2.getComment());
+	}
+
+	@Test
+	public void testRestHookSubscriptionGetsLatestVersionWithFlag() throws Exception {
+		String payload = "application/json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		waitForActivatedSubscriptionCount(0);
+
+		Subscription subscription = newSubscription(criteria1, payload);
+		subscription
+			.getChannel()
+			.addExtension(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION, new BooleanType("true"));
+		ourClient.create().resource(subscription).execute();
+
+		waitForActivatedSubscriptionCount(1);
+
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(true);
+		final CountDownLatch countDownLatch = new CountDownLatch(1);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
+
+		ourLog.info("** About to send observation");
+		Observation observation = sendObservation(code, "SNOMED-CT");
+		assertEquals("1", observation.getIdElement().getVersionIdPart());
+		assertNull(observation.getComment());
+
+		observation.setComment("changed");
+		MethodOutcome methodOutcome = ourClient.update().resource(observation).execute();
+		assertEquals("2", methodOutcome.getId().getVersionIdPart());
+		assertEquals("changed", observation.getComment());
+
+		// Wait for our two delivery channel threads to be paused
+		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
+		// Open the floodgates!
+		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(false);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+
+
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(2, ourUpdatedObservations);
+
+		Observation observation1 = ourUpdatedObservations.get(0);
+		Observation observation2 = ourUpdatedObservations.get(1);
+
+		assertEquals("2", observation1.getIdElement().getVersionIdPart());
+		assertEquals("changed", observation1.getComment());
+		assertEquals("2", observation2.getIdElement().getVersionIdPart());
+		assertEquals("changed", observation2.getComment());
 	}
 
 	@Test
@@ -136,7 +266,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload);
 		Subscription subscription2 = createSubscription(criteria2, payload);
-		waitForRegisteredSubscriptionCount(2);
+		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
@@ -216,7 +346,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload);
 		Subscription subscription2 = createSubscription(criteria2, payload);
-		waitForRegisteredSubscriptionCount(2);
+		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
@@ -294,7 +424,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload);
 		Subscription subscription2 = createSubscription(criteria2, payload);
-		waitForRegisteredSubscriptionCount(2);
+		waitForActivatedSubscriptionCount(2);
 
 		ourLog.info("** About to send obervation");
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
@@ -368,7 +498,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		createSubscription(criteria1, payload);
-		waitForRegisteredSubscriptionCount(1);
+		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("** About to send obervation");
 
@@ -466,7 +596,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload);
 		Subscription subscription2 = createSubscription(criteria2, payload);
-		waitForRegisteredSubscriptionCount(2);
+		waitForActivatedSubscriptionCount(2);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
@@ -502,7 +632,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// Add some headers, and we'll also turn back to requested status for fun
 		Subscription subscription = createSubscription(criteria1, payload);
-		waitForRegisteredSubscriptionCount(1);
+		waitForActivatedSubscriptionCount(1);
 
 		subscription.getChannel().addHeader("X-Foo: FOO");
 		subscription.getChannel().addHeader("X-Bar: BAR");
@@ -529,7 +659,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		Subscription subscription = createSubscription(criteria1, payload);
-		waitForRegisteredSubscriptionCount(1);
+		waitForActivatedSubscriptionCount(1);
 
 		sendObservation(code, "SNOMED-CT");
 
@@ -620,7 +750,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		mySearchParameterDao.create(sp);
 		mySearchParamRegsitry.forceRefresh();
 		createSubscription(criteria, "application/json");
-		waitForRegisteredSubscriptionCount(1);
+		waitForActivatedSubscriptionCount(1);
 
 		{
 			Observation bodySite = new Observation();

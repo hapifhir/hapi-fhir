@@ -46,7 +46,6 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private static boolean ourForcePayloadEncodeAndDecodeForUnitTests;
 	private SubscriptionChannel myProcessingChannel;
-	private ExecutorService myProcessingExecutor;
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
 
 	@Autowired

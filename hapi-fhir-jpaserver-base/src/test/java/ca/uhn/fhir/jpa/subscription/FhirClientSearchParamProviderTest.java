@@ -46,7 +46,7 @@ public class FhirClientSearchParamProviderTest extends BaseSubscriptionsR4Test {
 		mySearchParameterDao.create(sp);
 		mySearchParamRegsitry.forceRefresh();
 		createSubscription(criteria, "application/json");
-		waitForRegisteredSubscriptionCount(1);
+		waitForActivatedSubscriptionCount(1);
 
 		{
 			Observation observation = new Observation();
