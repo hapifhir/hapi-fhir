@@ -100,8 +100,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		}
 		waitForRegisteredSubscriptionCount(0);
 
-		ExecutorSubscribableChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannel();
-		processingChannel.setInterceptors(new ArrayList<>());
+		SubscriptionChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannel();
+		processingChannel.clearInterceptors();
 		myCountingInterceptor = new CountingInterceptor();
 		processingChannel.addInterceptor(myCountingInterceptor);
 	}

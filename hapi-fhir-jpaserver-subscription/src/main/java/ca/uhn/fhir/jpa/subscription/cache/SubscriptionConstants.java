@@ -53,4 +53,5 @@ public class SubscriptionConstants {
 	public static final int MAX_SUBSCRIPTION_RESULTS = 1000;
 
 	public static final int PROCESSING_EXECUTOR_QUEUE_SIZE = 1000;
+	public static final int DELIVERY_EXECUTOR_QUEUE_SIZE = 1000;
 }

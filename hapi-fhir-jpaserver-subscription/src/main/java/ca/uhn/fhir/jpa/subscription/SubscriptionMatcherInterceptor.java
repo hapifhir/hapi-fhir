@@ -6,15 +6,11 @@ import ca.uhn.fhir.jpa.subscription.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.subscriber.SubscriptionCheckingSubscriber;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
-import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -43,13 +39,13 @@ import java.util.concurrent.*;
 
 @Component
 public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAdapter {
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private static boolean ourForcePayloadEncodeAndDecodeForUnitTests;
-	private SubscribableChannel myProcessingChannel;
+	private SubscriptionChannel myProcessingChannel;
 	private ExecutorService myProcessingExecutor;
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
 
 	@Autowired
@@ -73,31 +69,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 
 		if (myProcessingChannel == null) {
 			myProcessingExecutorQueue = new LinkedBlockingQueue<>(SubscriptionConstants.PROCESSING_EXECUTOR_QUEUE_SIZE);
-			RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
-				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", myProcessingExecutorQueue.size());
-				StopWatch sw = new StopWatch();
-				try {
-					myProcessingExecutorQueue.put(theRunnable);
-				} catch (InterruptedException theE) {
-					throw new RejectedExecutionException("Task " + theRunnable.toString() +
-						" rejected from " + theE.toString());
-				}
-				ourLog.info("Slot become available after {}ms", sw.getMillis());
-			};
-			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
-				.namingPattern("subscription-proc-%d")
-				.daemon(false)
-				.priority(Thread.NORM_PRIORITY)
-				.build();
-			myProcessingExecutor = new ThreadPoolExecutor(
-				1,
-				SubscriptionConstants.EXECUTOR_THREAD_COUNT,
-				0L,
-				TimeUnit.MILLISECONDS,
-				myProcessingExecutorQueue,
-				threadFactory,
-				rejectedExecutionHandler);
-			myProcessingChannel = new ExecutorSubscribableChannel(myProcessingExecutor);
+			myProcessingChannel = new SubscriptionChannel(myProcessingExecutorQueue, "subscription-proc-%d");
 		}
 		myProcessingChannel.subscribe(mySubscriptionCheckingSubscriber);
 	}
@@ -158,7 +130,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	}
 
 	@VisibleForTesting
-	public ExecutorSubscribableChannel getProcessingChannel() {
-		return (ExecutorSubscribableChannel)myProcessingChannel;
+	public SubscriptionChannel getProcessingChannel() {
+		return myProcessingChannel;
 	}
 }
