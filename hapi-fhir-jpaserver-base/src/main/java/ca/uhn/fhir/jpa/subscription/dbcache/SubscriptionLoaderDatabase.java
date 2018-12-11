@@ -46,9 +46,6 @@ public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
-	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
-	private AsyncTaskExecutor myAsyncTaskExecutor;
-	@Autowired
 	private SubscriptionActivatingInterceptor mySubscriptionActivatingInterceptor;
 
 	// TODO KHS change
@@ -122,11 +119,5 @@ public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
 			return changesCount;
 		}
 	}
-
-	@VisibleForTesting
-	public void setAsyncTaskExecutorForUnitTest(AsyncTaskExecutor theAsyncTaskExecutor) {
-		myAsyncTaskExecutor = theAsyncTaskExecutor;
-	}
-
 }
 

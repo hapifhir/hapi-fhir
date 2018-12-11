@@ -67,8 +67,6 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 
-		mySubscriptionLoaderDatabase.setAsyncTaskExecutorForUnitTest(myAsyncTaskExecutor);
-
 		mySubscriptionTestUtil.registerEmailInterceptor(ourRestServer);
 	}
 
