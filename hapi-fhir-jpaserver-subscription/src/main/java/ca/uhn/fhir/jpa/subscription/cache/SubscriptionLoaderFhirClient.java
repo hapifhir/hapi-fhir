@@ -8,7 +8,6 @@ import java.util.concurrent.Semaphore;
 
 public class SubscriptionLoaderFhirClient implements ISubscriptionLoader {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
-	// TODO KHS change
 	private final Object myInitSubscriptionsLock = new Object();
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 

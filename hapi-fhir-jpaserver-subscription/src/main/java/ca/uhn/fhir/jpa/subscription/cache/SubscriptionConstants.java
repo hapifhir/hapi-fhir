@@ -47,11 +47,24 @@ public class SubscriptionConstants {
 	 */
 	public static final String EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-deliver-latest-version";
 
-	// FIXME KHS document
+	/**
+	 * The number of threads used in subscription channel processing
+	 */
 	public static final int EXECUTOR_THREAD_COUNT = 5;
+
+	/**
+	 * The maximum number of subscriptions that can be active at once
+	 */
 
 	public static final int MAX_SUBSCRIPTION_RESULTS = 1000;
 
+	/**
+	 * The size of the queue used for sending resources to the subscription matching processor
+	 */
 	public static final int PROCESSING_EXECUTOR_QUEUE_SIZE = 1000;
+
+	/**
+	 * The size of the queue used by each subscription delivery queue
+	 */
 	public static final int DELIVERY_EXECUTOR_QUEUE_SIZE = 1000;
 }

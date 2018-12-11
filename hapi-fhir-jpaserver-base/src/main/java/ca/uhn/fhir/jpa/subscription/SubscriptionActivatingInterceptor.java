@@ -52,6 +52,7 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -152,7 +153,7 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 	}
 
 	protected boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
-		if (mySubscriptionRegistry.hasSubscription(theSubscription.getIdElement()) != null) {
+		if (mySubscriptionRegistry.hasSubscription(theSubscription.getIdElement()).isPresent()) {
 			ourLog.info("Removing {} subscription {}", theStatusString, theSubscription.getIdElement().toUnqualified().getValue());
 			mySubscriptionRegistry.unregisterSubscription(theSubscription.getIdElement());
 			return true;
@@ -244,17 +245,14 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 	}
 
 	protected synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
-		CanonicalSubscription existingSubscription = mySubscriptionRegistry.hasSubscription(theSubscription.getIdElement());
+		Optional<CanonicalSubscription> existingSubscription = mySubscriptionRegistry.hasSubscription(theSubscription.getIdElement());
 		CanonicalSubscription newSubscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
 
-		if (existingSubscription != null) {
-			if (newSubscription.equals(existingSubscription)) {
+		if (existingSubscription.isPresent()) {
+			if (newSubscription.equals(existingSubscription.get())) {
 				// No changes
 				return false;
 			}
-		}
-
-		if (existingSubscription != null) {
 			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 			mySubscriptionRegistry.unregisterSubscription(theSubscription.getIdElement());
 		} else {

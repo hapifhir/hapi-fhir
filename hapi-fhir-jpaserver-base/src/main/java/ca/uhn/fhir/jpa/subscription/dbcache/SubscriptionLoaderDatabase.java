@@ -48,7 +48,6 @@ public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
 	@Autowired
 	private SubscriptionActivatingInterceptor mySubscriptionActivatingInterceptor;
 
-	// TODO KHS change
 	private final Object myInitSubscriptionsLock = new Object();
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 

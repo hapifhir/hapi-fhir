@@ -45,15 +45,11 @@ public class SubscriptionRegistry {
 		return myActiveSubscriptionCache.getAll();
 	}
 
-	// TODO KHS use Optional<>
-	public CanonicalSubscription hasSubscription(IIdType theId) {
+	public Optional<CanonicalSubscription> hasSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
-		ActiveSubscription activeSubscription = myActiveSubscriptionCache.get(theId.getIdPart());
-		if (activeSubscription == null) {
-			return null;
-		}
-		return activeSubscription.getSubscription();
+		Optional<ActiveSubscription> activeSubscription = Optional.ofNullable(myActiveSubscriptionCache.get(theId.getIdPart()));
+		return activeSubscription.map(ActiveSubscription::getSubscription);
 	}
 
 	@SuppressWarnings("UnusedReturnValue")
