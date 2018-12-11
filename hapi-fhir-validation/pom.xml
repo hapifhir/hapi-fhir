@@ -11,7 +11,7 @@
 
 	<artifactId>hapi-fhir-validation</artifactId>
 	<packaging>bundle</packaging>
-	<version>3.6.1-PHRFIX-SNAPSHOT</version>
+	<version>3.6.1-PHRFIX</version>
 
 	<name>HAPI FHIR - Validation</name>
 
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>fi.kela.kanta.phr</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
-			<version>3.6.1-PHRFIX-SNAPSHOT</version>
+			<version>3.6.1-PHRFIX</version>
 		</dependency>
 
 		<dependency>

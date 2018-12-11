@@ -12,7 +12,7 @@
 	<groupId>fi.kela.kanta.phr</groupId>
 	<artifactId>hapi-fhir-converter</artifactId>
 	<packaging>bundle</packaging>
-	<version>3.6.1-PHRFIX-SNAPSHOT</version>
+	<version>3.6.1-PHRFIX</version>
 
 	<dependencies>
 		<dependency>
