@@ -42,22 +42,6 @@ public class TestJPAConfig {
 		return new UnregisterScheduledProcessor(theEnv);
 	}
 
-	@Bean
-	public SubscriptionMatcherInMemory subscriptionMatcherInMemory() {
-		return new SubscriptionMatcherInMemory();
-	}
-
-	@Bean
-	public SubscriptionMatcherDatabase subscriptionMatcherDatabase() {
-		return new SubscriptionMatcherDatabase();
-	}
-
-	@Bean
-	@Primary
-	public ISubscriptionMatcher subscriptionMatcherCompositeInMemoryDatabase() {
-		return new SubscriptionMatcherCompositeInMemoryDatabase(subscriptionMatcherDatabase(), subscriptionMatcherInMemory());
-	}
-
 	@Lazy
 	@Bean
 	public SubscriptionTestUtil subscriptionInterceptorRegistrationUtil() {

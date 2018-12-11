@@ -10,6 +10,10 @@ import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherCompositeInMemoryDatabase;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherDatabase;
+import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
 import ca.uhn.fhir.jpa.subscription.subscriber.email.IEmailSender;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -131,6 +135,22 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Bean
 	protected ISearchParamProvider searchParamProvider() {
 		return new DatabaseSearchParamProvider();
+	}
+
+	@Bean
+	public SubscriptionMatcherInMemory subscriptionMatcherInMemory() {
+		return new SubscriptionMatcherInMemory();
+	}
+
+	@Bean
+	public SubscriptionMatcherDatabase subscriptionMatcherDatabase() {
+		return new SubscriptionMatcherDatabase();
+	}
+
+	@Bean
+	@Primary
+	public ISubscriptionMatcher subscriptionMatcherCompositeInMemoryDatabase() {
+		return new SubscriptionMatcherCompositeInMemoryDatabase(subscriptionMatcherDatabase(), subscriptionMatcherInMemory());
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
