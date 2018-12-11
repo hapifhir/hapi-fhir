@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import ca.uhn.fhir.jpa.searchparam.FhirClientSearchParamProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
-import ca.uhn.fhir.jpa.searchparam.FhirClientSearchParamProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;

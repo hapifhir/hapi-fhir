@@ -12,7 +12,6 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.*;
 
 public class SubscriptionChannel implements SubscribableChannel {

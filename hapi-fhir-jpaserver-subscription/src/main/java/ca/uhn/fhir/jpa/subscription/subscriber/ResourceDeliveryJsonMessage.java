@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.subscriber;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.subscriber.ResourceDeliveryMessage;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

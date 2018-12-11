@@ -30,8 +30,6 @@ import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
 
 public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
 

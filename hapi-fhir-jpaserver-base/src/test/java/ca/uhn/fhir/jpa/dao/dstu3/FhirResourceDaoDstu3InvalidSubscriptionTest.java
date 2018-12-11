@@ -3,9 +3,6 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
-import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
-import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.dbcache.SubscriptionLoaderDatabase;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -21,7 +18,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.Query;
 
-import static org.hl7.fhir.instance.model.Subscription.*;
 import static org.junit.Assert.*;
 
 public class FhirResourceDaoDstu3InvalidSubscriptionTest extends BaseJpaDstu3Test {

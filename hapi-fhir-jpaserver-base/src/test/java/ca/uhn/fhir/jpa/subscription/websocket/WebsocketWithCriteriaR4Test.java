@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.websocket;
 
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.SocketImplementation;
 import ca.uhn.fhir.jpa.subscription.FhirR4Util;
+import ca.uhn.fhir.jpa.subscription.SocketImplementation;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.eclipse.jetty.websocket.api.Session;
@@ -20,7 +20,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment

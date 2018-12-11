@@ -17,7 +17,7 @@ import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 @Configuration
 @Import(TestJPAConfig.class)

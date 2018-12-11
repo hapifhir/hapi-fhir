@@ -18,13 +18,11 @@ import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;

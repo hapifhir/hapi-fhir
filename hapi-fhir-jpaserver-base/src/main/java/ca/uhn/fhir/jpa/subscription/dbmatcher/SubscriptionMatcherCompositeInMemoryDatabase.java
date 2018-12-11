@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 public class SubscriptionMatcherCompositeInMemoryDatabase implements ISubscriptionMatcher {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherCompositeInMemoryDatabase.class);

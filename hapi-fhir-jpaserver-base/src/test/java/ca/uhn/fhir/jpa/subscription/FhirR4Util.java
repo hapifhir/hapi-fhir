@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.instance.model.api.*;
-
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 
 public class FhirR4Util {
 

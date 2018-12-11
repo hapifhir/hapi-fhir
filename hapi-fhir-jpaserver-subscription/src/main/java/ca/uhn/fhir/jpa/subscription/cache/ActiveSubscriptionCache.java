@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.subscription.cache;
 
-import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
-import org.springframework.messaging.MessageHandler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ActiveSubscriptionCache {

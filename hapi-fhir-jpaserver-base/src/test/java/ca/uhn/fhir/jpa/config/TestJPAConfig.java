@@ -3,14 +3,9 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherCompositeInMemoryDatabase;
-import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherDatabase;
-import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 

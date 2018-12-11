@@ -27,8 +27,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.utilities.graphql.Operation;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

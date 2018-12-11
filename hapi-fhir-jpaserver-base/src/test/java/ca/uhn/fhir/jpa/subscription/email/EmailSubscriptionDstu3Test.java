@@ -4,8 +4,6 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.JavaMailEmailSender;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Lists;
@@ -24,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test the rest-hook subscriptions

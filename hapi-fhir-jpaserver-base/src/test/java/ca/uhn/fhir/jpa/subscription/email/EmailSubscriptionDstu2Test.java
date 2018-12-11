@@ -4,8 +4,6 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.dbcache.SubscriptionLoaderDatabase;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.JavaMailEmailSender;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;

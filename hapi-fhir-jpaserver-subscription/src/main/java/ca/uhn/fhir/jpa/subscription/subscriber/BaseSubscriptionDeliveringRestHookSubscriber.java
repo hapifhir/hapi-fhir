@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription.subscriber;
  */
 
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.*;
@@ -30,7 +29,6 @@ import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -43,7 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage.OperationTypeEnum.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component

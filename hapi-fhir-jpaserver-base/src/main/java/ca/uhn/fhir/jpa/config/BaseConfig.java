@@ -14,7 +14,6 @@ import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherCompositeInMemo
 import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherDatabase;
 import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.IEmailSender;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
