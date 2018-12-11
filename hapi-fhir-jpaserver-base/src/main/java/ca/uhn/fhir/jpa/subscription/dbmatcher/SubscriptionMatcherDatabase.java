@@ -40,8 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-@Service
-@Lazy
 public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherDatabase.class);
 

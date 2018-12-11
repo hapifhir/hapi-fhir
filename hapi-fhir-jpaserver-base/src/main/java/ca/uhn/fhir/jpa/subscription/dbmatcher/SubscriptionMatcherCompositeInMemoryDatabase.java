@@ -30,16 +30,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
 public class SubscriptionMatcherCompositeInMemoryDatabase implements ISubscriptionMatcher {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherCompositeInMemoryDatabase.class);
 
-	@Autowired
-	SubscriptionMatcherDatabase mySubscriptionMatcherDatabase;
-	@Autowired
-	SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
+	private final SubscriptionMatcherDatabase mySubscriptionMatcherDatabase;
+	private final SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
 	@Autowired
 	DaoConfig myDaoConfig;
+
+	public SubscriptionMatcherCompositeInMemoryDatabase(SubscriptionMatcherDatabase theSubscriptionMatcherDatabase, SubscriptionMatcherInMemory theSubscriptionMatcherInMemory) {
+		mySubscriptionMatcherDatabase = theSubscriptionMatcherDatabase;
+		mySubscriptionMatcherInMemory = theSubscriptionMatcherInMemory;
+	}
 
 	@Override
 	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {
