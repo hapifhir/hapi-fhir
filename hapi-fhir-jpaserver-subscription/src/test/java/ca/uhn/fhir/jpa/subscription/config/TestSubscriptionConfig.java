@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.PortUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,4 +29,9 @@ public class TestSubscriptionConfig {
 
 		return myFhirContext.newRestfulGenericClient(ourServerBase);
 	};
+
+	@Bean
+	public SubscriptionMatcherInMemory subscriptionMatcherInMemory() {
+		return new SubscriptionMatcherInMemory();
+	}
 }
