@@ -22,8 +22,6 @@ public class SubscriptionCannonicalizer<S extends IBaseResource> {
 	FhirContext myFhirContext;
 	@Autowired(required = false)
 	@Qualifier("myEventDefinitionDaoR4")
-// FIXME KHS Deal with this
-//	private IFhirResourceDao<org.hl7.fhir.r4.model.EventDefinition> myEventDefinitionDaoR4;
 	public CanonicalSubscription canonicalize(S theSubscription) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:
@@ -145,9 +143,6 @@ public class SubscriptionCannonicalizer<S extends IBaseResource> {
 			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
 				throw new PreconditionFailedException("Topic reference must be an EventDefinition");
 			}
-			// FIXME KHS deal with this
-//			org.hl7.fhir.r4.model.EventDefinition def = myEventDefinitionDaoR4.read(ref.getReferenceElement());
-//			retVal.addTrigger(new CanonicalSubscription.CanonicalEventDefinition(def));
 		}
 
 		return retVal;
