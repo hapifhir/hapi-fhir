@@ -182,20 +182,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 	}
 
-// FIXME KHS
-	//	/**
-//	 * This is lazy created so we only ask for it if its needed
-//	 */
-//	protected SubscriptionRestHookMatcherInterceptor getRestHookSubscriptionInterceptor() {
-//		SubscriptionRestHookMatcherInterceptor retVal = ourWebApplicationContext.getBean(SubscriptionRestHookMatcherInterceptor.class);
-//		ourRestHookSubscriptionInterceptorRequested = true;
-//		return retVal;
-//	}
-
-	protected boolean hasRestHookSubscriptionInterceptor() {
-		return ourRestHookSubscriptionInterceptorRequested;
-	}
-
 	protected boolean shouldLogClient() {
 		return true;
 	}

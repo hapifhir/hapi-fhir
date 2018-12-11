@@ -1,14 +1,21 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.subscription.cache.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.subscriber.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.subscriber.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.subscription.subscriber.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.Subscription;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionTestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionTestUtil.class);
+
+	private JavaMailEmailSender myEmailSender;
 
 	@Autowired
 	private BeanFactory myBeanFactory;
@@ -18,6 +25,8 @@ public class SubscriptionTestUtil {
 	private SubscriptionInterceptorLoader mySubscriptionInterceptorLoader;
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	@Autowired
+	private SubscriptionRegistry mySubscriptionRegistry;
 
 	public void waitForQueueToDrain() throws InterruptedException {
 		Thread.sleep(100);
@@ -29,10 +38,6 @@ public class SubscriptionTestUtil {
 			ourLog.info("Executor work queue has {} items", mySubscriptionMatcherInterceptor.getExecutorQueueSizeForUnitTests());
 		}
 		Thread.sleep(100);
-	}
-
-	public SubscriptionDeliveringEmailSubscriber createSubscriptionDeliveringEmailSubscriber() {
-		return myBeanFactory.getBean(SubscriptionDeliveringEmailSubscriber.class);
 	}
 
 	public void registerEmailInterceptor(RestfulServer theRestfulServer) {
@@ -57,5 +62,22 @@ public class SubscriptionTestUtil {
 
 	public int getExecutorQueueSizeForUnitTests() {
 		return mySubscriptionMatcherInterceptor.getExecutorQueueSizeForUnitTests();
+	}
+
+	public void initEmailSender(int theListenerPort) {
+		myEmailSender = new JavaMailEmailSender();
+		myEmailSender.setSmtpServerHostname("localhost");
+		myEmailSender.setSmtpServerPort(theListenerPort);
+		myEmailSender.start();
+	}
+
+	public void setEmailSender(IIdType theIdElement) {
+		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
+		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) activeSubscription.getDeliveryHandler();
+		subscriber.setEmailSender(myEmailSender);
+	}
+
+	public IEmailSender getEmailSender() {
+		return myEmailSender;
 	}
 }

@@ -2,14 +2,13 @@ package ca.uhn.fhir.jpa.subscription.cache;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 
 public class ActiveSubscription {
@@ -63,5 +62,10 @@ public class ActiveSubscription {
 
 	public String getCriteriaString() {
 		return mySubscription.getCriteriaString();
+	}
+
+	@VisibleForTesting
+	public MessageHandler getDeliveryHandler() {
+		return myDeliveryHandlerSet.iterator().next();
 	}
 }

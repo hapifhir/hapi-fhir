@@ -5,14 +5,12 @@ import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -47,10 +45,15 @@ public class SubscriptionRegistry {
 		return myActiveSubscriptionCache.getAll();
 	}
 
+	// TODO KHS use Optional<>
 	public CanonicalSubscription hasSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		Validate.notBlank(theId.getIdPart());
-		return myActiveSubscriptionCache.get(theId.getIdPart()).getSubscription();
+		ActiveSubscription activeSubscription = myActiveSubscriptionCache.get(theId.getIdPart());
+		if (activeSubscription == null) {
+			return null;
+		}
+		return activeSubscription.getSubscription();
 	}
 
 	@SuppressWarnings("UnusedReturnValue")

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
@@ -82,14 +83,22 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 	private SubscriptionCannonicalizer mySubscriptionCannonicalizer;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
-		String subscriptionChannelType = myFhirContext
+		String subscriptionChannelTypeCode = myFhirContext
 			.newTerser()
 			.getSingleValueOrNull(theSubscription, SubscriptionMatcherInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class)
 			.getValueAsString();
+
+		Subscription.SubscriptionChannelType subscriptionChannelType = Subscription.SubscriptionChannelType.fromCode(subscriptionChannelTypeCode);
+		// Only activate supported subscriptions
+		if (!myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType)) {
+			return false;
+		}
 
 		final IPrimitiveType<?> status = myFhirContext.newTerser().getSingleValueOrNull(theSubscription, SubscriptionMatcherInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
 		String statusString = status.getValueAsString();

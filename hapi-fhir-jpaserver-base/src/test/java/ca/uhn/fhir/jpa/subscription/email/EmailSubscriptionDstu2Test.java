@@ -60,43 +60,18 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		}
 		mySubscriptionIds.clear();
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor(ourRestServer);
-	// FIXME KHS
-//		ourRestServer.unregisterInterceptor(mySubscriber);
 	}
 
 	@Before
 	public void before() throws Exception {
 		// TODO KHS doesn't this happen automatically?  Or is this call here to change the order?
 		super.before();
-		SubscriptionDeliveringEmailSubscriber mySubscriber = mySubscriptionTestUtil.createSubscriptionDeliveringEmailSubscriber();
 
-		JavaMailEmailSender emailSender = new JavaMailEmailSender();
-		emailSender.setSmtpServerHostname("localhost");
-		emailSender.setSmtpServerPort(ourListenerPort);
-		emailSender.start();
+		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 
-		mySubscriber.setEmailSender(emailSender);
-// FIXME KHS need this?
-		//		mySubscriber.setResourceDaos(myResourceDaos);
-//		mySubscriber.setFhirContext(myFhirCtx);
-//		mySubscriber.setTxManager(ourTxManager);
 		mySubscriptionLoaderDatabase.setAsyncTaskExecutorForUnitTest(myAsyncTaskExecutor);
-// FIXME KHS need this?
-		//		mySubscriber.start();
 
 		mySubscriptionTestUtil.registerEmailInterceptor(ourRestServer);
-
-//		ourLog.info("Sending test email to warm up the server");
-//		EmailDetails details = new EmailDetails();
-//		details.setFrom("a@a.com");
-//		details.setTo(Arrays.asList("b@b.com"));
-//		details.setSubjectTemplate("SUBJ");
-//		details.setBodyTemplate("BODY");
-//		emailSender.send(details);
-//		ourLog.info("Done sending test email to warm up the server");
-//		Store store = ourTestSmtp.getManagers().getImapHostManager().getStore();
-//		MailFolder mailbox = store.getMailbox(ImapConstants.USER_NAMESPACE);
-//		mailbox.deleteAllMessages();
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
@@ -146,7 +121,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Subscription subscription1 = createSubscription(criteria1, payload, "to1@example.com,to2@example.com");
 		mySubscriptionTestUtil.waitForQueueToDrain();
-
+		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement());
 		assertEquals(0, Arrays.asList(ourTestSmtp.getReceivedMessages()).size());
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");

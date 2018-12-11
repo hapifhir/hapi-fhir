@@ -42,7 +42,6 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	private static GreenMail ourTestSmtp;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
-
 	@After
 	public void afterUnregisterEmailListener() {
 		ourLog.info("**** Starting @After *****");
@@ -67,13 +66,8 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourTestSmtp.purgeEmailFromAllMailboxes();
 		mySubscriptionTestUtil.registerEmailInterceptor(ourRestServer);
 
-		JavaMailEmailSender emailSender = new JavaMailEmailSender();
-		emailSender.setSmtpServerHostname("localhost");
-		emailSender.setSmtpServerPort(ourListenerPort);
-		emailSender.start();
+		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 
-		SubscriptionDeliveringEmailSubscriber emailSubscriber = mySubscriptionTestUtil.createSubscriptionDeliveringEmailSubscriber();
-		emailSubscriber.setEmailSender(emailSender);
 		myDaoConfig.setEmailFromAddress("123@hapifhir.io");
 	}
 
@@ -122,8 +116,9 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		createSubscription(criteria1, payload);
+		Subscription subscription = createSubscription(criteria1, payload);
 		waitForQueueToDrain();
+		mySubscriptionTestUtil.setEmailSender(subscription.getIdElement());
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
@@ -164,12 +159,11 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 
-
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscriptionTemp));
 
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
-
+		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement());
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
@@ -215,6 +209,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("Subscription ID is: {}", id.getValue());
 
 		waitForQueueToDrain();
+		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement());
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
