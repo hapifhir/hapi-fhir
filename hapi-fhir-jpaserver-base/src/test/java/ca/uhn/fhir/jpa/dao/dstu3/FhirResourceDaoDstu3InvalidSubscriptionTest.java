@@ -39,8 +39,6 @@ public class FhirResourceDaoDstu3InvalidSubscriptionTest extends BaseJpaDstu3Tes
 
 	@Before
 	public void before() {
-		myDaoConfig.addSupportedSubscriptionType(SubscriptionChannelType.RESTHOOK);
-// FIXME KHS do we need to register interceptors here?
 		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
 	}
 

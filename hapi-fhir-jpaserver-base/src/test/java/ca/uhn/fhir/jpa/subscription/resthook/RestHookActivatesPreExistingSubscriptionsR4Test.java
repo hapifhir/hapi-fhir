@@ -121,10 +121,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		// FIXME KHS
-//		if (hasRestHookSubscriptionInterceptor()) {
 			mySubscriptionTestUtil.waitForQueueToDrain();
-//		}
 	}
 
 	public static class ObservationListener implements IResourceProvider {
