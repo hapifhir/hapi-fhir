@@ -142,7 +142,12 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         return item.getChildrenByName(ANSWER_ELEMENT)
                 .stream()
                 .flatMap(c -> c.getChildren().stream())
+                .filter(DefaultEnableWhenEvaluator::notExtension)
                 .collect(Collectors.toList());
+    }
+    
+    private static boolean notExtension(Element e) {
+    	return !Extension.class.isAssignableFrom(e.getClass());
     }
 
     private boolean compareCodingAnswer(Coding expectedAnswer, Coding actualAnswer, QuestionnaireItemOperator questionnaireItemOperator) {
