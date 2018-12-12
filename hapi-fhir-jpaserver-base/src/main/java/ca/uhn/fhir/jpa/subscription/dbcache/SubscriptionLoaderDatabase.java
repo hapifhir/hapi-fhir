@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.subscription.dbcache;
 
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
-import ca.uhn.fhir.jpa.subscription.cache.ISubscriptionLoader;
-import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
-import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -17,9 +16,7 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;

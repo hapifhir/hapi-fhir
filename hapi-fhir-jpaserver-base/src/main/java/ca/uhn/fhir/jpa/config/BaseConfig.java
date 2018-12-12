@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ca.uhn.fhir.jpa.dao.DatabaseSearchParamProvider;
+import ca.uhn.fhir.jpa.dao.SearchParamProviderDatabase;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -12,8 +12,8 @@ import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherCompositeInMemoryDatabase;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherDatabase;
-import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
+import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatcherInMemory;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,7 +133,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	@Bean
 	protected ISearchParamProvider searchParamProvider() {
-		return new DatabaseSearchParamProvider();
+		return new SearchParamProviderDatabase();
 	}
 
 	@Bean

@@ -27,8 +27,10 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.subscription.cache.SubscriptionCannonicalizer;
-import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCannonicalizer;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -145,21 +147,13 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 				return activateSubscription(activeStatus, theSubscription, requestedStatus);
 			}
 		} else if (activeStatus.equals(statusString)) {
-			return registerSubscriptionUnlessAlreadyRegistered(theSubscription);
+			return mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(theSubscription);
 		} else {
 			// Status isn't "active" or "requested"
-			return unregisterSubscriptionIfRegistered(theSubscription, statusString);
+			return mySubscriptionRegistry.unregisterSubscriptionIfRegistered(theSubscription, statusString);
 		}
 	}
 
-	protected boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
-		if (mySubscriptionRegistry.hasSubscription(theSubscription.getIdElement()).isPresent()) {
-			ourLog.info("Removing {} subscription {}", theStatusString, theSubscription.getIdElement().toUnqualified().getValue());
-			mySubscriptionRegistry.unregisterSubscription(theSubscription.getIdElement());
-			return true;
-		}
-		return false;
-	}
 
 	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
@@ -244,23 +238,6 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 		});
 	}
 
-	protected synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
-		Optional<CanonicalSubscription> existingSubscription = mySubscriptionRegistry.hasSubscription(theSubscription.getIdElement());
-		CanonicalSubscription newSubscription = mySubscriptionCanonicalizer.canonicalize(theSubscription);
-
-		if (existingSubscription.isPresent()) {
-			if (newSubscription.equals(existingSubscription.get())) {
-				// No changes
-				return false;
-			}
-			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
-			mySubscriptionRegistry.unregisterSubscription(theSubscription.getIdElement());
-		} else {
-			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
-		}
-		mySubscriptionRegistry.registerSubscription(theSubscription.getIdElement(), theSubscription);
-		return true;
-	}
 
 	@VisibleForTesting
 	public static void setWaitForSubscriptionActivationSynchronouslyForUnitTest(boolean theWaitForSubscriptionActivationSynchronouslyForUnitTest) {

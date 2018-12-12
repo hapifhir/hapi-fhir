@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.subscription.email;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Lists;

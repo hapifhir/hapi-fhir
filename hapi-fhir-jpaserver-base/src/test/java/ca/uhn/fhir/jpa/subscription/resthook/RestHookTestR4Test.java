@@ -2,10 +2,8 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
-import ca.uhn.fhir.jpa.subscription.CountingInterceptor;
-import ca.uhn.fhir.jpa.subscription.SubscriptionChannel;
 import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -20,9 +18,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.ChannelInterceptor;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

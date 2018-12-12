@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.subscription.module.SubscriptionChannel;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;

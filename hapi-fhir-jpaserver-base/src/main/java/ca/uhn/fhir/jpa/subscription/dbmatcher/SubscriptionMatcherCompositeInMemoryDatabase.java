@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.subscription.dbmatcher;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatchResult;
-import ca.uhn.fhir.jpa.subscription.matcher.SubscriptionMatcherInMemory;
+import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatcherInMemory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.subscriber.SubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionDeliveringRestHookSubscriber;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;

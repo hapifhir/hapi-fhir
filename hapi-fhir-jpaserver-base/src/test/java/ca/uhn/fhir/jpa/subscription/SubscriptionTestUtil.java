@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.subscription.cache.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.cache.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.IEmailSender;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.JavaMailEmailSender;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.SubscriptionDeliveringEmailSubscriber;
+import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;

@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.IEmailSender;
-import ca.uhn.fhir.jpa.subscription.subscriber.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;

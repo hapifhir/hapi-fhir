@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
