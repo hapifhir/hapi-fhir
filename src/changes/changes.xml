@@ -142,6 +142,13 @@
 				causes Media resources to be served as raw content if the client explicitly requests
 				the correct content type cia the Accept header.
 			</action>
+			<action type="add" issue="917">
+				A new configuration item has been added to the FhirInstanceValidator that 
+				allows you to specify additional "known extension domains", meaning
+				domains in which the validator will not complain about when it
+				encounters new extensions. Thanks to Heinz-Dieter Conradi for the
+				pull request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
