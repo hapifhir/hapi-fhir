@@ -64,11 +64,33 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
                 .anyMatch(answer -> evaluateAnswer(answer, enableCondition.getAnswer(), enableCondition.getOperator()));            
         return new EnableWhenResult(result, linkId, enableCondition, questionnaireResponse);
     }
+    
+    public Type convertToType(Element element)  {
+        Type b = new Factory().create(element.fhirType());
+        if (b instanceof PrimitiveType) {
+          ((PrimitiveType<?>) b).setValueAsString(element.primitiveValue());
+        } else {
+          for (Element child : element.getChildren()) {
+        	  if (!isExtension(child)) {
+        		  b.setProperty(child.getName(), convertToType(child));
+        	  }
+          }
+        }
+        return b;
+      }
+
+
+	private boolean isExtension(Element element) {
+		return "Extension".equals(element.fhirType());
+	}
 
     protected boolean evaluateAnswer(Element answer, Type expectedAnswer, QuestionnaireItemOperator questionnaireItemOperator) {
         Type actualAnswer;
+        if (isExtension(answer)) {
+        	return false;
+        }
         try {
-            actualAnswer = answer.asType();
+        	actualAnswer = convertToType(answer);
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Unexpected answer type", e);
         }
@@ -80,7 +102,7 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         } else if ((expectedAnswer instanceof PrimitiveType)) {
             return comparePrimitiveAnswer((PrimitiveType<?>)actualAnswer, (PrimitiveType<?>)expectedAnswer, questionnaireItemOperator);
         } else if (expectedAnswer instanceof Quantity) {
-        	return compareQuantityAnswer((Quantity)expectedAnswer, (Quantity)actualAnswer, questionnaireItemOperator);
+        	return compareQuantityAnswer((Quantity)actualAnswer, (Quantity)expectedAnswer, questionnaireItemOperator);
         }
         // TODO: Attachment, reference?
         throw new UnprocessableEntityException("Unimplemented answer type: " + expectedAnswer.getClass());
@@ -142,14 +164,9 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         return item.getChildrenByName(ANSWER_ELEMENT)
                 .stream()
                 .flatMap(c -> c.getChildren().stream())
-                .filter(DefaultEnableWhenEvaluator::notExtension)
                 .collect(Collectors.toList());
     }
     
-    private static boolean notExtension(Element e) {
-    	return !Extension.class.isAssignableFrom(e.getClass());
-    }
-
     private boolean compareCodingAnswer(Coding expectedAnswer, Coding actualAnswer, QuestionnaireItemOperator questionnaireItemOperator) {
         boolean result = compareSystems(expectedAnswer, actualAnswer) && compareCodes(expectedAnswer, actualAnswer);
         if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
