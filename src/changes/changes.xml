@@ -98,9 +98,11 @@
 				or authorizing the contents of the response.
 			</action>
 			<action type="add">
+				JPA Migrator tool enhancements:
 				An invalid SQL syntax issue has been fixed when running the CLI JPA Migrator tool against 
 				Oracle or SQL Server. In addition, when using the "Dry Run" option, all generated SQL
-				statements will be logged at the end of the run.
+				statements will be logged at the end of the run. Also, a case sensitivity issue when running against
+				some Postgres databases has been corrected.
 			</action>
 			<action type="add">
 				In the JPA server, when performing a chained reference search on a search parameter with

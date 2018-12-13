@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,7 +53,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), theTableName, false, true);
+					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, true);
 
 					Set<String> indexNames = new HashSet<>();
 					while (indexes.next()) {
@@ -81,7 +81,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), theTableName, false, false);
+					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, false);
 
 					while (indexes.next()) {
 						String indexName = indexes.getString("INDEX_NAME");
@@ -112,7 +112,7 @@ public class JdbcUtils {
 					metadata = connection.getMetaData();
 					String catalog = connection.getCatalog();
 					String schema = connection.getSchema();
-					ResultSet indexes = metadata.getColumns(catalog, schema, theTableName, null);
+					ResultSet indexes = metadata.getColumns(catalog, schema, massageIdentifier(metadata, theTableName), null);
 
 					while (indexes.next()) {
 
@@ -165,7 +165,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getCrossReference(connection.getCatalog(), connection.getSchema(), theTableName, connection.getCatalog(), connection.getSchema(), theForeignTable);
+					ResultSet indexes = metadata.getCrossReference(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theForeignTable));
 
 					Set<String> columnNames = new HashSet<>();
 					while (indexes.next()) {
@@ -201,7 +201,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getColumns(connection.getCatalog(), connection.getSchema(), theTableName, null);
+					ResultSet indexes = metadata.getColumns(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), null);
 
 					Set<String> columnNames = new HashSet<>();
 					while (indexes.next()) {
@@ -253,7 +253,7 @@ public class JdbcUtils {
 						}
 					}
 					return sequenceNames;
-				} catch (SQLException e ) {
+				} catch (SQLException e) {
 					throw new InternalErrorException(e);
 				}
 			});
@@ -298,7 +298,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getColumns(connection.getCatalog(), connection.getSchema(), theTableName, theColumnName);
+					ResultSet tables = metadata.getColumns(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), null);
 
 					while (tables.next()) {
 						String tableName = toUpperCase(tables.getString("TABLE_NAME"), Locale.US);
@@ -324,5 +324,15 @@ public class JdbcUtils {
 				}
 			});
 		}
+	}
+
+	private static String massageIdentifier(DatabaseMetaData theMetadata, String theCatalog) throws SQLException {
+		String retVal = theCatalog;
+		if (theMetadata.storesLowerCaseIdentifiers()) {
+			retVal = retVal.toLowerCase();
+		} else {
+			retVal = retVal.toUpperCase();
+		}
+		return retVal;
 	}
 }
