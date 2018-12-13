@@ -189,7 +189,7 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
     }
 
     private boolean compareSystems(Coding expectedCoding, Coding value) {
-        if (expectedCoding.hasSystem() != value.hasSystem()) {
+        if (expectedCoding.hasSystem() && !value.hasSystem()) {
             return false;
         }
         if (expectedCoding.hasSystem()) {
