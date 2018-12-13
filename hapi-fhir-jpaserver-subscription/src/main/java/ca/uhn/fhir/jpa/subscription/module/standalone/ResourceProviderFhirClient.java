@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ResourceProviderFhirClient implements IResourceProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderFhirClient.class);
 
 	@Autowired
 	FhirContext myFhirContext;

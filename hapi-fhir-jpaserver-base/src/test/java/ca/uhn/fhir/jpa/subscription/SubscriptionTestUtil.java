@@ -26,6 +26,7 @@ public class SubscriptionTestUtil {
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 
+	// TODO KHS replace this and similar functions with CountdownLatch
 	public void waitForQueueToDrain() throws InterruptedException {
 		Thread.sleep(100);
 		ourLog.info("Executor work queue has {} items", mySubscriptionMatcherInterceptor.getExecutorQueueSizeForUnitTests());

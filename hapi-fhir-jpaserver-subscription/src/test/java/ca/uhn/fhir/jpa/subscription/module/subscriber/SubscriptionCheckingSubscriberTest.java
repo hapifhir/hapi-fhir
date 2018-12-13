@@ -4,17 +4,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionDeliveryChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.standalone.StandaloneSubscriptionMessageHandler;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.PortUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
@@ -27,7 +25,7 @@ import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
+import org.springframework.messaging.SubscribableChannel;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -41,8 +39,15 @@ import static org.junit.Assert.fail;
  * Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test
  */
 public class SubscriptionCheckingSubscriberTest extends BaseSubscriptionDstu3Test {
-
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriberTest.class);
+
+	@Autowired
+	FhirContext myFhirContext;
+	@Autowired
+	StandaloneSubscriptionMessageHandler myStandaloneSubscriptionMessageHandler;
+	@Autowired
+	ISubscriptionDeliveryChannelFactory mySubscriptionDeliveryChannelFactory;
+
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
@@ -50,15 +55,9 @@ public class SubscriptionCheckingSubscriberTest extends BaseSubscriptionDstu3Tes
 	private static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
+	private static SubscribableChannel ourSubscribableChannel;
 	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	private long idCounter = 0;
-
-	@Autowired
-	FhirContext myFhirContext;
-	@Autowired
-	SubscriptionCheckingSubscriber mySubscriptionCheckingSubscriber;
-	@Autowired
-	SubscriptionRegistry mySubscriptionRegistry;
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -70,24 +69,23 @@ public class SubscriptionCheckingSubscriberTest extends BaseSubscriptionDstu3Tes
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
+		if (ourSubscribableChannel == null) {
+			ourSubscribableChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel("test-%d");
+			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
+		}
 	}
 
-	public MethodOutcome createResource(IBaseResource theNewResource) {
+	public <T extends IBaseResource> T sendResource(T theResource) {
 		// FIXME KHS move these into a MessageHandler
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theNewResource);
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
 		++idCounter;
 		IdType id = new IdType(resourceDef.getName(), idCounter);
-		theNewResource.setId(id);
+		theResource.setId(id);
 
-		if (resourceDef.getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
-			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(theNewResource);
-		}
-		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(msg);
-		mySubscriptionCheckingSubscriber.handleMessage(message);
-		MethodOutcome retval = new MethodOutcome(id, true);
-		retval.setResource(theNewResource);
-		return retval;
+		ourSubscribableChannel.send(message);
+		return theResource;
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
@@ -102,11 +100,7 @@ public class SubscriptionCheckingSubscriberTest extends BaseSubscriptionDstu3Tes
 		channel.setEndpoint(theEndpoint);
 		subscription.setChannel(channel);
 
-		MethodOutcome methodOutcome = createResource(subscription);
-		subscription.setId(methodOutcome.getId().getIdPart());
-		mySubscriptionIds.add(methodOutcome.getId());
-
-		return subscription;
+		return sendResource(subscription);
 	}
 
 	private Observation sendObservation(String code, String system) {
@@ -119,12 +113,7 @@ public class SubscriptionCheckingSubscriberTest extends BaseSubscriptionDstu3Tes
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome = createResource(observation);
-
-		String observationId = methodOutcome.getId().getIdPart();
-		observation.setId(observationId);
-
-		return observation;
+		return sendResource(observation);
 	}
 
 	@Test

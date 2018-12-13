@@ -39,7 +39,7 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 	protected SubscriptionRegistry mySubscriptionRegistry;
 
 	@Override
-	public void handleMessage(Message<?> theMessage) throws MessagingException {
+	public void handleMessage(Message theMessage) throws MessagingException {
 		if (!(theMessage.getPayload() instanceof ResourceDeliveryMessage)) {
 			ourLog.warn("Unexpected payload type: {}", theMessage.getPayload());
 			return;

@@ -15,7 +15,7 @@ public class StoppableSubscriptionDeliveringRestHookSubscriber extends Subscript
 	private CountDownLatch myCountDownLatch;
 
 	@Override
-	public void handleMessage(Message<?> theMessage) throws MessagingException {
+	public void handleMessage(Message theMessage) throws MessagingException {
 		if (myCountDownLatch != null) {
 			myCountDownLatch.countDown();
 		}
