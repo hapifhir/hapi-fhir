@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemEnableWhenComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemOptionComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.junit.AfterClass;
@@ -33,6 +34,9 @@ import java.util.List;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.BOOLEAN;
+import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE;
+import static org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -551,7 +555,34 @@ public class QuestionnaireResponseValidatorDstu3Test {
 				errors.getMessages().stream().filter(vm -> vm.getMessage().contains("Structural Error"))
 						.anyMatch(vm -> vm.getMessage().contains("link1")));
 	}
-
+	
+	@Test
+	public void testAnswerIsValueCodingWithExtensionInside() throws Exception {
+		Questionnaire q = new Questionnaire();
+		Coding qcoding = new Coding();
+		qcoding.setCode("1293");
+		q.addItem().setLinkId("1B").setRequired(true).setType(CHOICE).addOption().setValue(qcoding);
+		q.addItem().setLinkId("2B").setType(BOOLEAN).addEnableWhen().setQuestion("1B").setAnswer(qcoding);
+		
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setStatus(COMPLETED);
+		qr.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+		QuestionnaireResponseItemComponent qrItem = qr.addItem().setLinkId("1B");
+		Coding coding = new Coding();
+		coding.setCode("1293");
+		QuestionnaireResponseItemAnswerComponent answer = qrItem.addAnswer();
+		answer.setValue(coding);
+		coding.addExtension("http://hl7.org/fhir/StructureDefinition/questionnaire-hidden", new BooleanType(true));
+		qr.addItem().setLinkId("2B").addAnswer().setValue(new BooleanType(true));
+				
+		String reference = qr.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		
+		ValidationResult errors = myVal.validateWithResult(qr);
+		assertThat(errors.toString(), containsString("No issues"));
+		
+	}
+	
 	@Test
 	public void testEmbeddedItemInChoice() {
 		String questionnaireRef = QUESTIONNAIRE_URL;
