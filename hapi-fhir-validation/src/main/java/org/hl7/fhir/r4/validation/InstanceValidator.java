@@ -416,8 +416,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private boolean allowUnknownExtension(String url) {
-    if (url.contains("example.org") || url.contains("acme.com") || url.contains("nema.org") || url.startsWith("http://hl7.org/fhir/tools/StructureDefinition/") || url.equals("http://hl7.org/fhir/StructureDefinition/structuredefinition-expression"))
-      // Added structuredefinition-expression explicitly because it wasn't defined in the version of the spec it needs to be used with
+    if (isPredefinedExtension(url))
       return true;
     for (String s : extensionDomains)
       if (url.startsWith(s))
@@ -426,13 +425,20 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
   }
 
   private boolean isKnownExtension(String url) {
-    // Added structuredefinition-expression and following extensions explicitly because they weren't defined in the version of the spec they need to be used with
-    if (url.contains("example.org") || url.contains("acme.com") || url.contains("nema.org") || url.startsWith("http://hl7.org/fhir/tools/StructureDefinition/") || url.equals("http://hl7.org/fhir/StructureDefinition/structuredefinition-expression") || url.equals(VersionConvertorConstants.IG_DEPENDSON_PACKAGE_EXTENSION))
+    if (isPredefinedExtension(url))
       return true;
     for (String s : extensionDomains)
       if (url.startsWith(s))
         return true;
     return false;
+  }
+
+  private boolean isPredefinedExtension(String url) {
+    return url.contains("example.org")
+        || url.contains("acme.com")
+        || url.contains("nema.org")
+        || url.startsWith("http://hl7.org/fhir/StructureDefinition/")
+        || url.equals(VersionConvertorConstants.IG_DEPENDSON_PACKAGE_EXTENSION);
   }
 
   private void bpCheck(List<ValidationMessage> errors, IssueType invalid, int line, int col, String literalPath, boolean test, String message) {
@@ -1948,6 +1954,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 
   public List<String> getExtensionDomains() {
     return extensionDomains;
+  }
+
+  public InstanceValidator addExtensionDomains(List<String> extensionDomains) {
+    this.extensionDomains.addAll(extensionDomains);
+    return this;
   }
 
   private Element getFromBundle(Element bundle, String ref, String fullUrl, List<ValidationMessage> errors, String path) {
