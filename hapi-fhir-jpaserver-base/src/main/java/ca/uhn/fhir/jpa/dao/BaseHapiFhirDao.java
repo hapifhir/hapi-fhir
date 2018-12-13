@@ -61,6 +61,7 @@ import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.PageRequest;
@@ -182,8 +183,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
-	private BeanFactory beanFactory;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
@@ -191,6 +190,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	@Autowired
 	private DatabaseSearchParamSynchronizer myDatabaseSearchParamSynchronizer;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
 
 	private ApplicationContext myApplicationContext;
 
@@ -752,9 +753,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return LogicalReferenceHelper.isLogicalReference(myConfig.getModelConfig(), theId);
 	}
 
-	@Override
+	// TODO KHS inject a searchBuilderFactory into callers of this method and delete this method
 	public SearchBuilder newSearchBuilder() {
-		return beanFactory.getBean(SearchBuilder.class, this);
+		return mySearchBuilderFactory.newSearchBuilder(this);
 	}
 
 	public void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {

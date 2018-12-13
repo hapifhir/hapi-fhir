@@ -18,8 +18,6 @@ public class SubscriptionTestUtil {
 	private JavaMailEmailSender myEmailSender;
 
 	@Autowired
-	private BeanFactory myBeanFactory;
-	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private SubscriptionInterceptorLoader mySubscriptionInterceptorLoader;

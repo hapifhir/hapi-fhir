@@ -12,6 +12,8 @@ import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherCompositeInMemoryDatabase;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherDatabase;
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionDeliveryChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionDeliveryChannelFactoryBlockingQueue;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatcherInMemory;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -145,6 +147,14 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Bean
 	public SubscriptionMatcherDatabase subscriptionMatcherDatabase() {
 		return new SubscriptionMatcherDatabase();
+	}
+
+	/**
+	 * Create a @Primary @Bean if you need a different implementation
+	 */
+	@Bean
+	public ISubscriptionDeliveryChannelFactory blockingQueueSubscriptionDeliveryChannelFactory() {
+		return new SubscriptionDeliveryChannelFactoryBlockingQueue();
 	}
 
 	@Bean

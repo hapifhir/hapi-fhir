@@ -6,21 +6,24 @@ import ca.uhn.fhir.jpa.subscription.module.subscriber.email.SubscriptionDeliveri
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class DeliveryHandlerCreator {
-	@Autowired
-	BeanFactory myBeanFactory;
+public abstract class SubscriptionDeliveryHandlerFactory {
+	@Lookup
+	protected abstract SubscriptionDeliveringEmailSubscriber getSubscriptionDeliveringEmailSubscriber();
+	@Lookup
+	protected abstract SubscriptionDeliveringRestHookSubscriber getSubscriptionDeliveringRestHookSubscriber();
 
 	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
 		if (theSubscription.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
-			return Optional.of(myBeanFactory.getBean(SubscriptionDeliveringEmailSubscriber.class));
+			return Optional.of(getSubscriptionDeliveringEmailSubscriber());
 		} else if (theSubscription.getChannelType() == Subscription.SubscriptionChannelType.RESTHOOK) {
-			return Optional.of(myBeanFactory.getBean(SubscriptionDeliveringRestHookSubscriber.class));
+			return Optional.of(getSubscriptionDeliveringRestHookSubscriber());
 		} else {
 			return Optional.empty();
 		}

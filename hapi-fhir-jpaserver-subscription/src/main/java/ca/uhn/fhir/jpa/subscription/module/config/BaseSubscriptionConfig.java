@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionDeliveryChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionDeliveryChannelFactoryBlockingQueue;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,4 +31,9 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam", "ca.uhn.fhir.jpa.subscription.module"})
 public abstract class BaseSubscriptionConfig {
 	public abstract FhirContext fhirContext();
+
+	@Bean
+	public ISubscriptionDeliveryChannelFactory blockingQueueSubscriptionDeliveryChannelFactory() {
+		return new SubscriptionDeliveryChannelFactoryBlockingQueue();
+	}
 }

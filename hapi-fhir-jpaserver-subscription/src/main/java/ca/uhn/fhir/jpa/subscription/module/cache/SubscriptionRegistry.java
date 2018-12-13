@@ -28,9 +28,9 @@ public class SubscriptionRegistry {
 	@Autowired
 	SubscriptionCannonicalizer mySubscriptionCanonicalizer;
 	@Autowired
-	DeliveryChannelCreator myDeliveryChannelCreator;
+	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
 	@Autowired
-	DeliveryHandlerCreator myDeliveryHandlerCreator;
+	ISubscriptionDeliveryChannelFactory mySubscriptionDeliveryChannelFactory;
 
 	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
 
@@ -57,8 +57,8 @@ public class SubscriptionRegistry {
 		Validate.notNull(theSubscription);
 
 		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
-		SubscribableChannel deliveryChannel = myDeliveryChannelCreator.createDeliveryChannel(canonicalized);
-		Optional<MessageHandler> deliveryHandler = myDeliveryHandlerCreator.createDeliveryHandler(canonicalized);
+		SubscribableChannel deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel("subscription-delivery-" + subscriptionId + "-%d");
+		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(canonicalized);
 
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, deliveryChannel);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
