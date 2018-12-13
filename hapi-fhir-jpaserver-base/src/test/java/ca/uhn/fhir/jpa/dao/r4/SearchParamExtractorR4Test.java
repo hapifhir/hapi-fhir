@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
@@ -88,6 +89,11 @@ public class SearchParamExtractorR4Test {
 			@Override
 			public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
 				return null;
+			}
+
+			@Override
+			public void setSearchParamProvider(ISearchParamProvider theSearchParamProvider) {
+				// nothing
 			}
 		};
 

@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class SubscriptionProviderFhirClient implements ISubscriptionProvider {
 	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	IGenericClient myClient;
@@ -26,10 +28,11 @@ public class SubscriptionProviderFhirClient implements ISubscriptionProvider {
 	public IBundleProvider search(SearchParameterMap theMap) {
 		FhirContext fhirContext = myClient.getFhirContext();
 
-		// FIXME KHS use theMap
+		String searchURL = ResourceTypeEnum.SUBSCRIPTION.getCode()+theMap.toNormalizedQueryString(myFhirContext);
+
 		IBaseBundle bundle = myClient
 			.search()
-			.forResource(ResourceTypeEnum.SUBSCRIPTION.getCode())
+			.byUrl(searchURL)
 			.cacheControl(new CacheControlDirective().setNoCache(true))
 			.execute();
 

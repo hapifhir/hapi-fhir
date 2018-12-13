@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import com.google.common.annotations.VisibleForTesting;
 
 import java.util.Collection;
 import java.util.List;
@@ -59,4 +60,7 @@ public interface ISearchParamRegistry {
 	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
 
 	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
+
+	@VisibleForTesting
+	void setSearchParamProvider(ISearchParamProvider theSearchParamProvider);
 }

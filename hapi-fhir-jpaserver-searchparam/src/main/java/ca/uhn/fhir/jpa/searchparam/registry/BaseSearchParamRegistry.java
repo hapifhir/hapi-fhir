@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -337,5 +338,9 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		return getActiveSearchParams(theResourceDef.getName()).values();
 	}
 
-
+	@VisibleForTesting
+	@Override
+	public void setSearchParamProvider(ISearchParamProvider theSearchParamProvider) {
+		mySearchParamProvider = theSearchParamProvider;
+	}
 }
