@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module;
+package ca.uhn.fhir.jpa.subscription.module.standalone;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -19,12 +19,8 @@ public class ResourceProviderFhirClient implements IResourceProvider {
 
 	@Autowired
 	FhirContext myFhirContext;
-
-	private final IGenericClient myClient;
-
-	public ResourceProviderFhirClient(IGenericClient theClient) {
-		myClient = theClient;
-	}
+	@Autowired
+	IGenericClient myClient;
 
 	@Override
 	public IBaseResource getResource(IIdType payloadId) throws ResourceGoneException {

@@ -129,33 +129,5 @@ public class SubscriptionCheckingSubscriber implements MessageHandler {
 				ourLog.warn("Do not have deliovery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
 			}
 		}
-
-
 	}
-
-	/**
-	 * Subclasses may override
-	 */
-	protected String massageCriteria(String theCriteria) {
-		return theCriteria;
-	}
-
-	// FIXME KHS did anyone use this?
-//	/**
-//	 * Search based on a query criteria
-//	 */
-//	protected IBundleProvider performSearch(String theCriteria) {
-//		RuntimeResourceDefinition responseResourceDef = getSubscriptionDao().validateCriteriaAndReturnResourceDefinition(theCriteria);
-//		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
-//
-//		RequestDetails req = new ServletSubRequestDetails();
-//		req.setSubRequest(true);
-//
-//		IFhirResourceDao<? extends IBaseResource> responseDao = getSubscriptionInterceptor().getDao(responseResourceDef.getImplementingClass());
-//		responseCriteriaUrl.setLoadSynchronousUpTo(1);
-//
-//		IBundleProvider responseResults = responseDao.search(responseCriteriaUrl, req);
-//		return responseResults;
-//	}
-
 }

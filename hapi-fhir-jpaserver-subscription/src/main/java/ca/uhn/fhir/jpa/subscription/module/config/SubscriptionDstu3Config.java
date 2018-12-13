@@ -23,16 +23,21 @@ package ca.uhn.fhir.jpa.subscription.module.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 // From BaseDstu3Config
 public class SubscriptionDstu3Config extends BaseSubscriptionConfig {
+	@Autowired
+	ISearchParamProvider mySearchParamProvider;
+
 	@Override
 	public FhirContext fhirContext() {
 		return fhirContextDstu3();
@@ -52,7 +57,7 @@ public class SubscriptionDstu3Config extends BaseSubscriptionConfig {
 
 	@Bean
 	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryDstu3(searchParamProvider());
+		return new SearchParamRegistryDstu3(mySearchParamProvider);
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

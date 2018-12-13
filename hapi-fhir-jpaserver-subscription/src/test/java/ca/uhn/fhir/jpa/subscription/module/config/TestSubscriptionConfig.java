@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.subscription.module.ResourceProviderFhirClient;
+import ca.uhn.fhir.jpa.subscription.module.standalone.ResourceProviderFhirClient;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatcherInMemory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.IResourceProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -35,9 +35,5 @@ public class TestSubscriptionConfig {
 	@Bean
 	public SubscriptionMatcherInMemory subscriptionMatcherInMemory() {
 		return new SubscriptionMatcherInMemory();
-	}
-
-	@Bean
-	public IResourceProvider resourceProviderFhirClient() { return new ResourceProviderFhirClient(fhirClient());
 	}
 }

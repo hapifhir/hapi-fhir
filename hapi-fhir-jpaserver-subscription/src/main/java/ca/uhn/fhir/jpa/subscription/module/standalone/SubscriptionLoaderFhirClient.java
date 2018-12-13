@@ -1,23 +1,24 @@
-package ca.uhn.fhir.jpa.subscription.module.cache;
+package ca.uhn.fhir.jpa.subscription.module.standalone;
 
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.Semaphore;
 
+@Service
 public class SubscriptionLoaderFhirClient implements ISubscriptionLoader {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
 	private final Object myInitSubscriptionsLock = new Object();
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
-	private final IGenericClient myClient;
-
-	public SubscriptionLoaderFhirClient(IGenericClient theClient) {
-		myClient = theClient;
-	}
+	@Autowired
+	IGenericClient myClient;
 
 	@PostConstruct
 	public void start() {

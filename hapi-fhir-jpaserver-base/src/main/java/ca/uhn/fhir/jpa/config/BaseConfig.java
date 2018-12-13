@@ -59,7 +59,8 @@ import javax.annotation.Nonnull;
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 @ComponentScan(basePackages = "ca.uhn.fhir.jpa", excludeFilters={
 		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=BaseConfig.class),
-		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=WebSocketConfigurer.class)})
+		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=WebSocketConfigurer.class),
+			@ComponentScan.Filter(type=FilterType.REGEX, pattern="ca.uhn.fhir.jpa.subscription.module.standalone.*")})
 
 public abstract class BaseConfig implements SchedulingConfigurer {
 

@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.SubscriptionChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Service;
@@ -11,7 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @Service
 public class DeliveryChannelCreator {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DeliveryChannelCreator.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(DeliveryChannelCreator.class);
 
 	@Autowired
 	FhirContext myFhirContext;

@@ -21,31 +21,11 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.searchparam.SearchParamProviderFhirClient;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
-import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionLoader;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoaderFhirClient;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam", "ca.uhn.fhir.jpa.subscription.module"})
 public abstract class BaseSubscriptionConfig {
-	@Autowired
-	IGenericClient myClient;
-
 	public abstract FhirContext fhirContext();
-
-	@Bean
-	protected ISearchParamProvider searchParamProvider() {
-		return new SearchParamProviderFhirClient(myClient);
-	}
-
-	@Bean
-	protected ISubscriptionLoader subscriptionLoader() {
-		return new SubscriptionLoaderFhirClient(myClient);
-	}
 }
