@@ -518,7 +518,7 @@
 		<jaxb_api_version>2.3.0</jaxb_api_version>
 		<jaxb_core_version>2.3.0</jaxb_core_version>
 		<jersey_version>2.25.1</jersey_version>
-		<jetty_version>9.4.12.v20180830</jetty_version>
+		<jetty_version>9.4.14.v20181114</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
 		<hibernate_version>5.3.6.Final</hibernate_version>

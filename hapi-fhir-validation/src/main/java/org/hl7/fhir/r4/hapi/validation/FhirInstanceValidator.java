@@ -32,6 +32,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,6 +46,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private DocumentBuilderFactory myDocBuilderFactory;
 	private boolean myNoTerminologyChecks;
 	private StructureDefinition myStructureDefintion;
+	private List<String> extensionDomains = Collections.emptyList();
 
 	private IValidationSupport myValidationSupport;
 
@@ -68,18 +70,52 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		myValidationSupport = theValidationSupport;
 	}
 
-	private String determineResourceName(Document theDocument) {
-		Element root = null;
+	/**
+	 * Every element in a resource or data type includes an optional <it>extension</it> child element
+	 * which is identified by it's {@code url attribute}. There exists a number of predefined
+	 * extension urls or extension domains:<ul>
+	 *  <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
+	 *  <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
+	 * </ul>
+	 * It is possible to extend this list of known extension by defining custom extensions:
+	 * Any url which starts which one of the elements in the list of custom extension domains is
+	 * considered as known.
+	 * <p>
+	 * Any unknown extension domain will result in an information message when validating a resource.
+	 * </p>
+	 */
+	public FhirInstanceValidator setCustomExtensionDomains(List<String> extensionDomains) {
+		this.extensionDomains = extensionDomains;
+		return this;
+	}
 
+	/**
+	 * Every element in a resource or data type includes an optional <it>extension</it> child element
+	 * which is identified by it's {@code url attribute}. There exists a number of predefined
+	 * extension urls or extension domains:<ul>
+	 *  <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
+	 *  <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
+	 * </ul>
+	 * It is possible to extend this list of known extension by defining custom extensions:
+	 * Any url which starts which one of the elements in the list of custom extension domains is
+	 * considered as known.
+	 * <p>
+	 * Any unknown extension domain will result in an information message when validating a resource.
+	 * </p>
+	 */
+	public FhirInstanceValidator setCustomExtensionDomains(String... extensionDomains) {
+		this.extensionDomains = Arrays.asList(extensionDomains);
+		return this;
+	}
+
+	private String determineResourceName(Document theDocument) {
 		NodeList list = theDocument.getChildNodes();
 		for (int i = 0; i < list.getLength(); i++) {
 			if (list.item(i) instanceof Element) {
-				root = (Element) list.item(i);
-				break;
+				return list.item(i).getLocalName();
 			}
 		}
-		root = theDocument.getDocumentElement();
-		return root.getLocalName();
+		return theDocument.getDocumentElement().getLocalName();
 	}
 
 	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
@@ -120,8 +156,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * reported at the ERROR level. If this setting is set to {@link BestPracticeWarningLevel#Ignore}, best practice
 	 * guielines will be ignored.
 	 * </p>
-	 *
-	 * @see {@link #setBestPracticeWarningLevel(BestPracticeWarningLevel)}
+	 * 
+	 * @see #setBestPracticeWarningLevel(BestPracticeWarningLevel)
 	 */
 	public BestPracticeWarningLevel getBestPracticeWarningLevel() {
 		return myBestPracticeWarningLevel;
@@ -211,8 +247,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
+		v.addExtensionDomains(extensionDomains);
 
-		List<ValidationMessage> messages = new ArrayList<ValidationMessage>();
+		List<ValidationMessage> messages = new ArrayList<>();
 
 		if (theEncoding == EncodingEnum.XML) {
 			Document document;
@@ -312,7 +349,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	public static class NullEvaluationContext implements IEvaluationContext {
 
 		@Override
-		public TypeDetails checkFunction(Object theAppContext, String theFunctionName, List<TypeDetails> theParameters) throws PathEngineException {
+		public TypeDetails checkFunction(Object theAppContext, String theFunctionName, List<TypeDetails> theParameters) {
 			return null;
 		}
 
@@ -327,12 +364,12 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public Base resolveConstant(Object theAppContext, String theName) throws PathEngineException {
+		public Base resolveConstant(Object theAppContext, String theName) {
 			return null;
 		}
 
 		@Override
-		public TypeDetails resolveConstantType(Object theAppContext, String theName) throws PathEngineException {
+		public TypeDetails resolveConstantType(Object theAppContext, String theName) {
 			return null;
 		}
 

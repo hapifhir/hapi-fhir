@@ -60,6 +60,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
+	private List<String> extensionDomains = Collections.emptyList();
 
 	/**
 	 * Constructor
@@ -81,18 +82,52 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		myValidationSupport = theValidationSupport;
 	}
 
-	private String determineResourceName(Document theDocument) {
-		Element root = null;
+	/**
+	 * Every element in a resource or data type includes an optional <it>extension</it> child element
+	 * which is identified by it's {@code url attribute}. There exists a number of predefined
+	 * extension urls or extension domains:<ul>
+	 *  <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
+	 *  <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
+	 * </ul>
+	 * It is possible to extend this list of known extension by defining custom extensions:
+	 * Any url which starts which one of the elements in the list of custom extension domains is
+	 * considered as known.
+	 * <p>
+	 * Any unknown extension domain will result in an information message when validating a resource.
+	 * </p>
+	 */
+	public FhirInstanceValidator setCustomExtensionDomains(List<String> extensionDomains) {
+		this.extensionDomains = extensionDomains;
+		return this;
+	}
 
+	/**
+	 * Every element in a resource or data type includes an optional <it>extension</it> child element
+	 * which is identified by it's {@code url attribute}. There exists a number of predefined
+	 * extension urls or extension domains:<ul>
+	 *  <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
+	 *  <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
+	 * </ul>
+	 * It is possible to extend this list of known extension by defining custom extensions:
+	 * Any url which starts which one of the elements in the list of custom extension domains is
+	 * considered as known.
+	 * <p>
+	 * Any unknown extension domain will result in an information message when validating a resource.
+	 * </p>
+	 */
+	public FhirInstanceValidator setCustomExtensionDomains(String... extensionDomains) {
+		this.extensionDomains = Arrays.asList(extensionDomains);
+		return this;
+	}
+
+	private String determineResourceName(Document theDocument) {
 		NodeList list = theDocument.getChildNodes();
 		for (int i = 0; i < list.getLength(); i++) {
 			if (list.item(i) instanceof Element) {
-				root = (Element) list.item(i);
-				break;
+				return list.item(i).getLocalName();
 			}
 		}
-		root = theDocument.getDocumentElement();
-		return root.getLocalName();
+		return theDocument.getDocumentElement().getLocalName();
 	}
 
 	private ArrayList<String> determineIfProfilesSpecified(Document theDocument) {
@@ -138,7 +173,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * guielines will be ignored.
 	 * </p>
 	 *
-	 * @see {@link #setBestPracticeWarningLevel(BestPracticeWarningLevel)}
+	 * @see #setBestPracticeWarningLevel(BestPracticeWarningLevel)
 	 */
 	public BestPracticeWarningLevel getBestPracticeWarningLevel() {
 		return myBestPracticeWarningLevel;
@@ -235,6 +270,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
+		v.addExtensionDomains(extensionDomains);
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
@@ -343,7 +379,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		private LoadingCache<ResourceKey, org.hl7.fhir.r4.model.Resource> myFetchResourceCache;
 		private org.hl7.fhir.r4.model.Parameters myExpansionProfile;
 
-		public WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
+		WorkerContextWrapper(HapiWorkerContext theWorkerContext) {
 			myWrap = theWorkerContext;
 			myConverter = new VersionConvertor_30_40();
 
@@ -424,7 +460,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public void cacheResource(org.hl7.fhir.r4.model.Resource res) throws FHIRException {
+		public void cacheResource(org.hl7.fhir.r4.model.Resource res) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -446,7 +482,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 		@Override
 		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r4.model.ValueSet source, boolean cacheOk, boolean heiarchical) {
-			ValueSet convertedSource = null;
+			ValueSet convertedSource;
 			try {
 				convertedSource = VersionConvertor_30_40.convertValueSet(source);
 			} catch (FHIRException e) {
@@ -470,7 +506,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heiarchical) throws FHIRException {
+		public ValueSetExpander.ValueSetExpansionOutcome expandVS(org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent binding, boolean cacheOk, boolean heiarchical) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -637,7 +673,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public IResourceValidator newValidator() throws FHIRException {
+		public IResourceValidator newValidator() {
 			throw new UnsupportedOperationException();
 		}
 
@@ -662,7 +698,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public boolean supportsSystem(String system) throws TerminologyServiceException {
+		public boolean supportsSystem(String system) {
 			return myWrap.supportsSystem(system);
 		}
 
@@ -679,6 +715,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public ValidationResult validateCode(String system, String code, String display) {
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display);
+			// TODO: converted code might be null -> NPE
 			return convertValidationResult(result);
 		}
 
@@ -729,6 +766,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				throw new InternalErrorException(e);
 			}
 
+			// TODO: converted code might be null -> NPE
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
 			return convertValidationResult(result);
 		}
@@ -749,6 +787,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				throw new InternalErrorException(e);
 			}
 
+			// TODO: converted code might be null -> NPE
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
 			return convertValidationResult(result);
 		}

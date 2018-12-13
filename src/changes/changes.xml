@@ -98,9 +98,11 @@
 				or authorizing the contents of the response.
 			</action>
 			<action type="add">
+				JPA Migrator tool enhancements:
 				An invalid SQL syntax issue has been fixed when running the CLI JPA Migrator tool against 
 				Oracle or SQL Server. In addition, when using the "Dry Run" option, all generated SQL
-				statements will be logged at the end of the run.
+				statements will be logged at the end of the run. Also, a case sensitivity issue when running against
+				some Postgres databases has been corrected.
 			</action>
 			<action type="add">
 				In the JPA server, when performing a chained reference search on a search parameter with
@@ -141,6 +143,13 @@
 				A new interceptor called ServeMediaResourceRawInterceptor has been added. This interceptor
 				causes Media resources to be served as raw content if the client explicitly requests
 				the correct content type cia the Accept header.
+			</action>
+			<action type="add" issue="917">
+				A new configuration item has been added to the FhirInstanceValidator that 
+				allows you to specify additional "known extension domains", meaning
+				domains in which the validator will not complain about when it
+				encounters new extensions. Thanks to Heinz-Dieter Conradi for the
+				pull request!
 			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
