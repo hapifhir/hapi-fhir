@@ -553,7 +553,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		hfjResource.dropColumn("RES_TEXT");
 		hfjResource.dropColumn("RES_ENCODING");
 
-		Builder.BuilderWithTableName hfjResVer = version.onTable("HFJ_RESOURCE");
+		Builder.BuilderWithTableName hfjResVer = version.onTable("HFJ_RES_VER");
 		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());
 		hfjResVer.modifyColumn("RES_ENCODING")
 			.nullable();
