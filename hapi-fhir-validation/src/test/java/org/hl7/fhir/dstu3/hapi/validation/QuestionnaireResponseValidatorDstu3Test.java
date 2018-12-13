@@ -584,6 +584,35 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	}
 	
 	@Test
+	public void testChoiceItemsEnableWhenHasNoSystemYetAnswerHasSystem() throws Exception {
+		Questionnaire q = new Questionnaire();
+		Coding qcoding = new Coding();
+		qcoding.setCode("male");
+		qcoding.setSystem("http://hl7.org/fhir/administrative-gender");
+		q.addItem().setLinkId("1B").setRequired(true).setType(CHOICE).addOption().setValue(qcoding);
+		Coding enablewhenCoding = new Coding();
+		enablewhenCoding.setCode("male");
+		q.addItem().setLinkId("2B").setType(BOOLEAN).addEnableWhen().setQuestion("1B").setAnswer(enablewhenCoding);
+		
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setStatus(COMPLETED);
+		qr.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+		QuestionnaireResponseItemComponent qrItem = qr.addItem().setLinkId("1B");
+		Coding coding = new Coding();
+		coding.setCode("male");
+		coding.setSystem("http://hl7.org/fhir/administrative-gender");
+		QuestionnaireResponseItemAnswerComponent answer = qrItem.addAnswer();
+		answer.setValue(coding);
+		qr.addItem().setLinkId("2B").addAnswer().setValue(new BooleanType(true));
+				
+		String reference = qr.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		
+		ValidationResult errors = myVal.validateWithResult(qr);
+		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
+	@Test
 	public void testEmbeddedItemInChoice() {
 		String questionnaireRef = QUESTIONNAIRE_URL;
 		String valueSetRef = "http://somevalueset";
