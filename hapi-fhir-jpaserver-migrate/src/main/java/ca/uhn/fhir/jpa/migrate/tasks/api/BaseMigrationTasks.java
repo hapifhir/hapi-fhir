@@ -279,9 +279,7 @@ public class BaseMigrationTasks<T extends Enum> {
 						task.setNullable(myNullable);
 						task.setColumnType(theColumnType);
 						addTask(task);
-
 					}
-
 				}
 			}
 
