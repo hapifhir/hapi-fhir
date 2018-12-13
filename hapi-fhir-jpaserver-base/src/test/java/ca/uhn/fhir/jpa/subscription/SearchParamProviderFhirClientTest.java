@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import ca.uhn.fhir.jpa.searchparam.SearchParamProviderFhirClient;
+import ca.uhn.fhir.jpa.subscription.module.standalone.SearchParamProviderFhirClient;
 import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -17,21 +17,6 @@ import static org.junit.Assert.assertEquals;
 
 
 public class SearchParamProviderFhirClientTest extends BaseSubscriptionsR4Test {
-	@Autowired
-	BaseSearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	ISearchParamProvider origSearchParamProvider;
-
-	@Before
-	public void useFhirClientSearchParamProvider() {
-		mySearchParamRegistry.setSearchParamProvider(new SearchParamProviderFhirClient(ourClient));
-	}
-
-	@After
-	public void revert() {
-		mySearchParamRegistry.setSearchParamProvider(origSearchParamProvider);
-	}
-
 	@Test
 	public void testCustomSearchParam() throws Exception {
 		String criteria = "Observation?accessType=Catheter,PD%20Catheter";

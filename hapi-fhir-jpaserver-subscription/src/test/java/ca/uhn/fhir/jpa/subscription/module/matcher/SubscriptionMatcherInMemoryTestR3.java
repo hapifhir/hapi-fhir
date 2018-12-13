@@ -282,7 +282,7 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
 		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
-		setSearchParamBundleResponse(bundle);
+		initSearchParamRegistry(bundle);
 
 		{
 			Provenance prov = new Provenance();
@@ -314,7 +314,7 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
 		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
-		setSearchParamBundleResponse(bundle);
+		initSearchParamRegistry(bundle);
 
 		{
 			BodySite bodySite = new BodySite();
@@ -406,7 +406,7 @@ public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
 		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
-		setSearchParamBundleResponse(bundle);
+		initSearchParamRegistry(bundle);
 
 		{
 			ProcedureRequest pr = new ProcedureRequest();

@@ -135,11 +135,6 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	}
 
 	@Bean
-	protected ISearchParamProvider searchParamProvider() {
-		return new SearchParamProviderDatabase();
-	}
-
-	@Bean
 	public SubscriptionMatcherInMemory subscriptionMatcherInMemory() {
 		return new SubscriptionMatcherInMemory();
 	}

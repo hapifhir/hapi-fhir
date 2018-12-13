@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription.module.standalone;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.IResourceProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;

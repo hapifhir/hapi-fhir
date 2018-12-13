@@ -123,7 +123,7 @@ public class BaseDstu3Config extends BaseConfig {
 
 	@Bean
 	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryDstu3(searchParamProvider());
+		return new SearchParamRegistryDstu3();
 	}
 
 	@Bean(name = "mySystemDaoDstu3", autowire = Autowire.BY_NAME)

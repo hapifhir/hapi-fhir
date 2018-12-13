@@ -27,9 +27,11 @@ import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+@Service
 public class SearchParamProviderDatabase implements ISearchParamProvider {
 	@Autowired
 	private PlatformTransactionManager myTxManager;

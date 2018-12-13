@@ -1,9 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.dbcache.SubscriptionLoaderDatabase;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -21,8 +19,6 @@ import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.task.AsyncTaskExecutor;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -41,12 +37,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@Autowired
-	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
-	private AsyncTaskExecutor myAsyncTaskExecutor;
-	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
-	@Autowired
-	private SubscriptionLoaderDatabase mySubscriptionLoaderDatabase;
 
 	@After
 	public void after() throws Exception {

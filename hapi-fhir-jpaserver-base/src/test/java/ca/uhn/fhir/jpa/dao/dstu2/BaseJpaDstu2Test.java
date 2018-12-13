@@ -16,7 +16,7 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionLoader;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -183,7 +183,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	protected ISubscriptionLoader mySubscriptionLoader;
+	protected SubscriptionLoader mySubscriptionLoader;
 
 	@Before
 	public void beforeCreateInterceptor() {

@@ -35,9 +35,6 @@ import org.springframework.context.annotation.Primary;
 
 // From BaseDstu3Config
 public class SubscriptionDstu3Config extends BaseSubscriptionConfig {
-	@Autowired
-	ISearchParamProvider mySearchParamProvider;
-
 	@Override
 	public FhirContext fhirContext() {
 		return fhirContextDstu3();
@@ -57,7 +54,7 @@ public class SubscriptionDstu3Config extends BaseSubscriptionConfig {
 
 	@Bean
 	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryDstu3(mySearchParamProvider);
+		return new SearchParamRegistryDstu3();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

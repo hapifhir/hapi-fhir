@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.searchparam;
+package ca.uhn.fhir.jpa.subscription.module.standalone;
 
 /*-
  * #%L
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
@@ -31,14 +32,14 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SearchParamProviderFhirClient implements ISearchParamProvider {
 
-	private final IGenericClient myClient;
-
-	public SearchParamProviderFhirClient(IGenericClient theClient) {
-		myClient = theClient;
-	}
+	@Autowired
+	private IGenericClient myClient;
 
 	@Override
 	public IBundleProvider search(SearchParameterMap theParams) {

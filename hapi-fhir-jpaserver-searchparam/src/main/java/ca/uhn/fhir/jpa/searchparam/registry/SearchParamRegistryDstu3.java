@@ -39,10 +39,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryDstu3 extends BaseSearchParamRegistry<SearchParameter> {
 
-	public SearchParamRegistryDstu3(ISearchParamProvider theSearchParamProvider) {
-		super(theSearchParamProvider);
-	}
-
 	@Override
 	protected JpaRuntimeSearchParam toRuntimeSp(SearchParameter theNextSp) {
 		String name = theNextSp.getCode();

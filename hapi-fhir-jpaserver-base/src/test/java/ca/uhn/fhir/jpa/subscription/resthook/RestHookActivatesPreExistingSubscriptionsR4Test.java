@@ -57,7 +57,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	@Before
 	public void beforeSetSubscriptionActivatingInterceptor() {
 		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
-		mySubscriptionLoaderDatabase.initSubscriptions();
+		mySubscriptionLoader.initSubscriptions();
 	}
 
 
@@ -109,7 +109,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 		createSubscription(criteria2, payload, ourListenerServerBase);
 
 		mySubscriptionTestUtil.registerRestHookInterceptor(ourRestServer);
-		mySubscriptionLoaderDatabase.initSubscriptions();
+		mySubscriptionLoader.initSubscriptions();
 
 		sendObservation(code, "SNOMED-CT");
 

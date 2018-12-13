@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
-import ca.uhn.fhir.jpa.subscription.dbcache.SubscriptionLoaderDatabase;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -72,7 +72,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	private boolean ourRestHookSubscriptionInterceptorRequested;
 
 	@Autowired
-	protected SubscriptionLoaderDatabase mySubscriptionLoaderDatabase;
+	protected SubscriptionLoader mySubscriptionLoader;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -204,7 +204,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				fail("Failed to init subscriptions");
 			}
 			try {
-				mySubscriptionLoaderDatabase.initSubscriptions();
+				mySubscriptionLoader.initSubscriptions();
 				break;
 			} catch (ResourceVersionConflictException e) {
 				Thread.sleep(250);

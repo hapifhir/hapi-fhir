@@ -71,7 +71,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 		for (int i = 0; i < 5; i++) {
-			int changes = this.mySubscriptionLoaderDatabase.doInitSubscriptions();
+			int changes = this.mySubscriptionLoader.doInitSubscriptions();
 			assertEquals(0, changes);
 		}
 	}

@@ -1,28 +1,18 @@
-package ca.uhn.fhir.jpa.subscription.dbcache;
+package ca.uhn.fhir.jpa.subscription.module.cache;
 
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
-import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionLoader;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.HashSet;
@@ -33,31 +23,20 @@ import java.util.concurrent.Semaphore;
 
 @Service
 @Lazy
-public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionLoaderDatabase.class);
+public class SubscriptionLoader {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 
 	@Autowired
-	private PlatformTransactionManager myTxManager;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private ISubscriptionProvider mySubscriptionProvidor;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	private SubscriptionActivatingInterceptor mySubscriptionActivatingInterceptor;
 
 	private final Object myInitSubscriptionsLock = new Object();
 	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
 
 	@PostConstruct
 	public void start() {
-
-		TransactionTemplate transactionTemplate = new TransactionTemplate(myTxManager);
-		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				initSubscriptions();
-			}
-		});
+		initSubscriptions();
 	}
 
 	/**
@@ -65,7 +44,6 @@ public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
 	 */
 	@SuppressWarnings("unused")
 	@Scheduled(fixedDelay = 60000)
-	@Override
 	public void initSubscriptions() {
 		if (!myInitSubscriptionsSemaphore.tryAcquire()) {
 			return;
@@ -87,11 +65,8 @@ public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
 				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 
-			RequestDetails req = new ServletSubRequestDetails();
-			req.setSubRequest(true);
+			IBundleProvider subscriptionBundleList = mySubscriptionProvidor.search(map);
 
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
-			IBundleProvider subscriptionBundleList = subscriptionDao.search(map, req);
 			if (subscriptionBundleList.size() >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
 				ourLog.error("Currently over " + SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
 			}
@@ -103,7 +78,7 @@ public class SubscriptionLoaderDatabase implements ISubscriptionLoader {
 			for (IBaseResource resource : resourceList) {
 				String nextId = resource.getIdElement().getIdPart();
 				allIds.add(nextId);
-				boolean changed = mySubscriptionActivatingInterceptor.activateOrRegisterSubscriptionIfRequired(resource);
+				boolean changed = mySubscriptionProvidor.loadSubscription(resource);
 				if (changed) {
 					changesCount++;
 				}
