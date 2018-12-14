@@ -67,7 +67,7 @@ public class ActiveSubscription {
 	}
 
 	@VisibleForTesting
-	public MessageHandler getDeliveryHandler() {
+	public MessageHandler getDeliveryHandlerForUnitTest() {
 		return myDeliveryHandlerSet.iterator().next();
 	}
 }

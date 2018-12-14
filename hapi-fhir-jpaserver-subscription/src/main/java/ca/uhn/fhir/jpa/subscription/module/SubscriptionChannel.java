@@ -64,12 +64,12 @@ public class SubscriptionChannel implements SubscribableChannel {
 	}
 
 	@VisibleForTesting
-	public void clearInterceptors() {
+	public void clearInterceptorsForUnitTest() {
 		mySubscribableChannel.setInterceptors(new ArrayList<>());
 	}
 
 	@VisibleForTesting
-	public void addInterceptor(ChannelInterceptor theInterceptor) {
+	public void addInterceptorForUnitTest(ChannelInterceptor theInterceptor) {
 		mySubscribableChannel.addInterceptor(theInterceptor);
 	}
 }

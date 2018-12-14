@@ -321,7 +321,7 @@ public class ModelConfig {
 	}
 
 	@VisibleForTesting
-	public void clearSupportedSubscriptionTypes() {
+	public void clearSupportedSubscriptionTypesForUnitTest() {
 		mySupportedSubscriptionTypes.clear();
 	}
 

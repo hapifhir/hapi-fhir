@@ -92,7 +92,7 @@ public class SearchParamExtractorR4Test {
 			}
 
 			@Override
-			public void setSearchParamProvider(ISearchParamProvider theSearchParamProvider) {
+			public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
 				// nothing
 			}
 		};

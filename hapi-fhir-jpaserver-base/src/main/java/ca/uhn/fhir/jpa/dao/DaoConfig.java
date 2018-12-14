@@ -112,7 +112,7 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
-	private List<IServerInterceptor> myInterceptors;
+	private List<IServerInterceptor> myInterceptors = new ArrayList<>();
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -484,12 +484,24 @@ public class DaoConfig {
 	 * Returns the interceptors which will be notified of operations.
 	 *
 	 * @see #setInterceptors(List)
+	 * @deprecated Marked as deprecated as of HAPI 3.7.0.  Use {@link #registerInterceptor} and {@link #unregisterInterceptor}instead.
 	 */
+
+	@Deprecated
 	public List<IServerInterceptor> getInterceptors() {
-		if (myInterceptors == null) {
-			myInterceptors = new ArrayList<>();
-		}
 		return myInterceptors;
+	}
+
+	public void registerInterceptor(IServerInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		if (!myInterceptors.contains(theInterceptor)) {
+			myInterceptors.add(theInterceptor);
+		}
+	}
+
+	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		myInterceptors.remove(theInterceptor);
 	}
 
 	/**
@@ -1482,8 +1494,8 @@ public class DaoConfig {
 	}
 
 	@VisibleForTesting
-	public void clearSupportedSubscriptionTypes() {
-		myModelConfig.clearSupportedSubscriptionTypes();
+	public void clearSupportedSubscriptionTypesForUnitTest() {
+		myModelConfig.clearSupportedSubscriptionTypesForUnitTest();
 	}
 
 	/**

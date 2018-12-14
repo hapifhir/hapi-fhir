@@ -70,7 +70,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor(ourRestServer);
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@Override
@@ -131,7 +131,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 
 	@Before
 	public void beforeRegisterRestHookListener() {
-		mySubscriptionTestUtil.registerRestHookInterceptor(ourRestServer);
+		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
 	@Before

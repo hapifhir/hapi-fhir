@@ -126,7 +126,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	}
 
 	@VisibleForTesting
-	public SubscriptionChannel getProcessingChannel() {
+	public SubscriptionChannel getProcessingChannelForUnitTest() {
 		return myProcessingChannel;
 	}
 }

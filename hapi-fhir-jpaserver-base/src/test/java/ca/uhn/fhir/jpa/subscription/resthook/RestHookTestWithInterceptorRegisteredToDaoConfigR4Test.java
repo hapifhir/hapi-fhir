@@ -55,12 +55,12 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor(ourRestServer);
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
-		mySubscriptionTestUtil.registerRestHookInterceptor(ourRestServer);
+		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
 	@Before

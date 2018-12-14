@@ -149,7 +149,7 @@ public class JpaServerDemo extends RestfulServer {
 		daoConfig.setReuseCachedSearchResultsForMillis(ContextHolder.getReuseCachedSearchResultsForMillis());
 
 		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
-		subscriptionInterceptorLoader.registerInterceptors(this);
+		subscriptionInterceptorLoader.registerInterceptors();
 	}
 
 }

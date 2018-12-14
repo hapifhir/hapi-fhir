@@ -77,12 +77,12 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor(ourRestServer);
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
-		mySubscriptionTestUtil.registerRestHookInterceptor(ourRestServer);
+		mySubscriptionTestUtil.registerRestHookInterceptor();
 	}
 
 	@Before
@@ -99,10 +99,10 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		}
 		waitForActivatedSubscriptionCount(0);
 
-		SubscriptionChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannel();
-		processingChannel.clearInterceptors();
+		SubscriptionChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		processingChannel.clearInterceptorsForUnitTest();
 		myCountingInterceptor = new CountingInterceptor();
-		processingChannel.addInterceptor(myCountingInterceptor);
+		processingChannel.addInterceptorForUnitTest(myCountingInterceptor);
 	}
 
 

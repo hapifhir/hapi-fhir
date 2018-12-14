@@ -44,8 +44,12 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	@Autowired
 	private ModelConfig myModelConfig;
 
-	@Autowired(required = false)
 	private IEmailSender myEmailSender;
+
+	@Autowired
+	public SubscriptionDeliveringEmailSubscriber(IEmailSender theEmailSender) {
+		myEmailSender = theEmailSender;
+	}
 
 	@Override
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws Exception {

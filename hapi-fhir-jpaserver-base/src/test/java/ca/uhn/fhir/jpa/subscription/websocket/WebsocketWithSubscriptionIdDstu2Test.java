@@ -61,7 +61,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 	@After
 	public void after() throws Exception {
 		super.after();
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor(ourRestServer);
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@After
@@ -74,7 +74,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 	public void before() throws Exception {
 		super.before();
 
-		mySubscriptionTestUtil.registerWebSocketInterceptor(ourRestServer);
+		mySubscriptionTestUtil.registerWebSocketInterceptor();
 
 		/*
 		 * Create patient

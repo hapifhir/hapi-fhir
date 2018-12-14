@@ -29,12 +29,12 @@ public class SubscriptionProviderFhirClientTest extends BaseSubscriptionsR4Test 
 		SubscriptionProviderFhirClient subscriptionProvider = new SubscriptionProviderFhirClient(ourClient);
 		// This bean is only available in the standalone subscription context, so we have to autowire it manually.
 		autowireCapableBeanFactory.autowireBean(subscriptionProvider);
-		mySubscriptionLoader.setSubscriptionProvider(subscriptionProvider);
+		mySubscriptionLoader.setSubscriptionProviderForUnitTest(subscriptionProvider);
 	}
 
 	@After
 	public void revert() {
-		mySubscriptionLoader.setSubscriptionProvider(origSubscriptionProvider);
+		mySubscriptionLoader.setSubscriptionProviderForUnitTest(origSubscriptionProvider);
 	}
 
 	private String myCode = "1000000050";

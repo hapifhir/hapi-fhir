@@ -56,7 +56,11 @@ public class SubscriptionLoader {
 	}
 
 	@VisibleForTesting
-	public int doInitSubscriptions() {
+	public int doInitSubscriptionsForUnitTest() {
+		return doInitSubscriptions();
+	}
+
+	private int doInitSubscriptions() {
 		synchronized (myInitSubscriptionsLock) {
 			ourLog.debug("Starting init subscriptions");
 			SearchParameterMap map = new SearchParameterMap();
@@ -92,7 +96,7 @@ public class SubscriptionLoader {
 	}
 
 	@VisibleForTesting
-	public void setSubscriptionProvider(ISubscriptionProvider theSubscriptionProvider) {
+	public void setSubscriptionProviderForUnitTest(ISubscriptionProvider theSubscriptionProvider) {
 		mySubscriptionProvidor = theSubscriptionProvider;
 	}
 }

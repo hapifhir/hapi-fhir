@@ -48,7 +48,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 			ourClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor(ourRestServer);
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@Before
@@ -58,7 +58,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 
-		mySubscriptionTestUtil.registerEmailInterceptor(ourRestServer);
+		mySubscriptionTestUtil.registerEmailInterceptor();
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {

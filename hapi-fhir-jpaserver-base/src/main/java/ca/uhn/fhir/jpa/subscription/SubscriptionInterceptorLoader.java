@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +17,18 @@ public class SubscriptionInterceptorLoader {
 	@Autowired
 	SubscriptionActivatingInterceptor mySubscriptionActivatingInterceptor;
 
-	public void registerInterceptors(RestfulServer theRestfulServer) {
+	public void registerInterceptors() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
 
 		if (!supportedSubscriptionTypes.isEmpty()) {
-			theRestfulServer.registerInterceptor(mySubscriptionActivatingInterceptor);
-			theRestfulServer.registerInterceptor(mySubscriptionMatcherInterceptor);
+			myDaoConfig.registerInterceptor(mySubscriptionActivatingInterceptor);
+			myDaoConfig.registerInterceptor(mySubscriptionMatcherInterceptor);
 		}
 	}
 
 	@VisibleForTesting
-	public void unregisterInterceptors(RestfulServer theRestfulServer) {
-		theRestfulServer.unregisterInterceptor(mySubscriptionActivatingInterceptor);
-		theRestfulServer.unregisterInterceptor(mySubscriptionMatcherInterceptor);
+	public void unregisterInterceptorsForUnitTest() {
+		myDaoConfig.unregisterInterceptor(mySubscriptionActivatingInterceptor);
+		myDaoConfig.unregisterInterceptor(mySubscriptionMatcherInterceptor);
 	}
 }

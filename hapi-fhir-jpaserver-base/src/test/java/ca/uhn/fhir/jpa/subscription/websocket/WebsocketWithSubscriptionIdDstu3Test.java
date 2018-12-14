@@ -56,7 +56,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 	public void after() throws Exception {
 		super.after();
 
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor(ourRestServer);
+		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
 	@After
@@ -72,7 +72,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 		myDaoConfig.setSubscriptionEnabled(true);
 		myDaoConfig.setSubscriptionPollDelay(0L);
 
-		mySubscriptionTestUtil.registerWebSocketInterceptor(ourRestServer);
+		mySubscriptionTestUtil.registerWebSocketInterceptor();
 
 		/*
 		 * Create patient

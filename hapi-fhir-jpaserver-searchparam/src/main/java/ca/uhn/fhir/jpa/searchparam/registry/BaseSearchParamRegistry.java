@@ -340,7 +340,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 	@VisibleForTesting
 	@Override
-	public void setSearchParamProvider(ISearchParamProvider theSearchParamProvider) {
+	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
 		mySearchParamProvider = theSearchParamProvider;
 	}
 }

@@ -62,5 +62,5 @@ public interface ISearchParamRegistry {
 	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
 
 	@VisibleForTesting
-	void setSearchParamProvider(ISearchParamProvider theSearchParamProvider);
+	void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider);
 }

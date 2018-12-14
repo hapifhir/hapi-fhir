@@ -1338,7 +1338,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	public void registerInterceptor(IServerInterceptor theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		myInterceptors.add(theInterceptor);
+		if (!myInterceptors.contains(theInterceptor)) {
+			myInterceptors.add(theInterceptor);
+		}
 	}
 
 	/**

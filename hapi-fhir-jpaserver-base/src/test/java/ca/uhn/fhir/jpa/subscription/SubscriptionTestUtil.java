@@ -38,24 +38,24 @@ public class SubscriptionTestUtil {
 		Thread.sleep(100);
 	}
 
-	public void registerEmailInterceptor(RestfulServer theRestfulServer) {
+	public void registerEmailInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
-		mySubscriptionInterceptorLoader.registerInterceptors(theRestfulServer);
+		mySubscriptionInterceptorLoader.registerInterceptors();
 	}
 
-	public void registerRestHookInterceptor(RestfulServer theRestfulServer) {
+	public void registerRestHookInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-		mySubscriptionInterceptorLoader.registerInterceptors(theRestfulServer);
+		mySubscriptionInterceptorLoader.registerInterceptors();
 	}
 
-	public void registerWebSocketInterceptor(RestfulServer theRestfulServer) {
+	public void registerWebSocketInterceptor() {
 		myDaoConfig.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
-		mySubscriptionInterceptorLoader.registerInterceptors(theRestfulServer);
+		mySubscriptionInterceptorLoader.registerInterceptors();
 	}
 
-	public void unregisterSubscriptionInterceptor(RestfulServer theRestfulServer) {
-		myDaoConfig.clearSupportedSubscriptionTypes();
-		mySubscriptionInterceptorLoader.unregisterInterceptors(theRestfulServer);
+	public void unregisterSubscriptionInterceptor() {
+		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
+		mySubscriptionInterceptorLoader.unregisterInterceptorsForUnitTest();
 	}
 
 	public int getExecutorQueueSizeForUnitTests() {
@@ -71,7 +71,7 @@ public class SubscriptionTestUtil {
 
 	public void setEmailSender(IIdType theIdElement) {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
-		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) activeSubscription.getDeliveryHandler();
+		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) activeSubscription.getDeliveryHandlerForUnitTest();
 		subscriber.setEmailSender(myEmailSender);
 	}
 

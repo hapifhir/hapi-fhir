@@ -24,12 +24,12 @@ public class SearchParamProviderFhirClientTest extends BaseSubscriptionsR4Test {
 
 	@Before
 	public void useFhirClientSearchParamProvider() {
-		mySearchParamRegistry.setSearchParamProvider(new SearchParamProviderFhirClient(ourClient));
+		mySearchParamRegistry.setSearchParamProviderForUnitTest(new SearchParamProviderFhirClient(ourClient));
 	}
 
 	@After
 	public void revert() {
-		mySearchParamRegistry.setSearchParamProvider(origSearchParamProvider);
+		mySearchParamRegistry.setSearchParamProviderForUnitTest(origSearchParamProvider);
 	}
 
 	@Test

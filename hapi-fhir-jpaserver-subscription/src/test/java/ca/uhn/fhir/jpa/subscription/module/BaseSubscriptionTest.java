@@ -33,7 +33,7 @@ public abstract class BaseSubscriptionTest {
 
 	public void initSubscriptionLoader(IBundleProvider theBundleProvider) {
 		((MockSubscriptionProviderFhirClient)mySubscriptionProvider).setBundleProvider(theBundleProvider);
-		mySubscriptionLoader.doInitSubscriptions();
+		mySubscriptionLoader.doInitSubscriptionsForUnitTest();
 	}
 
 }
