@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search.reindex;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -98,6 +98,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	private FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@VisibleForTesting
 	void setReindexJobDaoForUnitTest(IResourceReindexJobDao theReindexJobDao) {
@@ -186,7 +188,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		runReindexingPass();
 	}
 
-
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public Integer runReindexingPass() {
@@ -232,9 +233,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		expungeJobsMarkedAsDeleted();
 	}
 
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-
 	private int runReindexJobs() {
 		Collection<ResourceReindexJobEntity> jobs = getResourceReindexJobEntities();
 
@@ -277,6 +275,11 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		});
 	}
 
+	@VisibleForTesting
+	public void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
 	private int runReindexJob(ResourceReindexJobEntity theJob) {
 		if (theJob.getSuspendedUntil() != null) {
 			if (theJob.getSuspendedUntil().getTime() > System.currentTimeMillis()) {
@@ -288,6 +291,11 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		StopWatch sw = new StopWatch();
 		AtomicInteger counter = new AtomicInteger();
 
+		/*
+		 * On the first time we run a particular reindex job, let's make sure we
+		 * have the latest search parameters loaded. This is good since a common reason to
+		 * be reindexing is that the search parameters have changed in some way.
+		 */
 		if (theJob.getThresholdLow() == null) {
 			mySearchParamRegistry.forceRefresh();
 		}
