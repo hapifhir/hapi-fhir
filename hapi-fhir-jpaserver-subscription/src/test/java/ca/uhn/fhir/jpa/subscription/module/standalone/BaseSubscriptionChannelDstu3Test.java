@@ -67,7 +67,7 @@ public abstract class BaseSubscriptionChannelDstu3Test extends BaseSubscriptionD
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
 		if (ourSubscribableChannel == null) {
-			ourSubscribableChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel("test-%d");
+			ourSubscribableChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
 		}
 	}

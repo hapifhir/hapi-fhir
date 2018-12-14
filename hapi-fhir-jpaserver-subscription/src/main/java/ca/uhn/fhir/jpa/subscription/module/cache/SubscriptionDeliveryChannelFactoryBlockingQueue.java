@@ -6,7 +6,7 @@ import org.springframework.messaging.SubscribableChannel;
 public class SubscriptionDeliveryChannelFactoryBlockingQueue implements ISubscriptionDeliveryChannelFactory {
 
 	@Override
-	public SubscribableChannel newDeliveryChannel(String theNamePrefix) {
-		return new SubscriptionChannelLinkedBlockingQueue(theNamePrefix);
+	public SubscribableChannel newDeliveryChannel(String theSubscriptionId, String theChannelType) {
+		return new SubscriptionChannelLinkedBlockingQueue(theSubscriptionId, theChannelType);
 	}
 }

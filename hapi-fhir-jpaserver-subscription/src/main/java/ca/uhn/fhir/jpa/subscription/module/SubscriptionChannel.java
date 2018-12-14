@@ -21,6 +21,7 @@ public class SubscriptionChannel implements SubscribableChannel {
 	private final ExecutorSubscribableChannel mySubscribableChannel;
 
 	public SubscriptionChannel(BlockingQueue<Runnable> theQueue, String namingPattern) {
+
 		ThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern(namingPattern)
 			.daemon(false)
