@@ -503,13 +503,13 @@
 
 		<!-- Dependency Versions -->
 		<activation_api_version>1.2.0</activation_api_version>
-		<apache_karaf_version>4.1.6</apache_karaf_version>
-		<aries_spifly_version>1.0.10</aries_spifly_version>
+		<apache_karaf_version>4.2.2-SNAPSHOT</apache_karaf_version>
+		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.11</commons_codec_version>
-		<commons_text_version>1.4</commons_text_version>
+		<commons_text_version>1.6</commons_text_version>
 		<commons_io_version>2.6</commons_io_version>
-		<commons_lang3_version>3.8</commons_lang3_version>
+		<commons_lang3_version>3.8.1</commons_lang3_version>
 		<derby_version>10.14.2.0</derby_version>
 		<error_prone_annotations_version>2.0.18</error_prone_annotations_version>
 		<guava_version>25.0-jre</guava_version>
