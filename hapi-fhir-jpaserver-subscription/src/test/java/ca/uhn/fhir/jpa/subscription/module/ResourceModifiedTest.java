@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import org.hl7.fhir.r4.model.Organization;
 import org.junit.Test;
 

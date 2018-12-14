@@ -1,10 +1,8 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.module.standalone.SearchParamProviderFhirClient;
-import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.subscription.module.standalone.SearchParamProviderFhirClient;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -13,8 +11,6 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;

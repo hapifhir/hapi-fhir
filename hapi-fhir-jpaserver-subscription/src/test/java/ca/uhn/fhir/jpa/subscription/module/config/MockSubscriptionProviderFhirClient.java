@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.module.standalone.SearchParamProviderFhirClient;
 import ca.uhn.fhir.jpa.subscription.module.standalone.SubscriptionProviderFhirClient;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;

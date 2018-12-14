@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.subscription.module.subscriber.email.SubscriptionDeliveri
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.hl7.fhir.instance.model.Subscription;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SubscriptionTestUtil {

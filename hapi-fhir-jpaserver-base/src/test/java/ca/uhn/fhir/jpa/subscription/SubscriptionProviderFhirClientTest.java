@@ -4,13 +4,10 @@ import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.standalone.SubscriptionProviderFhirClient;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
@@ -19,7 +16,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-// FIXME KHS finish this
 public class SubscriptionProviderFhirClientTest extends BaseSubscriptionsR4Test {
 	@Autowired
 	SubscriptionLoader mySubscriptionLoader;
