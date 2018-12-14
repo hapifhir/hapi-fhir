@@ -310,7 +310,13 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void addPredicateLanguage(List<List<? extends IQueryParameterType>> theList) {
+	private Predicate addPredicateLanguage(List<List<? extends IQueryParameterType>> theList) {
+		return addPredicateLanguage(theList,
+			null);
+	}
+
+	private Predicate addPredicateLanguage(List<List<? extends IQueryParameterType>> theList,
+														SearchFilterParser.CompareOperation operation) {
 		for (List<? extends IQueryParameterType> nextList : theList) {
 
 			Set<String> values = new HashSet<String>();
@@ -330,11 +336,24 @@ public class SearchBuilder implements ISearchBuilder {
 				continue;
 			}
 
-			Predicate predicate = myResourceTableRoot.get("myLanguage").as(String.class).in(values);
+			Predicate predicate = null;
+			if ((operation == null) ||
+				(operation == SearchFilterParser.CompareOperation.eq)) {
+				predicate = myResourceTableRoot.get("myLanguage").as(String.class).in(values);
+			}
+			else if (operation == SearchFilterParser.CompareOperation.ne) {
+				predicate = myResourceTableRoot.get("myLanguage").as(String.class).in(values).not();
+			}
+			else {
+				throw new InvalidRequestException("Unsupported operator specified in language query, only \"eq\" and \"ne\" are supported");
+			}
 			myPredicates.add(predicate);
+			if (operation != null) {
+				return predicate;
+			}
 		}
 
-		return;
+		return null;
 	}
 
 	private Predicate addPredicateNumber(String theResourceName,
@@ -757,6 +776,9 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 				else if (operation == SearchFilterParser.CompareOperation.ne) {
 					nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids).not();
+				}
+				else {
+					throw new InvalidRequestException("Unsupported operator specified in resource ID query, only \"eq\" and \"ne\" are supported");
 				}
 				myPredicates.add(nextPredicate);
 			} else {
@@ -2484,7 +2506,8 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 		} else if (searchParam.getName().equals(BaseResource.SP_RES_LANGUAGE)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
-				addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(((SearchFilterParser.FilterParameter) filter).getValue()))));
+				return addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(((SearchFilterParser.FilterParameter) filter).getValue()))),
+					filter.getOperation());
 			}
 			else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
