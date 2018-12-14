@@ -57,10 +57,9 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	@Autowired
 	private ModelConfig myModelConfig;
 	private volatile long myLastRefresh;
-	private ApplicationContext myApplicationContext;
 	private ISearchParamProvider mySearchParamProvider;
 
-	public BaseSearchParamRegistry(ISearchParamProvider theSearchParamProvider) {
+	BaseSearchParamRegistry(ISearchParamProvider theSearchParamProvider) {
 		super();
 		mySearchParamProvider = theSearchParamProvider;
 	}
@@ -128,7 +127,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		return Collections.unmodifiableList(retVal);
 	}
 
-	public Map<String, Map<String, RuntimeSearchParam>> getBuiltInSearchParams() {
+	private Map<String, Map<String, RuntimeSearchParam>> getBuiltInSearchParams() {
 		return myBuiltInSearchParams;
 	}
 

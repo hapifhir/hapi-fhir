@@ -151,6 +151,11 @@
 				encounters new extensions. Thanks to Heinz-Dieter Conradi for the
 				pull request!
 			</action>
+			<action type="fix">
+				Under some circumstances, when a custom search parameter was added to the JPA server 
+				resources could start reindexing before the new search parameter had been saved, meaning that
+				it was not applied to all resources. This has been corrected.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

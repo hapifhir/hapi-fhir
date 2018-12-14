@@ -174,19 +174,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	private ISearchDao mySearchDao;
 	@Autowired
-	private ISearchParamExtractor mySearchParamExtractor;
-	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	//@Autowired
 	//private ISearchResultDao mySearchResultDao;
 	@Autowired
-	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-	@Autowired
 	private BeanFactory beanFactory;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	@Autowired
