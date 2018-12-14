@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.module.standalone.SubscriptionProviderFhirClient;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -89,6 +90,11 @@ public class SubscriptionLoader {
 
 			return changesCount;
 		}
+	}
+
+	@VisibleForTesting
+	public void setSubscriptionProvider(ISubscriptionProvider theSubscriptionProvider) {
+		mySubscriptionProvidor = theSubscriptionProvider;
 	}
 }
 

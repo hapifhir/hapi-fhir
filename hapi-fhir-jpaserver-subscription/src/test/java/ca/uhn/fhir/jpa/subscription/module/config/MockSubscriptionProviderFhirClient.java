@@ -9,6 +9,11 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 public class MockSubscriptionProviderFhirClient extends SubscriptionProviderFhirClient {
 	private IBundleProvider myBundleProvider = new SimpleBundleProvider();
 
+
+	public MockSubscriptionProviderFhirClient() {
+		super(null);
+	}
+
 	public void setBundleProvider(IBundleProvider theBundleProvider) {
 		myBundleProvider = theBundleProvider;
 	}

@@ -21,14 +21,19 @@ public class SubscriptionProviderFhirClient implements ISubscriptionProvider {
 	private FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
+
 	IGenericClient myClient;
+
+	@Autowired
+	public SubscriptionProviderFhirClient(IGenericClient theClient) {
+		myClient = theClient;
+	}
 
 	@Override
 	public IBundleProvider search(SearchParameterMap theMap) {
 		FhirContext fhirContext = myClient.getFhirContext();
 
-		String searchURL = ResourceTypeEnum.SUBSCRIPTION.getCode()+theMap.toNormalizedQueryString(myFhirContext);
+		String searchURL = ResourceTypeEnum.SUBSCRIPTION.getCode() + theMap.toNormalizedQueryString(myFhirContext);
 
 		IBaseBundle bundle = myClient
 			.search()
