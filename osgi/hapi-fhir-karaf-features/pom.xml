@@ -17,8 +17,12 @@
 
 	<properties>
 		<features.file>features.xml</features.file>
-		<pax-logging-version>1.8.6</pax-logging-version>
-		<felix-framework-version>3.2.2</felix-framework-version>
+		<pax_logging_version>1.10.1</pax_logging_version>
+		<felix_framework_version>3.2.2</felix_framework_version>
+		<osgi_version>6.0.0</osgi_version>
+		<configadmin_version>1.9.10</configadmin_version>
+		<aries_blueprint_api_version>1.0.1</aries_blueprint_api_version>
+		<aries_blueprint_core_version>1.10.1</aries_blueprint_core_version>
 	</properties>
 
 	<dependencies>
@@ -87,43 +91,43 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
-			<version>4.3.1</version>
+			<version>${osgi_version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-api</artifactId>
-			<version>${pax-logging-version}</version>
+			<version>${pax_logging_version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.ops4j.pax.logging</groupId>
 			<artifactId>pax-logging-service</artifactId>
-			<version>${pax-logging-version}</version>
+			<version>${pax_logging_version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.framework</artifactId>
-			<version>${felix-framework-version}</version>
+			<version>${felix_framework_version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.configadmin</artifactId>
-			<version>1.8.8</version>
+			<version>${configadmin_version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.aries.blueprint</groupId>
 			<artifactId>org.apache.aries.blueprint.api</artifactId>
-			<version>1.0.1</version>
+			<version>${aries_blueprint_api_version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.aries.blueprint</groupId>
 			<artifactId>org.apache.aries.blueprint.core</artifactId>
-			<version>1.0.1</version>
+			<version>${aries_blueprint_core_version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
