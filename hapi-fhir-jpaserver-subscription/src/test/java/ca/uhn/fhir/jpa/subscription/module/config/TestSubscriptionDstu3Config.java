@@ -13,10 +13,10 @@ public class TestSubscriptionDstu3Config extends SubscriptionDstu3Config {
 	@Bean
 	@Primary
 	public ISearchParamProvider searchParamProvider() {
-		return new MockSearchParamProviderFhirClient();
+		return new MockFhirClientSearchParamProvider();
 	}
 
 	@Bean
 	@Primary
-	public ISubscriptionProvider subsriptionProvider() { return new MockSubscriptionProviderFhirClient();}
+	public ISubscriptionProvider subsriptionProvider() { return new MockFhirClientSubscriptionProvider();}
 }

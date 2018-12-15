@@ -4,8 +4,8 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
-import ca.uhn.fhir.jpa.subscription.module.config.MockSearchParamProviderFhirClient;
-import ca.uhn.fhir.jpa.subscription.module.config.MockSubscriptionProviderFhirClient;
+import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
+import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +27,12 @@ public abstract class BaseSubscriptionTest {
 	SubscriptionLoader mySubscriptionLoader;
 
 	public void initSearchParamRegistry(IBundleProvider theBundleProvider) {
-		((MockSearchParamProviderFhirClient)mySearchParamProvider).setBundleProvider(theBundleProvider);
+		((MockFhirClientSearchParamProvider)mySearchParamProvider).setBundleProvider(theBundleProvider);
 		mySearchParamRegistry.forceRefresh();
 	}
 
 	public void initSubscriptionLoader(IBundleProvider theBundleProvider) {
-		((MockSubscriptionProviderFhirClient)mySubscriptionProvider).setBundleProvider(theBundleProvider);
+		((MockFhirClientSubscriptionProvider)mySubscriptionProvider).setBundleProvider(theBundleProvider);
 		mySubscriptionLoader.doInitSubscriptionsForUnitTest();
 	}
 

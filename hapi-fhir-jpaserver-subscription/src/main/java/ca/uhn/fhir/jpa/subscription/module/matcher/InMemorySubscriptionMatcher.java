@@ -31,7 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class SubscriptionMatcherInMemory implements ISubscriptionMatcher {
+public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 
 	@Autowired
 	private FhirContext myContext;

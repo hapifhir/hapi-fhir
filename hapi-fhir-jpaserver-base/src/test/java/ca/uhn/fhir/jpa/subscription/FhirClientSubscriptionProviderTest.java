@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
-import ca.uhn.fhir.jpa.subscription.module.standalone.SubscriptionProviderFhirClient;
+import ca.uhn.fhir.jpa.subscription.module.standalone.FhirClientSubscriptionProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.After;
@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class SubscriptionProviderFhirClientTest extends BaseSubscriptionsR4Test {
+public class FhirClientSubscriptionProviderTest extends BaseSubscriptionsR4Test {
 	@Autowired
 	SubscriptionLoader mySubscriptionLoader;
 	@Autowired
@@ -26,7 +26,7 @@ public class SubscriptionProviderFhirClientTest extends BaseSubscriptionsR4Test 
 
 	@Before
 	public void useFhirClientSubscriptionProvider() {
-		SubscriptionProviderFhirClient subscriptionProvider = new SubscriptionProviderFhirClient(ourClient);
+		FhirClientSubscriptionProvider subscriptionProvider = new FhirClientSubscriptionProvider(ourClient);
 		// This bean is only available in the standalone subscription context, so we have to autowire it manually.
 		autowireCapableBeanFactory.autowireBean(subscriptionProvider);
 		mySubscriptionLoader.setSubscriptionProviderForUnitTest(subscriptionProvider);

@@ -8,12 +8,12 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
-import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherCompositeInMemoryDatabase;
-import ca.uhn.fhir.jpa.subscription.dbmatcher.SubscriptionMatcherDatabase;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDatabaseSubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.DatabaseSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactoryBlockingQueue;
+import ca.uhn.fhir.jpa.subscription.module.cache.BlockingQueueSubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatcherInMemory;
+import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,13 +133,13 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	}
 
 	@Bean
-	public SubscriptionMatcherInMemory subscriptionMatcherInMemory() {
-		return new SubscriptionMatcherInMemory();
+	public InMemorySubscriptionMatcher subscriptionMatcherInMemory() {
+		return new InMemorySubscriptionMatcher();
 	}
 
 	@Bean
-	public SubscriptionMatcherDatabase subscriptionMatcherDatabase() {
-		return new SubscriptionMatcherDatabase();
+	public DatabaseSubscriptionMatcher subscriptionMatcherDatabase() {
+		return new DatabaseSubscriptionMatcher();
 	}
 
 	/**
@@ -147,13 +147,13 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	 */
 	@Bean
 	public ISubscriptionChannelFactory blockingQueueSubscriptionDeliveryChannelFactory() {
-		return new SubscriptionChannelFactoryBlockingQueue();
+		return new BlockingQueueSubscriptionChannelFactory();
 	}
 
 	@Bean
 	@Primary
 	public ISubscriptionMatcher subscriptionMatcherCompositeInMemoryDatabase() {
-		return new SubscriptionMatcherCompositeInMemoryDatabase(subscriptionMatcherDatabase(), subscriptionMatcherInMemory());
+		return new CompositeInMemoryDatabaseSubscriptionMatcher(subscriptionMatcherDatabase(), subscriptionMatcherInMemory());
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {

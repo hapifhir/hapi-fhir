@@ -38,8 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class SubscriptionMatcherDatabase implements ISubscriptionMatcher {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherDatabase.class);
+public class DatabaseSubscriptionMatcher implements ISubscriptionMatcher {
+	private Logger ourLog = LoggerFactory.getLogger(DatabaseSubscriptionMatcher.class);
 
 	@Autowired
 	private FhirContext myCtx;

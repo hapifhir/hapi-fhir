@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SubscriptionProviderDatabase implements ISubscriptionProvider {
+public class DatabaseSubscriptionProvider implements ISubscriptionProvider {
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired

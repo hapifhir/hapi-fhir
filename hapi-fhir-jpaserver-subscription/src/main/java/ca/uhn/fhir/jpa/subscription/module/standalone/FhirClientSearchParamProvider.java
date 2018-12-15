@@ -38,13 +38,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SearchParamProviderFhirClient implements ISearchParamProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamProviderFhirClient.class);
+public class FhirClientSearchParamProvider implements ISearchParamProvider {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirClientSearchParamProvider.class);
 
 	private IGenericClient myClient;
 
 	@Autowired
-	public SearchParamProviderFhirClient(IGenericClient theClient) {
+	public FhirClientSearchParamProvider(IGenericClient theClient) {
 		myClient = theClient;
 	}
 

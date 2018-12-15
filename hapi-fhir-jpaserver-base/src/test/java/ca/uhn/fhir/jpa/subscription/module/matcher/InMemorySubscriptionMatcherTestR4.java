@@ -29,18 +29,18 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
-public class SubscriptionMatcherInMemoryTestR4 {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionMatcherInMemoryTestR4.class);
+public class InMemorySubscriptionMatcherTestR4 {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InMemorySubscriptionMatcherTestR4.class);
 
 	@Autowired
-	SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
+	InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
 	@Autowired
 	FhirContext myContext;
 
 	private SubscriptionMatchResult match(IBaseResource resource, SearchParameterMap params) {
 		String criteria = params.toNormalizedQueryString(myContext);
 		ourLog.info("Criteria: <{}>", criteria);
-		return mySubscriptionMatcherInMemory.match(criteria, resource);
+		return myInMemorySubscriptionMatcher.match(criteria, resource);
 	}
 
 	private void assertUnsupported(IBaseResource resource, SearchParameterMap params) {
@@ -383,7 +383,7 @@ public class SubscriptionMatcherInMemoryTestR4 {
 			ResourceModifiedMessage msg = new ResourceModifiedMessage(myContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 			msg.setSubscriptionId("Subscription/123");
 			msg.setId(new IdType("Patient/ABC"));
-			SubscriptionMatchResult result = mySubscriptionMatcherInMemory.match(criteria, msg);
+			SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(criteria, msg);
 			fail();
 		} catch (InternalErrorException e){
 			assertEquals("Failure processing resource ID[Patient/ABC] for subscription ID[Subscription/123]: Invalid resource reference found at path[Patient.managingOrganization] - Does not contain resource type - urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());

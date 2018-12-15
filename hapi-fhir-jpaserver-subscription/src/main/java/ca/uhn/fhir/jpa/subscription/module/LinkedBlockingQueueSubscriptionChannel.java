@@ -4,9 +4,9 @@ import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class SubscriptionChannelLinkedBlockingQueue extends SubscriptionChannel {
+public class LinkedBlockingQueueSubscriptionChannel extends SubscriptionChannel {
 
-	public SubscriptionChannelLinkedBlockingQueue(String theThreadNamingPattern) {
+	public LinkedBlockingQueueSubscriptionChannel(String theThreadNamingPattern) {
 		super(new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE), theThreadNamingPattern);
 	}
 }

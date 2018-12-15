@@ -1,14 +1,15 @@
 package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.subscription.module.standalone.SearchParamProviderFhirClient;
+import ca.uhn.fhir.jpa.subscription.module.standalone.FhirClientSubscriptionProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 
-public class MockSearchParamProviderFhirClient extends SearchParamProviderFhirClient {
+public class MockFhirClientSubscriptionProvider extends FhirClientSubscriptionProvider {
 	private IBundleProvider myBundleProvider = new SimpleBundleProvider();
 
-	public MockSearchParamProviderFhirClient() {
+
+	public MockFhirClientSubscriptionProvider() {
 		super(null);
 	}
 

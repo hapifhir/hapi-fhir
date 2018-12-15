@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactoryBlockingQueue;
+import ca.uhn.fhir.jpa.subscription.module.cache.BlockingQueueSubscriptionChannelFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +34,6 @@ public abstract class BaseSubscriptionConfig {
 
 	@Bean
 	public ISubscriptionChannelFactory blockingQueueSubscriptionDeliveryChannelFactory() {
-		return new SubscriptionChannelFactoryBlockingQueue();
+		return new BlockingQueueSubscriptionChannelFactory();
 	}
 }

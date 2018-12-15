@@ -15,23 +15,23 @@ import java.util.Arrays;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class SubscriptionMatcherInMemoryTestR3 extends BaseSubscriptionDstu3Test {
+public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test {
 	@Autowired
-	SubscriptionMatcherInMemory mySubscriptionMatcherInMemory;
+	InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
-		assertFalse(mySubscriptionMatcherInMemory.match(criteria, resource).supported());
+		assertFalse(myInMemorySubscriptionMatcher.match(criteria, resource).supported());
 	}
 
 	private void assertMatched(IBaseResource resource, String criteria) {
-		SubscriptionMatchResult result = mySubscriptionMatcherInMemory.match(criteria, resource);
+		SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(criteria, resource);
 
 		assertTrue(result.supported());
 		assertTrue(result.matched());
 	}
 
 	private void assertNotMatched(IBaseResource resource, String criteria) {
-		SubscriptionMatchResult result = mySubscriptionMatcherInMemory.match(criteria, resource);
+		SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(criteria, resource);
 
 		assertTrue(result.supported());
 		assertFalse(result.matched());

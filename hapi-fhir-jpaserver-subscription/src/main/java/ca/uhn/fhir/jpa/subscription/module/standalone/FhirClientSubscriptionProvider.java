@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SubscriptionProviderFhirClient implements ISubscriptionProvider {
+public class FhirClientSubscriptionProvider implements ISubscriptionProvider {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -25,7 +25,7 @@ public class SubscriptionProviderFhirClient implements ISubscriptionProvider {
 	IGenericClient myClient;
 
 	@Autowired
-	public SubscriptionProviderFhirClient(IGenericClient theClient) {
+	public FhirClientSubscriptionProvider(IGenericClient theClient) {
 		myClient = theClient;
 	}
 

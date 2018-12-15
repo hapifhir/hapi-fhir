@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.subscription.module.standalone.SearchParamProviderFhirClient;
+import ca.uhn.fhir.jpa.subscription.module.standalone.FhirClientSearchParamProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.junit.Assert.assertEquals;
 
 
-public class SearchParamProviderFhirClientTest extends BaseSubscriptionsR4Test {
+public class FhirClientSearchParamProviderTest extends BaseSubscriptionsR4Test {
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -24,7 +24,7 @@ public class SearchParamProviderFhirClientTest extends BaseSubscriptionsR4Test {
 
 	@Before
 	public void useFhirClientSearchParamProvider() {
-		mySearchParamRegistry.setSearchParamProviderForUnitTest(new SearchParamProviderFhirClient(ourClient));
+		mySearchParamRegistry.setSearchParamProviderForUnitTest(new FhirClientSearchParamProvider(ourClient));
 	}
 
 	@After
