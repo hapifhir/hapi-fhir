@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DatabaseResourceProvider implements IResourceProvider {
+public class DaoResourceProvider implements IResourceProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
 	@Autowired

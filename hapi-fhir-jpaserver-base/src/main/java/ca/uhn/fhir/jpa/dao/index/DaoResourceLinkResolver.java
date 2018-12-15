@@ -41,8 +41,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 
 @Service
-public class DatabaseResourceLinkResolver implements IResourceLinkResolver {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DatabaseResourceLinkResolver.class);
+public class DaoResourceLinkResolver implements IResourceLinkResolver {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
 
 	@Autowired
 	private DaoConfig myDaoConfig;

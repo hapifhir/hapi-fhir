@@ -8,8 +8,8 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
-import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDatabaseSubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.dbmatcher.DatabaseSubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.BlockingQueueSubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
@@ -133,13 +133,13 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	}
 
 	@Bean
-	public InMemorySubscriptionMatcher subscriptionMatcherInMemory() {
+	public InMemorySubscriptionMatcher inMemorySubscriptionMatcher() {
 		return new InMemorySubscriptionMatcher();
 	}
 
 	@Bean
-	public DatabaseSubscriptionMatcher subscriptionMatcherDatabase() {
-		return new DatabaseSubscriptionMatcher();
+	public DaoSubscriptionMatcher daoSubscriptionMatcher() {
+		return new DaoSubscriptionMatcher();
 	}
 
 	/**
@@ -153,7 +153,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Bean
 	@Primary
 	public ISubscriptionMatcher subscriptionMatcherCompositeInMemoryDatabase() {
-		return new CompositeInMemoryDatabaseSubscriptionMatcher(subscriptionMatcherDatabase(), subscriptionMatcherInMemory());
+		return new CompositeInMemoryDaoSubscriptionMatcher(daoSubscriptionMatcher(), inMemorySubscriptionMatcher());
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {

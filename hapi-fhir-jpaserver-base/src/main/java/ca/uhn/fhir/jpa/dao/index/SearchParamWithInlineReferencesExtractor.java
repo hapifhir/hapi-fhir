@@ -77,9 +77,9 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	ResourceLinkExtractor myResourceLinkExtractor;
 	@Autowired
-	DatabaseResourceLinkResolver myDatabaseResourceLinkResolver;
+	DaoResourceLinkResolver myDaoResourceLinkResolver;
 	@Autowired
-	DatabaseSearchParamSynchronizer myDatabaseSearchParamSynchronizer;
+	DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 
@@ -99,7 +99,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		extractInlineReferences(theResource);
 
-		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDatabaseResourceLinkResolver);
+		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDaoResourceLinkResolver);
 
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
@@ -258,12 +258,12 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		// Store composite string uniques
 		if (myDaoConfig.isUniqueIndexesEnabled()) {
-			for (ResourceIndexedCompositeStringUnique next : myDatabaseSearchParamSynchronizer.subtract(existingParams.compositeStringUniques, theParams.compositeStringUniques)) {
+			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(existingParams.compositeStringUniques, theParams.compositeStringUniques)) {
 				ourLog.debug("Removing unique index: {}", next);
 				myEntityManager.remove(next);
 				theEntity.getParamsCompositeStringUnique().remove(next);
 			}
-			for (ResourceIndexedCompositeStringUnique next : myDatabaseSearchParamSynchronizer.subtract(theParams.compositeStringUniques, existingParams.compositeStringUniques)) {
+			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(theParams.compositeStringUniques, existingParams.compositeStringUniques)) {
 				if (myDaoConfig.isUniqueIndexesCheckedBeforeSave()) {
 					ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 					if (existing != null) {

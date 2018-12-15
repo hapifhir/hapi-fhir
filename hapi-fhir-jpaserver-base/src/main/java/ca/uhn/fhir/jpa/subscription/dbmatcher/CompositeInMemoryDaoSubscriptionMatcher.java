@@ -29,16 +29,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class CompositeInMemoryDatabaseSubscriptionMatcher implements ISubscriptionMatcher {
-	private Logger ourLog = LoggerFactory.getLogger(CompositeInMemoryDatabaseSubscriptionMatcher.class);
+public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMatcher {
+	private Logger ourLog = LoggerFactory.getLogger(CompositeInMemoryDaoSubscriptionMatcher.class);
 
-	private final DatabaseSubscriptionMatcher myDatabaseSubscriptionMatcher;
+	private final DaoSubscriptionMatcher myDaoSubscriptionMatcher;
 	private final InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
 	@Autowired
 	DaoConfig myDaoConfig;
 
-	public CompositeInMemoryDatabaseSubscriptionMatcher(DatabaseSubscriptionMatcher theDatabaseSubscriptionMatcher, InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
-		myDatabaseSubscriptionMatcher = theDatabaseSubscriptionMatcher;
+	public CompositeInMemoryDaoSubscriptionMatcher(DaoSubscriptionMatcher theDaoSubscriptionMatcher, InMemorySubscriptionMatcher theInMemorySubscriptionMatcher) {
+		myDaoSubscriptionMatcher = theDaoSubscriptionMatcher;
 		myInMemorySubscriptionMatcher = theInMemorySubscriptionMatcher;
 	}
 
@@ -49,10 +49,10 @@ public class CompositeInMemoryDatabaseSubscriptionMatcher implements ISubscripti
 			result = myInMemorySubscriptionMatcher.match(criteria, msg);
 			if (!result.supported()) {
 				ourLog.info("Criteria {} not supported by InMemoryMatcher: {}.  Reverting to DatabaseMatcher", criteria, result.getUnsupportedReason());
-				result = myDatabaseSubscriptionMatcher.match(criteria, msg);
+				result = myDaoSubscriptionMatcher.match(criteria, msg);
 			}
 		} else {
-			result = myDatabaseSubscriptionMatcher.match(criteria, msg);
+			result = myDaoSubscriptionMatcher.match(criteria, msg);
 		}
 		return result;
 	}

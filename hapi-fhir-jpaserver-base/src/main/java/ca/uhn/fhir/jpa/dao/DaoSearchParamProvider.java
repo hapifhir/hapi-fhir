@@ -32,7 +32,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
-public class DatabaseSearchParamProvider implements ISearchParamProvider {
+public class DaoSearchParamProvider implements ISearchParamProvider {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired

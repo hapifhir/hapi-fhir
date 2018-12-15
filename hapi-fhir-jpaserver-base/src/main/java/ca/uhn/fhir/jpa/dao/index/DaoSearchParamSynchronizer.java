@@ -35,7 +35,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Service
-public class DatabaseSearchParamSynchronizer {
+public class DaoSearchParamSynchronizer {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
