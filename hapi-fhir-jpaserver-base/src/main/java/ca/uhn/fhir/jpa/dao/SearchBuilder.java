@@ -2512,27 +2512,21 @@ public class SearchBuilder implements ISearchBuilder {
 			else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
 			}
-		} else if (searchParam.getName().equals(Constants.PARAM_HAS)) {
-			HasParam param = new HasParam();
-			param.setValueAsQueryToken(null,
-				null,
-				null,
-				((SearchFilterParser.FilterParameter) filter).getValue());
-			addPredicateHas(Collections.singletonList(Collections.singletonList(param)));
-		} else if ((searchParam.getName().equals(Constants.PARAM_TAG)) ||
-			(searchParam.equals(Constants.PARAM_SECURITY))) {
-			TokenParam param = new TokenParam();
-			param.setValueAsQueryToken(null,
-				null,
-				null,
-				((SearchFilterParser.FilterParameter) filter).getValue());
-			addPredicateTag(Collections.singletonList(Collections.singletonList(param)),
-				searchParam.getName());
 		}
-		else if (searchParam.equals(Constants.PARAM_PROFILE)) {
-			addPredicateTag(Collections.singletonList(Collections.singletonList(new UriParam(((SearchFilterParser.FilterParameter) filter).getValue()))),
-				searchParam.getName());
-		}
+//		else if ((searchParam.getName().equals(Constants.PARAM_TAG)) ||
+//			(searchParam.equals(Constants.PARAM_SECURITY))) {
+//			TokenParam param = new TokenParam();
+//			param.setValueAsQueryToken(null,
+//				null,
+//				null,
+//				((SearchFilterParser.FilterParameter) filter).getValue());
+//			return addPredicateTag(Collections.singletonList(Collections.singletonList(param)),
+//				searchParam.getName());
+//		}
+//		else if (searchParam.equals(Constants.PARAM_PROFILE)) {
+//			addPredicateTag(Collections.singletonList(Collections.singletonList(new UriParam(((SearchFilterParser.FilterParameter) filter).getValue()))),
+//				searchParam.getName());
+//		}
 		else if (searchParam != null) {
 			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
 			if (typeEnum == RestSearchParameterTypeEnum.URI) {
