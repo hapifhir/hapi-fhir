@@ -20,12 +20,12 @@ public class StoppableSubscriptionDeliveringRestHookSubscriber extends Subscript
 			myCountDownLatch.countDown();
 		}
 		if (myPauseEveryMessage) {
-			pause();
+			waitIfPaused();
 		}
 		super.handleMessage(theMessage);
 	}
 
-	private synchronized void pause() {
+	private synchronized void waitIfPaused() {
 		try {
 			if (myPauseEveryMessage) {
 				wait();
@@ -35,12 +35,13 @@ public class StoppableSubscriptionDeliveringRestHookSubscriber extends Subscript
 		}
 	}
 
-	public synchronized void unPause() {
-		notifyAll();
+	public void pause() {
+		myPauseEveryMessage = true;
 	}
 
-	public void setPauseEveryMessage(boolean thePauseEveryMessage) {
-		myPauseEveryMessage = thePauseEveryMessage;
+	public synchronized void unPause() {
+		myPauseEveryMessage = false;
+		notifyAll();
 	}
 
 	public void setCountDownLatch(CountDownLatch theCountDownLatch) {

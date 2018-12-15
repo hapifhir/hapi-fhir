@@ -37,7 +37,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@After
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(false);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 	}
@@ -168,7 +167,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		createSubscription(criteria1, payload);
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(true);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
 
@@ -185,7 +184,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(false);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 
 
@@ -218,7 +216,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(true);
+		myStoppableSubscriptionDeliveringRestHookSubscriber.pause();
 		final CountDownLatch countDownLatch = new CountDownLatch(1);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(countDownLatch);
 
@@ -235,7 +233,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		// Wait for our two delivery channel threads to be paused
 		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
-		myStoppableSubscriptionDeliveringRestHookSubscriber.setPauseEveryMessage(false);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 
 

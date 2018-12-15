@@ -6,5 +6,5 @@ import org.springframework.stereotype.Service;
 @Service
 public abstract class SearchBuilderFactory {
 	@Lookup
-	public abstract SearchBuilder newSearchBuilder(BaseHapiFhirDao theTBaseHapiFhirResourceDao);
+	public abstract SearchBuilder newSearchBuilder(BaseHapiFhirDao theBaseHapiFhirResourceDao);
 }

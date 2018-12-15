@@ -484,7 +484,7 @@ public class DaoConfig {
 	 * Returns the interceptors which will be notified of operations.
 	 *
 	 * @see #setInterceptors(List)
-	 * @deprecated Marked as deprecated as of HAPI 3.7.0.  Use {@link #registerInterceptor} and {@link #unregisterInterceptor}instead.
+	 * @deprecated Marked as deprecated as of HAPI 3.7.0.  Use {@link #registerInterceptor} or {@link #unregisterInterceptor}instead.
 	 */
 
 	@Deprecated
