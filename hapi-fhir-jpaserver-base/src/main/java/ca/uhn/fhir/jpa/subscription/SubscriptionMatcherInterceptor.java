@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.SubscriptionChannel;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionCheckingSubscriber;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /*-
  * #%L

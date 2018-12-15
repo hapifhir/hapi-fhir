@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -39,6 +41,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -72,27 +75,31 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc, ApplicationContextAware {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringProvider.class);
 
 	public static final int DEFAULT_MAX_SUBMIT = 10000;
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringProvider.class);
-	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
+
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	// FIXME KHS this should work like the CDR change
-	private List<SubscriptionMatcherInterceptor> mySubscriptionInterceptorList;
-	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
+	@Autowired
+	private DaoConfig myDaoConfig;
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+
+	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
+	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
 	private ApplicationContext myAppCtx;
 	private ExecutorService myExecutorService;
 
 	@Override
 	public IBaseParameters triggerSubscription(List<UriParam> theResourceIds, List<StringParam> theSearchUrls, @IdParam IIdType theSubscriptionId) {
-		if (mySubscriptionInterceptorList.isEmpty()) {
+		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
 			throw new PreconditionFailedException("Subscription processing not active on this server");
 		}
 
@@ -301,9 +308,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		return myExecutorService.submit(() -> {
 			for (int i = 0; ; i++) {
 				try {
-					for (SubscriptionMatcherInterceptor next : mySubscriptionInterceptorList) {
-						next.submitResourceModified(msg);
-					}
+						mySubscriptionMatcherInterceptor.submitResourceModified(msg);
 					break;
 				} catch (Exception e) {
 					if (i >= 3) {
@@ -346,14 +351,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void start() {
-		mySubscriptionInterceptorList = ObjectUtils.defaultIfNull(mySubscriptionInterceptorList, Collections.emptyList());
-		mySubscriptionInterceptorList = new ArrayList<>();
-		// FIXME KHS see CDR
-		Collection values1 = myAppCtx.getBeansOfType(SubscriptionMatcherInterceptor.class).values();
-		Collection<SubscriptionMatcherInterceptor> values = (Collection<SubscriptionMatcherInterceptor>) values1;
-		mySubscriptionInterceptorList.addAll(values);
-
-
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern("SubscriptionTriggering-%d")
