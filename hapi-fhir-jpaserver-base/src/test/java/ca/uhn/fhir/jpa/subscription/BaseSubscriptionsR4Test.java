@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.SubscribableChannel;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;

@@ -80,6 +80,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private FhirContext myFhirContext;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	// FIXME KHS this should work like the CDR change
 	private List<SubscriptionMatcherInterceptor> mySubscriptionInterceptorList;
 	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
 	@Autowired
@@ -347,6 +348,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	public void start() {
 		mySubscriptionInterceptorList = ObjectUtils.defaultIfNull(mySubscriptionInterceptorList, Collections.emptyList());
 		mySubscriptionInterceptorList = new ArrayList<>();
+		// FIXME KHS see CDR
 		Collection values1 = myAppCtx.getBeansOfType(SubscriptionMatcherInterceptor.class).values();
 		Collection<SubscriptionMatcherInterceptor> values = (Collection<SubscriptionMatcherInterceptor>) values1;
 		mySubscriptionInterceptorList.addAll(values);

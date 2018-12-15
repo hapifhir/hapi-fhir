@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.subscription.module.SubscriptionChannelLinkedBlockingQueue;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
@@ -24,15 +25,20 @@ public class SubscriptionTestUtil {
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 
+	public int getExecutorQueueSize() {
+		SubscriptionChannelLinkedBlockingQueue channel = (SubscriptionChannelLinkedBlockingQueue) mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		return channel.getQueueSizeForUnitTest();
+	}
+
 	// TODO KHS replace this and similar functions with CountdownLatch
 	public void waitForQueueToDrain() throws InterruptedException {
 		Thread.sleep(100);
-		ourLog.info("Executor work queue has {} items", mySubscriptionMatcherInterceptor.getExecutorQueueSizeForUnitTests());
-		if (mySubscriptionMatcherInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
-			while (mySubscriptionMatcherInterceptor.getExecutorQueueSizeForUnitTests() > 0) {
+		ourLog.info("Executor work queue has {} items", getExecutorQueueSize());
+		if (getExecutorQueueSize() > 0) {
+			while (getExecutorQueueSize() > 0) {
 				Thread.sleep(50);
 			}
-			ourLog.info("Executor work queue has {} items", mySubscriptionMatcherInterceptor.getExecutorQueueSizeForUnitTests());
+			ourLog.info("Executor work queue has {} items", getExecutorQueueSize());
 		}
 		Thread.sleep(100);
 	}
@@ -58,7 +64,7 @@ public class SubscriptionTestUtil {
 	}
 
 	public int getExecutorQueueSizeForUnitTests() {
-		return mySubscriptionMatcherInterceptor.getExecutorQueueSizeForUnitTests();
+		return getExecutorQueueSize();
 	}
 
 	public void initEmailSender(int theListenerPort) {

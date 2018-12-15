@@ -19,11 +19,12 @@ public class SubscriptionChannel implements SubscribableChannel {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionChannel.class);
 
 	private final ExecutorSubscribableChannel mySubscribableChannel;
+	private final BlockingQueue<Runnable> myQueue;
 
-	public SubscriptionChannel(BlockingQueue<Runnable> theQueue, String namingPattern) {
+	public SubscriptionChannel(BlockingQueue<Runnable> theQueue, String theThreadNamingPattern) {
 
 		ThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern(namingPattern)
+			.namingPattern(theThreadNamingPattern)
 			.daemon(false)
 			.priority(Thread.NORM_PRIORITY)
 			.build();
@@ -46,6 +47,7 @@ public class SubscriptionChannel implements SubscribableChannel {
 			theQueue,
 			threadFactory,
 			rejectedExecutionHandler);
+		myQueue = theQueue;
 		mySubscribableChannel = new ExecutorSubscribableChannel(executor);
 	}
 
@@ -72,5 +74,10 @@ public class SubscriptionChannel implements SubscribableChannel {
 	@VisibleForTesting
 	public void addInterceptorForUnitTest(ChannelInterceptor theInterceptor) {
 		mySubscribableChannel.addInterceptor(theInterceptor);
+	}
+
+	@VisibleForTesting
+	public int getQueueSizeForUnitTest() {
+		return myQueue.size();
 	}
 }

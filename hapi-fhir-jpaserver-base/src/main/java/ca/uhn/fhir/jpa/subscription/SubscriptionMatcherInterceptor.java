@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.SubscriptionChannel;
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionCheckingSubscriber;
@@ -13,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -46,13 +48,14 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private static boolean ourForcePayloadEncodeAndDecodeForUnitTests;
-	private SubscriptionChannel myProcessingChannel;
-	private LinkedBlockingQueue<Runnable> myProcessingExecutorQueue;
+	private SubscribableChannel myProcessingChannel;
 
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionCheckingSubscriber mySubscriptionCheckingSubscriber;
+	@Autowired
+	private ISubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	/**
 	 * Constructor
@@ -64,8 +67,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	@PostConstruct
 	public void start() {
 		if (myProcessingChannel == null) {
-			myProcessingExecutorQueue = new LinkedBlockingQueue<>(SubscriptionConstants.PROCESSING_EXECUTOR_QUEUE_SIZE);
-			myProcessingChannel = new SubscriptionChannel(myProcessingExecutorQueue, "subscription-proc-%d");
+			myProcessingChannel = mySubscriptionChannelFactory.newProcessingChannel("subscription-matching");
 		}
 		myProcessingChannel.subscribe(mySubscriptionCheckingSubscriber);
 	}
@@ -121,12 +123,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	}
 
 	@VisibleForTesting
-	public int getExecutorQueueSizeForUnitTests() {
-		return myProcessingExecutorQueue.size();
-	}
-
-	@VisibleForTesting
 	public SubscriptionChannel getProcessingChannelForUnitTest() {
-		return myProcessingChannel;
+		return (SubscriptionChannel) myProcessingChannel;
 	}
 }

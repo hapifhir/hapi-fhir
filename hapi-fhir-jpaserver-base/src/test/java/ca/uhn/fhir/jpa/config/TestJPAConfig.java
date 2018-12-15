@@ -41,13 +41,13 @@ public class TestJPAConfig {
 
 	@Lazy
 	@Bean
-	public SubscriptionTestUtil subscriptionInterceptorRegistrationUtil() {
+	public SubscriptionTestUtil subscriptionTestUtil() {
 		return new SubscriptionTestUtil();
 	}
 
 	@Bean
 	@Primary
-	public SubscriptionDeliveringRestHookSubscriber subscriptionDeliveringRestHookSubscriber() {
+	public SubscriptionDeliveringRestHookSubscriber stoppableSubscriptionDeliveringRestHookSubscriber() {
 		return new StoppableSubscriptionDeliveringRestHookSubscriber();
 	}
 }

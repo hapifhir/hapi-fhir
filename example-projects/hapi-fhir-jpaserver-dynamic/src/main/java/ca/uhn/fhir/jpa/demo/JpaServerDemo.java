@@ -129,7 +129,7 @@ public class JpaServerDemo extends RestfulServer {
 		 * Register interceptors for the server based on DaoConfig.getSupportedSubscriptionTypes()
 		 */
 		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
-		subscriptionInterceptorLoader.registerInterceptors(this);
+		subscriptionInterceptorLoader.registerInterceptors();
 
 		/*
 		 * If you are hosting this server at a specific DNS name, the server will try to 
