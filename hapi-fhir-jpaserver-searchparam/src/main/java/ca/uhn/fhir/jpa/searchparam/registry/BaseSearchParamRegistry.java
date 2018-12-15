@@ -117,7 +117,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		return Collections.unmodifiableList(retVal);
 	}
 
-	public Map<String, Map<String, RuntimeSearchParam>> getBuiltInSearchParams() {
+	private Map<String, Map<String, RuntimeSearchParam>> getBuiltInSearchParams() {
 		return myBuiltInSearchParams;
 	}
 
