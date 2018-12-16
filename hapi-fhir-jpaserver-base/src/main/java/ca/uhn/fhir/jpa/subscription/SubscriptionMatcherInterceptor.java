@@ -65,7 +65,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	@PostConstruct
 	public void start() {
 		if (myProcessingChannel == null) {
-			myProcessingChannel = mySubscriptionChannelFactory.newProcessingChannel("subscription-matching");
+			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel("subscription-matching");
 		}
 		myProcessingChannel.subscribe(mySubscriptionCheckingSubscriber);
 	}

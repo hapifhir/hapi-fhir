@@ -5,5 +5,5 @@ import org.springframework.messaging.SubscribableChannel;
 public interface ISubscriptionChannelFactory {
 	SubscribableChannel newDeliveryChannel(String theSubscriptionId, String theChannelType);
 
-	SubscribableChannel newProcessingChannel(String theChannelName);
+	SubscribableChannel newMatchingChannel(String theChannelName);
 }

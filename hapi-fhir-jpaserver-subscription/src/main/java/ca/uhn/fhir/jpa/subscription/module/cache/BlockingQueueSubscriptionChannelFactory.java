@@ -16,7 +16,7 @@ public class BlockingQueueSubscriptionChannelFactory implements ISubscriptionCha
 	}
 
 	@Override
-	public SubscriptionChannel newProcessingChannel(String theChannelName) {
+	public SubscriptionChannel newMatchingChannel(String theChannelName) {
 		return new LinkedBlockingQueueSubscriptionChannel(theChannelName + "-%d");
 	}
 }
