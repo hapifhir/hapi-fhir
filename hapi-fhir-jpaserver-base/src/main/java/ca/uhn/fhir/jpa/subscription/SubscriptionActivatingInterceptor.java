@@ -45,6 +45,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -71,12 +72,12 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
+	// TODO KHS James, is this the correct taskExecutor?
 	@Autowired
+	@Qualifier("hapiJpaTaskExecutor")
 	private AsyncTaskExecutor myTaskExecutor;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	private SubscriptionCannonicalizer mySubscriptionCanonicalizer;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
