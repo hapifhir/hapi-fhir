@@ -11,7 +11,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,8 +19,7 @@ import java.util.List;
 public class SubscriptionCannonicalizer<S extends IBaseResource> {
 	@Autowired
 	FhirContext myFhirContext;
-	@Autowired(required = false)
-	@Qualifier("myEventDefinitionDaoR4")
+
 	public CanonicalSubscription canonicalize(S theSubscription) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:
@@ -147,6 +145,4 @@ public class SubscriptionCannonicalizer<S extends IBaseResource> {
 
 		return retVal;
 	}
-
-
 }

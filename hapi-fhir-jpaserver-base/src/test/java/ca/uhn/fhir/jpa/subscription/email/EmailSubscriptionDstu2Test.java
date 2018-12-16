@@ -53,7 +53,6 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Before
 	public void before() throws Exception {
-		// TODO KHS doesn't this happen automatically?  Or is this call here to change the order?
 		super.before();
 
 		mySubscriptionTestUtil.initEmailSender(ourListenerPort);

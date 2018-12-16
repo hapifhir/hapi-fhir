@@ -36,6 +36,7 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 		ResourceModifiedMessage resourceModifiedMessage = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		IBaseResource resource = resourceModifiedMessage.getNewPayload(myFhirContext);
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resource);
+
 		if (resourceDef.getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
 		}

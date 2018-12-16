@@ -31,7 +31,7 @@ public class TestSubscriptionConfig {
 	};
 
 	@Bean
-	public InMemorySubscriptionMatcher subscriptionMatcherInMemory() {
+	public InMemorySubscriptionMatcher inMemorySubscriptionMatcher() {
 		return new InMemorySubscriptionMatcher();
 	}
 }
