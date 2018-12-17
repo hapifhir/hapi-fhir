@@ -347,20 +347,12 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	}
 	
 	@Test
-	public void testRequiredQuestionWithEnableWhenHidesQuestionHasAnswerTrue() {
+	public void testEnableWhenWithHasAnswerTrueDisablesQuestionWhenNoAnswerIsPresent() {
 
 		Questionnaire q = new Questionnaire();
-		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).addEnableWhen().setQuestion("link0").setHasAnswer(true);
 		
-		// create the questionnaire
-		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
-		item1.setLinkId("link1").setRequired(true);
-		q.addItem(item1);
-		QuestionnaireItemEnableWhenComponent enable = new QuestionnaireItemEnableWhenComponent();
-		item1.addEnableWhen(enable);
-		enable.setQuestion("link0");
-		enable.setHasAnswer(true);
-
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
