@@ -65,6 +65,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 	private Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier = ctx -> new DefaultEnableWhenEvaluator();
 
+	private boolean errorForUnknownProfiles;
+
 	/**
 	 * Constructor
 	 * <p>
@@ -190,6 +192,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	public boolean isAnyExtensionsAllowed() {
 		return myAnyExtensionsAllowed;
 	}
+	
+	public boolean isErrorForUnknownProfiles() {
+		return errorForUnknownProfiles;
+	}
+	
+	public void setErrorForUnknownProfiles(boolean errorForUnknownProfiles) {
+		this.errorForUnknownProfiles = errorForUnknownProfiles;
+	}
 
 	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the
@@ -249,7 +259,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
 		v.setMyEnableWhenEvaluator(enableWhenEvaluatorSupplier.apply(wrappedWorkerContext));
-		v.setErrorForUnknownProfiles(true); // TODO must be configurable instead of hardcoded to be always true
+		v.setErrorForUnknownProfiles(isErrorForUnknownProfiles());
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
