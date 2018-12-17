@@ -10,6 +10,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -17,15 +19,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -236,6 +237,32 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
+	public void testCreateReflexResourceTheHardWay() throws IOException, ServletException {
+		ServerOperationInterceptorAdapter interceptor = new ReflexInterceptor();
+
+		ourRestServer.registerInterceptor(interceptor);
+		try {
+
+			Patient p = new Patient();
+			p.setActive(true);
+			IIdType pid = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+			Bundle observations = ourClient
+				.search()
+				.forResource("Observation")
+				.where(Observation.SUBJECT.hasId(pid))
+				.returnBundle(Bundle.class)
+				.execute();
+			assertEquals(1, observations.getEntry().size());
+			ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(observations));
+
+		} finally {
+			ourRestServer.unregisterInterceptor(interceptor);
+		}
+	}
+
+
+		@Test
 	public void testCreateResourceWithVersionedReference() throws IOException, ServletException {
 		String methodName = "testCreateResourceWithVersionedReference";
 
@@ -350,6 +377,26 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
+		}
+	}
+
+	public class ReflexInterceptor extends ServerOperationInterceptorAdapter {
+		@Override
+		public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+			if (theResource instanceof Patient) {
+				((ServletRequestDetails) theRequest).getServletRequest().setAttribute("CREATED_PATIENT", theResource);
+			}
+		}
+
+		@Override
+		public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
+			Patient createdPatient = (Patient) theRequestDetails.getServletRequest().getAttribute("CREATED_PATIENT");
+			if (createdPatient != null) {
+				Observation observation = new Observation();
+				observation.setSubject(new Reference(createdPatient.getId()));
+
+				ourClient.create().resource(observation).execute();
+			}
 		}
 	}
 

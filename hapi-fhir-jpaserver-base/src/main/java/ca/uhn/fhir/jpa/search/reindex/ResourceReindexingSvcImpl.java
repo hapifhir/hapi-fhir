@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search.reindex;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,11 +30,11 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -98,6 +98,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	private FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@VisibleForTesting
 	void setReindexJobDaoForUnitTest(IResourceReindexJobDao theReindexJobDao) {
@@ -186,7 +188,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		runReindexingPass();
 	}
 
-
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public Integer runReindexingPass() {
@@ -203,7 +204,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		return null;
 	}
 
-	private Integer doReindexingPassInsideLock() {
+	private int doReindexingPassInsideLock() {
 		expungeJobsMarkedAsDeleted();
 		return runReindexJobs();
 	}
@@ -233,13 +234,13 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	private int runReindexJobs() {
-		Collection<ResourceReindexJobEntity> jobs = myTxTemplate.execute(t -> myReindexJobDao.findAll(PageRequest.of(0, 10), false));
-		assert jobs != null;
+		Collection<ResourceReindexJobEntity> jobs = getResourceReindexJobEntities();
 
 		if (jobs.size() > 0) {
 			ourLog.info("Running {} reindex jobs: {}", jobs.size(), jobs);
 		} else {
 			ourLog.debug("Running {} reindex jobs: {}", jobs.size(), jobs);
+			return 0;
 		}
 
 		int count = 0;
@@ -255,12 +256,28 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		return count;
 	}
 
+	@Override
+	public int countReindexJobs() {
+		return getResourceReindexJobEntities().size();
+	}
+
+	private Collection<ResourceReindexJobEntity> getResourceReindexJobEntities() {
+		Collection<ResourceReindexJobEntity> jobs = myTxTemplate.execute(t -> myReindexJobDao.findAll(PageRequest.of(0, 10), false));
+		assert jobs != null;
+		return jobs;
+	}
+
 	private void markJobAsDeleted(ResourceReindexJobEntity theJob) {
 		ourLog.info("Marking reindexing job ID[{}] as deleted", theJob.getId());
 		myTxTemplate.execute(t -> {
 			myReindexJobDao.markAsDeletedById(theJob.getId());
 			return null;
 		});
+	}
+
+	@VisibleForTesting
+	public void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
 	private int runReindexJob(ResourceReindexJobEntity theJob) {
@@ -273,6 +290,15 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		ourLog.info("Performing reindex pass for JOB[{}]", theJob.getId());
 		StopWatch sw = new StopWatch();
 		AtomicInteger counter = new AtomicInteger();
+
+		/*
+		 * On the first time we run a particular reindex job, let's make sure we
+		 * have the latest search parameters loaded. This is good since a common reason to
+		 * be reindexing is that the search parameters have changed in some way.
+		 */
+		if (theJob.getThresholdLow() == null) {
+			mySearchParamRegistry.forceRefresh();
+		}
 
 		// Calculate range
 		Date low = theJob.getThresholdLow() != null ? theJob.getThresholdLow() : BEGINNING_OF_TIME;
@@ -461,7 +487,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceTable.getResourceType());
 						long expectedVersion = resourceTable.getVersion();
-						IBaseResource resource = dao.read(resourceTable.getIdDt().toVersionless(), null,true);
+						IBaseResource resource = dao.read(resourceTable.getIdDt().toVersionless(), null, true);
 						if (resource == null) {
 							throw new InternalErrorException("Could not find resource version " + resourceTable.getIdDt().toUnqualified().getValue() + " in database");
 						}

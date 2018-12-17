@@ -711,7 +711,7 @@ public abstract class BaseStructureParser {
 		return null;
 	}
 
-	public static FhirVersionEnum determineVersionEnum(String version) throws MojoFailureException {
+	public static FhirVersionEnum determineVersionEnum(String version) {
 		FhirVersionEnum versionEnum;
 		if ("dstu2".equals(version)) {
 			versionEnum = FhirVersionEnum.DSTU2;
@@ -720,7 +720,7 @@ public abstract class BaseStructureParser {
 		} else if ("r4".equals(version)) {
 			versionEnum = FhirVersionEnum.R4;
 		} else {
-			throw new MojoFailureException("Unknown version: " + version);
+			throw new IllegalArgumentException("Unknown version: " + version);
 		}
 		return versionEnum;
 	}

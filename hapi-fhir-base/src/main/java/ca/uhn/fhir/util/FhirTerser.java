@@ -53,8 +53,8 @@ public class FhirTerser {
 		if (theChildDefinition == null)
 			return null;
 		if (theCurrentList == null || theCurrentList.isEmpty())
-			return new ArrayList<String>(Arrays.asList(theChildDefinition.getElementName()));
-		List<String> newList = new ArrayList<String>(theCurrentList);
+			return new ArrayList<>(Arrays.asList(theChildDefinition.getElementName()));
+		List<String> newList = new ArrayList<>(theCurrentList);
 		newList.add(theChildDefinition.getElementName());
 		return newList;
 	}

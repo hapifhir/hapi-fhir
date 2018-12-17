@@ -58,4 +58,6 @@ public interface IResourceReindexingSvc {
 	 * to be used by unit tests.
 	 */
 	void cancelAndPurgeAllJobs();
+
+	int countReindexJobs();
 }

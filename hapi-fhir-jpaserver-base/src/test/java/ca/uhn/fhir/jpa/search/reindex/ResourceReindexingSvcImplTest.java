@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -63,6 +64,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	@Captor
 	private ArgumentCaptor<Date> myHighCaptor;
 	private ResourceReindexJobEntity mySingleJob;
+	@Mock
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Override
 	protected FhirContext getContext() {
@@ -87,6 +90,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		mySvc.setReindexJobDaoForUnitTest(myReindexJobDao);
 		mySvc.setResourceTableDaoForUnitTest(myResourceTableDao);
 		mySvc.setTxManagerForUnitTest(myTxManager);
+		mySvc.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		mySvc.start();
 	}
 
@@ -175,6 +179,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		verify(myReindexJobDao, times(1)).getReindexCount(any());
 		verify(myReindexJobDao, times(1)).setReindexCount(any(), anyInt());
 		verifyNoMoreInteractions(myReindexJobDao);
+
+		verify(mySearchParamRegistry, times(1)).forceRefresh();
 	}
 
 	@Test
