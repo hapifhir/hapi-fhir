@@ -26,7 +26,7 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>fi.kela.kanta.phr</groupId>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
