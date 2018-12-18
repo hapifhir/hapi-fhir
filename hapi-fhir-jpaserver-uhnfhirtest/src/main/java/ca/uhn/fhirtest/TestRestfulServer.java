@@ -21,7 +21,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhirtest.config.*;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
@@ -35,7 +34,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class TestRestfulServer extends RestfulServer {
@@ -225,15 +223,6 @@ public class TestRestfulServer extends RestfulServer {
 		 * Spool results to the database
 		 */
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
-
-		/*
-		 * Load interceptors for the server from Spring
-		 */
-		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
-		for (IServerInterceptor interceptor : interceptorBeans) {
-			this.registerInterceptor(interceptor);
-		}
-
 	}
 
 	/**

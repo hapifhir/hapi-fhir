@@ -1,16 +1,13 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.*;
-import java.util.*;
-
-import org.apache.maven.plugin.*;
-import org.apache.maven.plugins.annotations.*;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.project.MavenProject;
+import org.apache.maven.plugins.annotations.Parameter;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.tinder.parser.*;
+import java.io.File;
 
 @Mojo(name = "generate-sources", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class TinderSourcesGeneratorMojo extends AbstractGeneratorMojo {

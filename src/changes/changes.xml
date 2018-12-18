@@ -25,6 +25,23 @@
 				DaoConfig (by default it is true). If isEnableInMemorySubscriptionMatching is "false", then all
 				subscription matching will query the database as before.
 			</action>
+			<action type="change">
+				Removed BaseSubscriptionInterceptor and all its subclasses (RestHook, EMail, WebSocket).  These are replaced
+				by two new interceptors: SubscriptionActivatingInterceptor that is responsible for activating subscriptions
+				and SubscriptionMatchingInterceptor that is responsible for matching incoming resources against activated
+				subscriptions.  Call DaoConfig.addSupportedSubscriptionType(type) to configure which subscription types
+				are supported in your environment.  The helper method SubscriptionInterceptorLoader.registerInterceptors()
+				will check if any subscription types are supported, and if so then register both the activating and matching
+				interceptors.  See https://github.com/jamesagnew/hapi-fhir/wiki/Proposed-Subscription-Design-Change for more
+				details.
+			</action>
+			<action type="change">
+				Added support for matching subscriptions in a separate server from the REST Server.  To do this, run the
+				SubscriptionActivatingInterceptor on the REST server and the SubscriptionMatchingInterceptor in the
+				standalone server.  Classes required to support running a standalone subscription server are in the
+				ca.uhn.fhir.jpa.subscription.module.standalone package.  These classes are excluded by default from
+				the JPA ApplicationContext (that package is explicitly filtered out in the BaseConfig.java @ComponentScan).
+			</action>
 			<action type="add">
 				Changed behaviour of FHIR Server to reject subscriptions with invalid criteria. If a Subscription
 				is submitted with invalid criteria, the server returns HTTP 422 "Unprocessable Entity" and the
@@ -155,6 +172,37 @@
 				Under some circumstances, when a custom search parameter was added to the JPA server 
 				resources could start reindexing before the new search parameter had been saved, meaning that
 				it was not applied to all resources. This has been corrected.
+			</action>
+			<action type="change">
+				In example-projects/README.md and hapi-fhir-jpaserver-example/README.md, incidate that these examples projects
+				are no longer maintained.  The README.md points users to a starter project they should use for examples.
+			</action>
+			<action type="change">
+				Replaced use of BeanFactory with custom factory classes that Spring @Lookup the @Scope("prototype") beans
+				(e.g. SearchBuilderFactory).
+			</action>
+			<action type="change">
+				Moved e-mail from address configuration from EmailInterceptor (which doesn't exist any more) to DaoConfig.
+			</action>
+			<action type="add">
+				Added 3 interfaces for services required by the standalone subscription server.  The standalone subscription
+				server doesn't have access to a database and so needs to get its resources using a FhirClient.  Thus
+				for each of these interfaces, there are two implementations: a Dao implementaiton and a FhirClient
+				implementation.  The interfaces thus introduced are ISubscriptionProvider (used to load subscriptions
+				into the SubscriptionRegistry), the IResourceProvider (used to get the latest version of a resource
+				if the "get latest version" flag is set on the subscription) and ISearchParamProvider used to load
+				custom search parameters.
+			</action>
+			<action type="change">
+				Separated active subscription cache from the interceptors into a new Spring component called the
+				SubscriptionRegistry.  This component maintains a cache of ActiveSubscriptions.  An ActiveSubscription
+				contains the subscription, it's delivery channel, and a list of delivery handlers.
+			</action>
+			<action type="change">
+				Introduced a Spring factory interfaces called ISubscriptionDeliveryChannelFactory and
+				ISubscriptionDeliveryHandlerFactory that are used to create delivery channels and handlers.  By default,
+				HAPI FHIR ships with a LinkedBlockingQueue implementation of the delivery channel factory.  If a different
+				type of channel factory is required, add it to your application context and mark it as @Primary.
 			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">

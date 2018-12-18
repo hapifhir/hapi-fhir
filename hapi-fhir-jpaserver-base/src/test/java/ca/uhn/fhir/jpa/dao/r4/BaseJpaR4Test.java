@@ -15,7 +15,7 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -223,8 +223,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("mySearchParameterDaoR4")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
 	@Autowired
-	protected ISearchParamPresenceSvc mySearchParamPresenceSvc;
-	@Autowired
 	protected ISearchParamRegistry mySearchParamRegsitry;
 	@Autowired
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
@@ -273,6 +271,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected ICacheWarmingSvc myCacheWarmingSvc;
 	@Autowired
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
+	@Autowired
+	protected SubscriptionRegistry mySubscriptionRegistry;
 
 	@After()
 	public void afterCleanupDao() {
