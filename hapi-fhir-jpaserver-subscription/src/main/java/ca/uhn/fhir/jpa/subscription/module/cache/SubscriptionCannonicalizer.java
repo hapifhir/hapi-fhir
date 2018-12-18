@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -39,7 +40,7 @@ public class SubscriptionCannonicalizer<S extends IBaseResource> {
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus()));
-			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType()));
+			retVal.setChannelType(CanonicalSubscriptionChannelType.fromCode(subscription.getChannel().getType()));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setHeaders(subscription.getChannel().getHeader());
@@ -57,14 +58,14 @@ public class SubscriptionCannonicalizer<S extends IBaseResource> {
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		try {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
-			retVal.setChannelType(org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
+			retVal.setChannelType(CanonicalSubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
 			retVal.setCriteriaString(subscription.getCriteria());
 			retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 			retVal.setHeaders(subscription.getChannel().getHeader());
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 
-			if (retVal.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
+			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
 				String subjectTemplate;
 				String bodyTemplate;
@@ -78,7 +79,7 @@ public class SubscriptionCannonicalizer<S extends IBaseResource> {
 				retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
 			}
 
-			if (retVal.getChannelType() == Subscription.SubscriptionChannelType.RESTHOOK) {
+			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
 				String stripVersionIds;
 				String deliverLatestVersion;
 				try {
@@ -102,14 +103,14 @@ public class SubscriptionCannonicalizer<S extends IBaseResource> {
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
 		retVal.setStatus(subscription.getStatus());
-		retVal.setChannelType(subscription.getChannel().getType());
+		retVal.setChannelType(CanonicalSubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
 		retVal.setCriteriaString(subscription.getCriteria());
 		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
 		retVal.setHeaders(subscription.getChannel().getHeader());
 		retVal.setIdElement(subscription.getIdElement());
 		retVal.setPayloadString(subscription.getChannel().getPayload());
 
-		if (retVal.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
+		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			String from;
 			String subjectTemplate;
 			try {
@@ -122,7 +123,7 @@ public class SubscriptionCannonicalizer<S extends IBaseResource> {
 			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
 		}
 
-		if (retVal.getChannelType() == Subscription.SubscriptionChannelType.RESTHOOK) {
+		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
 			String stripVersionIds;
 			String deliverLatestVersion;
 			try {

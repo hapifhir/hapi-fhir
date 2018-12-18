@@ -54,7 +54,7 @@ public class CanonicalSubscription implements Serializable {
 	@JsonProperty("headers")
 	private List<String> myHeaders;
 	@JsonProperty("channelType")
-	private Subscription.SubscriptionChannelType myChannelType;
+	private CanonicalSubscriptionChannelType myChannelType;
 	@JsonProperty("status")
 	private Subscription.SubscriptionStatus myStatus;
 	@JsonProperty("triggerDefinition")
@@ -73,11 +73,11 @@ public class CanonicalSubscription implements Serializable {
 	}
 
 
-	public Subscription.SubscriptionChannelType getChannelType() {
+	public CanonicalSubscriptionChannelType getChannelType() {
 		return myChannelType;
 	}
 
-	public void setChannelType(Subscription.SubscriptionChannelType theChannelType) {
+	public void setChannelType(CanonicalSubscriptionChannelType theChannelType) {
 		myChannelType = theChannelType;
 	}
 
