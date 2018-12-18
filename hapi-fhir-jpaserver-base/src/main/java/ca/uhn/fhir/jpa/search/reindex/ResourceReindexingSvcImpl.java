@@ -293,8 +293,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 		/*
 		 * On the first time we run a particular reindex job, let's make sure we
-		 * have the latest search parameters loaded. This is good since a common reason to
-		 * be reindexing is that the search parameters have changed in some way.
+		 * have the latest search parameters loaded. A common reason to
+		 * be reindexing is that the search parameters have changed in some way, so
+		 * this makes sure we're on the latest versions
 		 */
 		if (theJob.getThresholdLow() == null) {
 			mySearchParamRegistry.forceRefresh();
