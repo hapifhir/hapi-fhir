@@ -34,12 +34,16 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 			return;
 		}
 		ResourceModifiedMessage resourceModifiedMessage = ((ResourceModifiedJsonMessage) theMessage).getPayload();
-		IBaseResource resource = resourceModifiedMessage.getNewPayload(myFhirContext);
+		updateSubscriptionRegistryAndPerformMatching(resourceModifiedMessage);
+	}
+
+	public void updateSubscriptionRegistryAndPerformMatching(ResourceModifiedMessage theResourceModifiedMessage) {
+		IBaseResource resource = theResourceModifiedMessage.getNewPayload(myFhirContext);
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resource);
 
 		if (resourceDef.getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
 		}
-		mySubscriptionMatchingSubscriber.handleMessage(theMessage);
+		mySubscriptionMatchingSubscriber.matchActiveSubscriptionsAndDeliver(theResourceModifiedMessage);
 	}
 }
