@@ -23,6 +23,7 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
@@ -172,7 +173,7 @@ public class FhirAutoConfiguration {
 			return b;
 		}
 
-		@Bean(name="hapiJpaTaskExecutor")
+		@Bean(name=BaseConfig.TASK_EXECUTOR_NAME)
 		public AsyncTaskExecutor taskScheduler() {
 			ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
 			retVal.setConcurrentExecutor(scheduledExecutorService().getObject());

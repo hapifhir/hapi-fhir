@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
@@ -72,9 +73,8 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
-	// TODO KHS James, is this the correct taskExecutor?
 	@Autowired
-	@Qualifier("hapiJpaTaskExecutor")
+	@Qualifier(BaseConfig.TASK_EXECUTOR_NAME)
 	private AsyncTaskExecutor myTaskExecutor;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
