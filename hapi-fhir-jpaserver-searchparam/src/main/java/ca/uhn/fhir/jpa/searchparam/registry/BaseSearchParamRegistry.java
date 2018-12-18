@@ -36,7 +36,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
@@ -45,29 +44,20 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implements ISearchParamRegistry {
+	@Autowired
+	private ModelConfig myModelConfig;
+	@Autowired
+	private ISearchParamProvider mySearchParamProvider;
+	@Autowired
+	private FhirContext myFhirContext;
 
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
 	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
 	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
 	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
-	@Autowired
-	private FhirContext myCtx;
 	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
-	@Autowired
-	private ModelConfig myModelConfig;
 	private volatile long myLastRefresh;
-	private ISearchParamProvider mySearchParamProvider;
-
-	BaseSearchParamRegistry(ISearchParamProvider theSearchParamProvider) {
-		super();
-		mySearchParamProvider = theSearchParamProvider;
-	}
-
-	@VisibleForTesting
-	public void setSearchParamProvider(ISearchParamProvider theSearchParamProvider) {
-		mySearchParamProvider = theSearchParamProvider;
-	}
 
 	@Override
 	public void requestRefresh() {
@@ -219,10 +209,10 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	public void postConstruct() {
 		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
 
-		Set<String> resourceNames = myCtx.getResourceNames();
+		Set<String> resourceNames = myFhirContext.getResourceNames();
 
 		for (String resourceName : resourceNames) {
-			RuntimeResourceDefinition nextResDef = myCtx.getResourceDefinition(resourceName);
+			RuntimeResourceDefinition nextResDef = myFhirContext.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
 			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
 			resourceNameToSearchParams.put(nextResourceName, nameToParam);
@@ -283,7 +273,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 					continue;
 				}
 
-				for (String nextBaseName : SearchParameterUtil.getBaseAsStrings(myCtx, nextSp)) {
+				for (String nextBaseName : SearchParameterUtil.getBaseAsStrings(myFhirContext, nextSp)) {
 					if (isBlank(nextBaseName)) {
 						continue;
 					}
@@ -348,5 +338,9 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		return getActiveSearchParams(theResourceDef.getName()).values();
 	}
 
-
+	@VisibleForTesting
+	@Override
+	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
+		mySearchParamProvider = theSearchParamProvider;
+	}
 }

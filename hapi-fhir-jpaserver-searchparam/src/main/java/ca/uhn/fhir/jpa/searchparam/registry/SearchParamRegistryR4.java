@@ -41,10 +41,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryR4 extends BaseSearchParamRegistry<SearchParameter> {
 
-	public SearchParamRegistryR4(ISearchParamProvider theSearchParamProvider) {
-		super(theSearchParamProvider);
-	}
-
 	@Override
 	protected RuntimeSearchParam toRuntimeSp(SearchParameter theNextSp) {
 		String name = theNextSp.getCode();
@@ -128,6 +124,4 @@ public class SearchParamRegistryR4 extends BaseSearchParamRegistry<SearchParamet
 
 		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
 	}
-
-
 }

@@ -9,7 +9,6 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import com.google.gson.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -32,8 +31,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
