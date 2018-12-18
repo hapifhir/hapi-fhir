@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionCheckingSubscriberTest;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class BaseSubscriptionChannelDstu3Test extends BaseSubscriptionDstu3Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriberTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
 
 	@Autowired
 	FhirContext myFhirContext;
