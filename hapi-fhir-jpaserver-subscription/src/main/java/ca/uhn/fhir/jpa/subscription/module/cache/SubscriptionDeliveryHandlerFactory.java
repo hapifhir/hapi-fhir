@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.SubscriptionDeliveringEmailSubscriber;
@@ -21,9 +22,9 @@ public abstract class SubscriptionDeliveryHandlerFactory {
 	protected abstract SubscriptionDeliveringRestHookSubscriber getSubscriptionDeliveringRestHookSubscriber();
 
 	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
-		if (theSubscription.getChannelType() == Subscription.SubscriptionChannelType.EMAIL) {
+		if (theSubscription.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 			return Optional.of(getSubscriptionDeliveringEmailSubscriber(myEmailSender));
-		} else if (theSubscription.getChannelType() == Subscription.SubscriptionChannelType.RESTHOOK) {
+		} else if (theSubscription.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
 			return Optional.of(getSubscriptionDeliveringRestHookSubscriber());
 		} else {
 			return Optional.empty();
