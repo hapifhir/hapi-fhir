@@ -51,7 +51,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 
 	@Autowired
-	IResourceProvider myResourceProvider;
+	IResourceRetriever myResourceRetriever;
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
 		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
@@ -126,7 +126,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
 			IIdType payloadId = theMsg.getPayloadId(myFhirContext);
 			try {
-				payloadResource = myResourceProvider.getResource(payloadId.toVersionless());
+				payloadResource = myResourceRetriever.getResource(payloadId.toVersionless());
 			} catch (ResourceGoneException e) {
 				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(myFhirContext));
 				return null;
