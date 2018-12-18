@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionCheckingSubscriber;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -23,7 +23,7 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
-	SubscriptionCheckingSubscriber mySubscriptionCheckingSubscriber;
+	SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
 
@@ -40,6 +40,6 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 		if (resourceDef.getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
 		}
-		mySubscriptionCheckingSubscriber.handleMessage(theMessage);
+		mySubscriptionMatchingSubscriber.handleMessage(theMessage);
 	}
 }

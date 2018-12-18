@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -65,6 +66,7 @@ import java.util.concurrent.TimeUnit;
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
 @Service
+@Lazy
 public class SubscriptionActivatingInterceptor extends ServerOperationInterceptorAdapter {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
 

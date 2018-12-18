@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.SubscriptionChannel;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionCheckingSubscriber;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import com.google.common.annotations.VisibleForTesting;
@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +41,7 @@ import javax.annotation.PreDestroy;
  */
 
 @Component
+@Lazy
 public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAdapter {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
@@ -51,7 +53,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private SubscriptionCheckingSubscriber mySubscriptionCheckingSubscriber;
+	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
 	private ISubscriptionChannelFactory mySubscriptionChannelFactory;
 
@@ -67,13 +69,13 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 		if (myProcessingChannel == null) {
 			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel("subscription-matching");
 		}
-		myProcessingChannel.subscribe(mySubscriptionCheckingSubscriber);
+		myProcessingChannel.subscribe(mySubscriptionMatchingSubscriber);
 	}
 
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void preDestroy() {
-		myProcessingChannel.unsubscribe(mySubscriptionCheckingSubscriber);
+		myProcessingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
 	}
 
 	@Override
