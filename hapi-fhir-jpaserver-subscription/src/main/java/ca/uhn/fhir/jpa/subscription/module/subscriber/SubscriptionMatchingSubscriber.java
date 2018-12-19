@@ -22,7 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Subscription Server
  * %%
  * Copyright (C) 2014 - 2018 University Health Network
  * %%
