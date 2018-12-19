@@ -138,7 +138,7 @@ public abstract class BaseClient implements IRestfulClient {
 	public <T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl) {
 		BaseHttpClientInvocation clientInvocation = new HttpGetClientInvocation(getFhirContext(), theUrl);
 		ResourceResponseHandler<T> binding = new ResourceResponseHandler<T>(theResourceType);
-		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null, null, null);
+		return invokeClient(getFhirContext(), binding, clientInvocation, null, false, false, null, null, null, null, null);
 	}
 
 	void forceConformanceCheck() {
@@ -215,11 +215,12 @@ public abstract class BaseClient implements IRestfulClient {
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, boolean theLogRequestAndResponse) {
-		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null, null, null, null);
+		return invokeClient(theContext, binding, clientInvocation, null, null, theLogRequestAndResponse, null, null, null, null, null);
 	}
 
 	<T> T invokeClient(FhirContext theContext, IClientResponseHandler<T> binding, BaseHttpClientInvocation clientInvocation, EncodingEnum theEncoding, Boolean thePrettyPrint,
-							 boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements, CacheControlDirective theCacheControlDirective, String theCustomAcceptHeader) {
+							 boolean theLogRequestAndResponse, SummaryEnum theSummaryMode, Set<String> theSubsetElements, CacheControlDirective theCacheControlDirective, String theCustomAcceptHeader,
+							 Map<String, List<String>> theCustomHeaders) {
 
 		if (!myDontValidateConformance) {
 			myFactory.validateServerBaseIfConfiguredToDoSo(myUrlBase, myClient, this);
@@ -277,6 +278,14 @@ public abstract class BaseClient implements IRestfulClient {
 				}
 				if (b.length() > 0) {
 					httpRequest.addHeader(Constants.HEADER_CACHE_CONTROL, b.toString());
+				}
+			}
+
+			if (theCustomHeaders != null) {
+				for (Map.Entry<String, List<String>> customHeader: theCustomHeaders.entrySet()) {
+					for (String value: customHeader.getValue()) {
+						httpRequest.addHeader(customHeader.getKey(), value);
+					}
 				}
 			}
 
