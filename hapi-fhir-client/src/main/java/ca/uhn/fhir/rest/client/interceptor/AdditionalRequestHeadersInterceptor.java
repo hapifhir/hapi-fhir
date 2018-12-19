@@ -33,12 +33,15 @@ import java.util.Objects;
 
 /**
  * This interceptor adds arbitrary header values to requests made by the client.
+ *
+ * This is now also possible directly on the Fluent Client API by calling
+ * {@link ca.uhn.fhir.rest.gclient.IClientExecutable#withAdditionalHeader(String, String)}
  */
 public class AdditionalRequestHeadersInterceptor implements IClientInterceptor {
 	private final Map<String, List<String>> additionalHttpHeaders = new HashMap<>();
 
 	public AdditionalRequestHeadersInterceptor() {
-		this(new HashMap<String, List<String>>());
+		this(new HashMap<>());
 	}
 
 	public AdditionalRequestHeadersInterceptor(Map<String, List<String>> additionalHttpHeaders) {
@@ -84,7 +87,7 @@ public class AdditionalRequestHeadersInterceptor implements IClientInterceptor {
 	 */
 	private List<String> getHeaderValues(String headerName) {
 		if (additionalHttpHeaders.get(headerName) == null) {
-			additionalHttpHeaders.put(headerName, new ArrayList<String>());
+			additionalHttpHeaders.put(headerName, new ArrayList<>());
 		}
 		return additionalHttpHeaders.get(headerName);
 	}

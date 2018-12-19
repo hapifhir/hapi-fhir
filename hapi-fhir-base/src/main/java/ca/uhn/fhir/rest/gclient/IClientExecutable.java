@@ -89,6 +89,21 @@ public interface IClientExecutable<T extends IClientExecutable<?, Y>, Y> {
 	T encodedXml();
 
 	/**
+	 * Set a HTTP header not explicitly defined in FHIR but commonly used in real-world scenarios. One
+	 * important example is to set the Authorization header (e.g. Basic Auth or OAuth2-based Bearer auth),
+	 * which tends to be cumbersome using {@link ca.uhn.fhir.rest.client.api.IClientInterceptor IClientInterceptors},
+	 * particularly when REST clients shall be reused and are thus supposed to remain stateless.
+	 * <p>It is the responsibility of the caller to care for proper encoding of the header value, e.g.
+	 * using Base64.</p>
+	 * <p>This is a short-cut alternative to using a corresponding client interceptor</p>
+	 *
+	 * @param theHeaderName header name
+	 * @param theHeaderValue header value
+	 * @return
+	 */
+	T withAdditionalHeader(String theHeaderName, String theHeaderValue);
+
+	/**
 	 * Actually execute the client operation
 	 */
 	Y execute();
