@@ -1571,6 +1571,11 @@ public class CompartmentDefinition extends MetadataResource {
       public CompartmentDefinition copy() {
         CompartmentDefinition dst = new CompartmentDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(CompartmentDefinition dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
@@ -1582,30 +1587,29 @@ public class CompartmentDefinition extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         dst.purpose = purpose == null ? null : purpose.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.code = code == null ? null : code.copy();
         dst.search = search == null ? null : search.copy();
         if (resource != null) {
           dst.resource = new ArrayList<CompartmentDefinitionResourceComponent>();
           for (CompartmentDefinitionResourceComponent i : resource)
             dst.resource.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected CompartmentDefinition typedCopy() {
+  protected CompartmentDefinition typedCopy() {
         return copy();
       }
 

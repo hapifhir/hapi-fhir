@@ -1229,33 +1229,37 @@ public class Substance extends DomainResource {
       public Substance copy() {
         Substance dst = new Substance();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Substance dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.code = code == null ? null : code.copy();
         dst.description = description == null ? null : description.copy();
         if (instance != null) {
           dst.instance = new ArrayList<SubstanceInstanceComponent>();
           for (SubstanceInstanceComponent i : instance)
             dst.instance.add(i.copy());
-        };
+        }
         if (ingredient != null) {
           dst.ingredient = new ArrayList<SubstanceIngredientComponent>();
           for (SubstanceIngredientComponent i : ingredient)
             dst.ingredient.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Substance typedCopy() {
+  protected Substance typedCopy() {
         return copy();
       }
 

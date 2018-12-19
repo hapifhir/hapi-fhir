@@ -1369,12 +1369,17 @@ public class DocumentManifest extends DomainResource {
       public DocumentManifest copy() {
         DocumentManifest dst = new DocumentManifest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(DocumentManifest dst) {
+        super.copyValues(dst);
         dst.masterIdentifier = masterIdentifier == null ? null : masterIdentifier.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
         dst.subject = subject == null ? null : subject.copy();
@@ -1383,28 +1388,27 @@ public class DocumentManifest extends DomainResource {
           dst.author = new ArrayList<Reference>();
           for (Reference i : author)
             dst.author.add(i.copy());
-        };
+        }
         if (recipient != null) {
           dst.recipient = new ArrayList<Reference>();
           for (Reference i : recipient)
             dst.recipient.add(i.copy());
-        };
+        }
         dst.source = source == null ? null : source.copy();
         dst.description = description == null ? null : description.copy();
         if (content != null) {
           dst.content = new ArrayList<DocumentManifestContentComponent>();
           for (DocumentManifestContentComponent i : content)
             dst.content.add(i.copy());
-        };
+        }
         if (related != null) {
           dst.related = new ArrayList<DocumentManifestRelatedComponent>();
           for (DocumentManifestRelatedComponent i : related)
             dst.related.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected DocumentManifest typedCopy() {
+  protected DocumentManifest typedCopy() {
         return copy();
       }
 

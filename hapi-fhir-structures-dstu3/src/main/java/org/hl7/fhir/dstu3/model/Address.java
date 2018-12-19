@@ -1038,6 +1038,11 @@ public class Address extends Type implements ICompositeType {
       public Address copy() {
         Address dst = new Address();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Address dst) {
+        super.copyValues(dst);
         dst.use = use == null ? null : use.copy();
         dst.type = type == null ? null : type.copy();
         dst.text = text == null ? null : text.copy();
@@ -1045,17 +1050,17 @@ public class Address extends Type implements ICompositeType {
           dst.line = new ArrayList<StringType>();
           for (StringType i : line)
             dst.line.add(i.copy());
-        };
+        }
+        ;
         dst.city = city == null ? null : city.copy();
         dst.district = district == null ? null : district.copy();
         dst.state = state == null ? null : state.copy();
         dst.postalCode = postalCode == null ? null : postalCode.copy();
         dst.country = country == null ? null : country.copy();
         dst.period = period == null ? null : period.copy();
-        return dst;
       }
 
-      protected Address typedCopy() {
+  protected Address typedCopy() {
         return copy();
       }
 

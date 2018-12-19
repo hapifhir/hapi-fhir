@@ -653,6 +653,11 @@ public class SampledData extends Type implements ICompositeType {
       public SampledData copy() {
         SampledData dst = new SampledData();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(SampledData dst) {
+        super.copyValues(dst);
         dst.origin = origin == null ? null : origin.copy();
         dst.period = period == null ? null : period.copy();
         dst.factor = factor == null ? null : factor.copy();
@@ -660,10 +665,9 @@ public class SampledData extends Type implements ICompositeType {
         dst.upperLimit = upperLimit == null ? null : upperLimit.copy();
         dst.dimensions = dimensions == null ? null : dimensions.copy();
         dst.data = data == null ? null : data.copy();
-        return dst;
       }
 
-      protected SampledData typedCopy() {
+  protected SampledData typedCopy() {
         return copy();
       }
 

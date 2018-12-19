@@ -2480,11 +2480,16 @@ public class AllergyIntolerance extends DomainResource {
       public AllergyIntolerance copy() {
         AllergyIntolerance dst = new AllergyIntolerance();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(AllergyIntolerance dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.clinicalStatus = clinicalStatus == null ? null : clinicalStatus.copy();
         dst.verificationStatus = verificationStatus == null ? null : verificationStatus.copy();
         dst.type = type == null ? null : type.copy();
@@ -2492,7 +2497,7 @@ public class AllergyIntolerance extends DomainResource {
           dst.category = new ArrayList<Enumeration<AllergyIntoleranceCategory>>();
           for (Enumeration<AllergyIntoleranceCategory> i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.criticality = criticality == null ? null : criticality.copy();
         dst.code = code == null ? null : code.copy();
         dst.patient = patient == null ? null : patient.copy();
@@ -2505,16 +2510,15 @@ public class AllergyIntolerance extends DomainResource {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (reaction != null) {
           dst.reaction = new ArrayList<AllergyIntoleranceReactionComponent>();
           for (AllergyIntoleranceReactionComponent i : reaction)
             dst.reaction.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected AllergyIntolerance typedCopy() {
+  protected AllergyIntolerance typedCopy() {
         return copy();
       }
 

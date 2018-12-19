@@ -2296,11 +2296,16 @@ public class VisionPrescription extends DomainResource {
       public VisionPrescription copy() {
         VisionPrescription dst = new VisionPrescription();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(VisionPrescription dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
@@ -2311,11 +2316,10 @@ public class VisionPrescription extends DomainResource {
           dst.dispense = new ArrayList<VisionPrescriptionDispenseComponent>();
           for (VisionPrescriptionDispenseComponent i : dispense)
             dst.dispense.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected VisionPrescription typedCopy() {
+  protected VisionPrescription typedCopy() {
         return copy();
       }
 

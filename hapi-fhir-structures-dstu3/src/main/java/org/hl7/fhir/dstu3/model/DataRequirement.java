@@ -1290,31 +1290,35 @@ public class DataRequirement extends Type implements ICompositeType {
       public DataRequirement copy() {
         DataRequirement dst = new DataRequirement();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(DataRequirement dst) {
+        super.copyValues(dst);
         dst.type = type == null ? null : type.copy();
         if (profile != null) {
           dst.profile = new ArrayList<UriType>();
           for (UriType i : profile)
             dst.profile.add(i.copy());
-        };
+        }
         if (mustSupport != null) {
           dst.mustSupport = new ArrayList<StringType>();
           for (StringType i : mustSupport)
             dst.mustSupport.add(i.copy());
-        };
+        }
         if (codeFilter != null) {
           dst.codeFilter = new ArrayList<DataRequirementCodeFilterComponent>();
           for (DataRequirementCodeFilterComponent i : codeFilter)
             dst.codeFilter.add(i.copy());
-        };
+        }
         if (dateFilter != null) {
           dst.dateFilter = new ArrayList<DataRequirementDateFilterComponent>();
           for (DataRequirementDateFilterComponent i : dateFilter)
             dst.dateFilter.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected DataRequirement typedCopy() {
+  protected DataRequirement typedCopy() {
         return copy();
       }
 

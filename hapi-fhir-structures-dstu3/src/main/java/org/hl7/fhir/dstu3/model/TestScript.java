@@ -12234,6 +12234,11 @@ public class TestScript extends MetadataResource {
       public TestScript copy() {
         TestScript dst = new TestScript();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(TestScript dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.version = version == null ? null : version.copy();
@@ -12247,67 +12252,66 @@ public class TestScript extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
         if (origin != null) {
           dst.origin = new ArrayList<TestScriptOriginComponent>();
           for (TestScriptOriginComponent i : origin)
             dst.origin.add(i.copy());
-        };
+        }
         if (destination != null) {
           dst.destination = new ArrayList<TestScriptDestinationComponent>();
           for (TestScriptDestinationComponent i : destination)
             dst.destination.add(i.copy());
-        };
+        }
         dst.metadata = metadata == null ? null : metadata.copy();
         if (fixture != null) {
           dst.fixture = new ArrayList<TestScriptFixtureComponent>();
           for (TestScriptFixtureComponent i : fixture)
             dst.fixture.add(i.copy());
-        };
+        }
         if (profile != null) {
           dst.profile = new ArrayList<Reference>();
           for (Reference i : profile)
             dst.profile.add(i.copy());
-        };
+        }
         if (variable != null) {
           dst.variable = new ArrayList<TestScriptVariableComponent>();
           for (TestScriptVariableComponent i : variable)
             dst.variable.add(i.copy());
-        };
+        }
         if (rule != null) {
           dst.rule = new ArrayList<TestScriptRuleComponent>();
           for (TestScriptRuleComponent i : rule)
             dst.rule.add(i.copy());
-        };
+        }
         if (ruleset != null) {
           dst.ruleset = new ArrayList<TestScriptRulesetComponent>();
           for (TestScriptRulesetComponent i : ruleset)
             dst.ruleset.add(i.copy());
-        };
+        }
         dst.setup = setup == null ? null : setup.copy();
         if (test != null) {
           dst.test = new ArrayList<TestScriptTestComponent>();
           for (TestScriptTestComponent i : test)
             dst.test.add(i.copy());
-        };
+        }
         dst.teardown = teardown == null ? null : teardown.copy();
-        return dst;
       }
 
-      protected TestScript typedCopy() {
+  protected TestScript typedCopy() {
         return copy();
       }
 

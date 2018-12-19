@@ -1748,27 +1748,32 @@ public class EpisodeOfCare extends DomainResource {
       public EpisodeOfCare copy() {
         EpisodeOfCare dst = new EpisodeOfCare();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(EpisodeOfCare dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         if (statusHistory != null) {
           dst.statusHistory = new ArrayList<EpisodeOfCareStatusHistoryComponent>();
           for (EpisodeOfCareStatusHistoryComponent i : statusHistory)
             dst.statusHistory.add(i.copy());
-        };
+        }
         if (type != null) {
           dst.type = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : type)
             dst.type.add(i.copy());
-        };
+        }
         if (diagnosis != null) {
           dst.diagnosis = new ArrayList<DiagnosisComponent>();
           for (DiagnosisComponent i : diagnosis)
             dst.diagnosis.add(i.copy());
-        };
+        }
         dst.patient = patient == null ? null : patient.copy();
         dst.managingOrganization = managingOrganization == null ? null : managingOrganization.copy();
         dst.period = period == null ? null : period.copy();
@@ -1776,22 +1781,21 @@ public class EpisodeOfCare extends DomainResource {
           dst.referralRequest = new ArrayList<Reference>();
           for (Reference i : referralRequest)
             dst.referralRequest.add(i.copy());
-        };
+        }
         dst.careManager = careManager == null ? null : careManager.copy();
         if (team != null) {
           dst.team = new ArrayList<Reference>();
           for (Reference i : team)
             dst.team.add(i.copy());
-        };
+        }
         if (account != null) {
           dst.account = new ArrayList<Reference>();
           for (Reference i : account)
             dst.account.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected EpisodeOfCare typedCopy() {
+  protected EpisodeOfCare typedCopy() {
         return copy();
       }
 

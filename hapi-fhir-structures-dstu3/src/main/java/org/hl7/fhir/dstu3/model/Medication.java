@@ -1891,6 +1891,11 @@ public class Medication extends DomainResource {
       public Medication copy() {
         Medication dst = new Medication();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Medication dst) {
+        super.copyValues(dst);
         dst.code = code == null ? null : code.copy();
         dst.status = status == null ? null : status.copy();
         dst.isBrand = isBrand == null ? null : isBrand.copy();
@@ -1901,17 +1906,16 @@ public class Medication extends DomainResource {
           dst.ingredient = new ArrayList<MedicationIngredientComponent>();
           for (MedicationIngredientComponent i : ingredient)
             dst.ingredient.add(i.copy());
-        };
+        }
         dst.package_ = package_ == null ? null : package_.copy();
         if (image != null) {
           dst.image = new ArrayList<Attachment>();
           for (Attachment i : image)
             dst.image.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Medication typedCopy() {
+  protected Medication typedCopy() {
         return copy();
       }
 

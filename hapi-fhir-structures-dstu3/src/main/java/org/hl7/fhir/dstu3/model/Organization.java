@@ -1198,48 +1198,52 @@ public class Organization extends DomainResource {
       public Organization copy() {
         Organization dst = new Organization();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Organization dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.active = active == null ? null : active.copy();
         if (type != null) {
           dst.type = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : type)
             dst.type.add(i.copy());
-        };
+        }
         dst.name = name == null ? null : name.copy();
         if (alias != null) {
           dst.alias = new ArrayList<StringType>();
           for (StringType i : alias)
             dst.alias.add(i.copy());
-        };
+        }
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
-        };
+        }
         if (address != null) {
           dst.address = new ArrayList<Address>();
           for (Address i : address)
             dst.address.add(i.copy());
-        };
+        }
         dst.partOf = partOf == null ? null : partOf.copy();
         if (contact != null) {
           dst.contact = new ArrayList<OrganizationContactComponent>();
           for (OrganizationContactComponent i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         if (endpoint != null) {
           dst.endpoint = new ArrayList<Reference>();
           for (Reference i : endpoint)
             dst.endpoint.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Organization typedCopy() {
+  protected Organization typedCopy() {
         return copy();
       }
 

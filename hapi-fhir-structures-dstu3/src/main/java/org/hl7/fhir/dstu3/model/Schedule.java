@@ -657,34 +657,38 @@ public class Schedule extends DomainResource {
       public Schedule copy() {
         Schedule dst = new Schedule();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Schedule dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.active = active == null ? null : active.copy();
         dst.serviceCategory = serviceCategory == null ? null : serviceCategory.copy();
         if (serviceType != null) {
           dst.serviceType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : serviceType)
             dst.serviceType.add(i.copy());
-        };
+        }
         if (specialty != null) {
           dst.specialty = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : specialty)
             dst.specialty.add(i.copy());
-        };
+        }
         if (actor != null) {
           dst.actor = new ArrayList<Reference>();
           for (Reference i : actor)
             dst.actor.add(i.copy());
-        };
+        }
         dst.planningHorizon = planningHorizon == null ? null : planningHorizon.copy();
         dst.comment = comment == null ? null : comment.copy();
-        return dst;
       }
 
-      protected Schedule typedCopy() {
+  protected Schedule typedCopy() {
         return copy();
       }
 

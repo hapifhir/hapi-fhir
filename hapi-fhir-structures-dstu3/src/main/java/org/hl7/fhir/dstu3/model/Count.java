@@ -121,7 +121,11 @@ public class Count extends Quantity implements ICompositeType {
         return dst;
       }
 
-      protected Count typedCopy() {
+      public void copyValues(Count dst) {
+        super.copyValues(dst);
+      }
+
+  protected Count typedCopy() {
         return copy();
       }
 

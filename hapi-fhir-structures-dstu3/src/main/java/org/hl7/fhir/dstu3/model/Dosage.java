@@ -978,13 +978,18 @@ public class Dosage extends Type implements ICompositeType {
       public Dosage copy() {
         Dosage dst = new Dosage();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Dosage dst) {
+        super.copyValues(dst);
         dst.sequence = sequence == null ? null : sequence.copy();
         dst.text = text == null ? null : text.copy();
         if (additionalInstruction != null) {
           dst.additionalInstruction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : additionalInstruction)
             dst.additionalInstruction.add(i.copy());
-        };
+        }
         dst.patientInstruction = patientInstruction == null ? null : patientInstruction.copy();
         dst.timing = timing == null ? null : timing.copy();
         dst.asNeeded = asNeeded == null ? null : asNeeded.copy();
@@ -996,10 +1001,9 @@ public class Dosage extends Type implements ICompositeType {
         dst.maxDosePerAdministration = maxDosePerAdministration == null ? null : maxDosePerAdministration.copy();
         dst.maxDosePerLifetime = maxDosePerLifetime == null ? null : maxDosePerLifetime.copy();
         dst.rate = rate == null ? null : rate.copy();
-        return dst;
       }
 
-      protected Dosage typedCopy() {
+  protected Dosage typedCopy() {
         return copy();
       }
 

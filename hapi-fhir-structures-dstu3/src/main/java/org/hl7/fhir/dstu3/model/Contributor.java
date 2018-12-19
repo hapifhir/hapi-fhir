@@ -461,17 +461,21 @@ public class Contributor extends Type implements ICompositeType {
       public Contributor copy() {
         Contributor dst = new Contributor();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Contributor dst) {
+        super.copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.name = name == null ? null : name.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Contributor typedCopy() {
+  protected Contributor typedCopy() {
         return copy();
       }
 

@@ -1036,11 +1036,16 @@ public class DeviceUseStatement extends DomainResource {
       public DeviceUseStatement copy() {
         DeviceUseStatement dst = new DeviceUseStatement();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(DeviceUseStatement dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.whenUsed = whenUsed == null ? null : whenUsed.copy();
@@ -1052,17 +1057,16 @@ public class DeviceUseStatement extends DomainResource {
           dst.indication = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : indication)
             dst.indication.add(i.copy());
-        };
+        }
         dst.bodySite = bodySite == null ? null : bodySite.copy();
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected DeviceUseStatement typedCopy() {
+  protected DeviceUseStatement typedCopy() {
         return copy();
       }
 

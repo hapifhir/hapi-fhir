@@ -3238,6 +3238,11 @@ public class ExpansionProfile extends MetadataResource {
       public ExpansionProfile copy() {
         ExpansionProfile dst = new ExpansionProfile();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ExpansionProfile dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.version = version == null ? null : version.copy();
@@ -3250,23 +3255,23 @@ public class ExpansionProfile extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         if (fixedVersion != null) {
           dst.fixedVersion = new ArrayList<ExpansionProfileFixedVersionComponent>();
           for (ExpansionProfileFixedVersionComponent i : fixedVersion)
             dst.fixedVersion.add(i.copy());
-        };
+        }
         dst.excludedSystem = excludedSystem == null ? null : excludedSystem.copy();
         dst.includeDesignations = includeDesignations == null ? null : includeDesignations.copy();
         dst.designation = designation == null ? null : designation.copy();
@@ -3277,10 +3282,9 @@ public class ExpansionProfile extends MetadataResource {
         dst.excludePostCoordinated = excludePostCoordinated == null ? null : excludePostCoordinated.copy();
         dst.displayLanguage = displayLanguage == null ? null : displayLanguage.copy();
         dst.limitedExpansion = limitedExpansion == null ? null : limitedExpansion.copy();
-        return dst;
       }
 
-      protected ExpansionProfile typedCopy() {
+  protected ExpansionProfile typedCopy() {
         return copy();
       }
 

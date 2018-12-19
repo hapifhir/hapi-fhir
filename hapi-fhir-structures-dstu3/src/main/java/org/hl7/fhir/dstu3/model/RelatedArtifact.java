@@ -703,16 +703,20 @@ public class RelatedArtifact extends Type implements ICompositeType {
       public RelatedArtifact copy() {
         RelatedArtifact dst = new RelatedArtifact();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(RelatedArtifact dst) {
+        super.copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.display = display == null ? null : display.copy();
         dst.citation = citation == null ? null : citation.copy();
         dst.url = url == null ? null : url.copy();
         dst.document = document == null ? null : document.copy();
         dst.resource = resource == null ? null : resource.copy();
-        return dst;
       }
 
-      protected RelatedArtifact typedCopy() {
+  protected RelatedArtifact typedCopy() {
         return copy();
       }
 

@@ -121,7 +121,11 @@ public class Distance extends Quantity implements ICompositeType {
         return dst;
       }
 
-      protected Distance typedCopy() {
+      public void copyValues(Distance dst) {
+        super.copyValues(dst);
+      }
+
+  protected Distance typedCopy() {
         return copy();
       }
 

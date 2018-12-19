@@ -328,13 +328,17 @@ public class Binary extends BaseBinary implements IBaseBinary {
       public Binary copy() {
         Binary dst = new Binary();
         copyValues(dst);
-        dst.contentType = contentType == null ? null : contentType.copy();
-        dst.securityContext = securityContext == null ? null : securityContext.copy();
-        dst.content = content == null ? null : content.copy();
         return dst;
       }
 
-      protected Binary typedCopy() {
+      public void copyValues(Binary dst) {
+        super.copyValues(dst);
+        dst.contentType = contentType == null ? null : contentType.copy();
+        dst.securityContext = securityContext == null ? null : securityContext.copy();
+        dst.content = content == null ? null : content.copy();
+      }
+
+  protected Binary typedCopy() {
         return copy();
       }
 

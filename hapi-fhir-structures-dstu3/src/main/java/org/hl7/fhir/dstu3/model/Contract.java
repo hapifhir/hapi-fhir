@@ -5702,6 +5702,11 @@ public class Contract extends DomainResource {
       public Contract copy() {
         Contract dst = new Contract();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Contract dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.issued = issued == null ? null : issued.copy();
@@ -5710,85 +5715,84 @@ public class Contract extends DomainResource {
           dst.subject = new ArrayList<Reference>();
           for (Reference i : subject)
             dst.subject.add(i.copy());
-        };
+        }
         if (topic != null) {
           dst.topic = new ArrayList<Reference>();
           for (Reference i : topic)
             dst.topic.add(i.copy());
-        };
+        }
         if (authority != null) {
           dst.authority = new ArrayList<Reference>();
           for (Reference i : authority)
             dst.authority.add(i.copy());
-        };
+        }
         if (domain != null) {
           dst.domain = new ArrayList<Reference>();
           for (Reference i : domain)
             dst.domain.add(i.copy());
-        };
+        }
         dst.type = type == null ? null : type.copy();
         if (subType != null) {
           dst.subType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : subType)
             dst.subType.add(i.copy());
-        };
+        }
         if (action != null) {
           dst.action = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : action)
             dst.action.add(i.copy());
-        };
+        }
         if (actionReason != null) {
           dst.actionReason = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : actionReason)
             dst.actionReason.add(i.copy());
-        };
+        }
         dst.decisionType = decisionType == null ? null : decisionType.copy();
         dst.contentDerivative = contentDerivative == null ? null : contentDerivative.copy();
         if (securityLabel != null) {
           dst.securityLabel = new ArrayList<Coding>();
           for (Coding i : securityLabel)
             dst.securityLabel.add(i.copy());
-        };
+        }
         if (agent != null) {
           dst.agent = new ArrayList<AgentComponent>();
           for (AgentComponent i : agent)
             dst.agent.add(i.copy());
-        };
+        }
         if (signer != null) {
           dst.signer = new ArrayList<SignatoryComponent>();
           for (SignatoryComponent i : signer)
             dst.signer.add(i.copy());
-        };
+        }
         if (valuedItem != null) {
           dst.valuedItem = new ArrayList<ValuedItemComponent>();
           for (ValuedItemComponent i : valuedItem)
             dst.valuedItem.add(i.copy());
-        };
+        }
         if (term != null) {
           dst.term = new ArrayList<TermComponent>();
           for (TermComponent i : term)
             dst.term.add(i.copy());
-        };
+        }
         dst.binding = binding == null ? null : binding.copy();
         if (friendly != null) {
           dst.friendly = new ArrayList<FriendlyLanguageComponent>();
           for (FriendlyLanguageComponent i : friendly)
             dst.friendly.add(i.copy());
-        };
+        }
         if (legal != null) {
           dst.legal = new ArrayList<LegalLanguageComponent>();
           for (LegalLanguageComponent i : legal)
             dst.legal.add(i.copy());
-        };
+        }
         if (rule != null) {
           dst.rule = new ArrayList<ComputableLanguageComponent>();
           for (ComputableLanguageComponent i : rule)
             dst.rule.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Contract typedCopy() {
+  protected Contract typedCopy() {
         return copy();
       }
 

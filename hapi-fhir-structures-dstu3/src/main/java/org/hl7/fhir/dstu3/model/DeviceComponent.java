@@ -1250,6 +1250,11 @@ public class DeviceComponent extends DomainResource {
       public DeviceComponent copy() {
         DeviceComponent dst = new DeviceComponent();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(DeviceComponent dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.type = type == null ? null : type.copy();
         dst.lastSystemChange = lastSystemChange == null ? null : lastSystemChange.copy();
@@ -1259,19 +1264,18 @@ public class DeviceComponent extends DomainResource {
           dst.operationalStatus = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : operationalStatus)
             dst.operationalStatus.add(i.copy());
-        };
+        }
         dst.parameterGroup = parameterGroup == null ? null : parameterGroup.copy();
         dst.measurementPrinciple = measurementPrinciple == null ? null : measurementPrinciple.copy();
         if (productionSpecification != null) {
           dst.productionSpecification = new ArrayList<DeviceComponentProductionSpecificationComponent>();
           for (DeviceComponentProductionSpecificationComponent i : productionSpecification)
             dst.productionSpecification.add(i.copy());
-        };
+        }
         dst.languageCode = languageCode == null ? null : languageCode.copy();
-        return dst;
       }
 
-      protected DeviceComponent typedCopy() {
+  protected DeviceComponent typedCopy() {
         return copy();
       }
 

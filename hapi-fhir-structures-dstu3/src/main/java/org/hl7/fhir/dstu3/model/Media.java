@@ -1416,16 +1416,21 @@ public class Media extends DomainResource {
       public Media copy() {
         Media dst = new Media();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Media dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         dst.type = type == null ? null : type.copy();
         dst.subtype = subtype == null ? null : subtype.copy();
         dst.view = view == null ? null : view.copy();
@@ -1437,7 +1442,7 @@ public class Media extends DomainResource {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         dst.bodySite = bodySite == null ? null : bodySite.copy();
         dst.device = device == null ? null : device.copy();
         dst.height = height == null ? null : height.copy();
@@ -1449,11 +1454,10 @@ public class Media extends DomainResource {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Media typedCopy() {
+  protected Media typedCopy() {
         return copy();
       }
 

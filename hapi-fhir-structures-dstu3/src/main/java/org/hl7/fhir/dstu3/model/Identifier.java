@@ -618,16 +618,20 @@ public class Identifier extends Type implements ICompositeType {
       public Identifier copy() {
         Identifier dst = new Identifier();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Identifier dst) {
+        super.copyValues(dst);
         dst.use = use == null ? null : use.copy();
         dst.type = type == null ? null : type.copy();
         dst.system = system == null ? null : system.copy();
         dst.value = value == null ? null : value.copy();
         dst.period = period == null ? null : period.copy();
         dst.assigner = assigner == null ? null : assigner.copy();
-        return dst;
       }
 
-      protected Identifier typedCopy() {
+  protected Identifier typedCopy() {
         return copy();
       }
 

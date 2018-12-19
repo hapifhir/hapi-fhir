@@ -604,14 +604,18 @@ public class TriggerDefinition extends Type implements ICompositeType {
       public TriggerDefinition copy() {
         TriggerDefinition dst = new TriggerDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(TriggerDefinition dst) {
+        super.copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.eventName = eventName == null ? null : eventName.copy();
         dst.eventTiming = eventTiming == null ? null : eventTiming.copy();
         dst.eventData = eventData == null ? null : eventData.copy();
-        return dst;
       }
 
-      protected TriggerDefinition typedCopy() {
+  protected TriggerDefinition typedCopy() {
         return copy();
       }
 

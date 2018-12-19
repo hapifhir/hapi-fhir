@@ -3161,6 +3161,11 @@ public class OperationDefinition extends MetadataResource {
       public OperationDefinition copy() {
         OperationDefinition dst = new OperationDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(OperationDefinition dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
@@ -3173,18 +3178,18 @@ public class OperationDefinition extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.idempotent = idempotent == null ? null : idempotent.copy();
         dst.code = code == null ? null : code.copy();
@@ -3194,7 +3199,7 @@ public class OperationDefinition extends MetadataResource {
           dst.resource = new ArrayList<CodeType>();
           for (CodeType i : resource)
             dst.resource.add(i.copy());
-        };
+        }
         dst.system = system == null ? null : system.copy();
         dst.type = type == null ? null : type.copy();
         dst.instance = instance == null ? null : instance.copy();
@@ -3202,16 +3207,15 @@ public class OperationDefinition extends MetadataResource {
           dst.parameter = new ArrayList<OperationDefinitionParameterComponent>();
           for (OperationDefinitionParameterComponent i : parameter)
             dst.parameter.add(i.copy());
-        };
+        }
         if (overload != null) {
           dst.overload = new ArrayList<OperationDefinitionOverloadComponent>();
           for (OperationDefinitionOverloadComponent i : overload)
             dst.overload.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected OperationDefinition typedCopy() {
+  protected OperationDefinition typedCopy() {
         return copy();
       }
 

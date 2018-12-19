@@ -1695,6 +1695,11 @@ public class NamingSystem extends MetadataResource {
       public NamingSystem copy() {
         NamingSystem dst = new NamingSystem();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(NamingSystem dst) {
+        super.copyValues(dst);
         dst.name = name == null ? null : name.copy();
         dst.status = status == null ? null : status.copy();
         dst.kind = kind == null ? null : kind.copy();
@@ -1704,7 +1709,7 @@ public class NamingSystem extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.responsible = responsible == null ? null : responsible.copy();
         dst.type = type == null ? null : type.copy();
         dst.description = description == null ? null : description.copy();
@@ -1712,23 +1717,22 @@ public class NamingSystem extends MetadataResource {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.usage = usage == null ? null : usage.copy();
         if (uniqueId != null) {
           dst.uniqueId = new ArrayList<NamingSystemUniqueIdComponent>();
           for (NamingSystemUniqueIdComponent i : uniqueId)
             dst.uniqueId.add(i.copy());
-        };
+        }
         dst.replacedBy = replacedBy == null ? null : replacedBy.copy();
-        return dst;
       }
 
-      protected NamingSystem typedCopy() {
+  protected NamingSystem typedCopy() {
         return copy();
       }
 

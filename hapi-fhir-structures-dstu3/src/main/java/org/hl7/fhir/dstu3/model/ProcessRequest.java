@@ -1590,11 +1590,16 @@ public class ProcessRequest extends DomainResource {
       public ProcessRequest copy() {
         ProcessRequest dst = new ProcessRequest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ProcessRequest dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.action = action == null ? null : action.copy();
         dst.target = target == null ? null : target.copy();
@@ -1609,22 +1614,21 @@ public class ProcessRequest extends DomainResource {
           dst.item = new ArrayList<ItemsComponent>();
           for (ItemsComponent i : item)
             dst.item.add(i.copy());
-        };
+        }
         if (include != null) {
           dst.include = new ArrayList<StringType>();
           for (StringType i : include)
             dst.include.add(i.copy());
-        };
+        }
         if (exclude != null) {
           dst.exclude = new ArrayList<StringType>();
           for (StringType i : exclude)
             dst.exclude.add(i.copy());
-        };
+        }
         dst.period = period == null ? null : period.copy();
-        return dst;
       }
 
-      protected ProcessRequest typedCopy() {
+  protected ProcessRequest typedCopy() {
         return copy();
       }
 

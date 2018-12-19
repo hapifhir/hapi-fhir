@@ -47,15 +47,19 @@ public class SimpleQuantity extends Quantity {
       public SimpleQuantity copy() {
         SimpleQuantity dst = new SimpleQuantity();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(SimpleQuantity dst) {
+        super.copyValues(dst);
         dst.value = value == null ? null : value.copy();
         dst.comparator = comparator == null ? null : comparator.copy();
         dst.unit = unit == null ? null : unit.copy();
         dst.system = system == null ? null : system.copy();
         dst.code = code == null ? null : code.copy();
-        return dst;
       }
 
-      protected SimpleQuantity typedCopy() {
+  protected SimpleQuantity typedCopy() {
         return copy();
       }
 

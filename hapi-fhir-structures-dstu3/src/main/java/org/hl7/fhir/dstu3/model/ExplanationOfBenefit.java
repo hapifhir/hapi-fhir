@@ -12715,18 +12715,23 @@ public class ExplanationOfBenefit extends DomainResource {
       public ExplanationOfBenefit copy() {
         ExplanationOfBenefit dst = new ExplanationOfBenefit();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ExplanationOfBenefit dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
         if (subType != null) {
           dst.subType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : subType)
             dst.subType.add(i.copy());
-        };
+        }
         dst.patient = patient == null ? null : patient.copy();
         dst.billablePeriod = billablePeriod == null ? null : billablePeriod.copy();
         dst.created = created == null ? null : created.copy();
@@ -12744,7 +12749,7 @@ public class ExplanationOfBenefit extends DomainResource {
           dst.related = new ArrayList<RelatedClaimComponent>();
           for (RelatedClaimComponent i : related)
             dst.related.add(i.copy());
-        };
+        }
         dst.prescription = prescription == null ? null : prescription.copy();
         dst.originalPrescription = originalPrescription == null ? null : originalPrescription.copy();
         dst.payee = payee == null ? null : payee.copy();
@@ -12752,22 +12757,22 @@ public class ExplanationOfBenefit extends DomainResource {
           dst.information = new ArrayList<SupportingInformationComponent>();
           for (SupportingInformationComponent i : information)
             dst.information.add(i.copy());
-        };
+        }
         if (careTeam != null) {
           dst.careTeam = new ArrayList<CareTeamComponent>();
           for (CareTeamComponent i : careTeam)
             dst.careTeam.add(i.copy());
-        };
+        }
         if (diagnosis != null) {
           dst.diagnosis = new ArrayList<DiagnosisComponent>();
           for (DiagnosisComponent i : diagnosis)
             dst.diagnosis.add(i.copy());
-        };
+        }
         if (procedure != null) {
           dst.procedure = new ArrayList<ProcedureComponent>();
           for (ProcedureComponent i : procedure)
             dst.procedure.add(i.copy());
-        };
+        }
         dst.precedence = precedence == null ? null : precedence.copy();
         dst.insurance = insurance == null ? null : insurance.copy();
         dst.accident = accident == null ? null : accident.copy();
@@ -12777,12 +12782,12 @@ public class ExplanationOfBenefit extends DomainResource {
           dst.item = new ArrayList<ItemComponent>();
           for (ItemComponent i : item)
             dst.item.add(i.copy());
-        };
+        }
         if (addItem != null) {
           dst.addItem = new ArrayList<AddedItemComponent>();
           for (AddedItemComponent i : addItem)
             dst.addItem.add(i.copy());
-        };
+        }
         dst.totalCost = totalCost == null ? null : totalCost.copy();
         dst.unallocDeductable = unallocDeductable == null ? null : unallocDeductable.copy();
         dst.totalBenefit = totalBenefit == null ? null : totalBenefit.copy();
@@ -12792,16 +12797,15 @@ public class ExplanationOfBenefit extends DomainResource {
           dst.processNote = new ArrayList<NoteComponent>();
           for (NoteComponent i : processNote)
             dst.processNote.add(i.copy());
-        };
+        }
         if (benefitBalance != null) {
           dst.benefitBalance = new ArrayList<BenefitBalanceComponent>();
           for (BenefitBalanceComponent i : benefitBalance)
             dst.benefitBalance.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ExplanationOfBenefit typedCopy() {
+  protected ExplanationOfBenefit typedCopy() {
         return copy();
       }
 

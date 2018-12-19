@@ -3626,6 +3626,11 @@ public class TestReport extends DomainResource {
       public TestReport copy() {
         TestReport dst = new TestReport();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(TestReport dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.name = name == null ? null : name.copy();
         dst.status = status == null ? null : status.copy();
@@ -3638,18 +3643,17 @@ public class TestReport extends DomainResource {
           dst.participant = new ArrayList<TestReportParticipantComponent>();
           for (TestReportParticipantComponent i : participant)
             dst.participant.add(i.copy());
-        };
+        }
         dst.setup = setup == null ? null : setup.copy();
         if (test != null) {
           dst.test = new ArrayList<TestReportTestComponent>();
           for (TestReportTestComponent i : test)
             dst.test.add(i.copy());
-        };
+        }
         dst.teardown = teardown == null ? null : teardown.copy();
-        return dst;
       }
 
-      protected TestReport typedCopy() {
+  protected TestReport typedCopy() {
         return copy();
       }
 

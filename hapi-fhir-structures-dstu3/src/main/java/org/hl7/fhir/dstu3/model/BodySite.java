@@ -601,29 +601,33 @@ public class BodySite extends DomainResource {
       public BodySite copy() {
         BodySite dst = new BodySite();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(BodySite dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.active = active == null ? null : active.copy();
         dst.code = code == null ? null : code.copy();
         if (qualifier != null) {
           dst.qualifier = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : qualifier)
             dst.qualifier.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (image != null) {
           dst.image = new ArrayList<Attachment>();
           for (Attachment i : image)
             dst.image.add(i.copy());
-        };
+        }
         dst.patient = patient == null ? null : patient.copy();
-        return dst;
       }
 
-      protected BodySite typedCopy() {
+  protected BodySite typedCopy() {
         return copy();
       }
 

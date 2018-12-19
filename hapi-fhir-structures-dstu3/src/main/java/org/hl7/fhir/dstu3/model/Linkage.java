@@ -663,17 +663,21 @@ public class Linkage extends DomainResource {
       public Linkage copy() {
         Linkage dst = new Linkage();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Linkage dst) {
+        super.copyValues(dst);
         dst.active = active == null ? null : active.copy();
         dst.author = author == null ? null : author.copy();
         if (item != null) {
           dst.item = new ArrayList<LinkageItemComponent>();
           for (LinkageItemComponent i : item)
             dst.item.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Linkage typedCopy() {
+  protected Linkage typedCopy() {
         return copy();
       }
 

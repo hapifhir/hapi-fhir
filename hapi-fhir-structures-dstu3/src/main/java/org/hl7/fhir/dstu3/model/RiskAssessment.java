@@ -1907,6 +1907,11 @@ public class RiskAssessment extends DomainResource {
       public RiskAssessment copy() {
         RiskAssessment dst = new RiskAssessment();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(RiskAssessment dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.basedOn = basedOn == null ? null : basedOn.copy();
         dst.parent = parent == null ? null : parent.copy();
@@ -1923,18 +1928,17 @@ public class RiskAssessment extends DomainResource {
           dst.basis = new ArrayList<Reference>();
           for (Reference i : basis)
             dst.basis.add(i.copy());
-        };
+        }
         if (prediction != null) {
           dst.prediction = new ArrayList<RiskAssessmentPredictionComponent>();
           for (RiskAssessmentPredictionComponent i : prediction)
             dst.prediction.add(i.copy());
-        };
+        }
         dst.mitigation = mitigation == null ? null : mitigation.copy();
         dst.comment = comment == null ? null : comment.copy();
-        return dst;
       }
 
-      protected RiskAssessment typedCopy() {
+  protected RiskAssessment typedCopy() {
         return copy();
       }
 

@@ -6149,11 +6149,16 @@ public class ClaimResponse extends DomainResource {
       public ClaimResponse copy() {
         ClaimResponse dst = new ClaimResponse();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ClaimResponse dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.created = created == null ? null : created.copy();
@@ -6168,17 +6173,17 @@ public class ClaimResponse extends DomainResource {
           dst.item = new ArrayList<ItemComponent>();
           for (ItemComponent i : item)
             dst.item.add(i.copy());
-        };
+        }
         if (addItem != null) {
           dst.addItem = new ArrayList<AddedItemComponent>();
           for (AddedItemComponent i : addItem)
             dst.addItem.add(i.copy());
-        };
+        }
         if (error != null) {
           dst.error = new ArrayList<ErrorComponent>();
           for (ErrorComponent i : error)
             dst.error.add(i.copy());
-        };
+        }
         dst.totalCost = totalCost == null ? null : totalCost.copy();
         dst.unallocDeductable = unallocDeductable == null ? null : unallocDeductable.copy();
         dst.totalBenefit = totalBenefit == null ? null : totalBenefit.copy();
@@ -6189,21 +6194,20 @@ public class ClaimResponse extends DomainResource {
           dst.processNote = new ArrayList<NoteComponent>();
           for (NoteComponent i : processNote)
             dst.processNote.add(i.copy());
-        };
+        }
         if (communicationRequest != null) {
           dst.communicationRequest = new ArrayList<Reference>();
           for (Reference i : communicationRequest)
             dst.communicationRequest.add(i.copy());
-        };
+        }
         if (insurance != null) {
           dst.insurance = new ArrayList<InsuranceComponent>();
           for (InsuranceComponent i : insurance)
             dst.insurance.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ClaimResponse typedCopy() {
+  protected ClaimResponse typedCopy() {
         return copy();
       }
 

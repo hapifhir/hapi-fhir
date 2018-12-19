@@ -2375,11 +2375,16 @@ public class Specimen extends DomainResource {
       public Specimen copy() {
         Specimen dst = new Specimen();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Specimen dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.accessionIdentifier = accessionIdentifier == null ? null : accessionIdentifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
@@ -2389,32 +2394,31 @@ public class Specimen extends DomainResource {
           dst.parent = new ArrayList<Reference>();
           for (Reference i : parent)
             dst.parent.add(i.copy());
-        };
+        }
         if (request != null) {
           dst.request = new ArrayList<Reference>();
           for (Reference i : request)
             dst.request.add(i.copy());
-        };
+        }
         dst.collection = collection == null ? null : collection.copy();
         if (processing != null) {
           dst.processing = new ArrayList<SpecimenProcessingComponent>();
           for (SpecimenProcessingComponent i : processing)
             dst.processing.add(i.copy());
-        };
+        }
         if (container != null) {
           dst.container = new ArrayList<SpecimenContainerComponent>();
           for (SpecimenContainerComponent i : container)
             dst.container.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Specimen typedCopy() {
+  protected Specimen typedCopy() {
         return copy();
       }
 

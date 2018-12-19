@@ -3763,23 +3763,28 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public Task copy() {
         Task dst = new Task();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Task dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.definition = definition == null ? null : definition.copy();
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         dst.groupIdentifier = groupIdentifier == null ? null : groupIdentifier.copy();
         if (partOf != null) {
           dst.partOf = new ArrayList<Reference>();
           for (Reference i : partOf)
             dst.partOf.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.statusReason = statusReason == null ? null : statusReason.copy();
         dst.businessStatus = businessStatus == null ? null : businessStatus.copy();
@@ -3798,34 +3803,33 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           dst.performerType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : performerType)
             dst.performerType.add(i.copy());
-        };
+        }
         dst.owner = owner == null ? null : owner.copy();
         dst.reason = reason == null ? null : reason.copy();
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (relevantHistory != null) {
           dst.relevantHistory = new ArrayList<Reference>();
           for (Reference i : relevantHistory)
             dst.relevantHistory.add(i.copy());
-        };
+        }
         dst.restriction = restriction == null ? null : restriction.copy();
         if (input != null) {
           dst.input = new ArrayList<ParameterComponent>();
           for (ParameterComponent i : input)
             dst.input.add(i.copy());
-        };
+        }
         if (output != null) {
           dst.output = new ArrayList<TaskOutputComponent>();
           for (TaskOutputComponent i : output)
             dst.output.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Task typedCopy() {
+  protected Task typedCopy() {
         return copy();
       }
 

@@ -2258,11 +2258,16 @@ public class Coverage extends DomainResource {
       public Coverage copy() {
         Coverage dst = new Coverage();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Coverage dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
         dst.policyHolder = policyHolder == null ? null : policyHolder.copy();
@@ -2275,7 +2280,7 @@ public class Coverage extends DomainResource {
           dst.payor = new ArrayList<Reference>();
           for (Reference i : payor)
             dst.payor.add(i.copy());
-        };
+        }
         dst.grouping = grouping == null ? null : grouping.copy();
         dst.dependent = dependent == null ? null : dependent.copy();
         dst.sequence = sequence == null ? null : sequence.copy();
@@ -2285,11 +2290,10 @@ public class Coverage extends DomainResource {
           dst.contract = new ArrayList<Reference>();
           for (Reference i : contract)
             dst.contract.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Coverage typedCopy() {
+  protected Coverage typedCopy() {
         return copy();
       }
 

@@ -8704,18 +8704,23 @@ public class Claim extends DomainResource {
       public Claim copy() {
         Claim dst = new Claim();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Claim dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
         if (subType != null) {
           dst.subType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : subType)
             dst.subType.add(i.copy());
-        };
+        }
         dst.use = use == null ? null : use.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.billablePeriod = billablePeriod == null ? null : billablePeriod.copy();
@@ -8730,7 +8735,7 @@ public class Claim extends DomainResource {
           dst.related = new ArrayList<RelatedClaimComponent>();
           for (RelatedClaimComponent i : related)
             dst.related.add(i.copy());
-        };
+        }
         dst.prescription = prescription == null ? null : prescription.copy();
         dst.originalPrescription = originalPrescription == null ? null : originalPrescription.copy();
         dst.payee = payee == null ? null : payee.copy();
@@ -8740,27 +8745,27 @@ public class Claim extends DomainResource {
           dst.careTeam = new ArrayList<CareTeamComponent>();
           for (CareTeamComponent i : careTeam)
             dst.careTeam.add(i.copy());
-        };
+        }
         if (information != null) {
           dst.information = new ArrayList<SpecialConditionComponent>();
           for (SpecialConditionComponent i : information)
             dst.information.add(i.copy());
-        };
+        }
         if (diagnosis != null) {
           dst.diagnosis = new ArrayList<DiagnosisComponent>();
           for (DiagnosisComponent i : diagnosis)
             dst.diagnosis.add(i.copy());
-        };
+        }
         if (procedure != null) {
           dst.procedure = new ArrayList<ProcedureComponent>();
           for (ProcedureComponent i : procedure)
             dst.procedure.add(i.copy());
-        };
+        }
         if (insurance != null) {
           dst.insurance = new ArrayList<InsuranceComponent>();
           for (InsuranceComponent i : insurance)
             dst.insurance.add(i.copy());
-        };
+        }
         dst.accident = accident == null ? null : accident.copy();
         dst.employmentImpacted = employmentImpacted == null ? null : employmentImpacted.copy();
         dst.hospitalization = hospitalization == null ? null : hospitalization.copy();
@@ -8768,12 +8773,11 @@ public class Claim extends DomainResource {
           dst.item = new ArrayList<ItemComponent>();
           for (ItemComponent i : item)
             dst.item.add(i.copy());
-        };
+        }
         dst.total = total == null ? null : total.copy();
-        return dst;
       }
 
-      protected Claim typedCopy() {
+  protected Claim typedCopy() {
         return copy();
       }
 

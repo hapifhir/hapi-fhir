@@ -121,7 +121,11 @@ public class Age extends Quantity implements ICompositeType {
         return dst;
       }
 
-      protected Age typedCopy() {
+      public void copyValues(Age dst) {
+        super.copyValues(dst);
+      }
+
+  protected Age typedCopy() {
         return copy();
       }
 

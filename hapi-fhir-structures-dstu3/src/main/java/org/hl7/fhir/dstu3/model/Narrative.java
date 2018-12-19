@@ -362,12 +362,16 @@ public class Narrative extends BaseNarrative implements INarrative {
       public Narrative copy() {
         Narrative dst = new Narrative();
         copyValues(dst);
-        dst.status = status == null ? null : status.copy();
-        dst.div = div == null ? null : div.copy();
         return dst;
       }
 
-      protected Narrative typedCopy() {
+      public void copyValues(Narrative dst) {
+        super.copyValues(dst);
+        dst.status = status == null ? null : status.copy();
+        dst.div = div == null ? null : div.copy();
+      }
+
+  protected Narrative typedCopy() {
         return copy();
       }
 

@@ -337,7 +337,9 @@ public class ActivityDefinition extends MetadataResource {
          */
         MEDICATIONREQUEST, 
         /**
-         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
+         * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains 
+
+The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
          */
         MEDICATIONSTATEMENT, 
         /**
@@ -5152,12 +5154,17 @@ public class ActivityDefinition extends MetadataResource {
       public ActivityDefinition copy() {
         ActivityDefinition dst = new ActivityDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ActivityDefinition dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
@@ -5175,38 +5182,38 @@ public class ActivityDefinition extends MetadataResource {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : topic)
             dst.topic.add(i.copy());
-        };
+        }
         if (contributor != null) {
           dst.contributor = new ArrayList<Contributor>();
           for (Contributor i : contributor)
             dst.contributor.add(i.copy());
-        };
+        }
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.copyright = copyright == null ? null : copyright.copy();
         if (relatedArtifact != null) {
           dst.relatedArtifact = new ArrayList<RelatedArtifact>();
           for (RelatedArtifact i : relatedArtifact)
             dst.relatedArtifact.add(i.copy());
-        };
+        }
         if (library != null) {
           dst.library = new ArrayList<Reference>();
           for (Reference i : library)
             dst.library.add(i.copy());
-        };
+        }
         dst.kind = kind == null ? null : kind.copy();
         dst.code = code == null ? null : code.copy();
         dst.timing = timing == null ? null : timing.copy();
@@ -5215,29 +5222,28 @@ public class ActivityDefinition extends MetadataResource {
           dst.participant = new ArrayList<ActivityDefinitionParticipantComponent>();
           for (ActivityDefinitionParticipantComponent i : participant)
             dst.participant.add(i.copy());
-        };
+        }
         dst.product = product == null ? null : product.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
         if (dosage != null) {
           dst.dosage = new ArrayList<Dosage>();
           for (Dosage i : dosage)
             dst.dosage.add(i.copy());
-        };
+        }
         if (bodySite != null) {
           dst.bodySite = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : bodySite)
             dst.bodySite.add(i.copy());
-        };
+        }
         dst.transform = transform == null ? null : transform.copy();
         if (dynamicValue != null) {
           dst.dynamicValue = new ArrayList<ActivityDefinitionDynamicValueComponent>();
           for (ActivityDefinitionDynamicValueComponent i : dynamicValue)
             dst.dynamicValue.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ActivityDefinition typedCopy() {
+  protected ActivityDefinition typedCopy() {
         return copy();
       }
 

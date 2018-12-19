@@ -1572,6 +1572,11 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
       public ImagingManifest copy() {
         ImagingManifest dst = new ImagingManifest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ImagingManifest dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.authoringTime = authoringTime == null ? null : authoringTime.copy();
@@ -1581,11 +1586,10 @@ The value may be derived from the DICOM Standard Part 16, CID-7010 descriptions 
           dst.study = new ArrayList<StudyComponent>();
           for (StudyComponent i : study)
             dst.study.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ImagingManifest typedCopy() {
+  protected ImagingManifest typedCopy() {
         return copy();
       }
 

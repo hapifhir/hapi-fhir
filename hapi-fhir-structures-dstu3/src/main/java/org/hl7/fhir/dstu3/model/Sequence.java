@@ -4371,11 +4371,16 @@ public class Sequence extends DomainResource {
       public Sequence copy() {
         Sequence dst = new Sequence();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Sequence dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.type = type == null ? null : type.copy();
         dst.coordinateSystem = coordinateSystem == null ? null : coordinateSystem.copy();
         dst.patient = patient == null ? null : patient.copy();
@@ -4388,28 +4393,27 @@ public class Sequence extends DomainResource {
           dst.variant = new ArrayList<SequenceVariantComponent>();
           for (SequenceVariantComponent i : variant)
             dst.variant.add(i.copy());
-        };
+        }
         dst.observedSeq = observedSeq == null ? null : observedSeq.copy();
         if (quality != null) {
           dst.quality = new ArrayList<SequenceQualityComponent>();
           for (SequenceQualityComponent i : quality)
             dst.quality.add(i.copy());
-        };
+        }
         dst.readCoverage = readCoverage == null ? null : readCoverage.copy();
         if (repository != null) {
           dst.repository = new ArrayList<SequenceRepositoryComponent>();
           for (SequenceRepositoryComponent i : repository)
             dst.repository.add(i.copy());
-        };
+        }
         if (pointer != null) {
           dst.pointer = new ArrayList<Reference>();
           for (Reference i : pointer)
             dst.pointer.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Sequence typedCopy() {
+  protected Sequence typedCopy() {
         return copy();
       }
 

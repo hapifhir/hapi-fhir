@@ -2066,12 +2066,18 @@ public class MessageHeader extends DomainResource {
       public MessageHeader copy() {
         MessageHeader dst = new MessageHeader();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(MessageHeader dst) {
+        super.copyValues(dst);
         dst.event = event == null ? null : event.copy();
         if (destination != null) {
           dst.destination = new ArrayList<MessageDestinationComponent>();
           for (MessageDestinationComponent i : destination)
             dst.destination.add(i.copy());
-        };
+        }
+        ;
         dst.receiver = receiver == null ? null : receiver.copy();
         dst.sender = sender == null ? null : sender.copy();
         dst.timestamp = timestamp == null ? null : timestamp.copy();
@@ -2085,11 +2091,10 @@ public class MessageHeader extends DomainResource {
           dst.focus = new ArrayList<Reference>();
           for (Reference i : focus)
             dst.focus.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected MessageHeader typedCopy() {
+  protected MessageHeader typedCopy() {
         return copy();
       }
 

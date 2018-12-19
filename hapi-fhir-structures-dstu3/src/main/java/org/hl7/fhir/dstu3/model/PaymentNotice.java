@@ -916,11 +916,16 @@ public class PaymentNotice extends DomainResource {
       public PaymentNotice copy() {
         PaymentNotice dst = new PaymentNotice();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(PaymentNotice dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.request = request == null ? null : request.copy();
         dst.response = response == null ? null : response.copy();
@@ -930,10 +935,9 @@ public class PaymentNotice extends DomainResource {
         dst.provider = provider == null ? null : provider.copy();
         dst.organization = organization == null ? null : organization.copy();
         dst.paymentStatus = paymentStatus == null ? null : paymentStatus.copy();
-        return dst;
       }
 
-      protected PaymentNotice typedCopy() {
+  protected PaymentNotice typedCopy() {
         return copy();
       }
 

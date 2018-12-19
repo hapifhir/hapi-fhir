@@ -2713,12 +2713,17 @@ public class DocumentReference extends DomainResource {
       public DocumentReference copy() {
         DocumentReference dst = new DocumentReference();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(DocumentReference dst) {
+        super.copyValues(dst);
         dst.masterIdentifier = masterIdentifier == null ? null : masterIdentifier.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.docStatus = docStatus == null ? null : docStatus.copy();
         dst.type = type == null ? null : type.copy();
@@ -2730,30 +2735,29 @@ public class DocumentReference extends DomainResource {
           dst.author = new ArrayList<Reference>();
           for (Reference i : author)
             dst.author.add(i.copy());
-        };
+        }
         dst.authenticator = authenticator == null ? null : authenticator.copy();
         dst.custodian = custodian == null ? null : custodian.copy();
         if (relatesTo != null) {
           dst.relatesTo = new ArrayList<DocumentReferenceRelatesToComponent>();
           for (DocumentReferenceRelatesToComponent i : relatesTo)
             dst.relatesTo.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (securityLabel != null) {
           dst.securityLabel = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : securityLabel)
             dst.securityLabel.add(i.copy());
-        };
+        }
         if (content != null) {
           dst.content = new ArrayList<DocumentReferenceContentComponent>();
           for (DocumentReferenceContentComponent i : content)
             dst.content.add(i.copy());
-        };
+        }
         dst.context = context == null ? null : context.copy();
-        return dst;
       }
 
-      protected DocumentReference typedCopy() {
+  protected DocumentReference typedCopy() {
         return copy();
       }
 

@@ -1389,15 +1389,19 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
       public OperationOutcome copy() {
         OperationOutcome dst = new OperationOutcome();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(OperationOutcome dst) {
+        super.copyValues(dst);
         if (issue != null) {
           dst.issue = new ArrayList<OperationOutcomeIssueComponent>();
           for (OperationOutcomeIssueComponent i : issue)
             dst.issue.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected OperationOutcome typedCopy() {
+  protected OperationOutcome typedCopy() {
         return copy();
       }
 

@@ -1725,44 +1725,48 @@ public class Provenance extends DomainResource {
       public Provenance copy() {
         Provenance dst = new Provenance();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Provenance dst) {
+        super.copyValues(dst);
         if (target != null) {
           dst.target = new ArrayList<Reference>();
           for (Reference i : target)
             dst.target.add(i.copy());
-        };
+        }
         dst.period = period == null ? null : period.copy();
         dst.recorded = recorded == null ? null : recorded.copy();
         if (policy != null) {
           dst.policy = new ArrayList<UriType>();
           for (UriType i : policy)
             dst.policy.add(i.copy());
-        };
+        }
         dst.location = location == null ? null : location.copy();
         if (reason != null) {
           dst.reason = new ArrayList<Coding>();
           for (Coding i : reason)
             dst.reason.add(i.copy());
-        };
+        }
         dst.activity = activity == null ? null : activity.copy();
         if (agent != null) {
           dst.agent = new ArrayList<ProvenanceAgentComponent>();
           for (ProvenanceAgentComponent i : agent)
             dst.agent.add(i.copy());
-        };
+        }
         if (entity != null) {
           dst.entity = new ArrayList<ProvenanceEntityComponent>();
           for (ProvenanceEntityComponent i : entity)
             dst.entity.add(i.copy());
-        };
+        }
         if (signature != null) {
           dst.signature = new ArrayList<Signature>();
           for (Signature i : signature)
             dst.signature.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Provenance typedCopy() {
+  protected Provenance typedCopy() {
         return copy();
       }
 

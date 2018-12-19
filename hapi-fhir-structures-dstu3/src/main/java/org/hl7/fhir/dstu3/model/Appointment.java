@@ -2405,41 +2405,46 @@ public class Appointment extends DomainResource {
       public Appointment copy() {
         Appointment dst = new Appointment();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Appointment dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.serviceCategory = serviceCategory == null ? null : serviceCategory.copy();
         if (serviceType != null) {
           dst.serviceType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : serviceType)
             dst.serviceType.add(i.copy());
-        };
+        }
         if (specialty != null) {
           dst.specialty = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : specialty)
             dst.specialty.add(i.copy());
-        };
+        }
         dst.appointmentType = appointmentType == null ? null : appointmentType.copy();
         if (reason != null) {
           dst.reason = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reason)
             dst.reason.add(i.copy());
-        };
+        }
         if (indication != null) {
           dst.indication = new ArrayList<Reference>();
           for (Reference i : indication)
             dst.indication.add(i.copy());
-        };
+        }
         dst.priority = priority == null ? null : priority.copy();
         dst.description = description == null ? null : description.copy();
         if (supportingInformation != null) {
           dst.supportingInformation = new ArrayList<Reference>();
           for (Reference i : supportingInformation)
             dst.supportingInformation.add(i.copy());
-        };
+        }
         dst.start = start == null ? null : start.copy();
         dst.end = end == null ? null : end.copy();
         dst.minutesDuration = minutesDuration == null ? null : minutesDuration.copy();
@@ -2447,28 +2452,27 @@ public class Appointment extends DomainResource {
           dst.slot = new ArrayList<Reference>();
           for (Reference i : slot)
             dst.slot.add(i.copy());
-        };
+        }
         dst.created = created == null ? null : created.copy();
         dst.comment = comment == null ? null : comment.copy();
         if (incomingReferral != null) {
           dst.incomingReferral = new ArrayList<Reference>();
           for (Reference i : incomingReferral)
             dst.incomingReferral.add(i.copy());
-        };
+        }
         if (participant != null) {
           dst.participant = new ArrayList<AppointmentParticipantComponent>();
           for (AppointmentParticipantComponent i : participant)
             dst.participant.add(i.copy());
-        };
+        }
         if (requestedPeriod != null) {
           dst.requestedPeriod = new ArrayList<Period>();
           for (Period i : requestedPeriod)
             dst.requestedPeriod.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Appointment typedCopy() {
+  protected Appointment typedCopy() {
         return copy();
       }
 

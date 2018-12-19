@@ -1035,11 +1035,16 @@ public class Endpoint extends DomainResource {
       public Endpoint copy() {
         Endpoint dst = new Endpoint();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Endpoint dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.connectionType = connectionType == null ? null : connectionType.copy();
         dst.name = name == null ? null : name.copy();
@@ -1048,28 +1053,28 @@ public class Endpoint extends DomainResource {
           dst.contact = new ArrayList<ContactPoint>();
           for (ContactPoint i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.period = period == null ? null : period.copy();
         if (payloadType != null) {
           dst.payloadType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : payloadType)
             dst.payloadType.add(i.copy());
-        };
+        }
         if (payloadMimeType != null) {
           dst.payloadMimeType = new ArrayList<CodeType>();
           for (CodeType i : payloadMimeType)
             dst.payloadMimeType.add(i.copy());
-        };
+        }
         dst.address = address == null ? null : address.copy();
         if (header != null) {
           dst.header = new ArrayList<StringType>();
           for (StringType i : header)
             dst.header.add(i.copy());
-        };
-        return dst;
+        }
+        ;
       }
 
-      protected Endpoint typedCopy() {
+  protected Endpoint typedCopy() {
         return copy();
       }
 

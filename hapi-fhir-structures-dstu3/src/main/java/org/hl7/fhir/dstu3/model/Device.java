@@ -2197,11 +2197,16 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
       public Device copy() {
         Device dst = new Device();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Device dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.udi = udi == null ? null : udi.copy();
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
@@ -2217,23 +2222,22 @@ http://hl7.org/fhir/NamingSystem/iccbba-other-di.
           dst.contact = new ArrayList<ContactPoint>();
           for (ContactPoint i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.location = location == null ? null : location.copy();
         dst.url = url == null ? null : url.copy();
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (safety != null) {
           dst.safety = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : safety)
             dst.safety.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Device typedCopy() {
+  protected Device typedCopy() {
         return copy();
       }
 

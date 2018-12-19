@@ -1782,12 +1782,17 @@ public class ServiceDefinition extends MetadataResource {
       public ServiceDefinition copy() {
         ServiceDefinition dst = new ServiceDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ServiceDefinition dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
@@ -1805,48 +1810,47 @@ public class ServiceDefinition extends MetadataResource {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : topic)
             dst.topic.add(i.copy());
-        };
+        }
         if (contributor != null) {
           dst.contributor = new ArrayList<Contributor>();
           for (Contributor i : contributor)
             dst.contributor.add(i.copy());
-        };
+        }
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.copyright = copyright == null ? null : copyright.copy();
         if (relatedArtifact != null) {
           dst.relatedArtifact = new ArrayList<RelatedArtifact>();
           for (RelatedArtifact i : relatedArtifact)
             dst.relatedArtifact.add(i.copy());
-        };
+        }
         if (trigger != null) {
           dst.trigger = new ArrayList<TriggerDefinition>();
           for (TriggerDefinition i : trigger)
             dst.trigger.add(i.copy());
-        };
+        }
         if (dataRequirement != null) {
           dst.dataRequirement = new ArrayList<DataRequirement>();
           for (DataRequirement i : dataRequirement)
             dst.dataRequirement.add(i.copy());
-        };
+        }
         dst.operationDefinition = operationDefinition == null ? null : operationDefinition.copy();
-        return dst;
       }
 
-      protected ServiceDefinition typedCopy() {
+  protected ServiceDefinition typedCopy() {
         return copy();
       }
 

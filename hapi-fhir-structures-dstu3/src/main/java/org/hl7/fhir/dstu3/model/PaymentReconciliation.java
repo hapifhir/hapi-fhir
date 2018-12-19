@@ -1914,11 +1914,16 @@ public class PaymentReconciliation extends DomainResource {
       public PaymentReconciliation copy() {
         PaymentReconciliation dst = new PaymentReconciliation();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(PaymentReconciliation dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.period = period == null ? null : period.copy();
         dst.created = created == null ? null : created.copy();
@@ -1932,18 +1937,17 @@ public class PaymentReconciliation extends DomainResource {
           dst.detail = new ArrayList<DetailsComponent>();
           for (DetailsComponent i : detail)
             dst.detail.add(i.copy());
-        };
+        }
         dst.form = form == null ? null : form.copy();
         dst.total = total == null ? null : total.copy();
         if (processNote != null) {
           dst.processNote = new ArrayList<NotesComponent>();
           for (NotesComponent i : processNote)
             dst.processNote.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected PaymentReconciliation typedCopy() {
+  protected PaymentReconciliation typedCopy() {
         return copy();
       }
 

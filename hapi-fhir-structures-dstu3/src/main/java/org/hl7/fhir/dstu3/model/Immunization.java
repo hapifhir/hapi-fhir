@@ -2993,11 +2993,16 @@ public class Immunization extends DomainResource {
       public Immunization copy() {
         Immunization dst = new Immunization();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Immunization dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.notGiven = notGiven == null ? null : notGiven.copy();
         dst.vaccineCode = vaccineCode == null ? null : vaccineCode.copy();
@@ -3017,27 +3022,26 @@ public class Immunization extends DomainResource {
           dst.practitioner = new ArrayList<ImmunizationPractitionerComponent>();
           for (ImmunizationPractitionerComponent i : practitioner)
             dst.practitioner.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         dst.explanation = explanation == null ? null : explanation.copy();
         if (reaction != null) {
           dst.reaction = new ArrayList<ImmunizationReactionComponent>();
           for (ImmunizationReactionComponent i : reaction)
             dst.reaction.add(i.copy());
-        };
+        }
         if (vaccinationProtocol != null) {
           dst.vaccinationProtocol = new ArrayList<ImmunizationVaccinationProtocolComponent>();
           for (ImmunizationVaccinationProtocolComponent i : vaccinationProtocol)
             dst.vaccinationProtocol.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Immunization typedCopy() {
+  protected Immunization typedCopy() {
         return copy();
       }
 

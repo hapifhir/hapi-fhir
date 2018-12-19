@@ -3466,11 +3466,16 @@ public class NutritionOrder extends DomainResource {
       public NutritionOrder copy() {
         NutritionOrder dst = new NutritionOrder();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(NutritionOrder dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
@@ -3480,28 +3485,27 @@ public class NutritionOrder extends DomainResource {
           dst.allergyIntolerance = new ArrayList<Reference>();
           for (Reference i : allergyIntolerance)
             dst.allergyIntolerance.add(i.copy());
-        };
+        }
         if (foodPreferenceModifier != null) {
           dst.foodPreferenceModifier = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : foodPreferenceModifier)
             dst.foodPreferenceModifier.add(i.copy());
-        };
+        }
         if (excludeFoodModifier != null) {
           dst.excludeFoodModifier = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : excludeFoodModifier)
             dst.excludeFoodModifier.add(i.copy());
-        };
+        }
         dst.oralDiet = oralDiet == null ? null : oralDiet.copy();
         if (supplement != null) {
           dst.supplement = new ArrayList<NutritionOrderSupplementComponent>();
           for (NutritionOrderSupplementComponent i : supplement)
             dst.supplement.add(i.copy());
-        };
+        }
         dst.enteralFormula = enteralFormula == null ? null : enteralFormula.copy();
-        return dst;
       }
 
-      protected NutritionOrder typedCopy() {
+  protected NutritionOrder typedCopy() {
         return copy();
       }
 

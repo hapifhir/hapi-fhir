@@ -719,11 +719,16 @@ public class Flag extends DomainResource {
       public Flag copy() {
         Flag dst = new Flag();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Flag dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.category = category == null ? null : category.copy();
         dst.code = code == null ? null : code.copy();
@@ -731,10 +736,9 @@ public class Flag extends DomainResource {
         dst.period = period == null ? null : period.copy();
         dst.encounter = encounter == null ? null : encounter.copy();
         dst.author = author == null ? null : author.copy();
-        return dst;
       }
 
-      protected Flag typedCopy() {
+  protected Flag typedCopy() {
         return copy();
       }
 

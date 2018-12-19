@@ -2192,18 +2192,23 @@ public class ChargeItem extends DomainResource {
       public ChargeItem copy() {
         ChargeItem dst = new ChargeItem();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ChargeItem dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         if (definition != null) {
           dst.definition = new ArrayList<UriType>();
           for (UriType i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         if (partOf != null) {
           dst.partOf = new ArrayList<Reference>();
           for (Reference i : partOf)
             dst.partOf.add(i.copy());
-        };
+        }
         dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
@@ -2212,7 +2217,7 @@ public class ChargeItem extends DomainResource {
           dst.participant = new ArrayList<ChargeItemParticipantComponent>();
           for (ChargeItemParticipantComponent i : participant)
             dst.participant.add(i.copy());
-        };
+        }
         dst.performingOrganization = performingOrganization == null ? null : performingOrganization.copy();
         dst.requestingOrganization = requestingOrganization == null ? null : requestingOrganization.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
@@ -2220,7 +2225,7 @@ public class ChargeItem extends DomainResource {
           dst.bodysite = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : bodysite)
             dst.bodysite.add(i.copy());
-        };
+        }
         dst.factorOverride = factorOverride == null ? null : factorOverride.copy();
         dst.priceOverride = priceOverride == null ? null : priceOverride.copy();
         dst.overrideReason = overrideReason == null ? null : overrideReason.copy();
@@ -2230,31 +2235,30 @@ public class ChargeItem extends DomainResource {
           dst.reason = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reason)
             dst.reason.add(i.copy());
-        };
+        }
         if (service != null) {
           dst.service = new ArrayList<Reference>();
           for (Reference i : service)
             dst.service.add(i.copy());
-        };
+        }
         if (account != null) {
           dst.account = new ArrayList<Reference>();
           for (Reference i : account)
             dst.account.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (supportingInformation != null) {
           dst.supportingInformation = new ArrayList<Reference>();
           for (Reference i : supportingInformation)
             dst.supportingInformation.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ChargeItem typedCopy() {
+  protected ChargeItem typedCopy() {
         return copy();
       }
 

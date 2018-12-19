@@ -811,11 +811,16 @@ public class EnrollmentRequest extends DomainResource {
       public EnrollmentRequest copy() {
         EnrollmentRequest dst = new EnrollmentRequest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(EnrollmentRequest dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.created = created == null ? null : created.copy();
         dst.insurer = insurer == null ? null : insurer.copy();
@@ -823,10 +828,9 @@ public class EnrollmentRequest extends DomainResource {
         dst.organization = organization == null ? null : organization.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.coverage = coverage == null ? null : coverage.copy();
-        return dst;
       }
 
-      protected EnrollmentRequest typedCopy() {
+  protected EnrollmentRequest typedCopy() {
         return copy();
       }
 

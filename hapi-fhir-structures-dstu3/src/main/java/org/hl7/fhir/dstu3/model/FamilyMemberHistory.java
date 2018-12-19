@@ -2045,16 +2045,21 @@ public class FamilyMemberHistory extends DomainResource {
       public FamilyMemberHistory copy() {
         FamilyMemberHistory dst = new FamilyMemberHistory();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(FamilyMemberHistory dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (definition != null) {
           dst.definition = new ArrayList<Reference>();
           for (Reference i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.notDone = notDone == null ? null : notDone.copy();
         dst.notDoneReason = notDoneReason == null ? null : notDoneReason.copy();
@@ -2071,26 +2076,25 @@ public class FamilyMemberHistory extends DomainResource {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
           for (Reference i : reasonReference)
             dst.reasonReference.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (condition != null) {
           dst.condition = new ArrayList<FamilyMemberHistoryConditionComponent>();
           for (FamilyMemberHistoryConditionComponent i : condition)
             dst.condition.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected FamilyMemberHistory typedCopy() {
+  protected FamilyMemberHistory typedCopy() {
         return copy();
       }
 
