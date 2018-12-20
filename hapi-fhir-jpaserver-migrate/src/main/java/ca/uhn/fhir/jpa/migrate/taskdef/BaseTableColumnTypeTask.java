@@ -66,6 +66,13 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MSSQL_2012, "datetime2");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.ORACLE_12C, "timestamp");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.POSTGRES_9_4, "timestamp");
+
+		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.DERBY_EMBEDDED, "boolean");
+		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.MSSQL_2012, "bit");
+		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.MARIADB_10_1, "bit");
+		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.ORACLE_12C, "number(1,0)");
+		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.POSTGRES_9_4, "boolean");
+		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.MYSQL_5_7, "bit");
 	}
 
 	public ColumnTypeEnum getColumnType() {
@@ -155,6 +162,13 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 			public String getDescriptor(Long theColumnLength) {
 				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
 				return "timestamp";
+			}
+		},
+		BOOLEAN {
+			@Override
+			public String getDescriptor(Long theColumnLength) {
+				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
+				return "boolean";
 			}
 		},
 		INT {
