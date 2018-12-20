@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscriptionChannel;
+import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
@@ -26,7 +26,7 @@ public class SubscriptionTestUtil {
 	private SubscriptionRegistry mySubscriptionRegistry;
 
 	public int getExecutorQueueSize() {
-		LinkedBlockingQueueSubscriptionChannel channel = (LinkedBlockingQueueSubscriptionChannel) mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingQueueSubscribableChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		return channel.getQueueSizeForUnitTest();
 	}
 

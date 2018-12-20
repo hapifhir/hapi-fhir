@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.SubscriptionChannel;
-import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -55,7 +55,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
-	private ISubscriptionChannelFactory mySubscriptionChannelFactory;
+	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	/**
 	 * Constructor
@@ -123,7 +123,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	}
 
 	@VisibleForTesting
-	public SubscriptionChannel getProcessingChannelForUnitTest() {
-		return (SubscriptionChannel) myProcessingChannel;
+	public LinkedBlockingQueueSubscribableChannel getProcessingChannelForUnitTest() {
+		return (LinkedBlockingQueueSubscribableChannel) myProcessingChannel;
 	}
 }

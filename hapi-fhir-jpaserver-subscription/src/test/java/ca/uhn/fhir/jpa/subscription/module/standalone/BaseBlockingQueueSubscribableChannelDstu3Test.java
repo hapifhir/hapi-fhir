@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.subscription.module.standalone;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class BaseSubscriptionChannelDstu3Test extends BaseSubscriptionDstu3Test {
+public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends BaseSubscriptionDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
 
 	@Autowired
@@ -43,7 +43,7 @@ public abstract class BaseSubscriptionChannelDstu3Test extends BaseSubscriptionD
 	@Autowired
 	StandaloneSubscriptionMessageHandler myStandaloneSubscriptionMessageHandler;
 	@Autowired
-	ISubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
+	SubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
@@ -67,7 +67,7 @@ public abstract class BaseSubscriptionChannelDstu3Test extends BaseSubscriptionD
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
 		if (ourSubscribableChannel == null) {
-			ourSubscribableChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
+			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
 		}
 	}

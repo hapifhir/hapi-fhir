@@ -10,8 +10,8 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.module.cache.BlockingQueueSubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import org.hibernate.jpa.HibernatePersistenceProvider;
@@ -146,8 +146,8 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	 * Create a @Primary @Bean if you need a different implementation
 	 */
 	@Bean
-	public ISubscriptionChannelFactory blockingQueueSubscriptionDeliveryChannelFactory() {
-		return new BlockingQueueSubscriptionChannelFactory();
+	public ISubscribableChannelFactory blockingQueueSubscriptionDeliveryChannelFactory() {
+		return new LinkedBlockingQueueSubscribableChannelFactory();
 	}
 
 	@Bean

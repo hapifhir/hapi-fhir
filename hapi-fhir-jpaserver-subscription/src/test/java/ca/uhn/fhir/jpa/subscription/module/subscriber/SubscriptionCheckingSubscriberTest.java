@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
-import ca.uhn.fhir.jpa.subscription.module.standalone.BaseSubscriptionChannelDstu3Test;
+import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test
  */
-public class SubscriptionCheckingSubscriberTest extends BaseSubscriptionChannelDstu3Test {
+public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriberTest.class);
 
 	@Test
