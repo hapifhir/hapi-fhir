@@ -204,6 +204,11 @@
 				HAPI FHIR ships with a LinkedBlockingQueue implementation of the delivery channel factory.  If a different
 				type of channel factory is required, add it to your application context and mark it as @Primary.
 			</action>
+			<action type="fix" issue="980">
+				When using the HL7.org DSTU2 structures, a QuestionnaireResponse with a 
+				value of type reference would fail to parse. Thanks to David Gileadi for
+				the pull request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
