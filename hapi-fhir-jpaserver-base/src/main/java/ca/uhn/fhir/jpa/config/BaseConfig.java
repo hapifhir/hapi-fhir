@@ -146,7 +146,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	 * Create a @Primary @Bean if you need a different implementation
 	 */
 	@Bean
-	public ISubscribableChannelFactory blockingQueueSubscriptionDeliveryChannelFactory() {
+	public ISubscribableChannelFactory linkedBlockingQueueSubscribableChannelFactory() {
 		return new LinkedBlockingQueueSubscribableChannelFactory();
 	}
 
