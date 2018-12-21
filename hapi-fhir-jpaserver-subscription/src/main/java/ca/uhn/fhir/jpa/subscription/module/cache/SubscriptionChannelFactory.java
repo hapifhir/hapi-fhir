@@ -15,15 +15,14 @@ public class SubscriptionChannelFactory {
 	}
 
 	public SubscribableChannel newDeliveryChannel(String theSubscriptionId, String theChannelType) {
-		String threadName = "subscription-delivery-" +
+		String channelName = "subscription-delivery-" +
 			theChannelType +
 			"-" +
-			theSubscriptionId +
-			"-%d";
-		return mySubscribableChannelFactory.createSubscribableChannel(threadName);
+			theSubscriptionId;
+		return mySubscribableChannelFactory.createSubscribableChannel(channelName);
 	}
 
 	public SubscribableChannel newMatchingChannel(String theChannelName) {
-		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName + "-%d");
+		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName);
 	}
 }

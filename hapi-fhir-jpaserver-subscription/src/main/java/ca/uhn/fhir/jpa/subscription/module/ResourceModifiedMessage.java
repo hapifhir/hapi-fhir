@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.IResourceMessage;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -32,7 +33,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ResourceModifiedMessage {
+public class ResourceModifiedMessage implements IResourceMessage {
 
 	private static final long serialVersionUID = 1L;
 
