@@ -53,8 +53,7 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 			ourLog.warn("Unexpected message payload type: {}", theMessage);
 			return;
 		}
-		ResourceModifiedMessage resourceModifiedMessage = ((ResourceModifiedJsonMessage) theMessage).getPayload();
-		updateSubscriptionRegistryAndPerformMatching(resourceModifiedMessage);
+		updateSubscriptionRegistryAndPerformMatching(((ResourceModifiedJsonMessage) theMessage).getPayload());
 	}
 
 	public void updateSubscriptionRegistryAndPerformMatching(ResourceModifiedMessage theResourceModifiedMessage) {
