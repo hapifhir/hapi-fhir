@@ -209,6 +209,10 @@
 				value of type reference would fail to parse. Thanks to David Gileadi for
 				the pull request!
 			</action>
+			<action type="add" issue="1051">
+				FHIR Servers now support the HTTP HEAD method for FHIR read operations. Thanks
+				to GitHub user Cory00 for the pull request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
