@@ -20,6 +20,7 @@
 						<li>thymeleaf-spring4 (Testpage Overlay) has been replaced with thymeleaf-spring5</li>
 						<li>Commons-Lang3: 3.8 -&gt; 3.8.1</li>
 						<li>Commons-Text: 1.4 -&gt; 1.4</li>
+						<li>Spring Boot: 1.5.6.RELEASE -&gt; 2.1.1.RELEASE</li>
 					</ul>
 				]]>
 			</action>
