@@ -510,28 +510,29 @@
 		<aries_spifly_version>1.0.10</aries_spifly_version>
 		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.11</commons_codec_version>
-		<commons_text_version>1.4</commons_text_version>
+		<commons_text_version>1.6</commons_text_version>
 		<commons_io_version>2.6</commons_io_version>
-		<commons_lang3_version>3.8</commons_lang3_version>
+		<commons_lang3_version>3.8.1</commons_lang3_version>
 		<derby_version>10.14.2.0</derby_version>
 		<error_prone_annotations_version>2.0.18</error_prone_annotations_version>
 		<guava_version>25.0-jre</guava_version>
 		<gson_version>2.8.5</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
-		<jaxb_api_version>2.3.0</jaxb_api_version>
-		<jaxb_core_version>2.3.0</jaxb_core_version>
+		<jaxb_api_version>2.3.1</jaxb_api_version>
+		<jaxb_core_version>2.3.0.1</jaxb_core_version>
+		<jaxb_runtime_version>2.3.1</jaxb_runtime_version>
 		<jersey_version>2.25.1</jersey_version>
 		<jetty_version>9.4.14.v20181114</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.3.6.Final</hibernate_version>
-		<hibernate_search_version>5.10.3.Final</hibernate_search_version>
-		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
+		<hibernate_version>5.4.0.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
+		<hibernate_search_version>5.11.0.Final</hibernate_search_version>
+		<lucene_version>5.5.5</lucene_version>
+		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
 		<jackson_version>2.9.7</jackson_version>
-		<lucene_version>5.5.5</lucene_version>
 		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
@@ -541,12 +542,12 @@
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.25</slf4j_version>
-		<spring_version>5.0.8.RELEASE</spring_version>
-		<spring_data_version>2.0.7.RELEASE</spring_data_version>
+		<spring_version>5.1.3.RELEASE</spring_version>
+		<spring_data_version>2.1.3.RELEASE</spring_data_version>
 		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
-		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.0.11.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
@@ -664,6 +665,11 @@
 				<version>1.2.0</version>
 			</dependency>
 			<dependency>
+				<groupId>com.sun.activation</groupId>
+				<artifactId>jakarta.activation</artifactId>
+				<version>1.2.1</version>
+			</dependency>
+			<dependency>
 				<groupId>com.sun.mail</groupId>
 				<artifactId>javax.mail</artifactId>
 				<version>1.6.1</version>
@@ -755,6 +761,7 @@
 				<artifactId>mssql-jdbc</artifactId>
 				<version>6.2.2.jre8</version>
 			</dependency>
+			<!--
 			<dependency>
 				<groupId>com.sun.xml.bind</groupId>
 				<artifactId>jaxb-core</artifactId>
@@ -765,6 +772,7 @@
 				<artifactId>jaxb-impl</artifactId>
 				<version>${jaxb_core_version}</version>
 			</dependency>
+			-->
 			<dependency>
 				<groupId>javax.mail</groupId>
 				<artifactId>javax.mail-api</artifactId>
@@ -1064,13 +1072,11 @@
 				<artifactId>javax.json</artifactId>
 				<version>1.0.4</version>
 			</dependency>
-			<!--
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
 				<version>${jaxb_runtime_version}</version>
 			</dependency>
-			-->
 			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-server</artifactId>
@@ -1154,7 +1160,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.18.3</version>
+				<version>2.23.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
@@ -1323,7 +1329,7 @@
 				<plugin>
 					<groupId>org.basepom.maven</groupId>
 					<artifactId>duplicate-finder-maven-plugin</artifactId>
-					<version>1.2.1</version>
+					<version>1.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>de.jpdigital</groupId>
@@ -1485,7 +1491,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.6</version>
+					<version>2.7</version>
 					<configuration>
 						<processDependencyManagementTransitive>false</processDependencyManagementTransitive>
 					</configuration>
