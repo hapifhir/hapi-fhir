@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
+import ca.uhn.fhir.model.dstu2.resource.AuditEvent;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -46,6 +47,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import okhttp3.OkHttpClient;
 import org.apache.http.client.HttpClient;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.*;
@@ -69,6 +71,7 @@ import org.springframework.util.CollectionUtils;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for HAPI FHIR.
@@ -164,26 +167,11 @@ public class FhirAutoConfiguration {
 	@ConditionalOnBean(DataSource.class)
 	@EnableConfigurationProperties(FhirProperties.class)
 	static class FhirJpaServerConfiguration {
-
-		@Bean
-		@ConditionalOnMissingBean
-		public ScheduledExecutorFactoryBean scheduledExecutorService() {
-			ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
-			b.setPoolSize(5);
-			return b;
-		}
-
-		@Bean(name=BaseConfig.TASK_EXECUTOR_NAME)
-		public AsyncTaskExecutor taskScheduler() {
-			ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-			retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
-			retVal.setScheduledExecutor(scheduledExecutorService().getObject());
-			return retVal;
-		}
+		@Autowired
+		private ScheduledExecutorService myScheduledExecutorService;
 
 		@Configuration
 		@EntityScan(basePackages = {"ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.jpa.model.entity"})
-		@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 		static class FhirJpaDaoConfiguration {
 
 			@Bean

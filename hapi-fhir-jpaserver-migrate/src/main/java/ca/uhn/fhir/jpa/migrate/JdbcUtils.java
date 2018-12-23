@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,10 +22,19 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
+import org.hibernate.engine.jdbc.env.internal.NormalizingIdentifierHelperImpl;
+import org.hibernate.engine.jdbc.env.spi.*;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
+import org.hibernate.engine.jdbc.spi.TypeInfo;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.schema.extract.spi.ExtractionContext;
+import org.hibernate.tool.schema.extract.spi.SequenceInformation;
+import org.hibernate.tool.schema.extract.spi.SequenceInformationExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -233,24 +242,80 @@ public class JdbcUtils {
 
 					Set<String> sequenceNames = new HashSet<>();
 					if (dialect.supportsSequences()) {
-						String sql = dialect.getQuerySequencesString();
-						if (sql != null) {
 
-							Statement statement = null;
-							ResultSet rs = null;
-							try {
-								statement = connection.createStatement();
-								rs = statement.executeQuery(sql);
-
-								while (rs.next()) {
-									sequenceNames.add(rs.getString(1).toUpperCase());
-								}
-							} finally {
-								if (rs != null) rs.close();
-								if (statement != null) statement.close();
+						// Use Hibernate to get a list of current sequences
+						SequenceInformationExtractor sequenceInformationExtractor = dialect.getSequenceInformationExtractor();
+						ExtractionContext extractionContext = new ExtractionContext.EmptyExtractionContext() {
+							@Override
+							public Connection getJdbcConnection() {
+								return connection;
 							}
 
+							@Override
+							public ServiceRegistry getServiceRegistry() {
+								return super.getServiceRegistry();
+							}
+
+							@Override
+							public JdbcEnvironment getJdbcEnvironment() {
+								return new JdbcEnvironment() {
+									@Override
+									public Dialect getDialect() {
+										return dialect;
+									}
+
+									@Override
+									public ExtractedDatabaseMetaData getExtractedDatabaseMetaData() {
+										return null;
+									}
+
+									@Override
+									public Identifier getCurrentCatalog() {
+										return null;
+									}
+
+									@Override
+									public Identifier getCurrentSchema() {
+										return null;
+									}
+
+									@Override
+									public QualifiedObjectNameFormatter getQualifiedObjectNameFormatter() {
+										return null;
+									}
+
+									@Override
+									public IdentifierHelper getIdentifierHelper() {
+										return new NormalizingIdentifierHelperImpl(this, null, true, true, true, null, null, null);
+									}
+
+									@Override
+									public NameQualifierSupport getNameQualifierSupport() {
+										return null;
+									}
+
+									@Override
+									public SqlExceptionHelper getSqlExceptionHelper() {
+										return null;
+									}
+
+									@Override
+									public LobCreatorBuilder getLobCreatorBuilder() {
+										return null;
+									}
+
+									@Override
+									public TypeInfo getTypeInfoForJdbcCode(int jdbcTypeCode) {
+										return null;
+									}
+								};
+							}
+						};
+						Iterable<SequenceInformation> sequences = sequenceInformationExtractor.extractMetadata(extractionContext);
+						for (SequenceInformation next : sequences) {
+							sequenceNames.add(next.getSequenceName().getSequenceName().getText());
 						}
+
 					}
 					return sequenceNames;
 				} catch (SQLException e) {

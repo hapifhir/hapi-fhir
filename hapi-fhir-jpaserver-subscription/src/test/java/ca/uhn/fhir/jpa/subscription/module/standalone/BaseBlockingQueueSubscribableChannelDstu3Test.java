@@ -164,8 +164,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 		@Update
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
-			ourUpdatedObservations.add(theObservation);
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
+			ourUpdatedObservations.add(theObservation);
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
