@@ -533,7 +533,7 @@
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
 		<jackson_version>2.9.7</jackson_version>
-		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
+		<maven_assembly_plugin_version>3.1.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
 		<ph_schematron_version>5.0.4</ph_schematron_version>
@@ -1336,6 +1336,11 @@
 					<groupId>de.jpdigital</groupId>
 					<artifactId>hibernate52-ddl-maven-plugin</artifactId>
 					<version>2.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>${maven_assembly_plugin_version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.felix</groupId>
