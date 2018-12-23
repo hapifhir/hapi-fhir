@@ -11,8 +11,8 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests copied from jpa.subscription.resthook.RestHookTestDstu3Test
  */
-public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriberTest.class);
+public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
 
 	@Test
 	public void testRestHookSubscriptionApplicationFhirJson() throws Exception {

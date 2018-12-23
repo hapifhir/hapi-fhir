@@ -41,8 +41,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 @Service
-public class SubscriptionCheckingSubscriber implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionCheckingSubscriber.class);
+public class SubscriptionMatchingSubscriber implements MessageHandler {
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
 
 	@Autowired
 	private ISubscriptionMatcher mySubscriptionMatcher;
@@ -61,19 +61,23 @@ public class SubscriptionCheckingSubscriber implements MessageHandler {
 		}
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
-		switch (msg.getOperationType()) {
+		matchActiveSubscriptionsAndDeliver(msg);
+	}
+
+	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
+		switch (theMsg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
 			case MANUALLY_TRIGGERED:
 				break;
 			case DELETE:
 			default:
-				ourLog.trace("Not processing modified message for {}", msg.getOperationType());
+				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 				// ignore anything else
 				return;
 		}
 
-		IIdType id = msg.getId(myFhirContext);
+		IIdType id = theMsg.getId(myFhirContext);
 		String resourceType = id.getResourceType();
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
@@ -85,9 +89,9 @@ public class SubscriptionCheckingSubscriber implements MessageHandler {
 			String nextSubscriptionId = nextActiveSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue();
 			String nextCriteriaString = nextActiveSubscription.getCriteriaString();
 
-			if (isNotBlank(msg.getSubscriptionId())) {
-				if (!msg.getSubscriptionId().equals(nextSubscriptionId)) {
-					ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, msg.getSubscriptionId());
+			if (isNotBlank(theMsg.getSubscriptionId())) {
+				if (!theMsg.getSubscriptionId().equals(nextSubscriptionId)) {
+					ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, theMsg.getSubscriptionId());
 					continue;
 				}
 			}
@@ -109,17 +113,17 @@ public class SubscriptionCheckingSubscriber implements MessageHandler {
 				continue;
 			}
 
-			if (!mySubscriptionMatcher.match(nextCriteriaString, msg).matched()) {
+			if (!mySubscriptionMatcher.match(nextCriteriaString, theMsg).matched()) {
 				continue;
 			}
 
 			ourLog.debug("Found match: queueing rest-hook notification for resource: {}", id.toUnqualifiedVersionless().getValue());
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-			deliveryMsg.setPayload(myFhirContext, msg.getNewPayload(myFhirContext));
+			deliveryMsg.setPayload(myFhirContext, theMsg.getNewPayload(myFhirContext));
 			deliveryMsg.setSubscription(nextActiveSubscription.getSubscription());
-			deliveryMsg.setOperationType(msg.getOperationType());
-			deliveryMsg.setPayloadId(msg.getId(myFhirContext));
+			deliveryMsg.setOperationType(theMsg.getOperationType());
+			deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
 
 			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
 			MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();

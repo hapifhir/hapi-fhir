@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.subscription;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
-import ca.uhn.fhir.jpa.subscription.module.SubscriptionChannel;
+import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -24,7 +24,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.SubscribableChannel;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -100,7 +99,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		}
 		waitForActivatedSubscriptionCount(0);
 
-		SubscriptionChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
+		LinkedBlockingQueueSubscribableChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
 		processingChannel.clearInterceptorsForUnitTest();
 		myCountingInterceptor = new CountingInterceptor();
 		processingChannel.addInterceptorForUnitTest(myCountingInterceptor);

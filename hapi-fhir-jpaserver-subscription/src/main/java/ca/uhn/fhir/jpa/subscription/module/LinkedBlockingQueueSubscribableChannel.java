@@ -35,13 +35,13 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import java.util.ArrayList;
 import java.util.concurrent.*;
 
-public class SubscriptionChannel implements SubscribableChannel {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionChannel.class);
+public class LinkedBlockingQueueSubscribableChannel implements SubscribableChannel {
+	private Logger ourLog = LoggerFactory.getLogger(LinkedBlockingQueueSubscribableChannel.class);
 
 	private final ExecutorSubscribableChannel mySubscribableChannel;
 	private final BlockingQueue<Runnable> myQueue;
 
-	public SubscriptionChannel(BlockingQueue<Runnable> theQueue, String theThreadNamingPattern) {
+	public LinkedBlockingQueueSubscribableChannel(BlockingQueue<Runnable> theQueue, String theThreadNamingPattern) {
 
 		ThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern(theThreadNamingPattern)

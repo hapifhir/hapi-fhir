@@ -35,7 +35,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ResourceDeliveryMessage {
+public class ResourceDeliveryMessage implements IResourceMessage {
 
 	private static final long serialVersionUID = 1L;
 
@@ -101,6 +101,7 @@ public class ResourceDeliveryMessage {
 	public void setPayload(FhirContext theCtx, IBaseResource thePayload) {
 		myPayload = thePayload;
 		myPayloadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
+		myPayloadId = thePayload.getIdElement().toUnqualified().getValue();
 	}
 
 	public void setPayloadId(IIdType thePayloadId) {
@@ -109,5 +110,8 @@ public class ResourceDeliveryMessage {
 			myPayloadId = thePayloadId.getValue();
 		}
 	}
-
+	@Override
+	public String getPayloadId() {
+		return myPayloadId;
+	}
 }

@@ -39,8 +39,9 @@
 				and SubscriptionMatchingInterceptor that is responsible for matching incoming resources against activated
 				subscriptions.  Call DaoConfig.addSupportedSubscriptionType(type) to configure which subscription types
 				are supported in your environment.  The helper method SubscriptionInterceptorLoader.registerInterceptors()
-				will check if any subscription types are supported, and if so then register both the activating and matching
-				interceptors.  See https://github.com/jamesagnew/hapi-fhir/wiki/Proposed-Subscription-Design-Change for more
+				will check if any subscription types are supported, and if so then load active subscriptions into the
+				SubscriptionRegistry and then register both the activating and matching interceptors.
+				See https://github.com/jamesagnew/hapi-fhir/wiki/Proposed-Subscription-Design-Change for more
 				details.
 			</action>
 			<action type="change">
@@ -207,10 +208,10 @@
 				contains the subscription, it's delivery channel, and a list of delivery handlers.
 			</action>
 			<action type="change">
-				Introduced a Spring factory interfaces called ISubscriptionDeliveryChannelFactory and
-				ISubscriptionDeliveryHandlerFactory that are used to create delivery channels and handlers.  By default,
-				HAPI FHIR ships with a LinkedBlockingQueue implementation of the delivery channel factory.  If a different
-				type of channel factory is required, add it to your application context and mark it as @Primary.
+				Introduced a new Spring factory interface ISubscribableChannelFactory that is used to create delivery
+				channels and handlers.  By default, HAPI FHIR ships with a LinkedBlockingQueue implementation of the
+				delivery channel factory.  If a different type of channel factory is required (e.g. JMS or Kafka), add it
+				to your application context and mark it as @Primary.
 			</action>
 			<action type="fix" issue="980">
 				When using the HL7.org DSTU2 structures, a QuestionnaireResponse with a 

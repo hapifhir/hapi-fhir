@@ -50,7 +50,7 @@ public class SubscriptionRegistry {
 	@Autowired
 	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
 	@Autowired
-	ISubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
+	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 
 	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
 
