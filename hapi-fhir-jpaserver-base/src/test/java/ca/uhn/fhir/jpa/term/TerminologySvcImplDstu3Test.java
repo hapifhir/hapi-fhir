@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -582,6 +584,50 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
 		}
 	}
+
+	/**
+	 * Check that a custom ValueSet against a custom CodeSystem expands correctly
+	 */
+	@Test
+	public void testCustomValueSetExpansion() {
+
+		CodeSystem cs=  new CodeSystem();
+		cs.setUrl("http://codesystems-r-us");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		IIdType csId = myCodeSystemDao.create(cs).getId().toUnqualifiedVersionless();
+
+		TermCodeSystemVersion version = new TermCodeSystemVersion();
+		version.getConcepts().add(new TermConcept(version, "A"));
+		version.getConcepts().add(new TermConcept(version, "B"));
+		version.getConcepts().add(new TermConcept(version, "C"));
+		version.getConcepts().add(new TermConcept(version, "D"));
+		runInTransaction(()->{
+			ResourceTable resTable = myEntityManager.find(ResourceTable.class, csId.getIdPartAsLong());
+			version.setResource(resTable);
+			myTermSvc.storeNewCodeSystemVersion(csId.getIdPartAsLong(), cs.getUrl(), "My System", version);
+		});
+
+		org.hl7.fhir.dstu3.model.ValueSet vs = new org.hl7.fhir.dstu3.model.ValueSet();
+		vs.setUrl("http://valuesets-r-us");
+		vs.getCompose()
+			.addInclude()
+			.setSystem(cs.getUrl())
+			.addConcept(new org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent().setCode("A"))
+			.addConcept(new org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent().setCode("C"));
+		myValueSetDao.create(vs);
+
+		org.hl7.fhir.dstu3.model.ValueSet expansion = myValueSetDao.expandByIdentifier(vs.getUrl(), null);
+		List<String> expansionCodes = expansion
+			.getExpansion()
+			.getContains()
+			.stream()
+			.map(t -> t.getCode())
+			.sorted()
+			.collect(Collectors.toList());
+		assertEquals(Lists.newArrayList("A","C"), expansionCodes);
+
+	}
+
 
 	public static List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
 		List<String> retVal = new ArrayList<>();

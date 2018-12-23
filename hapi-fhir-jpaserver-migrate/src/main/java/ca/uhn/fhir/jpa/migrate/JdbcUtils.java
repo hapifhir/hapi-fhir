@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,10 +22,19 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
 import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
+import org.hibernate.engine.jdbc.env.internal.NormalizingIdentifierHelperImpl;
+import org.hibernate.engine.jdbc.env.spi.*;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
+import org.hibernate.engine.jdbc.spi.TypeInfo;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.schema.extract.spi.ExtractionContext;
+import org.hibernate.tool.schema.extract.spi.SequenceInformation;
+import org.hibernate.tool.schema.extract.spi.SequenceInformationExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -53,7 +62,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), theTableName, false, true);
+					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, true);
 
 					Set<String> indexNames = new HashSet<>();
 					while (indexes.next()) {
@@ -81,7 +90,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), theTableName, false, false);
+					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, false);
 
 					while (indexes.next()) {
 						String indexName = indexes.getString("INDEX_NAME");
@@ -112,7 +121,7 @@ public class JdbcUtils {
 					metadata = connection.getMetaData();
 					String catalog = connection.getCatalog();
 					String schema = connection.getSchema();
-					ResultSet indexes = metadata.getColumns(catalog, schema, theTableName, null);
+					ResultSet indexes = metadata.getColumns(catalog, schema, massageIdentifier(metadata, theTableName), null);
 
 					while (indexes.next()) {
 
@@ -165,7 +174,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getCrossReference(connection.getCatalog(), connection.getSchema(), theTableName, connection.getCatalog(), connection.getSchema(), theForeignTable);
+					ResultSet indexes = metadata.getCrossReference(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theForeignTable));
 
 					Set<String> columnNames = new HashSet<>();
 					while (indexes.next()) {
@@ -201,7 +210,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getColumns(connection.getCatalog(), connection.getSchema(), theTableName, null);
+					ResultSet indexes = metadata.getColumns(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), null);
 
 					Set<String> columnNames = new HashSet<>();
 					while (indexes.next()) {
@@ -233,27 +242,83 @@ public class JdbcUtils {
 
 					Set<String> sequenceNames = new HashSet<>();
 					if (dialect.supportsSequences()) {
-						String sql = dialect.getQuerySequencesString();
-						if (sql != null) {
 
-							Statement statement = null;
-							ResultSet rs = null;
-							try {
-								statement = connection.createStatement();
-								rs = statement.executeQuery(sql);
-
-								while (rs.next()) {
-									sequenceNames.add(rs.getString(1).toUpperCase());
-								}
-							} finally {
-								if (rs != null) rs.close();
-								if (statement != null) statement.close();
+						// Use Hibernate to get a list of current sequences
+						SequenceInformationExtractor sequenceInformationExtractor = dialect.getSequenceInformationExtractor();
+						ExtractionContext extractionContext = new ExtractionContext.EmptyExtractionContext() {
+							@Override
+							public Connection getJdbcConnection() {
+								return connection;
 							}
 
+							@Override
+							public ServiceRegistry getServiceRegistry() {
+								return super.getServiceRegistry();
+							}
+
+							@Override
+							public JdbcEnvironment getJdbcEnvironment() {
+								return new JdbcEnvironment() {
+									@Override
+									public Dialect getDialect() {
+										return dialect;
+									}
+
+									@Override
+									public ExtractedDatabaseMetaData getExtractedDatabaseMetaData() {
+										return null;
+									}
+
+									@Override
+									public Identifier getCurrentCatalog() {
+										return null;
+									}
+
+									@Override
+									public Identifier getCurrentSchema() {
+										return null;
+									}
+
+									@Override
+									public QualifiedObjectNameFormatter getQualifiedObjectNameFormatter() {
+										return null;
+									}
+
+									@Override
+									public IdentifierHelper getIdentifierHelper() {
+										return new NormalizingIdentifierHelperImpl(this, null, true, true, true, null, null, null);
+									}
+
+									@Override
+									public NameQualifierSupport getNameQualifierSupport() {
+										return null;
+									}
+
+									@Override
+									public SqlExceptionHelper getSqlExceptionHelper() {
+										return null;
+									}
+
+									@Override
+									public LobCreatorBuilder getLobCreatorBuilder() {
+										return null;
+									}
+
+									@Override
+									public TypeInfo getTypeInfoForJdbcCode(int jdbcTypeCode) {
+										return null;
+									}
+								};
+							}
+						};
+						Iterable<SequenceInformation> sequences = sequenceInformationExtractor.extractMetadata(extractionContext);
+						for (SequenceInformation next : sequences) {
+							sequenceNames.add(next.getSequenceName().getSequenceName().getText());
 						}
+
 					}
 					return sequenceNames;
-				} catch (SQLException e ) {
+				} catch (SQLException e) {
 					throw new InternalErrorException(e);
 				}
 			});
@@ -298,7 +363,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getColumns(connection.getCatalog(), connection.getSchema(), theTableName, theColumnName);
+					ResultSet tables = metadata.getColumns(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), null);
 
 					while (tables.next()) {
 						String tableName = toUpperCase(tables.getString("TABLE_NAME"), Locale.US);
@@ -324,5 +389,15 @@ public class JdbcUtils {
 				}
 			});
 		}
+	}
+
+	private static String massageIdentifier(DatabaseMetaData theMetadata, String theCatalog) throws SQLException {
+		String retVal = theCatalog;
+		if (theMetadata.storesLowerCaseIdentifiers()) {
+			retVal = retVal.toLowerCase();
+		} else {
+			retVal = retVal.toUpperCase();
+		}
+		return retVal;
 	}
 }

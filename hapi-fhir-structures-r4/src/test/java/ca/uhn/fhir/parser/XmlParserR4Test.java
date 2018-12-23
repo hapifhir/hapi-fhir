@@ -195,13 +195,6 @@ public class XmlParserR4Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(o);
 		ourLog.info(encoded);
 
-		FhirContext
-			.forR4()
-			.newRestfulGenericClient("http://hapi.fhir.org/baseR4")
-			.create()
-			.resource(o)
-			.execute();
-
 		assertThat(encoded, containsString("<comment value=\"123&#xa;456\"/>"));
 
 		o = ourCtx.newXmlParser().parseResource(Observation.class, encoded);

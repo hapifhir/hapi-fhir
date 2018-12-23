@@ -256,25 +256,28 @@ public abstract class BaseApp {
 			System.err.println("" + ansi().fg(Ansi.Color.WHITE).boldOff());
 			logCommandUsageNoHeader(command);
 			runCleanupHookAndUnregister();
-			System.exit(1);
+			exitDueToException(e);
 		} catch (CommandFailureException e) {
 			ourLog.error(e.getMessage());
 			runCleanupHookAndUnregister();
-			if ("true".equals(System.getProperty("test"))) {
-				throw e;
-			} else {
-				System.exit(1);
-			}
+			exitDueToException(e);
 		} catch (Throwable t) {
 			ourLog.error("Error during execution: ", t);
 			runCleanupHookAndUnregister();
-			if ("true".equals(System.getProperty("test"))) {
-				throw new CommandFailureException("Error: " + t.toString(), t);
-			} else {
-				System.exit(1);
-			}
+			exitDueToException(new CommandFailureException("Error: " + t.toString(), t));
 		}
 
+	}
+
+	private void exitDueToException(Throwable e) {
+		if ("true".equals(System.getProperty("test"))) {
+			if (e instanceof CommandFailureException) {
+				throw (CommandFailureException)e;
+			}
+			throw new Error(e);
+		} else {
+			System.exit(1);
+		}
 	}
 
 	private void runCleanupHookAndUnregister() {

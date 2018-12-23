@@ -57,6 +57,63 @@ public class RestfulServerUtils {
 	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<String>(Arrays.asList("Bundle", "*.text", "*.(mandatory)"));
 	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<FhirVersionEnum, FhirContext>());
 
+	private enum NarrativeModeEnum {
+		NORMAL, ONLY, SUPPRESS;
+
+		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
+			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
+		}
+	}
+
+	/**
+	 * Return type for {@link RestfulServerUtils#determineRequestEncodingNoDefault(RequestDetails)}
+	 */
+	public static class ResponseEncoding {
+		private final String myContentType;
+		private final EncodingEnum myEncoding;
+		private final Boolean myNonLegacy;
+
+		public ResponseEncoding(FhirContext theCtx, EncodingEnum theEncoding, String theContentType) {
+			super();
+			myEncoding = theEncoding;
+			myContentType = theContentType;
+			if (theContentType != null) {
+				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
+				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
+					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1);
+				} else {
+					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1) && !EncodingEnum.isLegacy(theContentType);
+				}
+			} else {
+				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
+				if (ctxtEnum.isOlderThan(FhirVersionEnum.DSTU3)) {
+					myNonLegacy = null;
+				} else {
+					myNonLegacy = Boolean.TRUE;
+				}
+			}
+		}
+
+		public String getContentType() {
+			return myContentType;
+		}
+
+		public EncodingEnum getEncoding() {
+			return myEncoding;
+		}
+
+		public String getResourceContentType() {
+			if (Boolean.TRUE.equals(isNonLegacy())) {
+				return getEncoding().getResourceContentTypeNonLegacy();
+			}
+			return getEncoding().getResourceContentType();
+		}
+
+		Boolean isNonLegacy() {
+			return myNonLegacy;
+		}
+	}
+
 	public static void configureResponseParser(RequestDetails theRequestDetails, IParser parser) {
 		// Pretty print
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theRequestDetails.getServer(), theRequestDetails);
@@ -272,6 +329,15 @@ public class RestfulServerUtils {
 	 * equally, returns thePrefer.
 	 */
 	public static ResponseEncoding determineResponseEncodingNoDefault(RequestDetails theReq, EncodingEnum thePrefer) {
+		return determineResponseEncodingNoDefault(theReq, thePrefer, null);
+	}
+
+	/**
+	 * Try to determing the response content type, given the request Accept header and
+	 * _format parameter. If a value is provided to thePreferContents, we'll
+	 * prefer to return that value over the native FHIR value.
+	 */
+	public static ResponseEncoding determineResponseEncodingNoDefault(RequestDetails theReq, EncodingEnum thePrefer, String thePreferContentType) {
 		String[] format = theReq.getParameters().get(Constants.PARAM_FORMAT);
 		if (format != null) {
 			for (String nextFormat : format) {
@@ -333,12 +399,12 @@ public class RestfulServerUtils {
 					ResponseEncoding encoding;
 					if (endSpaceIndex == -1) {
 						if (startSpaceIndex == 0) {
-							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken);
+							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken, thePreferContentType);
 						} else {
-							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex));
+							encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex), thePreferContentType);
 						}
 					} else {
-						encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex, endSpaceIndex));
+						encoding = getEncodingForContentType(theReq.getServer().getFhirContext(), strict, nextToken.substring(startSpaceIndex, endSpaceIndex), thePreferContentType);
 						String remaining = nextToken.substring(endSpaceIndex + 1);
 						StringTokenizer qualifierTok = new StringTokenizer(remaining, ";");
 						while (qualifierTok.hasMoreTokens()) {
@@ -476,12 +542,17 @@ public class RestfulServerUtils {
 		return context;
 	}
 
-	private static ResponseEncoding getEncodingForContentType(FhirContext theFhirContext, boolean theStrict, String theContentType) {
+	private static ResponseEncoding getEncodingForContentType(FhirContext theFhirContext, boolean theStrict, String theContentType, String thePreferContentType) {
 		EncodingEnum encoding;
 		if (theStrict) {
 			encoding = EncodingEnum.forContentTypeStrict(theContentType);
 		} else {
 			encoding = EncodingEnum.forContentType(theContentType);
+		}
+		if (isNotBlank(thePreferContentType)) {
+			if (thePreferContentType.equals(theContentType)) {
+				return new ResponseEncoding(theFhirContext, encoding, theContentType);
+			}
 		}
 		if (encoding == null) {
 			return null;
@@ -749,23 +820,6 @@ public class RestfulServerUtils {
 		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
 	}
 
-	public static String createEtag(String theVersionId) {
-		return "W/\"" + theVersionId + '"';
-	}
-
-	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {
-		String[] retVal = theRequest.getParameters().get(theParamName);
-		if (retVal == null) {
-			return null;
-		}
-		try {
-			return Integer.parseInt(retVal[0]);
-		} catch (NumberFormatException e) {
-			ourLog.debug("Failed to parse {} value '{}': {}", new Object[] {theParamName, retVal[0], e});
-			return null;
-		}
-	}
-
 	// static Integer tryToExtractNamedParameter(HttpServletRequest theRequest, String name) {
 	// String countString = theRequest.getParameter(name);
 	// Integer count = null;
@@ -779,60 +833,26 @@ public class RestfulServerUtils {
 	// return count;
 	// }
 
+	public static String createEtag(String theVersionId) {
+		return "W/\"" + theVersionId + '"';
+	}
+
+	public static Integer tryToExtractNamedParameter(RequestDetails theRequest, String theParamName) {
+		String[] retVal = theRequest.getParameters().get(theParamName);
+		if (retVal == null) {
+			return null;
+		}
+		try {
+			return Integer.parseInt(retVal[0]);
+		} catch (NumberFormatException e) {
+			ourLog.debug("Failed to parse {} value '{}': {}", new Object[]{theParamName, retVal[0], e});
+			return null;
+		}
+	}
+
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {
 			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
-		}
-	}
-
-	private enum NarrativeModeEnum {
-		NORMAL, ONLY, SUPPRESS;
-
-		public static NarrativeModeEnum valueOfCaseInsensitive(String theCode) {
-			return valueOf(NarrativeModeEnum.class, theCode.toUpperCase());
-		}
-	}
-
-	/**
-	 * Return type for {@link RestfulServerUtils#determineRequestEncodingNoDefault(RequestDetails)}
-	 */
-	public static class ResponseEncoding {
-		private final EncodingEnum myEncoding;
-		private final Boolean myNonLegacy;
-
-		public ResponseEncoding(FhirContext theCtx, EncodingEnum theEncoding, String theContentType) {
-			super();
-			myEncoding = theEncoding;
-			if (theContentType != null) {
-				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
-				if (theContentType.equals(EncodingEnum.JSON_PLAIN_STRING) || theContentType.equals(EncodingEnum.XML_PLAIN_STRING)) {
-					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1);
-				} else {
-					myNonLegacy = ctxtEnum.isNewerThan(FhirVersionEnum.DSTU2_1) && !EncodingEnum.isLegacy(theContentType);
-				}
-			} else {
-				FhirVersionEnum ctxtEnum = theCtx.getVersion().getVersion();
-				if (ctxtEnum.isOlderThan(FhirVersionEnum.DSTU3)) {
-					myNonLegacy = null;
-				} else {
-					myNonLegacy = Boolean.TRUE;
-				}
-			}
-		}
-
-		public EncodingEnum getEncoding() {
-			return myEncoding;
-		}
-
-		public String getResourceContentType() {
-			if (Boolean.TRUE.equals(isNonLegacy())) {
-				return getEncoding().getResourceContentTypeNonLegacy();
-			}
-			return getEncoding().getResourceContentType();
-		}
-
-		public Boolean isNonLegacy() {
-			return myNonLegacy;
 		}
 	}
 

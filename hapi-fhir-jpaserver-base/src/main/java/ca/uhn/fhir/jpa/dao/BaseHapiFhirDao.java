@@ -2,16 +2,16 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.data.*;
-import ca.uhn.fhir.jpa.dao.index.*;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
-import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -59,7 +59,6 @@ import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -78,8 +77,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import java.io.CharArrayWriter;
-import java.text.Normalizer;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -174,23 +171,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	private ISearchDao mySearchDao;
 	@Autowired
-	private ISearchParamExtractor mySearchParamExtractor;
-	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	//@Autowired
 	//private ISearchResultDao mySearchResultDao;
 	@Autowired
-	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-	@Autowired
-	private BeanFactory beanFactory;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private SearchParamExtractorService mySearchParamExtractorService;
 	@Autowired
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	@Autowired
-	private DatabaseSearchParamSynchronizer myDatabaseSearchParamSynchronizer;
+	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
+	@Autowired
+	private SearchBuilderFactory mySearchBuilderFactory;
 
 	private ApplicationContext myApplicationContext;
 
@@ -752,9 +743,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return LogicalReferenceHelper.isLogicalReference(myConfig.getModelConfig(), theId);
 	}
 
-	@Override
+	// TODO KHS inject a searchBuilderFactory into callers of this method and delete this method
 	public SearchBuilder newSearchBuilder() {
-		return beanFactory.getBean(SearchBuilder.class, this);
+		return mySearchBuilderFactory.newSearchBuilder(this);
 	}
 
 	public void notifyInterceptors(RestOperationTypeEnum theOperationType, ActionRequestDetails theRequestDetails) {
@@ -1412,7 +1403,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 * Indexing
 		 */
 		if (thePerformIndexing) {
-			myDatabaseSearchParamSynchronizer.synchronizeSearchParamsToDatabase(newParams, theEntity, existingParams);
+			myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(newParams, theEntity, existingParams);
 			mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, theEntity, existingParams);
 		}
 

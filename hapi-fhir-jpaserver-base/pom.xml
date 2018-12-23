@@ -231,14 +231,14 @@
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-impl</artifactId>
-		</dependency>
+		</dependency>-->
 
 		<!-- Test Database -->
 		<dependency>
@@ -360,18 +360,10 @@
 					<artifactId>xml-apis</artifactId>
 					<groupId>xml-apis</groupId>
 				</exclusion>
-				<exclusion>
-					<groupId>org.jboss.spec.javax.transaction</groupId>
-					<artifactId>jboss-transaction-api_1.2_spec</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>activation</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>javax.activation-api</artifactId>
-				</exclusion>
+				<!--<exclusion>-->
+					<!--<groupId>org.jboss.spec.javax.transaction</groupId>-->
+					<!--<artifactId>jboss-transaction-api_1.2_spec</artifactId>-->
+				<!--</exclusion>-->
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -409,9 +401,14 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>javax.transaction-api</artifactId>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>javax.activation</artifactId>
+			<version>1.2.0</version>
 		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>javax.transaction</groupId>-->
+			<!--<artifactId>javax.transaction-api</artifactId>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>javax.mail-api</artifactId>
@@ -428,10 +425,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>com.sun.activation</groupId>
-			<artifactId>javax.activation</artifactId>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>com.sun.activation</groupId>-->
+			<!--<artifactId>javax.activation</artifactId>-->
+		<!--</dependency>-->
 		<!--<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
@@ -596,20 +593,20 @@
 					as JDK9 no longer includes them by default
 					-->
 					<dependency>
-						<groupId>javax.xml.bind</groupId>
-						<artifactId>jaxb-api</artifactId>
-						<version>${jaxb_api_version}</version>
+						<groupId>org.glassfish.jaxb</groupId>
+						<artifactId>jaxb-runtime</artifactId>
+						<version>${jaxb_runtime_version}</version>
 					</dependency>
-					<dependency>
-						<groupId>com.sun.xml.bind</groupId>
-						<artifactId>jaxb-core</artifactId>
-						<version>${jaxb_core_version}</version>
-					</dependency>
-					<dependency>
-						<groupId>com.sun.xml.bind</groupId>
-						<artifactId>jaxb-impl</artifactId>
-						<version>${jaxb_core_version}</version>
-					</dependency>
+					<!--<dependency>-->
+						<!--<groupId>com.sun.xml.bind</groupId>-->
+						<!--<artifactId>jaxb-core</artifactId>-->
+						<!--<version>${jaxb_core_version}</version>-->
+					<!--</dependency>-->
+					<!--<dependency>-->
+						<!--<groupId>com.sun.xml.bind</groupId>-->
+						<!--<artifactId>jaxb-impl</artifactId>-->
+						<!--<version>${jaxb_core_version}</version>-->
+					<!--</dependency>-->
 				</dependencies>
 			</plugin>
 			<plugin>

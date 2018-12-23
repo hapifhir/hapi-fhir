@@ -4,12 +4,12 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
-import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.Subscription;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +112,7 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
-	private List<IServerInterceptor> myInterceptors;
+	private List<IServerInterceptor> myInterceptors = new ArrayList<>();
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -484,12 +484,24 @@ public class DaoConfig {
 	 * Returns the interceptors which will be notified of operations.
 	 *
 	 * @see #setInterceptors(List)
+	 * @deprecated Marked as deprecated as of HAPI 3.7.0.  Use {@link #registerInterceptor} or {@link #unregisterInterceptor}instead.
 	 */
+
+	@Deprecated
 	public List<IServerInterceptor> getInterceptors() {
-		if (myInterceptors == null) {
-			myInterceptors = new ArrayList<>();
-		}
 		return myInterceptors;
+	}
+
+	public void registerInterceptor(IServerInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		if (!myInterceptors.contains(theInterceptor)) {
+			myInterceptors.add(theInterceptor);
+		}
+	}
+
+	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		myInterceptors.remove(theInterceptor);
 	}
 
 	/**
@@ -1461,6 +1473,47 @@ public class DaoConfig {
 	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
 		myModelConfig.setDefaultSearchParamsCanBeOverridden(theDefaultSearchParamsCanBeOverridden);
 	}
+
+	/**
+	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
+	 * to the server matching these types will be activated.
+	 *
+	 */
+	public DaoConfig addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
+		myModelConfig.addSupportedSubscriptionType(theSubscriptionChannelType);
+		return this;
+	}
+
+	/**
+	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
+	 * to the server matching these types will be activated.
+	 *
+	 */
+	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
+		return myModelConfig.getSupportedSubscriptionTypes();
+	}
+
+	@VisibleForTesting
+	public void clearSupportedSubscriptionTypesForUnitTest() {
+		myModelConfig.clearSupportedSubscriptionTypesForUnitTest();
+	}
+
+	/**
+	 * If e-mail subscriptions are supported, the From address used when sending e-mails
+	 */
+
+	public String getEmailFromAddress() {
+		return myModelConfig.getEmailFromAddress();
+	}
+
+	/**
+	 * If e-mail subscriptions are supported, the From address used when sending e-mails
+	 */
+
+	public void setEmailFromAddress(String theEmailFromAddress) {
+		myModelConfig.setEmailFromAddress(theEmailFromAddress);
+	}
+
 
 
 	public enum IndexEnabledEnum {

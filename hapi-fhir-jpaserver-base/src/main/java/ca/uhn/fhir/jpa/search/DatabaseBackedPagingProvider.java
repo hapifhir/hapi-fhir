@@ -28,7 +28,9 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
+// Note: this class is not annotated with @Service because we want to
+// explicitly define it in BaseConfig.java. This is done so that
+// implementors can override if they want to.
 public class DatabaseBackedPagingProvider extends BasePagingProvider implements IPagingProvider {
 
 	@Autowired

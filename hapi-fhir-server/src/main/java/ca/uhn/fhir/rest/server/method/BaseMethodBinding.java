@@ -84,6 +84,8 @@ public abstract class BaseMethodBinding<T> {
 			}
 		}
 
+		// This allows us to invoke methods on private classes
+		myMethod.setAccessible(true);
 	}
 
 	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {

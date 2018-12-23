@@ -116,7 +116,7 @@ public class BaseDstu2Config extends BaseConfig {
 
 	@Bean
 	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryDstu2(searchParamProvider());
+		return new SearchParamRegistryDstu2();
 	}
 
 	@Bean(name = "mySystemDaoDstu2", autowire = Autowire.BY_NAME)
