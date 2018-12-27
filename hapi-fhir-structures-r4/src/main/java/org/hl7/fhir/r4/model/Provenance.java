@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1063,7 +1063,7 @@ public class Provenance extends DomainResource {
      */
     public Period getOccurredPeriod() throws FHIRException { 
       if (this.occurred == null)
-        return null;
+        this.occurred = new Period();
       if (!(this.occurred instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurred.getClass().getName()+" was encountered");
       return (Period) this.occurred;
@@ -1078,7 +1078,7 @@ public class Provenance extends DomainResource {
      */
     public DateTimeType getOccurredDateTimeType() throws FHIRException { 
       if (this.occurred == null)
-        return null;
+        this.occurred = new DateTimeType();
       if (!(this.occurred instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurred.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurred;

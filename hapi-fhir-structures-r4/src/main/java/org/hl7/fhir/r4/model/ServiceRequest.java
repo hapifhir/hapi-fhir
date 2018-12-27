@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -58,23 +58,23 @@ public class ServiceRequest extends DomainResource {
          */
         ACTIVE, 
         /**
-         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.
+         * The request (and any implicit authorization to act) has been temporarily withdrawn but is expected to resume in the future.
          */
         ONHOLD, 
         /**
-         * The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.
+         * The request (and any implicit authorization to act) has been terminated prior to the known full completion of the intended actions.  No further activity should occur.
          */
         REVOKED, 
         /**
-         * Activity against the request has been sufficiently completed to the satisfaction of the requester.
+         * The activity described by the request has been fully performed.  No further activity will occur.
          */
         COMPLETED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
+         * This request should never have existed and should be considered 'void'.  (It is possible that real-world decisions were based on it.  If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.
+         * The authoring/source system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which.
          */
         UNKNOWN, 
         /**
@@ -131,11 +131,11 @@ public class ServiceRequest extends DomainResource {
           switch (this) {
             case DRAFT: return "The request has been created but is not yet complete or ready for action.";
             case ACTIVE: return "The request is in force and ready to be acted upon.";
-            case ONHOLD: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.";
-            case REVOKED: return "The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.";
-            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester.";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.";
+            case ONHOLD: return "The request (and any implicit authorization to act) has been temporarily withdrawn but is expected to resume in the future.";
+            case REVOKED: return "The request (and any implicit authorization to act) has been terminated prior to the known full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "The activity described by the request has been fully performed.  No further activity will occur.";
+            case ENTEREDINERROR: return "This request should never have existed and should be considered 'void'.  (It is possible that real-world decisions were based on it.  If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
+            case UNKNOWN: return "The authoring/source system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which.";
             default: return "?";
           }
         }
@@ -230,7 +230,11 @@ public class ServiceRequest extends DomainResource {
          */
         PLAN, 
         /**
-         * The request represents a request/demand and authorization for action.
+         * The request represents a legally binding instruction authored by a Patient or RelatedPerson.
+         */
+        DIRECTIVE, 
+        /**
+         * The request represents a request/demand and authorization for action by a Practitioner.
          */
         ORDER, 
         /**
@@ -264,6 +268,8 @@ public class ServiceRequest extends DomainResource {
           return PROPOSAL;
         if ("plan".equals(codeString))
           return PLAN;
+        if ("directive".equals(codeString))
+          return DIRECTIVE;
         if ("order".equals(codeString))
           return ORDER;
         if ("original-order".equals(codeString))
@@ -285,6 +291,7 @@ public class ServiceRequest extends DomainResource {
           switch (this) {
             case PROPOSAL: return "proposal";
             case PLAN: return "plan";
+            case DIRECTIVE: return "directive";
             case ORDER: return "order";
             case ORIGINALORDER: return "original-order";
             case REFLEXORDER: return "reflex-order";
@@ -298,6 +305,7 @@ public class ServiceRequest extends DomainResource {
           switch (this) {
             case PROPOSAL: return "http://hl7.org/fhir/request-intent";
             case PLAN: return "http://hl7.org/fhir/request-intent";
+            case DIRECTIVE: return "http://hl7.org/fhir/request-intent";
             case ORDER: return "http://hl7.org/fhir/request-intent";
             case ORIGINALORDER: return "http://hl7.org/fhir/request-intent";
             case REFLEXORDER: return "http://hl7.org/fhir/request-intent";
@@ -311,7 +319,8 @@ public class ServiceRequest extends DomainResource {
           switch (this) {
             case PROPOSAL: return "The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act.";
             case PLAN: return "The request represents an intention to ensure something occurs without providing an authorization for others to act.";
-            case ORDER: return "The request represents a request/demand and authorization for action.";
+            case DIRECTIVE: return "The request represents a legally binding instruction authored by a Patient or RelatedPerson.";
+            case ORDER: return "The request represents a request/demand and authorization for action by a Practitioner.";
             case ORIGINALORDER: return "The request represents an original authorization for action.";
             case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization.";
             case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order.";
@@ -324,6 +333,7 @@ public class ServiceRequest extends DomainResource {
           switch (this) {
             case PROPOSAL: return "Proposal";
             case PLAN: return "Plan";
+            case DIRECTIVE: return "Directive";
             case ORDER: return "Order";
             case ORIGINALORDER: return "Original Order";
             case REFLEXORDER: return "Reflex Order";
@@ -344,6 +354,8 @@ public class ServiceRequest extends DomainResource {
           return ServiceRequestIntent.PROPOSAL;
         if ("plan".equals(codeString))
           return ServiceRequestIntent.PLAN;
+        if ("directive".equals(codeString))
+          return ServiceRequestIntent.DIRECTIVE;
         if ("order".equals(codeString))
           return ServiceRequestIntent.ORDER;
         if ("original-order".equals(codeString))
@@ -370,6 +382,8 @@ public class ServiceRequest extends DomainResource {
           return new Enumeration<ServiceRequestIntent>(this, ServiceRequestIntent.PROPOSAL);
         if ("plan".equals(codeString))
           return new Enumeration<ServiceRequestIntent>(this, ServiceRequestIntent.PLAN);
+        if ("directive".equals(codeString))
+          return new Enumeration<ServiceRequestIntent>(this, ServiceRequestIntent.DIRECTIVE);
         if ("order".equals(codeString))
           return new Enumeration<ServiceRequestIntent>(this, ServiceRequestIntent.ORDER);
         if ("original-order".equals(codeString))
@@ -389,6 +403,8 @@ public class ServiceRequest extends DomainResource {
         return "proposal";
       if (code == ServiceRequestIntent.PLAN)
         return "plan";
+      if (code == ServiceRequestIntent.DIRECTIVE)
+        return "directive";
       if (code == ServiceRequestIntent.ORDER)
         return "order";
       if (code == ServiceRequestIntent.ORIGINALORDER)
@@ -650,7 +666,7 @@ public class ServiceRequest extends DomainResource {
      * On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).
      */
     @Child(name = "subject", type = {Patient.class, Group.class, Location.class, Device.class}, order=14, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Individual the service is ordered for", formalDefinition="On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans)." )
+    @Description(shortDefinition="Individual or Entity the service is ordered for", formalDefinition="On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans)." )
     protected Reference subject;
 
     /**
@@ -659,16 +675,16 @@ public class ServiceRequest extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * An encounter or episode of care that provides additional information about the healthcare context in which this request is made.
+     * An encounter that provides additional information about the healthcare context in which this request is made.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=15, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Encounter or Episode during which request was created", formalDefinition="An encounter or episode of care that provides additional information about the healthcare context in which this request is made." )
-    protected Reference context;
+    @Child(name = "encounter", type = {Encounter.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Encounter in which the request was created", formalDefinition="An encounter that provides additional information about the healthcare context in which this request is made." )
+    protected Reference encounter;
 
     /**
-     * The actual object that is the target of the reference (An encounter or episode of care that provides additional information about the healthcare context in which this request is made.)
+     * The actual object that is the target of the reference (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    protected Resource contextTarget;
+    protected Encounter encounterTarget;
 
     /**
      * The date/time at which the requested service should occur.
@@ -745,21 +761,21 @@ public class ServiceRequest extends DomainResource {
 
 
     /**
-     * An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.
+     * An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in `supportingInfo`.
      */
     @Child(name = "reasonCode", type = {CodeableConcept.class}, order=24, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Explanation/Justification for procedure or service", formalDefinition="An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation." )
+    @Description(shortDefinition="Explanation/Justification for procedure or service", formalDefinition="An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in `supportingInfo`." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/procedure-reason")
     protected List<CodeableConcept> reasonCode;
 
     /**
-     * Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.
+     * Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in `supportingInfo`.
      */
     @Child(name = "reasonReference", type = {Condition.class, Observation.class, DiagnosticReport.class, DocumentReference.class}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Explanation/Justification for service or service", formalDefinition="Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation." )
+    @Description(shortDefinition="Explanation/Justification for service or service", formalDefinition="Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in `supportingInfo`." )
     protected List<Reference> reasonReference;
     /**
-     * The actual objects that are the target of the reference (Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.)
+     * The actual objects that are the target of the reference (Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in `supportingInfo`.)
      */
     protected List<Resource> reasonReferenceTarget;
 
@@ -834,7 +850,7 @@ public class ServiceRequest extends DomainResource {
     protected List<Provenance> relevantHistoryTarget;
 
 
-    private static final long serialVersionUID = 1917439228L;
+    private static final long serialVersionUID = -1202335045L;
 
   /**
    * Constructor
@@ -1516,7 +1532,7 @@ public class ServiceRequest extends DomainResource {
      */
     public Quantity getQuantityQuantity() throws FHIRException { 
       if (this.quantity == null)
-        return null;
+        this.quantity = new Quantity();
       if (!(this.quantity instanceof Quantity))
         throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.quantity.getClass().getName()+" was encountered");
       return (Quantity) this.quantity;
@@ -1531,7 +1547,7 @@ public class ServiceRequest extends DomainResource {
      */
     public Ratio getQuantityRatio() throws FHIRException { 
       if (this.quantity == null)
-        return null;
+        this.quantity = new Ratio();
       if (!(this.quantity instanceof Ratio))
         throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.quantity.getClass().getName()+" was encountered");
       return (Ratio) this.quantity;
@@ -1546,7 +1562,7 @@ public class ServiceRequest extends DomainResource {
      */
     public Range getQuantityRange() throws FHIRException { 
       if (this.quantity == null)
-        return null;
+        this.quantity = new Range();
       if (!(this.quantity instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.quantity.getClass().getName()+" was encountered");
       return (Range) this.quantity;
@@ -1610,41 +1626,46 @@ public class ServiceRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #context} (An encounter or episode of care that provides additional information about the healthcare context in which this request is made.)
+     * @return {@link #encounter} (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    public Reference getContext() { 
-      if (this.context == null)
+    public Reference getEncounter() { 
+      if (this.encounter == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ServiceRequest.context");
+          throw new Error("Attempt to auto-create ServiceRequest.encounter");
         else if (Configuration.doAutoCreate())
-          this.context = new Reference(); // cc
-      return this.context;
+          this.encounter = new Reference(); // cc
+      return this.encounter;
     }
 
-    public boolean hasContext() { 
-      return this.context != null && !this.context.isEmpty();
+    public boolean hasEncounter() { 
+      return this.encounter != null && !this.encounter.isEmpty();
     }
 
     /**
-     * @param value {@link #context} (An encounter or episode of care that provides additional information about the healthcare context in which this request is made.)
+     * @param value {@link #encounter} (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    public ServiceRequest setContext(Reference value) { 
-      this.context = value;
+    public ServiceRequest setEncounter(Reference value) { 
+      this.encounter = value;
       return this;
     }
 
     /**
-     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An encounter or episode of care that provides additional information about the healthcare context in which this request is made.)
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    public Resource getContextTarget() { 
-      return this.contextTarget;
+    public Encounter getEncounterTarget() { 
+      if (this.encounterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create ServiceRequest.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounterTarget = new Encounter(); // aa
+      return this.encounterTarget;
     }
 
     /**
-     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An encounter or episode of care that provides additional information about the healthcare context in which this request is made.)
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    public ServiceRequest setContextTarget(Resource value) { 
-      this.contextTarget = value;
+    public ServiceRequest setEncounterTarget(Encounter value) { 
+      this.encounterTarget = value;
       return this;
     }
 
@@ -1660,7 +1681,7 @@ public class ServiceRequest extends DomainResource {
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
       if (this.occurrence == null)
-        return null;
+        this.occurrence = new DateTimeType();
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
@@ -1675,7 +1696,7 @@ public class ServiceRequest extends DomainResource {
      */
     public Period getOccurrencePeriod() throws FHIRException { 
       if (this.occurrence == null)
-        return null;
+        this.occurrence = new Period();
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
@@ -1690,7 +1711,7 @@ public class ServiceRequest extends DomainResource {
      */
     public Timing getOccurrenceTiming() throws FHIRException { 
       if (this.occurrence == null)
-        return null;
+        this.occurrence = new Timing();
       if (!(this.occurrence instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Timing) this.occurrence;
@@ -1726,7 +1747,7 @@ public class ServiceRequest extends DomainResource {
      */
     public BooleanType getAsNeededBooleanType() throws FHIRException { 
       if (this.asNeeded == null)
-        return null;
+        this.asNeeded = new BooleanType();
       if (!(this.asNeeded instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (BooleanType) this.asNeeded;
@@ -1741,7 +1762,7 @@ public class ServiceRequest extends DomainResource {
      */
     public CodeableConcept getAsNeededCodeableConcept() throws FHIRException { 
       if (this.asNeeded == null)
-        return null;
+        this.asNeeded = new CodeableConcept();
       if (!(this.asNeeded instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (CodeableConcept) this.asNeeded;
@@ -2069,7 +2090,7 @@ public class ServiceRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #reasonCode} (An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.)
+     * @return {@link #reasonCode} (An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in `supportingInfo`.)
      */
     public List<CodeableConcept> getReasonCode() { 
       if (this.reasonCode == null)
@@ -2122,7 +2143,7 @@ public class ServiceRequest extends DomainResource {
     }
 
     /**
-     * @return {@link #reasonReference} (Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.)
+     * @return {@link #reasonReference} (Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in `supportingInfo`.)
      */
     public List<Reference> getReasonReference() { 
       if (this.reasonReference == null)
@@ -2632,7 +2653,7 @@ public class ServiceRequest extends DomainResource {
         children.add(new Property("orderDetail", "CodeableConcept", "Additional details and instructions about the how the services are to be delivered.   For example, and order for a urinary catheter may have an order detail for an external or indwelling catheter, or an order for a bandage may require additional instructions specifying how the bandage should be applied.", 0, java.lang.Integer.MAX_VALUE, orderDetail));
         children.add(new Property("quantity[x]", "Quantity|Ratio|Range", "An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).", 0, 1, quantity));
         children.add(new Property("subject", "Reference(Patient|Group|Location|Device)", "On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).", 0, 1, subject));
-        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter or episode of care that provides additional information about the healthcare context in which this request is made.", 0, 1, context));
+        children.add(new Property("encounter", "Reference(Encounter)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, 1, encounter));
         children.add(new Property("occurrence[x]", "dateTime|Period|Timing", "The date/time at which the requested service should occur.", 0, 1, occurrence));
         children.add(new Property("asNeeded[x]", "boolean|CodeableConcept", "If a CodeableConcept is present, it indicates the pre-condition for performing the service.  For example \"pain\", \"on flare-up\", etc.", 0, 1, asNeeded));
         children.add(new Property("authoredOn", "dateTime", "When the request transitioned to being actionable.", 0, 1, authoredOn));
@@ -2641,8 +2662,8 @@ public class ServiceRequest extends DomainResource {
         children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.", 0, java.lang.Integer.MAX_VALUE, performer));
         children.add(new Property("locationCode", "CodeableConcept", "The preferred location(s) where the procedure should actually happen in coded or free text form. E.g. at home or nursing day care center.", 0, java.lang.Integer.MAX_VALUE, locationCode));
         children.add(new Property("locationReference", "Reference(Location)", "A reference to the the preferred location(s) where the procedure should actually happen. E.g. at home or nursing day care center.", 0, java.lang.Integer.MAX_VALUE, locationReference));
-        children.add(new Property("reasonCode", "CodeableConcept", "An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
-        children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
+        children.add(new Property("reasonCode", "CodeableConcept", "An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in `supportingInfo`.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in `supportingInfo`.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         children.add(new Property("insurance", "Reference(Coverage|ClaimResponse)", "Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be needed for delivering the requested service.", 0, java.lang.Integer.MAX_VALUE, insurance));
         children.add(new Property("supportingInfo", "Reference(Any)", "Additional clinical information about the patient or specimen that may influence the services or their interpretations.     This information includes diagnosis, clinical findings and other observations.  In laboratory ordering these are typically referred to as \"ask at order entry questions (AOEs)\".  This includes observations explicitly requested by the producer (filler) to provide context or supporting information needed to complete the order. For example,  reporting the amount of inspired oxygen for blood gas measurements.", 0, java.lang.Integer.MAX_VALUE, supportingInfo));
         children.add(new Property("specimen", "Reference(Specimen)", "One or more specimens that the laboratory procedure will use.", 0, java.lang.Integer.MAX_VALUE, specimen));
@@ -2674,7 +2695,7 @@ public class ServiceRequest extends DomainResource {
         case -1004987840: /*quantityRatio*/  return new Property("quantity[x]", "Quantity|Ratio|Range", "An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).", 0, 1, quantity);
         case -1004993678: /*quantityRange*/  return new Property("quantity[x]", "Quantity|Ratio|Range", "An amount of service being requested which can be a quantity ( for example $1,500 home modification), a ratio ( for example, 20 half day visits per month), or a range (2.0 to 1.8 Gy per fraction).", 0, 1, quantity);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Location|Device)", "On whom or what the service is to be performed. This is usually a human patient, but can also be requested on animals, groups of humans or animals, devices such as dialysis machines, or even locations (typically for environmental scans).", 0, 1, subject);
-        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter or episode of care that provides additional information about the healthcare context in which this request is made.", 0, 1, context);
+        case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, 1, encounter);
         case -2022646513: /*occurrence[x]*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date/time at which the requested service should occur.", 0, 1, occurrence);
         case 1687874001: /*occurrence*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date/time at which the requested service should occur.", 0, 1, occurrence);
         case -298443636: /*occurrenceDateTime*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "The date/time at which the requested service should occur.", 0, 1, occurrence);
@@ -2690,8 +2711,8 @@ public class ServiceRequest extends DomainResource {
         case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam|HealthcareService|Patient|Device|RelatedPerson)", "The desired performer for doing the requested service.  For example, the surgeon, dermatopathologist, endoscopist, etc.", 0, java.lang.Integer.MAX_VALUE, performer);
         case -58794174: /*locationCode*/  return new Property("locationCode", "CodeableConcept", "The preferred location(s) where the procedure should actually happen in coded or free text form. E.g. at home or nursing day care center.", 0, java.lang.Integer.MAX_VALUE, locationCode);
         case 755866390: /*locationReference*/  return new Property("locationReference", "Reference(Location)", "A reference to the the preferred location(s) where the procedure should actually happen. E.g. at home or nursing day care center.", 0, java.lang.Integer.MAX_VALUE, locationReference);
-        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
-        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in supportingInformation.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "An explanation or justification for why this service is being requested in coded or textual form.   This is often for billing purposes.  May relate to the resources referred to in `supportingInfo`.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Indicates another resource that provides a justification for why this service is being requested.   May relate to the resources referred to in `supportingInfo`.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
         case 73049818: /*insurance*/  return new Property("insurance", "Reference(Coverage|ClaimResponse)", "Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be needed for delivering the requested service.", 0, java.lang.Integer.MAX_VALUE, insurance);
         case 1922406657: /*supportingInfo*/  return new Property("supportingInfo", "Reference(Any)", "Additional clinical information about the patient or specimen that may influence the services or their interpretations.     This information includes diagnosis, clinical findings and other observations.  In laboratory ordering these are typically referred to as \"ask at order entry questions (AOEs)\".  This includes observations explicitly requested by the producer (filler) to provide context or supporting information needed to complete the order. For example,  reporting the amount of inspired oxygen for blood gas measurements.", 0, java.lang.Integer.MAX_VALUE, supportingInfo);
         case -2132868344: /*specimen*/  return new Property("specimen", "Reference(Specimen)", "One or more specimens that the laboratory procedure will use.", 0, java.lang.Integer.MAX_VALUE, specimen);
@@ -2722,7 +2743,7 @@ public class ServiceRequest extends DomainResource {
         case 1187338559: /*orderDetail*/ return this.orderDetail == null ? new Base[0] : this.orderDetail.toArray(new Base[this.orderDetail.size()]); // CodeableConcept
         case -1285004149: /*quantity*/ return this.quantity == null ? new Base[0] : new Base[] {this.quantity}; // Type
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
-        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case 1687874001: /*occurrence*/ return this.occurrence == null ? new Base[0] : new Base[] {this.occurrence}; // Type
         case -1432923513: /*asNeeded*/ return this.asNeeded == null ? new Base[0] : new Base[] {this.asNeeded}; // Type
         case -1500852503: /*authoredOn*/ return this.authoredOn == null ? new Base[0] : new Base[] {this.authoredOn}; // DateTimeType
@@ -2796,8 +2817,8 @@ public class ServiceRequest extends DomainResource {
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           return value;
-        case 951530927: // context
-          this.context = castToReference(value); // Reference
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
           return value;
         case 1687874001: // occurrence
           this.occurrence = castToType(value); // Type
@@ -2890,8 +2911,8 @@ public class ServiceRequest extends DomainResource {
           this.quantity = castToType(value); // Type
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
-        } else if (name.equals("context")) {
-          this.context = castToReference(value); // Reference
+        } else if (name.equals("encounter")) {
+          this.encounter = castToReference(value); // Reference
         } else if (name.equals("occurrence[x]")) {
           this.occurrence = castToType(value); // Type
         } else if (name.equals("asNeeded[x]")) {
@@ -2950,7 +2971,7 @@ public class ServiceRequest extends DomainResource {
         case -515002347:  return getQuantity(); 
         case -1285004149:  return getQuantity(); 
         case -1867885268:  return getSubject(); 
-        case 951530927:  return getContext(); 
+        case 1524132147:  return getEncounter(); 
         case -2022646513:  return getOccurrence(); 
         case 1687874001:  return getOccurrence(); 
         case -544329575:  return getAsNeeded(); 
@@ -2993,7 +3014,7 @@ public class ServiceRequest extends DomainResource {
         case 1187338559: /*orderDetail*/ return new String[] {"CodeableConcept"};
         case -1285004149: /*quantity*/ return new String[] {"Quantity", "Ratio", "Range"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
-        case 951530927: /*context*/ return new String[] {"Reference"};
+        case 1524132147: /*encounter*/ return new String[] {"Reference"};
         case 1687874001: /*occurrence*/ return new String[] {"dateTime", "Period", "Timing"};
         case -1432923513: /*asNeeded*/ return new String[] {"boolean", "CodeableConcept"};
         case -1500852503: /*authoredOn*/ return new String[] {"dateTime"};
@@ -3075,9 +3096,9 @@ public class ServiceRequest extends DomainResource {
           this.subject = new Reference();
           return this.subject;
         }
-        else if (name.equals("context")) {
-          this.context = new Reference();
-          return this.context;
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
         }
         else if (name.equals("occurrenceDateTime")) {
           this.occurrence = new DateTimeType();
@@ -3201,7 +3222,7 @@ public class ServiceRequest extends DomainResource {
         };
         dst.quantity = quantity == null ? null : quantity.copy();
         dst.subject = subject == null ? null : subject.copy();
-        dst.context = context == null ? null : context.copy();
+        dst.encounter = encounter == null ? null : encounter.copy();
         dst.occurrence = occurrence == null ? null : occurrence.copy();
         dst.asNeeded = asNeeded == null ? null : asNeeded.copy();
         dst.authoredOn = authoredOn == null ? null : authoredOn.copy();
@@ -3282,7 +3303,7 @@ public class ServiceRequest extends DomainResource {
            && compareDeep(replaces, o.replaces, true) && compareDeep(requisition, o.requisition, true) && compareDeep(status, o.status, true)
            && compareDeep(intent, o.intent, true) && compareDeep(category, o.category, true) && compareDeep(priority, o.priority, true)
            && compareDeep(doNotPerform, o.doNotPerform, true) && compareDeep(code, o.code, true) && compareDeep(orderDetail, o.orderDetail, true)
-           && compareDeep(quantity, o.quantity, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
+           && compareDeep(quantity, o.quantity, true) && compareDeep(subject, o.subject, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(occurrence, o.occurrence, true) && compareDeep(asNeeded, o.asNeeded, true) && compareDeep(authoredOn, o.authoredOn, true)
            && compareDeep(requester, o.requester, true) && compareDeep(performerType, o.performerType, true)
            && compareDeep(performer, o.performer, true) && compareDeep(locationCode, o.locationCode, true)
@@ -3309,7 +3330,7 @@ public class ServiceRequest extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiatesCanonical
           , instantiatesUri, basedOn, replaces, requisition, status, intent, category, priority
-          , doNotPerform, code, orderDetail, quantity, subject, context, occurrence, asNeeded
+          , doNotPerform, code, orderDetail, quantity, subject, encounter, occurrence, asNeeded
           , authoredOn, requester, performerType, performer, locationCode, locationReference
           , reasonCode, reasonReference, insurance, supportingInfo, specimen, bodySite, note
           , patientInstruction, relevantHistory);
@@ -3535,17 +3556,17 @@ public class ServiceRequest extends DomainResource {
    * <p>
    * Description: <b>An encounter in which this request is made</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ServiceRequest.context</b><br>
+   * Path: <b>ServiceRequest.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="ServiceRequest.context.where(resolve() is Encounter)", description="An encounter in which this request is made", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="encounter", path="ServiceRequest.encounter", description="An encounter in which this request is made", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
    * <p>
    * Description: <b>An encounter in which this request is made</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>ServiceRequest.context</b><br>
+   * Path: <b>ServiceRequest.encounter</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
@@ -3713,32 +3734,6 @@ public class ServiceRequest extends DomainResource {
    * the path value of "<b>ServiceRequest:specimen</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SPECIMEN = new ca.uhn.fhir.model.api.Include("ServiceRequest:specimen").toLocked();
-
- /**
-   * Search parameter: <b>context</b>
-   * <p>
-   * Description: <b>Encounter or Episode during which request was created</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>ServiceRequest.context</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="ServiceRequest.context", description="Encounter or Episode during which request was created", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class, EpisodeOfCare.class } )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>Encounter or Episode during which request was created</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>ServiceRequest.context</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>ServiceRequest:context</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("ServiceRequest:context").toLocked();
 
  /**
    * Search parameter: <b>instantiates-uri</b>

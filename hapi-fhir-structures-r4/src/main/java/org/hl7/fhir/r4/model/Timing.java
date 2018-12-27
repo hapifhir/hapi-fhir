@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1000,7 +1000,7 @@ public class Timing extends BackboneType implements ICompositeType {
          */
         public Duration getBoundsDuration() throws FHIRException { 
           if (this.bounds == null)
-            return null;
+            this.bounds = new Duration();
           if (!(this.bounds instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Duration) this.bounds;
@@ -1015,7 +1015,7 @@ public class Timing extends BackboneType implements ICompositeType {
          */
         public Range getBoundsRange() throws FHIRException { 
           if (this.bounds == null)
-            return null;
+            this.bounds = new Range();
           if (!(this.bounds instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Range) this.bounds;
@@ -1030,7 +1030,7 @@ public class Timing extends BackboneType implements ICompositeType {
          */
         public Period getBoundsPeriod() throws FHIRException { 
           if (this.bounds == null)
-            return null;
+            this.bounds = new Period();
           if (!(this.bounds instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.bounds.getClass().getName()+" was encountered");
           return (Period) this.bounds;

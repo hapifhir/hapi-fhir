@@ -137,6 +137,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myGroupDaoR4")
 	protected IFhirResourceDao<Group> myGroupDao;
 	@Autowired
+	@Qualifier("myMolecularSequenceDaoR4")
+	protected IFhirResourceDao<MolecularSequence> myMolecularSequenceDao;
+	@Autowired
 	@Qualifier("myImmunizationDaoR4")
 	protected IFhirResourceDao<Immunization> myImmunizationDao;
 	@Autowired

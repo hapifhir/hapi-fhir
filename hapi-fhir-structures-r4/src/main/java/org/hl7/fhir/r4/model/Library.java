@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -182,7 +182,7 @@ public class Library extends MetadataResource {
     /**
      * The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content.
      */
-    @Child(name = "content", type = {Attachment.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "content", type = {Attachment.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Contents of the library, either embedded or referenced", formalDefinition="The content of the library as an Attachment. The content may be a reference to a url, or may be directly embedded as a base-64 string. Either way, the contentType of the attachment determines how to interpret the content." )
     protected List<Attachment> content;
 
@@ -628,7 +628,7 @@ public class Library extends MetadataResource {
      */
     public CodeableConcept getSubjectCodeableConcept() throws FHIRException { 
       if (this.subject == null)
-        return null;
+        this.subject = new CodeableConcept();
       if (!(this.subject instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.subject.getClass().getName()+" was encountered");
       return (CodeableConcept) this.subject;
@@ -643,7 +643,7 @@ public class Library extends MetadataResource {
      */
     public Reference getSubjectReference() throws FHIRException { 
       if (this.subject == null)
-        return null;
+        this.subject = new Reference();
       if (!(this.subject instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.subject.getClass().getName()+" was encountered");
       return (Reference) this.subject;
@@ -868,7 +868,7 @@ public class Library extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate library instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate library instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -1735,7 +1735,7 @@ public class Library extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the library.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the library from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate library instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate library instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the library is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this library is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("usage", "string", "A detailed description of how the library is used from a clinical perspective.", 0, 1, usage));
@@ -1774,7 +1774,7 @@ public class Library extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the library.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the library from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate library instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate library instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the library is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this library is needed and why it has been designed as it has.", 0, 1, purpose);
         case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the library is used from a clinical perspective.", 0, 1, usage);
@@ -2780,6 +2780,26 @@ public class Library extends MetadataResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam TOPIC = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TOPIC);
+
+ /**
+   * Search parameter: <b>content-type</b>
+   * <p>
+   * Description: <b>The type of content in the library (e.g. text/cql)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Library.content.contentType</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="content-type", path="Library.content.contentType", description="The type of content in the library (e.g. text/cql)", type="token" )
+  public static final String SP_CONTENT_TYPE = "content-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>content-type</b>
+   * <p>
+   * Description: <b>The type of content in the library (e.g. text/cql)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Library.content.contentType</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CONTENT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CONTENT_TYPE);
 
  /**
    * Search parameter: <b>context-type-quantity</b>

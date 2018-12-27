@@ -5,7 +5,7 @@
 		"status": "generated",
 		"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n    <p>\n\tAuthorize Normal access for Treatment\n\t</p><p>\n    Patient &quot;P. van de Heuvel&quot; wishes to have all of the PHI collected at the Good Health Psychiatric Hospital \n   available for normal treatment use.\n   </p>\n   </div>"
 	},
-	"status": "completed",
+	"status": "active",
 	"patient": {
 		"reference": "Patient/f001",
 		"display": "P. van de Heuvel"

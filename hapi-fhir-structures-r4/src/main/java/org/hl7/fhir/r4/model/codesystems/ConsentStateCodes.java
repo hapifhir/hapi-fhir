@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Wed, Jan 10, 2018 14:53-0500 for FHIR v3.2.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,7 +57,7 @@ public enum ConsentStateCodes {
          */
         INACTIVE, 
         /**
-         * The consent was created wrongly (e.g. wrong patient) and should be ignored
+         * The consent was created wrongly (e.g. wrong patient) and should be ignored.
          */
         ENTEREDINERROR, 
         /**
@@ -102,7 +102,7 @@ public enum ConsentStateCodes {
             case ACTIVE: return "The consent is to be followed and enforced.";
             case REJECTED: return "The consent has been rejected by one or more of the parties.";
             case INACTIVE: return "The consent is terminated or replaced.";
-            case ENTEREDINERROR: return "The consent was created wrongly (e.g. wrong patient) and should be ignored";
+            case ENTEREDINERROR: return "The consent was created wrongly (e.g. wrong patient) and should be ignored.";
             default: return "?";
           }
         }

@@ -215,7 +215,10 @@ import com.google.gson.JsonObject;
      * @return
      */
     public String fhirVersion() {
-      return npm.getAsJsonObject("dependencies").get("hl7.fhir.core").getAsString();
+      if ("hl7.fhir.core".equals(npm.get("name").getAsString()))
+        return npm.get("version").getAsString();
+      else
+        return npm.getAsJsonObject("dependencies").get("hl7.fhir.core").getAsString();
     }
 
     public String description() {

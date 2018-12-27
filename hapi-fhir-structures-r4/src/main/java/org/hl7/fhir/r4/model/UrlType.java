@@ -66,7 +66,9 @@ public class UrlType extends UriType {
 	 */
 	@Override
 	public UrlType copy() {
-		return new UrlType(getValue());
+		UrlType ret = new UrlType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

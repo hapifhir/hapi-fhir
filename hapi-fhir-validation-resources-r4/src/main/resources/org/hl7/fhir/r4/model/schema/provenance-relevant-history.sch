@@ -12,7 +12,7 @@
   <sch:pattern>
     <sch:title>f:Provenance</sch:title>
     <sch:rule context="f:Provenance">
-      <sch:assert test="count(f:occurred[x]) &gt;= 1">occurred[x]: minimum cardinality of 'occurred[x]' is 1</sch:assert>
+      <sch:assert test="count(f:occurredDateTime) &gt;= 1">occurredDateTime: minimum cardinality of 'occurredDateTime' is 1</sch:assert>
       <sch:assert test="count(f:activity) &gt;= 1">activity: minimum cardinality of 'activity' is 1</sch:assert>
     </sch:rule>
   </sch:pattern>

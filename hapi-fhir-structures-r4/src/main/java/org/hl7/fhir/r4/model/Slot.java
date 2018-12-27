@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1133,6 +1133,86 @@ public class Slot extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
+   * Search parameter: <b>specialty</b>
+   * <p>
+   * Description: <b>The specialty of a practitioner that would be required to perform the service requested in this appointment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.specialty</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="specialty", path="Slot.specialty", description="The specialty of a practitioner that would be required to perform the service requested in this appointment", type="token" )
+  public static final String SP_SPECIALTY = "specialty";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
+   * <p>
+   * Description: <b>The specialty of a practitioner that would be required to perform the service requested in this appointment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.specialty</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SPECIALTY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SPECIALTY);
+
+ /**
+   * Search parameter: <b>service-category</b>
+   * <p>
+   * Description: <b>A broad categorization of the service that is to be performed during this appointment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.serviceCategory</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="service-category", path="Slot.serviceCategory", description="A broad categorization of the service that is to be performed during this appointment", type="token" )
+  public static final String SP_SERVICE_CATEGORY = "service-category";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>service-category</b>
+   * <p>
+   * Description: <b>A broad categorization of the service that is to be performed during this appointment</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.serviceCategory</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERVICE_CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERVICE_CATEGORY);
+
+ /**
+   * Search parameter: <b>appointment-type</b>
+   * <p>
+   * Description: <b>The style of appointment or patient that may be booked in the slot (not service type)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.appointmentType</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="appointment-type", path="Slot.appointmentType", description="The style of appointment or patient that may be booked in the slot (not service type)", type="token" )
+  public static final String SP_APPOINTMENT_TYPE = "appointment-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>appointment-type</b>
+   * <p>
+   * Description: <b>The style of appointment or patient that may be booked in the slot (not service type)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.appointmentType</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam APPOINTMENT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_APPOINTMENT_TYPE);
+
+ /**
+   * Search parameter: <b>service-type</b>
+   * <p>
+   * Description: <b>The type of appointments that can be booked into the slot</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.serviceType</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="service-type", path="Slot.serviceType", description="The type of appointments that can be booked into the slot", type="token" )
+  public static final String SP_SERVICE_TYPE = "service-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>service-type</b>
+   * <p>
+   * Description: <b>The type of appointments that can be booked into the slot</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Slot.serviceType</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERVICE_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERVICE_TYPE);
+
+ /**
    * Search parameter: <b>start</b>
    * <p>
    * Description: <b>Appointment date/time.</b><br>
@@ -1151,26 +1231,6 @@ public class Slot extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.DateClientParam START = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_START);
-
- /**
-   * Search parameter: <b>slot-type</b>
-   * <p>
-   * Description: <b>The type of appointments that can be booked into the slot</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Slot.serviceType</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="slot-type", path="Slot.serviceType", description="The type of appointments that can be booked into the slot", type="token" )
-  public static final String SP_SLOT_TYPE = "slot-type";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>slot-type</b>
-   * <p>
-   * Description: <b>The type of appointments that can be booked into the slot</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Slot.serviceType</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SLOT_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SLOT_TYPE);
 
  /**
    * Search parameter: <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1667,7 +1667,7 @@ Deceased patients may also be marked as inactive for the same reasons, but may b
      */
     public BooleanType getDeceasedBooleanType() throws FHIRException { 
       if (this.deceased == null)
-        return null;
+        this.deceased = new BooleanType();
       if (!(this.deceased instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (BooleanType) this.deceased;
@@ -1682,7 +1682,7 @@ Deceased patients may also be marked as inactive for the same reasons, but may b
      */
     public DateTimeType getDeceasedDateTimeType() throws FHIRException { 
       if (this.deceased == null)
-        return null;
+        this.deceased = new DateTimeType();
       if (!(this.deceased instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (DateTimeType) this.deceased;
@@ -1795,7 +1795,7 @@ Deceased patients may also be marked as inactive for the same reasons, but may b
      */
     public BooleanType getMultipleBirthBooleanType() throws FHIRException { 
       if (this.multipleBirth == null)
-        return null;
+        this.multipleBirth = new BooleanType();
       if (!(this.multipleBirth instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
       return (BooleanType) this.multipleBirth;
@@ -1810,7 +1810,7 @@ Deceased patients may also be marked as inactive for the same reasons, but may b
      */
     public IntegerType getMultipleBirthIntegerType() throws FHIRException { 
       if (this.multipleBirth == null)
-        return null;
+        this.multipleBirth = new IntegerType();
       if (!(this.multipleBirth instanceof IntegerType))
         throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.multipleBirth.getClass().getName()+" was encountered");
       return (IntegerType) this.multipleBirth;

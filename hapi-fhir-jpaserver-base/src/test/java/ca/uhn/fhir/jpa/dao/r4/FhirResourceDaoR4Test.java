@@ -3203,32 +3203,32 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	public void testSortByNumber() {
 		String methodName = "testSortByNumber";
 
-		ImmunizationRecommendation e1 = new ImmunizationRecommendation();
+		MolecularSequence e1 = new MolecularSequence();
 		e1.addIdentifier().setSystem("foo").setValue(methodName);
-		e1.addRecommendation().setDoseNumber(new PositiveIntType(1));
-		IIdType id1 = myImmunizationRecommendationDao.create(e1, mySrd).getId().toUnqualifiedVersionless();
+		e1.addVariant().setStart(1);
+		IIdType id1 = myMolecularSequenceDao.create(e1, mySrd).getId().toUnqualifiedVersionless();
 
-		ImmunizationRecommendation e3 = new ImmunizationRecommendation();
+		MolecularSequence e3 = new MolecularSequence();
 		e3.addIdentifier().setSystem("foo").setValue(methodName);
-		e3.addRecommendation().setDoseNumber(new PositiveIntType(3));
-		IIdType id3 = myImmunizationRecommendationDao.create(e3, mySrd).getId().toUnqualifiedVersionless();
+		e3.addVariant().setStart(3);
+		IIdType id3 = myMolecularSequenceDao.create(e3, mySrd).getId().toUnqualifiedVersionless();
 
-		ImmunizationRecommendation e2 = new ImmunizationRecommendation();
+		MolecularSequence e2 = new MolecularSequence();
 		e2.addIdentifier().setSystem("foo").setValue(methodName);
-		e2.addRecommendation().setDoseNumber(new PositiveIntType(2));
-		IIdType id2 = myImmunizationRecommendationDao.create(e2, mySrd).getId().toUnqualifiedVersionless();
+		e2.addVariant().setStart(2);
+		IIdType id2 = myMolecularSequenceDao.create(e2, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
 		List<String> actual;
 
 		pm = new SearchParameterMap();
-		pm.setSort(new SortSpec(ImmunizationRecommendation.SP_DOSE_NUMBER));
-		actual = toUnqualifiedVersionlessIdValues(myImmunizationRecommendationDao.search(pm));
+		pm.setSort(new SortSpec(MolecularSequence.SP_VARIANT_START));
+		actual = toUnqualifiedVersionlessIdValues(myMolecularSequenceDao.search(pm));
 		assertThat(actual, contains(toValues(id1, id2, id3)));
 
 		pm = new SearchParameterMap();
-		pm.setSort(new SortSpec(ImmunizationRecommendation.SP_DOSE_NUMBER, SortOrderEnum.DESC));
-		actual = toUnqualifiedVersionlessIdValues(myImmunizationRecommendationDao.search(pm));
+		pm.setSort(new SortSpec(MolecularSequence.SP_VARIANT_START, SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIdValues(myMolecularSequenceDao.search(pm));
 		assertThat(actual, contains(toValues(id3, id2, id1)));
 	}
 

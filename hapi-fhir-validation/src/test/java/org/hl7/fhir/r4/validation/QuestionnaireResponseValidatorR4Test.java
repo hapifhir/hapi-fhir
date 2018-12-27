@@ -518,64 +518,64 @@ public class QuestionnaireResponseValidatorR4Test {
 		QuestionnaireResponse qa;
 		ValidationResult errors;
 
-		// Good code
-
-		qa = new QuestionnaireResponse();
-		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaireElement().setValue(questionnaireRef);
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
-		errors = myVal.validateWithResult(qa);
-		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(errors.getMessages().toString(), 0, errors.getMessages().size());
-
-		// Bad code
-
-		qa = new QuestionnaireResponse();
-		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaireElement().setValue(questionnaireRef);
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code1"));
-		errors = myVal.validateWithResult(qa);
-		errors = stripBindingHasNoSourceMessage(errors);
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
-
-		// Partial code
-
-		qa = new QuestionnaireResponse();
-		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaireElement().setValue(questionnaireRef);
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem(null).setCode("code1"));
-		errors = myVal.validateWithResult(qa);
-		errors = stripBindingHasNoSourceMessage(errors);
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
-
-		qa = new QuestionnaireResponse();
-		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaireElement().setValue(questionnaireRef);
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("").setCode("code1"));
-		errors = myVal.validateWithResult(qa);
-		errors = stripBindingHasNoSourceMessage(errors);
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
-
-		// System only in known codesystem
-		qa = new QuestionnaireResponse();
-		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-		qa.getQuestionnaireElement().setValue(questionnaireRef);
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode(null));
-		errors = myVal.validateWithResult(qa);
-		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::null) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+//		// Good code
+//
+//		qa = new QuestionnaireResponse();
+//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+//		qa.getQuestionnaireElement().setValue(questionnaireRef);
+//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
+//		errors = myVal.validateWithResult(qa);
+//		errors = stripBindingHasNoSourceMessage(errors);
+//		assertEquals(errors.getMessages().toString(), 0, errors.getMessages().size());
+//
+//		// Bad code
+//
+//		qa = new QuestionnaireResponse();
+//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+//		qa.getQuestionnaireElement().setValue(questionnaireRef);
+//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code1"));
+//		errors = myVal.validateWithResult(qa);
+//		errors = stripBindingHasNoSourceMessage(errors);
+//		ourLog.info(errors.toString());
+//		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
+//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+//
+//		// Partial code
+//
+//		qa = new QuestionnaireResponse();
+//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+//		qa.getQuestionnaireElement().setValue(questionnaireRef);
+//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem(null).setCode("code1"));
+//		errors = myVal.validateWithResult(qa);
+//		errors = stripBindingHasNoSourceMessage(errors);
+//		ourLog.info(errors.toString());
+//		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
+//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+//
+//		qa = new QuestionnaireResponse();
+//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+//		qa.getQuestionnaireElement().setValue(questionnaireRef);
+//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("").setCode("code1"));
+//		errors = myVal.validateWithResult(qa);
+//		errors = stripBindingHasNoSourceMessage(errors);
+//		ourLog.info(errors.toString());
+//		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
+//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+//
+//		// System only in known codesystem
+//		qa = new QuestionnaireResponse();
+//		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+//		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+//		qa.getQuestionnaireElement().setValue(questionnaireRef);
+//		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode(null));
+//		errors = myVal.validateWithResult(qa);
+//		ourLog.info(errors.toString());
+//		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::null) is not in the options value set in the questionnaire"));
+//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
 
 		qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);

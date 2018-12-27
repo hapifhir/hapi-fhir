@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -419,7 +419,7 @@ public class CatalogEntry extends DomainResource {
     /**
      * The item in a catalog or definition.
      */
-    @Child(name = "referencedItem", type = {Medication.class, Device.class, Organization.class, Practitioner.class, HealthcareService.class, ActivityDefinition.class, PlanDefinition.class, SpecimenDefinition.class, ObservationDefinition.class, Binary.class}, order=3, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "referencedItem", type = {Medication.class, Device.class, Organization.class, Practitioner.class, PractitionerRole.class, HealthcareService.class, ActivityDefinition.class, PlanDefinition.class, SpecimenDefinition.class, ObservationDefinition.class, Binary.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The item that is being defined", formalDefinition="The item in a catalog or definition." )
     protected Reference referencedItem;
 
@@ -1112,7 +1112,7 @@ public class CatalogEntry extends DomainResource {
         children.add(new Property("identifier", "Identifier", "Used in supporting different identifiers for the same product, e.g. manufacturer code and retailer code.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("type", "CodeableConcept", "The type of item - medication, device, service, protocol or other.", 0, 1, type));
         children.add(new Property("orderable", "boolean", "Whether the entry represents an orderable item.", 0, 1, orderable));
-        children.add(new Property("referencedItem", "Reference(Medication|Device|Organization|Practitioner|HealthcareService|ActivityDefinition|PlanDefinition|SpecimenDefinition|ObservationDefinition|Binary)", "The item in a catalog or definition.", 0, 1, referencedItem));
+        children.add(new Property("referencedItem", "Reference(Medication|Device|Organization|Practitioner|PractitionerRole|HealthcareService|ActivityDefinition|PlanDefinition|SpecimenDefinition|ObservationDefinition|Binary)", "The item in a catalog or definition.", 0, 1, referencedItem));
         children.add(new Property("additionalIdentifier", "Identifier", "Used in supporting related concepts, e.g. NDC to RxNorm.", 0, java.lang.Integer.MAX_VALUE, additionalIdentifier));
         children.add(new Property("classification", "CodeableConcept", "Classes of devices, or ATC for medication.", 0, java.lang.Integer.MAX_VALUE, classification));
         children.add(new Property("status", "code", "Used to support catalog exchange even for unsupported products, e.g. getting list of medications even if not prescribable.", 0, 1, status));
@@ -1130,7 +1130,7 @@ public class CatalogEntry extends DomainResource {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Used in supporting different identifiers for the same product, e.g. manufacturer code and retailer code.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of item - medication, device, service, protocol or other.", 0, 1, type);
         case -391199320: /*orderable*/  return new Property("orderable", "boolean", "Whether the entry represents an orderable item.", 0, 1, orderable);
-        case -1896630996: /*referencedItem*/  return new Property("referencedItem", "Reference(Medication|Device|Organization|Practitioner|HealthcareService|ActivityDefinition|PlanDefinition|SpecimenDefinition|ObservationDefinition|Binary)", "The item in a catalog or definition.", 0, 1, referencedItem);
+        case -1896630996: /*referencedItem*/  return new Property("referencedItem", "Reference(Medication|Device|Organization|Practitioner|PractitionerRole|HealthcareService|ActivityDefinition|PlanDefinition|SpecimenDefinition|ObservationDefinition|Binary)", "The item in a catalog or definition.", 0, 1, referencedItem);
         case 1195162672: /*additionalIdentifier*/  return new Property("additionalIdentifier", "Identifier", "Used in supporting related concepts, e.g. NDC to RxNorm.", 0, java.lang.Integer.MAX_VALUE, additionalIdentifier);
         case 382350310: /*classification*/  return new Property("classification", "CodeableConcept", "Classes of devices, or ATC for medication.", 0, java.lang.Integer.MAX_VALUE, classification);
         case -892481550: /*status*/  return new Property("status", "code", "Used to support catalog exchange even for unsupported products, e.g. getting list of medications even if not prescribable.", 0, 1, status);

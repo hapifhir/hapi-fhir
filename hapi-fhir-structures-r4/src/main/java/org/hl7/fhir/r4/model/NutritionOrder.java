@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -58,23 +58,23 @@ public class NutritionOrder extends DomainResource {
          */
         ACTIVE, 
         /**
-         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.
+         * The request (and any implicit authorization to act) has been temporarily withdrawn but is expected to resume in the future.
          */
         ONHOLD, 
         /**
-         * The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.
+         * The request (and any implicit authorization to act) has been terminated prior to the known full completion of the intended actions.  No further activity should occur.
          */
         REVOKED, 
         /**
-         * Activity against the request has been sufficiently completed to the satisfaction of the requester.
+         * The activity described by the request has been fully performed.  No further activity will occur.
          */
         COMPLETED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
+         * This request should never have existed and should be considered 'void'.  (It is possible that real-world decisions were based on it.  If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.
+         * The authoring/source system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which.
          */
         UNKNOWN, 
         /**
@@ -131,11 +131,11 @@ public class NutritionOrder extends DomainResource {
           switch (this) {
             case DRAFT: return "The request has been created but is not yet complete or ready for action.";
             case ACTIVE: return "The request is in force and ready to be acted upon.";
-            case ONHOLD: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.";
-            case REVOKED: return "The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.";
-            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester.";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.";
+            case ONHOLD: return "The request (and any implicit authorization to act) has been temporarily withdrawn but is expected to resume in the future.";
+            case REVOKED: return "The request (and any implicit authorization to act) has been terminated prior to the known full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "The activity described by the request has been fully performed.  No further activity will occur.";
+            case ENTEREDINERROR: return "This request should never have existed and should be considered 'void'.  (It is possible that real-world decisions were based on it.  If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
+            case UNKNOWN: return "The authoring/source system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which.";
             default: return "?";
           }
         }
@@ -230,7 +230,11 @@ public class NutritionOrder extends DomainResource {
          */
         PLAN, 
         /**
-         * The request represents a request/demand and authorization for action.
+         * The request represents a legally binding instruction authored by a Patient or RelatedPerson.
+         */
+        DIRECTIVE, 
+        /**
+         * The request represents a request/demand and authorization for action by a Practitioner.
          */
         ORDER, 
         /**
@@ -264,6 +268,8 @@ public class NutritionOrder extends DomainResource {
           return PROPOSAL;
         if ("plan".equals(codeString))
           return PLAN;
+        if ("directive".equals(codeString))
+          return DIRECTIVE;
         if ("order".equals(codeString))
           return ORDER;
         if ("original-order".equals(codeString))
@@ -285,6 +291,7 @@ public class NutritionOrder extends DomainResource {
           switch (this) {
             case PROPOSAL: return "proposal";
             case PLAN: return "plan";
+            case DIRECTIVE: return "directive";
             case ORDER: return "order";
             case ORIGINALORDER: return "original-order";
             case REFLEXORDER: return "reflex-order";
@@ -298,6 +305,7 @@ public class NutritionOrder extends DomainResource {
           switch (this) {
             case PROPOSAL: return "http://hl7.org/fhir/request-intent";
             case PLAN: return "http://hl7.org/fhir/request-intent";
+            case DIRECTIVE: return "http://hl7.org/fhir/request-intent";
             case ORDER: return "http://hl7.org/fhir/request-intent";
             case ORIGINALORDER: return "http://hl7.org/fhir/request-intent";
             case REFLEXORDER: return "http://hl7.org/fhir/request-intent";
@@ -311,7 +319,8 @@ public class NutritionOrder extends DomainResource {
           switch (this) {
             case PROPOSAL: return "The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act.";
             case PLAN: return "The request represents an intention to ensure something occurs without providing an authorization for others to act.";
-            case ORDER: return "The request represents a request/demand and authorization for action.";
+            case DIRECTIVE: return "The request represents a legally binding instruction authored by a Patient or RelatedPerson.";
+            case ORDER: return "The request represents a request/demand and authorization for action by a Practitioner.";
             case ORIGINALORDER: return "The request represents an original authorization for action.";
             case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization.";
             case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order.";
@@ -324,6 +333,7 @@ public class NutritionOrder extends DomainResource {
           switch (this) {
             case PROPOSAL: return "Proposal";
             case PLAN: return "Plan";
+            case DIRECTIVE: return "Directive";
             case ORDER: return "Order";
             case ORIGINALORDER: return "Original Order";
             case REFLEXORDER: return "Reflex Order";
@@ -344,6 +354,8 @@ public class NutritionOrder extends DomainResource {
           return NutritiionOrderIntent.PROPOSAL;
         if ("plan".equals(codeString))
           return NutritiionOrderIntent.PLAN;
+        if ("directive".equals(codeString))
+          return NutritiionOrderIntent.DIRECTIVE;
         if ("order".equals(codeString))
           return NutritiionOrderIntent.ORDER;
         if ("original-order".equals(codeString))
@@ -370,6 +382,8 @@ public class NutritionOrder extends DomainResource {
           return new Enumeration<NutritiionOrderIntent>(this, NutritiionOrderIntent.PROPOSAL);
         if ("plan".equals(codeString))
           return new Enumeration<NutritiionOrderIntent>(this, NutritiionOrderIntent.PLAN);
+        if ("directive".equals(codeString))
+          return new Enumeration<NutritiionOrderIntent>(this, NutritiionOrderIntent.DIRECTIVE);
         if ("order".equals(codeString))
           return new Enumeration<NutritiionOrderIntent>(this, NutritiionOrderIntent.ORDER);
         if ("original-order".equals(codeString))
@@ -389,6 +403,8 @@ public class NutritionOrder extends DomainResource {
         return "proposal";
       if (code == NutritiionOrderIntent.PLAN)
         return "plan";
+      if (code == NutritiionOrderIntent.DIRECTIVE)
+        return "directive";
       if (code == NutritiionOrderIntent.ORDER)
         return "order";
       if (code == NutritiionOrderIntent.ORIGINALORDER)
@@ -2519,7 +2535,7 @@ public class NutritionOrder extends DomainResource {
          */
         public Quantity getRateQuantity() throws FHIRException { 
           if (this.rate == null)
-            return null;
+            this.rate = new Quantity();
           if (!(this.rate instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Quantity) this.rate;
@@ -2534,7 +2550,7 @@ public class NutritionOrder extends DomainResource {
          */
         public Ratio getRateRatio() throws FHIRException { 
           if (this.rate == null)
-            return null;
+            this.rate = new Ratio();
           if (!(this.rate instanceof Ratio))
             throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Ratio) this.rate;
@@ -2766,14 +2782,14 @@ public class NutritionOrder extends DomainResource {
     /**
      * An encounter that provides additional information about the healthcare context in which this request is made.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "encounter", type = {Encounter.class}, order=7, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The encounter associated with this nutrition order", formalDefinition="An encounter that provides additional information about the healthcare context in which this request is made." )
-    protected Reference context;
+    protected Reference encounter;
 
     /**
      * The actual object that is the target of the reference (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    protected Resource contextTarget;
+    protected Encounter encounterTarget;
 
     /**
      * The date and time that this nutrition order was requested.
@@ -2850,7 +2866,7 @@ public class NutritionOrder extends DomainResource {
     @Description(shortDefinition="Comments", formalDefinition="Comments made about the {{title}} by the requester, performer, subject or other participants." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = 2084704926L;
+    private static final long serialVersionUID = 1746744267L;
 
   /**
    * Constructor
@@ -3241,41 +3257,46 @@ public class NutritionOrder extends DomainResource {
     }
 
     /**
-     * @return {@link #context} (An encounter that provides additional information about the healthcare context in which this request is made.)
+     * @return {@link #encounter} (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    public Reference getContext() { 
-      if (this.context == null)
+    public Reference getEncounter() { 
+      if (this.encounter == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create NutritionOrder.context");
+          throw new Error("Attempt to auto-create NutritionOrder.encounter");
         else if (Configuration.doAutoCreate())
-          this.context = new Reference(); // cc
-      return this.context;
+          this.encounter = new Reference(); // cc
+      return this.encounter;
     }
 
-    public boolean hasContext() { 
-      return this.context != null && !this.context.isEmpty();
+    public boolean hasEncounter() { 
+      return this.encounter != null && !this.encounter.isEmpty();
     }
 
     /**
-     * @param value {@link #context} (An encounter that provides additional information about the healthcare context in which this request is made.)
+     * @param value {@link #encounter} (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    public NutritionOrder setContext(Reference value) { 
-      this.context = value;
+    public NutritionOrder setEncounter(Reference value) { 
+      this.encounter = value;
       return this;
     }
 
     /**
-     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An encounter that provides additional information about the healthcare context in which this request is made.)
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    public Resource getContextTarget() { 
-      return this.contextTarget;
+    public Encounter getEncounterTarget() { 
+      if (this.encounterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create NutritionOrder.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounterTarget = new Encounter(); // aa
+      return this.encounterTarget;
     }
 
     /**
-     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An encounter that provides additional information about the healthcare context in which this request is made.)
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (An encounter that provides additional information about the healthcare context in which this request is made.)
      */
-    public NutritionOrder setContextTarget(Resource value) { 
-      this.contextTarget = value;
+    public NutritionOrder setEncounterTarget(Encounter value) { 
+      this.encounterTarget = value;
       return this;
     }
 
@@ -3707,7 +3728,7 @@ public class NutritionOrder extends DomainResource {
         children.add(new Property("status", "code", "The workflow status of the nutrition order/request.", 0, 1, status));
         children.add(new Property("intent", "code", "Indicates the level of authority/intentionality associated with the NutrionOrder and where the request fits into the workflow chain.", 0, 1, intent));
         children.add(new Property("patient", "Reference(Patient)", "The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding.", 0, 1, patient));
-        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, 1, context));
+        children.add(new Property("encounter", "Reference(Encounter)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, 1, encounter));
         children.add(new Property("dateTime", "dateTime", "The date and time that this nutrition order was requested.", 0, 1, dateTime));
         children.add(new Property("orderer", "Reference(Practitioner|PractitionerRole)", "The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.", 0, 1, orderer));
         children.add(new Property("allergyIntolerance", "Reference(AllergyIntolerance)", "A link to a record of allergies or intolerances  which should be included in the nutrition order.", 0, java.lang.Integer.MAX_VALUE, allergyIntolerance));
@@ -3729,7 +3750,7 @@ public class NutritionOrder extends DomainResource {
         case -892481550: /*status*/  return new Property("status", "code", "The workflow status of the nutrition order/request.", 0, 1, status);
         case -1183762788: /*intent*/  return new Property("intent", "code", "Indicates the level of authority/intentionality associated with the NutrionOrder and where the request fits into the workflow chain.", 0, 1, intent);
         case -791418107: /*patient*/  return new Property("patient", "Reference(Patient)", "The person (patient) who needs the nutrition order for an oral diet, nutritional supplement and/or enteral or formula feeding.", 0, 1, patient);
-        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, 1, context);
+        case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "An encounter that provides additional information about the healthcare context in which this request is made.", 0, 1, encounter);
         case 1792749467: /*dateTime*/  return new Property("dateTime", "dateTime", "The date and time that this nutrition order was requested.", 0, 1, dateTime);
         case -1207109509: /*orderer*/  return new Property("orderer", "Reference(Practitioner|PractitionerRole)", "The practitioner that holds legal responsibility for ordering the diet, nutritional supplement, or formula feedings.", 0, 1, orderer);
         case -120164120: /*allergyIntolerance*/  return new Property("allergyIntolerance", "Reference(AllergyIntolerance)", "A link to a record of allergies or intolerances  which should be included in the nutrition order.", 0, java.lang.Integer.MAX_VALUE, allergyIntolerance);
@@ -3754,7 +3775,7 @@ public class NutritionOrder extends DomainResource {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<NutritionOrderStatus>
         case -1183762788: /*intent*/ return this.intent == null ? new Base[0] : new Base[] {this.intent}; // Enumeration<NutritiionOrderIntent>
         case -791418107: /*patient*/ return this.patient == null ? new Base[0] : new Base[] {this.patient}; // Reference
-        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case 1792749467: /*dateTime*/ return this.dateTime == null ? new Base[0] : new Base[] {this.dateTime}; // DateTimeType
         case -1207109509: /*orderer*/ return this.orderer == null ? new Base[0] : new Base[] {this.orderer}; // Reference
         case -120164120: /*allergyIntolerance*/ return this.allergyIntolerance == null ? new Base[0] : this.allergyIntolerance.toArray(new Base[this.allergyIntolerance.size()]); // Reference
@@ -3795,8 +3816,8 @@ public class NutritionOrder extends DomainResource {
         case -791418107: // patient
           this.patient = castToReference(value); // Reference
           return value;
-        case 951530927: // context
-          this.context = castToReference(value); // Reference
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
           return value;
         case 1792749467: // dateTime
           this.dateTime = castToDateTime(value); // DateTimeType
@@ -3848,8 +3869,8 @@ public class NutritionOrder extends DomainResource {
           this.intent = (Enumeration) value; // Enumeration<NutritiionOrderIntent>
         } else if (name.equals("patient")) {
           this.patient = castToReference(value); // Reference
-        } else if (name.equals("context")) {
-          this.context = castToReference(value); // Reference
+        } else if (name.equals("encounter")) {
+          this.encounter = castToReference(value); // Reference
         } else if (name.equals("dateTime")) {
           this.dateTime = castToDateTime(value); // DateTimeType
         } else if (name.equals("orderer")) {
@@ -3883,7 +3904,7 @@ public class NutritionOrder extends DomainResource {
         case -892481550:  return getStatusElement();
         case -1183762788:  return getIntentElement();
         case -791418107:  return getPatient(); 
-        case 951530927:  return getContext(); 
+        case 1524132147:  return getEncounter(); 
         case 1792749467:  return getDateTimeElement();
         case -1207109509:  return getOrderer(); 
         case -120164120:  return addAllergyIntolerance(); 
@@ -3908,7 +3929,7 @@ public class NutritionOrder extends DomainResource {
         case -892481550: /*status*/ return new String[] {"code"};
         case -1183762788: /*intent*/ return new String[] {"code"};
         case -791418107: /*patient*/ return new String[] {"Reference"};
-        case 951530927: /*context*/ return new String[] {"Reference"};
+        case 1524132147: /*encounter*/ return new String[] {"Reference"};
         case 1792749467: /*dateTime*/ return new String[] {"dateTime"};
         case -1207109509: /*orderer*/ return new String[] {"Reference"};
         case -120164120: /*allergyIntolerance*/ return new String[] {"Reference"};
@@ -3947,9 +3968,9 @@ public class NutritionOrder extends DomainResource {
           this.patient = new Reference();
           return this.patient;
         }
-        else if (name.equals("context")) {
-          this.context = new Reference();
-          return this.context;
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
         }
         else if (name.equals("dateTime")) {
           throw new FHIRException("Cannot call addChild on a primitive type NutritionOrder.dateTime");
@@ -4016,7 +4037,7 @@ public class NutritionOrder extends DomainResource {
         dst.status = status == null ? null : status.copy();
         dst.intent = intent == null ? null : intent.copy();
         dst.patient = patient == null ? null : patient.copy();
-        dst.context = context == null ? null : context.copy();
+        dst.encounter = encounter == null ? null : encounter.copy();
         dst.dateTime = dateTime == null ? null : dateTime.copy();
         dst.orderer = orderer == null ? null : orderer.copy();
         if (allergyIntolerance != null) {
@@ -4063,7 +4084,7 @@ public class NutritionOrder extends DomainResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(instantiatesCanonical, o.instantiatesCanonical, true)
            && compareDeep(instantiatesUri, o.instantiatesUri, true) && compareDeep(instantiates, o.instantiates, true)
            && compareDeep(status, o.status, true) && compareDeep(intent, o.intent, true) && compareDeep(patient, o.patient, true)
-           && compareDeep(context, o.context, true) && compareDeep(dateTime, o.dateTime, true) && compareDeep(orderer, o.orderer, true)
+           && compareDeep(encounter, o.encounter, true) && compareDeep(dateTime, o.dateTime, true) && compareDeep(orderer, o.orderer, true)
            && compareDeep(allergyIntolerance, o.allergyIntolerance, true) && compareDeep(foodPreferenceModifier, o.foodPreferenceModifier, true)
            && compareDeep(excludeFoodModifier, o.excludeFoodModifier, true) && compareDeep(oralDiet, o.oralDiet, true)
            && compareDeep(supplement, o.supplement, true) && compareDeep(enteralFormula, o.enteralFormula, true)
@@ -4084,9 +4105,9 @@ public class NutritionOrder extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiatesCanonical
-          , instantiatesUri, instantiates, status, intent, patient, context, dateTime, orderer
-          , allergyIntolerance, foodPreferenceModifier, excludeFoodModifier, oralDiet, supplement
-          , enteralFormula, note);
+          , instantiatesUri, instantiates, status, intent, patient, encounter, dateTime
+          , orderer, allergyIntolerance, foodPreferenceModifier, excludeFoodModifier, oralDiet
+          , supplement, enteralFormula, note);
       }
 
   @Override
@@ -4207,32 +4228,6 @@ public class NutritionOrder extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam SUPPLEMENT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SUPPLEMENT);
 
  /**
-   * Search parameter: <b>context</b>
-   * <p>
-   * Description: <b>Return nutrition orders with this encounter identifier</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>NutritionOrder.context</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="NutritionOrder.context", description="Return nutrition orders with this encounter identifier", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class, EpisodeOfCare.class } )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>Return nutrition orders with this encounter identifier</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>NutritionOrder.context</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>NutritionOrder:context</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("NutritionOrder:context").toLocked();
-
- /**
    * Search parameter: <b>formula</b>
    * <p>
    * Description: <b>Type of enteral or infant formula</b><br>
@@ -4297,6 +4292,32 @@ public class NutritionOrder extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.UriClientParam INSTANTIATES_URI = new ca.uhn.fhir.rest.gclient.UriClientParam(SP_INSTANTIATES_URI);
+
+ /**
+   * Search parameter: <b>encounter</b>
+   * <p>
+   * Description: <b>Return nutrition orders with this encounter identifier</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>NutritionOrder.encounter</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="encounter", path="NutritionOrder.encounter", description="Return nutrition orders with this encounter identifier", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class } )
+  public static final String SP_ENCOUNTER = "encounter";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
+   * <p>
+   * Description: <b>Return nutrition orders with this encounter identifier</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>NutritionOrder.encounter</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>NutritionOrder:encounter</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_ENCOUNTER = new ca.uhn.fhir.model.api.Include("NutritionOrder:encounter").toLocked();
 
  /**
    * Search parameter: <b>oraldiet</b>

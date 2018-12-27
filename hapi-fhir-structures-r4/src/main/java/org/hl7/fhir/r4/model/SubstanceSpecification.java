@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -95,11 +95,11 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * Quantitative value for this moiety.
          */
-        @Child(name = "amount", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "amount", type = {Quantity.class, StringType.class}, order=7, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Quantitative value for this moiety", formalDefinition="Quantitative value for this moiety." )
-        protected StringType amount;
+        protected Type amount;
 
-        private static final long serialVersionUID = 45594592L;
+        private static final long serialVersionUID = -505630417L;
 
     /**
      * Constructor
@@ -303,19 +303,40 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @return {@link #amount} (Quantitative value for this moiety.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
+         * @return {@link #amount} (Quantitative value for this moiety.)
          */
-        public StringType getAmountElement() { 
-          if (this.amount == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationMoietyComponent.amount");
-            else if (Configuration.doAutoCreate())
-              this.amount = new StringType(); // bb
+        public Type getAmount() { 
           return this.amount;
         }
 
-        public boolean hasAmountElement() { 
-          return this.amount != null && !this.amount.isEmpty();
+        /**
+         * @return {@link #amount} (Quantitative value for this moiety.)
+         */
+        public Quantity getAmountQuantity() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new Quantity();
+          if (!(this.amount instanceof Quantity))
+            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (Quantity) this.amount;
+        }
+
+        public boolean hasAmountQuantity() { 
+          return this != null && this.amount instanceof Quantity;
+        }
+
+        /**
+         * @return {@link #amount} (Quantitative value for this moiety.)
+         */
+        public StringType getAmountStringType() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new StringType();
+          if (!(this.amount instanceof StringType))
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (StringType) this.amount;
+        }
+
+        public boolean hasAmountStringType() { 
+          return this != null && this.amount instanceof StringType;
         }
 
         public boolean hasAmount() { 
@@ -323,31 +344,12 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Quantitative value for this moiety.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
+         * @param value {@link #amount} (Quantitative value for this moiety.)
          */
-        public SubstanceSpecificationMoietyComponent setAmountElement(StringType value) { 
+        public SubstanceSpecificationMoietyComponent setAmount(Type value) { 
+          if (value != null && !(value instanceof Quantity || value instanceof StringType))
+            throw new Error("Not the right type for SubstanceSpecification.moiety.amount[x]: "+value.fhirType());
           this.amount = value;
-          return this;
-        }
-
-        /**
-         * @return Quantitative value for this moiety.
-         */
-        public String getAmount() { 
-          return this.amount == null ? null : this.amount.getValue();
-        }
-
-        /**
-         * @param value Quantitative value for this moiety.
-         */
-        public SubstanceSpecificationMoietyComponent setAmount(String value) { 
-          if (Utilities.noString(value))
-            this.amount = null;
-          else {
-            if (this.amount == null)
-              this.amount = new StringType();
-            this.amount.setValue(value);
-          }
           return this;
         }
 
@@ -359,7 +361,7 @@ public class SubstanceSpecification extends DomainResource {
           children.add(new Property("stereochemistry", "CodeableConcept", "Stereochemistry type.", 0, 1, stereochemistry));
           children.add(new Property("opticalActivity", "CodeableConcept", "Optical activity type.", 0, 1, opticalActivity));
           children.add(new Property("molecularFormula", "string", "Molecular formula.", 0, 1, molecularFormula));
-          children.add(new Property("amount", "string", "Quantitative value for this moiety.", 0, 1, amount));
+          children.add(new Property("amount[x]", "Quantity|string", "Quantitative value for this moiety.", 0, 1, amount));
         }
 
         @Override
@@ -371,7 +373,10 @@ public class SubstanceSpecification extends DomainResource {
           case 263475116: /*stereochemistry*/  return new Property("stereochemistry", "CodeableConcept", "Stereochemistry type.", 0, 1, stereochemistry);
           case 1420900135: /*opticalActivity*/  return new Property("opticalActivity", "CodeableConcept", "Optical activity type.", 0, 1, opticalActivity);
           case 616660246: /*molecularFormula*/  return new Property("molecularFormula", "string", "Molecular formula.", 0, 1, molecularFormula);
-          case -1413853096: /*amount*/  return new Property("amount", "string", "Quantitative value for this moiety.", 0, 1, amount);
+          case 646780200: /*amount[x]*/  return new Property("amount[x]", "Quantity|string", "Quantitative value for this moiety.", 0, 1, amount);
+          case -1413853096: /*amount*/  return new Property("amount[x]", "Quantity|string", "Quantitative value for this moiety.", 0, 1, amount);
+          case 1664303363: /*amountQuantity*/  return new Property("amount[x]", "Quantity|string", "Quantitative value for this moiety.", 0, 1, amount);
+          case 773651081: /*amountString*/  return new Property("amount[x]", "Quantity|string", "Quantitative value for this moiety.", 0, 1, amount);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -386,7 +391,7 @@ public class SubstanceSpecification extends DomainResource {
         case 263475116: /*stereochemistry*/ return this.stereochemistry == null ? new Base[0] : new Base[] {this.stereochemistry}; // CodeableConcept
         case 1420900135: /*opticalActivity*/ return this.opticalActivity == null ? new Base[0] : new Base[] {this.opticalActivity}; // CodeableConcept
         case 616660246: /*molecularFormula*/ return this.molecularFormula == null ? new Base[0] : new Base[] {this.molecularFormula}; // StringType
-        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // StringType
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -414,7 +419,7 @@ public class SubstanceSpecification extends DomainResource {
           this.molecularFormula = castToString(value); // StringType
           return value;
         case -1413853096: // amount
-          this.amount = castToString(value); // StringType
+          this.amount = castToType(value); // Type
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -435,8 +440,8 @@ public class SubstanceSpecification extends DomainResource {
           this.opticalActivity = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("molecularFormula")) {
           this.molecularFormula = castToString(value); // StringType
-        } else if (name.equals("amount")) {
-          this.amount = castToString(value); // StringType
+        } else if (name.equals("amount[x]")) {
+          this.amount = castToType(value); // Type
         } else
           return super.setProperty(name, value);
         return value;
@@ -451,7 +456,8 @@ public class SubstanceSpecification extends DomainResource {
         case 263475116:  return getStereochemistry(); 
         case 1420900135:  return getOpticalActivity(); 
         case 616660246:  return getMolecularFormulaElement();
-        case -1413853096:  return getAmountElement();
+        case 646780200:  return getAmount(); 
+        case -1413853096:  return getAmount(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -466,7 +472,7 @@ public class SubstanceSpecification extends DomainResource {
         case 263475116: /*stereochemistry*/ return new String[] {"CodeableConcept"};
         case 1420900135: /*opticalActivity*/ return new String[] {"CodeableConcept"};
         case 616660246: /*molecularFormula*/ return new String[] {"string"};
-        case -1413853096: /*amount*/ return new String[] {"string"};
+        case -1413853096: /*amount*/ return new String[] {"Quantity", "string"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -496,8 +502,13 @@ public class SubstanceSpecification extends DomainResource {
         else if (name.equals("molecularFormula")) {
           throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.molecularFormula");
         }
-        else if (name.equals("amount")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.amount");
+        else if (name.equals("amountQuantity")) {
+          this.amount = new Quantity();
+          return this.amount;
+        }
+        else if (name.equals("amountString")) {
+          this.amount = new StringType();
+          return this.amount;
         }
         else
           return super.addChild(name);
@@ -537,7 +548,7 @@ public class SubstanceSpecification extends DomainResource {
           return false;
         SubstanceSpecificationMoietyComponent o = (SubstanceSpecificationMoietyComponent) other_;
         return compareValues(name, o.name, true) && compareValues(molecularFormula, o.molecularFormula, true)
-           && compareValues(amount, o.amount, true);
+          ;
       }
 
       public boolean isEmpty() {
@@ -555,48 +566,41 @@ public class SubstanceSpecification extends DomainResource {
     @Block()
     public static class SubstanceSpecificationPropertyComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Description todo.
+         * A category for this property, e.g. Physical, Chemical, Enzymatic.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Description todo", formalDefinition="Description todo." )
-        protected CodeableConcept type;
+        @Child(name = "category", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="A category for this property, e.g. Physical, Chemical, Enzymatic", formalDefinition="A category for this property, e.g. Physical, Chemical, Enzymatic." )
+        protected CodeableConcept category;
 
         /**
-         * Description todo.
+         * Property type e.g. viscosity, pH, isoelectric point.
          */
-        @Child(name = "name", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Description todo", formalDefinition="Description todo." )
-        protected CodeableConcept name;
+        @Child(name = "code", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Property type e.g. viscosity, pH, isoelectric point", formalDefinition="Property type e.g. viscosity, pH, isoelectric point." )
+        protected CodeableConcept code;
 
         /**
-         * A field that should be used to capture parameters that were used in the measurement of a property.
+         * Parameters that were used in the measurement of a property (e.g. for viscosity: measured at 20C with a pH of 7.1).
          */
         @Child(name = "parameters", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="A field that should be used to capture parameters that were used in the measurement of a property", formalDefinition="A field that should be used to capture parameters that were used in the measurement of a property." )
+        @Description(shortDefinition="Parameters that were used in the measurement of a property (e.g. for viscosity: measured at 20C with a pH of 7.1)", formalDefinition="Parameters that were used in the measurement of a property (e.g. for viscosity: measured at 20C with a pH of 7.1)." )
         protected StringType parameters;
 
         /**
-         * Identifier for a substance upon which a defining property depends.
+         * A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).
          */
-        @Child(name = "substanceId", type = {Identifier.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Identifier for a substance upon which a defining property depends", formalDefinition="Identifier for a substance upon which a defining property depends." )
-        protected Identifier substanceId;
-
-        /**
-         * Description todo.
-         */
-        @Child(name = "substanceName", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Description todo", formalDefinition="Description todo." )
-        protected StringType substanceName;
+        @Child(name = "definingSubstance", type = {SubstanceSpecification.class, Substance.class, CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol)", formalDefinition="A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol)." )
+        protected Type definingSubstance;
 
         /**
          * Quantitative value for this property.
          */
-        @Child(name = "amount", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "amount", type = {Quantity.class, StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Quantitative value for this property", formalDefinition="Quantitative value for this property." )
-        protected StringType amount;
+        protected Type amount;
 
-        private static final long serialVersionUID = 83235941L;
+        private static final long serialVersionUID = 556834916L;
 
     /**
      * Constructor
@@ -606,55 +610,55 @@ public class SubstanceSpecification extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (Description todo.)
+         * @return {@link #category} (A category for this property, e.g. Physical, Chemical, Enzymatic.)
          */
-        public CodeableConcept getType() { 
-          if (this.type == null)
+        public CodeableConcept getCategory() { 
+          if (this.category == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationPropertyComponent.type");
+              throw new Error("Attempt to auto-create SubstanceSpecificationPropertyComponent.category");
             else if (Configuration.doAutoCreate())
-              this.type = new CodeableConcept(); // cc
-          return this.type;
+              this.category = new CodeableConcept(); // cc
+          return this.category;
         }
 
-        public boolean hasType() { 
-          return this.type != null && !this.type.isEmpty();
+        public boolean hasCategory() { 
+          return this.category != null && !this.category.isEmpty();
         }
 
         /**
-         * @param value {@link #type} (Description todo.)
+         * @param value {@link #category} (A category for this property, e.g. Physical, Chemical, Enzymatic.)
          */
-        public SubstanceSpecificationPropertyComponent setType(CodeableConcept value) { 
-          this.type = value;
+        public SubstanceSpecificationPropertyComponent setCategory(CodeableConcept value) { 
+          this.category = value;
           return this;
         }
 
         /**
-         * @return {@link #name} (Description todo.)
+         * @return {@link #code} (Property type e.g. viscosity, pH, isoelectric point.)
          */
-        public CodeableConcept getName() { 
-          if (this.name == null)
+        public CodeableConcept getCode() { 
+          if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationPropertyComponent.name");
+              throw new Error("Attempt to auto-create SubstanceSpecificationPropertyComponent.code");
             else if (Configuration.doAutoCreate())
-              this.name = new CodeableConcept(); // cc
-          return this.name;
+              this.code = new CodeableConcept(); // cc
+          return this.code;
         }
 
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
         }
 
         /**
-         * @param value {@link #name} (Description todo.)
+         * @param value {@link #code} (Property type e.g. viscosity, pH, isoelectric point.)
          */
-        public SubstanceSpecificationPropertyComponent setName(CodeableConcept value) { 
-          this.name = value;
+        public SubstanceSpecificationPropertyComponent setCode(CodeableConcept value) { 
+          this.code = value;
           return this;
         }
 
         /**
-         * @return {@link #parameters} (A field that should be used to capture parameters that were used in the measurement of a property.). This is the underlying object with id, value and extensions. The accessor "getParameters" gives direct access to the value
+         * @return {@link #parameters} (Parameters that were used in the measurement of a property (e.g. for viscosity: measured at 20C with a pH of 7.1).). This is the underlying object with id, value and extensions. The accessor "getParameters" gives direct access to the value
          */
         public StringType getParametersElement() { 
           if (this.parameters == null)
@@ -674,7 +678,7 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @param value {@link #parameters} (A field that should be used to capture parameters that were used in the measurement of a property.). This is the underlying object with id, value and extensions. The accessor "getParameters" gives direct access to the value
+         * @param value {@link #parameters} (Parameters that were used in the measurement of a property (e.g. for viscosity: measured at 20C with a pH of 7.1).). This is the underlying object with id, value and extensions. The accessor "getParameters" gives direct access to the value
          */
         public SubstanceSpecificationPropertyComponent setParametersElement(StringType value) { 
           this.parameters = value;
@@ -682,14 +686,14 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @return A field that should be used to capture parameters that were used in the measurement of a property.
+         * @return Parameters that were used in the measurement of a property (e.g. for viscosity: measured at 20C with a pH of 7.1).
          */
         public String getParameters() { 
           return this.parameters == null ? null : this.parameters.getValue();
         }
 
         /**
-         * @param value A field that should be used to capture parameters that were used in the measurement of a property.
+         * @param value Parameters that were used in the measurement of a property (e.g. for viscosity: measured at 20C with a pH of 7.1).
          */
         public SubstanceSpecificationPropertyComponent setParameters(String value) { 
           if (Utilities.noString(value))
@@ -703,92 +707,91 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @return {@link #substanceId} (Identifier for a substance upon which a defining property depends.)
+         * @return {@link #definingSubstance} (A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).)
          */
-        public Identifier getSubstanceId() { 
-          if (this.substanceId == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationPropertyComponent.substanceId");
-            else if (Configuration.doAutoCreate())
-              this.substanceId = new Identifier(); // cc
-          return this.substanceId;
-        }
-
-        public boolean hasSubstanceId() { 
-          return this.substanceId != null && !this.substanceId.isEmpty();
+        public Type getDefiningSubstance() { 
+          return this.definingSubstance;
         }
 
         /**
-         * @param value {@link #substanceId} (Identifier for a substance upon which a defining property depends.)
+         * @return {@link #definingSubstance} (A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).)
          */
-        public SubstanceSpecificationPropertyComponent setSubstanceId(Identifier value) { 
-          this.substanceId = value;
+        public Reference getDefiningSubstanceReference() throws FHIRException { 
+          if (this.definingSubstance == null)
+            this.definingSubstance = new Reference();
+          if (!(this.definingSubstance instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.definingSubstance.getClass().getName()+" was encountered");
+          return (Reference) this.definingSubstance;
+        }
+
+        public boolean hasDefiningSubstanceReference() { 
+          return this != null && this.definingSubstance instanceof Reference;
+        }
+
+        /**
+         * @return {@link #definingSubstance} (A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).)
+         */
+        public CodeableConcept getDefiningSubstanceCodeableConcept() throws FHIRException { 
+          if (this.definingSubstance == null)
+            this.definingSubstance = new CodeableConcept();
+          if (!(this.definingSubstance instanceof CodeableConcept))
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.definingSubstance.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.definingSubstance;
+        }
+
+        public boolean hasDefiningSubstanceCodeableConcept() { 
+          return this != null && this.definingSubstance instanceof CodeableConcept;
+        }
+
+        public boolean hasDefiningSubstance() { 
+          return this.definingSubstance != null && !this.definingSubstance.isEmpty();
+        }
+
+        /**
+         * @param value {@link #definingSubstance} (A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).)
+         */
+        public SubstanceSpecificationPropertyComponent setDefiningSubstance(Type value) { 
+          if (value != null && !(value instanceof Reference || value instanceof CodeableConcept))
+            throw new Error("Not the right type for SubstanceSpecification.property.definingSubstance[x]: "+value.fhirType());
+          this.definingSubstance = value;
           return this;
         }
 
         /**
-         * @return {@link #substanceName} (Description todo.). This is the underlying object with id, value and extensions. The accessor "getSubstanceName" gives direct access to the value
+         * @return {@link #amount} (Quantitative value for this property.)
          */
-        public StringType getSubstanceNameElement() { 
-          if (this.substanceName == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationPropertyComponent.substanceName");
-            else if (Configuration.doAutoCreate())
-              this.substanceName = new StringType(); // bb
-          return this.substanceName;
-        }
-
-        public boolean hasSubstanceNameElement() { 
-          return this.substanceName != null && !this.substanceName.isEmpty();
-        }
-
-        public boolean hasSubstanceName() { 
-          return this.substanceName != null && !this.substanceName.isEmpty();
-        }
-
-        /**
-         * @param value {@link #substanceName} (Description todo.). This is the underlying object with id, value and extensions. The accessor "getSubstanceName" gives direct access to the value
-         */
-        public SubstanceSpecificationPropertyComponent setSubstanceNameElement(StringType value) { 
-          this.substanceName = value;
-          return this;
-        }
-
-        /**
-         * @return Description todo.
-         */
-        public String getSubstanceName() { 
-          return this.substanceName == null ? null : this.substanceName.getValue();
-        }
-
-        /**
-         * @param value Description todo.
-         */
-        public SubstanceSpecificationPropertyComponent setSubstanceName(String value) { 
-          if (Utilities.noString(value))
-            this.substanceName = null;
-          else {
-            if (this.substanceName == null)
-              this.substanceName = new StringType();
-            this.substanceName.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #amount} (Quantitative value for this property.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
-         */
-        public StringType getAmountElement() { 
-          if (this.amount == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationPropertyComponent.amount");
-            else if (Configuration.doAutoCreate())
-              this.amount = new StringType(); // bb
+        public Type getAmount() { 
           return this.amount;
         }
 
-        public boolean hasAmountElement() { 
-          return this.amount != null && !this.amount.isEmpty();
+        /**
+         * @return {@link #amount} (Quantitative value for this property.)
+         */
+        public Quantity getAmountQuantity() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new Quantity();
+          if (!(this.amount instanceof Quantity))
+            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (Quantity) this.amount;
+        }
+
+        public boolean hasAmountQuantity() { 
+          return this != null && this.amount instanceof Quantity;
+        }
+
+        /**
+         * @return {@link #amount} (Quantitative value for this property.)
+         */
+        public StringType getAmountStringType() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new StringType();
+          if (!(this.amount instanceof StringType))
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (StringType) this.amount;
+        }
+
+        public boolean hasAmountStringType() { 
+          return this != null && this.amount instanceof StringType;
         }
 
         public boolean hasAmount() { 
@@ -796,53 +799,38 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Quantitative value for this property.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
+         * @param value {@link #amount} (Quantitative value for this property.)
          */
-        public SubstanceSpecificationPropertyComponent setAmountElement(StringType value) { 
+        public SubstanceSpecificationPropertyComponent setAmount(Type value) { 
+          if (value != null && !(value instanceof Quantity || value instanceof StringType))
+            throw new Error("Not the right type for SubstanceSpecification.property.amount[x]: "+value.fhirType());
           this.amount = value;
-          return this;
-        }
-
-        /**
-         * @return Quantitative value for this property.
-         */
-        public String getAmount() { 
-          return this.amount == null ? null : this.amount.getValue();
-        }
-
-        /**
-         * @param value Quantitative value for this property.
-         */
-        public SubstanceSpecificationPropertyComponent setAmount(String value) { 
-          if (Utilities.noString(value))
-            this.amount = null;
-          else {
-            if (this.amount == null)
-              this.amount = new StringType();
-            this.amount.setValue(value);
-          }
           return this;
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("type", "CodeableConcept", "Description todo.", 0, 1, type));
-          children.add(new Property("name", "CodeableConcept", "Description todo.", 0, 1, name));
-          children.add(new Property("parameters", "string", "A field that should be used to capture parameters that were used in the measurement of a property.", 0, 1, parameters));
-          children.add(new Property("substanceId", "Identifier", "Identifier for a substance upon which a defining property depends.", 0, 1, substanceId));
-          children.add(new Property("substanceName", "string", "Description todo.", 0, 1, substanceName));
-          children.add(new Property("amount", "string", "Quantitative value for this property.", 0, 1, amount));
+          children.add(new Property("category", "CodeableConcept", "A category for this property, e.g. Physical, Chemical, Enzymatic.", 0, 1, category));
+          children.add(new Property("code", "CodeableConcept", "Property type e.g. viscosity, pH, isoelectric point.", 0, 1, code));
+          children.add(new Property("parameters", "string", "Parameters that were used in the measurement of a property (e.g. for viscosity: measured at 20C with a pH of 7.1).", 0, 1, parameters));
+          children.add(new Property("definingSubstance[x]", "Reference(SubstanceSpecification|Substance)|CodeableConcept", "A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).", 0, 1, definingSubstance));
+          children.add(new Property("amount[x]", "Quantity|string", "Quantitative value for this property.", 0, 1, amount));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Description todo.", 0, 1, type);
-          case 3373707: /*name*/  return new Property("name", "CodeableConcept", "Description todo.", 0, 1, name);
-          case 458736106: /*parameters*/  return new Property("parameters", "string", "A field that should be used to capture parameters that were used in the measurement of a property.", 0, 1, parameters);
-          case -1732496725: /*substanceId*/  return new Property("substanceId", "Identifier", "Identifier for a substance upon which a defining property depends.", 0, 1, substanceId);
-          case 1518107675: /*substanceName*/  return new Property("substanceName", "string", "Description todo.", 0, 1, substanceName);
-          case -1413853096: /*amount*/  return new Property("amount", "string", "Quantitative value for this property.", 0, 1, amount);
+          case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A category for this property, e.g. Physical, Chemical, Enzymatic.", 0, 1, category);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Property type e.g. viscosity, pH, isoelectric point.", 0, 1, code);
+          case 458736106: /*parameters*/  return new Property("parameters", "string", "Parameters that were used in the measurement of a property (e.g. for viscosity: measured at 20C with a pH of 7.1).", 0, 1, parameters);
+          case 1535270120: /*definingSubstance[x]*/  return new Property("definingSubstance[x]", "Reference(SubstanceSpecification|Substance)|CodeableConcept", "A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).", 0, 1, definingSubstance);
+          case 1901076632: /*definingSubstance*/  return new Property("definingSubstance[x]", "Reference(SubstanceSpecification|Substance)|CodeableConcept", "A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).", 0, 1, definingSubstance);
+          case -2101581421: /*definingSubstanceReference*/  return new Property("definingSubstance[x]", "Reference(SubstanceSpecification|Substance)|CodeableConcept", "A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).", 0, 1, definingSubstance);
+          case -1438235671: /*definingSubstanceCodeableConcept*/  return new Property("definingSubstance[x]", "Reference(SubstanceSpecification|Substance)|CodeableConcept", "A substance upon which a defining property depends (e.g. for solubility: in water, in alcohol).", 0, 1, definingSubstance);
+          case 646780200: /*amount[x]*/  return new Property("amount[x]", "Quantity|string", "Quantitative value for this property.", 0, 1, amount);
+          case -1413853096: /*amount*/  return new Property("amount[x]", "Quantity|string", "Quantitative value for this property.", 0, 1, amount);
+          case 1664303363: /*amountQuantity*/  return new Property("amount[x]", "Quantity|string", "Quantitative value for this property.", 0, 1, amount);
+          case 773651081: /*amountString*/  return new Property("amount[x]", "Quantity|string", "Quantitative value for this property.", 0, 1, amount);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -851,12 +839,11 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // CodeableConcept
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case 458736106: /*parameters*/ return this.parameters == null ? new Base[0] : new Base[] {this.parameters}; // StringType
-        case -1732496725: /*substanceId*/ return this.substanceId == null ? new Base[0] : new Base[] {this.substanceId}; // Identifier
-        case 1518107675: /*substanceName*/ return this.substanceName == null ? new Base[0] : new Base[] {this.substanceName}; // StringType
-        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // StringType
+        case 1901076632: /*definingSubstance*/ return this.definingSubstance == null ? new Base[0] : new Base[] {this.definingSubstance}; // Type
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Type
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -865,23 +852,20 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 3575610: // type
-          this.type = castToCodeableConcept(value); // CodeableConcept
+        case 50511102: // category
+          this.category = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case 3373707: // name
-          this.name = castToCodeableConcept(value); // CodeableConcept
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 458736106: // parameters
           this.parameters = castToString(value); // StringType
           return value;
-        case -1732496725: // substanceId
-          this.substanceId = castToIdentifier(value); // Identifier
-          return value;
-        case 1518107675: // substanceName
-          this.substanceName = castToString(value); // StringType
+        case 1901076632: // definingSubstance
+          this.definingSubstance = castToType(value); // Type
           return value;
         case -1413853096: // amount
-          this.amount = castToString(value); // StringType
+          this.amount = castToType(value); // Type
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -890,18 +874,16 @@ public class SubstanceSpecification extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("name")) {
-          this.name = castToCodeableConcept(value); // CodeableConcept
+        if (name.equals("category")) {
+          this.category = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("code")) {
+          this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("parameters")) {
           this.parameters = castToString(value); // StringType
-        } else if (name.equals("substanceId")) {
-          this.substanceId = castToIdentifier(value); // Identifier
-        } else if (name.equals("substanceName")) {
-          this.substanceName = castToString(value); // StringType
-        } else if (name.equals("amount")) {
-          this.amount = castToString(value); // StringType
+        } else if (name.equals("definingSubstance[x]")) {
+          this.definingSubstance = castToType(value); // Type
+        } else if (name.equals("amount[x]")) {
+          this.amount = castToType(value); // Type
         } else
           return super.setProperty(name, value);
         return value;
@@ -910,12 +892,13 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610:  return getType(); 
-        case 3373707:  return getName(); 
+        case 50511102:  return getCategory(); 
+        case 3059181:  return getCode(); 
         case 458736106:  return getParametersElement();
-        case -1732496725:  return getSubstanceId(); 
-        case 1518107675:  return getSubstanceNameElement();
-        case -1413853096:  return getAmountElement();
+        case 1535270120:  return getDefiningSubstance(); 
+        case 1901076632:  return getDefiningSubstance(); 
+        case 646780200:  return getAmount(); 
+        case -1413853096:  return getAmount(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -924,12 +907,11 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 3373707: /*name*/ return new String[] {"CodeableConcept"};
+        case 50511102: /*category*/ return new String[] {"CodeableConcept"};
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case 458736106: /*parameters*/ return new String[] {"string"};
-        case -1732496725: /*substanceId*/ return new String[] {"Identifier"};
-        case 1518107675: /*substanceName*/ return new String[] {"string"};
-        case -1413853096: /*amount*/ return new String[] {"string"};
+        case 1901076632: /*definingSubstance*/ return new String[] {"Reference", "CodeableConcept"};
+        case -1413853096: /*amount*/ return new String[] {"Quantity", "string"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -937,26 +919,32 @@ public class SubstanceSpecification extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
-          this.type = new CodeableConcept();
-          return this.type;
+        if (name.equals("category")) {
+          this.category = new CodeableConcept();
+          return this.category;
         }
-        else if (name.equals("name")) {
-          this.name = new CodeableConcept();
-          return this.name;
+        else if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
         }
         else if (name.equals("parameters")) {
           throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.parameters");
         }
-        else if (name.equals("substanceId")) {
-          this.substanceId = new Identifier();
-          return this.substanceId;
+        else if (name.equals("definingSubstanceReference")) {
+          this.definingSubstance = new Reference();
+          return this.definingSubstance;
         }
-        else if (name.equals("substanceName")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.substanceName");
+        else if (name.equals("definingSubstanceCodeableConcept")) {
+          this.definingSubstance = new CodeableConcept();
+          return this.definingSubstance;
         }
-        else if (name.equals("amount")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.amount");
+        else if (name.equals("amountQuantity")) {
+          this.amount = new Quantity();
+          return this.amount;
+        }
+        else if (name.equals("amountString")) {
+          this.amount = new StringType();
+          return this.amount;
         }
         else
           return super.addChild(name);
@@ -965,11 +953,10 @@ public class SubstanceSpecification extends DomainResource {
       public SubstanceSpecificationPropertyComponent copy() {
         SubstanceSpecificationPropertyComponent dst = new SubstanceSpecificationPropertyComponent();
         copyValues(dst);
-        dst.type = type == null ? null : type.copy();
-        dst.name = name == null ? null : name.copy();
+        dst.category = category == null ? null : category.copy();
+        dst.code = code == null ? null : code.copy();
         dst.parameters = parameters == null ? null : parameters.copy();
-        dst.substanceId = substanceId == null ? null : substanceId.copy();
-        dst.substanceName = substanceName == null ? null : substanceName.copy();
+        dst.definingSubstance = definingSubstance == null ? null : definingSubstance.copy();
         dst.amount = amount == null ? null : amount.copy();
         return dst;
       }
@@ -981,9 +968,9 @@ public class SubstanceSpecification extends DomainResource {
         if (!(other_ instanceof SubstanceSpecificationPropertyComponent))
           return false;
         SubstanceSpecificationPropertyComponent o = (SubstanceSpecificationPropertyComponent) other_;
-        return compareDeep(type, o.type, true) && compareDeep(name, o.name, true) && compareDeep(parameters, o.parameters, true)
-           && compareDeep(substanceId, o.substanceId, true) && compareDeep(substanceName, o.substanceName, true)
-           && compareDeep(amount, o.amount, true);
+        return compareDeep(category, o.category, true) && compareDeep(code, o.code, true) && compareDeep(parameters, o.parameters, true)
+           && compareDeep(definingSubstance, o.definingSubstance, true) && compareDeep(amount, o.amount, true)
+          ;
       }
 
       @Override
@@ -993,13 +980,12 @@ public class SubstanceSpecification extends DomainResource {
         if (!(other_ instanceof SubstanceSpecificationPropertyComponent))
           return false;
         SubstanceSpecificationPropertyComponent o = (SubstanceSpecificationPropertyComponent) other_;
-        return compareValues(parameters, o.parameters, true) && compareValues(substanceName, o.substanceName, true)
-           && compareValues(amount, o.amount, true);
+        return compareValues(parameters, o.parameters, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, name, parameters, substanceId
-          , substanceName, amount);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(category, code, parameters
+          , definingSubstance, amount);
       }
 
   public String fhirType() {
@@ -1033,10 +1019,10 @@ public class SubstanceSpecification extends DomainResource {
         protected StringType molecularFormula;
 
         /**
-         * Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical. and each moiety separated by a dot.
+         * Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical, each moiety separated by a dot.
          */
         @Child(name = "molecularFormulaByMoiety", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical. and each moiety separated by a dot", formalDefinition="Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical. and each moiety separated by a dot." )
+        @Description(shortDefinition="Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical, each moiety separated by a dot", formalDefinition="Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical, each moiety separated by a dot." )
         protected StringType molecularFormulaByMoiety;
 
         /**
@@ -1056,23 +1042,23 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * Supporting literature.
          */
-        @Child(name = "referenceSource", type = {DocumentReference.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "source", type = {DocumentReference.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Supporting literature", formalDefinition="Supporting literature." )
-        protected List<Reference> referenceSource;
+        protected List<Reference> source;
         /**
          * The actual objects that are the target of the reference (Supporting literature.)
          */
-        protected List<DocumentReference> referenceSourceTarget;
+        protected List<DocumentReference> sourceTarget;
 
 
         /**
-         * Molectular structural representation.
+         * Molecular structural representation.
          */
-        @Child(name = "structuralRepresentation", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Molectular structural representation", formalDefinition="Molectular structural representation." )
-        protected List<SubstanceSpecificationStructureStructuralRepresentationComponent> structuralRepresentation;
+        @Child(name = "representation", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Molecular structural representation", formalDefinition="Molecular structural representation." )
+        protected List<SubstanceSpecificationStructureRepresentationComponent> representation;
 
-        private static final long serialVersionUID = -2087062825L;
+        private static final long serialVersionUID = -851521497L;
 
     /**
      * Constructor
@@ -1179,7 +1165,7 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @return {@link #molecularFormulaByMoiety} (Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical. and each moiety separated by a dot.). This is the underlying object with id, value and extensions. The accessor "getMolecularFormulaByMoiety" gives direct access to the value
+         * @return {@link #molecularFormulaByMoiety} (Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical, each moiety separated by a dot.). This is the underlying object with id, value and extensions. The accessor "getMolecularFormulaByMoiety" gives direct access to the value
          */
         public StringType getMolecularFormulaByMoietyElement() { 
           if (this.molecularFormulaByMoiety == null)
@@ -1199,7 +1185,7 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @param value {@link #molecularFormulaByMoiety} (Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical. and each moiety separated by a dot.). This is the underlying object with id, value and extensions. The accessor "getMolecularFormulaByMoiety" gives direct access to the value
+         * @param value {@link #molecularFormulaByMoiety} (Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical, each moiety separated by a dot.). This is the underlying object with id, value and extensions. The accessor "getMolecularFormulaByMoiety" gives direct access to the value
          */
         public SubstanceSpecificationStructureComponent setMolecularFormulaByMoietyElement(StringType value) { 
           this.molecularFormulaByMoiety = value;
@@ -1207,14 +1193,14 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @return Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical. and each moiety separated by a dot.
+         * @return Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical, each moiety separated by a dot.
          */
         public String getMolecularFormulaByMoiety() { 
           return this.molecularFormulaByMoiety == null ? null : this.molecularFormulaByMoiety.getValue();
         }
 
         /**
-         * @param value Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical. and each moiety separated by a dot.
+         * @param value Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical, each moiety separated by a dot.
          */
         public SubstanceSpecificationStructureComponent setMolecularFormulaByMoiety(String value) { 
           if (Utilities.noString(value))
@@ -1305,131 +1291,131 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @return {@link #referenceSource} (Supporting literature.)
+         * @return {@link #source} (Supporting literature.)
          */
-        public List<Reference> getReferenceSource() { 
-          if (this.referenceSource == null)
-            this.referenceSource = new ArrayList<Reference>();
-          return this.referenceSource;
+        public List<Reference> getSource() { 
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          return this.source;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SubstanceSpecificationStructureComponent setReferenceSource(List<Reference> theReferenceSource) { 
-          this.referenceSource = theReferenceSource;
+        public SubstanceSpecificationStructureComponent setSource(List<Reference> theSource) { 
+          this.source = theSource;
           return this;
         }
 
-        public boolean hasReferenceSource() { 
-          if (this.referenceSource == null)
+        public boolean hasSource() { 
+          if (this.source == null)
             return false;
-          for (Reference item : this.referenceSource)
+          for (Reference item : this.source)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public Reference addReferenceSource() { //3
+        public Reference addSource() { //3
           Reference t = new Reference();
-          if (this.referenceSource == null)
-            this.referenceSource = new ArrayList<Reference>();
-          this.referenceSource.add(t);
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          this.source.add(t);
           return t;
         }
 
-        public SubstanceSpecificationStructureComponent addReferenceSource(Reference t) { //3
+        public SubstanceSpecificationStructureComponent addSource(Reference t) { //3
           if (t == null)
             return this;
-          if (this.referenceSource == null)
-            this.referenceSource = new ArrayList<Reference>();
-          this.referenceSource.add(t);
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          this.source.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #referenceSource}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #source}, creating it if it does not already exist
          */
-        public Reference getReferenceSourceFirstRep() { 
-          if (getReferenceSource().isEmpty()) {
-            addReferenceSource();
+        public Reference getSourceFirstRep() { 
+          if (getSource().isEmpty()) {
+            addSource();
           }
-          return getReferenceSource().get(0);
+          return getSource().get(0);
         }
 
         /**
          * @deprecated Use Reference#setResource(IBaseResource) instead
          */
         @Deprecated
-        public List<DocumentReference> getReferenceSourceTarget() { 
-          if (this.referenceSourceTarget == null)
-            this.referenceSourceTarget = new ArrayList<DocumentReference>();
-          return this.referenceSourceTarget;
+        public List<DocumentReference> getSourceTarget() { 
+          if (this.sourceTarget == null)
+            this.sourceTarget = new ArrayList<DocumentReference>();
+          return this.sourceTarget;
         }
 
         /**
          * @deprecated Use Reference#setResource(IBaseResource) instead
          */
         @Deprecated
-        public DocumentReference addReferenceSourceTarget() { 
+        public DocumentReference addSourceTarget() { 
           DocumentReference r = new DocumentReference();
-          if (this.referenceSourceTarget == null)
-            this.referenceSourceTarget = new ArrayList<DocumentReference>();
-          this.referenceSourceTarget.add(r);
+          if (this.sourceTarget == null)
+            this.sourceTarget = new ArrayList<DocumentReference>();
+          this.sourceTarget.add(r);
           return r;
         }
 
         /**
-         * @return {@link #structuralRepresentation} (Molectular structural representation.)
+         * @return {@link #representation} (Molecular structural representation.)
          */
-        public List<SubstanceSpecificationStructureStructuralRepresentationComponent> getStructuralRepresentation() { 
-          if (this.structuralRepresentation == null)
-            this.structuralRepresentation = new ArrayList<SubstanceSpecificationStructureStructuralRepresentationComponent>();
-          return this.structuralRepresentation;
+        public List<SubstanceSpecificationStructureRepresentationComponent> getRepresentation() { 
+          if (this.representation == null)
+            this.representation = new ArrayList<SubstanceSpecificationStructureRepresentationComponent>();
+          return this.representation;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SubstanceSpecificationStructureComponent setStructuralRepresentation(List<SubstanceSpecificationStructureStructuralRepresentationComponent> theStructuralRepresentation) { 
-          this.structuralRepresentation = theStructuralRepresentation;
+        public SubstanceSpecificationStructureComponent setRepresentation(List<SubstanceSpecificationStructureRepresentationComponent> theRepresentation) { 
+          this.representation = theRepresentation;
           return this;
         }
 
-        public boolean hasStructuralRepresentation() { 
-          if (this.structuralRepresentation == null)
+        public boolean hasRepresentation() { 
+          if (this.representation == null)
             return false;
-          for (SubstanceSpecificationStructureStructuralRepresentationComponent item : this.structuralRepresentation)
+          for (SubstanceSpecificationStructureRepresentationComponent item : this.representation)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public SubstanceSpecificationStructureStructuralRepresentationComponent addStructuralRepresentation() { //3
-          SubstanceSpecificationStructureStructuralRepresentationComponent t = new SubstanceSpecificationStructureStructuralRepresentationComponent();
-          if (this.structuralRepresentation == null)
-            this.structuralRepresentation = new ArrayList<SubstanceSpecificationStructureStructuralRepresentationComponent>();
-          this.structuralRepresentation.add(t);
+        public SubstanceSpecificationStructureRepresentationComponent addRepresentation() { //3
+          SubstanceSpecificationStructureRepresentationComponent t = new SubstanceSpecificationStructureRepresentationComponent();
+          if (this.representation == null)
+            this.representation = new ArrayList<SubstanceSpecificationStructureRepresentationComponent>();
+          this.representation.add(t);
           return t;
         }
 
-        public SubstanceSpecificationStructureComponent addStructuralRepresentation(SubstanceSpecificationStructureStructuralRepresentationComponent t) { //3
+        public SubstanceSpecificationStructureComponent addRepresentation(SubstanceSpecificationStructureRepresentationComponent t) { //3
           if (t == null)
             return this;
-          if (this.structuralRepresentation == null)
-            this.structuralRepresentation = new ArrayList<SubstanceSpecificationStructureStructuralRepresentationComponent>();
-          this.structuralRepresentation.add(t);
+          if (this.representation == null)
+            this.representation = new ArrayList<SubstanceSpecificationStructureRepresentationComponent>();
+          this.representation.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #structuralRepresentation}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #representation}, creating it if it does not already exist
          */
-        public SubstanceSpecificationStructureStructuralRepresentationComponent getStructuralRepresentationFirstRep() { 
-          if (getStructuralRepresentation().isEmpty()) {
-            addStructuralRepresentation();
+        public SubstanceSpecificationStructureRepresentationComponent getRepresentationFirstRep() { 
+          if (getRepresentation().isEmpty()) {
+            addRepresentation();
           }
-          return getStructuralRepresentation().get(0);
+          return getRepresentation().get(0);
         }
 
         protected void listChildren(List<Property> children) {
@@ -1437,11 +1423,11 @@ public class SubstanceSpecification extends DomainResource {
           children.add(new Property("stereochemistry", "CodeableConcept", "Stereochemistry type.", 0, 1, stereochemistry));
           children.add(new Property("opticalActivity", "CodeableConcept", "Optical activity type.", 0, 1, opticalActivity));
           children.add(new Property("molecularFormula", "string", "Molecular formula.", 0, 1, molecularFormula));
-          children.add(new Property("molecularFormulaByMoiety", "string", "Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical. and each moiety separated by a dot.", 0, 1, molecularFormulaByMoiety));
+          children.add(new Property("molecularFormulaByMoiety", "string", "Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical, each moiety separated by a dot.", 0, 1, molecularFormulaByMoiety));
           children.add(new Property("isotope", "", "Applicable for single substances that contain a radionuclide or a non-natural isotopic ratio.", 0, java.lang.Integer.MAX_VALUE, isotope));
           children.add(new Property("molecularWeight", "@SubstanceSpecification.structure.isotope.molecularWeight", "The molecular weight or weight range (for proteins, polymers or nucleic acids).", 0, 1, molecularWeight));
-          children.add(new Property("referenceSource", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource));
-          children.add(new Property("structuralRepresentation", "", "Molectular structural representation.", 0, java.lang.Integer.MAX_VALUE, structuralRepresentation));
+          children.add(new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source));
+          children.add(new Property("representation", "", "Molecular structural representation.", 0, java.lang.Integer.MAX_VALUE, representation));
         }
 
         @Override
@@ -1450,11 +1436,11 @@ public class SubstanceSpecification extends DomainResource {
           case 263475116: /*stereochemistry*/  return new Property("stereochemistry", "CodeableConcept", "Stereochemistry type.", 0, 1, stereochemistry);
           case 1420900135: /*opticalActivity*/  return new Property("opticalActivity", "CodeableConcept", "Optical activity type.", 0, 1, opticalActivity);
           case 616660246: /*molecularFormula*/  return new Property("molecularFormula", "string", "Molecular formula.", 0, 1, molecularFormula);
-          case 1315452848: /*molecularFormulaByMoiety*/  return new Property("molecularFormulaByMoiety", "string", "Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical. and each moiety separated by a dot.", 0, 1, molecularFormulaByMoiety);
+          case 1315452848: /*molecularFormulaByMoiety*/  return new Property("molecularFormulaByMoiety", "string", "Specified per moiety according to the Hill system, i.e. first C, then H, then alphabetical, each moiety separated by a dot.", 0, 1, molecularFormulaByMoiety);
           case 2097035189: /*isotope*/  return new Property("isotope", "", "Applicable for single substances that contain a radionuclide or a non-natural isotopic ratio.", 0, java.lang.Integer.MAX_VALUE, isotope);
           case 635625672: /*molecularWeight*/  return new Property("molecularWeight", "@SubstanceSpecification.structure.isotope.molecularWeight", "The molecular weight or weight range (for proteins, polymers or nucleic acids).", 0, 1, molecularWeight);
-          case 882421574: /*referenceSource*/  return new Property("referenceSource", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource);
-          case 14311178: /*structuralRepresentation*/  return new Property("structuralRepresentation", "", "Molectular structural representation.", 0, java.lang.Integer.MAX_VALUE, structuralRepresentation);
+          case -896505829: /*source*/  return new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source);
+          case -671065907: /*representation*/  return new Property("representation", "", "Molecular structural representation.", 0, java.lang.Integer.MAX_VALUE, representation);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1469,8 +1455,8 @@ public class SubstanceSpecification extends DomainResource {
         case 1315452848: /*molecularFormulaByMoiety*/ return this.molecularFormulaByMoiety == null ? new Base[0] : new Base[] {this.molecularFormulaByMoiety}; // StringType
         case 2097035189: /*isotope*/ return this.isotope == null ? new Base[0] : this.isotope.toArray(new Base[this.isotope.size()]); // SubstanceSpecificationStructureIsotopeComponent
         case 635625672: /*molecularWeight*/ return this.molecularWeight == null ? new Base[0] : new Base[] {this.molecularWeight}; // SubstanceSpecificationStructureIsotopeMolecularWeightComponent
-        case 882421574: /*referenceSource*/ return this.referenceSource == null ? new Base[0] : this.referenceSource.toArray(new Base[this.referenceSource.size()]); // Reference
-        case 14311178: /*structuralRepresentation*/ return this.structuralRepresentation == null ? new Base[0] : this.structuralRepresentation.toArray(new Base[this.structuralRepresentation.size()]); // SubstanceSpecificationStructureStructuralRepresentationComponent
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : this.source.toArray(new Base[this.source.size()]); // Reference
+        case -671065907: /*representation*/ return this.representation == null ? new Base[0] : this.representation.toArray(new Base[this.representation.size()]); // SubstanceSpecificationStructureRepresentationComponent
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1497,11 +1483,11 @@ public class SubstanceSpecification extends DomainResource {
         case 635625672: // molecularWeight
           this.molecularWeight = (SubstanceSpecificationStructureIsotopeMolecularWeightComponent) value; // SubstanceSpecificationStructureIsotopeMolecularWeightComponent
           return value;
-        case 882421574: // referenceSource
-          this.getReferenceSource().add(castToReference(value)); // Reference
+        case -896505829: // source
+          this.getSource().add(castToReference(value)); // Reference
           return value;
-        case 14311178: // structuralRepresentation
-          this.getStructuralRepresentation().add((SubstanceSpecificationStructureStructuralRepresentationComponent) value); // SubstanceSpecificationStructureStructuralRepresentationComponent
+        case -671065907: // representation
+          this.getRepresentation().add((SubstanceSpecificationStructureRepresentationComponent) value); // SubstanceSpecificationStructureRepresentationComponent
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1522,10 +1508,10 @@ public class SubstanceSpecification extends DomainResource {
           this.getIsotope().add((SubstanceSpecificationStructureIsotopeComponent) value);
         } else if (name.equals("molecularWeight")) {
           this.molecularWeight = (SubstanceSpecificationStructureIsotopeMolecularWeightComponent) value; // SubstanceSpecificationStructureIsotopeMolecularWeightComponent
-        } else if (name.equals("referenceSource")) {
-          this.getReferenceSource().add(castToReference(value));
-        } else if (name.equals("structuralRepresentation")) {
-          this.getStructuralRepresentation().add((SubstanceSpecificationStructureStructuralRepresentationComponent) value);
+        } else if (name.equals("source")) {
+          this.getSource().add(castToReference(value));
+        } else if (name.equals("representation")) {
+          this.getRepresentation().add((SubstanceSpecificationStructureRepresentationComponent) value);
         } else
           return super.setProperty(name, value);
         return value;
@@ -1540,8 +1526,8 @@ public class SubstanceSpecification extends DomainResource {
         case 1315452848:  return getMolecularFormulaByMoietyElement();
         case 2097035189:  return addIsotope(); 
         case 635625672:  return getMolecularWeight(); 
-        case 882421574:  return addReferenceSource(); 
-        case 14311178:  return addStructuralRepresentation(); 
+        case -896505829:  return addSource(); 
+        case -671065907:  return addRepresentation(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1556,8 +1542,8 @@ public class SubstanceSpecification extends DomainResource {
         case 1315452848: /*molecularFormulaByMoiety*/ return new String[] {"string"};
         case 2097035189: /*isotope*/ return new String[] {};
         case 635625672: /*molecularWeight*/ return new String[] {"@SubstanceSpecification.structure.isotope.molecularWeight"};
-        case 882421574: /*referenceSource*/ return new String[] {"Reference"};
-        case 14311178: /*structuralRepresentation*/ return new String[] {};
+        case -896505829: /*source*/ return new String[] {"Reference"};
+        case -671065907: /*representation*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1586,11 +1572,11 @@ public class SubstanceSpecification extends DomainResource {
           this.molecularWeight = new SubstanceSpecificationStructureIsotopeMolecularWeightComponent();
           return this.molecularWeight;
         }
-        else if (name.equals("referenceSource")) {
-          return addReferenceSource();
+        else if (name.equals("source")) {
+          return addSource();
         }
-        else if (name.equals("structuralRepresentation")) {
-          return addStructuralRepresentation();
+        else if (name.equals("representation")) {
+          return addRepresentation();
         }
         else
           return super.addChild(name);
@@ -1609,15 +1595,15 @@ public class SubstanceSpecification extends DomainResource {
             dst.isotope.add(i.copy());
         };
         dst.molecularWeight = molecularWeight == null ? null : molecularWeight.copy();
-        if (referenceSource != null) {
-          dst.referenceSource = new ArrayList<Reference>();
-          for (Reference i : referenceSource)
-            dst.referenceSource.add(i.copy());
+        if (source != null) {
+          dst.source = new ArrayList<Reference>();
+          for (Reference i : source)
+            dst.source.add(i.copy());
         };
-        if (structuralRepresentation != null) {
-          dst.structuralRepresentation = new ArrayList<SubstanceSpecificationStructureStructuralRepresentationComponent>();
-          for (SubstanceSpecificationStructureStructuralRepresentationComponent i : structuralRepresentation)
-            dst.structuralRepresentation.add(i.copy());
+        if (representation != null) {
+          dst.representation = new ArrayList<SubstanceSpecificationStructureRepresentationComponent>();
+          for (SubstanceSpecificationStructureRepresentationComponent i : representation)
+            dst.representation.add(i.copy());
         };
         return dst;
       }
@@ -1632,8 +1618,7 @@ public class SubstanceSpecification extends DomainResource {
         return compareDeep(stereochemistry, o.stereochemistry, true) && compareDeep(opticalActivity, o.opticalActivity, true)
            && compareDeep(molecularFormula, o.molecularFormula, true) && compareDeep(molecularFormulaByMoiety, o.molecularFormulaByMoiety, true)
            && compareDeep(isotope, o.isotope, true) && compareDeep(molecularWeight, o.molecularWeight, true)
-           && compareDeep(referenceSource, o.referenceSource, true) && compareDeep(structuralRepresentation, o.structuralRepresentation, true)
-          ;
+           && compareDeep(source, o.source, true) && compareDeep(representation, o.representation, true);
       }
 
       @Override
@@ -1649,8 +1634,8 @@ public class SubstanceSpecification extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(stereochemistry, opticalActivity
-          , molecularFormula, molecularFormulaByMoiety, isotope, molecularWeight, referenceSource
-          , structuralRepresentation);
+          , molecularFormula, molecularFormulaByMoiety, isotope, molecularWeight, source, representation
+          );
       }
 
   public String fhirType() {
@@ -1665,46 +1650,39 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * Substance identifier for each non-natural or radioisotope.
          */
-        @Child(name = "nuclideId", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Substance identifier for each non-natural or radioisotope", formalDefinition="Substance identifier for each non-natural or radioisotope." )
-        protected Identifier nuclideId;
+        protected Identifier identifier;
 
         /**
          * Substance name for each non-natural or radioisotope.
          */
-        @Child(name = "nuclideName", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "name", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Substance name for each non-natural or radioisotope", formalDefinition="Substance name for each non-natural or radioisotope." )
-        protected CodeableConcept nuclideName;
+        protected CodeableConcept name;
 
         /**
          * The type of isotopic substitution present in a single substance.
          */
-        @Child(name = "substitutionType", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "substitution", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The type of isotopic substitution present in a single substance", formalDefinition="The type of isotopic substitution present in a single substance." )
-        protected CodeableConcept substitutionType;
+        protected CodeableConcept substitution;
 
         /**
          * Half life - for a non-natural nuclide.
          */
-        @Child(name = "nuclideHalfLife", type = {Quantity.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "halfLife", type = {Quantity.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Half life - for a non-natural nuclide", formalDefinition="Half life - for a non-natural nuclide." )
-        protected Quantity nuclideHalfLife;
-
-        /**
-         * Quantitative values for this isotope.
-         */
-        @Child(name = "amount", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Quantitative values for this isotope", formalDefinition="Quantitative values for this isotope." )
-        protected StringType amount;
+        protected Quantity halfLife;
 
         /**
          * The molecular weight or weight range (for proteins, polymers or nucleic acids).
          */
-        @Child(name = "molecularWeight", type = {}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "molecularWeight", type = {}, order=5, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The molecular weight or weight range (for proteins, polymers or nucleic acids)", formalDefinition="The molecular weight or weight range (for proteins, polymers or nucleic acids)." )
         protected SubstanceSpecificationStructureIsotopeMolecularWeightComponent molecularWeight;
 
-        private static final long serialVersionUID = -654404311L;
+        private static final long serialVersionUID = -531167114L;
 
     /**
      * Constructor
@@ -1714,147 +1692,98 @@ public class SubstanceSpecification extends DomainResource {
       }
 
         /**
-         * @return {@link #nuclideId} (Substance identifier for each non-natural or radioisotope.)
+         * @return {@link #identifier} (Substance identifier for each non-natural or radioisotope.)
          */
-        public Identifier getNuclideId() { 
-          if (this.nuclideId == null)
+        public Identifier getIdentifier() { 
+          if (this.identifier == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeComponent.nuclideId");
+              throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeComponent.identifier");
             else if (Configuration.doAutoCreate())
-              this.nuclideId = new Identifier(); // cc
-          return this.nuclideId;
+              this.identifier = new Identifier(); // cc
+          return this.identifier;
         }
 
-        public boolean hasNuclideId() { 
-          return this.nuclideId != null && !this.nuclideId.isEmpty();
+        public boolean hasIdentifier() { 
+          return this.identifier != null && !this.identifier.isEmpty();
         }
 
         /**
-         * @param value {@link #nuclideId} (Substance identifier for each non-natural or radioisotope.)
+         * @param value {@link #identifier} (Substance identifier for each non-natural or radioisotope.)
          */
-        public SubstanceSpecificationStructureIsotopeComponent setNuclideId(Identifier value) { 
-          this.nuclideId = value;
+        public SubstanceSpecificationStructureIsotopeComponent setIdentifier(Identifier value) { 
+          this.identifier = value;
           return this;
         }
 
         /**
-         * @return {@link #nuclideName} (Substance name for each non-natural or radioisotope.)
+         * @return {@link #name} (Substance name for each non-natural or radioisotope.)
          */
-        public CodeableConcept getNuclideName() { 
-          if (this.nuclideName == null)
+        public CodeableConcept getName() { 
+          if (this.name == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeComponent.nuclideName");
+              throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeComponent.name");
             else if (Configuration.doAutoCreate())
-              this.nuclideName = new CodeableConcept(); // cc
-          return this.nuclideName;
+              this.name = new CodeableConcept(); // cc
+          return this.name;
         }
 
-        public boolean hasNuclideName() { 
-          return this.nuclideName != null && !this.nuclideName.isEmpty();
+        public boolean hasName() { 
+          return this.name != null && !this.name.isEmpty();
         }
 
         /**
-         * @param value {@link #nuclideName} (Substance name for each non-natural or radioisotope.)
+         * @param value {@link #name} (Substance name for each non-natural or radioisotope.)
          */
-        public SubstanceSpecificationStructureIsotopeComponent setNuclideName(CodeableConcept value) { 
-          this.nuclideName = value;
+        public SubstanceSpecificationStructureIsotopeComponent setName(CodeableConcept value) { 
+          this.name = value;
           return this;
         }
 
         /**
-         * @return {@link #substitutionType} (The type of isotopic substitution present in a single substance.)
+         * @return {@link #substitution} (The type of isotopic substitution present in a single substance.)
          */
-        public CodeableConcept getSubstitutionType() { 
-          if (this.substitutionType == null)
+        public CodeableConcept getSubstitution() { 
+          if (this.substitution == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeComponent.substitutionType");
+              throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeComponent.substitution");
             else if (Configuration.doAutoCreate())
-              this.substitutionType = new CodeableConcept(); // cc
-          return this.substitutionType;
+              this.substitution = new CodeableConcept(); // cc
+          return this.substitution;
         }
 
-        public boolean hasSubstitutionType() { 
-          return this.substitutionType != null && !this.substitutionType.isEmpty();
+        public boolean hasSubstitution() { 
+          return this.substitution != null && !this.substitution.isEmpty();
         }
 
         /**
-         * @param value {@link #substitutionType} (The type of isotopic substitution present in a single substance.)
+         * @param value {@link #substitution} (The type of isotopic substitution present in a single substance.)
          */
-        public SubstanceSpecificationStructureIsotopeComponent setSubstitutionType(CodeableConcept value) { 
-          this.substitutionType = value;
+        public SubstanceSpecificationStructureIsotopeComponent setSubstitution(CodeableConcept value) { 
+          this.substitution = value;
           return this;
         }
 
         /**
-         * @return {@link #nuclideHalfLife} (Half life - for a non-natural nuclide.)
+         * @return {@link #halfLife} (Half life - for a non-natural nuclide.)
          */
-        public Quantity getNuclideHalfLife() { 
-          if (this.nuclideHalfLife == null)
+        public Quantity getHalfLife() { 
+          if (this.halfLife == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeComponent.nuclideHalfLife");
+              throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeComponent.halfLife");
             else if (Configuration.doAutoCreate())
-              this.nuclideHalfLife = new Quantity(); // cc
-          return this.nuclideHalfLife;
+              this.halfLife = new Quantity(); // cc
+          return this.halfLife;
         }
 
-        public boolean hasNuclideHalfLife() { 
-          return this.nuclideHalfLife != null && !this.nuclideHalfLife.isEmpty();
-        }
-
-        /**
-         * @param value {@link #nuclideHalfLife} (Half life - for a non-natural nuclide.)
-         */
-        public SubstanceSpecificationStructureIsotopeComponent setNuclideHalfLife(Quantity value) { 
-          this.nuclideHalfLife = value;
-          return this;
+        public boolean hasHalfLife() { 
+          return this.halfLife != null && !this.halfLife.isEmpty();
         }
 
         /**
-         * @return {@link #amount} (Quantitative values for this isotope.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
+         * @param value {@link #halfLife} (Half life - for a non-natural nuclide.)
          */
-        public StringType getAmountElement() { 
-          if (this.amount == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeComponent.amount");
-            else if (Configuration.doAutoCreate())
-              this.amount = new StringType(); // bb
-          return this.amount;
-        }
-
-        public boolean hasAmountElement() { 
-          return this.amount != null && !this.amount.isEmpty();
-        }
-
-        public boolean hasAmount() { 
-          return this.amount != null && !this.amount.isEmpty();
-        }
-
-        /**
-         * @param value {@link #amount} (Quantitative values for this isotope.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
-         */
-        public SubstanceSpecificationStructureIsotopeComponent setAmountElement(StringType value) { 
-          this.amount = value;
-          return this;
-        }
-
-        /**
-         * @return Quantitative values for this isotope.
-         */
-        public String getAmount() { 
-          return this.amount == null ? null : this.amount.getValue();
-        }
-
-        /**
-         * @param value Quantitative values for this isotope.
-         */
-        public SubstanceSpecificationStructureIsotopeComponent setAmount(String value) { 
-          if (Utilities.noString(value))
-            this.amount = null;
-          else {
-            if (this.amount == null)
-              this.amount = new StringType();
-            this.amount.setValue(value);
-          }
+        public SubstanceSpecificationStructureIsotopeComponent setHalfLife(Quantity value) { 
+          this.halfLife = value;
           return this;
         }
 
@@ -1884,22 +1813,20 @@ public class SubstanceSpecification extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("nuclideId", "Identifier", "Substance identifier for each non-natural or radioisotope.", 0, 1, nuclideId));
-          children.add(new Property("nuclideName", "CodeableConcept", "Substance name for each non-natural or radioisotope.", 0, 1, nuclideName));
-          children.add(new Property("substitutionType", "CodeableConcept", "The type of isotopic substitution present in a single substance.", 0, 1, substitutionType));
-          children.add(new Property("nuclideHalfLife", "Quantity", "Half life - for a non-natural nuclide.", 0, 1, nuclideHalfLife));
-          children.add(new Property("amount", "string", "Quantitative values for this isotope.", 0, 1, amount));
+          children.add(new Property("identifier", "Identifier", "Substance identifier for each non-natural or radioisotope.", 0, 1, identifier));
+          children.add(new Property("name", "CodeableConcept", "Substance name for each non-natural or radioisotope.", 0, 1, name));
+          children.add(new Property("substitution", "CodeableConcept", "The type of isotopic substitution present in a single substance.", 0, 1, substitution));
+          children.add(new Property("halfLife", "Quantity", "Half life - for a non-natural nuclide.", 0, 1, halfLife));
           children.add(new Property("molecularWeight", "", "The molecular weight or weight range (for proteins, polymers or nucleic acids).", 0, 1, molecularWeight));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 1654398709: /*nuclideId*/  return new Property("nuclideId", "Identifier", "Substance identifier for each non-natural or radioisotope.", 0, 1, nuclideId);
-          case 739409381: /*nuclideName*/  return new Property("nuclideName", "CodeableConcept", "Substance name for each non-natural or radioisotope.", 0, 1, nuclideName);
-          case -1937621033: /*substitutionType*/  return new Property("substitutionType", "CodeableConcept", "The type of isotopic substitution present in a single substance.", 0, 1, substitutionType);
-          case 1348294697: /*nuclideHalfLife*/  return new Property("nuclideHalfLife", "Quantity", "Half life - for a non-natural nuclide.", 0, 1, nuclideHalfLife);
-          case -1413853096: /*amount*/  return new Property("amount", "string", "Quantitative values for this isotope.", 0, 1, amount);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Substance identifier for each non-natural or radioisotope.", 0, 1, identifier);
+          case 3373707: /*name*/  return new Property("name", "CodeableConcept", "Substance name for each non-natural or radioisotope.", 0, 1, name);
+          case 826147581: /*substitution*/  return new Property("substitution", "CodeableConcept", "The type of isotopic substitution present in a single substance.", 0, 1, substitution);
+          case -54292017: /*halfLife*/  return new Property("halfLife", "Quantity", "Half life - for a non-natural nuclide.", 0, 1, halfLife);
           case 635625672: /*molecularWeight*/  return new Property("molecularWeight", "", "The molecular weight or weight range (for proteins, polymers or nucleic acids).", 0, 1, molecularWeight);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1909,11 +1836,10 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 1654398709: /*nuclideId*/ return this.nuclideId == null ? new Base[0] : new Base[] {this.nuclideId}; // Identifier
-        case 739409381: /*nuclideName*/ return this.nuclideName == null ? new Base[0] : new Base[] {this.nuclideName}; // CodeableConcept
-        case -1937621033: /*substitutionType*/ return this.substitutionType == null ? new Base[0] : new Base[] {this.substitutionType}; // CodeableConcept
-        case 1348294697: /*nuclideHalfLife*/ return this.nuclideHalfLife == null ? new Base[0] : new Base[] {this.nuclideHalfLife}; // Quantity
-        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // StringType
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // CodeableConcept
+        case 826147581: /*substitution*/ return this.substitution == null ? new Base[0] : new Base[] {this.substitution}; // CodeableConcept
+        case -54292017: /*halfLife*/ return this.halfLife == null ? new Base[0] : new Base[] {this.halfLife}; // Quantity
         case 635625672: /*molecularWeight*/ return this.molecularWeight == null ? new Base[0] : new Base[] {this.molecularWeight}; // SubstanceSpecificationStructureIsotopeMolecularWeightComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1923,20 +1849,17 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 1654398709: // nuclideId
-          this.nuclideId = castToIdentifier(value); // Identifier
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
           return value;
-        case 739409381: // nuclideName
-          this.nuclideName = castToCodeableConcept(value); // CodeableConcept
+        case 3373707: // name
+          this.name = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case -1937621033: // substitutionType
-          this.substitutionType = castToCodeableConcept(value); // CodeableConcept
+        case 826147581: // substitution
+          this.substitution = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case 1348294697: // nuclideHalfLife
-          this.nuclideHalfLife = castToQuantity(value); // Quantity
-          return value;
-        case -1413853096: // amount
-          this.amount = castToString(value); // StringType
+        case -54292017: // halfLife
+          this.halfLife = castToQuantity(value); // Quantity
           return value;
         case 635625672: // molecularWeight
           this.molecularWeight = (SubstanceSpecificationStructureIsotopeMolecularWeightComponent) value; // SubstanceSpecificationStructureIsotopeMolecularWeightComponent
@@ -1948,16 +1871,14 @@ public class SubstanceSpecification extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("nuclideId")) {
-          this.nuclideId = castToIdentifier(value); // Identifier
-        } else if (name.equals("nuclideName")) {
-          this.nuclideName = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("substitutionType")) {
-          this.substitutionType = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("nuclideHalfLife")) {
-          this.nuclideHalfLife = castToQuantity(value); // Quantity
-        } else if (name.equals("amount")) {
-          this.amount = castToString(value); // StringType
+        if (name.equals("identifier")) {
+          this.identifier = castToIdentifier(value); // Identifier
+        } else if (name.equals("name")) {
+          this.name = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("substitution")) {
+          this.substitution = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("halfLife")) {
+          this.halfLife = castToQuantity(value); // Quantity
         } else if (name.equals("molecularWeight")) {
           this.molecularWeight = (SubstanceSpecificationStructureIsotopeMolecularWeightComponent) value; // SubstanceSpecificationStructureIsotopeMolecularWeightComponent
         } else
@@ -1968,11 +1889,10 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1654398709:  return getNuclideId(); 
-        case 739409381:  return getNuclideName(); 
-        case -1937621033:  return getSubstitutionType(); 
-        case 1348294697:  return getNuclideHalfLife(); 
-        case -1413853096:  return getAmountElement();
+        case -1618432855:  return getIdentifier(); 
+        case 3373707:  return getName(); 
+        case 826147581:  return getSubstitution(); 
+        case -54292017:  return getHalfLife(); 
         case 635625672:  return getMolecularWeight(); 
         default: return super.makeProperty(hash, name);
         }
@@ -1982,11 +1902,10 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1654398709: /*nuclideId*/ return new String[] {"Identifier"};
-        case 739409381: /*nuclideName*/ return new String[] {"CodeableConcept"};
-        case -1937621033: /*substitutionType*/ return new String[] {"CodeableConcept"};
-        case 1348294697: /*nuclideHalfLife*/ return new String[] {"Quantity"};
-        case -1413853096: /*amount*/ return new String[] {"string"};
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case 3373707: /*name*/ return new String[] {"CodeableConcept"};
+        case 826147581: /*substitution*/ return new String[] {"CodeableConcept"};
+        case -54292017: /*halfLife*/ return new String[] {"Quantity"};
         case 635625672: /*molecularWeight*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1995,24 +1914,21 @@ public class SubstanceSpecification extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("nuclideId")) {
-          this.nuclideId = new Identifier();
-          return this.nuclideId;
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
         }
-        else if (name.equals("nuclideName")) {
-          this.nuclideName = new CodeableConcept();
-          return this.nuclideName;
+        else if (name.equals("name")) {
+          this.name = new CodeableConcept();
+          return this.name;
         }
-        else if (name.equals("substitutionType")) {
-          this.substitutionType = new CodeableConcept();
-          return this.substitutionType;
+        else if (name.equals("substitution")) {
+          this.substitution = new CodeableConcept();
+          return this.substitution;
         }
-        else if (name.equals("nuclideHalfLife")) {
-          this.nuclideHalfLife = new Quantity();
-          return this.nuclideHalfLife;
-        }
-        else if (name.equals("amount")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.amount");
+        else if (name.equals("halfLife")) {
+          this.halfLife = new Quantity();
+          return this.halfLife;
         }
         else if (name.equals("molecularWeight")) {
           this.molecularWeight = new SubstanceSpecificationStructureIsotopeMolecularWeightComponent();
@@ -2025,11 +1941,10 @@ public class SubstanceSpecification extends DomainResource {
       public SubstanceSpecificationStructureIsotopeComponent copy() {
         SubstanceSpecificationStructureIsotopeComponent dst = new SubstanceSpecificationStructureIsotopeComponent();
         copyValues(dst);
-        dst.nuclideId = nuclideId == null ? null : nuclideId.copy();
-        dst.nuclideName = nuclideName == null ? null : nuclideName.copy();
-        dst.substitutionType = substitutionType == null ? null : substitutionType.copy();
-        dst.nuclideHalfLife = nuclideHalfLife == null ? null : nuclideHalfLife.copy();
-        dst.amount = amount == null ? null : amount.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
+        dst.name = name == null ? null : name.copy();
+        dst.substitution = substitution == null ? null : substitution.copy();
+        dst.halfLife = halfLife == null ? null : halfLife.copy();
         dst.molecularWeight = molecularWeight == null ? null : molecularWeight.copy();
         return dst;
       }
@@ -2041,9 +1956,8 @@ public class SubstanceSpecification extends DomainResource {
         if (!(other_ instanceof SubstanceSpecificationStructureIsotopeComponent))
           return false;
         SubstanceSpecificationStructureIsotopeComponent o = (SubstanceSpecificationStructureIsotopeComponent) other_;
-        return compareDeep(nuclideId, o.nuclideId, true) && compareDeep(nuclideName, o.nuclideName, true)
-           && compareDeep(substitutionType, o.substitutionType, true) && compareDeep(nuclideHalfLife, o.nuclideHalfLife, true)
-           && compareDeep(amount, o.amount, true) && compareDeep(molecularWeight, o.molecularWeight, true)
+        return compareDeep(identifier, o.identifier, true) && compareDeep(name, o.name, true) && compareDeep(substitution, o.substitution, true)
+           && compareDeep(halfLife, o.halfLife, true) && compareDeep(molecularWeight, o.molecularWeight, true)
           ;
       }
 
@@ -2054,12 +1968,12 @@ public class SubstanceSpecification extends DomainResource {
         if (!(other_ instanceof SubstanceSpecificationStructureIsotopeComponent))
           return false;
         SubstanceSpecificationStructureIsotopeComponent o = (SubstanceSpecificationStructureIsotopeComponent) other_;
-        return compareValues(amount, o.amount, true);
+        return true;
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(nuclideId, nuclideName, substitutionType
-          , nuclideHalfLife, amount, molecularWeight);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, name, substitution
+          , halfLife, molecularWeight);
       }
 
   public String fhirType() {
@@ -2088,11 +2002,11 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.
          */
-        @Child(name = "amount", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "amount", type = {Quantity.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field", formalDefinition="Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field." )
-        protected StringType amount;
+        protected Quantity amount;
 
-        private static final long serialVersionUID = -1221185948L;
+        private static final long serialVersionUID = 805939780L;
 
     /**
      * Constructor
@@ -2150,19 +2064,15 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @return {@link #amount} (Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
+         * @return {@link #amount} (Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.)
          */
-        public StringType getAmountElement() { 
+        public Quantity getAmount() { 
           if (this.amount == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SubstanceSpecificationStructureIsotopeMolecularWeightComponent.amount");
             else if (Configuration.doAutoCreate())
-              this.amount = new StringType(); // bb
+              this.amount = new Quantity(); // cc
           return this.amount;
-        }
-
-        public boolean hasAmountElement() { 
-          return this.amount != null && !this.amount.isEmpty();
         }
 
         public boolean hasAmount() { 
@@ -2170,31 +2080,10 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.). This is the underlying object with id, value and extensions. The accessor "getAmount" gives direct access to the value
+         * @param value {@link #amount} (Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.)
          */
-        public SubstanceSpecificationStructureIsotopeMolecularWeightComponent setAmountElement(StringType value) { 
+        public SubstanceSpecificationStructureIsotopeMolecularWeightComponent setAmount(Quantity value) { 
           this.amount = value;
-          return this;
-        }
-
-        /**
-         * @return Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.
-         */
-        public String getAmount() { 
-          return this.amount == null ? null : this.amount.getValue();
-        }
-
-        /**
-         * @param value Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.
-         */
-        public SubstanceSpecificationStructureIsotopeMolecularWeightComponent setAmount(String value) { 
-          if (Utilities.noString(value))
-            this.amount = null;
-          else {
-            if (this.amount == null)
-              this.amount = new StringType();
-            this.amount.setValue(value);
-          }
           return this;
         }
 
@@ -2202,7 +2091,7 @@ public class SubstanceSpecification extends DomainResource {
           super.listChildren(children);
           children.add(new Property("method", "CodeableConcept", "The method by which the molecular weight was determined.", 0, 1, method));
           children.add(new Property("type", "CodeableConcept", "Type of molecular weight such as exact, average (also known as. number average), weight average.", 0, 1, type));
-          children.add(new Property("amount", "string", "Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.", 0, 1, amount));
+          children.add(new Property("amount", "Quantity", "Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.", 0, 1, amount));
         }
 
         @Override
@@ -2210,7 +2099,7 @@ public class SubstanceSpecification extends DomainResource {
           switch (_hash) {
           case -1077554975: /*method*/  return new Property("method", "CodeableConcept", "The method by which the molecular weight was determined.", 0, 1, method);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of molecular weight such as exact, average (also known as. number average), weight average.", 0, 1, type);
-          case -1413853096: /*amount*/  return new Property("amount", "string", "Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.", 0, 1, amount);
+          case -1413853096: /*amount*/  return new Property("amount", "Quantity", "Used to capture quantitative values for a variety of elements. If only limits are given, the arithmetic mean would be the average. If only a single definite value for a given element is given, it would be captured in this field.", 0, 1, amount);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2221,7 +2110,7 @@ public class SubstanceSpecification extends DomainResource {
         switch (hash) {
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // StringType
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Quantity
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2237,7 +2126,7 @@ public class SubstanceSpecification extends DomainResource {
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1413853096: // amount
-          this.amount = castToString(value); // StringType
+          this.amount = castToQuantity(value); // Quantity
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2251,7 +2140,7 @@ public class SubstanceSpecification extends DomainResource {
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("amount")) {
-          this.amount = castToString(value); // StringType
+          this.amount = castToQuantity(value); // Quantity
         } else
           return super.setProperty(name, value);
         return value;
@@ -2262,7 +2151,7 @@ public class SubstanceSpecification extends DomainResource {
         switch (hash) {
         case -1077554975:  return getMethod(); 
         case 3575610:  return getType(); 
-        case -1413853096:  return getAmountElement();
+        case -1413853096:  return getAmount(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -2273,7 +2162,7 @@ public class SubstanceSpecification extends DomainResource {
         switch (hash) {
         case -1077554975: /*method*/ return new String[] {"CodeableConcept"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case -1413853096: /*amount*/ return new String[] {"string"};
+        case -1413853096: /*amount*/ return new String[] {"Quantity"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2290,7 +2179,8 @@ public class SubstanceSpecification extends DomainResource {
           return this.type;
         }
         else if (name.equals("amount")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.amount");
+          this.amount = new Quantity();
+          return this.amount;
         }
         else
           return super.addChild(name);
@@ -2323,7 +2213,7 @@ public class SubstanceSpecification extends DomainResource {
         if (!(other_ instanceof SubstanceSpecificationStructureIsotopeMolecularWeightComponent))
           return false;
         SubstanceSpecificationStructureIsotopeMolecularWeightComponent o = (SubstanceSpecificationStructureIsotopeMolecularWeightComponent) other_;
-        return compareValues(amount, o.amount, true);
+        return true;
       }
 
       public boolean isEmpty() {
@@ -2338,7 +2228,7 @@ public class SubstanceSpecification extends DomainResource {
   }
 
     @Block()
-    public static class SubstanceSpecificationStructureStructuralRepresentationComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SubstanceSpecificationStructureRepresentationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The type of structure (e.g. Full, Partial, Representative).
          */
@@ -2365,7 +2255,7 @@ public class SubstanceSpecification extends DomainResource {
     /**
      * Constructor
      */
-      public SubstanceSpecificationStructureStructuralRepresentationComponent() {
+      public SubstanceSpecificationStructureRepresentationComponent() {
         super();
       }
 
@@ -2375,7 +2265,7 @@ public class SubstanceSpecification extends DomainResource {
         public CodeableConcept getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationStructureStructuralRepresentationComponent.type");
+              throw new Error("Attempt to auto-create SubstanceSpecificationStructureRepresentationComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new CodeableConcept(); // cc
           return this.type;
@@ -2388,7 +2278,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #type} (The type of structure (e.g. Full, Partial, Representative).)
          */
-        public SubstanceSpecificationStructureStructuralRepresentationComponent setType(CodeableConcept value) { 
+        public SubstanceSpecificationStructureRepresentationComponent setType(CodeableConcept value) { 
           this.type = value;
           return this;
         }
@@ -2399,7 +2289,7 @@ public class SubstanceSpecification extends DomainResource {
         public StringType getRepresentationElement() { 
           if (this.representation == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationStructureStructuralRepresentationComponent.representation");
+              throw new Error("Attempt to auto-create SubstanceSpecificationStructureRepresentationComponent.representation");
             else if (Configuration.doAutoCreate())
               this.representation = new StringType(); // bb
           return this.representation;
@@ -2416,7 +2306,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #representation} (The structural representation as text string in a format e.g. InChI, SMILES, MOLFILE, CDX.). This is the underlying object with id, value and extensions. The accessor "getRepresentation" gives direct access to the value
          */
-        public SubstanceSpecificationStructureStructuralRepresentationComponent setRepresentationElement(StringType value) { 
+        public SubstanceSpecificationStructureRepresentationComponent setRepresentationElement(StringType value) { 
           this.representation = value;
           return this;
         }
@@ -2431,7 +2321,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value The structural representation as text string in a format e.g. InChI, SMILES, MOLFILE, CDX.
          */
-        public SubstanceSpecificationStructureStructuralRepresentationComponent setRepresentation(String value) { 
+        public SubstanceSpecificationStructureRepresentationComponent setRepresentation(String value) { 
           if (Utilities.noString(value))
             this.representation = null;
           else {
@@ -2448,7 +2338,7 @@ public class SubstanceSpecification extends DomainResource {
         public Attachment getAttachment() { 
           if (this.attachment == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationStructureStructuralRepresentationComponent.attachment");
+              throw new Error("Attempt to auto-create SubstanceSpecificationStructureRepresentationComponent.attachment");
             else if (Configuration.doAutoCreate())
               this.attachment = new Attachment(); // cc
           return this.attachment;
@@ -2461,7 +2351,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #attachment} (An attached file with the structural representation.)
          */
-        public SubstanceSpecificationStructureStructuralRepresentationComponent setAttachment(Attachment value) { 
+        public SubstanceSpecificationStructureRepresentationComponent setAttachment(Attachment value) { 
           this.attachment = value;
           return this;
         }
@@ -2564,8 +2454,8 @@ public class SubstanceSpecification extends DomainResource {
           return super.addChild(name);
       }
 
-      public SubstanceSpecificationStructureStructuralRepresentationComponent copy() {
-        SubstanceSpecificationStructureStructuralRepresentationComponent dst = new SubstanceSpecificationStructureStructuralRepresentationComponent();
+      public SubstanceSpecificationStructureRepresentationComponent copy() {
+        SubstanceSpecificationStructureRepresentationComponent dst = new SubstanceSpecificationStructureRepresentationComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
         dst.representation = representation == null ? null : representation.copy();
@@ -2577,9 +2467,9 @@ public class SubstanceSpecification extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof SubstanceSpecificationStructureStructuralRepresentationComponent))
+        if (!(other_ instanceof SubstanceSpecificationStructureRepresentationComponent))
           return false;
-        SubstanceSpecificationStructureStructuralRepresentationComponent o = (SubstanceSpecificationStructureStructuralRepresentationComponent) other_;
+        SubstanceSpecificationStructureRepresentationComponent o = (SubstanceSpecificationStructureRepresentationComponent) other_;
         return compareDeep(type, o.type, true) && compareDeep(representation, o.representation, true) && compareDeep(attachment, o.attachment, true)
           ;
       }
@@ -2588,9 +2478,9 @@ public class SubstanceSpecification extends DomainResource {
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof SubstanceSpecificationStructureStructuralRepresentationComponent))
+        if (!(other_ instanceof SubstanceSpecificationStructureRepresentationComponent))
           return false;
-        SubstanceSpecificationStructureStructuralRepresentationComponent o = (SubstanceSpecificationStructureStructuralRepresentationComponent) other_;
+        SubstanceSpecificationStructureRepresentationComponent o = (SubstanceSpecificationStructureRepresentationComponent) other_;
         return compareValues(representation, o.representation, true);
       }
 
@@ -2600,14 +2490,14 @@ public class SubstanceSpecification extends DomainResource {
       }
 
   public String fhirType() {
-    return "SubstanceSpecification.structure.structuralRepresentation";
+    return "SubstanceSpecification.structure.representation";
 
   }
 
   }
 
     @Block()
-    public static class SubstanceSpecificationSubstanceCodeComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SubstanceSpecificationCodeComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The specific code.
          */
@@ -2639,16 +2529,21 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * Supporting literature.
          */
-        @Child(name = "referenceSource", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "source", type = {DocumentReference.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Supporting literature", formalDefinition="Supporting literature." )
-        protected List<StringType> referenceSource;
+        protected List<Reference> source;
+        /**
+         * The actual objects that are the target of the reference (Supporting literature.)
+         */
+        protected List<DocumentReference> sourceTarget;
 
-        private static final long serialVersionUID = 1936663817L;
+
+        private static final long serialVersionUID = -1629693460L;
 
     /**
      * Constructor
      */
-      public SubstanceSpecificationSubstanceCodeComponent() {
+      public SubstanceSpecificationCodeComponent() {
         super();
       }
 
@@ -2658,7 +2553,7 @@ public class SubstanceSpecification extends DomainResource {
         public CodeableConcept getCode() { 
           if (this.code == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationSubstanceCodeComponent.code");
+              throw new Error("Attempt to auto-create SubstanceSpecificationCodeComponent.code");
             else if (Configuration.doAutoCreate())
               this.code = new CodeableConcept(); // cc
           return this.code;
@@ -2671,7 +2566,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #code} (The specific code.)
          */
-        public SubstanceSpecificationSubstanceCodeComponent setCode(CodeableConcept value) { 
+        public SubstanceSpecificationCodeComponent setCode(CodeableConcept value) { 
           this.code = value;
           return this;
         }
@@ -2682,7 +2577,7 @@ public class SubstanceSpecification extends DomainResource {
         public CodeableConcept getStatus() { 
           if (this.status == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationSubstanceCodeComponent.status");
+              throw new Error("Attempt to auto-create SubstanceSpecificationCodeComponent.status");
             else if (Configuration.doAutoCreate())
               this.status = new CodeableConcept(); // cc
           return this.status;
@@ -2695,7 +2590,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #status} (Status of the code assignment.)
          */
-        public SubstanceSpecificationSubstanceCodeComponent setStatus(CodeableConcept value) { 
+        public SubstanceSpecificationCodeComponent setStatus(CodeableConcept value) { 
           this.status = value;
           return this;
         }
@@ -2706,7 +2601,7 @@ public class SubstanceSpecification extends DomainResource {
         public DateTimeType getStatusDateElement() { 
           if (this.statusDate == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationSubstanceCodeComponent.statusDate");
+              throw new Error("Attempt to auto-create SubstanceSpecificationCodeComponent.statusDate");
             else if (Configuration.doAutoCreate())
               this.statusDate = new DateTimeType(); // bb
           return this.statusDate;
@@ -2723,7 +2618,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #statusDate} (The date at which the code status is changed as part of the terminology maintenance.). This is the underlying object with id, value and extensions. The accessor "getStatusDate" gives direct access to the value
          */
-        public SubstanceSpecificationSubstanceCodeComponent setStatusDateElement(DateTimeType value) { 
+        public SubstanceSpecificationCodeComponent setStatusDateElement(DateTimeType value) { 
           this.statusDate = value;
           return this;
         }
@@ -2738,7 +2633,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value The date at which the code status is changed as part of the terminology maintenance.
          */
-        public SubstanceSpecificationSubstanceCodeComponent setStatusDate(Date value) { 
+        public SubstanceSpecificationCodeComponent setStatusDate(Date value) { 
           if (value == null)
             this.statusDate = null;
           else {
@@ -2755,7 +2650,7 @@ public class SubstanceSpecification extends DomainResource {
         public StringType getCommentElement() { 
           if (this.comment == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationSubstanceCodeComponent.comment");
+              throw new Error("Attempt to auto-create SubstanceSpecificationCodeComponent.comment");
             else if (Configuration.doAutoCreate())
               this.comment = new StringType(); // bb
           return this.comment;
@@ -2772,7 +2667,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #comment} (Any comment can be provided in this field, if necessary.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
          */
-        public SubstanceSpecificationSubstanceCodeComponent setCommentElement(StringType value) { 
+        public SubstanceSpecificationCodeComponent setCommentElement(StringType value) { 
           this.comment = value;
           return this;
         }
@@ -2787,7 +2682,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value Any comment can be provided in this field, if necessary.
          */
-        public SubstanceSpecificationSubstanceCodeComponent setComment(String value) { 
+        public SubstanceSpecificationCodeComponent setComment(String value) { 
           if (Utilities.noString(value))
             this.comment = null;
           else {
@@ -2799,64 +2694,78 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @return {@link #referenceSource} (Supporting literature.)
+         * @return {@link #source} (Supporting literature.)
          */
-        public List<StringType> getReferenceSource() { 
-          if (this.referenceSource == null)
-            this.referenceSource = new ArrayList<StringType>();
-          return this.referenceSource;
+        public List<Reference> getSource() { 
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          return this.source;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SubstanceSpecificationSubstanceCodeComponent setReferenceSource(List<StringType> theReferenceSource) { 
-          this.referenceSource = theReferenceSource;
+        public SubstanceSpecificationCodeComponent setSource(List<Reference> theSource) { 
+          this.source = theSource;
           return this;
         }
 
-        public boolean hasReferenceSource() { 
-          if (this.referenceSource == null)
+        public boolean hasSource() { 
+          if (this.source == null)
             return false;
-          for (StringType item : this.referenceSource)
+          for (Reference item : this.source)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        /**
-         * @return {@link #referenceSource} (Supporting literature.)
-         */
-        public StringType addReferenceSourceElement() {//2 
-          StringType t = new StringType();
-          if (this.referenceSource == null)
-            this.referenceSource = new ArrayList<StringType>();
-          this.referenceSource.add(t);
+        public Reference addSource() { //3
+          Reference t = new Reference();
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          this.source.add(t);
           return t;
         }
 
-        /**
-         * @param value {@link #referenceSource} (Supporting literature.)
-         */
-        public SubstanceSpecificationSubstanceCodeComponent addReferenceSource(String value) { //1
-          StringType t = new StringType();
-          t.setValue(value);
-          if (this.referenceSource == null)
-            this.referenceSource = new ArrayList<StringType>();
-          this.referenceSource.add(t);
+        public SubstanceSpecificationCodeComponent addSource(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          this.source.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #referenceSource} (Supporting literature.)
+         * @return The first repetition of repeating field {@link #source}, creating it if it does not already exist
          */
-        public boolean hasReferenceSource(String value) { 
-          if (this.referenceSource == null)
-            return false;
-          for (StringType v : this.referenceSource)
-            if (v.getValue().equals(value)) // string
-              return true;
-          return false;
+        public Reference getSourceFirstRep() { 
+          if (getSource().isEmpty()) {
+            addSource();
+          }
+          return getSource().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<DocumentReference> getSourceTarget() { 
+          if (this.sourceTarget == null)
+            this.sourceTarget = new ArrayList<DocumentReference>();
+          return this.sourceTarget;
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public DocumentReference addSourceTarget() { 
+          DocumentReference r = new DocumentReference();
+          if (this.sourceTarget == null)
+            this.sourceTarget = new ArrayList<DocumentReference>();
+          this.sourceTarget.add(r);
+          return r;
         }
 
         protected void listChildren(List<Property> children) {
@@ -2865,7 +2774,7 @@ public class SubstanceSpecification extends DomainResource {
           children.add(new Property("status", "CodeableConcept", "Status of the code assignment.", 0, 1, status));
           children.add(new Property("statusDate", "dateTime", "The date at which the code status is changed as part of the terminology maintenance.", 0, 1, statusDate));
           children.add(new Property("comment", "string", "Any comment can be provided in this field, if necessary.", 0, 1, comment));
-          children.add(new Property("referenceSource", "string", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource));
+          children.add(new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source));
         }
 
         @Override
@@ -2875,7 +2784,7 @@ public class SubstanceSpecification extends DomainResource {
           case -892481550: /*status*/  return new Property("status", "CodeableConcept", "Status of the code assignment.", 0, 1, status);
           case 247524032: /*statusDate*/  return new Property("statusDate", "dateTime", "The date at which the code status is changed as part of the terminology maintenance.", 0, 1, statusDate);
           case 950398559: /*comment*/  return new Property("comment", "string", "Any comment can be provided in this field, if necessary.", 0, 1, comment);
-          case 882421574: /*referenceSource*/  return new Property("referenceSource", "string", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource);
+          case -896505829: /*source*/  return new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2888,7 +2797,7 @@ public class SubstanceSpecification extends DomainResource {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // CodeableConcept
         case 247524032: /*statusDate*/ return this.statusDate == null ? new Base[0] : new Base[] {this.statusDate}; // DateTimeType
         case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
-        case 882421574: /*referenceSource*/ return this.referenceSource == null ? new Base[0] : this.referenceSource.toArray(new Base[this.referenceSource.size()]); // StringType
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : this.source.toArray(new Base[this.source.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2909,8 +2818,8 @@ public class SubstanceSpecification extends DomainResource {
         case 950398559: // comment
           this.comment = castToString(value); // StringType
           return value;
-        case 882421574: // referenceSource
-          this.getReferenceSource().add(castToString(value)); // StringType
+        case -896505829: // source
+          this.getSource().add(castToReference(value)); // Reference
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2927,8 +2836,8 @@ public class SubstanceSpecification extends DomainResource {
           this.statusDate = castToDateTime(value); // DateTimeType
         } else if (name.equals("comment")) {
           this.comment = castToString(value); // StringType
-        } else if (name.equals("referenceSource")) {
-          this.getReferenceSource().add(castToString(value));
+        } else if (name.equals("source")) {
+          this.getSource().add(castToReference(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -2941,7 +2850,7 @@ public class SubstanceSpecification extends DomainResource {
         case -892481550:  return getStatus(); 
         case 247524032:  return getStatusDateElement();
         case 950398559:  return getCommentElement();
-        case 882421574:  return addReferenceSourceElement();
+        case -896505829:  return addSource(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -2954,7 +2863,7 @@ public class SubstanceSpecification extends DomainResource {
         case -892481550: /*status*/ return new String[] {"CodeableConcept"};
         case 247524032: /*statusDate*/ return new String[] {"dateTime"};
         case 950398559: /*comment*/ return new String[] {"string"};
-        case 882421574: /*referenceSource*/ return new String[] {"string"};
+        case -896505829: /*source*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2976,24 +2885,24 @@ public class SubstanceSpecification extends DomainResource {
         else if (name.equals("comment")) {
           throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.comment");
         }
-        else if (name.equals("referenceSource")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.referenceSource");
+        else if (name.equals("source")) {
+          return addSource();
         }
         else
           return super.addChild(name);
       }
 
-      public SubstanceSpecificationSubstanceCodeComponent copy() {
-        SubstanceSpecificationSubstanceCodeComponent dst = new SubstanceSpecificationSubstanceCodeComponent();
+      public SubstanceSpecificationCodeComponent copy() {
+        SubstanceSpecificationCodeComponent dst = new SubstanceSpecificationCodeComponent();
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
         dst.status = status == null ? null : status.copy();
         dst.statusDate = statusDate == null ? null : statusDate.copy();
         dst.comment = comment == null ? null : comment.copy();
-        if (referenceSource != null) {
-          dst.referenceSource = new ArrayList<StringType>();
-          for (StringType i : referenceSource)
-            dst.referenceSource.add(i.copy());
+        if (source != null) {
+          dst.source = new ArrayList<Reference>();
+          for (Reference i : source)
+            dst.source.add(i.copy());
         };
         return dst;
       }
@@ -3002,43 +2911,41 @@ public class SubstanceSpecification extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof SubstanceSpecificationSubstanceCodeComponent))
+        if (!(other_ instanceof SubstanceSpecificationCodeComponent))
           return false;
-        SubstanceSpecificationSubstanceCodeComponent o = (SubstanceSpecificationSubstanceCodeComponent) other_;
+        SubstanceSpecificationCodeComponent o = (SubstanceSpecificationCodeComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(status, o.status, true) && compareDeep(statusDate, o.statusDate, true)
-           && compareDeep(comment, o.comment, true) && compareDeep(referenceSource, o.referenceSource, true)
-          ;
+           && compareDeep(comment, o.comment, true) && compareDeep(source, o.source, true);
       }
 
       @Override
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof SubstanceSpecificationSubstanceCodeComponent))
+        if (!(other_ instanceof SubstanceSpecificationCodeComponent))
           return false;
-        SubstanceSpecificationSubstanceCodeComponent o = (SubstanceSpecificationSubstanceCodeComponent) other_;
-        return compareValues(statusDate, o.statusDate, true) && compareValues(comment, o.comment, true) && compareValues(referenceSource, o.referenceSource, true)
-          ;
+        SubstanceSpecificationCodeComponent o = (SubstanceSpecificationCodeComponent) other_;
+        return compareValues(statusDate, o.statusDate, true) && compareValues(comment, o.comment, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, status, statusDate
-          , comment, referenceSource);
+          , comment, source);
       }
 
   public String fhirType() {
-    return "SubstanceSpecification.substanceCode";
+    return "SubstanceSpecification.code";
 
   }
 
   }
 
     @Block()
-    public static class SubstanceSpecificationSubstanceNameComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SubstanceSpecificationNameComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * The actual name.
          */
-        @Child(name = "name", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The actual name", formalDefinition="The actual name." )
         protected StringType name;
 
@@ -3050,47 +2957,88 @@ public class SubstanceSpecification extends DomainResource {
         protected CodeableConcept type;
 
         /**
+         * The status of the name.
+         */
+        @Child(name = "status", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The status of the name", formalDefinition="The status of the name." )
+        protected CodeableConcept status;
+
+        /**
+         * If this is the preferred name for this substance.
+         */
+        @Child(name = "preferred", type = {BooleanType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="If this is the preferred name for this substance", formalDefinition="If this is the preferred name for this substance." )
+        protected BooleanType preferred;
+
+        /**
          * Language of the name.
          */
-        @Child(name = "language", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "language", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Language of the name", formalDefinition="Language of the name." )
         protected List<CodeableConcept> language;
 
         /**
          * The use context of this name for example if there is a different name a drug active ingredient as opposed to a food colour additive.
          */
-        @Child(name = "domain", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "domain", type = {CodeableConcept.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="The use context of this name for example if there is a different name a drug active ingredient as opposed to a food colour additive", formalDefinition="The use context of this name for example if there is a different name a drug active ingredient as opposed to a food colour additive." )
         protected List<CodeableConcept> domain;
 
         /**
          * The jurisdiction where this name applies.
          */
-        @Child(name = "jurisdiction", type = {CodeableConcept.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "jurisdiction", type = {CodeableConcept.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="The jurisdiction where this name applies", formalDefinition="The jurisdiction where this name applies." )
         protected List<CodeableConcept> jurisdiction;
 
         /**
+         * A synonym of this name.
+         */
+        @Child(name = "synonym", type = {SubstanceSpecificationNameComponent.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="A synonym of this name", formalDefinition="A synonym of this name." )
+        protected List<SubstanceSpecificationNameComponent> synonym;
+
+        /**
+         * A translation for this name.
+         */
+        @Child(name = "translation", type = {SubstanceSpecificationNameComponent.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="A translation for this name", formalDefinition="A translation for this name." )
+        protected List<SubstanceSpecificationNameComponent> translation;
+
+        /**
          * Details of the official nature of this name.
          */
-        @Child(name = "officialName", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "official", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Details of the official nature of this name", formalDefinition="Details of the official nature of this name." )
-        protected List<SubstanceSpecificationSubstanceNameOfficialNameComponent> officialName;
+        protected List<SubstanceSpecificationNameOfficialComponent> official;
 
         /**
          * Supporting literature.
          */
-        @Child(name = "referenceSource", type = {StringType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "source", type = {DocumentReference.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Supporting literature", formalDefinition="Supporting literature." )
-        protected List<StringType> referenceSource;
+        protected List<Reference> source;
+        /**
+         * The actual objects that are the target of the reference (Supporting literature.)
+         */
+        protected List<DocumentReference> sourceTarget;
 
-        private static final long serialVersionUID = -1690760755L;
+
+        private static final long serialVersionUID = 1547107852L;
 
     /**
      * Constructor
      */
-      public SubstanceSpecificationSubstanceNameComponent() {
+      public SubstanceSpecificationNameComponent() {
         super();
+      }
+
+    /**
+     * Constructor
+     */
+      public SubstanceSpecificationNameComponent(StringType name) {
+        super();
+        this.name = name;
       }
 
         /**
@@ -3099,7 +3047,7 @@ public class SubstanceSpecification extends DomainResource {
         public StringType getNameElement() { 
           if (this.name == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationSubstanceNameComponent.name");
+              throw new Error("Attempt to auto-create SubstanceSpecificationNameComponent.name");
             else if (Configuration.doAutoCreate())
               this.name = new StringType(); // bb
           return this.name;
@@ -3116,7 +3064,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #name} (The actual name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
          */
-        public SubstanceSpecificationSubstanceNameComponent setNameElement(StringType value) { 
+        public SubstanceSpecificationNameComponent setNameElement(StringType value) { 
           this.name = value;
           return this;
         }
@@ -3131,14 +3079,10 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value The actual name.
          */
-        public SubstanceSpecificationSubstanceNameComponent setName(String value) { 
-          if (Utilities.noString(value))
-            this.name = null;
-          else {
+        public SubstanceSpecificationNameComponent setName(String value) { 
             if (this.name == null)
               this.name = new StringType();
             this.name.setValue(value);
-          }
           return this;
         }
 
@@ -3148,7 +3092,7 @@ public class SubstanceSpecification extends DomainResource {
         public CodeableConcept getType() { 
           if (this.type == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationSubstanceNameComponent.type");
+              throw new Error("Attempt to auto-create SubstanceSpecificationNameComponent.type");
             else if (Configuration.doAutoCreate())
               this.type = new CodeableConcept(); // cc
           return this.type;
@@ -3161,8 +3105,77 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #type} (Name type.)
          */
-        public SubstanceSpecificationSubstanceNameComponent setType(CodeableConcept value) { 
+        public SubstanceSpecificationNameComponent setType(CodeableConcept value) { 
           this.type = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #status} (The status of the name.)
+         */
+        public CodeableConcept getStatus() { 
+          if (this.status == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SubstanceSpecificationNameComponent.status");
+            else if (Configuration.doAutoCreate())
+              this.status = new CodeableConcept(); // cc
+          return this.status;
+        }
+
+        public boolean hasStatus() { 
+          return this.status != null && !this.status.isEmpty();
+        }
+
+        /**
+         * @param value {@link #status} (The status of the name.)
+         */
+        public SubstanceSpecificationNameComponent setStatus(CodeableConcept value) { 
+          this.status = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #preferred} (If this is the preferred name for this substance.). This is the underlying object with id, value and extensions. The accessor "getPreferred" gives direct access to the value
+         */
+        public BooleanType getPreferredElement() { 
+          if (this.preferred == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SubstanceSpecificationNameComponent.preferred");
+            else if (Configuration.doAutoCreate())
+              this.preferred = new BooleanType(); // bb
+          return this.preferred;
+        }
+
+        public boolean hasPreferredElement() { 
+          return this.preferred != null && !this.preferred.isEmpty();
+        }
+
+        public boolean hasPreferred() { 
+          return this.preferred != null && !this.preferred.isEmpty();
+        }
+
+        /**
+         * @param value {@link #preferred} (If this is the preferred name for this substance.). This is the underlying object with id, value and extensions. The accessor "getPreferred" gives direct access to the value
+         */
+        public SubstanceSpecificationNameComponent setPreferredElement(BooleanType value) { 
+          this.preferred = value;
+          return this;
+        }
+
+        /**
+         * @return If this is the preferred name for this substance.
+         */
+        public boolean getPreferred() { 
+          return this.preferred == null || this.preferred.isEmpty() ? false : this.preferred.getValue();
+        }
+
+        /**
+         * @param value If this is the preferred name for this substance.
+         */
+        public SubstanceSpecificationNameComponent setPreferred(boolean value) { 
+            if (this.preferred == null)
+              this.preferred = new BooleanType();
+            this.preferred.setValue(value);
           return this;
         }
 
@@ -3178,7 +3191,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SubstanceSpecificationSubstanceNameComponent setLanguage(List<CodeableConcept> theLanguage) { 
+        public SubstanceSpecificationNameComponent setLanguage(List<CodeableConcept> theLanguage) { 
           this.language = theLanguage;
           return this;
         }
@@ -3200,7 +3213,7 @@ public class SubstanceSpecification extends DomainResource {
           return t;
         }
 
-        public SubstanceSpecificationSubstanceNameComponent addLanguage(CodeableConcept t) { //3
+        public SubstanceSpecificationNameComponent addLanguage(CodeableConcept t) { //3
           if (t == null)
             return this;
           if (this.language == null)
@@ -3231,7 +3244,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SubstanceSpecificationSubstanceNameComponent setDomain(List<CodeableConcept> theDomain) { 
+        public SubstanceSpecificationNameComponent setDomain(List<CodeableConcept> theDomain) { 
           this.domain = theDomain;
           return this;
         }
@@ -3253,7 +3266,7 @@ public class SubstanceSpecification extends DomainResource {
           return t;
         }
 
-        public SubstanceSpecificationSubstanceNameComponent addDomain(CodeableConcept t) { //3
+        public SubstanceSpecificationNameComponent addDomain(CodeableConcept t) { //3
           if (t == null)
             return this;
           if (this.domain == null)
@@ -3284,7 +3297,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SubstanceSpecificationSubstanceNameComponent setJurisdiction(List<CodeableConcept> theJurisdiction) { 
+        public SubstanceSpecificationNameComponent setJurisdiction(List<CodeableConcept> theJurisdiction) { 
           this.jurisdiction = theJurisdiction;
           return this;
         }
@@ -3306,7 +3319,7 @@ public class SubstanceSpecification extends DomainResource {
           return t;
         }
 
-        public SubstanceSpecificationSubstanceNameComponent addJurisdiction(CodeableConcept t) { //3
+        public SubstanceSpecificationNameComponent addJurisdiction(CodeableConcept t) { //3
           if (t == null)
             return this;
           if (this.jurisdiction == null)
@@ -3326,128 +3339,252 @@ public class SubstanceSpecification extends DomainResource {
         }
 
         /**
-         * @return {@link #officialName} (Details of the official nature of this name.)
+         * @return {@link #synonym} (A synonym of this name.)
          */
-        public List<SubstanceSpecificationSubstanceNameOfficialNameComponent> getOfficialName() { 
-          if (this.officialName == null)
-            this.officialName = new ArrayList<SubstanceSpecificationSubstanceNameOfficialNameComponent>();
-          return this.officialName;
+        public List<SubstanceSpecificationNameComponent> getSynonym() { 
+          if (this.synonym == null)
+            this.synonym = new ArrayList<SubstanceSpecificationNameComponent>();
+          return this.synonym;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SubstanceSpecificationSubstanceNameComponent setOfficialName(List<SubstanceSpecificationSubstanceNameOfficialNameComponent> theOfficialName) { 
-          this.officialName = theOfficialName;
+        public SubstanceSpecificationNameComponent setSynonym(List<SubstanceSpecificationNameComponent> theSynonym) { 
+          this.synonym = theSynonym;
           return this;
         }
 
-        public boolean hasOfficialName() { 
-          if (this.officialName == null)
+        public boolean hasSynonym() { 
+          if (this.synonym == null)
             return false;
-          for (SubstanceSpecificationSubstanceNameOfficialNameComponent item : this.officialName)
+          for (SubstanceSpecificationNameComponent item : this.synonym)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public SubstanceSpecificationSubstanceNameOfficialNameComponent addOfficialName() { //3
-          SubstanceSpecificationSubstanceNameOfficialNameComponent t = new SubstanceSpecificationSubstanceNameOfficialNameComponent();
-          if (this.officialName == null)
-            this.officialName = new ArrayList<SubstanceSpecificationSubstanceNameOfficialNameComponent>();
-          this.officialName.add(t);
+        public SubstanceSpecificationNameComponent addSynonym() { //3
+          SubstanceSpecificationNameComponent t = new SubstanceSpecificationNameComponent();
+          if (this.synonym == null)
+            this.synonym = new ArrayList<SubstanceSpecificationNameComponent>();
+          this.synonym.add(t);
           return t;
         }
 
-        public SubstanceSpecificationSubstanceNameComponent addOfficialName(SubstanceSpecificationSubstanceNameOfficialNameComponent t) { //3
+        public SubstanceSpecificationNameComponent addSynonym(SubstanceSpecificationNameComponent t) { //3
           if (t == null)
             return this;
-          if (this.officialName == null)
-            this.officialName = new ArrayList<SubstanceSpecificationSubstanceNameOfficialNameComponent>();
-          this.officialName.add(t);
+          if (this.synonym == null)
+            this.synonym = new ArrayList<SubstanceSpecificationNameComponent>();
+          this.synonym.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #officialName}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #synonym}, creating it if it does not already exist
          */
-        public SubstanceSpecificationSubstanceNameOfficialNameComponent getOfficialNameFirstRep() { 
-          if (getOfficialName().isEmpty()) {
-            addOfficialName();
+        public SubstanceSpecificationNameComponent getSynonymFirstRep() { 
+          if (getSynonym().isEmpty()) {
+            addSynonym();
           }
-          return getOfficialName().get(0);
+          return getSynonym().get(0);
         }
 
         /**
-         * @return {@link #referenceSource} (Supporting literature.)
+         * @return {@link #translation} (A translation for this name.)
          */
-        public List<StringType> getReferenceSource() { 
-          if (this.referenceSource == null)
-            this.referenceSource = new ArrayList<StringType>();
-          return this.referenceSource;
+        public List<SubstanceSpecificationNameComponent> getTranslation() { 
+          if (this.translation == null)
+            this.translation = new ArrayList<SubstanceSpecificationNameComponent>();
+          return this.translation;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public SubstanceSpecificationSubstanceNameComponent setReferenceSource(List<StringType> theReferenceSource) { 
-          this.referenceSource = theReferenceSource;
+        public SubstanceSpecificationNameComponent setTranslation(List<SubstanceSpecificationNameComponent> theTranslation) { 
+          this.translation = theTranslation;
           return this;
         }
 
-        public boolean hasReferenceSource() { 
-          if (this.referenceSource == null)
+        public boolean hasTranslation() { 
+          if (this.translation == null)
             return false;
-          for (StringType item : this.referenceSource)
+          for (SubstanceSpecificationNameComponent item : this.translation)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        /**
-         * @return {@link #referenceSource} (Supporting literature.)
-         */
-        public StringType addReferenceSourceElement() {//2 
-          StringType t = new StringType();
-          if (this.referenceSource == null)
-            this.referenceSource = new ArrayList<StringType>();
-          this.referenceSource.add(t);
+        public SubstanceSpecificationNameComponent addTranslation() { //3
+          SubstanceSpecificationNameComponent t = new SubstanceSpecificationNameComponent();
+          if (this.translation == null)
+            this.translation = new ArrayList<SubstanceSpecificationNameComponent>();
+          this.translation.add(t);
           return t;
         }
 
-        /**
-         * @param value {@link #referenceSource} (Supporting literature.)
-         */
-        public SubstanceSpecificationSubstanceNameComponent addReferenceSource(String value) { //1
-          StringType t = new StringType();
-          t.setValue(value);
-          if (this.referenceSource == null)
-            this.referenceSource = new ArrayList<StringType>();
-          this.referenceSource.add(t);
+        public SubstanceSpecificationNameComponent addTranslation(SubstanceSpecificationNameComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.translation == null)
+            this.translation = new ArrayList<SubstanceSpecificationNameComponent>();
+          this.translation.add(t);
           return this;
         }
 
         /**
-         * @param value {@link #referenceSource} (Supporting literature.)
+         * @return The first repetition of repeating field {@link #translation}, creating it if it does not already exist
          */
-        public boolean hasReferenceSource(String value) { 
-          if (this.referenceSource == null)
+        public SubstanceSpecificationNameComponent getTranslationFirstRep() { 
+          if (getTranslation().isEmpty()) {
+            addTranslation();
+          }
+          return getTranslation().get(0);
+        }
+
+        /**
+         * @return {@link #official} (Details of the official nature of this name.)
+         */
+        public List<SubstanceSpecificationNameOfficialComponent> getOfficial() { 
+          if (this.official == null)
+            this.official = new ArrayList<SubstanceSpecificationNameOfficialComponent>();
+          return this.official;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SubstanceSpecificationNameComponent setOfficial(List<SubstanceSpecificationNameOfficialComponent> theOfficial) { 
+          this.official = theOfficial;
+          return this;
+        }
+
+        public boolean hasOfficial() { 
+          if (this.official == null)
             return false;
-          for (StringType v : this.referenceSource)
-            if (v.getValue().equals(value)) // string
+          for (SubstanceSpecificationNameOfficialComponent item : this.official)
+            if (!item.isEmpty())
               return true;
           return false;
+        }
+
+        public SubstanceSpecificationNameOfficialComponent addOfficial() { //3
+          SubstanceSpecificationNameOfficialComponent t = new SubstanceSpecificationNameOfficialComponent();
+          if (this.official == null)
+            this.official = new ArrayList<SubstanceSpecificationNameOfficialComponent>();
+          this.official.add(t);
+          return t;
+        }
+
+        public SubstanceSpecificationNameComponent addOfficial(SubstanceSpecificationNameOfficialComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.official == null)
+            this.official = new ArrayList<SubstanceSpecificationNameOfficialComponent>();
+          this.official.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #official}, creating it if it does not already exist
+         */
+        public SubstanceSpecificationNameOfficialComponent getOfficialFirstRep() { 
+          if (getOfficial().isEmpty()) {
+            addOfficial();
+          }
+          return getOfficial().get(0);
+        }
+
+        /**
+         * @return {@link #source} (Supporting literature.)
+         */
+        public List<Reference> getSource() { 
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          return this.source;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SubstanceSpecificationNameComponent setSource(List<Reference> theSource) { 
+          this.source = theSource;
+          return this;
+        }
+
+        public boolean hasSource() { 
+          if (this.source == null)
+            return false;
+          for (Reference item : this.source)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Reference addSource() { //3
+          Reference t = new Reference();
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          this.source.add(t);
+          return t;
+        }
+
+        public SubstanceSpecificationNameComponent addSource(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          this.source.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #source}, creating it if it does not already exist
+         */
+        public Reference getSourceFirstRep() { 
+          if (getSource().isEmpty()) {
+            addSource();
+          }
+          return getSource().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<DocumentReference> getSourceTarget() { 
+          if (this.sourceTarget == null)
+            this.sourceTarget = new ArrayList<DocumentReference>();
+          return this.sourceTarget;
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public DocumentReference addSourceTarget() { 
+          DocumentReference r = new DocumentReference();
+          if (this.sourceTarget == null)
+            this.sourceTarget = new ArrayList<DocumentReference>();
+          this.sourceTarget.add(r);
+          return r;
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("name", "string", "The actual name.", 0, 1, name));
           children.add(new Property("type", "CodeableConcept", "Name type.", 0, 1, type));
+          children.add(new Property("status", "CodeableConcept", "The status of the name.", 0, 1, status));
+          children.add(new Property("preferred", "boolean", "If this is the preferred name for this substance.", 0, 1, preferred));
           children.add(new Property("language", "CodeableConcept", "Language of the name.", 0, java.lang.Integer.MAX_VALUE, language));
           children.add(new Property("domain", "CodeableConcept", "The use context of this name for example if there is a different name a drug active ingredient as opposed to a food colour additive.", 0, java.lang.Integer.MAX_VALUE, domain));
           children.add(new Property("jurisdiction", "CodeableConcept", "The jurisdiction where this name applies.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
-          children.add(new Property("officialName", "", "Details of the official nature of this name.", 0, java.lang.Integer.MAX_VALUE, officialName));
-          children.add(new Property("referenceSource", "string", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource));
+          children.add(new Property("synonym", "@SubstanceSpecification.name", "A synonym of this name.", 0, java.lang.Integer.MAX_VALUE, synonym));
+          children.add(new Property("translation", "@SubstanceSpecification.name", "A translation for this name.", 0, java.lang.Integer.MAX_VALUE, translation));
+          children.add(new Property("official", "", "Details of the official nature of this name.", 0, java.lang.Integer.MAX_VALUE, official));
+          children.add(new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source));
         }
 
         @Override
@@ -3455,11 +3592,15 @@ public class SubstanceSpecification extends DomainResource {
           switch (_hash) {
           case 3373707: /*name*/  return new Property("name", "string", "The actual name.", 0, 1, name);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Name type.", 0, 1, type);
+          case -892481550: /*status*/  return new Property("status", "CodeableConcept", "The status of the name.", 0, 1, status);
+          case -1294005119: /*preferred*/  return new Property("preferred", "boolean", "If this is the preferred name for this substance.", 0, 1, preferred);
           case -1613589672: /*language*/  return new Property("language", "CodeableConcept", "Language of the name.", 0, java.lang.Integer.MAX_VALUE, language);
           case -1326197564: /*domain*/  return new Property("domain", "CodeableConcept", "The use context of this name for example if there is a different name a drug active ingredient as opposed to a food colour additive.", 0, java.lang.Integer.MAX_VALUE, domain);
           case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "The jurisdiction where this name applies.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
-          case 1486494742: /*officialName*/  return new Property("officialName", "", "Details of the official nature of this name.", 0, java.lang.Integer.MAX_VALUE, officialName);
-          case 882421574: /*referenceSource*/  return new Property("referenceSource", "string", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource);
+          case -1742128133: /*synonym*/  return new Property("synonym", "@SubstanceSpecification.name", "A synonym of this name.", 0, java.lang.Integer.MAX_VALUE, synonym);
+          case -1840647503: /*translation*/  return new Property("translation", "@SubstanceSpecification.name", "A translation for this name.", 0, java.lang.Integer.MAX_VALUE, translation);
+          case -765289749: /*official*/  return new Property("official", "", "Details of the official nature of this name.", 0, java.lang.Integer.MAX_VALUE, official);
+          case -896505829: /*source*/  return new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -3470,11 +3611,15 @@ public class SubstanceSpecification extends DomainResource {
         switch (hash) {
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // CodeableConcept
+        case -1294005119: /*preferred*/ return this.preferred == null ? new Base[0] : new Base[] {this.preferred}; // BooleanType
         case -1613589672: /*language*/ return this.language == null ? new Base[0] : this.language.toArray(new Base[this.language.size()]); // CodeableConcept
         case -1326197564: /*domain*/ return this.domain == null ? new Base[0] : this.domain.toArray(new Base[this.domain.size()]); // CodeableConcept
         case -507075711: /*jurisdiction*/ return this.jurisdiction == null ? new Base[0] : this.jurisdiction.toArray(new Base[this.jurisdiction.size()]); // CodeableConcept
-        case 1486494742: /*officialName*/ return this.officialName == null ? new Base[0] : this.officialName.toArray(new Base[this.officialName.size()]); // SubstanceSpecificationSubstanceNameOfficialNameComponent
-        case 882421574: /*referenceSource*/ return this.referenceSource == null ? new Base[0] : this.referenceSource.toArray(new Base[this.referenceSource.size()]); // StringType
+        case -1742128133: /*synonym*/ return this.synonym == null ? new Base[0] : this.synonym.toArray(new Base[this.synonym.size()]); // SubstanceSpecificationNameComponent
+        case -1840647503: /*translation*/ return this.translation == null ? new Base[0] : this.translation.toArray(new Base[this.translation.size()]); // SubstanceSpecificationNameComponent
+        case -765289749: /*official*/ return this.official == null ? new Base[0] : this.official.toArray(new Base[this.official.size()]); // SubstanceSpecificationNameOfficialComponent
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : this.source.toArray(new Base[this.source.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -3489,6 +3634,12 @@ public class SubstanceSpecification extends DomainResource {
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
+        case -892481550: // status
+          this.status = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1294005119: // preferred
+          this.preferred = castToBoolean(value); // BooleanType
+          return value;
         case -1613589672: // language
           this.getLanguage().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
@@ -3498,11 +3649,17 @@ public class SubstanceSpecification extends DomainResource {
         case -507075711: // jurisdiction
           this.getJurisdiction().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case 1486494742: // officialName
-          this.getOfficialName().add((SubstanceSpecificationSubstanceNameOfficialNameComponent) value); // SubstanceSpecificationSubstanceNameOfficialNameComponent
+        case -1742128133: // synonym
+          this.getSynonym().add((SubstanceSpecificationNameComponent) value); // SubstanceSpecificationNameComponent
           return value;
-        case 882421574: // referenceSource
-          this.getReferenceSource().add(castToString(value)); // StringType
+        case -1840647503: // translation
+          this.getTranslation().add((SubstanceSpecificationNameComponent) value); // SubstanceSpecificationNameComponent
+          return value;
+        case -765289749: // official
+          this.getOfficial().add((SubstanceSpecificationNameOfficialComponent) value); // SubstanceSpecificationNameOfficialComponent
+          return value;
+        case -896505829: // source
+          this.getSource().add(castToReference(value)); // Reference
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -3515,16 +3672,24 @@ public class SubstanceSpecification extends DomainResource {
           this.name = castToString(value); // StringType
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("status")) {
+          this.status = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("preferred")) {
+          this.preferred = castToBoolean(value); // BooleanType
         } else if (name.equals("language")) {
           this.getLanguage().add(castToCodeableConcept(value));
         } else if (name.equals("domain")) {
           this.getDomain().add(castToCodeableConcept(value));
         } else if (name.equals("jurisdiction")) {
           this.getJurisdiction().add(castToCodeableConcept(value));
-        } else if (name.equals("officialName")) {
-          this.getOfficialName().add((SubstanceSpecificationSubstanceNameOfficialNameComponent) value);
-        } else if (name.equals("referenceSource")) {
-          this.getReferenceSource().add(castToString(value));
+        } else if (name.equals("synonym")) {
+          this.getSynonym().add((SubstanceSpecificationNameComponent) value);
+        } else if (name.equals("translation")) {
+          this.getTranslation().add((SubstanceSpecificationNameComponent) value);
+        } else if (name.equals("official")) {
+          this.getOfficial().add((SubstanceSpecificationNameOfficialComponent) value);
+        } else if (name.equals("source")) {
+          this.getSource().add(castToReference(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -3535,11 +3700,15 @@ public class SubstanceSpecification extends DomainResource {
         switch (hash) {
         case 3373707:  return getNameElement();
         case 3575610:  return getType(); 
+        case -892481550:  return getStatus(); 
+        case -1294005119:  return getPreferredElement();
         case -1613589672:  return addLanguage(); 
         case -1326197564:  return addDomain(); 
         case -507075711:  return addJurisdiction(); 
-        case 1486494742:  return addOfficialName(); 
-        case 882421574:  return addReferenceSourceElement();
+        case -1742128133:  return addSynonym(); 
+        case -1840647503:  return addTranslation(); 
+        case -765289749:  return addOfficial(); 
+        case -896505829:  return addSource(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -3550,11 +3719,15 @@ public class SubstanceSpecification extends DomainResource {
         switch (hash) {
         case 3373707: /*name*/ return new String[] {"string"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
+        case -892481550: /*status*/ return new String[] {"CodeableConcept"};
+        case -1294005119: /*preferred*/ return new String[] {"boolean"};
         case -1613589672: /*language*/ return new String[] {"CodeableConcept"};
         case -1326197564: /*domain*/ return new String[] {"CodeableConcept"};
         case -507075711: /*jurisdiction*/ return new String[] {"CodeableConcept"};
-        case 1486494742: /*officialName*/ return new String[] {};
-        case 882421574: /*referenceSource*/ return new String[] {"string"};
+        case -1742128133: /*synonym*/ return new String[] {"@SubstanceSpecification.name"};
+        case -1840647503: /*translation*/ return new String[] {"@SubstanceSpecification.name"};
+        case -765289749: /*official*/ return new String[] {};
+        case -896505829: /*source*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -3569,6 +3742,13 @@ public class SubstanceSpecification extends DomainResource {
           this.type = new CodeableConcept();
           return this.type;
         }
+        else if (name.equals("status")) {
+          this.status = new CodeableConcept();
+          return this.status;
+        }
+        else if (name.equals("preferred")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.preferred");
+        }
         else if (name.equals("language")) {
           return addLanguage();
         }
@@ -3578,21 +3758,29 @@ public class SubstanceSpecification extends DomainResource {
         else if (name.equals("jurisdiction")) {
           return addJurisdiction();
         }
-        else if (name.equals("officialName")) {
-          return addOfficialName();
+        else if (name.equals("synonym")) {
+          return addSynonym();
         }
-        else if (name.equals("referenceSource")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.referenceSource");
+        else if (name.equals("translation")) {
+          return addTranslation();
+        }
+        else if (name.equals("official")) {
+          return addOfficial();
+        }
+        else if (name.equals("source")) {
+          return addSource();
         }
         else
           return super.addChild(name);
       }
 
-      public SubstanceSpecificationSubstanceNameComponent copy() {
-        SubstanceSpecificationSubstanceNameComponent dst = new SubstanceSpecificationSubstanceNameComponent();
+      public SubstanceSpecificationNameComponent copy() {
+        SubstanceSpecificationNameComponent dst = new SubstanceSpecificationNameComponent();
         copyValues(dst);
         dst.name = name == null ? null : name.copy();
         dst.type = type == null ? null : type.copy();
+        dst.status = status == null ? null : status.copy();
+        dst.preferred = preferred == null ? null : preferred.copy();
         if (language != null) {
           dst.language = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : language)
@@ -3608,15 +3796,25 @@ public class SubstanceSpecification extends DomainResource {
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
         };
-        if (officialName != null) {
-          dst.officialName = new ArrayList<SubstanceSpecificationSubstanceNameOfficialNameComponent>();
-          for (SubstanceSpecificationSubstanceNameOfficialNameComponent i : officialName)
-            dst.officialName.add(i.copy());
+        if (synonym != null) {
+          dst.synonym = new ArrayList<SubstanceSpecificationNameComponent>();
+          for (SubstanceSpecificationNameComponent i : synonym)
+            dst.synonym.add(i.copy());
         };
-        if (referenceSource != null) {
-          dst.referenceSource = new ArrayList<StringType>();
-          for (StringType i : referenceSource)
-            dst.referenceSource.add(i.copy());
+        if (translation != null) {
+          dst.translation = new ArrayList<SubstanceSpecificationNameComponent>();
+          for (SubstanceSpecificationNameComponent i : translation)
+            dst.translation.add(i.copy());
+        };
+        if (official != null) {
+          dst.official = new ArrayList<SubstanceSpecificationNameOfficialComponent>();
+          for (SubstanceSpecificationNameOfficialComponent i : official)
+            dst.official.add(i.copy());
+        };
+        if (source != null) {
+          dst.source = new ArrayList<Reference>();
+          for (Reference i : source)
+            dst.source.add(i.copy());
         };
         return dst;
       }
@@ -3625,39 +3823,39 @@ public class SubstanceSpecification extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof SubstanceSpecificationSubstanceNameComponent))
+        if (!(other_ instanceof SubstanceSpecificationNameComponent))
           return false;
-        SubstanceSpecificationSubstanceNameComponent o = (SubstanceSpecificationSubstanceNameComponent) other_;
-        return compareDeep(name, o.name, true) && compareDeep(type, o.type, true) && compareDeep(language, o.language, true)
-           && compareDeep(domain, o.domain, true) && compareDeep(jurisdiction, o.jurisdiction, true) && compareDeep(officialName, o.officialName, true)
-           && compareDeep(referenceSource, o.referenceSource, true);
+        SubstanceSpecificationNameComponent o = (SubstanceSpecificationNameComponent) other_;
+        return compareDeep(name, o.name, true) && compareDeep(type, o.type, true) && compareDeep(status, o.status, true)
+           && compareDeep(preferred, o.preferred, true) && compareDeep(language, o.language, true) && compareDeep(domain, o.domain, true)
+           && compareDeep(jurisdiction, o.jurisdiction, true) && compareDeep(synonym, o.synonym, true) && compareDeep(translation, o.translation, true)
+           && compareDeep(official, o.official, true) && compareDeep(source, o.source, true);
       }
 
       @Override
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof SubstanceSpecificationSubstanceNameComponent))
+        if (!(other_ instanceof SubstanceSpecificationNameComponent))
           return false;
-        SubstanceSpecificationSubstanceNameComponent o = (SubstanceSpecificationSubstanceNameComponent) other_;
-        return compareValues(name, o.name, true) && compareValues(referenceSource, o.referenceSource, true)
-          ;
+        SubstanceSpecificationNameComponent o = (SubstanceSpecificationNameComponent) other_;
+        return compareValues(name, o.name, true) && compareValues(preferred, o.preferred, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, type, language, domain
-          , jurisdiction, officialName, referenceSource);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, type, status, preferred
+          , language, domain, jurisdiction, synonym, translation, official, source);
       }
 
   public String fhirType() {
-    return "SubstanceSpecification.substanceName";
+    return "SubstanceSpecification.name";
 
   }
 
   }
 
     @Block()
-    public static class SubstanceSpecificationSubstanceNameOfficialNameComponent extends BackboneElement implements IBaseBackboneElement {
+    public static class SubstanceSpecificationNameOfficialComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Which authority uses this official name.
          */
@@ -3684,7 +3882,7 @@ public class SubstanceSpecification extends DomainResource {
     /**
      * Constructor
      */
-      public SubstanceSpecificationSubstanceNameOfficialNameComponent() {
+      public SubstanceSpecificationNameOfficialComponent() {
         super();
       }
 
@@ -3694,7 +3892,7 @@ public class SubstanceSpecification extends DomainResource {
         public CodeableConcept getAuthority() { 
           if (this.authority == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationSubstanceNameOfficialNameComponent.authority");
+              throw new Error("Attempt to auto-create SubstanceSpecificationNameOfficialComponent.authority");
             else if (Configuration.doAutoCreate())
               this.authority = new CodeableConcept(); // cc
           return this.authority;
@@ -3707,7 +3905,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #authority} (Which authority uses this official name.)
          */
-        public SubstanceSpecificationSubstanceNameOfficialNameComponent setAuthority(CodeableConcept value) { 
+        public SubstanceSpecificationNameOfficialComponent setAuthority(CodeableConcept value) { 
           this.authority = value;
           return this;
         }
@@ -3718,7 +3916,7 @@ public class SubstanceSpecification extends DomainResource {
         public CodeableConcept getStatus() { 
           if (this.status == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationSubstanceNameOfficialNameComponent.status");
+              throw new Error("Attempt to auto-create SubstanceSpecificationNameOfficialComponent.status");
             else if (Configuration.doAutoCreate())
               this.status = new CodeableConcept(); // cc
           return this.status;
@@ -3731,7 +3929,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #status} (The status of the official name.)
          */
-        public SubstanceSpecificationSubstanceNameOfficialNameComponent setStatus(CodeableConcept value) { 
+        public SubstanceSpecificationNameOfficialComponent setStatus(CodeableConcept value) { 
           this.status = value;
           return this;
         }
@@ -3742,7 +3940,7 @@ public class SubstanceSpecification extends DomainResource {
         public DateTimeType getDateElement() { 
           if (this.date == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceSpecificationSubstanceNameOfficialNameComponent.date");
+              throw new Error("Attempt to auto-create SubstanceSpecificationNameOfficialComponent.date");
             else if (Configuration.doAutoCreate())
               this.date = new DateTimeType(); // bb
           return this.date;
@@ -3759,7 +3957,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value {@link #date} (Date of official name change.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
          */
-        public SubstanceSpecificationSubstanceNameOfficialNameComponent setDateElement(DateTimeType value) { 
+        public SubstanceSpecificationNameOfficialComponent setDateElement(DateTimeType value) { 
           this.date = value;
           return this;
         }
@@ -3774,7 +3972,7 @@ public class SubstanceSpecification extends DomainResource {
         /**
          * @param value Date of official name change.
          */
-        public SubstanceSpecificationSubstanceNameOfficialNameComponent setDate(Date value) { 
+        public SubstanceSpecificationNameOfficialComponent setDate(Date value) { 
           if (value == null)
             this.date = null;
           else {
@@ -3883,8 +4081,8 @@ public class SubstanceSpecification extends DomainResource {
           return super.addChild(name);
       }
 
-      public SubstanceSpecificationSubstanceNameOfficialNameComponent copy() {
-        SubstanceSpecificationSubstanceNameOfficialNameComponent dst = new SubstanceSpecificationSubstanceNameOfficialNameComponent();
+      public SubstanceSpecificationNameOfficialComponent copy() {
+        SubstanceSpecificationNameOfficialComponent dst = new SubstanceSpecificationNameOfficialComponent();
         copyValues(dst);
         dst.authority = authority == null ? null : authority.copy();
         dst.status = status == null ? null : status.copy();
@@ -3896,9 +4094,9 @@ public class SubstanceSpecification extends DomainResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof SubstanceSpecificationSubstanceNameOfficialNameComponent))
+        if (!(other_ instanceof SubstanceSpecificationNameOfficialComponent))
           return false;
-        SubstanceSpecificationSubstanceNameOfficialNameComponent o = (SubstanceSpecificationSubstanceNameOfficialNameComponent) other_;
+        SubstanceSpecificationNameOfficialComponent o = (SubstanceSpecificationNameOfficialComponent) other_;
         return compareDeep(authority, o.authority, true) && compareDeep(status, o.status, true) && compareDeep(date, o.date, true)
           ;
       }
@@ -3907,9 +4105,9 @@ public class SubstanceSpecification extends DomainResource {
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof SubstanceSpecificationSubstanceNameOfficialNameComponent))
+        if (!(other_ instanceof SubstanceSpecificationNameOfficialComponent))
           return false;
-        SubstanceSpecificationSubstanceNameOfficialNameComponent o = (SubstanceSpecificationSubstanceNameOfficialNameComponent) other_;
+        SubstanceSpecificationNameOfficialComponent o = (SubstanceSpecificationNameOfficialComponent) other_;
         return compareValues(date, o.date, true);
       }
 
@@ -3919,65 +4117,703 @@ public class SubstanceSpecification extends DomainResource {
       }
 
   public String fhirType() {
-    return "SubstanceSpecification.substanceName.officialName";
+    return "SubstanceSpecification.name.official";
 
   }
 
   }
 
-    /**
-     * Textual comment.
-     */
-    @Child(name = "comment", type = {StringType.class}, order=0, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Textual comment", formalDefinition="Textual comment." )
-    protected StringType comment;
+    @Block()
+    public static class SubstanceSpecificationRelationshipComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * A pointer to another substance, as a resource or just a representational code.
+         */
+        @Child(name = "substance", type = {SubstanceSpecification.class, CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="A pointer to another substance, as a resource or just a representational code", formalDefinition="A pointer to another substance, as a resource or just a representational code." )
+        protected Type substance;
+
+        /**
+         * For example "salt to parent", "active moiety", "starting material".
+         */
+        @Child(name = "relationship", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="For example \"salt to parent\", \"active moiety\", \"starting material\"", formalDefinition="For example \"salt to parent\", \"active moiety\", \"starting material\"." )
+        protected CodeableConcept relationship;
+
+        /**
+         * For example where an enzyme strongly bonds with a particular substance, this is a defining relationship for that enzyme, out of several possible substance relationships.
+         */
+        @Child(name = "isDefining", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="For example where an enzyme strongly bonds with a particular substance, this is a defining relationship for that enzyme, out of several possible substance relationships", formalDefinition="For example where an enzyme strongly bonds with a particular substance, this is a defining relationship for that enzyme, out of several possible substance relationships." )
+        protected BooleanType isDefining;
+
+        /**
+         * A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.
+         */
+        @Child(name = "amount", type = {Quantity.class, Range.class, Ratio.class, StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other", formalDefinition="A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other." )
+        protected Type amount;
+
+        /**
+         * For use when the numeric.
+         */
+        @Child(name = "amountRatioLowLimit", type = {Ratio.class}, order=5, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="For use when the numeric", formalDefinition="For use when the numeric." )
+        protected Ratio amountRatioLowLimit;
+
+        /**
+         * An operator for the amount, for example "average", "approximately", "less than".
+         */
+        @Child(name = "amountType", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="An operator for the amount, for example \"average\", \"approximately\", \"less than\"", formalDefinition="An operator for the amount, for example \"average\", \"approximately\", \"less than\"." )
+        protected CodeableConcept amountType;
+
+        /**
+         * Supporting literature.
+         */
+        @Child(name = "source", type = {DocumentReference.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Supporting literature", formalDefinition="Supporting literature." )
+        protected List<Reference> source;
+        /**
+         * The actual objects that are the target of the reference (Supporting literature.)
+         */
+        protected List<DocumentReference> sourceTarget;
+
+
+        private static final long serialVersionUID = -1277419269L;
 
     /**
-     * Chemicals may be stoichiometric or non-stoichiometric.
+     * Constructor
      */
-    @Child(name = "stoichiometric", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Chemicals may be stoichiometric or non-stoichiometric", formalDefinition="Chemicals may be stoichiometric or non-stoichiometric." )
-    protected BooleanType stoichiometric;
+      public SubstanceSpecificationRelationshipComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #substance} (A pointer to another substance, as a resource or just a representational code.)
+         */
+        public Type getSubstance() { 
+          return this.substance;
+        }
+
+        /**
+         * @return {@link #substance} (A pointer to another substance, as a resource or just a representational code.)
+         */
+        public Reference getSubstanceReference() throws FHIRException { 
+          if (this.substance == null)
+            this.substance = new Reference();
+          if (!(this.substance instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.substance.getClass().getName()+" was encountered");
+          return (Reference) this.substance;
+        }
+
+        public boolean hasSubstanceReference() { 
+          return this != null && this.substance instanceof Reference;
+        }
+
+        /**
+         * @return {@link #substance} (A pointer to another substance, as a resource or just a representational code.)
+         */
+        public CodeableConcept getSubstanceCodeableConcept() throws FHIRException { 
+          if (this.substance == null)
+            this.substance = new CodeableConcept();
+          if (!(this.substance instanceof CodeableConcept))
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.substance.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.substance;
+        }
+
+        public boolean hasSubstanceCodeableConcept() { 
+          return this != null && this.substance instanceof CodeableConcept;
+        }
+
+        public boolean hasSubstance() { 
+          return this.substance != null && !this.substance.isEmpty();
+        }
+
+        /**
+         * @param value {@link #substance} (A pointer to another substance, as a resource or just a representational code.)
+         */
+        public SubstanceSpecificationRelationshipComponent setSubstance(Type value) { 
+          if (value != null && !(value instanceof Reference || value instanceof CodeableConcept))
+            throw new Error("Not the right type for SubstanceSpecification.relationship.substance[x]: "+value.fhirType());
+          this.substance = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #relationship} (For example "salt to parent", "active moiety", "starting material".)
+         */
+        public CodeableConcept getRelationship() { 
+          if (this.relationship == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SubstanceSpecificationRelationshipComponent.relationship");
+            else if (Configuration.doAutoCreate())
+              this.relationship = new CodeableConcept(); // cc
+          return this.relationship;
+        }
+
+        public boolean hasRelationship() { 
+          return this.relationship != null && !this.relationship.isEmpty();
+        }
+
+        /**
+         * @param value {@link #relationship} (For example "salt to parent", "active moiety", "starting material".)
+         */
+        public SubstanceSpecificationRelationshipComponent setRelationship(CodeableConcept value) { 
+          this.relationship = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #isDefining} (For example where an enzyme strongly bonds with a particular substance, this is a defining relationship for that enzyme, out of several possible substance relationships.). This is the underlying object with id, value and extensions. The accessor "getIsDefining" gives direct access to the value
+         */
+        public BooleanType getIsDefiningElement() { 
+          if (this.isDefining == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SubstanceSpecificationRelationshipComponent.isDefining");
+            else if (Configuration.doAutoCreate())
+              this.isDefining = new BooleanType(); // bb
+          return this.isDefining;
+        }
+
+        public boolean hasIsDefiningElement() { 
+          return this.isDefining != null && !this.isDefining.isEmpty();
+        }
+
+        public boolean hasIsDefining() { 
+          return this.isDefining != null && !this.isDefining.isEmpty();
+        }
+
+        /**
+         * @param value {@link #isDefining} (For example where an enzyme strongly bonds with a particular substance, this is a defining relationship for that enzyme, out of several possible substance relationships.). This is the underlying object with id, value and extensions. The accessor "getIsDefining" gives direct access to the value
+         */
+        public SubstanceSpecificationRelationshipComponent setIsDefiningElement(BooleanType value) { 
+          this.isDefining = value;
+          return this;
+        }
+
+        /**
+         * @return For example where an enzyme strongly bonds with a particular substance, this is a defining relationship for that enzyme, out of several possible substance relationships.
+         */
+        public boolean getIsDefining() { 
+          return this.isDefining == null || this.isDefining.isEmpty() ? false : this.isDefining.getValue();
+        }
+
+        /**
+         * @param value For example where an enzyme strongly bonds with a particular substance, this is a defining relationship for that enzyme, out of several possible substance relationships.
+         */
+        public SubstanceSpecificationRelationshipComponent setIsDefining(boolean value) { 
+            if (this.isDefining == null)
+              this.isDefining = new BooleanType();
+            this.isDefining.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #amount} (A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.)
+         */
+        public Type getAmount() { 
+          return this.amount;
+        }
+
+        /**
+         * @return {@link #amount} (A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.)
+         */
+        public Quantity getAmountQuantity() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new Quantity();
+          if (!(this.amount instanceof Quantity))
+            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (Quantity) this.amount;
+        }
+
+        public boolean hasAmountQuantity() { 
+          return this != null && this.amount instanceof Quantity;
+        }
+
+        /**
+         * @return {@link #amount} (A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.)
+         */
+        public Range getAmountRange() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new Range();
+          if (!(this.amount instanceof Range))
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (Range) this.amount;
+        }
+
+        public boolean hasAmountRange() { 
+          return this != null && this.amount instanceof Range;
+        }
+
+        /**
+         * @return {@link #amount} (A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.)
+         */
+        public Ratio getAmountRatio() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new Ratio();
+          if (!(this.amount instanceof Ratio))
+            throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (Ratio) this.amount;
+        }
+
+        public boolean hasAmountRatio() { 
+          return this != null && this.amount instanceof Ratio;
+        }
+
+        /**
+         * @return {@link #amount} (A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.)
+         */
+        public StringType getAmountStringType() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new StringType();
+          if (!(this.amount instanceof StringType))
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (StringType) this.amount;
+        }
+
+        public boolean hasAmountStringType() { 
+          return this != null && this.amount instanceof StringType;
+        }
+
+        public boolean hasAmount() { 
+          return this.amount != null && !this.amount.isEmpty();
+        }
+
+        /**
+         * @param value {@link #amount} (A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.)
+         */
+        public SubstanceSpecificationRelationshipComponent setAmount(Type value) { 
+          if (value != null && !(value instanceof Quantity || value instanceof Range || value instanceof Ratio || value instanceof StringType))
+            throw new Error("Not the right type for SubstanceSpecification.relationship.amount[x]: "+value.fhirType());
+          this.amount = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #amountRatioLowLimit} (For use when the numeric.)
+         */
+        public Ratio getAmountRatioLowLimit() { 
+          if (this.amountRatioLowLimit == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SubstanceSpecificationRelationshipComponent.amountRatioLowLimit");
+            else if (Configuration.doAutoCreate())
+              this.amountRatioLowLimit = new Ratio(); // cc
+          return this.amountRatioLowLimit;
+        }
+
+        public boolean hasAmountRatioLowLimit() { 
+          return this.amountRatioLowLimit != null && !this.amountRatioLowLimit.isEmpty();
+        }
+
+        /**
+         * @param value {@link #amountRatioLowLimit} (For use when the numeric.)
+         */
+        public SubstanceSpecificationRelationshipComponent setAmountRatioLowLimit(Ratio value) { 
+          this.amountRatioLowLimit = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #amountType} (An operator for the amount, for example "average", "approximately", "less than".)
+         */
+        public CodeableConcept getAmountType() { 
+          if (this.amountType == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SubstanceSpecificationRelationshipComponent.amountType");
+            else if (Configuration.doAutoCreate())
+              this.amountType = new CodeableConcept(); // cc
+          return this.amountType;
+        }
+
+        public boolean hasAmountType() { 
+          return this.amountType != null && !this.amountType.isEmpty();
+        }
+
+        /**
+         * @param value {@link #amountType} (An operator for the amount, for example "average", "approximately", "less than".)
+         */
+        public SubstanceSpecificationRelationshipComponent setAmountType(CodeableConcept value) { 
+          this.amountType = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #source} (Supporting literature.)
+         */
+        public List<Reference> getSource() { 
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          return this.source;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public SubstanceSpecificationRelationshipComponent setSource(List<Reference> theSource) { 
+          this.source = theSource;
+          return this;
+        }
+
+        public boolean hasSource() { 
+          if (this.source == null)
+            return false;
+          for (Reference item : this.source)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public Reference addSource() { //3
+          Reference t = new Reference();
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          this.source.add(t);
+          return t;
+        }
+
+        public SubstanceSpecificationRelationshipComponent addSource(Reference t) { //3
+          if (t == null)
+            return this;
+          if (this.source == null)
+            this.source = new ArrayList<Reference>();
+          this.source.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #source}, creating it if it does not already exist
+         */
+        public Reference getSourceFirstRep() { 
+          if (getSource().isEmpty()) {
+            addSource();
+          }
+          return getSource().get(0);
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public List<DocumentReference> getSourceTarget() { 
+          if (this.sourceTarget == null)
+            this.sourceTarget = new ArrayList<DocumentReference>();
+          return this.sourceTarget;
+        }
+
+        /**
+         * @deprecated Use Reference#setResource(IBaseResource) instead
+         */
+        @Deprecated
+        public DocumentReference addSourceTarget() { 
+          DocumentReference r = new DocumentReference();
+          if (this.sourceTarget == null)
+            this.sourceTarget = new ArrayList<DocumentReference>();
+          this.sourceTarget.add(r);
+          return r;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "A pointer to another substance, as a resource or just a representational code.", 0, 1, substance));
+          children.add(new Property("relationship", "CodeableConcept", "For example \"salt to parent\", \"active moiety\", \"starting material\".", 0, 1, relationship));
+          children.add(new Property("isDefining", "boolean", "For example where an enzyme strongly bonds with a particular substance, this is a defining relationship for that enzyme, out of several possible substance relationships.", 0, 1, isDefining));
+          children.add(new Property("amount[x]", "Quantity|Range|Ratio|string", "A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.", 0, 1, amount));
+          children.add(new Property("amountRatioLowLimit", "Ratio", "For use when the numeric.", 0, 1, amountRatioLowLimit));
+          children.add(new Property("amountType", "CodeableConcept", "An operator for the amount, for example \"average\", \"approximately\", \"less than\".", 0, 1, amountType));
+          children.add(new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 2127194384: /*substance[x]*/  return new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "A pointer to another substance, as a resource or just a representational code.", 0, 1, substance);
+          case 530040176: /*substance*/  return new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "A pointer to another substance, as a resource or just a representational code.", 0, 1, substance);
+          case 516208571: /*substanceReference*/  return new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "A pointer to another substance, as a resource or just a representational code.", 0, 1, substance);
+          case -1974119407: /*substanceCodeableConcept*/  return new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "A pointer to another substance, as a resource or just a representational code.", 0, 1, substance);
+          case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "For example \"salt to parent\", \"active moiety\", \"starting material\".", 0, 1, relationship);
+          case -141812990: /*isDefining*/  return new Property("isDefining", "boolean", "For example where an enzyme strongly bonds with a particular substance, this is a defining relationship for that enzyme, out of several possible substance relationships.", 0, 1, isDefining);
+          case 646780200: /*amount[x]*/  return new Property("amount[x]", "Quantity|Range|Ratio|string", "A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.", 0, 1, amount);
+          case -1413853096: /*amount*/  return new Property("amount[x]", "Quantity|Range|Ratio|string", "A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.", 0, 1, amount);
+          case 1664303363: /*amountQuantity*/  return new Property("amount[x]", "Quantity|Range|Ratio|string", "A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.", 0, 1, amount);
+          case -1223462971: /*amountRange*/  return new Property("amount[x]", "Quantity|Range|Ratio|string", "A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.", 0, 1, amount);
+          case -1223457133: /*amountRatio*/  return new Property("amount[x]", "Quantity|Range|Ratio|string", "A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.", 0, 1, amount);
+          case 773651081: /*amountString*/  return new Property("amount[x]", "Quantity|Range|Ratio|string", "A numeric factor for the relationship, for instance to express that the salt of a substance has some percentage of the active substance in relation to some other.", 0, 1, amount);
+          case 2140623994: /*amountRatioLowLimit*/  return new Property("amountRatioLowLimit", "Ratio", "For use when the numeric.", 0, 1, amountRatioLowLimit);
+          case -1424857166: /*amountType*/  return new Property("amountType", "CodeableConcept", "An operator for the amount, for example \"average\", \"approximately\", \"less than\".", 0, 1, amountType);
+          case -896505829: /*source*/  return new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 530040176: /*substance*/ return this.substance == null ? new Base[0] : new Base[] {this.substance}; // Type
+        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeableConcept
+        case -141812990: /*isDefining*/ return this.isDefining == null ? new Base[0] : new Base[] {this.isDefining}; // BooleanType
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Type
+        case 2140623994: /*amountRatioLowLimit*/ return this.amountRatioLowLimit == null ? new Base[0] : new Base[] {this.amountRatioLowLimit}; // Ratio
+        case -1424857166: /*amountType*/ return this.amountType == null ? new Base[0] : new Base[] {this.amountType}; // CodeableConcept
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : this.source.toArray(new Base[this.source.size()]); // Reference
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 530040176: // substance
+          this.substance = castToType(value); // Type
+          return value;
+        case -261851592: // relationship
+          this.relationship = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -141812990: // isDefining
+          this.isDefining = castToBoolean(value); // BooleanType
+          return value;
+        case -1413853096: // amount
+          this.amount = castToType(value); // Type
+          return value;
+        case 2140623994: // amountRatioLowLimit
+          this.amountRatioLowLimit = castToRatio(value); // Ratio
+          return value;
+        case -1424857166: // amountType
+          this.amountType = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -896505829: // source
+          this.getSource().add(castToReference(value)); // Reference
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("substance[x]")) {
+          this.substance = castToType(value); // Type
+        } else if (name.equals("relationship")) {
+          this.relationship = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("isDefining")) {
+          this.isDefining = castToBoolean(value); // BooleanType
+        } else if (name.equals("amount[x]")) {
+          this.amount = castToType(value); // Type
+        } else if (name.equals("amountRatioLowLimit")) {
+          this.amountRatioLowLimit = castToRatio(value); // Ratio
+        } else if (name.equals("amountType")) {
+          this.amountType = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("source")) {
+          this.getSource().add(castToReference(value));
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 2127194384:  return getSubstance(); 
+        case 530040176:  return getSubstance(); 
+        case -261851592:  return getRelationship(); 
+        case -141812990:  return getIsDefiningElement();
+        case 646780200:  return getAmount(); 
+        case -1413853096:  return getAmount(); 
+        case 2140623994:  return getAmountRatioLowLimit(); 
+        case -1424857166:  return getAmountType(); 
+        case -896505829:  return addSource(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 530040176: /*substance*/ return new String[] {"Reference", "CodeableConcept"};
+        case -261851592: /*relationship*/ return new String[] {"CodeableConcept"};
+        case -141812990: /*isDefining*/ return new String[] {"boolean"};
+        case -1413853096: /*amount*/ return new String[] {"Quantity", "Range", "Ratio", "string"};
+        case 2140623994: /*amountRatioLowLimit*/ return new String[] {"Ratio"};
+        case -1424857166: /*amountType*/ return new String[] {"CodeableConcept"};
+        case -896505829: /*source*/ return new String[] {"Reference"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("substanceReference")) {
+          this.substance = new Reference();
+          return this.substance;
+        }
+        else if (name.equals("substanceCodeableConcept")) {
+          this.substance = new CodeableConcept();
+          return this.substance;
+        }
+        else if (name.equals("relationship")) {
+          this.relationship = new CodeableConcept();
+          return this.relationship;
+        }
+        else if (name.equals("isDefining")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.isDefining");
+        }
+        else if (name.equals("amountQuantity")) {
+          this.amount = new Quantity();
+          return this.amount;
+        }
+        else if (name.equals("amountRange")) {
+          this.amount = new Range();
+          return this.amount;
+        }
+        else if (name.equals("amountRatio")) {
+          this.amount = new Ratio();
+          return this.amount;
+        }
+        else if (name.equals("amountString")) {
+          this.amount = new StringType();
+          return this.amount;
+        }
+        else if (name.equals("amountRatioLowLimit")) {
+          this.amountRatioLowLimit = new Ratio();
+          return this.amountRatioLowLimit;
+        }
+        else if (name.equals("amountType")) {
+          this.amountType = new CodeableConcept();
+          return this.amountType;
+        }
+        else if (name.equals("source")) {
+          return addSource();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public SubstanceSpecificationRelationshipComponent copy() {
+        SubstanceSpecificationRelationshipComponent dst = new SubstanceSpecificationRelationshipComponent();
+        copyValues(dst);
+        dst.substance = substance == null ? null : substance.copy();
+        dst.relationship = relationship == null ? null : relationship.copy();
+        dst.isDefining = isDefining == null ? null : isDefining.copy();
+        dst.amount = amount == null ? null : amount.copy();
+        dst.amountRatioLowLimit = amountRatioLowLimit == null ? null : amountRatioLowLimit.copy();
+        dst.amountType = amountType == null ? null : amountType.copy();
+        if (source != null) {
+          dst.source = new ArrayList<Reference>();
+          for (Reference i : source)
+            dst.source.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof SubstanceSpecificationRelationshipComponent))
+          return false;
+        SubstanceSpecificationRelationshipComponent o = (SubstanceSpecificationRelationshipComponent) other_;
+        return compareDeep(substance, o.substance, true) && compareDeep(relationship, o.relationship, true)
+           && compareDeep(isDefining, o.isDefining, true) && compareDeep(amount, o.amount, true) && compareDeep(amountRatioLowLimit, o.amountRatioLowLimit, true)
+           && compareDeep(amountType, o.amountType, true) && compareDeep(source, o.source, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof SubstanceSpecificationRelationshipComponent))
+          return false;
+        SubstanceSpecificationRelationshipComponent o = (SubstanceSpecificationRelationshipComponent) other_;
+        return compareValues(isDefining, o.isDefining, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(substance, relationship, isDefining
+          , amount, amountRatioLowLimit, amountType, source);
+      }
+
+  public String fhirType() {
+    return "SubstanceSpecification.relationship";
+
+  }
+
+  }
 
     /**
      * Identifier by which this substance is known.
      */
-    @Child(name = "identifier", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Identifier by which this substance is known", formalDefinition="Identifier by which this substance is known." )
     protected Identifier identifier;
 
     /**
      * High level categorization, e.g. polymer or nucleic acid.
      */
-    @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="High level categorization, e.g. polymer or nucleic acid", formalDefinition="High level categorization, e.g. polymer or nucleic acid." )
     protected CodeableConcept type;
 
     /**
+     * Status of substance within the catalogue e.g. approved.
+     */
+    @Child(name = "status", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Status of substance within the catalogue e.g. approved", formalDefinition="Status of substance within the catalogue e.g. approved." )
+    protected CodeableConcept status;
+
+    /**
+     * If the substance applies to only human or veterinary use.
+     */
+    @Child(name = "domain", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="If the substance applies to only human or veterinary use", formalDefinition="If the substance applies to only human or veterinary use." )
+    protected CodeableConcept domain;
+
+    /**
+     * Textual description of the substance.
+     */
+    @Child(name = "description", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Textual description of the substance", formalDefinition="Textual description of the substance." )
+    protected StringType description;
+
+    /**
      * Supporting literature.
      */
-    @Child(name = "referenceSource", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "source", type = {DocumentReference.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Supporting literature", formalDefinition="Supporting literature." )
-    protected List<StringType> referenceSource;
+    protected List<Reference> source;
+    /**
+     * The actual objects that are the target of the reference (Supporting literature.)
+     */
+    protected List<DocumentReference> sourceTarget;
+
+
+    /**
+     * Textual comment about this record of a substance.
+     */
+    @Child(name = "comment", type = {StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Textual comment about this record of a substance", formalDefinition="Textual comment about this record of a substance." )
+    protected StringType comment;
 
     /**
      * Moiety, for structural modifications.
      */
-    @Child(name = "moiety", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "moiety", type = {}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Moiety, for structural modifications", formalDefinition="Moiety, for structural modifications." )
     protected List<SubstanceSpecificationMoietyComponent> moiety;
 
     /**
      * General specifications for this substance, including how it is related to other substances.
      */
-    @Child(name = "property", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "property", type = {}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="General specifications for this substance, including how it is related to other substances", formalDefinition="General specifications for this substance, including how it is related to other substances." )
     protected List<SubstanceSpecificationPropertyComponent> property;
 
     /**
      * General information detailing this substance.
      */
-    @Child(name = "referenceInformation", type = {SubstanceReferenceInformation.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "referenceInformation", type = {SubstanceReferenceInformation.class}, order=9, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="General information detailing this substance", formalDefinition="General information detailing this substance." )
     protected Reference referenceInformation;
 
@@ -3989,35 +4825,54 @@ public class SubstanceSpecification extends DomainResource {
     /**
      * Structural information.
      */
-    @Child(name = "structure", type = {}, order=8, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "structure", type = {}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Structural information", formalDefinition="Structural information." )
     protected SubstanceSpecificationStructureComponent structure;
 
     /**
      * Codes associated with the substance.
      */
-    @Child(name = "substanceCode", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "code", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Codes associated with the substance", formalDefinition="Codes associated with the substance." )
-    protected List<SubstanceSpecificationSubstanceCodeComponent> substanceCode;
+    protected List<SubstanceSpecificationCodeComponent> code;
 
     /**
-     * Names applicable to this substence.
+     * Names applicable to this substance.
      */
-    @Child(name = "substanceName", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Names applicable to this substence", formalDefinition="Names applicable to this substence." )
-    protected List<SubstanceSpecificationSubstanceNameComponent> substanceName;
+    @Child(name = "name", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Names applicable to this substance", formalDefinition="Names applicable to this substance." )
+    protected List<SubstanceSpecificationNameComponent> name;
 
     /**
      * The molecular weight or weight range (for proteins, polymers or nucleic acids).
      */
-    @Child(name = "molecularWeight", type = {SubstanceSpecificationStructureIsotopeMolecularWeightComponent.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "molecularWeight", type = {SubstanceSpecificationStructureIsotopeMolecularWeightComponent.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The molecular weight or weight range (for proteins, polymers or nucleic acids)", formalDefinition="The molecular weight or weight range (for proteins, polymers or nucleic acids)." )
     protected List<SubstanceSpecificationStructureIsotopeMolecularWeightComponent> molecularWeight;
 
     /**
+     * A link between this substance and another, with details of the relationship.
+     */
+    @Child(name = "relationship", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="A link between this substance and another, with details of the relationship", formalDefinition="A link between this substance and another, with details of the relationship." )
+    protected List<SubstanceSpecificationRelationshipComponent> relationship;
+
+    /**
+     * Data items specific to nucleic acids.
+     */
+    @Child(name = "nucleicAcid", type = {SubstanceNucleicAcid.class}, order=15, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Data items specific to nucleic acids", formalDefinition="Data items specific to nucleic acids." )
+    protected Reference nucleicAcid;
+
+    /**
+     * The actual object that is the target of the reference (Data items specific to nucleic acids.)
+     */
+    protected SubstanceNucleicAcid nucleicAcidTarget;
+
+    /**
      * Data items specific to polymers.
      */
-    @Child(name = "polymer", type = {SubstancePolymer.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "polymer", type = {SubstancePolymer.class}, order=16, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Data items specific to polymers", formalDefinition="Data items specific to polymers." )
     protected Reference polymer;
 
@@ -4026,107 +4881,37 @@ public class SubstanceSpecification extends DomainResource {
      */
     protected SubstancePolymer polymerTarget;
 
-    private static final long serialVersionUID = -55630281L;
+    /**
+     * Data items specific to proteins.
+     */
+    @Child(name = "protein", type = {SubstanceProtein.class}, order=17, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Data items specific to proteins", formalDefinition="Data items specific to proteins." )
+    protected Reference protein;
+
+    /**
+     * The actual object that is the target of the reference (Data items specific to proteins.)
+     */
+    protected SubstanceProtein proteinTarget;
+
+    /**
+     * Material or taxonomic/anatomical source for the substance.
+     */
+    @Child(name = "sourceMaterial", type = {SubstanceSourceMaterial.class}, order=18, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Material or taxonomic/anatomical source for the substance", formalDefinition="Material or taxonomic/anatomical source for the substance." )
+    protected Reference sourceMaterial;
+
+    /**
+     * The actual object that is the target of the reference (Material or taxonomic/anatomical source for the substance.)
+     */
+    protected SubstanceSourceMaterial sourceMaterialTarget;
+
+    private static final long serialVersionUID = 1782072718L;
 
   /**
    * Constructor
    */
     public SubstanceSpecification() {
       super();
-    }
-
-    /**
-     * @return {@link #comment} (Textual comment.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
-     */
-    public StringType getCommentElement() { 
-      if (this.comment == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SubstanceSpecification.comment");
-        else if (Configuration.doAutoCreate())
-          this.comment = new StringType(); // bb
-      return this.comment;
-    }
-
-    public boolean hasCommentElement() { 
-      return this.comment != null && !this.comment.isEmpty();
-    }
-
-    public boolean hasComment() { 
-      return this.comment != null && !this.comment.isEmpty();
-    }
-
-    /**
-     * @param value {@link #comment} (Textual comment.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
-     */
-    public SubstanceSpecification setCommentElement(StringType value) { 
-      this.comment = value;
-      return this;
-    }
-
-    /**
-     * @return Textual comment.
-     */
-    public String getComment() { 
-      return this.comment == null ? null : this.comment.getValue();
-    }
-
-    /**
-     * @param value Textual comment.
-     */
-    public SubstanceSpecification setComment(String value) { 
-      if (Utilities.noString(value))
-        this.comment = null;
-      else {
-        if (this.comment == null)
-          this.comment = new StringType();
-        this.comment.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #stoichiometric} (Chemicals may be stoichiometric or non-stoichiometric.). This is the underlying object with id, value and extensions. The accessor "getStoichiometric" gives direct access to the value
-     */
-    public BooleanType getStoichiometricElement() { 
-      if (this.stoichiometric == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SubstanceSpecification.stoichiometric");
-        else if (Configuration.doAutoCreate())
-          this.stoichiometric = new BooleanType(); // bb
-      return this.stoichiometric;
-    }
-
-    public boolean hasStoichiometricElement() { 
-      return this.stoichiometric != null && !this.stoichiometric.isEmpty();
-    }
-
-    public boolean hasStoichiometric() { 
-      return this.stoichiometric != null && !this.stoichiometric.isEmpty();
-    }
-
-    /**
-     * @param value {@link #stoichiometric} (Chemicals may be stoichiometric or non-stoichiometric.). This is the underlying object with id, value and extensions. The accessor "getStoichiometric" gives direct access to the value
-     */
-    public SubstanceSpecification setStoichiometricElement(BooleanType value) { 
-      this.stoichiometric = value;
-      return this;
-    }
-
-    /**
-     * @return Chemicals may be stoichiometric or non-stoichiometric.
-     */
-    public boolean getStoichiometric() { 
-      return this.stoichiometric == null || this.stoichiometric.isEmpty() ? false : this.stoichiometric.getValue();
-    }
-
-    /**
-     * @param value Chemicals may be stoichiometric or non-stoichiometric.
-     */
-    public SubstanceSpecification setStoichiometric(boolean value) { 
-        if (this.stoichiometric == null)
-          this.stoichiometric = new BooleanType();
-        this.stoichiometric.setValue(value);
-      return this;
     }
 
     /**
@@ -4178,64 +4963,224 @@ public class SubstanceSpecification extends DomainResource {
     }
 
     /**
-     * @return {@link #referenceSource} (Supporting literature.)
+     * @return {@link #status} (Status of substance within the catalogue e.g. approved.)
      */
-    public List<StringType> getReferenceSource() { 
-      if (this.referenceSource == null)
-        this.referenceSource = new ArrayList<StringType>();
-      return this.referenceSource;
+    public CodeableConcept getStatus() { 
+      if (this.status == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.status");
+        else if (Configuration.doAutoCreate())
+          this.status = new CodeableConcept(); // cc
+      return this.status;
+    }
+
+    public boolean hasStatus() { 
+      return this.status != null && !this.status.isEmpty();
+    }
+
+    /**
+     * @param value {@link #status} (Status of substance within the catalogue e.g. approved.)
+     */
+    public SubstanceSpecification setStatus(CodeableConcept value) { 
+      this.status = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #domain} (If the substance applies to only human or veterinary use.)
+     */
+    public CodeableConcept getDomain() { 
+      if (this.domain == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.domain");
+        else if (Configuration.doAutoCreate())
+          this.domain = new CodeableConcept(); // cc
+      return this.domain;
+    }
+
+    public boolean hasDomain() { 
+      return this.domain != null && !this.domain.isEmpty();
+    }
+
+    /**
+     * @param value {@link #domain} (If the substance applies to only human or veterinary use.)
+     */
+    public SubstanceSpecification setDomain(CodeableConcept value) { 
+      this.domain = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #description} (Textual description of the substance.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     */
+    public StringType getDescriptionElement() { 
+      if (this.description == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.description");
+        else if (Configuration.doAutoCreate())
+          this.description = new StringType(); // bb
+      return this.description;
+    }
+
+    public boolean hasDescriptionElement() { 
+      return this.description != null && !this.description.isEmpty();
+    }
+
+    public boolean hasDescription() { 
+      return this.description != null && !this.description.isEmpty();
+    }
+
+    /**
+     * @param value {@link #description} (Textual description of the substance.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     */
+    public SubstanceSpecification setDescriptionElement(StringType value) { 
+      this.description = value;
+      return this;
+    }
+
+    /**
+     * @return Textual description of the substance.
+     */
+    public String getDescription() { 
+      return this.description == null ? null : this.description.getValue();
+    }
+
+    /**
+     * @param value Textual description of the substance.
+     */
+    public SubstanceSpecification setDescription(String value) { 
+      if (Utilities.noString(value))
+        this.description = null;
+      else {
+        if (this.description == null)
+          this.description = new StringType();
+        this.description.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #source} (Supporting literature.)
+     */
+    public List<Reference> getSource() { 
+      if (this.source == null)
+        this.source = new ArrayList<Reference>();
+      return this.source;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public SubstanceSpecification setReferenceSource(List<StringType> theReferenceSource) { 
-      this.referenceSource = theReferenceSource;
+    public SubstanceSpecification setSource(List<Reference> theSource) { 
+      this.source = theSource;
       return this;
     }
 
-    public boolean hasReferenceSource() { 
-      if (this.referenceSource == null)
+    public boolean hasSource() { 
+      if (this.source == null)
         return false;
-      for (StringType item : this.referenceSource)
+      for (Reference item : this.source)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    /**
-     * @return {@link #referenceSource} (Supporting literature.)
-     */
-    public StringType addReferenceSourceElement() {//2 
-      StringType t = new StringType();
-      if (this.referenceSource == null)
-        this.referenceSource = new ArrayList<StringType>();
-      this.referenceSource.add(t);
+    public Reference addSource() { //3
+      Reference t = new Reference();
+      if (this.source == null)
+        this.source = new ArrayList<Reference>();
+      this.source.add(t);
       return t;
     }
 
-    /**
-     * @param value {@link #referenceSource} (Supporting literature.)
-     */
-    public SubstanceSpecification addReferenceSource(String value) { //1
-      StringType t = new StringType();
-      t.setValue(value);
-      if (this.referenceSource == null)
-        this.referenceSource = new ArrayList<StringType>();
-      this.referenceSource.add(t);
+    public SubstanceSpecification addSource(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.source == null)
+        this.source = new ArrayList<Reference>();
+      this.source.add(t);
       return this;
     }
 
     /**
-     * @param value {@link #referenceSource} (Supporting literature.)
+     * @return The first repetition of repeating field {@link #source}, creating it if it does not already exist
      */
-    public boolean hasReferenceSource(String value) { 
-      if (this.referenceSource == null)
-        return false;
-      for (StringType v : this.referenceSource)
-        if (v.getValue().equals(value)) // string
-          return true;
-      return false;
+    public Reference getSourceFirstRep() { 
+      if (getSource().isEmpty()) {
+        addSource();
+      }
+      return getSource().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<DocumentReference> getSourceTarget() { 
+      if (this.sourceTarget == null)
+        this.sourceTarget = new ArrayList<DocumentReference>();
+      return this.sourceTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public DocumentReference addSourceTarget() { 
+      DocumentReference r = new DocumentReference();
+      if (this.sourceTarget == null)
+        this.sourceTarget = new ArrayList<DocumentReference>();
+      this.sourceTarget.add(r);
+      return r;
+    }
+
+    /**
+     * @return {@link #comment} (Textual comment about this record of a substance.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+     */
+    public StringType getCommentElement() { 
+      if (this.comment == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.comment");
+        else if (Configuration.doAutoCreate())
+          this.comment = new StringType(); // bb
+      return this.comment;
+    }
+
+    public boolean hasCommentElement() { 
+      return this.comment != null && !this.comment.isEmpty();
+    }
+
+    public boolean hasComment() { 
+      return this.comment != null && !this.comment.isEmpty();
+    }
+
+    /**
+     * @param value {@link #comment} (Textual comment about this record of a substance.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+     */
+    public SubstanceSpecification setCommentElement(StringType value) { 
+      this.comment = value;
+      return this;
+    }
+
+    /**
+     * @return Textual comment about this record of a substance.
+     */
+    public String getComment() { 
+      return this.comment == null ? null : this.comment.getValue();
+    }
+
+    /**
+     * @param value Textual comment about this record of a substance.
+     */
+    public SubstanceSpecification setComment(String value) { 
+      if (Utilities.noString(value))
+        this.comment = null;
+      else {
+        if (this.comment == null)
+          this.comment = new StringType();
+        this.comment.setValue(value);
+      }
+      return this;
     }
 
     /**
@@ -4413,109 +5358,109 @@ public class SubstanceSpecification extends DomainResource {
     }
 
     /**
-     * @return {@link #substanceCode} (Codes associated with the substance.)
+     * @return {@link #code} (Codes associated with the substance.)
      */
-    public List<SubstanceSpecificationSubstanceCodeComponent> getSubstanceCode() { 
-      if (this.substanceCode == null)
-        this.substanceCode = new ArrayList<SubstanceSpecificationSubstanceCodeComponent>();
-      return this.substanceCode;
+    public List<SubstanceSpecificationCodeComponent> getCode() { 
+      if (this.code == null)
+        this.code = new ArrayList<SubstanceSpecificationCodeComponent>();
+      return this.code;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public SubstanceSpecification setSubstanceCode(List<SubstanceSpecificationSubstanceCodeComponent> theSubstanceCode) { 
-      this.substanceCode = theSubstanceCode;
+    public SubstanceSpecification setCode(List<SubstanceSpecificationCodeComponent> theCode) { 
+      this.code = theCode;
       return this;
     }
 
-    public boolean hasSubstanceCode() { 
-      if (this.substanceCode == null)
+    public boolean hasCode() { 
+      if (this.code == null)
         return false;
-      for (SubstanceSpecificationSubstanceCodeComponent item : this.substanceCode)
+      for (SubstanceSpecificationCodeComponent item : this.code)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public SubstanceSpecificationSubstanceCodeComponent addSubstanceCode() { //3
-      SubstanceSpecificationSubstanceCodeComponent t = new SubstanceSpecificationSubstanceCodeComponent();
-      if (this.substanceCode == null)
-        this.substanceCode = new ArrayList<SubstanceSpecificationSubstanceCodeComponent>();
-      this.substanceCode.add(t);
+    public SubstanceSpecificationCodeComponent addCode() { //3
+      SubstanceSpecificationCodeComponent t = new SubstanceSpecificationCodeComponent();
+      if (this.code == null)
+        this.code = new ArrayList<SubstanceSpecificationCodeComponent>();
+      this.code.add(t);
       return t;
     }
 
-    public SubstanceSpecification addSubstanceCode(SubstanceSpecificationSubstanceCodeComponent t) { //3
+    public SubstanceSpecification addCode(SubstanceSpecificationCodeComponent t) { //3
       if (t == null)
         return this;
-      if (this.substanceCode == null)
-        this.substanceCode = new ArrayList<SubstanceSpecificationSubstanceCodeComponent>();
-      this.substanceCode.add(t);
+      if (this.code == null)
+        this.code = new ArrayList<SubstanceSpecificationCodeComponent>();
+      this.code.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #substanceCode}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #code}, creating it if it does not already exist
      */
-    public SubstanceSpecificationSubstanceCodeComponent getSubstanceCodeFirstRep() { 
-      if (getSubstanceCode().isEmpty()) {
-        addSubstanceCode();
+    public SubstanceSpecificationCodeComponent getCodeFirstRep() { 
+      if (getCode().isEmpty()) {
+        addCode();
       }
-      return getSubstanceCode().get(0);
+      return getCode().get(0);
     }
 
     /**
-     * @return {@link #substanceName} (Names applicable to this substence.)
+     * @return {@link #name} (Names applicable to this substance.)
      */
-    public List<SubstanceSpecificationSubstanceNameComponent> getSubstanceName() { 
-      if (this.substanceName == null)
-        this.substanceName = new ArrayList<SubstanceSpecificationSubstanceNameComponent>();
-      return this.substanceName;
+    public List<SubstanceSpecificationNameComponent> getName() { 
+      if (this.name == null)
+        this.name = new ArrayList<SubstanceSpecificationNameComponent>();
+      return this.name;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public SubstanceSpecification setSubstanceName(List<SubstanceSpecificationSubstanceNameComponent> theSubstanceName) { 
-      this.substanceName = theSubstanceName;
+    public SubstanceSpecification setName(List<SubstanceSpecificationNameComponent> theName) { 
+      this.name = theName;
       return this;
     }
 
-    public boolean hasSubstanceName() { 
-      if (this.substanceName == null)
+    public boolean hasName() { 
+      if (this.name == null)
         return false;
-      for (SubstanceSpecificationSubstanceNameComponent item : this.substanceName)
+      for (SubstanceSpecificationNameComponent item : this.name)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public SubstanceSpecificationSubstanceNameComponent addSubstanceName() { //3
-      SubstanceSpecificationSubstanceNameComponent t = new SubstanceSpecificationSubstanceNameComponent();
-      if (this.substanceName == null)
-        this.substanceName = new ArrayList<SubstanceSpecificationSubstanceNameComponent>();
-      this.substanceName.add(t);
+    public SubstanceSpecificationNameComponent addName() { //3
+      SubstanceSpecificationNameComponent t = new SubstanceSpecificationNameComponent();
+      if (this.name == null)
+        this.name = new ArrayList<SubstanceSpecificationNameComponent>();
+      this.name.add(t);
       return t;
     }
 
-    public SubstanceSpecification addSubstanceName(SubstanceSpecificationSubstanceNameComponent t) { //3
+    public SubstanceSpecification addName(SubstanceSpecificationNameComponent t) { //3
       if (t == null)
         return this;
-      if (this.substanceName == null)
-        this.substanceName = new ArrayList<SubstanceSpecificationSubstanceNameComponent>();
-      this.substanceName.add(t);
+      if (this.name == null)
+        this.name = new ArrayList<SubstanceSpecificationNameComponent>();
+      this.name.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #substanceName}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #name}, creating it if it does not already exist
      */
-    public SubstanceSpecificationSubstanceNameComponent getSubstanceNameFirstRep() { 
-      if (getSubstanceName().isEmpty()) {
-        addSubstanceName();
+    public SubstanceSpecificationNameComponent getNameFirstRep() { 
+      if (getName().isEmpty()) {
+        addName();
       }
-      return getSubstanceName().get(0);
+      return getName().get(0);
     }
 
     /**
@@ -4572,6 +5517,103 @@ public class SubstanceSpecification extends DomainResource {
     }
 
     /**
+     * @return {@link #relationship} (A link between this substance and another, with details of the relationship.)
+     */
+    public List<SubstanceSpecificationRelationshipComponent> getRelationship() { 
+      if (this.relationship == null)
+        this.relationship = new ArrayList<SubstanceSpecificationRelationshipComponent>();
+      return this.relationship;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SubstanceSpecification setRelationship(List<SubstanceSpecificationRelationshipComponent> theRelationship) { 
+      this.relationship = theRelationship;
+      return this;
+    }
+
+    public boolean hasRelationship() { 
+      if (this.relationship == null)
+        return false;
+      for (SubstanceSpecificationRelationshipComponent item : this.relationship)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public SubstanceSpecificationRelationshipComponent addRelationship() { //3
+      SubstanceSpecificationRelationshipComponent t = new SubstanceSpecificationRelationshipComponent();
+      if (this.relationship == null)
+        this.relationship = new ArrayList<SubstanceSpecificationRelationshipComponent>();
+      this.relationship.add(t);
+      return t;
+    }
+
+    public SubstanceSpecification addRelationship(SubstanceSpecificationRelationshipComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.relationship == null)
+        this.relationship = new ArrayList<SubstanceSpecificationRelationshipComponent>();
+      this.relationship.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #relationship}, creating it if it does not already exist
+     */
+    public SubstanceSpecificationRelationshipComponent getRelationshipFirstRep() { 
+      if (getRelationship().isEmpty()) {
+        addRelationship();
+      }
+      return getRelationship().get(0);
+    }
+
+    /**
+     * @return {@link #nucleicAcid} (Data items specific to nucleic acids.)
+     */
+    public Reference getNucleicAcid() { 
+      if (this.nucleicAcid == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.nucleicAcid");
+        else if (Configuration.doAutoCreate())
+          this.nucleicAcid = new Reference(); // cc
+      return this.nucleicAcid;
+    }
+
+    public boolean hasNucleicAcid() { 
+      return this.nucleicAcid != null && !this.nucleicAcid.isEmpty();
+    }
+
+    /**
+     * @param value {@link #nucleicAcid} (Data items specific to nucleic acids.)
+     */
+    public SubstanceSpecification setNucleicAcid(Reference value) { 
+      this.nucleicAcid = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #nucleicAcid} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Data items specific to nucleic acids.)
+     */
+    public SubstanceNucleicAcid getNucleicAcidTarget() { 
+      if (this.nucleicAcidTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.nucleicAcid");
+        else if (Configuration.doAutoCreate())
+          this.nucleicAcidTarget = new SubstanceNucleicAcid(); // aa
+      return this.nucleicAcidTarget;
+    }
+
+    /**
+     * @param value {@link #nucleicAcid} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Data items specific to nucleic acids.)
+     */
+    public SubstanceSpecification setNucleicAcidTarget(SubstanceNucleicAcid value) { 
+      this.nucleicAcidTarget = value;
+      return this;
+    }
+
+    /**
      * @return {@link #polymer} (Data items specific to polymers.)
      */
     public Reference getPolymer() { 
@@ -4615,39 +5657,139 @@ public class SubstanceSpecification extends DomainResource {
       return this;
     }
 
+    /**
+     * @return {@link #protein} (Data items specific to proteins.)
+     */
+    public Reference getProtein() { 
+      if (this.protein == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.protein");
+        else if (Configuration.doAutoCreate())
+          this.protein = new Reference(); // cc
+      return this.protein;
+    }
+
+    public boolean hasProtein() { 
+      return this.protein != null && !this.protein.isEmpty();
+    }
+
+    /**
+     * @param value {@link #protein} (Data items specific to proteins.)
+     */
+    public SubstanceSpecification setProtein(Reference value) { 
+      this.protein = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #protein} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Data items specific to proteins.)
+     */
+    public SubstanceProtein getProteinTarget() { 
+      if (this.proteinTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.protein");
+        else if (Configuration.doAutoCreate())
+          this.proteinTarget = new SubstanceProtein(); // aa
+      return this.proteinTarget;
+    }
+
+    /**
+     * @param value {@link #protein} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Data items specific to proteins.)
+     */
+    public SubstanceSpecification setProteinTarget(SubstanceProtein value) { 
+      this.proteinTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #sourceMaterial} (Material or taxonomic/anatomical source for the substance.)
+     */
+    public Reference getSourceMaterial() { 
+      if (this.sourceMaterial == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.sourceMaterial");
+        else if (Configuration.doAutoCreate())
+          this.sourceMaterial = new Reference(); // cc
+      return this.sourceMaterial;
+    }
+
+    public boolean hasSourceMaterial() { 
+      return this.sourceMaterial != null && !this.sourceMaterial.isEmpty();
+    }
+
+    /**
+     * @param value {@link #sourceMaterial} (Material or taxonomic/anatomical source for the substance.)
+     */
+    public SubstanceSpecification setSourceMaterial(Reference value) { 
+      this.sourceMaterial = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #sourceMaterial} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Material or taxonomic/anatomical source for the substance.)
+     */
+    public SubstanceSourceMaterial getSourceMaterialTarget() { 
+      if (this.sourceMaterialTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create SubstanceSpecification.sourceMaterial");
+        else if (Configuration.doAutoCreate())
+          this.sourceMaterialTarget = new SubstanceSourceMaterial(); // aa
+      return this.sourceMaterialTarget;
+    }
+
+    /**
+     * @param value {@link #sourceMaterial} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Material or taxonomic/anatomical source for the substance.)
+     */
+    public SubstanceSpecification setSourceMaterialTarget(SubstanceSourceMaterial value) { 
+      this.sourceMaterialTarget = value;
+      return this;
+    }
+
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("comment", "string", "Textual comment.", 0, 1, comment));
-        children.add(new Property("stoichiometric", "boolean", "Chemicals may be stoichiometric or non-stoichiometric.", 0, 1, stoichiometric));
         children.add(new Property("identifier", "Identifier", "Identifier by which this substance is known.", 0, 1, identifier));
         children.add(new Property("type", "CodeableConcept", "High level categorization, e.g. polymer or nucleic acid.", 0, 1, type));
-        children.add(new Property("referenceSource", "string", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource));
+        children.add(new Property("status", "CodeableConcept", "Status of substance within the catalogue e.g. approved.", 0, 1, status));
+        children.add(new Property("domain", "CodeableConcept", "If the substance applies to only human or veterinary use.", 0, 1, domain));
+        children.add(new Property("description", "string", "Textual description of the substance.", 0, 1, description));
+        children.add(new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source));
+        children.add(new Property("comment", "string", "Textual comment about this record of a substance.", 0, 1, comment));
         children.add(new Property("moiety", "", "Moiety, for structural modifications.", 0, java.lang.Integer.MAX_VALUE, moiety));
         children.add(new Property("property", "", "General specifications for this substance, including how it is related to other substances.", 0, java.lang.Integer.MAX_VALUE, property));
         children.add(new Property("referenceInformation", "Reference(SubstanceReferenceInformation)", "General information detailing this substance.", 0, 1, referenceInformation));
         children.add(new Property("structure", "", "Structural information.", 0, 1, structure));
-        children.add(new Property("substanceCode", "", "Codes associated with the substance.", 0, java.lang.Integer.MAX_VALUE, substanceCode));
-        children.add(new Property("substanceName", "", "Names applicable to this substence.", 0, java.lang.Integer.MAX_VALUE, substanceName));
+        children.add(new Property("code", "", "Codes associated with the substance.", 0, java.lang.Integer.MAX_VALUE, code));
+        children.add(new Property("name", "", "Names applicable to this substance.", 0, java.lang.Integer.MAX_VALUE, name));
         children.add(new Property("molecularWeight", "@SubstanceSpecification.structure.isotope.molecularWeight", "The molecular weight or weight range (for proteins, polymers or nucleic acids).", 0, java.lang.Integer.MAX_VALUE, molecularWeight));
+        children.add(new Property("relationship", "", "A link between this substance and another, with details of the relationship.", 0, java.lang.Integer.MAX_VALUE, relationship));
+        children.add(new Property("nucleicAcid", "Reference(SubstanceNucleicAcid)", "Data items specific to nucleic acids.", 0, 1, nucleicAcid));
         children.add(new Property("polymer", "Reference(SubstancePolymer)", "Data items specific to polymers.", 0, 1, polymer));
+        children.add(new Property("protein", "Reference(SubstanceProtein)", "Data items specific to proteins.", 0, 1, protein));
+        children.add(new Property("sourceMaterial", "Reference(SubstanceSourceMaterial)", "Material or taxonomic/anatomical source for the substance.", 0, 1, sourceMaterial));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 950398559: /*comment*/  return new Property("comment", "string", "Textual comment.", 0, 1, comment);
-        case -251826186: /*stoichiometric*/  return new Property("stoichiometric", "boolean", "Chemicals may be stoichiometric or non-stoichiometric.", 0, 1, stoichiometric);
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifier by which this substance is known.", 0, 1, identifier);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "High level categorization, e.g. polymer or nucleic acid.", 0, 1, type);
-        case 882421574: /*referenceSource*/  return new Property("referenceSource", "string", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, referenceSource);
+        case -892481550: /*status*/  return new Property("status", "CodeableConcept", "Status of substance within the catalogue e.g. approved.", 0, 1, status);
+        case -1326197564: /*domain*/  return new Property("domain", "CodeableConcept", "If the substance applies to only human or veterinary use.", 0, 1, domain);
+        case -1724546052: /*description*/  return new Property("description", "string", "Textual description of the substance.", 0, 1, description);
+        case -896505829: /*source*/  return new Property("source", "Reference(DocumentReference)", "Supporting literature.", 0, java.lang.Integer.MAX_VALUE, source);
+        case 950398559: /*comment*/  return new Property("comment", "string", "Textual comment about this record of a substance.", 0, 1, comment);
         case -1068650173: /*moiety*/  return new Property("moiety", "", "Moiety, for structural modifications.", 0, java.lang.Integer.MAX_VALUE, moiety);
         case -993141291: /*property*/  return new Property("property", "", "General specifications for this substance, including how it is related to other substances.", 0, java.lang.Integer.MAX_VALUE, property);
         case -2117930783: /*referenceInformation*/  return new Property("referenceInformation", "Reference(SubstanceReferenceInformation)", "General information detailing this substance.", 0, 1, referenceInformation);
         case 144518515: /*structure*/  return new Property("structure", "", "Structural information.", 0, 1, structure);
-        case 1517793149: /*substanceCode*/  return new Property("substanceCode", "", "Codes associated with the substance.", 0, java.lang.Integer.MAX_VALUE, substanceCode);
-        case 1518107675: /*substanceName*/  return new Property("substanceName", "", "Names applicable to this substence.", 0, java.lang.Integer.MAX_VALUE, substanceName);
+        case 3059181: /*code*/  return new Property("code", "", "Codes associated with the substance.", 0, java.lang.Integer.MAX_VALUE, code);
+        case 3373707: /*name*/  return new Property("name", "", "Names applicable to this substance.", 0, java.lang.Integer.MAX_VALUE, name);
         case 635625672: /*molecularWeight*/  return new Property("molecularWeight", "@SubstanceSpecification.structure.isotope.molecularWeight", "The molecular weight or weight range (for proteins, polymers or nucleic acids).", 0, java.lang.Integer.MAX_VALUE, molecularWeight);
+        case -261851592: /*relationship*/  return new Property("relationship", "", "A link between this substance and another, with details of the relationship.", 0, java.lang.Integer.MAX_VALUE, relationship);
+        case 1625275180: /*nucleicAcid*/  return new Property("nucleicAcid", "Reference(SubstanceNucleicAcid)", "Data items specific to nucleic acids.", 0, 1, nucleicAcid);
         case -397514098: /*polymer*/  return new Property("polymer", "Reference(SubstancePolymer)", "Data items specific to polymers.", 0, 1, polymer);
+        case -309012605: /*protein*/  return new Property("protein", "Reference(SubstanceProtein)", "Data items specific to proteins.", 0, 1, protein);
+        case -1064442270: /*sourceMaterial*/  return new Property("sourceMaterial", "Reference(SubstanceSourceMaterial)", "Material or taxonomic/anatomical source for the substance.", 0, 1, sourceMaterial);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -4656,19 +5798,25 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
-        case -251826186: /*stoichiometric*/ return this.stoichiometric == null ? new Base[0] : new Base[] {this.stoichiometric}; // BooleanType
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case 882421574: /*referenceSource*/ return this.referenceSource == null ? new Base[0] : this.referenceSource.toArray(new Base[this.referenceSource.size()]); // StringType
+        case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // CodeableConcept
+        case -1326197564: /*domain*/ return this.domain == null ? new Base[0] : new Base[] {this.domain}; // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : this.source.toArray(new Base[this.source.size()]); // Reference
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
         case -1068650173: /*moiety*/ return this.moiety == null ? new Base[0] : this.moiety.toArray(new Base[this.moiety.size()]); // SubstanceSpecificationMoietyComponent
         case -993141291: /*property*/ return this.property == null ? new Base[0] : this.property.toArray(new Base[this.property.size()]); // SubstanceSpecificationPropertyComponent
         case -2117930783: /*referenceInformation*/ return this.referenceInformation == null ? new Base[0] : new Base[] {this.referenceInformation}; // Reference
         case 144518515: /*structure*/ return this.structure == null ? new Base[0] : new Base[] {this.structure}; // SubstanceSpecificationStructureComponent
-        case 1517793149: /*substanceCode*/ return this.substanceCode == null ? new Base[0] : this.substanceCode.toArray(new Base[this.substanceCode.size()]); // SubstanceSpecificationSubstanceCodeComponent
-        case 1518107675: /*substanceName*/ return this.substanceName == null ? new Base[0] : this.substanceName.toArray(new Base[this.substanceName.size()]); // SubstanceSpecificationSubstanceNameComponent
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // SubstanceSpecificationCodeComponent
+        case 3373707: /*name*/ return this.name == null ? new Base[0] : this.name.toArray(new Base[this.name.size()]); // SubstanceSpecificationNameComponent
         case 635625672: /*molecularWeight*/ return this.molecularWeight == null ? new Base[0] : this.molecularWeight.toArray(new Base[this.molecularWeight.size()]); // SubstanceSpecificationStructureIsotopeMolecularWeightComponent
+        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : this.relationship.toArray(new Base[this.relationship.size()]); // SubstanceSpecificationRelationshipComponent
+        case 1625275180: /*nucleicAcid*/ return this.nucleicAcid == null ? new Base[0] : new Base[] {this.nucleicAcid}; // Reference
         case -397514098: /*polymer*/ return this.polymer == null ? new Base[0] : new Base[] {this.polymer}; // Reference
+        case -309012605: /*protein*/ return this.protein == null ? new Base[0] : new Base[] {this.protein}; // Reference
+        case -1064442270: /*sourceMaterial*/ return this.sourceMaterial == null ? new Base[0] : new Base[] {this.sourceMaterial}; // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -4677,20 +5825,26 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 950398559: // comment
-          this.comment = castToString(value); // StringType
-          return value;
-        case -251826186: // stoichiometric
-          this.stoichiometric = castToBoolean(value); // BooleanType
-          return value;
         case -1618432855: // identifier
           this.identifier = castToIdentifier(value); // Identifier
           return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case 882421574: // referenceSource
-          this.getReferenceSource().add(castToString(value)); // StringType
+        case -892481550: // status
+          this.status = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1326197564: // domain
+          this.domain = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          return value;
+        case -896505829: // source
+          this.getSource().add(castToReference(value)); // Reference
+          return value;
+        case 950398559: // comment
+          this.comment = castToString(value); // StringType
           return value;
         case -1068650173: // moiety
           this.getMoiety().add((SubstanceSpecificationMoietyComponent) value); // SubstanceSpecificationMoietyComponent
@@ -4704,17 +5858,29 @@ public class SubstanceSpecification extends DomainResource {
         case 144518515: // structure
           this.structure = (SubstanceSpecificationStructureComponent) value; // SubstanceSpecificationStructureComponent
           return value;
-        case 1517793149: // substanceCode
-          this.getSubstanceCode().add((SubstanceSpecificationSubstanceCodeComponent) value); // SubstanceSpecificationSubstanceCodeComponent
+        case 3059181: // code
+          this.getCode().add((SubstanceSpecificationCodeComponent) value); // SubstanceSpecificationCodeComponent
           return value;
-        case 1518107675: // substanceName
-          this.getSubstanceName().add((SubstanceSpecificationSubstanceNameComponent) value); // SubstanceSpecificationSubstanceNameComponent
+        case 3373707: // name
+          this.getName().add((SubstanceSpecificationNameComponent) value); // SubstanceSpecificationNameComponent
           return value;
         case 635625672: // molecularWeight
           this.getMolecularWeight().add((SubstanceSpecificationStructureIsotopeMolecularWeightComponent) value); // SubstanceSpecificationStructureIsotopeMolecularWeightComponent
           return value;
+        case -261851592: // relationship
+          this.getRelationship().add((SubstanceSpecificationRelationshipComponent) value); // SubstanceSpecificationRelationshipComponent
+          return value;
+        case 1625275180: // nucleicAcid
+          this.nucleicAcid = castToReference(value); // Reference
+          return value;
         case -397514098: // polymer
           this.polymer = castToReference(value); // Reference
+          return value;
+        case -309012605: // protein
+          this.protein = castToReference(value); // Reference
+          return value;
+        case -1064442270: // sourceMaterial
+          this.sourceMaterial = castToReference(value); // Reference
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -4723,16 +5889,20 @@ public class SubstanceSpecification extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("comment")) {
-          this.comment = castToString(value); // StringType
-        } else if (name.equals("stoichiometric")) {
-          this.stoichiometric = castToBoolean(value); // BooleanType
-        } else if (name.equals("identifier")) {
+        if (name.equals("identifier")) {
           this.identifier = castToIdentifier(value); // Identifier
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("referenceSource")) {
-          this.getReferenceSource().add(castToString(value));
+        } else if (name.equals("status")) {
+          this.status = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("domain")) {
+          this.domain = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("description")) {
+          this.description = castToString(value); // StringType
+        } else if (name.equals("source")) {
+          this.getSource().add(castToReference(value));
+        } else if (name.equals("comment")) {
+          this.comment = castToString(value); // StringType
         } else if (name.equals("moiety")) {
           this.getMoiety().add((SubstanceSpecificationMoietyComponent) value);
         } else if (name.equals("property")) {
@@ -4741,14 +5911,22 @@ public class SubstanceSpecification extends DomainResource {
           this.referenceInformation = castToReference(value); // Reference
         } else if (name.equals("structure")) {
           this.structure = (SubstanceSpecificationStructureComponent) value; // SubstanceSpecificationStructureComponent
-        } else if (name.equals("substanceCode")) {
-          this.getSubstanceCode().add((SubstanceSpecificationSubstanceCodeComponent) value);
-        } else if (name.equals("substanceName")) {
-          this.getSubstanceName().add((SubstanceSpecificationSubstanceNameComponent) value);
+        } else if (name.equals("code")) {
+          this.getCode().add((SubstanceSpecificationCodeComponent) value);
+        } else if (name.equals("name")) {
+          this.getName().add((SubstanceSpecificationNameComponent) value);
         } else if (name.equals("molecularWeight")) {
           this.getMolecularWeight().add((SubstanceSpecificationStructureIsotopeMolecularWeightComponent) value);
+        } else if (name.equals("relationship")) {
+          this.getRelationship().add((SubstanceSpecificationRelationshipComponent) value);
+        } else if (name.equals("nucleicAcid")) {
+          this.nucleicAcid = castToReference(value); // Reference
         } else if (name.equals("polymer")) {
           this.polymer = castToReference(value); // Reference
+        } else if (name.equals("protein")) {
+          this.protein = castToReference(value); // Reference
+        } else if (name.equals("sourceMaterial")) {
+          this.sourceMaterial = castToReference(value); // Reference
         } else
           return super.setProperty(name, value);
         return value;
@@ -4757,19 +5935,25 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 950398559:  return getCommentElement();
-        case -251826186:  return getStoichiometricElement();
         case -1618432855:  return getIdentifier(); 
         case 3575610:  return getType(); 
-        case 882421574:  return addReferenceSourceElement();
+        case -892481550:  return getStatus(); 
+        case -1326197564:  return getDomain(); 
+        case -1724546052:  return getDescriptionElement();
+        case -896505829:  return addSource(); 
+        case 950398559:  return getCommentElement();
         case -1068650173:  return addMoiety(); 
         case -993141291:  return addProperty(); 
         case -2117930783:  return getReferenceInformation(); 
         case 144518515:  return getStructure(); 
-        case 1517793149:  return addSubstanceCode(); 
-        case 1518107675:  return addSubstanceName(); 
+        case 3059181:  return addCode(); 
+        case 3373707:  return addName(); 
         case 635625672:  return addMolecularWeight(); 
+        case -261851592:  return addRelationship(); 
+        case 1625275180:  return getNucleicAcid(); 
         case -397514098:  return getPolymer(); 
+        case -309012605:  return getProtein(); 
+        case -1064442270:  return getSourceMaterial(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -4778,19 +5962,25 @@ public class SubstanceSpecification extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 950398559: /*comment*/ return new String[] {"string"};
-        case -251826186: /*stoichiometric*/ return new String[] {"boolean"};
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 882421574: /*referenceSource*/ return new String[] {"string"};
+        case -892481550: /*status*/ return new String[] {"CodeableConcept"};
+        case -1326197564: /*domain*/ return new String[] {"CodeableConcept"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case -896505829: /*source*/ return new String[] {"Reference"};
+        case 950398559: /*comment*/ return new String[] {"string"};
         case -1068650173: /*moiety*/ return new String[] {};
         case -993141291: /*property*/ return new String[] {};
         case -2117930783: /*referenceInformation*/ return new String[] {"Reference"};
         case 144518515: /*structure*/ return new String[] {};
-        case 1517793149: /*substanceCode*/ return new String[] {};
-        case 1518107675: /*substanceName*/ return new String[] {};
+        case 3059181: /*code*/ return new String[] {};
+        case 3373707: /*name*/ return new String[] {};
         case 635625672: /*molecularWeight*/ return new String[] {"@SubstanceSpecification.structure.isotope.molecularWeight"};
+        case -261851592: /*relationship*/ return new String[] {};
+        case 1625275180: /*nucleicAcid*/ return new String[] {"Reference"};
         case -397514098: /*polymer*/ return new String[] {"Reference"};
+        case -309012605: /*protein*/ return new String[] {"Reference"};
+        case -1064442270: /*sourceMaterial*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -4798,13 +5988,7 @@ public class SubstanceSpecification extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("comment")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.comment");
-        }
-        else if (name.equals("stoichiometric")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.stoichiometric");
-        }
-        else if (name.equals("identifier")) {
+        if (name.equals("identifier")) {
           this.identifier = new Identifier();
           return this.identifier;
         }
@@ -4812,8 +5996,22 @@ public class SubstanceSpecification extends DomainResource {
           this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("referenceSource")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.referenceSource");
+        else if (name.equals("status")) {
+          this.status = new CodeableConcept();
+          return this.status;
+        }
+        else if (name.equals("domain")) {
+          this.domain = new CodeableConcept();
+          return this.domain;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.description");
+        }
+        else if (name.equals("source")) {
+          return addSource();
+        }
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type SubstanceSpecification.comment");
         }
         else if (name.equals("moiety")) {
           return addMoiety();
@@ -4829,18 +6027,33 @@ public class SubstanceSpecification extends DomainResource {
           this.structure = new SubstanceSpecificationStructureComponent();
           return this.structure;
         }
-        else if (name.equals("substanceCode")) {
-          return addSubstanceCode();
+        else if (name.equals("code")) {
+          return addCode();
         }
-        else if (name.equals("substanceName")) {
-          return addSubstanceName();
+        else if (name.equals("name")) {
+          return addName();
         }
         else if (name.equals("molecularWeight")) {
           return addMolecularWeight();
         }
+        else if (name.equals("relationship")) {
+          return addRelationship();
+        }
+        else if (name.equals("nucleicAcid")) {
+          this.nucleicAcid = new Reference();
+          return this.nucleicAcid;
+        }
         else if (name.equals("polymer")) {
           this.polymer = new Reference();
           return this.polymer;
+        }
+        else if (name.equals("protein")) {
+          this.protein = new Reference();
+          return this.protein;
+        }
+        else if (name.equals("sourceMaterial")) {
+          this.sourceMaterial = new Reference();
+          return this.sourceMaterial;
         }
         else
           return super.addChild(name);
@@ -4854,15 +6067,17 @@ public class SubstanceSpecification extends DomainResource {
       public SubstanceSpecification copy() {
         SubstanceSpecification dst = new SubstanceSpecification();
         copyValues(dst);
-        dst.comment = comment == null ? null : comment.copy();
-        dst.stoichiometric = stoichiometric == null ? null : stoichiometric.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.type = type == null ? null : type.copy();
-        if (referenceSource != null) {
-          dst.referenceSource = new ArrayList<StringType>();
-          for (StringType i : referenceSource)
-            dst.referenceSource.add(i.copy());
+        dst.status = status == null ? null : status.copy();
+        dst.domain = domain == null ? null : domain.copy();
+        dst.description = description == null ? null : description.copy();
+        if (source != null) {
+          dst.source = new ArrayList<Reference>();
+          for (Reference i : source)
+            dst.source.add(i.copy());
         };
+        dst.comment = comment == null ? null : comment.copy();
         if (moiety != null) {
           dst.moiety = new ArrayList<SubstanceSpecificationMoietyComponent>();
           for (SubstanceSpecificationMoietyComponent i : moiety)
@@ -4875,22 +6090,30 @@ public class SubstanceSpecification extends DomainResource {
         };
         dst.referenceInformation = referenceInformation == null ? null : referenceInformation.copy();
         dst.structure = structure == null ? null : structure.copy();
-        if (substanceCode != null) {
-          dst.substanceCode = new ArrayList<SubstanceSpecificationSubstanceCodeComponent>();
-          for (SubstanceSpecificationSubstanceCodeComponent i : substanceCode)
-            dst.substanceCode.add(i.copy());
+        if (code != null) {
+          dst.code = new ArrayList<SubstanceSpecificationCodeComponent>();
+          for (SubstanceSpecificationCodeComponent i : code)
+            dst.code.add(i.copy());
         };
-        if (substanceName != null) {
-          dst.substanceName = new ArrayList<SubstanceSpecificationSubstanceNameComponent>();
-          for (SubstanceSpecificationSubstanceNameComponent i : substanceName)
-            dst.substanceName.add(i.copy());
+        if (name != null) {
+          dst.name = new ArrayList<SubstanceSpecificationNameComponent>();
+          for (SubstanceSpecificationNameComponent i : name)
+            dst.name.add(i.copy());
         };
         if (molecularWeight != null) {
           dst.molecularWeight = new ArrayList<SubstanceSpecificationStructureIsotopeMolecularWeightComponent>();
           for (SubstanceSpecificationStructureIsotopeMolecularWeightComponent i : molecularWeight)
             dst.molecularWeight.add(i.copy());
         };
+        if (relationship != null) {
+          dst.relationship = new ArrayList<SubstanceSpecificationRelationshipComponent>();
+          for (SubstanceSpecificationRelationshipComponent i : relationship)
+            dst.relationship.add(i.copy());
+        };
+        dst.nucleicAcid = nucleicAcid == null ? null : nucleicAcid.copy();
         dst.polymer = polymer == null ? null : polymer.copy();
+        dst.protein = protein == null ? null : protein.copy();
+        dst.sourceMaterial = sourceMaterial == null ? null : sourceMaterial.copy();
         return dst;
       }
 
@@ -4905,12 +6128,14 @@ public class SubstanceSpecification extends DomainResource {
         if (!(other_ instanceof SubstanceSpecification))
           return false;
         SubstanceSpecification o = (SubstanceSpecification) other_;
-        return compareDeep(comment, o.comment, true) && compareDeep(stoichiometric, o.stoichiometric, true)
-           && compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(referenceSource, o.referenceSource, true)
-           && compareDeep(moiety, o.moiety, true) && compareDeep(property, o.property, true) && compareDeep(referenceInformation, o.referenceInformation, true)
-           && compareDeep(structure, o.structure, true) && compareDeep(substanceCode, o.substanceCode, true)
-           && compareDeep(substanceName, o.substanceName, true) && compareDeep(molecularWeight, o.molecularWeight, true)
-           && compareDeep(polymer, o.polymer, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(type, o.type, true) && compareDeep(status, o.status, true)
+           && compareDeep(domain, o.domain, true) && compareDeep(description, o.description, true) && compareDeep(source, o.source, true)
+           && compareDeep(comment, o.comment, true) && compareDeep(moiety, o.moiety, true) && compareDeep(property, o.property, true)
+           && compareDeep(referenceInformation, o.referenceInformation, true) && compareDeep(structure, o.structure, true)
+           && compareDeep(code, o.code, true) && compareDeep(name, o.name, true) && compareDeep(molecularWeight, o.molecularWeight, true)
+           && compareDeep(relationship, o.relationship, true) && compareDeep(nucleicAcid, o.nucleicAcid, true)
+           && compareDeep(polymer, o.polymer, true) && compareDeep(protein, o.protein, true) && compareDeep(sourceMaterial, o.sourceMaterial, true)
+          ;
       }
 
       @Override
@@ -4920,20 +6145,40 @@ public class SubstanceSpecification extends DomainResource {
         if (!(other_ instanceof SubstanceSpecification))
           return false;
         SubstanceSpecification o = (SubstanceSpecification) other_;
-        return compareValues(comment, o.comment, true) && compareValues(stoichiometric, o.stoichiometric, true)
-           && compareValues(referenceSource, o.referenceSource, true);
+        return compareValues(description, o.description, true) && compareValues(comment, o.comment, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(comment, stoichiometric, identifier
-          , type, referenceSource, moiety, property, referenceInformation, structure, substanceCode
-          , substanceName, molecularWeight, polymer);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, type, status
+          , domain, description, source, comment, moiety, property, referenceInformation
+          , structure, code, name, molecularWeight, relationship, nucleicAcid, polymer, protein
+          , sourceMaterial);
       }
 
   @Override
   public ResourceType getResourceType() {
     return ResourceType.SubstanceSpecification;
    }
+
+ /**
+   * Search parameter: <b>code</b>
+   * <p>
+   * Description: <b>Codes associated with the substance</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SubstanceSpecification.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="code", path="SubstanceSpecification.code", description="Codes associated with the substance", type="token" )
+  public static final String SP_CODE = "code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>code</b>
+   * <p>
+   * Description: <b>Codes associated with the substance</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>SubstanceSpecification.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
 
 
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,7 +57,7 @@ public enum MedicationStatementStatus {
          */
         STOPPED, 
         /**
-         * Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called "suspended".
+         * Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called 'suspended'.
          */
         ONHOLD, 
         /**
@@ -65,7 +65,7 @@ public enum MedicationStatementStatus {
          */
         UNKNOWN, 
         /**
-         * The medication was not consumed by the patient.
+         * The medication was not consumed by the patient
          */
         NOTTAKEN, 
         /**
@@ -107,7 +107,7 @@ public enum MedicationStatementStatus {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/medication-statement-status";
+          return "http://hl7.org/fhir/CodeSystem/medication-statement-status";
         }
         public String getDefinition() {
           switch (this) {
@@ -116,9 +116,9 @@ public enum MedicationStatementStatus {
             case ENTEREDINERROR: return "Some of the actions that are implied by the medication statement may have occurred.  For example, the patient may have taken some of the medication.  Clinical decision support systems should take this status into account.";
             case INTENDED: return "The medication may be taken at some time in the future.";
             case STOPPED: return "Actions implied by the statement have been permanently halted, before all of them occurred. This should not be used if the statement was entered in error.";
-            case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called \"suspended\".";
+            case ONHOLD: return "Actions implied by the statement have been temporarily halted, but are expected to continue later. May also be called 'suspended'.";
             case UNKNOWN: return "The state of the medication use is not currently known.";
-            case NOTTAKEN: return "The medication was not consumed by the patient.";
+            case NOTTAKEN: return "The medication was not consumed by the patient";
             default: return "?";
           }
         }

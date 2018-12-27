@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -48,14 +48,6 @@ public enum ConditionClinical {
          * The subject is experiencing a return of a condition, or signs and symptoms after a period of improvement or remission, e.g. relapse of cancer, multiple sclerosis, rheumatoid arthritis, systemic lupus erythematosus, bipolar disorder, [psychotic relapse of] schizophrenia, etc.
          */
         RELAPSE, 
-        /**
-         * The subject's condition is adequately or well managed such that the recommended evidence-based clinical outcome targets are met.
-         */
-        WELLCONTROLLED, 
-        /**
-         * The subject's condition is inadequately/poorly managed such that the recommended evidence-based clinical outcome targets are not met.
-         */
-        POORLYCONTROLLED, 
         /**
          * The subject is no longer experiencing the symptoms of the condition or there is no longer evidence of the condition.
          */
@@ -81,10 +73,6 @@ public enum ConditionClinical {
           return RECURRENCE;
         if ("relapse".equals(codeString))
           return RELAPSE;
-        if ("well-controlled".equals(codeString))
-          return WELLCONTROLLED;
-        if ("poorly-controlled".equals(codeString))
-          return POORLYCONTROLLED;
         if ("inactive".equals(codeString))
           return INACTIVE;
         if ("remission".equals(codeString))
@@ -98,8 +86,6 @@ public enum ConditionClinical {
             case ACTIVE: return "active";
             case RECURRENCE: return "recurrence";
             case RELAPSE: return "relapse";
-            case WELLCONTROLLED: return "well-controlled";
-            case POORLYCONTROLLED: return "poorly-controlled";
             case INACTIVE: return "inactive";
             case REMISSION: return "remission";
             case RESOLVED: return "resolved";
@@ -114,8 +100,6 @@ public enum ConditionClinical {
             case ACTIVE: return "The subject is currently experiencing the symptoms of the condition or there is evidence of the condition.";
             case RECURRENCE: return "The subject is experiencing a re-occurence or repeating of a previously resolved condition, e.g. urinary tract infection, pancreatitis, cholangitis, conjunctivitis.";
             case RELAPSE: return "The subject is experiencing a return of a condition, or signs and symptoms after a period of improvement or remission, e.g. relapse of cancer, multiple sclerosis, rheumatoid arthritis, systemic lupus erythematosus, bipolar disorder, [psychotic relapse of] schizophrenia, etc.";
-            case WELLCONTROLLED: return "The subject's condition is adequately or well managed such that the recommended evidence-based clinical outcome targets are met.";
-            case POORLYCONTROLLED: return "The subject's condition is inadequately/poorly managed such that the recommended evidence-based clinical outcome targets are not met.";
             case INACTIVE: return "The subject is no longer experiencing the symptoms of the condition or there is no longer evidence of the condition.";
             case REMISSION: return "The subject is no longer experiencing the symptoms of the condition, but there is a risk of the symptoms returning.";
             case RESOLVED: return "The subject is no longer experiencing the symptoms of the condition and there is a negligible perceived risk of the symptoms returning.";
@@ -127,8 +111,6 @@ public enum ConditionClinical {
             case ACTIVE: return "Active";
             case RECURRENCE: return "Recurrence";
             case RELAPSE: return "Relapse";
-            case WELLCONTROLLED: return "Well-Controlled";
-            case POORLYCONTROLLED: return "Poorly-Controlled";
             case INACTIVE: return "Inactive";
             case REMISSION: return "Remission";
             case RESOLVED: return "Resolved";

@@ -123,7 +123,7 @@ public class SearchParamExtractorR4Test {
 		assertNotNull(param);
 		List<PathAndRef> links = extractor.extractResourceLinks(enc, param);
 		assertEquals(1, links.size());
-		assertEquals("Encounter.location.location.where(resolve() is Location)", links.get(0).getPath());
+		assertEquals("Encounter.location.location", links.get(0).getPath());
 		assertEquals("Location/123", ((Reference) links.get(0).getRef()).getReference());
 	}
 
@@ -137,7 +137,7 @@ public class SearchParamExtractorR4Test {
 		assertNotNull(param);
 		List<PathAndRef> links = extractor.extractResourceLinks(consent, param);
 		assertEquals(1, links.size());
-		assertEquals("Consent.source.where(resolve() is Consent or resolve() is Contract or resolve() is QuestionnaireResponse or resolve() is DocumentReference)", links.get(0).getPath());
+		assertEquals("Consent.source", links.get(0).getPath());
 		assertEquals("Consent/999", ((Reference) links.get(0).getRef()).getReference());
 	}
 

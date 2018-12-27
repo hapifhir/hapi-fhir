@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -86,7 +86,7 @@ public class DiagnosticReport extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies to this report. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply although which one is not known.
+         * The authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which.
          */
         UNKNOWN, 
         /**
@@ -162,7 +162,7 @@ public class DiagnosticReport extends DomainResource {
             case APPENDED: return "Subsequent to being final, the report has been modified by adding new content. The existing content is unchanged.";
             case CANCELLED: return "The report is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
             case ENTEREDINERROR: return "The report has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies to this report. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply although which one is not known.";
+            case UNKNOWN: return "The authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which.";
             default: return "?";
           }
         }
@@ -552,10 +552,10 @@ public class DiagnosticReport extends DomainResource {
     /**
      * A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.
      */
-    @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "category", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Service category", formalDefinition="A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/diagnostic-service-sections")
-    protected CodeableConcept category;
+    protected List<CodeableConcept> category;
 
     /**
      * A code or name that describes this diagnostic report.
@@ -566,28 +566,28 @@ public class DiagnosticReport extends DomainResource {
     protected CodeableConcept code;
 
     /**
-     * The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.
+     * The subject of the report. Usually, but not always, this is a patient. However, diagnostic services also perform analyses on specimens collected from a variety of other sources.
      */
     @Child(name = "subject", type = {Patient.class, Group.class, Device.class, Location.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The subject of the report - usually, but not always, the patient", formalDefinition="The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources." )
+    @Description(shortDefinition="The subject of the report - usually, but not always, the patient", formalDefinition="The subject of the report. Usually, but not always, this is a patient. However, diagnostic services also perform analyses on specimens collected from a variety of other sources." )
     protected Reference subject;
 
     /**
-     * The actual object that is the target of the reference (The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.)
+     * The actual object that is the target of the reference (The subject of the report. Usually, but not always, this is a patient. However, diagnostic services also perform analyses on specimens collected from a variety of other sources.)
      */
     protected Resource subjectTarget;
 
     /**
-     * The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.
+     * The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport is about.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Health care event when test ordered", formalDefinition="The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about." )
-    protected Reference context;
+    @Child(name = "encounter", type = {Encounter.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Health care event when test ordered", formalDefinition="The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport is about." )
+    protected Reference encounter;
 
     /**
-     * The actual object that is the target of the reference (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.)
+     * The actual object that is the target of the reference (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport is about.)
      */
-    protected Resource contextTarget;
+    protected Encounter encounterTarget;
 
     /**
      * The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.
@@ -692,7 +692,7 @@ public class DiagnosticReport extends DomainResource {
     @Description(shortDefinition="Entire report as issued", formalDefinition="Rich text representation of the entire result as issued by the diagnostic service. Multiple formats are allowed but they SHALL be semantically equivalent." )
     protected List<Attachment> presentedForm;
 
-    private static final long serialVersionUID = 1472078619L;
+    private static final long serialVersionUID = 589102296L;
 
   /**
    * Constructor
@@ -874,25 +874,54 @@ public class DiagnosticReport extends DomainResource {
     /**
      * @return {@link #category} (A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.)
      */
-    public CodeableConcept getCategory() { 
+    public List<CodeableConcept> getCategory() { 
       if (this.category == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DiagnosticReport.category");
-        else if (Configuration.doAutoCreate())
-          this.category = new CodeableConcept(); // cc
+        this.category = new ArrayList<CodeableConcept>();
       return this.category;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public DiagnosticReport setCategory(List<CodeableConcept> theCategory) { 
+      this.category = theCategory;
+      return this;
+    }
+
     public boolean hasCategory() { 
-      return this.category != null && !this.category.isEmpty();
+      if (this.category == null)
+        return false;
+      for (CodeableConcept item : this.category)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addCategory() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return t;
+    }
+
+    public DiagnosticReport addCategory(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.category == null)
+        this.category = new ArrayList<CodeableConcept>();
+      this.category.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #category} (A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.)
+     * @return The first repetition of repeating field {@link #category}, creating it if it does not already exist
      */
-    public DiagnosticReport setCategory(CodeableConcept value) { 
-      this.category = value;
-      return this;
+    public CodeableConcept getCategoryFirstRep() { 
+      if (getCategory().isEmpty()) {
+        addCategory();
+      }
+      return getCategory().get(0);
     }
 
     /**
@@ -920,7 +949,7 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.)
+     * @return {@link #subject} (The subject of the report. Usually, but not always, this is a patient. However, diagnostic services also perform analyses on specimens collected from a variety of other sources.)
      */
     public Reference getSubject() { 
       if (this.subject == null)
@@ -936,7 +965,7 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @param value {@link #subject} (The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.)
+     * @param value {@link #subject} (The subject of the report. Usually, but not always, this is a patient. However, diagnostic services also perform analyses on specimens collected from a variety of other sources.)
      */
     public DiagnosticReport setSubject(Reference value) { 
       this.subject = value;
@@ -944,14 +973,14 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.)
+     * @return {@link #subject} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The subject of the report. Usually, but not always, this is a patient. However, diagnostic services also perform analyses on specimens collected from a variety of other sources.)
      */
     public Resource getSubjectTarget() { 
       return this.subjectTarget;
     }
 
     /**
-     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.)
+     * @param value {@link #subject} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The subject of the report. Usually, but not always, this is a patient. However, diagnostic services also perform analyses on specimens collected from a variety of other sources.)
      */
     public DiagnosticReport setSubjectTarget(Resource value) { 
       this.subjectTarget = value;
@@ -959,41 +988,46 @@ public class DiagnosticReport extends DomainResource {
     }
 
     /**
-     * @return {@link #context} (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.)
+     * @return {@link #encounter} (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport is about.)
      */
-    public Reference getContext() { 
-      if (this.context == null)
+    public Reference getEncounter() { 
+      if (this.encounter == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create DiagnosticReport.context");
+          throw new Error("Attempt to auto-create DiagnosticReport.encounter");
         else if (Configuration.doAutoCreate())
-          this.context = new Reference(); // cc
-      return this.context;
+          this.encounter = new Reference(); // cc
+      return this.encounter;
     }
 
-    public boolean hasContext() { 
-      return this.context != null && !this.context.isEmpty();
+    public boolean hasEncounter() { 
+      return this.encounter != null && !this.encounter.isEmpty();
     }
 
     /**
-     * @param value {@link #context} (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.)
+     * @param value {@link #encounter} (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport is about.)
      */
-    public DiagnosticReport setContext(Reference value) { 
-      this.context = value;
+    public DiagnosticReport setEncounter(Reference value) { 
+      this.encounter = value;
       return this;
     }
 
     /**
-     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.)
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport is about.)
      */
-    public Resource getContextTarget() { 
-      return this.contextTarget;
+    public Encounter getEncounterTarget() { 
+      if (this.encounterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create DiagnosticReport.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounterTarget = new Encounter(); // aa
+      return this.encounterTarget;
     }
 
     /**
-     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.)
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport is about.)
      */
-    public DiagnosticReport setContextTarget(Resource value) { 
-      this.contextTarget = value;
+    public DiagnosticReport setEncounterTarget(Encounter value) { 
+      this.encounterTarget = value;
       return this;
     }
 
@@ -1009,7 +1043,7 @@ public class DiagnosticReport extends DomainResource {
      */
     public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
       if (this.effective == null)
-        return null;
+        this.effective = new DateTimeType();
       if (!(this.effective instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (DateTimeType) this.effective;
@@ -1024,7 +1058,7 @@ public class DiagnosticReport extends DomainResource {
      */
     public Period getEffectivePeriod() throws FHIRException { 
       if (this.effective == null)
-        return null;
+        this.effective = new Period();
       if (!(this.effective instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
@@ -1661,10 +1695,10 @@ public class DiagnosticReport extends DomainResource {
         children.add(new Property("identifier", "Identifier", "Identifiers assigned to this report by the performer or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("basedOn", "Reference(CarePlan|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ServiceRequest)", "Details concerning a service requested.", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("status", "code", "The status of the diagnostic report.", 0, 1, status));
-        children.add(new Property("category", "CodeableConcept", "A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, 1, category));
+        children.add(new Property("category", "CodeableConcept", "A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category));
         children.add(new Property("code", "CodeableConcept", "A code or name that describes this diagnostic report.", 0, 1, code));
-        children.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.", 0, 1, subject));
-        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.", 0, 1, context));
+        children.add(new Property("subject", "Reference(Patient|Group|Device|Location)", "The subject of the report. Usually, but not always, this is a patient. However, diagnostic services also perform analyses on specimens collected from a variety of other sources.", 0, 1, subject));
+        children.add(new Property("encounter", "Reference(Encounter)", "The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport is about.", 0, 1, encounter));
         children.add(new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective));
         children.add(new Property("issued", "instant", "The date and time that this version of the report was made available to providers, typically after the report was reviewed and verified.", 0, 1, issued));
         children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Organization|CareTeam)", "The diagnostic service that is responsible for issuing the report.", 0, java.lang.Integer.MAX_VALUE, performer));
@@ -1684,10 +1718,10 @@ public class DiagnosticReport extends DomainResource {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Identifiers assigned to this report by the performer or other systems.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(CarePlan|ImmunizationRecommendation|MedicationRequest|NutritionOrder|ServiceRequest)", "Details concerning a service requested.", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the diagnostic report.", 0, 1, status);
-        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, 1, category);
+        case 50511102: /*category*/  return new Property("category", "CodeableConcept", "A code that classifies the clinical discipline, department or diagnostic service that created the report (e.g. cardiology, biochemistry, hematology, MRI). This is used for searching, sorting and display purposes.", 0, java.lang.Integer.MAX_VALUE, category);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code or name that describes this diagnostic report.", 0, 1, code);
-        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Device|Location)", "The subject of the report. Usually, but not always, this is a patient. However diagnostic services also perform analyses on specimens collected from a variety of other sources.", 0, 1, subject);
-        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport per is about.", 0, 1, context);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group|Device|Location)", "The subject of the report. Usually, but not always, this is a patient. However, diagnostic services also perform analyses on specimens collected from a variety of other sources.", 0, 1, subject);
+        case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "The healthcare event  (e.g. a patient and healthcare provider interaction) which this DiagnosticReport is about.", 0, 1, encounter);
         case 247104889: /*effective[x]*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
         case -1468651097: /*effective*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
         case -275306910: /*effectiveDateTime*/  return new Property("effective[x]", "dateTime|Period", "The time or time-period the observed values are related to. When the subject of the report is a patient, this is usually either the time of the procedure or of specimen collection(s), but very often the source of the date/time is not known, only the date/time itself.", 0, 1, effective);
@@ -1713,10 +1747,10 @@ public class DiagnosticReport extends DomainResource {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : this.identifier.toArray(new Base[this.identifier.size()]); // Identifier
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<DiagnosticReportStatus>
-        case 50511102: /*category*/ return this.category == null ? new Base[0] : new Base[] {this.category}; // CodeableConcept
+        case 50511102: /*category*/ return this.category == null ? new Base[0] : this.category.toArray(new Base[this.category.size()]); // CodeableConcept
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
-        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case -1468651097: /*effective*/ return this.effective == null ? new Base[0] : new Base[] {this.effective}; // Type
         case -1179159893: /*issued*/ return this.issued == null ? new Base[0] : new Base[] {this.issued}; // InstantType
         case 481140686: /*performer*/ return this.performer == null ? new Base[0] : this.performer.toArray(new Base[this.performer.size()]); // Reference
@@ -1747,7 +1781,7 @@ public class DiagnosticReport extends DomainResource {
           this.status = (Enumeration) value; // Enumeration<DiagnosticReportStatus>
           return value;
         case 50511102: // category
-          this.category = castToCodeableConcept(value); // CodeableConcept
+          this.getCategory().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 3059181: // code
           this.code = castToCodeableConcept(value); // CodeableConcept
@@ -1755,8 +1789,8 @@ public class DiagnosticReport extends DomainResource {
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           return value;
-        case 951530927: // context
-          this.context = castToReference(value); // Reference
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
           return value;
         case -1468651097: // effective
           this.effective = castToType(value); // Type
@@ -1806,13 +1840,13 @@ public class DiagnosticReport extends DomainResource {
           value = new DiagnosticReportStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<DiagnosticReportStatus>
         } else if (name.equals("category")) {
-          this.category = castToCodeableConcept(value); // CodeableConcept
+          this.getCategory().add(castToCodeableConcept(value));
         } else if (name.equals("code")) {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
-        } else if (name.equals("context")) {
-          this.context = castToReference(value); // Reference
+        } else if (name.equals("encounter")) {
+          this.encounter = castToReference(value); // Reference
         } else if (name.equals("effective[x]")) {
           this.effective = castToType(value); // Type
         } else if (name.equals("issued")) {
@@ -1846,10 +1880,10 @@ public class DiagnosticReport extends DomainResource {
         case -1618432855:  return addIdentifier(); 
         case -332612366:  return addBasedOn(); 
         case -892481550:  return getStatusElement();
-        case 50511102:  return getCategory(); 
+        case 50511102:  return addCategory(); 
         case 3059181:  return getCode(); 
         case -1867885268:  return getSubject(); 
-        case 951530927:  return getContext(); 
+        case 1524132147:  return getEncounter(); 
         case 247104889:  return getEffective(); 
         case -1468651097:  return getEffective(); 
         case -1179159893:  return getIssuedElement();
@@ -1876,7 +1910,7 @@ public class DiagnosticReport extends DomainResource {
         case 50511102: /*category*/ return new String[] {"CodeableConcept"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
-        case 951530927: /*context*/ return new String[] {"Reference"};
+        case 1524132147: /*encounter*/ return new String[] {"Reference"};
         case -1468651097: /*effective*/ return new String[] {"dateTime", "Period"};
         case -1179159893: /*issued*/ return new String[] {"instant"};
         case 481140686: /*performer*/ return new String[] {"Reference"};
@@ -1905,8 +1939,7 @@ public class DiagnosticReport extends DomainResource {
           throw new FHIRException("Cannot call addChild on a primitive type DiagnosticReport.status");
         }
         else if (name.equals("category")) {
-          this.category = new CodeableConcept();
-          return this.category;
+          return addCategory();
         }
         else if (name.equals("code")) {
           this.code = new CodeableConcept();
@@ -1916,9 +1949,9 @@ public class DiagnosticReport extends DomainResource {
           this.subject = new Reference();
           return this.subject;
         }
-        else if (name.equals("context")) {
-          this.context = new Reference();
-          return this.context;
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
         }
         else if (name.equals("effectiveDateTime")) {
           this.effective = new DateTimeType();
@@ -1981,10 +2014,14 @@ public class DiagnosticReport extends DomainResource {
             dst.basedOn.add(i.copy());
         };
         dst.status = status == null ? null : status.copy();
-        dst.category = category == null ? null : category.copy();
+        if (category != null) {
+          dst.category = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : category)
+            dst.category.add(i.copy());
+        };
         dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
-        dst.context = context == null ? null : context.copy();
+        dst.encounter = encounter == null ? null : encounter.copy();
         dst.effective = effective == null ? null : effective.copy();
         dst.issued = issued == null ? null : issued.copy();
         if (performer != null) {
@@ -2044,7 +2081,7 @@ public class DiagnosticReport extends DomainResource {
         DiagnosticReport o = (DiagnosticReport) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(status, o.status, true)
            && compareDeep(category, o.category, true) && compareDeep(code, o.code, true) && compareDeep(subject, o.subject, true)
-           && compareDeep(context, o.context, true) && compareDeep(effective, o.effective, true) && compareDeep(issued, o.issued, true)
+           && compareDeep(encounter, o.encounter, true) && compareDeep(effective, o.effective, true) && compareDeep(issued, o.issued, true)
            && compareDeep(performer, o.performer, true) && compareDeep(resultsInterpreter, o.resultsInterpreter, true)
            && compareDeep(specimen, o.specimen, true) && compareDeep(result, o.result, true) && compareDeep(imagingStudy, o.imagingStudy, true)
            && compareDeep(media, o.media, true) && compareDeep(conclusion, o.conclusion, true) && compareDeep(conclusionCode, o.conclusionCode, true)
@@ -2064,7 +2101,7 @@ public class DiagnosticReport extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, status
-          , category, code, subject, context, effective, issued, performer, resultsInterpreter
+          , category, code, subject, encounter, effective, issued, performer, resultsInterpreter
           , specimen, result, imagingStudy, media, conclusion, conclusionCode, presentedForm
           );
       }
@@ -2217,17 +2254,17 @@ public class DiagnosticReport extends DomainResource {
    * <p>
    * Description: <b>The Encounter when the order was made</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>DiagnosticReport.context</b><br>
+   * Path: <b>DiagnosticReport.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="DiagnosticReport.context.where(resolve() is Encounter)", description="The Encounter when the order was made", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class } )
+  @SearchParamDefinition(name="encounter", path="DiagnosticReport.encounter", description="The Encounter when the order was made", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
    * <p>
    * Description: <b>The Encounter when the order was made</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>DiagnosticReport.context</b><br>
+   * Path: <b>DiagnosticReport.encounter</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
@@ -2361,32 +2398,6 @@ public class DiagnosticReport extends DomainResource {
    * the path value of "<b>DiagnosticReport:specimen</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_SPECIMEN = new ca.uhn.fhir.model.api.Include("DiagnosticReport:specimen").toLocked();
-
- /**
-   * Search parameter: <b>context</b>
-   * <p>
-   * Description: <b>Healthcare event (Episode of Care or Encounter) related to the report</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>DiagnosticReport.context</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="DiagnosticReport.context", description="Healthcare event (Episode of Care or Encounter) related to the report", type="reference", target={Encounter.class, EpisodeOfCare.class } )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>Healthcare event (Episode of Care or Encounter) related to the report</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>DiagnosticReport.context</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>DiagnosticReport:context</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("DiagnosticReport:context").toLocked();
 
  /**
    * Search parameter: <b>issued</b>

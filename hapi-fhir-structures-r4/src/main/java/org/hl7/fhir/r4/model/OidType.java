@@ -66,7 +66,9 @@ public class OidType extends UriType {
 	 */
 	@Override
 	public OidType copy() {
-		return new OidType(getValue());
+		OidType ret = new OidType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

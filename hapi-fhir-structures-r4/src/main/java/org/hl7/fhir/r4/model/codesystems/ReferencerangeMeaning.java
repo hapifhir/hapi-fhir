@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum ReferencerangeMeaning {
          */
         TYPE, 
         /**
-         * Within two standard deviations from the mean and accounting for 95.45% of the relevant control population.
+         * Values expected for a normal member of the relevant control population being measured. Typically each results producer such as a laboratory has specific normal ranges and they are usually defined as within two standard deviations from the mean and account for 95.45% of this population.
          */
         NORMAL, 
         /**
@@ -147,7 +147,7 @@ public enum ReferencerangeMeaning {
         public String getDefinition() {
           switch (this) {
             case TYPE: return "General types of reference range.";
-            case NORMAL: return "Within two standard deviations from the mean and accounting for 95.45% of the relevant control population.";
+            case NORMAL: return "Values expected for a normal member of the relevant control population being measured. Typically each results producer such as a laboratory has specific normal ranges and they are usually defined as within two standard deviations from the mean and account for 95.45% of this population.";
             case RECOMMENDED: return "The range that is recommended by a relevant professional body.";
             case TREATMENT: return "The range at which treatment would/should be considered.";
             case THERAPEUTIC: return "The optimal range for best therapeutic outcomes.";

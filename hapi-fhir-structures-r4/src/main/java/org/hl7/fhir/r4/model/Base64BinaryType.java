@@ -67,7 +67,9 @@ public class Base64BinaryType extends PrimitiveType<byte[]> {
 
 	@Override
 	public Base64BinaryType copy() {
-		return new Base64BinaryType(getValue());
+		Base64BinaryType ret = new Base64BinaryType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

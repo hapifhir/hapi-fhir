@@ -447,7 +447,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		encounter.addDiagnosis(dc);
 		CodeableConcept reason = new CodeableConcept();
 		reason.setText("SLIPPED ON FLOOR,PAIN L) ELBOW");
-		encounter.addReason(reason);
+		encounter.addReasonCode(reason);
 
 		// add encounter to bundle so its created
 		bundle.addEntry()

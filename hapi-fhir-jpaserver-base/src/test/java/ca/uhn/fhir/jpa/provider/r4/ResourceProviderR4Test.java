@@ -1801,7 +1801,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
 		obs1.setValue(new Quantity(123));
-		obs1.setComment("obs1");
 		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
@@ -3853,8 +3852,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			ourClient
 				.search()
-				.forResource(Sequence.class)
-				.where(Sequence.END.withPrefix(ParamPrefixEnum.ENDS_BEFORE).number(100))
+				.forResource(MolecularSequence.class)
+				.where(MolecularSequence.VARIANT_END.withPrefix(ParamPrefixEnum.ENDS_BEFORE).number(100))
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.execute();

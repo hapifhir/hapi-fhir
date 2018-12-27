@@ -329,7 +329,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ep.setId(IdType.newRandomUuid());
 
 		enc.getEpisodeOfCareFirstRep().setReference(ep.getId());
-		cond.getContext().setReference(enc.getId());
+		cond.getEncounter().setReference(enc.getId());
 		ep.getDiagnosisFirstRep().getCondition().setReference(cond.getId());
 
 		Bundle inputBundle = new Bundle();
@@ -2693,7 +2693,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		cond.setId(IdType.newRandomUuid());
 
 		enc.addDiagnosis().getCondition().setReference(cond.getId());
-		cond.getContext().setReference(enc.getId());
+		cond.getEncounter().setReference(enc.getId());
 
 		request
 			.addEntry()
@@ -2738,7 +2738,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithCircularReferences3() throws IOException {
-		Bundle request = loadResourceFromClasspath(Bundle.class, "/dstu3_transaction2.xml");
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/r4/r4_transaction2.xml");
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(3, resp.getEntry().size());
@@ -3601,7 +3601,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void testUpdatePreviouslyDeletedResourceInBatch() {
 		AllergyIntolerance ai = new AllergyIntolerance();
 		ai.setId("AIA1914009");
-		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai.addNote().setText("Hello");
 		IIdType id = myAllergyIntoleranceDao.update(ai).getId();
 		assertEquals("1", id.getVersionIdPart());
 
@@ -3619,7 +3619,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		batch.setType(BundleType.BATCH);
 		ai = new AllergyIntolerance();
 		ai.setId("AIA1914009");
-		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai.addNote().setText("Hello");
 		batch
 			.addEntry()
 			.setFullUrl("AllergyIntolerance/AIA1914009")
