@@ -31,12 +31,13 @@ POSSIBILITY OF SUCH DAMAGE.
  */
 package org.hl7.fhir.r4.model;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.zip.DataFormatException;
-
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
  * Represents a FHIR instant datatype. Valid precisions values for this type are:

@@ -33,11 +33,9 @@
   "type" : {
     "text" : "History and Physical"
   },
-  "agent" : [
+  "author" : [
     {
-		 "who": {
-			 "reference": "#a1"
-		 }
+		 "reference": "#a1"
     }
   ],
   "created" : "2004-12-25T23:50:50",

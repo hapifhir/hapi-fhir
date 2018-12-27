@@ -34,9 +34,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
-	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
-	private static List<String> ourContentTypes = new ArrayList<>();
 	private static GreenMail ourTestSmtp;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 

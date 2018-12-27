@@ -2115,10 +2115,13 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       String url = tr.getCode();
       if (!Utilities.isAbsoluteUrl(url))
         url = "http://hl7.org/fhir/StructureDefinition/" + url;
+
+      String qualifiedType = "http://hl7.org/fhir/StructureDefinition/" + type;
+
       long t = System.nanoTime();
       StructureDefinition sd = context.fetchResource(StructureDefinition.class, url);
       sdTime = sdTime + (System.nanoTime() - t);
-      if (sd != null && (sd.getType().equals(type) || sd.getUrl().equals(type)) && sd.hasSnapshot())
+      if (sd != null && (sd.getType().equals(type) || sd.getUrl().equals(qualifiedType)) && sd.hasSnapshot())
         return sd;
     }
     return null;
@@ -2964,8 +2967,11 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         long t = System.nanoTime();
         ValidationResult res = context.validateCode(c, vs);
         txTime = txTime + (System.nanoTime() - t);
-        if (!res.isOk())
-          txRule(errors, res.getTxLink(), IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), false, "The value provided ("+c.getSystem()+"::"+c.getCode()+") is not in the options value set in the questionnaire");
+        if (!res.isOk()) {
+			  txRule(errors, res.getTxLink(), IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), false, "The value provided (" + c.getSystem() + "::" + c.getCode() + ") is not in the options value set in the questionnaire");
+		  } else if (res.getSeverity() != null) {
+        	  super.addValidationMessage(errors, IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), res.getMessage(), res.getSeverity(), Source.TerminologyEngine);
+		  }
       } catch (Exception e) {
         warning(errors, IssueType.CODEINVALID, value.line(), value.col(), stack.getLiteralPath(), false, "Error " + e.getMessage() + " validating Coding against Questionnaire Options");
       }

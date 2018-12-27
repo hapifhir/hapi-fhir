@@ -1,18 +1,18 @@
 package org.hl7.fhir.r4.model;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.DataFormatException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang3.time.FastDateFormat;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
-
-import ca.uhn.fhir.parser.DataFormatException;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseDateTimeType extends PrimitiveType<Date> {
 

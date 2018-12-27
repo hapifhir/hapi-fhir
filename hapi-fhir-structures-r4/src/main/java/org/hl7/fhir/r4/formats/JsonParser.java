@@ -43536,18 +43536,6 @@ public class JsonParser extends JsonParserBase {
         composeEnumerationCore("license", element.getLicenseElement(), new ImplementationGuide.SPDXLicenseEnumFactory(), false);
         composeEnumerationExtras("license", element.getLicenseElement(), new ImplementationGuide.SPDXLicenseEnumFactory(), false);
       }
-      if (element.hasFhirVersion()) {
-        openArray("fhirVersion");
-        for (Enumeration<ImplementationGuide.FHIRVersion> e : element.getFhirVersion()) 
-          composeEnumerationCore(null, e, new ImplementationGuide.FHIRVersionEnumFactory(), true);
-        closeArray();
-        if (anyHasExtras(element.getFhirVersion())) {
-          openArray("_fhirVersion");
-          for (Enumeration<ImplementationGuide.FHIRVersion> e : element.getFhirVersion()) 
-            composeEnumerationExtras(null, e, new ImplementationGuide.FHIRVersionEnumFactory(), true);
-          closeArray();
-        }
-      };
       if (element.hasDependsOn()) {
         openArray("dependsOn");
         for (ImplementationGuide.ImplementationGuideDependsOnComponent e : element.getDependsOn()) 
@@ -43684,18 +43672,6 @@ public class JsonParser extends JsonParserBase {
       if (element.hasReference()) {
         composeReference("reference", element.getReference());
       }
-      if (element.hasFhirVersion()) {
-        openArray("fhirVersion");
-        for (Enumeration<ImplementationGuide.FHIRVersion> e : element.getFhirVersion()) 
-          composeEnumerationCore(null, e, new ImplementationGuide.FHIRVersionEnumFactory(), true);
-        closeArray();
-        if (anyHasExtras(element.getFhirVersion())) {
-          openArray("_fhirVersion");
-          for (Enumeration<ImplementationGuide.FHIRVersion> e : element.getFhirVersion()) 
-            composeEnumerationExtras(null, e, new ImplementationGuide.FHIRVersionEnumFactory(), true);
-          closeArray();
-        }
-      };
       if (element.hasNameElement()) {
         composeStringCore("name", element.getNameElement(), false);
         composeStringExtras("name", element.getNameElement(), false);

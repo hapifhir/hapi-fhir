@@ -373,6 +373,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
+  public void setUcumService(UcumService ucumService) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public List<String> getTypeNames() {
     throw new UnsupportedOperationException();
   }

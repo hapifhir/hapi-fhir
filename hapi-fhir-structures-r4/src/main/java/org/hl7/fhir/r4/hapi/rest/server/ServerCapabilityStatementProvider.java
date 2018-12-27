@@ -207,7 +207,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
     retVal.setPublisher(myPublisher);
     retVal.setDateElement(conformanceDate());
-    retVal.setFhirVersion(FhirVersionEnum.R4.getFhirVersionString());
+    retVal.setFhirVersion(Enumerations.FHIRVersion.fromCode(FhirVersionEnum.R4.getFhirVersionString()));
 
     ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
     String serverBase = getServerConfiguration().getServerAddressStrategy().determineServerBase(servletContext, theRequest);

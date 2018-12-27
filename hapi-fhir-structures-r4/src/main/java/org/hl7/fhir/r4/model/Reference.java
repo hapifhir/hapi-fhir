@@ -379,7 +379,7 @@ The type is the Canonical URL of Resource Definition that is the type this refer
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -925155509:  return getReferenceElement();
+        case -925155509:  return (Base) getReferenceElement();
         case 3575610:  return getTypeElement();
         case -1618432855:  return getIdentifier(); 
         case 1671764162:  return getDisplayElement();

@@ -103,7 +103,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 		EventDefinition eventDef = new EventDefinition();
 		eventDef
 			.setPurpose("Monitor all admissions to Emergency")
-			.setTrigger(new TriggerDefinition()
+			.addTrigger(new TriggerDefinition()
 				.setType(TriggerDefinition.TriggerType.DATAADDED)
 				.setCondition(new Expression()
 					.setDescription("Encounter Location = emergency (active/completed encounters, current or previous)")

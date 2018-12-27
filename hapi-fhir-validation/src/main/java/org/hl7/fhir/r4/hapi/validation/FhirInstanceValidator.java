@@ -9,6 +9,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import com.google.gson.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -246,7 +247,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
-		v.addExtensionDomains(extensionDomains);
+		v.getExtensionDomains().addAll(extensionDomains);
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
@@ -363,7 +364,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public Base resolveConstant(Object theAppContext, String theName) {
+		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
 			return null;
 		}
 

@@ -1,8 +1,9 @@
 package org.hl7.fhir.r4.utils;
 
 //import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.util.ElementUtil;
 
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.util.ElementUtil;
 import org.apache.commons.lang3.NotImplementedException;
 import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
@@ -1351,12 +1352,14 @@ public class FHIRPathEngine {
 
   private List<Base> opAs(List<Base> left, List<Base> right) {
     List<Base> result = new ArrayList<Base>();
-    if (left.size() != 1 || right.size() != 1)
+    if (right.size() != 1)
       return result;
     else {
       String tn = convertToString(right);
-      if (tn.equals(left.get(0).fhirType()))
-        result.add(left.get(0));
+      for (Base nextLeft : left) {
+        if (tn.equals(nextLeft.fhirType()))
+          result.add(nextLeft);
+      }
     }
     return result;
   }
@@ -3049,7 +3052,7 @@ public class FHIRPathEngine {
         if (s.startsWith("#")) {
           Property p = context.resource.getChildByName("contained");
           for (Base c : p.getValues()) {
-            if (s.substring(1).equals(c.getIdBase())) {
+            if (s.equals(c.getIdBase())) {
               res = c;
               break;
             }

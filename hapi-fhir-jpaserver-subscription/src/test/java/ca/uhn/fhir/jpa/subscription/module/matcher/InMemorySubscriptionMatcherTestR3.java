@@ -4,9 +4,9 @@ import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.codesystems.MedicationRequestCategory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.codesystems.MedicationRequestCategory;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

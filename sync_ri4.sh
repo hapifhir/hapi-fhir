@@ -4,7 +4,11 @@
 cp -R /home/james/git/fhir/implementations/java/org.hl7.fhir.utilities/src/org hapi-fhir-utilities/src/main/java/
 #cp -R ./hapi-fhir-utilities/src/main/java/org/hl7/fhir/utilities/tests/* ./hapi-fhir-utilities/src/test/java/org/hl7/fhir/utilities/tests/
 #rm -R ./hapi-fhir-utilities/src/main/java/org/hl7/fhir/utilities/tests
-rm# hapi-fhir-utilities/src/main/java/org/hl7/fhir/utilities/xls/XLSXmlNormaliserTests.java
+rm hapi-fhir-utilities/src/main/java/org/hl7/fhir/utilities/xls/XLSXmlNormaliserTests.java
+rm hapi-fhir-structures-r4/src/test/java/ca/uhn/fhir/parser/XmlParserR4Test.java
+rm hapi-fhir-structures-r4/src/test/java/ca/uhn/fhir/rest/client/ClientServerValidationR4Test.java
+rm hapi-fhir-structures-r4/src/test/java/ca/uhn/fhir/rest/server/interceptor/AuthorizationInterceptorR4Test.java
+rm hapi-fhir-validation/src/main/java/org/hl7/fhir/conversion/tests/R3R4ConversionTests.java
 
 # RI Validation 
 cp -R /home/james/git/fhir/implementations/java/org.hl7.fhir.validation/src/org hapi-fhir-validation/src/main/java/

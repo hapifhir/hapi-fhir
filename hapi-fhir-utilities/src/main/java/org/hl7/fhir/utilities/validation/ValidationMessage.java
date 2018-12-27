@@ -468,7 +468,7 @@ public class ValidationMessage implements Comparator<ValidationMessage>, Compara
    * Constructor
    */
   public ValidationMessage() {
-    // nothing
+    super();
   }
 
   public ValidationMessage(Source source, IssueType type, String path, String message, IssueSeverity level) {

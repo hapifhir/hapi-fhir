@@ -49,7 +49,7 @@ public class QuestionnaireValidatorR4Test {
 	}
 
 	@Test
-	public void testQuestionnaireWithPredefinedExtensionDomains() {
+	public void testQuestionnaireWithPredefinedExtensionDomainsForCoding() {
 		String[] extensionDomainsToTest = new String[] {
 			"http://example.org/questionnaire-color-control-1",
 			"https://example.org/questionnaire-color-control-2",
@@ -57,7 +57,6 @@ public class QuestionnaireValidatorR4Test {
 			"https://acme.com/questionnaire-color-control-4",
 			"http://nema.org/questionnaire-color-control-5",
 			"https://nema.org/questionnaire-color-control-6",
-			"http://hl7.org/fhir/StructureDefinition/questionnaire-scoreItem",
 			"http://hl7.org/fhir/StructureDefinition/structuredefinition-expression",
 
 		};

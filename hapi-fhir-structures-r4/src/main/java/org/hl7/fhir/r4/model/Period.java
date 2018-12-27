@@ -31,15 +31,15 @@ package org.hl7.fhir.r4.model;
 
 // Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
-import java.util.*;
-
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.ChildOrder;
-import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.Block;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.model.api.annotation.Description;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+
+import java.util.Date;
+import java.util.List;
 /**
  * A time period defined by a start and end date and optionally time.
  */

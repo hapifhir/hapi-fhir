@@ -756,8 +756,9 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 
 	private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
+
 		@Override
-		public Base resolveConstant(Object appContext, String name) throws PathEngineException {
+		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
 			return null;
 		}
 
