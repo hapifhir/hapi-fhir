@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * This resource provides enrollment and plan details from the processing of an Enrollment resource.
+ * This resource provides enrollment and plan details from the processing of an EnrollmentRequest resource.
  */
 @ResourceDef(name="EnrollmentResponse", profile="http://hl7.org/fhir/StructureDefinition/EnrollmentResponse")
 public class EnrollmentResponse extends DomainResource {

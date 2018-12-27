@@ -69,7 +69,9 @@ public class CodeType extends StringType implements Comparable<CodeType>, ICodin
 
 	@Override
 	public CodeType copy() {
-		return new CodeType(getValue());
+		CodeType ret = new CodeType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

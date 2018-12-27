@@ -88,7 +88,9 @@ public class PositiveIntType extends IntegerType {
 
 	@Override
 	public PositiveIntType copy() {
-		return new PositiveIntType(getValue());
+		PositiveIntType ret = new PositiveIntType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

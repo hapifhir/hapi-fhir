@@ -40,7 +40,7 @@ public class ExpressionNode {
     Empty, Not, Exists, SubsetOf, SupersetOf, IsDistinct, Distinct, Count, Where, Select, All, Repeat, Aggregate, Item /*implicit from name[]*/, As, Is, Single,
     First, Last, Tail, Skip, Take, Union, Combine, Intersect, Exclude, Iif, Upper, Lower, ToChars, Substring, StartsWith, EndsWith, Matches, ReplaceMatches, Contains, Replace, Length,  
     Children, Descendants, MemberOf, Trace, Today, Now, Resolve, Extension, HasValue, AliasAs, Alias, HtmlChecks, OfType, Type,
-    IsBoolean, IsInteger, IsString, IsDecimal, IsQuantity, IsDateTime, IsTime, ToBoolean, ToInteger, ToString, ToDecimal, ToQuantity, ToDateTime, ToTime, ConformsTo;
+    ConvertsToBoolean, ConvertsToInteger, ConvertsToString, ConvertsToDecimal, ConvertsToQuantity, ConvertsToDateTime, ConvertsToTime, ToBoolean, ToInteger, ToString, ToDecimal, ToQuantity, ToDateTime, ToTime, ConformsTo;
 
     public static Function fromCode(String name) {
       if (name.equals("empty")) return Function.Empty;
@@ -102,13 +102,13 @@ public class ExpressionNode {
       if (name.equals("toBoolean")) return Function.ToBoolean;
       if (name.equals("toDateTime")) return Function.ToDateTime;
       if (name.equals("toTime")) return Function.ToTime;
-      if (name.equals("isInteger")) return Function.IsInteger;
-      if (name.equals("isDecimal")) return Function.IsDecimal;
-      if (name.equals("isString")) return Function.IsString;
-      if (name.equals("isQuantity")) return Function.IsQuantity;
-      if (name.equals("isBoolean")) return Function.IsBoolean;
-      if (name.equals("isDateTime")) return Function.IsDateTime;
-      if (name.equals("isTime")) return Function.IsTime;
+      if (name.equals("convertsToInteger")) return Function.ConvertsToInteger;
+      if (name.equals("convertsToDecimal")) return Function.ConvertsToDecimal;
+      if (name.equals("convertsToString")) return Function.ConvertsToString;
+      if (name.equals("convertsToQuantity")) return Function.ConvertsToQuantity;
+      if (name.equals("convertsToBoolean")) return Function.ConvertsToBoolean;
+      if (name.equals("convertsToDateTime")) return Function.ConvertsToDateTime;
+      if (name.equals("convertsToTime")) return Function.ConvertsToTime;
       if (name.equals("conformsTo")) return Function.ConformsTo;
       return null;
     }
@@ -173,13 +173,13 @@ public class ExpressionNode {
       case ToQuantity : return "toQuantity";
       case ToDateTime : return "toDateTime";
       case ToTime : return "toTime";
-      case IsInteger : return "isInteger";
-      case IsDecimal : return "isDecimal";
-      case IsString : return "isString";
-      case IsBoolean : return "isBoolean";
-      case IsQuantity : return "isQuantity";
-      case IsDateTime : return "isDateTime";
-      case IsTime : return "isTime";
+      case ConvertsToInteger : return "convertsToInteger";
+      case ConvertsToDecimal : return "convertsToDecimal";
+      case ConvertsToString : return "convertsToString";
+      case ConvertsToBoolean : return "convertsToBoolean";
+      case ConvertsToQuantity : return "convertsToQuantity";
+      case ConvertsToDateTime : return "convertsToDateTime";
+      case ConvertsToTime : return "isTime";
       case ConformsTo : return "conformsTo";
       default: return "??";
       }

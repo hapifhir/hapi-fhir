@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum IssueSeverity {
 
         /**
-         * The issue caused the action to fail, and no further checking could be performed.
+         * The issue caused the action to fail and no further checking could be performed.
          */
         FATAL, 
         /**
@@ -83,7 +83,7 @@ public enum IssueSeverity {
         }
         public String getDefinition() {
           switch (this) {
-            case FATAL: return "The issue caused the action to fail, and no further checking could be performed.";
+            case FATAL: return "The issue caused the action to fail and no further checking could be performed.";
             case ERROR: return "The issue is sufficiently important to cause the action to fail.";
             case WARNING: return "The issue is not important enough to cause the action to fail but may cause it to be performed suboptimally or in a way that is not as desired.";
             case INFORMATION: return "The issue has no relation to the degree of success of the action.";

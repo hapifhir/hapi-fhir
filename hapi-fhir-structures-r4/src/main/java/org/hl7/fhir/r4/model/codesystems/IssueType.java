@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum IssueType {
          */
         INVALID, 
         /**
-         * A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax.
+         * A structural issue in the content such as wrong namespace, unable to parse the content completely, invalid syntax, etc.
          */
         STRUCTURE, 
         /**
@@ -129,7 +129,7 @@ public enum IssueType {
          */
         CONFLICT, 
         /**
-         * Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.
+         * Transient processing issues. The system receiving the message may be able to resubmit the same content once an underlying issue is resolved.
          */
         TRANSIENT, 
         /**
@@ -273,7 +273,7 @@ public enum IssueType {
         public String getDefinition() {
           switch (this) {
             case INVALID: return "Content invalid against the specification or a profile.";
-            case STRUCTURE: return "A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax.";
+            case STRUCTURE: return "A structural issue in the content such as wrong namespace, unable to parse the content completely, invalid syntax, etc.";
             case REQUIRED: return "A required element is missing.";
             case VALUE: return "An element or header value is invalid.";
             case INVARIANT: return "A content validation rule failed - e.g. a schematron rule.";
@@ -295,7 +295,7 @@ public enum IssueType {
             case TOOCOSTLY: return "The operation was stopped to protect server resources; e.g. a request for a value set expansion on all of SNOMED CT.";
             case BUSINESSRULE: return "The content/operation failed to pass some business rule and so could not proceed.";
             case CONFLICT: return "Content could not be accepted because of an edit conflict (i.e. version aware updates). (In a pure RESTful environment, this would be an HTTP 409 error, but this code may be used where the conflict is discovered further into the application architecture.).";
-            case TRANSIENT: return "Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.";
+            case TRANSIENT: return "Transient processing issues. The system receiving the message may be able to resubmit the same content once an underlying issue is resolved.";
             case LOCKERROR: return "A resource/record locking failure (usually in an underlying database).";
             case NOSTORE: return "The persistent store is unavailable; e.g. the database is down for maintenance or similar action, and the interaction or operation cannot be processed.";
             case EXCEPTION: return "y.";

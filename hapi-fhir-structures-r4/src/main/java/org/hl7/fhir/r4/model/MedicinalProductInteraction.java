@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -48,14 +48,208 @@ import org.hl7.fhir.exceptions.FHIRException;
 @ResourceDef(name="MedicinalProductInteraction", profile="http://hl7.org/fhir/StructureDefinition/MedicinalProductInteraction")
 public class MedicinalProductInteraction extends DomainResource {
 
+    @Block()
+    public static class MedicinalProductInteractionInteractantComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The specific medication, food or laboratory test that interacts.
+         */
+        @Child(name = "item", type = {MedicinalProduct.class, Medication.class, Substance.class, ObservationDefinition.class, CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The specific medication, food or laboratory test that interacts", formalDefinition="The specific medication, food or laboratory test that interacts." )
+        protected Type item;
+
+        private static final long serialVersionUID = 1445276561L;
+
     /**
-     * The medication for which this is an indication.
+     * Constructor
      */
-    @Child(name = "subject", type = {MedicinalProduct.class, Medication.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="The medication for which this is an indication", formalDefinition="The medication for which this is an indication." )
+      public MedicinalProductInteractionInteractantComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public MedicinalProductInteractionInteractantComponent(Type item) {
+        super();
+        this.item = item;
+      }
+
+        /**
+         * @return {@link #item} (The specific medication, food or laboratory test that interacts.)
+         */
+        public Type getItem() { 
+          return this.item;
+        }
+
+        /**
+         * @return {@link #item} (The specific medication, food or laboratory test that interacts.)
+         */
+        public Reference getItemReference() throws FHIRException { 
+          if (this.item == null)
+            this.item = new Reference();
+          if (!(this.item instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.item.getClass().getName()+" was encountered");
+          return (Reference) this.item;
+        }
+
+        public boolean hasItemReference() { 
+          return this != null && this.item instanceof Reference;
+        }
+
+        /**
+         * @return {@link #item} (The specific medication, food or laboratory test that interacts.)
+         */
+        public CodeableConcept getItemCodeableConcept() throws FHIRException { 
+          if (this.item == null)
+            this.item = new CodeableConcept();
+          if (!(this.item instanceof CodeableConcept))
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.item.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.item;
+        }
+
+        public boolean hasItemCodeableConcept() { 
+          return this != null && this.item instanceof CodeableConcept;
+        }
+
+        public boolean hasItem() { 
+          return this.item != null && !this.item.isEmpty();
+        }
+
+        /**
+         * @param value {@link #item} (The specific medication, food or laboratory test that interacts.)
+         */
+        public MedicinalProductInteractionInteractantComponent setItem(Type value) { 
+          if (value != null && !(value instanceof Reference || value instanceof CodeableConcept))
+            throw new Error("Not the right type for MedicinalProductInteraction.interactant.item[x]: "+value.fhirType());
+          this.item = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("item[x]", "Reference(MedicinalProduct|Medication|Substance|ObservationDefinition)|CodeableConcept", "The specific medication, food or laboratory test that interacts.", 0, 1, item));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 2116201613: /*item[x]*/  return new Property("item[x]", "Reference(MedicinalProduct|Medication|Substance|ObservationDefinition)|CodeableConcept", "The specific medication, food or laboratory test that interacts.", 0, 1, item);
+          case 3242771: /*item*/  return new Property("item[x]", "Reference(MedicinalProduct|Medication|Substance|ObservationDefinition)|CodeableConcept", "The specific medication, food or laboratory test that interacts.", 0, 1, item);
+          case 1376364920: /*itemReference*/  return new Property("item[x]", "Reference(MedicinalProduct|Medication|Substance|ObservationDefinition)|CodeableConcept", "The specific medication, food or laboratory test that interacts.", 0, 1, item);
+          case 106644494: /*itemCodeableConcept*/  return new Property("item[x]", "Reference(MedicinalProduct|Medication|Substance|ObservationDefinition)|CodeableConcept", "The specific medication, food or laboratory test that interacts.", 0, 1, item);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3242771: /*item*/ return this.item == null ? new Base[0] : new Base[] {this.item}; // Type
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3242771: // item
+          this.item = castToType(value); // Type
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("item[x]")) {
+          this.item = castToType(value); // Type
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 2116201613:  return getItem(); 
+        case 3242771:  return getItem(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3242771: /*item*/ return new String[] {"Reference", "CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("itemReference")) {
+          this.item = new Reference();
+          return this.item;
+        }
+        else if (name.equals("itemCodeableConcept")) {
+          this.item = new CodeableConcept();
+          return this.item;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public MedicinalProductInteractionInteractantComponent copy() {
+        MedicinalProductInteractionInteractantComponent dst = new MedicinalProductInteractionInteractantComponent();
+        copyValues(dst);
+        dst.item = item == null ? null : item.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof MedicinalProductInteractionInteractantComponent))
+          return false;
+        MedicinalProductInteractionInteractantComponent o = (MedicinalProductInteractionInteractantComponent) other_;
+        return compareDeep(item, o.item, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof MedicinalProductInteractionInteractantComponent))
+          return false;
+        MedicinalProductInteractionInteractantComponent o = (MedicinalProductInteractionInteractantComponent) other_;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(item);
+      }
+
+  public String fhirType() {
+    return "MedicinalProductInteraction.interactant";
+
+  }
+
+  }
+
+    /**
+     * The medication for which this is a described interaction.
+     */
+    @Child(name = "subject", type = {MedicinalProduct.class, Medication.class, Substance.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="The medication for which this is a described interaction", formalDefinition="The medication for which this is a described interaction." )
     protected List<Reference> subject;
     /**
-     * The actual objects that are the target of the reference (The medication for which this is an indication.)
+     * The actual objects that are the target of the reference (The medication for which this is a described interaction.)
      */
     protected List<Resource> subjectTarget;
 
@@ -63,36 +257,36 @@ public class MedicinalProductInteraction extends DomainResource {
     /**
      * The interaction described.
      */
-    @Child(name = "interaction", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "description", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The interaction described", formalDefinition="The interaction described." )
-    protected StringType interaction;
+    protected StringType description;
 
     /**
      * The specific medication, food or laboratory test that interacts.
      */
-    @Child(name = "interactant", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "interactant", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The specific medication, food or laboratory test that interacts", formalDefinition="The specific medication, food or laboratory test that interacts." )
-    protected List<CodeableConcept> interactant;
+    protected List<MedicinalProductInteractionInteractantComponent> interactant;
 
     /**
-     * The type of the interaction.
+     * The type of the interaction e.g. drug-drug interaction, drug-food interaction, drug-lab test interaction.
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The type of the interaction", formalDefinition="The type of the interaction." )
+    @Description(shortDefinition="The type of the interaction e.g. drug-drug interaction, drug-food interaction, drug-lab test interaction", formalDefinition="The type of the interaction e.g. drug-drug interaction, drug-food interaction, drug-lab test interaction." )
     protected CodeableConcept type;
 
     /**
-     * The effect of the interaction.
+     * The effect of the interaction, for example "reduced gastric absorption of primary medication".
      */
     @Child(name = "effect", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The effect of the interaction", formalDefinition="The effect of the interaction." )
+    @Description(shortDefinition="The effect of the interaction, for example \"reduced gastric absorption of primary medication\"", formalDefinition="The effect of the interaction, for example \"reduced gastric absorption of primary medication\"." )
     protected CodeableConcept effect;
 
     /**
-     * The incidence of the interaction.
+     * The incidence of the interaction, e.g. theoretical, observed.
      */
     @Child(name = "incidence", type = {CodeableConcept.class}, order=5, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The incidence of the interaction", formalDefinition="The incidence of the interaction." )
+    @Description(shortDefinition="The incidence of the interaction, e.g. theoretical, observed", formalDefinition="The incidence of the interaction, e.g. theoretical, observed." )
     protected CodeableConcept incidence;
 
     /**
@@ -102,7 +296,7 @@ public class MedicinalProductInteraction extends DomainResource {
     @Description(shortDefinition="Actions for managing the interaction", formalDefinition="Actions for managing the interaction." )
     protected CodeableConcept management;
 
-    private static final long serialVersionUID = 1175278617L;
+    private static final long serialVersionUID = -1872687169L;
 
   /**
    * Constructor
@@ -112,7 +306,7 @@ public class MedicinalProductInteraction extends DomainResource {
     }
 
     /**
-     * @return {@link #subject} (The medication for which this is an indication.)
+     * @return {@link #subject} (The medication for which this is a described interaction.)
      */
     public List<Reference> getSubject() { 
       if (this.subject == null)
@@ -175,50 +369,50 @@ public class MedicinalProductInteraction extends DomainResource {
     }
 
     /**
-     * @return {@link #interaction} (The interaction described.). This is the underlying object with id, value and extensions. The accessor "getInteraction" gives direct access to the value
+     * @return {@link #description} (The interaction described.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public StringType getInteractionElement() { 
-      if (this.interaction == null)
+    public StringType getDescriptionElement() { 
+      if (this.description == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MedicinalProductInteraction.interaction");
+          throw new Error("Attempt to auto-create MedicinalProductInteraction.description");
         else if (Configuration.doAutoCreate())
-          this.interaction = new StringType(); // bb
-      return this.interaction;
+          this.description = new StringType(); // bb
+      return this.description;
     }
 
-    public boolean hasInteractionElement() { 
-      return this.interaction != null && !this.interaction.isEmpty();
+    public boolean hasDescriptionElement() { 
+      return this.description != null && !this.description.isEmpty();
     }
 
-    public boolean hasInteraction() { 
-      return this.interaction != null && !this.interaction.isEmpty();
+    public boolean hasDescription() { 
+      return this.description != null && !this.description.isEmpty();
     }
 
     /**
-     * @param value {@link #interaction} (The interaction described.). This is the underlying object with id, value and extensions. The accessor "getInteraction" gives direct access to the value
+     * @param value {@link #description} (The interaction described.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
-    public MedicinalProductInteraction setInteractionElement(StringType value) { 
-      this.interaction = value;
+    public MedicinalProductInteraction setDescriptionElement(StringType value) { 
+      this.description = value;
       return this;
     }
 
     /**
      * @return The interaction described.
      */
-    public String getInteraction() { 
-      return this.interaction == null ? null : this.interaction.getValue();
+    public String getDescription() { 
+      return this.description == null ? null : this.description.getValue();
     }
 
     /**
      * @param value The interaction described.
      */
-    public MedicinalProductInteraction setInteraction(String value) { 
+    public MedicinalProductInteraction setDescription(String value) { 
       if (Utilities.noString(value))
-        this.interaction = null;
+        this.description = null;
       else {
-        if (this.interaction == null)
-          this.interaction = new StringType();
-        this.interaction.setValue(value);
+        if (this.description == null)
+          this.description = new StringType();
+        this.description.setValue(value);
       }
       return this;
     }
@@ -226,16 +420,16 @@ public class MedicinalProductInteraction extends DomainResource {
     /**
      * @return {@link #interactant} (The specific medication, food or laboratory test that interacts.)
      */
-    public List<CodeableConcept> getInteractant() { 
+    public List<MedicinalProductInteractionInteractantComponent> getInteractant() { 
       if (this.interactant == null)
-        this.interactant = new ArrayList<CodeableConcept>();
+        this.interactant = new ArrayList<MedicinalProductInteractionInteractantComponent>();
       return this.interactant;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public MedicinalProductInteraction setInteractant(List<CodeableConcept> theInteractant) { 
+    public MedicinalProductInteraction setInteractant(List<MedicinalProductInteractionInteractantComponent> theInteractant) { 
       this.interactant = theInteractant;
       return this;
     }
@@ -243,25 +437,25 @@ public class MedicinalProductInteraction extends DomainResource {
     public boolean hasInteractant() { 
       if (this.interactant == null)
         return false;
-      for (CodeableConcept item : this.interactant)
+      for (MedicinalProductInteractionInteractantComponent item : this.interactant)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public CodeableConcept addInteractant() { //3
-      CodeableConcept t = new CodeableConcept();
+    public MedicinalProductInteractionInteractantComponent addInteractant() { //3
+      MedicinalProductInteractionInteractantComponent t = new MedicinalProductInteractionInteractantComponent();
       if (this.interactant == null)
-        this.interactant = new ArrayList<CodeableConcept>();
+        this.interactant = new ArrayList<MedicinalProductInteractionInteractantComponent>();
       this.interactant.add(t);
       return t;
     }
 
-    public MedicinalProductInteraction addInteractant(CodeableConcept t) { //3
+    public MedicinalProductInteraction addInteractant(MedicinalProductInteractionInteractantComponent t) { //3
       if (t == null)
         return this;
       if (this.interactant == null)
-        this.interactant = new ArrayList<CodeableConcept>();
+        this.interactant = new ArrayList<MedicinalProductInteractionInteractantComponent>();
       this.interactant.add(t);
       return this;
     }
@@ -269,7 +463,7 @@ public class MedicinalProductInteraction extends DomainResource {
     /**
      * @return The first repetition of repeating field {@link #interactant}, creating it if it does not already exist
      */
-    public CodeableConcept getInteractantFirstRep() { 
+    public MedicinalProductInteractionInteractantComponent getInteractantFirstRep() { 
       if (getInteractant().isEmpty()) {
         addInteractant();
       }
@@ -277,7 +471,7 @@ public class MedicinalProductInteraction extends DomainResource {
     }
 
     /**
-     * @return {@link #type} (The type of the interaction.)
+     * @return {@link #type} (The type of the interaction e.g. drug-drug interaction, drug-food interaction, drug-lab test interaction.)
      */
     public CodeableConcept getType() { 
       if (this.type == null)
@@ -293,7 +487,7 @@ public class MedicinalProductInteraction extends DomainResource {
     }
 
     /**
-     * @param value {@link #type} (The type of the interaction.)
+     * @param value {@link #type} (The type of the interaction e.g. drug-drug interaction, drug-food interaction, drug-lab test interaction.)
      */
     public MedicinalProductInteraction setType(CodeableConcept value) { 
       this.type = value;
@@ -301,7 +495,7 @@ public class MedicinalProductInteraction extends DomainResource {
     }
 
     /**
-     * @return {@link #effect} (The effect of the interaction.)
+     * @return {@link #effect} (The effect of the interaction, for example "reduced gastric absorption of primary medication".)
      */
     public CodeableConcept getEffect() { 
       if (this.effect == null)
@@ -317,7 +511,7 @@ public class MedicinalProductInteraction extends DomainResource {
     }
 
     /**
-     * @param value {@link #effect} (The effect of the interaction.)
+     * @param value {@link #effect} (The effect of the interaction, for example "reduced gastric absorption of primary medication".)
      */
     public MedicinalProductInteraction setEffect(CodeableConcept value) { 
       this.effect = value;
@@ -325,7 +519,7 @@ public class MedicinalProductInteraction extends DomainResource {
     }
 
     /**
-     * @return {@link #incidence} (The incidence of the interaction.)
+     * @return {@link #incidence} (The incidence of the interaction, e.g. theoretical, observed.)
      */
     public CodeableConcept getIncidence() { 
       if (this.incidence == null)
@@ -341,7 +535,7 @@ public class MedicinalProductInteraction extends DomainResource {
     }
 
     /**
-     * @param value {@link #incidence} (The incidence of the interaction.)
+     * @param value {@link #incidence} (The incidence of the interaction, e.g. theoretical, observed.)
      */
     public MedicinalProductInteraction setIncidence(CodeableConcept value) { 
       this.incidence = value;
@@ -374,24 +568,24 @@ public class MedicinalProductInteraction extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("subject", "Reference(MedicinalProduct|Medication)", "The medication for which this is an indication.", 0, java.lang.Integer.MAX_VALUE, subject));
-        children.add(new Property("interaction", "string", "The interaction described.", 0, 1, interaction));
-        children.add(new Property("interactant", "CodeableConcept", "The specific medication, food or laboratory test that interacts.", 0, java.lang.Integer.MAX_VALUE, interactant));
-        children.add(new Property("type", "CodeableConcept", "The type of the interaction.", 0, 1, type));
-        children.add(new Property("effect", "CodeableConcept", "The effect of the interaction.", 0, 1, effect));
-        children.add(new Property("incidence", "CodeableConcept", "The incidence of the interaction.", 0, 1, incidence));
+        children.add(new Property("subject", "Reference(MedicinalProduct|Medication|Substance)", "The medication for which this is a described interaction.", 0, java.lang.Integer.MAX_VALUE, subject));
+        children.add(new Property("description", "string", "The interaction described.", 0, 1, description));
+        children.add(new Property("interactant", "", "The specific medication, food or laboratory test that interacts.", 0, java.lang.Integer.MAX_VALUE, interactant));
+        children.add(new Property("type", "CodeableConcept", "The type of the interaction e.g. drug-drug interaction, drug-food interaction, drug-lab test interaction.", 0, 1, type));
+        children.add(new Property("effect", "CodeableConcept", "The effect of the interaction, for example \"reduced gastric absorption of primary medication\".", 0, 1, effect));
+        children.add(new Property("incidence", "CodeableConcept", "The incidence of the interaction, e.g. theoretical, observed.", 0, 1, incidence));
         children.add(new Property("management", "CodeableConcept", "Actions for managing the interaction.", 0, 1, management));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1867885268: /*subject*/  return new Property("subject", "Reference(MedicinalProduct|Medication)", "The medication for which this is an indication.", 0, java.lang.Integer.MAX_VALUE, subject);
-        case 1844104722: /*interaction*/  return new Property("interaction", "string", "The interaction described.", 0, 1, interaction);
-        case 1844097009: /*interactant*/  return new Property("interactant", "CodeableConcept", "The specific medication, food or laboratory test that interacts.", 0, java.lang.Integer.MAX_VALUE, interactant);
-        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of the interaction.", 0, 1, type);
-        case -1306084975: /*effect*/  return new Property("effect", "CodeableConcept", "The effect of the interaction.", 0, 1, effect);
-        case -1598467132: /*incidence*/  return new Property("incidence", "CodeableConcept", "The incidence of the interaction.", 0, 1, incidence);
+        case -1867885268: /*subject*/  return new Property("subject", "Reference(MedicinalProduct|Medication|Substance)", "The medication for which this is a described interaction.", 0, java.lang.Integer.MAX_VALUE, subject);
+        case -1724546052: /*description*/  return new Property("description", "string", "The interaction described.", 0, 1, description);
+        case 1844097009: /*interactant*/  return new Property("interactant", "", "The specific medication, food or laboratory test that interacts.", 0, java.lang.Integer.MAX_VALUE, interactant);
+        case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The type of the interaction e.g. drug-drug interaction, drug-food interaction, drug-lab test interaction.", 0, 1, type);
+        case -1306084975: /*effect*/  return new Property("effect", "CodeableConcept", "The effect of the interaction, for example \"reduced gastric absorption of primary medication\".", 0, 1, effect);
+        case -1598467132: /*incidence*/  return new Property("incidence", "CodeableConcept", "The incidence of the interaction, e.g. theoretical, observed.", 0, 1, incidence);
         case -1799980989: /*management*/  return new Property("management", "CodeableConcept", "Actions for managing the interaction.", 0, 1, management);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -402,8 +596,8 @@ public class MedicinalProductInteraction extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : this.subject.toArray(new Base[this.subject.size()]); // Reference
-        case 1844104722: /*interaction*/ return this.interaction == null ? new Base[0] : new Base[] {this.interaction}; // StringType
-        case 1844097009: /*interactant*/ return this.interactant == null ? new Base[0] : this.interactant.toArray(new Base[this.interactant.size()]); // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case 1844097009: /*interactant*/ return this.interactant == null ? new Base[0] : this.interactant.toArray(new Base[this.interactant.size()]); // MedicinalProductInteractionInteractantComponent
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case -1306084975: /*effect*/ return this.effect == null ? new Base[0] : new Base[] {this.effect}; // CodeableConcept
         case -1598467132: /*incidence*/ return this.incidence == null ? new Base[0] : new Base[] {this.incidence}; // CodeableConcept
@@ -419,11 +613,11 @@ public class MedicinalProductInteraction extends DomainResource {
         case -1867885268: // subject
           this.getSubject().add(castToReference(value)); // Reference
           return value;
-        case 1844104722: // interaction
-          this.interaction = castToString(value); // StringType
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
           return value;
         case 1844097009: // interactant
-          this.getInteractant().add(castToCodeableConcept(value)); // CodeableConcept
+          this.getInteractant().add((MedicinalProductInteractionInteractantComponent) value); // MedicinalProductInteractionInteractantComponent
           return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
@@ -446,10 +640,10 @@ public class MedicinalProductInteraction extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("subject")) {
           this.getSubject().add(castToReference(value));
-        } else if (name.equals("interaction")) {
-          this.interaction = castToString(value); // StringType
+        } else if (name.equals("description")) {
+          this.description = castToString(value); // StringType
         } else if (name.equals("interactant")) {
-          this.getInteractant().add(castToCodeableConcept(value));
+          this.getInteractant().add((MedicinalProductInteractionInteractantComponent) value);
         } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("effect")) {
@@ -467,7 +661,7 @@ public class MedicinalProductInteraction extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1867885268:  return addSubject(); 
-        case 1844104722:  return getInteractionElement();
+        case -1724546052:  return getDescriptionElement();
         case 1844097009:  return addInteractant(); 
         case 3575610:  return getType(); 
         case -1306084975:  return getEffect(); 
@@ -482,8 +676,8 @@ public class MedicinalProductInteraction extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -1867885268: /*subject*/ return new String[] {"Reference"};
-        case 1844104722: /*interaction*/ return new String[] {"string"};
-        case 1844097009: /*interactant*/ return new String[] {"CodeableConcept"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 1844097009: /*interactant*/ return new String[] {};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case -1306084975: /*effect*/ return new String[] {"CodeableConcept"};
         case -1598467132: /*incidence*/ return new String[] {"CodeableConcept"};
@@ -498,8 +692,8 @@ public class MedicinalProductInteraction extends DomainResource {
         if (name.equals("subject")) {
           return addSubject();
         }
-        else if (name.equals("interaction")) {
-          throw new FHIRException("Cannot call addChild on a primitive type MedicinalProductInteraction.interaction");
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type MedicinalProductInteraction.description");
         }
         else if (name.equals("interactant")) {
           return addInteractant();
@@ -537,10 +731,10 @@ public class MedicinalProductInteraction extends DomainResource {
           for (Reference i : subject)
             dst.subject.add(i.copy());
         };
-        dst.interaction = interaction == null ? null : interaction.copy();
+        dst.description = description == null ? null : description.copy();
         if (interactant != null) {
-          dst.interactant = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : interactant)
+          dst.interactant = new ArrayList<MedicinalProductInteractionInteractantComponent>();
+          for (MedicinalProductInteractionInteractantComponent i : interactant)
             dst.interactant.add(i.copy());
         };
         dst.type = type == null ? null : type.copy();
@@ -561,7 +755,7 @@ public class MedicinalProductInteraction extends DomainResource {
         if (!(other_ instanceof MedicinalProductInteraction))
           return false;
         MedicinalProductInteraction o = (MedicinalProductInteraction) other_;
-        return compareDeep(subject, o.subject, true) && compareDeep(interaction, o.interaction, true) && compareDeep(interactant, o.interactant, true)
+        return compareDeep(subject, o.subject, true) && compareDeep(description, o.description, true) && compareDeep(interactant, o.interactant, true)
            && compareDeep(type, o.type, true) && compareDeep(effect, o.effect, true) && compareDeep(incidence, o.incidence, true)
            && compareDeep(management, o.management, true);
       }
@@ -573,11 +767,11 @@ public class MedicinalProductInteraction extends DomainResource {
         if (!(other_ instanceof MedicinalProductInteraction))
           return false;
         MedicinalProductInteraction o = (MedicinalProductInteraction) other_;
-        return compareValues(interaction, o.interaction, true);
+        return compareValues(description, o.description, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(subject, interaction, interactant
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(subject, description, interactant
           , type, effect, incidence, management);
       }
 
@@ -594,7 +788,7 @@ public class MedicinalProductInteraction extends DomainResource {
    * Path: <b>MedicinalProductInteraction.subject</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="subject", path="MedicinalProductInteraction.subject", description="The medication for which this is an interaction", type="reference", target={Medication.class, MedicinalProduct.class } )
+  @SearchParamDefinition(name="subject", path="MedicinalProductInteraction.subject", description="The medication for which this is an interaction", type="reference", target={Medication.class, MedicinalProduct.class, Substance.class } )
   public static final String SP_SUBJECT = "subject";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>subject</b>

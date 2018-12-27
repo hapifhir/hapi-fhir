@@ -39,7 +39,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -161,7 +160,9 @@ public class DateType extends BaseDateTimeType {
 
 	@Override
 	public DateType copy() {
-		return new DateType(getValueAsString());
+		DateType ret = new DateType(getValueAsString());
+    copyValues(ret);
+    return ret;
 	}
 	
 	public static InstantType today() {

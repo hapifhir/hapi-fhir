@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -60,7 +60,7 @@ public class ConceptMap extends MetadataResource {
          */
         FIXED, 
         /**
-         * Use the map identified by the canonical URL in URL.
+         * Use the map identified by the canonical URL in the url element.
          */
         OTHERMAP, 
         /**
@@ -101,7 +101,7 @@ public class ConceptMap extends MetadataResource {
           switch (this) {
             case PROVIDED: return "Use the code as provided in the $translate request.";
             case FIXED: return "Use the code explicitly provided in the group.unmapped.";
-            case OTHERMAP: return "Use the map identified by the canonical URL in URL.";
+            case OTHERMAP: return "Use the map identified by the canonical URL in the url element.";
             default: return "?";
           }
         }
@@ -196,10 +196,10 @@ public class ConceptMap extends MetadataResource {
         protected List<SourceElementComponent> element;
 
         /**
-         * What to do when there is no mapping for the source concept. "Unmapped" does not include codes that are unamatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.
+         * What to do when there is no mapping for the source concept. "Unmapped" does not include codes that are unmatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.
          */
         @Child(name = "unmapped", type = {}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="What to do when there is no mapping for the source concept", formalDefinition="What to do when there is no mapping for the source concept. \"Unmapped\" does not include codes that are unamatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched." )
+        @Description(shortDefinition="What to do when there is no mapping for the source concept", formalDefinition="What to do when there is no mapping for the source concept. \"Unmapped\" does not include codes that are unmatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched." )
         protected ConceptMapGroupUnmappedComponent unmapped;
 
         private static final long serialVersionUID = 1606357508L;
@@ -461,7 +461,7 @@ public class ConceptMap extends MetadataResource {
         }
 
         /**
-         * @return {@link #unmapped} (What to do when there is no mapping for the source concept. "Unmapped" does not include codes that are unamatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.)
+         * @return {@link #unmapped} (What to do when there is no mapping for the source concept. "Unmapped" does not include codes that are unmatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.)
          */
         public ConceptMapGroupUnmappedComponent getUnmapped() { 
           if (this.unmapped == null)
@@ -477,7 +477,7 @@ public class ConceptMap extends MetadataResource {
         }
 
         /**
-         * @param value {@link #unmapped} (What to do when there is no mapping for the source concept. "Unmapped" does not include codes that are unamatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.)
+         * @param value {@link #unmapped} (What to do when there is no mapping for the source concept. "Unmapped" does not include codes that are unmatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.)
          */
         public ConceptMapGroupComponent setUnmapped(ConceptMapGroupUnmappedComponent value) { 
           this.unmapped = value;
@@ -491,7 +491,7 @@ public class ConceptMap extends MetadataResource {
           children.add(new Property("target", "uri", "An absolute URI that identifies the target system that the concepts will be mapped to.", 0, 1, target));
           children.add(new Property("targetVersion", "string", "The specific version of the code system, as determined by the code system authority.", 0, 1, targetVersion));
           children.add(new Property("element", "", "Mappings for an individual concept in the source to one or more concepts in the target.", 0, java.lang.Integer.MAX_VALUE, element));
-          children.add(new Property("unmapped", "", "What to do when there is no mapping for the source concept. \"Unmapped\" does not include codes that are unamatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.", 0, 1, unmapped));
+          children.add(new Property("unmapped", "", "What to do when there is no mapping for the source concept. \"Unmapped\" does not include codes that are unmatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.", 0, 1, unmapped));
         }
 
         @Override
@@ -502,7 +502,7 @@ public class ConceptMap extends MetadataResource {
           case -880905839: /*target*/  return new Property("target", "uri", "An absolute URI that identifies the target system that the concepts will be mapped to.", 0, 1, target);
           case -1639412217: /*targetVersion*/  return new Property("targetVersion", "string", "The specific version of the code system, as determined by the code system authority.", 0, 1, targetVersion);
           case -1662836996: /*element*/  return new Property("element", "", "Mappings for an individual concept in the source to one or more concepts in the target.", 0, java.lang.Integer.MAX_VALUE, element);
-          case -194857460: /*unmapped*/  return new Property("unmapped", "", "What to do when there is no mapping for the source concept. \"Unmapped\" does not include codes that are unamatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.", 0, 1, unmapped);
+          case -194857460: /*unmapped*/  return new Property("unmapped", "", "What to do when there is no mapping for the source concept. \"Unmapped\" does not include codes that are unmatched, and the unmapped element is ignored in a code is specified to have equivalence = unmatched.", 0, 1, unmapped);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1961,10 +1961,10 @@ public class ConceptMap extends MetadataResource {
         protected StringType display;
 
         /**
-         * The canonical URI of an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.
+         * The canonical reference to an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.
          */
         @Child(name = "url", type = {CanonicalType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Canonical URI for an additional ConceptMap to use for mapping if the source concept is unmapped", formalDefinition="The canonical URI of an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept." )
+        @Description(shortDefinition="canonical reference to an additional ConceptMap to use for mapping if the source concept is unmapped", formalDefinition="The canonical reference to an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept." )
         protected CanonicalType url;
 
         private static final long serialVersionUID = 1261364354L;
@@ -2128,7 +2128,7 @@ public class ConceptMap extends MetadataResource {
         }
 
         /**
-         * @return {@link #url} (The canonical URI of an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @return {@link #url} (The canonical reference to an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
          */
         public CanonicalType getUrlElement() { 
           if (this.url == null)
@@ -2148,7 +2148,7 @@ public class ConceptMap extends MetadataResource {
         }
 
         /**
-         * @param value {@link #url} (The canonical URI of an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @param value {@link #url} (The canonical reference to an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
          */
         public ConceptMapGroupUnmappedComponent setUrlElement(CanonicalType value) { 
           this.url = value;
@@ -2156,14 +2156,14 @@ public class ConceptMap extends MetadataResource {
         }
 
         /**
-         * @return The canonical URI of an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.
+         * @return The canonical reference to an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.
          */
         public String getUrl() { 
           return this.url == null ? null : this.url.getValue();
         }
 
         /**
-         * @param value The canonical URI of an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.
+         * @param value The canonical reference to an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.
          */
         public ConceptMapGroupUnmappedComponent setUrl(String value) { 
           if (Utilities.noString(value))
@@ -2181,7 +2181,7 @@ public class ConceptMap extends MetadataResource {
           children.add(new Property("mode", "code", "Defines which action to take if there is no match for the source concept in the target system designated for the group. One of 3 actions are possible: use the unmapped code (this is useful when doing a mapping between versions, and only a few codes have changed), use a fixed code (a default code), or alternatively, a reference to a different concept map can be provided (by canonical URL).", 0, 1, mode));
           children.add(new Property("code", "code", "The fixed code to use when the mode = 'fixed'  - all unmapped codes are mapped to a single fixed code.", 0, 1, code));
           children.add(new Property("display", "string", "The display for the code. The display is only provided to help editors when editing the concept map.", 0, 1, display));
-          children.add(new Property("url", "canonical(ConceptMap)", "The canonical URI of an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.", 0, 1, url));
+          children.add(new Property("url", "canonical(ConceptMap)", "The canonical reference to an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.", 0, 1, url));
         }
 
         @Override
@@ -2190,7 +2190,7 @@ public class ConceptMap extends MetadataResource {
           case 3357091: /*mode*/  return new Property("mode", "code", "Defines which action to take if there is no match for the source concept in the target system designated for the group. One of 3 actions are possible: use the unmapped code (this is useful when doing a mapping between versions, and only a few codes have changed), use a fixed code (a default code), or alternatively, a reference to a different concept map can be provided (by canonical URL).", 0, 1, mode);
           case 3059181: /*code*/  return new Property("code", "code", "The fixed code to use when the mode = 'fixed'  - all unmapped codes are mapped to a single fixed code.", 0, 1, code);
           case 1671764162: /*display*/  return new Property("display", "string", "The display for the code. The display is only provided to help editors when editing the concept map.", 0, 1, display);
-          case 116079: /*url*/  return new Property("url", "canonical(ConceptMap)", "The canonical URI of an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.", 0, 1, url);
+          case 116079: /*url*/  return new Property("url", "canonical(ConceptMap)", "The canonical reference to an additional ConceptMap resource instance to use for mapping if this ConceptMap resource contains no matching mapping for the source concept.", 0, 1, url);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2901,7 +2901,7 @@ public class ConceptMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate concept map instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate concept map instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -3116,7 +3116,7 @@ public class ConceptMap extends MetadataResource {
      */
     public UriType getSourceUriType() throws FHIRException { 
       if (this.source == null)
-        return null;
+        this.source = new UriType();
       if (!(this.source instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.source.getClass().getName()+" was encountered");
       return (UriType) this.source;
@@ -3131,7 +3131,7 @@ public class ConceptMap extends MetadataResource {
      */
     public CanonicalType getSourceCanonicalType() throws FHIRException { 
       if (this.source == null)
-        return null;
+        this.source = new CanonicalType();
       if (!(this.source instanceof CanonicalType))
         throw new FHIRException("Type mismatch: the type CanonicalType was expected, but "+this.source.getClass().getName()+" was encountered");
       return (CanonicalType) this.source;
@@ -3167,7 +3167,7 @@ public class ConceptMap extends MetadataResource {
      */
     public UriType getTargetUriType() throws FHIRException { 
       if (this.target == null)
-        return null;
+        this.target = new UriType();
       if (!(this.target instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.target.getClass().getName()+" was encountered");
       return (UriType) this.target;
@@ -3182,7 +3182,7 @@ public class ConceptMap extends MetadataResource {
      */
     public CanonicalType getTargetCanonicalType() throws FHIRException { 
       if (this.target == null)
-        return null;
+        this.target = new CanonicalType();
       if (!(this.target instanceof CanonicalType))
         throw new FHIRException("Type mismatch: the type CanonicalType was expected, but "+this.target.getClass().getName()+" was encountered");
       return (CanonicalType) this.target;
@@ -3272,7 +3272,7 @@ public class ConceptMap extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the concept map.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the concept map from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate concept map instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate concept map instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the concept map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this concept map is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the concept map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the concept map.", 0, 1, copyright));
@@ -3295,7 +3295,7 @@ public class ConceptMap extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the concept map.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the concept map from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate concept map instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate concept map instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the concept map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this concept map is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the concept map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the concept map.", 0, 1, copyright);
@@ -3675,17 +3675,17 @@ public class ConceptMap extends MetadataResource {
  /**
    * Search parameter: <b>other</b>
    * <p>
-   * Description: <b>Canonical URI for an additional ConceptMap to use for mapping if the source concept is unmapped</b><br>
+   * Description: <b>canonical reference to an additional ConceptMap to use for mapping if the source concept is unmapped</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ConceptMap.group.unmapped.url</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="other", path="ConceptMap.group.unmapped.url", description="Canonical URI for an additional ConceptMap to use for mapping if the source concept is unmapped", type="reference", target={ConceptMap.class } )
+  @SearchParamDefinition(name="other", path="ConceptMap.group.unmapped.url", description="canonical reference to an additional ConceptMap to use for mapping if the source concept is unmapped", type="reference", target={ConceptMap.class } )
   public static final String SP_OTHER = "other";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>other</b>
    * <p>
-   * Description: <b>Canonical URI for an additional ConceptMap to use for mapping if the source concept is unmapped</b><br>
+   * Description: <b>canonical reference to an additional ConceptMap to use for mapping if the source concept is unmapped</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>ConceptMap.group.unmapped.url</b><br>
    * </p>

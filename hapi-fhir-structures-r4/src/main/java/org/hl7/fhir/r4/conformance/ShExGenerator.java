@@ -578,11 +578,11 @@ public class ShExGenerator {
       StringBuilder facets =  new StringBuilder();
       if(ed.hasMinValue()) {
         Type mv = ed.getMinValue();
-        facets.append(tmplt(MINVALUE_TEMPLATE).add("val", TurtleParser.ttlLiteral(mv.primitiveValue(), mv.fhirType())).render());
+        facets.append(tmplt(MINVALUE_TEMPLATE).add("val", mv.primitiveValue()).render());
       }
       if(ed.hasMaxValue()) {
         Type mv = ed.getMaxValue();
-        facets.append(tmplt(MAXVALUE_TEMPLATE).add("val", TurtleParser.ttlLiteral(mv.primitiveValue(), mv.fhirType())).render());
+        facets.append(tmplt(MAXVALUE_TEMPLATE).add("val", mv.primitiveValue()).render());
       }
       if(ed.hasMaxLength()) {
         int ml = ed.getMaxLength();

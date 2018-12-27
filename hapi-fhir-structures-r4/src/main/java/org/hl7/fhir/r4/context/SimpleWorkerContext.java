@@ -49,6 +49,7 @@ import org.hl7.fhir.r4.model.StructureMap;
 import org.hl7.fhir.r4.model.StructureMap.StructureMapModelMode;
 import org.hl7.fhir.r4.model.StructureMap.StructureMapStructureComponent;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.terminologies.TerminologyClient;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.r4.terminologies.ValueSetExpansionCache;
 import org.hl7.fhir.r4.utils.INarrativeGenerator;
@@ -92,7 +93,6 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
   private String revision;
   private String date;
   private IValidatorFactory validatorFactory;
-  private UcumService ucumService;
   private boolean ignoreProfileErrors;
   
   public SimpleWorkerContext() throws FileNotFoundException, IOException, FHIRException {
@@ -186,10 +186,15 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
 		return res;
 	}
 
-  public static SimpleWorkerContext fromDefinitions(Map<String, byte[]> source, IContextResourceLoader loader) throws IOException, FHIRException {
+  public static SimpleWorkerContext fromDefinitions(Map<String, byte[]> source, IContextResourceLoader loader) throws FileNotFoundException, IOException, FHIRException  {
     SimpleWorkerContext res = new SimpleWorkerContext();
-    for (String name : source.keySet()) {
-      res.loadDefinitionItem(name, new ByteArrayInputStream(source.get(name)), loader);
+    for (String name : source.keySet()) { 
+      try {
+        res.loadDefinitionItem(name, new ByteArrayInputStream(source.get(name)), loader);
+      } catch (Exception e) {
+        System.out.println("Error loading "+name+": "+e.getMessage());
+        throw new FHIRException("Error loading "+name+": "+e.getMessage(), e);
+      }
     }
     return res;
   }
@@ -204,17 +209,13 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
       loadBytes(name, stream);
   }
 
-  public String connectToTSServer(String url) throws URISyntaxException {
-    tlog("Connect to "+url);
-    txServer = new FHIRToolingClient(url);
-    txServer.setTimeout(30000);
-    return txServer.getCapabilitiesStatementQuick().getSoftware().getVersion();
-  }
 
-  public String connectToTSServer(FHIRToolingClient client) throws URISyntaxException {
+  public String connectToTSServer(TerminologyClient client, String log) throws URISyntaxException, FHIRException {
     tlog("Connect to "+client.getAddress());
-    txServer = client;
-    return txServer.getCapabilitiesStatementQuick().getSoftware().getVersion();
+    txClient = client;
+    txLog = new HTMLClientLogger(log);
+    txClient.setLogger(txLog);
+    return txClient.getCapabilitiesStatementQuick().getSoftware().getVersion();
   }
 
 	public void loadFromFile(InputStream stream, String name, IContextResourceLoader loader) throws IOException, FHIRException {
@@ -452,6 +453,11 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
     Set<StructureDefinition> set = new HashSet<StructureDefinition>();
     for (StructureDefinition sd : listStructures()) {
       if (!set.contains(sd)) {
+        try {
+          generateSnapshot(sd);
+        } catch (Exception e) {
+          System.out.println("Unable to generate snapshot for "+sd.getUrl()+" because "+e.getMessage());
+        }
         result.add(sd);
         set.add(sd);
       }
@@ -542,42 +548,43 @@ public class SimpleWorkerContext extends BaseWorkerContext implements IWorkerCon
   }
 
   @Override
-  protected void seeMetadataResource(MetadataResource r, Map map, boolean addId) throws FHIRException {
+  public <T extends Resource> T fetchResource(Class<T> class_, String uri) {
+    T r = super.fetchResource(class_, uri);
     if (r instanceof StructureDefinition) {
       StructureDefinition p = (StructureDefinition)r;
-      
-      if (!p.hasSnapshot() && p.getKind() != StructureDefinitionKind.LOGICAL) {
-        if (!p.hasBaseDefinition())
-          throw new DefinitionException("Profile "+p.getName()+" ("+p.getUrl()+") has no base and no snapshot");
-        StructureDefinition sd = fetchResource(StructureDefinition.class, p.getBaseDefinition());
-        if (sd == null)
-          throw new DefinitionException("Profile "+p.getName()+" ("+p.getUrl()+") base "+p.getBaseDefinition()+" could not be resolved");
-        List<ValidationMessage> msgs = new ArrayList<ValidationMessage>();
-        List<String> errors = new ArrayList<String>();
-        ProfileUtilities pu = new ProfileUtilities(this, msgs, this);
-        pu.setThrowException(false);
-        pu.sortDifferential(sd, p, p.getUrl(), errors);
-        for (String err : errors)
-          msgs.add(new ValidationMessage(Source.ProfileValidator, IssueType.EXCEPTION, p.getUserString("path"), "Error sorting Differential: "+err, ValidationMessage.IssueSeverity.ERROR));
-        pu.generateSnapshot(sd, p, p.getUrl(), p.getName());
-        for (ValidationMessage msg : msgs) {
-          if ((!ignoreProfileErrors && msg.getLevel() == ValidationMessage.IssueSeverity.ERROR) || msg.getLevel() == ValidationMessage.IssueSeverity.FATAL)
-            throw new DefinitionException("Profile "+p.getName()+" ("+p.getUrl()+"). Error generating snapshot: "+msg.getMessage());
-        }
-        if (!p.hasSnapshot())
-          throw new FHIRException("Profile "+p.getName()+" ("+p.getUrl()+"). Error generating snapshot");
-        pu = null;
+      try {
+        generateSnapshot(p);
+      } catch (Exception e) {
+        // not sure what to do in this case?
+        System.out.println("Unable to generate snapshot for "+uri+": "+e.getMessage());
       }
     }
-    super.seeMetadataResource(r, map, addId);
+    return r;
   }
-
-  public UcumService getUcumService() {
-    return ucumService;
-  }
-
-  public void setUcumService(UcumService ucumService) {
-    this.ucumService = ucumService;
+  
+  public void generateSnapshot(StructureDefinition p) throws DefinitionException, FHIRException {
+    if (!p.hasSnapshot() && p.getKind() != StructureDefinitionKind.LOGICAL) {
+      if (!p.hasBaseDefinition())
+        throw new DefinitionException("Profile "+p.getName()+" ("+p.getUrl()+") has no base and no snapshot");
+      StructureDefinition sd = fetchResource(StructureDefinition.class, p.getBaseDefinition());
+      if (sd == null)
+        throw new DefinitionException("Profile "+p.getName()+" ("+p.getUrl()+") base "+p.getBaseDefinition()+" could not be resolved");
+      List<ValidationMessage> msgs = new ArrayList<ValidationMessage>();
+      List<String> errors = new ArrayList<String>();
+      ProfileUtilities pu = new ProfileUtilities(this, msgs, this);
+      pu.setThrowException(false);
+      pu.sortDifferential(sd, p, p.getUrl(), errors);
+      for (String err : errors)
+        msgs.add(new ValidationMessage(Source.ProfileValidator, IssueType.EXCEPTION, p.getUserString("path"), "Error sorting Differential: "+err, ValidationMessage.IssueSeverity.ERROR));
+      pu.generateSnapshot(sd, p, p.getUrl(), p.getName());
+      for (ValidationMessage msg : msgs) {
+        if ((!ignoreProfileErrors && msg.getLevel() == ValidationMessage.IssueSeverity.ERROR) || msg.getLevel() == ValidationMessage.IssueSeverity.FATAL)
+          throw new DefinitionException("Profile "+p.getName()+" ("+p.getUrl()+"). Error generating snapshot: "+msg.getMessage());
+      }
+      if (!p.hasSnapshot())
+        throw new FHIRException("Profile "+p.getName()+" ("+p.getUrl()+"). Error generating snapshot");
+      pu = null;
+    }
   }
 
   public boolean isIgnoreProfileErrors() {

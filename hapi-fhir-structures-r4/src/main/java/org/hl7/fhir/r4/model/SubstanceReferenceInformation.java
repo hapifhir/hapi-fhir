@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1038,677 +1038,6 @@ public class SubstanceReferenceInformation extends DomainResource {
   }
 
     @Block()
-    public static class SubstanceReferenceInformationRelationshipComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Todo.
-         */
-        @Child(name = "substance", type = {SubstanceSpecification.class, CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected Type substance;
-
-        /**
-         * Todo.
-         */
-        @Child(name = "relationship", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected CodeableConcept relationship;
-
-        /**
-         * Todo.
-         */
-        @Child(name = "interaction", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected CodeableConcept interaction;
-
-        /**
-         * Todo.
-         */
-        @Child(name = "isDefining", type = {BooleanType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected BooleanType isDefining;
-
-        /**
-         * Todo.
-         */
-        @Child(name = "amount", type = {Quantity.class, Range.class, StringType.class}, order=5, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected Type amount;
-
-        /**
-         * Todo.
-         */
-        @Child(name = "amountType", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected CodeableConcept amountType;
-
-        /**
-         * Todo.
-         */
-        @Child(name = "amountText", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected StringType amountText;
-
-        /**
-         * Todo.
-         */
-        @Child(name = "source", type = {DocumentReference.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected List<Reference> source;
-        /**
-         * The actual objects that are the target of the reference (Todo.)
-         */
-        protected List<DocumentReference> sourceTarget;
-
-
-        private static final long serialVersionUID = -2035399193L;
-
-    /**
-     * Constructor
-     */
-      public SubstanceReferenceInformationRelationshipComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #substance} (Todo.)
-         */
-        public Type getSubstance() { 
-          return this.substance;
-        }
-
-        /**
-         * @return {@link #substance} (Todo.)
-         */
-        public Reference getSubstanceReference() throws FHIRException { 
-          if (this.substance == null)
-            return null;
-          if (!(this.substance instanceof Reference))
-            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.substance.getClass().getName()+" was encountered");
-          return (Reference) this.substance;
-        }
-
-        public boolean hasSubstanceReference() { 
-          return this != null && this.substance instanceof Reference;
-        }
-
-        /**
-         * @return {@link #substance} (Todo.)
-         */
-        public CodeableConcept getSubstanceCodeableConcept() throws FHIRException { 
-          if (this.substance == null)
-            return null;
-          if (!(this.substance instanceof CodeableConcept))
-            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.substance.getClass().getName()+" was encountered");
-          return (CodeableConcept) this.substance;
-        }
-
-        public boolean hasSubstanceCodeableConcept() { 
-          return this != null && this.substance instanceof CodeableConcept;
-        }
-
-        public boolean hasSubstance() { 
-          return this.substance != null && !this.substance.isEmpty();
-        }
-
-        /**
-         * @param value {@link #substance} (Todo.)
-         */
-        public SubstanceReferenceInformationRelationshipComponent setSubstance(Type value) { 
-          if (value != null && !(value instanceof Reference || value instanceof CodeableConcept))
-            throw new Error("Not the right type for SubstanceReferenceInformation.relationship.substance[x]: "+value.fhirType());
-          this.substance = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #relationship} (Todo.)
-         */
-        public CodeableConcept getRelationship() { 
-          if (this.relationship == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceReferenceInformationRelationshipComponent.relationship");
-            else if (Configuration.doAutoCreate())
-              this.relationship = new CodeableConcept(); // cc
-          return this.relationship;
-        }
-
-        public boolean hasRelationship() { 
-          return this.relationship != null && !this.relationship.isEmpty();
-        }
-
-        /**
-         * @param value {@link #relationship} (Todo.)
-         */
-        public SubstanceReferenceInformationRelationshipComponent setRelationship(CodeableConcept value) { 
-          this.relationship = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #interaction} (Todo.)
-         */
-        public CodeableConcept getInteraction() { 
-          if (this.interaction == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceReferenceInformationRelationshipComponent.interaction");
-            else if (Configuration.doAutoCreate())
-              this.interaction = new CodeableConcept(); // cc
-          return this.interaction;
-        }
-
-        public boolean hasInteraction() { 
-          return this.interaction != null && !this.interaction.isEmpty();
-        }
-
-        /**
-         * @param value {@link #interaction} (Todo.)
-         */
-        public SubstanceReferenceInformationRelationshipComponent setInteraction(CodeableConcept value) { 
-          this.interaction = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #isDefining} (Todo.). This is the underlying object with id, value and extensions. The accessor "getIsDefining" gives direct access to the value
-         */
-        public BooleanType getIsDefiningElement() { 
-          if (this.isDefining == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceReferenceInformationRelationshipComponent.isDefining");
-            else if (Configuration.doAutoCreate())
-              this.isDefining = new BooleanType(); // bb
-          return this.isDefining;
-        }
-
-        public boolean hasIsDefiningElement() { 
-          return this.isDefining != null && !this.isDefining.isEmpty();
-        }
-
-        public boolean hasIsDefining() { 
-          return this.isDefining != null && !this.isDefining.isEmpty();
-        }
-
-        /**
-         * @param value {@link #isDefining} (Todo.). This is the underlying object with id, value and extensions. The accessor "getIsDefining" gives direct access to the value
-         */
-        public SubstanceReferenceInformationRelationshipComponent setIsDefiningElement(BooleanType value) { 
-          this.isDefining = value;
-          return this;
-        }
-
-        /**
-         * @return Todo.
-         */
-        public boolean getIsDefining() { 
-          return this.isDefining == null || this.isDefining.isEmpty() ? false : this.isDefining.getValue();
-        }
-
-        /**
-         * @param value Todo.
-         */
-        public SubstanceReferenceInformationRelationshipComponent setIsDefining(boolean value) { 
-            if (this.isDefining == null)
-              this.isDefining = new BooleanType();
-            this.isDefining.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #amount} (Todo.)
-         */
-        public Type getAmount() { 
-          return this.amount;
-        }
-
-        /**
-         * @return {@link #amount} (Todo.)
-         */
-        public Quantity getAmountQuantity() throws FHIRException { 
-          if (this.amount == null)
-            return null;
-          if (!(this.amount instanceof Quantity))
-            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.amount.getClass().getName()+" was encountered");
-          return (Quantity) this.amount;
-        }
-
-        public boolean hasAmountQuantity() { 
-          return this != null && this.amount instanceof Quantity;
-        }
-
-        /**
-         * @return {@link #amount} (Todo.)
-         */
-        public Range getAmountRange() throws FHIRException { 
-          if (this.amount == null)
-            return null;
-          if (!(this.amount instanceof Range))
-            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.amount.getClass().getName()+" was encountered");
-          return (Range) this.amount;
-        }
-
-        public boolean hasAmountRange() { 
-          return this != null && this.amount instanceof Range;
-        }
-
-        /**
-         * @return {@link #amount} (Todo.)
-         */
-        public StringType getAmountStringType() throws FHIRException { 
-          if (this.amount == null)
-            return null;
-          if (!(this.amount instanceof StringType))
-            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.amount.getClass().getName()+" was encountered");
-          return (StringType) this.amount;
-        }
-
-        public boolean hasAmountStringType() { 
-          return this != null && this.amount instanceof StringType;
-        }
-
-        public boolean hasAmount() { 
-          return this.amount != null && !this.amount.isEmpty();
-        }
-
-        /**
-         * @param value {@link #amount} (Todo.)
-         */
-        public SubstanceReferenceInformationRelationshipComponent setAmount(Type value) { 
-          if (value != null && !(value instanceof Quantity || value instanceof Range || value instanceof StringType))
-            throw new Error("Not the right type for SubstanceReferenceInformation.relationship.amount[x]: "+value.fhirType());
-          this.amount = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #amountType} (Todo.)
-         */
-        public CodeableConcept getAmountType() { 
-          if (this.amountType == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceReferenceInformationRelationshipComponent.amountType");
-            else if (Configuration.doAutoCreate())
-              this.amountType = new CodeableConcept(); // cc
-          return this.amountType;
-        }
-
-        public boolean hasAmountType() { 
-          return this.amountType != null && !this.amountType.isEmpty();
-        }
-
-        /**
-         * @param value {@link #amountType} (Todo.)
-         */
-        public SubstanceReferenceInformationRelationshipComponent setAmountType(CodeableConcept value) { 
-          this.amountType = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #amountText} (Todo.). This is the underlying object with id, value and extensions. The accessor "getAmountText" gives direct access to the value
-         */
-        public StringType getAmountTextElement() { 
-          if (this.amountText == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceReferenceInformationRelationshipComponent.amountText");
-            else if (Configuration.doAutoCreate())
-              this.amountText = new StringType(); // bb
-          return this.amountText;
-        }
-
-        public boolean hasAmountTextElement() { 
-          return this.amountText != null && !this.amountText.isEmpty();
-        }
-
-        public boolean hasAmountText() { 
-          return this.amountText != null && !this.amountText.isEmpty();
-        }
-
-        /**
-         * @param value {@link #amountText} (Todo.). This is the underlying object with id, value and extensions. The accessor "getAmountText" gives direct access to the value
-         */
-        public SubstanceReferenceInformationRelationshipComponent setAmountTextElement(StringType value) { 
-          this.amountText = value;
-          return this;
-        }
-
-        /**
-         * @return Todo.
-         */
-        public String getAmountText() { 
-          return this.amountText == null ? null : this.amountText.getValue();
-        }
-
-        /**
-         * @param value Todo.
-         */
-        public SubstanceReferenceInformationRelationshipComponent setAmountText(String value) { 
-          if (Utilities.noString(value))
-            this.amountText = null;
-          else {
-            if (this.amountText == null)
-              this.amountText = new StringType();
-            this.amountText.setValue(value);
-          }
-          return this;
-        }
-
-        /**
-         * @return {@link #source} (Todo.)
-         */
-        public List<Reference> getSource() { 
-          if (this.source == null)
-            this.source = new ArrayList<Reference>();
-          return this.source;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public SubstanceReferenceInformationRelationshipComponent setSource(List<Reference> theSource) { 
-          this.source = theSource;
-          return this;
-        }
-
-        public boolean hasSource() { 
-          if (this.source == null)
-            return false;
-          for (Reference item : this.source)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public Reference addSource() { //3
-          Reference t = new Reference();
-          if (this.source == null)
-            this.source = new ArrayList<Reference>();
-          this.source.add(t);
-          return t;
-        }
-
-        public SubstanceReferenceInformationRelationshipComponent addSource(Reference t) { //3
-          if (t == null)
-            return this;
-          if (this.source == null)
-            this.source = new ArrayList<Reference>();
-          this.source.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #source}, creating it if it does not already exist
-         */
-        public Reference getSourceFirstRep() { 
-          if (getSource().isEmpty()) {
-            addSource();
-          }
-          return getSource().get(0);
-        }
-
-        /**
-         * @deprecated Use Reference#setResource(IBaseResource) instead
-         */
-        @Deprecated
-        public List<DocumentReference> getSourceTarget() { 
-          if (this.sourceTarget == null)
-            this.sourceTarget = new ArrayList<DocumentReference>();
-          return this.sourceTarget;
-        }
-
-        /**
-         * @deprecated Use Reference#setResource(IBaseResource) instead
-         */
-        @Deprecated
-        public DocumentReference addSourceTarget() { 
-          DocumentReference r = new DocumentReference();
-          if (this.sourceTarget == null)
-            this.sourceTarget = new ArrayList<DocumentReference>();
-          this.sourceTarget.add(r);
-          return r;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "Todo.", 0, 1, substance));
-          children.add(new Property("relationship", "CodeableConcept", "Todo.", 0, 1, relationship));
-          children.add(new Property("interaction", "CodeableConcept", "Todo.", 0, 1, interaction));
-          children.add(new Property("isDefining", "boolean", "Todo.", 0, 1, isDefining));
-          children.add(new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount));
-          children.add(new Property("amountType", "CodeableConcept", "Todo.", 0, 1, amountType));
-          children.add(new Property("amountText", "string", "Todo.", 0, 1, amountText));
-          children.add(new Property("source", "Reference(DocumentReference)", "Todo.", 0, java.lang.Integer.MAX_VALUE, source));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 2127194384: /*substance[x]*/  return new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "Todo.", 0, 1, substance);
-          case 530040176: /*substance*/  return new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "Todo.", 0, 1, substance);
-          case 516208571: /*substanceReference*/  return new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "Todo.", 0, 1, substance);
-          case -1974119407: /*substanceCodeableConcept*/  return new Property("substance[x]", "Reference(SubstanceSpecification)|CodeableConcept", "Todo.", 0, 1, substance);
-          case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "Todo.", 0, 1, relationship);
-          case 1844104722: /*interaction*/  return new Property("interaction", "CodeableConcept", "Todo.", 0, 1, interaction);
-          case -141812990: /*isDefining*/  return new Property("isDefining", "boolean", "Todo.", 0, 1, isDefining);
-          case 646780200: /*amount[x]*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
-          case -1413853096: /*amount*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
-          case 1664303363: /*amountQuantity*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
-          case -1223462971: /*amountRange*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
-          case 773651081: /*amountString*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
-          case -1424857166: /*amountType*/  return new Property("amountType", "CodeableConcept", "Todo.", 0, 1, amountType);
-          case -1424876123: /*amountText*/  return new Property("amountText", "string", "Todo.", 0, 1, amountText);
-          case -896505829: /*source*/  return new Property("source", "Reference(DocumentReference)", "Todo.", 0, java.lang.Integer.MAX_VALUE, source);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 530040176: /*substance*/ return this.substance == null ? new Base[0] : new Base[] {this.substance}; // Type
-        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeableConcept
-        case 1844104722: /*interaction*/ return this.interaction == null ? new Base[0] : new Base[] {this.interaction}; // CodeableConcept
-        case -141812990: /*isDefining*/ return this.isDefining == null ? new Base[0] : new Base[] {this.isDefining}; // BooleanType
-        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Type
-        case -1424857166: /*amountType*/ return this.amountType == null ? new Base[0] : new Base[] {this.amountType}; // CodeableConcept
-        case -1424876123: /*amountText*/ return this.amountText == null ? new Base[0] : new Base[] {this.amountText}; // StringType
-        case -896505829: /*source*/ return this.source == null ? new Base[0] : this.source.toArray(new Base[this.source.size()]); // Reference
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 530040176: // substance
-          this.substance = castToType(value); // Type
-          return value;
-        case -261851592: // relationship
-          this.relationship = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 1844104722: // interaction
-          this.interaction = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case -141812990: // isDefining
-          this.isDefining = castToBoolean(value); // BooleanType
-          return value;
-        case -1413853096: // amount
-          this.amount = castToType(value); // Type
-          return value;
-        case -1424857166: // amountType
-          this.amountType = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case -1424876123: // amountText
-          this.amountText = castToString(value); // StringType
-          return value;
-        case -896505829: // source
-          this.getSource().add(castToReference(value)); // Reference
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("substance[x]")) {
-          this.substance = castToType(value); // Type
-        } else if (name.equals("relationship")) {
-          this.relationship = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("interaction")) {
-          this.interaction = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("isDefining")) {
-          this.isDefining = castToBoolean(value); // BooleanType
-        } else if (name.equals("amount[x]")) {
-          this.amount = castToType(value); // Type
-        } else if (name.equals("amountType")) {
-          this.amountType = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("amountText")) {
-          this.amountText = castToString(value); // StringType
-        } else if (name.equals("source")) {
-          this.getSource().add(castToReference(value));
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 2127194384:  return getSubstance(); 
-        case 530040176:  return getSubstance(); 
-        case -261851592:  return getRelationship(); 
-        case 1844104722:  return getInteraction(); 
-        case -141812990:  return getIsDefiningElement();
-        case 646780200:  return getAmount(); 
-        case -1413853096:  return getAmount(); 
-        case -1424857166:  return getAmountType(); 
-        case -1424876123:  return getAmountTextElement();
-        case -896505829:  return addSource(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 530040176: /*substance*/ return new String[] {"Reference", "CodeableConcept"};
-        case -261851592: /*relationship*/ return new String[] {"CodeableConcept"};
-        case 1844104722: /*interaction*/ return new String[] {"CodeableConcept"};
-        case -141812990: /*isDefining*/ return new String[] {"boolean"};
-        case -1413853096: /*amount*/ return new String[] {"Quantity", "Range", "string"};
-        case -1424857166: /*amountType*/ return new String[] {"CodeableConcept"};
-        case -1424876123: /*amountText*/ return new String[] {"string"};
-        case -896505829: /*source*/ return new String[] {"Reference"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("substanceReference")) {
-          this.substance = new Reference();
-          return this.substance;
-        }
-        else if (name.equals("substanceCodeableConcept")) {
-          this.substance = new CodeableConcept();
-          return this.substance;
-        }
-        else if (name.equals("relationship")) {
-          this.relationship = new CodeableConcept();
-          return this.relationship;
-        }
-        else if (name.equals("interaction")) {
-          this.interaction = new CodeableConcept();
-          return this.interaction;
-        }
-        else if (name.equals("isDefining")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceReferenceInformation.isDefining");
-        }
-        else if (name.equals("amountQuantity")) {
-          this.amount = new Quantity();
-          return this.amount;
-        }
-        else if (name.equals("amountRange")) {
-          this.amount = new Range();
-          return this.amount;
-        }
-        else if (name.equals("amountString")) {
-          this.amount = new StringType();
-          return this.amount;
-        }
-        else if (name.equals("amountType")) {
-          this.amountType = new CodeableConcept();
-          return this.amountType;
-        }
-        else if (name.equals("amountText")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SubstanceReferenceInformation.amountText");
-        }
-        else if (name.equals("source")) {
-          return addSource();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public SubstanceReferenceInformationRelationshipComponent copy() {
-        SubstanceReferenceInformationRelationshipComponent dst = new SubstanceReferenceInformationRelationshipComponent();
-        copyValues(dst);
-        dst.substance = substance == null ? null : substance.copy();
-        dst.relationship = relationship == null ? null : relationship.copy();
-        dst.interaction = interaction == null ? null : interaction.copy();
-        dst.isDefining = isDefining == null ? null : isDefining.copy();
-        dst.amount = amount == null ? null : amount.copy();
-        dst.amountType = amountType == null ? null : amountType.copy();
-        dst.amountText = amountText == null ? null : amountText.copy();
-        if (source != null) {
-          dst.source = new ArrayList<Reference>();
-          for (Reference i : source)
-            dst.source.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof SubstanceReferenceInformationRelationshipComponent))
-          return false;
-        SubstanceReferenceInformationRelationshipComponent o = (SubstanceReferenceInformationRelationshipComponent) other_;
-        return compareDeep(substance, o.substance, true) && compareDeep(relationship, o.relationship, true)
-           && compareDeep(interaction, o.interaction, true) && compareDeep(isDefining, o.isDefining, true)
-           && compareDeep(amount, o.amount, true) && compareDeep(amountType, o.amountType, true) && compareDeep(amountText, o.amountText, true)
-           && compareDeep(source, o.source, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof SubstanceReferenceInformationRelationshipComponent))
-          return false;
-        SubstanceReferenceInformationRelationshipComponent o = (SubstanceReferenceInformationRelationshipComponent) other_;
-        return compareValues(isDefining, o.isDefining, true) && compareValues(amountText, o.amountText, true)
-          ;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(substance, relationship, interaction
-          , isDefining, amount, amountType, amountText, source);
-      }
-
-  public String fhirType() {
-    return "SubstanceReferenceInformation.relationship";
-
-  }
-
-  }
-
-    @Block()
     public static class SubstanceReferenceInformationTargetComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Todo.
@@ -1748,7 +1077,21 @@ public class SubstanceReferenceInformation extends DomainResource {
         /**
          * Todo.
          */
-        @Child(name = "source", type = {DocumentReference.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Child(name = "amount", type = {Quantity.class, Range.class, StringType.class}, order=6, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Todo", formalDefinition="Todo." )
+        protected Type amount;
+
+        /**
+         * Todo.
+         */
+        @Child(name = "amountType", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="Todo", formalDefinition="Todo." )
+        protected CodeableConcept amountType;
+
+        /**
+         * Todo.
+         */
+        @Child(name = "source", type = {DocumentReference.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
         @Description(shortDefinition="Todo", formalDefinition="Todo." )
         protected List<Reference> source;
         /**
@@ -1757,21 +1100,7 @@ public class SubstanceReferenceInformation extends DomainResource {
         protected List<DocumentReference> sourceTarget;
 
 
-        /**
-         * Todo.
-         */
-        @Child(name = "amount", type = {Quantity.class, Range.class, StringType.class}, order=7, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected Type amount;
-
-        /**
-         * Todo.
-         */
-        @Child(name = "amountType", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Todo", formalDefinition="Todo." )
-        protected CodeableConcept amountType;
-
-        private static final long serialVersionUID = -1484285449L;
+        private static final long serialVersionUID = -1682270197L;
 
     /**
      * Constructor
@@ -1901,6 +1230,96 @@ public class SubstanceReferenceInformation extends DomainResource {
         }
 
         /**
+         * @return {@link #amount} (Todo.)
+         */
+        public Type getAmount() { 
+          return this.amount;
+        }
+
+        /**
+         * @return {@link #amount} (Todo.)
+         */
+        public Quantity getAmountQuantity() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new Quantity();
+          if (!(this.amount instanceof Quantity))
+            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (Quantity) this.amount;
+        }
+
+        public boolean hasAmountQuantity() { 
+          return this != null && this.amount instanceof Quantity;
+        }
+
+        /**
+         * @return {@link #amount} (Todo.)
+         */
+        public Range getAmountRange() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new Range();
+          if (!(this.amount instanceof Range))
+            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (Range) this.amount;
+        }
+
+        public boolean hasAmountRange() { 
+          return this != null && this.amount instanceof Range;
+        }
+
+        /**
+         * @return {@link #amount} (Todo.)
+         */
+        public StringType getAmountStringType() throws FHIRException { 
+          if (this.amount == null)
+            this.amount = new StringType();
+          if (!(this.amount instanceof StringType))
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.amount.getClass().getName()+" was encountered");
+          return (StringType) this.amount;
+        }
+
+        public boolean hasAmountStringType() { 
+          return this != null && this.amount instanceof StringType;
+        }
+
+        public boolean hasAmount() { 
+          return this.amount != null && !this.amount.isEmpty();
+        }
+
+        /**
+         * @param value {@link #amount} (Todo.)
+         */
+        public SubstanceReferenceInformationTargetComponent setAmount(Type value) { 
+          if (value != null && !(value instanceof Quantity || value instanceof Range || value instanceof StringType))
+            throw new Error("Not the right type for SubstanceReferenceInformation.target.amount[x]: "+value.fhirType());
+          this.amount = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #amountType} (Todo.)
+         */
+        public CodeableConcept getAmountType() { 
+          if (this.amountType == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SubstanceReferenceInformationTargetComponent.amountType");
+            else if (Configuration.doAutoCreate())
+              this.amountType = new CodeableConcept(); // cc
+          return this.amountType;
+        }
+
+        public boolean hasAmountType() { 
+          return this.amountType != null && !this.amountType.isEmpty();
+        }
+
+        /**
+         * @param value {@link #amountType} (Todo.)
+         */
+        public SubstanceReferenceInformationTargetComponent setAmountType(CodeableConcept value) { 
+          this.amountType = value;
+          return this;
+        }
+
+        /**
          * @return {@link #source} (Todo.)
          */
         public List<Reference> getSource() { 
@@ -1975,96 +1394,6 @@ public class SubstanceReferenceInformation extends DomainResource {
           return r;
         }
 
-        /**
-         * @return {@link #amount} (Todo.)
-         */
-        public Type getAmount() { 
-          return this.amount;
-        }
-
-        /**
-         * @return {@link #amount} (Todo.)
-         */
-        public Quantity getAmountQuantity() throws FHIRException { 
-          if (this.amount == null)
-            return null;
-          if (!(this.amount instanceof Quantity))
-            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.amount.getClass().getName()+" was encountered");
-          return (Quantity) this.amount;
-        }
-
-        public boolean hasAmountQuantity() { 
-          return this != null && this.amount instanceof Quantity;
-        }
-
-        /**
-         * @return {@link #amount} (Todo.)
-         */
-        public Range getAmountRange() throws FHIRException { 
-          if (this.amount == null)
-            return null;
-          if (!(this.amount instanceof Range))
-            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.amount.getClass().getName()+" was encountered");
-          return (Range) this.amount;
-        }
-
-        public boolean hasAmountRange() { 
-          return this != null && this.amount instanceof Range;
-        }
-
-        /**
-         * @return {@link #amount} (Todo.)
-         */
-        public StringType getAmountStringType() throws FHIRException { 
-          if (this.amount == null)
-            return null;
-          if (!(this.amount instanceof StringType))
-            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.amount.getClass().getName()+" was encountered");
-          return (StringType) this.amount;
-        }
-
-        public boolean hasAmountStringType() { 
-          return this != null && this.amount instanceof StringType;
-        }
-
-        public boolean hasAmount() { 
-          return this.amount != null && !this.amount.isEmpty();
-        }
-
-        /**
-         * @param value {@link #amount} (Todo.)
-         */
-        public SubstanceReferenceInformationTargetComponent setAmount(Type value) { 
-          if (value != null && !(value instanceof Quantity || value instanceof Range || value instanceof StringType))
-            throw new Error("Not the right type for SubstanceReferenceInformation.target.amount[x]: "+value.fhirType());
-          this.amount = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #amountType} (Todo.)
-         */
-        public CodeableConcept getAmountType() { 
-          if (this.amountType == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SubstanceReferenceInformationTargetComponent.amountType");
-            else if (Configuration.doAutoCreate())
-              this.amountType = new CodeableConcept(); // cc
-          return this.amountType;
-        }
-
-        public boolean hasAmountType() { 
-          return this.amountType != null && !this.amountType.isEmpty();
-        }
-
-        /**
-         * @param value {@link #amountType} (Todo.)
-         */
-        public SubstanceReferenceInformationTargetComponent setAmountType(CodeableConcept value) { 
-          this.amountType = value;
-          return this;
-        }
-
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("target", "Identifier", "Todo.", 0, 1, target));
@@ -2072,9 +1401,9 @@ public class SubstanceReferenceInformation extends DomainResource {
           children.add(new Property("interaction", "CodeableConcept", "Todo.", 0, 1, interaction));
           children.add(new Property("organism", "CodeableConcept", "Todo.", 0, 1, organism));
           children.add(new Property("organismType", "CodeableConcept", "Todo.", 0, 1, organismType));
-          children.add(new Property("source", "Reference(DocumentReference)", "Todo.", 0, java.lang.Integer.MAX_VALUE, source));
           children.add(new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount));
           children.add(new Property("amountType", "CodeableConcept", "Todo.", 0, 1, amountType));
+          children.add(new Property("source", "Reference(DocumentReference)", "Todo.", 0, java.lang.Integer.MAX_VALUE, source));
         }
 
         @Override
@@ -2085,13 +1414,13 @@ public class SubstanceReferenceInformation extends DomainResource {
           case 1844104722: /*interaction*/  return new Property("interaction", "CodeableConcept", "Todo.", 0, 1, interaction);
           case 1316389074: /*organism*/  return new Property("organism", "CodeableConcept", "Todo.", 0, 1, organism);
           case 988662572: /*organismType*/  return new Property("organismType", "CodeableConcept", "Todo.", 0, 1, organismType);
-          case -896505829: /*source*/  return new Property("source", "Reference(DocumentReference)", "Todo.", 0, java.lang.Integer.MAX_VALUE, source);
           case 646780200: /*amount[x]*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
           case -1413853096: /*amount*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
           case 1664303363: /*amountQuantity*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
           case -1223462971: /*amountRange*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
           case 773651081: /*amountString*/  return new Property("amount[x]", "Quantity|Range|string", "Todo.", 0, 1, amount);
           case -1424857166: /*amountType*/  return new Property("amountType", "CodeableConcept", "Todo.", 0, 1, amountType);
+          case -896505829: /*source*/  return new Property("source", "Reference(DocumentReference)", "Todo.", 0, java.lang.Integer.MAX_VALUE, source);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -2105,9 +1434,9 @@ public class SubstanceReferenceInformation extends DomainResource {
         case 1844104722: /*interaction*/ return this.interaction == null ? new Base[0] : new Base[] {this.interaction}; // CodeableConcept
         case 1316389074: /*organism*/ return this.organism == null ? new Base[0] : new Base[] {this.organism}; // CodeableConcept
         case 988662572: /*organismType*/ return this.organismType == null ? new Base[0] : new Base[] {this.organismType}; // CodeableConcept
-        case -896505829: /*source*/ return this.source == null ? new Base[0] : this.source.toArray(new Base[this.source.size()]); // Reference
         case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Type
         case -1424857166: /*amountType*/ return this.amountType == null ? new Base[0] : new Base[] {this.amountType}; // CodeableConcept
+        case -896505829: /*source*/ return this.source == null ? new Base[0] : this.source.toArray(new Base[this.source.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -2131,14 +1460,14 @@ public class SubstanceReferenceInformation extends DomainResource {
         case 988662572: // organismType
           this.organismType = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case -896505829: // source
-          this.getSource().add(castToReference(value)); // Reference
-          return value;
         case -1413853096: // amount
           this.amount = castToType(value); // Type
           return value;
         case -1424857166: // amountType
           this.amountType = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -896505829: // source
+          this.getSource().add(castToReference(value)); // Reference
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -2157,12 +1486,12 @@ public class SubstanceReferenceInformation extends DomainResource {
           this.organism = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("organismType")) {
           this.organismType = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("source")) {
-          this.getSource().add(castToReference(value));
         } else if (name.equals("amount[x]")) {
           this.amount = castToType(value); // Type
         } else if (name.equals("amountType")) {
           this.amountType = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("source")) {
+          this.getSource().add(castToReference(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -2176,10 +1505,10 @@ public class SubstanceReferenceInformation extends DomainResource {
         case 1844104722:  return getInteraction(); 
         case 1316389074:  return getOrganism(); 
         case 988662572:  return getOrganismType(); 
-        case -896505829:  return addSource(); 
         case 646780200:  return getAmount(); 
         case -1413853096:  return getAmount(); 
         case -1424857166:  return getAmountType(); 
+        case -896505829:  return addSource(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -2193,9 +1522,9 @@ public class SubstanceReferenceInformation extends DomainResource {
         case 1844104722: /*interaction*/ return new String[] {"CodeableConcept"};
         case 1316389074: /*organism*/ return new String[] {"CodeableConcept"};
         case 988662572: /*organismType*/ return new String[] {"CodeableConcept"};
-        case -896505829: /*source*/ return new String[] {"Reference"};
         case -1413853096: /*amount*/ return new String[] {"Quantity", "Range", "string"};
         case -1424857166: /*amountType*/ return new String[] {"CodeableConcept"};
+        case -896505829: /*source*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -2223,9 +1552,6 @@ public class SubstanceReferenceInformation extends DomainResource {
           this.organismType = new CodeableConcept();
           return this.organismType;
         }
-        else if (name.equals("source")) {
-          return addSource();
-        }
         else if (name.equals("amountQuantity")) {
           this.amount = new Quantity();
           return this.amount;
@@ -2242,6 +1568,9 @@ public class SubstanceReferenceInformation extends DomainResource {
           this.amountType = new CodeableConcept();
           return this.amountType;
         }
+        else if (name.equals("source")) {
+          return addSource();
+        }
         else
           return super.addChild(name);
       }
@@ -2254,13 +1583,13 @@ public class SubstanceReferenceInformation extends DomainResource {
         dst.interaction = interaction == null ? null : interaction.copy();
         dst.organism = organism == null ? null : organism.copy();
         dst.organismType = organismType == null ? null : organismType.copy();
+        dst.amount = amount == null ? null : amount.copy();
+        dst.amountType = amountType == null ? null : amountType.copy();
         if (source != null) {
           dst.source = new ArrayList<Reference>();
           for (Reference i : source)
             dst.source.add(i.copy());
         };
-        dst.amount = amount == null ? null : amount.copy();
-        dst.amountType = amountType == null ? null : amountType.copy();
         return dst;
       }
 
@@ -2272,8 +1601,8 @@ public class SubstanceReferenceInformation extends DomainResource {
           return false;
         SubstanceReferenceInformationTargetComponent o = (SubstanceReferenceInformationTargetComponent) other_;
         return compareDeep(target, o.target, true) && compareDeep(type, o.type, true) && compareDeep(interaction, o.interaction, true)
-           && compareDeep(organism, o.organism, true) && compareDeep(organismType, o.organismType, true) && compareDeep(source, o.source, true)
-           && compareDeep(amount, o.amount, true) && compareDeep(amountType, o.amountType, true);
+           && compareDeep(organism, o.organism, true) && compareDeep(organismType, o.organismType, true) && compareDeep(amount, o.amount, true)
+           && compareDeep(amountType, o.amountType, true) && compareDeep(source, o.source, true);
       }
 
       @Override
@@ -2288,7 +1617,7 @@ public class SubstanceReferenceInformation extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(target, type, interaction
-          , organism, organismType, source, amount, amountType);
+          , organism, organismType, amount, amountType, source);
       }
 
   public String fhirType() {
@@ -2329,18 +1658,11 @@ public class SubstanceReferenceInformation extends DomainResource {
     /**
      * Todo.
      */
-    @Child(name = "relationship", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Todo", formalDefinition="Todo." )
-    protected List<SubstanceReferenceInformationRelationshipComponent> relationship;
-
-    /**
-     * Todo.
-     */
-    @Child(name = "target", type = {}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "target", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Todo", formalDefinition="Todo." )
     protected List<SubstanceReferenceInformationTargetComponent> target;
 
-    private static final long serialVersionUID = -1644936638L;
+    private static final long serialVersionUID = 890303332L;
 
   /**
    * Constructor
@@ -2558,59 +1880,6 @@ public class SubstanceReferenceInformation extends DomainResource {
     }
 
     /**
-     * @return {@link #relationship} (Todo.)
-     */
-    public List<SubstanceReferenceInformationRelationshipComponent> getRelationship() { 
-      if (this.relationship == null)
-        this.relationship = new ArrayList<SubstanceReferenceInformationRelationshipComponent>();
-      return this.relationship;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public SubstanceReferenceInformation setRelationship(List<SubstanceReferenceInformationRelationshipComponent> theRelationship) { 
-      this.relationship = theRelationship;
-      return this;
-    }
-
-    public boolean hasRelationship() { 
-      if (this.relationship == null)
-        return false;
-      for (SubstanceReferenceInformationRelationshipComponent item : this.relationship)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public SubstanceReferenceInformationRelationshipComponent addRelationship() { //3
-      SubstanceReferenceInformationRelationshipComponent t = new SubstanceReferenceInformationRelationshipComponent();
-      if (this.relationship == null)
-        this.relationship = new ArrayList<SubstanceReferenceInformationRelationshipComponent>();
-      this.relationship.add(t);
-      return t;
-    }
-
-    public SubstanceReferenceInformation addRelationship(SubstanceReferenceInformationRelationshipComponent t) { //3
-      if (t == null)
-        return this;
-      if (this.relationship == null)
-        this.relationship = new ArrayList<SubstanceReferenceInformationRelationshipComponent>();
-      this.relationship.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #relationship}, creating it if it does not already exist
-     */
-    public SubstanceReferenceInformationRelationshipComponent getRelationshipFirstRep() { 
-      if (getRelationship().isEmpty()) {
-        addRelationship();
-      }
-      return getRelationship().get(0);
-    }
-
-    /**
      * @return {@link #target} (Todo.)
      */
     public List<SubstanceReferenceInformationTargetComponent> getTarget() { 
@@ -2669,7 +1938,6 @@ public class SubstanceReferenceInformation extends DomainResource {
         children.add(new Property("gene", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, gene));
         children.add(new Property("geneElement", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, geneElement));
         children.add(new Property("classification", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, classification));
-        children.add(new Property("relationship", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, relationship));
         children.add(new Property("target", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, target));
       }
 
@@ -2680,7 +1948,6 @@ public class SubstanceReferenceInformation extends DomainResource {
         case 3169045: /*gene*/  return new Property("gene", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, gene);
         case -94918105: /*geneElement*/  return new Property("geneElement", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, geneElement);
         case 382350310: /*classification*/  return new Property("classification", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, classification);
-        case -261851592: /*relationship*/  return new Property("relationship", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, relationship);
         case -880905839: /*target*/  return new Property("target", "", "Todo.", 0, java.lang.Integer.MAX_VALUE, target);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -2694,7 +1961,6 @@ public class SubstanceReferenceInformation extends DomainResource {
         case 3169045: /*gene*/ return this.gene == null ? new Base[0] : this.gene.toArray(new Base[this.gene.size()]); // SubstanceReferenceInformationGeneComponent
         case -94918105: /*geneElement*/ return this.geneElement == null ? new Base[0] : this.geneElement.toArray(new Base[this.geneElement.size()]); // SubstanceReferenceInformationGeneElementComponent
         case 382350310: /*classification*/ return this.classification == null ? new Base[0] : this.classification.toArray(new Base[this.classification.size()]); // SubstanceReferenceInformationClassificationComponent
-        case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : this.relationship.toArray(new Base[this.relationship.size()]); // SubstanceReferenceInformationRelationshipComponent
         case -880905839: /*target*/ return this.target == null ? new Base[0] : this.target.toArray(new Base[this.target.size()]); // SubstanceReferenceInformationTargetComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2716,9 +1982,6 @@ public class SubstanceReferenceInformation extends DomainResource {
         case 382350310: // classification
           this.getClassification().add((SubstanceReferenceInformationClassificationComponent) value); // SubstanceReferenceInformationClassificationComponent
           return value;
-        case -261851592: // relationship
-          this.getRelationship().add((SubstanceReferenceInformationRelationshipComponent) value); // SubstanceReferenceInformationRelationshipComponent
-          return value;
         case -880905839: // target
           this.getTarget().add((SubstanceReferenceInformationTargetComponent) value); // SubstanceReferenceInformationTargetComponent
           return value;
@@ -2737,8 +2000,6 @@ public class SubstanceReferenceInformation extends DomainResource {
           this.getGeneElement().add((SubstanceReferenceInformationGeneElementComponent) value);
         } else if (name.equals("classification")) {
           this.getClassification().add((SubstanceReferenceInformationClassificationComponent) value);
-        } else if (name.equals("relationship")) {
-          this.getRelationship().add((SubstanceReferenceInformationRelationshipComponent) value);
         } else if (name.equals("target")) {
           this.getTarget().add((SubstanceReferenceInformationTargetComponent) value);
         } else
@@ -2753,7 +2014,6 @@ public class SubstanceReferenceInformation extends DomainResource {
         case 3169045:  return addGene(); 
         case -94918105:  return addGeneElement(); 
         case 382350310:  return addClassification(); 
-        case -261851592:  return addRelationship(); 
         case -880905839:  return addTarget(); 
         default: return super.makeProperty(hash, name);
         }
@@ -2767,7 +2027,6 @@ public class SubstanceReferenceInformation extends DomainResource {
         case 3169045: /*gene*/ return new String[] {};
         case -94918105: /*geneElement*/ return new String[] {};
         case 382350310: /*classification*/ return new String[] {};
-        case -261851592: /*relationship*/ return new String[] {};
         case -880905839: /*target*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -2787,9 +2046,6 @@ public class SubstanceReferenceInformation extends DomainResource {
         }
         else if (name.equals("classification")) {
           return addClassification();
-        }
-        else if (name.equals("relationship")) {
-          return addRelationship();
         }
         else if (name.equals("target")) {
           return addTarget();
@@ -2822,11 +2078,6 @@ public class SubstanceReferenceInformation extends DomainResource {
           for (SubstanceReferenceInformationClassificationComponent i : classification)
             dst.classification.add(i.copy());
         };
-        if (relationship != null) {
-          dst.relationship = new ArrayList<SubstanceReferenceInformationRelationshipComponent>();
-          for (SubstanceReferenceInformationRelationshipComponent i : relationship)
-            dst.relationship.add(i.copy());
-        };
         if (target != null) {
           dst.target = new ArrayList<SubstanceReferenceInformationTargetComponent>();
           for (SubstanceReferenceInformationTargetComponent i : target)
@@ -2847,8 +2098,7 @@ public class SubstanceReferenceInformation extends DomainResource {
           return false;
         SubstanceReferenceInformation o = (SubstanceReferenceInformation) other_;
         return compareDeep(comment, o.comment, true) && compareDeep(gene, o.gene, true) && compareDeep(geneElement, o.geneElement, true)
-           && compareDeep(classification, o.classification, true) && compareDeep(relationship, o.relationship, true)
-           && compareDeep(target, o.target, true);
+           && compareDeep(classification, o.classification, true) && compareDeep(target, o.target, true);
       }
 
       @Override
@@ -2863,7 +2113,7 @@ public class SubstanceReferenceInformation extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(comment, gene, geneElement
-          , classification, relationship, target);
+          , classification, target);
       }
 
   @Override

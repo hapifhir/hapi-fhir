@@ -36,7 +36,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.zip.DataFormatException;
 
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
@@ -198,7 +197,9 @@ public class InstantType extends BaseDateTimeType {
 
 	@Override
 	public InstantType copy() {
-		return new InstantType(getValueAsString());
+		InstantType ret = new InstantType(getValueAsString());
+    copyValues(ret);
+    return ret;
 	}
 
 	/**

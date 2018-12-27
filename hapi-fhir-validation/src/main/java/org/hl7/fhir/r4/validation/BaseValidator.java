@@ -144,6 +144,14 @@ public class BaseValidator {
     return thePass;
   }
 
+  protected boolean txHint(List<ValidationMessage> errors, String txLink, IssueType type, int line, int col, String path, boolean thePass, String theMessage, Object... theMessageArguments) {
+    if (!thePass) {
+      String message = formatMessage(theMessage, theMessageArguments);
+      errors.add(new ValidationMessage(Source.TerminologyEngine, type, line, col, path, message, IssueSeverity.INFORMATION).setTxLink(txLink));
+    }
+    return thePass;
+  }
+
   /**
    * Test a rule and add a {@link IssueSeverity#INFORMATION} validation message if the validation fails
    * 
@@ -185,6 +193,14 @@ public class BaseValidator {
     if (!thePass) {
       String message = formatMessage(theMessage, theMessageArguments);
       errors.add(new ValidationMessage(source, type, line, col, path, message, IssueSeverity.ERROR));
+    }
+    return thePass;
+  }
+
+  protected boolean txRule(List<ValidationMessage> errors, String txLink, IssueType type, int line, int col, String path, boolean thePass, String theMessage, Object... theMessageArguments) {
+    if (!thePass) {
+      String message = formatMessage(theMessage, theMessageArguments);
+      errors.add(new ValidationMessage(Source.TerminologyEngine, type, line, col, path, message, IssueSeverity.ERROR).setTxLink(txLink));
     }
     return thePass;
   }
@@ -294,6 +310,22 @@ public class BaseValidator {
     if (!thePass) {
       msg = formatMessage(msg, theMessageArguments);
       errors.add(new ValidationMessage(source, type, line, col, path, msg, IssueSeverity.WARNING));
+    }
+    return thePass;
+
+  }
+
+  /**
+   * Test a rule and add a {@link IssueSeverity#WARNING} validation message if the validation fails
+   * 
+   * @param thePass
+   *          Set this parameter to <code>false</code> if the validation does not pass
+   * @return Returns <code>thePass</code> (in other words, returns <code>true</code> if the rule did not fail validation)
+   */
+  protected boolean txWarning(List<ValidationMessage> errors, String txLink, IssueType type, int line, int col, String path, boolean thePass, String msg, Object... theMessageArguments) {
+    if (!thePass) {
+      msg = formatMessage(msg, theMessageArguments);
+      errors.add(new ValidationMessage(Source.TerminologyEngine, type, line, col, path, msg, IssueSeverity.WARNING).setTxLink(txLink));
     }
     return thePass;
 

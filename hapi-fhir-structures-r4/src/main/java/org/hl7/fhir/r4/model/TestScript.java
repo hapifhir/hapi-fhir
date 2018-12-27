@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -47,8 +47,180 @@ import org.hl7.fhir.exceptions.FHIRException;
  * A structured set of tests against a FHIR server or client implementation to determine compliance against the FHIR specification.
  */
 @ResourceDef(name="TestScript", profile="http://hl7.org/fhir/StructureDefinition/TestScript")
-@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "origin", "destination", "metadata", "fixture", "profile", "variable", "rule", "ruleset", "setup", "test", "teardown"})
+@ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "origin", "destination", "metadata", "fixture", "profile", "variable", "setup", "test", "teardown"})
 public class TestScript extends MetadataResource {
+
+    public enum TestScriptRequestMethodCode {
+        /**
+         * HTTP DELETE operation.
+         */
+        DELETE, 
+        /**
+         * HTTP GET operation.
+         */
+        GET, 
+        /**
+         * HTTP OPTIONS operation.
+         */
+        OPTIONS, 
+        /**
+         * HTTP PATCH operation.
+         */
+        PATCH, 
+        /**
+         * HTTP POST operation.
+         */
+        POST, 
+        /**
+         * HTTP PUT operation.
+         */
+        PUT, 
+        /**
+         * HTTP HEAD operation.
+         */
+        HEAD, 
+        /**
+         * added to help the parsers with the generic types
+         */
+        NULL;
+        public static TestScriptRequestMethodCode fromCode(String codeString) throws FHIRException {
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("delete".equals(codeString))
+          return DELETE;
+        if ("get".equals(codeString))
+          return GET;
+        if ("options".equals(codeString))
+          return OPTIONS;
+        if ("patch".equals(codeString))
+          return PATCH;
+        if ("post".equals(codeString))
+          return POST;
+        if ("put".equals(codeString))
+          return PUT;
+        if ("head".equals(codeString))
+          return HEAD;
+        if (Configuration.isAcceptInvalidEnums())
+          return null;
+        else
+          throw new FHIRException("Unknown TestScriptRequestMethodCode code '"+codeString+"'");
+        }
+        public String toCode() {
+          switch (this) {
+            case DELETE: return "delete";
+            case GET: return "get";
+            case OPTIONS: return "options";
+            case PATCH: return "patch";
+            case POST: return "post";
+            case PUT: return "put";
+            case HEAD: return "head";
+            default: return "?";
+          }
+        }
+        public String getSystem() {
+          switch (this) {
+            case DELETE: return "http://hl7.org/fhir/http-operations";
+            case GET: return "http://hl7.org/fhir/http-operations";
+            case OPTIONS: return "http://hl7.org/fhir/http-operations";
+            case PATCH: return "http://hl7.org/fhir/http-operations";
+            case POST: return "http://hl7.org/fhir/http-operations";
+            case PUT: return "http://hl7.org/fhir/http-operations";
+            case HEAD: return "http://hl7.org/fhir/http-operations";
+            default: return "?";
+          }
+        }
+        public String getDefinition() {
+          switch (this) {
+            case DELETE: return "HTTP DELETE operation.";
+            case GET: return "HTTP GET operation.";
+            case OPTIONS: return "HTTP OPTIONS operation.";
+            case PATCH: return "HTTP PATCH operation.";
+            case POST: return "HTTP POST operation.";
+            case PUT: return "HTTP PUT operation.";
+            case HEAD: return "HTTP HEAD operation.";
+            default: return "?";
+          }
+        }
+        public String getDisplay() {
+          switch (this) {
+            case DELETE: return "DELETE";
+            case GET: return "GET";
+            case OPTIONS: return "OPTIONS";
+            case PATCH: return "PATCH";
+            case POST: return "POST";
+            case PUT: return "PUT";
+            case HEAD: return "HEAD";
+            default: return "?";
+          }
+        }
+    }
+
+  public static class TestScriptRequestMethodCodeEnumFactory implements EnumFactory<TestScriptRequestMethodCode> {
+    public TestScriptRequestMethodCode fromCode(String codeString) throws IllegalArgumentException {
+      if (codeString == null || "".equals(codeString))
+            if (codeString == null || "".equals(codeString))
+                return null;
+        if ("delete".equals(codeString))
+          return TestScriptRequestMethodCode.DELETE;
+        if ("get".equals(codeString))
+          return TestScriptRequestMethodCode.GET;
+        if ("options".equals(codeString))
+          return TestScriptRequestMethodCode.OPTIONS;
+        if ("patch".equals(codeString))
+          return TestScriptRequestMethodCode.PATCH;
+        if ("post".equals(codeString))
+          return TestScriptRequestMethodCode.POST;
+        if ("put".equals(codeString))
+          return TestScriptRequestMethodCode.PUT;
+        if ("head".equals(codeString))
+          return TestScriptRequestMethodCode.HEAD;
+        throw new IllegalArgumentException("Unknown TestScriptRequestMethodCode code '"+codeString+"'");
+        }
+        public Enumeration<TestScriptRequestMethodCode> fromType(Base code) throws FHIRException {
+          if (code == null)
+            return null;
+          if (code.isEmpty())
+            return new Enumeration<TestScriptRequestMethodCode>(this);
+          String codeString = ((PrimitiveType) code).asStringValue();
+          if (codeString == null || "".equals(codeString))
+            return null;
+        if ("delete".equals(codeString))
+          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.DELETE);
+        if ("get".equals(codeString))
+          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.GET);
+        if ("options".equals(codeString))
+          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.OPTIONS);
+        if ("patch".equals(codeString))
+          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.PATCH);
+        if ("post".equals(codeString))
+          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.POST);
+        if ("put".equals(codeString))
+          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.PUT);
+        if ("head".equals(codeString))
+          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.HEAD);
+        throw new FHIRException("Unknown TestScriptRequestMethodCode code '"+codeString+"'");
+        }
+    public String toCode(TestScriptRequestMethodCode code) {
+      if (code == TestScriptRequestMethodCode.DELETE)
+        return "delete";
+      if (code == TestScriptRequestMethodCode.GET)
+        return "get";
+      if (code == TestScriptRequestMethodCode.OPTIONS)
+        return "options";
+      if (code == TestScriptRequestMethodCode.PATCH)
+        return "patch";
+      if (code == TestScriptRequestMethodCode.POST)
+        return "post";
+      if (code == TestScriptRequestMethodCode.PUT)
+        return "put";
+      if (code == TestScriptRequestMethodCode.HEAD)
+        return "head";
+      return "?";
+      }
+    public String toSystem(TestScriptRequestMethodCode code) {
+      return code.getSystem();
+      }
+    }
 
     public enum AssertionDirectionType {
         /**
@@ -374,162 +546,6 @@ public class TestScript extends MetadataResource {
       return "?";
       }
     public String toSystem(AssertionOperatorType code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum TestScriptRequestMethodCode {
-        /**
-         * HTTP DELETE operation.
-         */
-        DELETE, 
-        /**
-         * HTTP GET operation.
-         */
-        GET, 
-        /**
-         * HTTP OPTIONS operation.
-         */
-        OPTIONS, 
-        /**
-         * HTTP PATCH operation.
-         */
-        PATCH, 
-        /**
-         * HTTP POST operation.
-         */
-        POST, 
-        /**
-         * HTTP PUT operation.
-         */
-        PUT, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static TestScriptRequestMethodCode fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("delete".equals(codeString))
-          return DELETE;
-        if ("get".equals(codeString))
-          return GET;
-        if ("options".equals(codeString))
-          return OPTIONS;
-        if ("patch".equals(codeString))
-          return PATCH;
-        if ("post".equals(codeString))
-          return POST;
-        if ("put".equals(codeString))
-          return PUT;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown TestScriptRequestMethodCode code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case DELETE: return "delete";
-            case GET: return "get";
-            case OPTIONS: return "options";
-            case PATCH: return "patch";
-            case POST: return "post";
-            case PUT: return "put";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case DELETE: return "http://hl7.org/fhir/http-operations";
-            case GET: return "http://hl7.org/fhir/http-operations";
-            case OPTIONS: return "http://hl7.org/fhir/http-operations";
-            case PATCH: return "http://hl7.org/fhir/http-operations";
-            case POST: return "http://hl7.org/fhir/http-operations";
-            case PUT: return "http://hl7.org/fhir/http-operations";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case DELETE: return "HTTP DELETE operation.";
-            case GET: return "HTTP GET operation.";
-            case OPTIONS: return "HTTP OPTIONS operation.";
-            case PATCH: return "HTTP PATCH operation.";
-            case POST: return "HTTP POST operation.";
-            case PUT: return "HTTP PUT operation.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case DELETE: return "DELETE";
-            case GET: return "GET";
-            case OPTIONS: return "OPTIONS";
-            case PATCH: return "PATCH";
-            case POST: return "POST";
-            case PUT: return "PUT";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class TestScriptRequestMethodCodeEnumFactory implements EnumFactory<TestScriptRequestMethodCode> {
-    public TestScriptRequestMethodCode fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("delete".equals(codeString))
-          return TestScriptRequestMethodCode.DELETE;
-        if ("get".equals(codeString))
-          return TestScriptRequestMethodCode.GET;
-        if ("options".equals(codeString))
-          return TestScriptRequestMethodCode.OPTIONS;
-        if ("patch".equals(codeString))
-          return TestScriptRequestMethodCode.PATCH;
-        if ("post".equals(codeString))
-          return TestScriptRequestMethodCode.POST;
-        if ("put".equals(codeString))
-          return TestScriptRequestMethodCode.PUT;
-        throw new IllegalArgumentException("Unknown TestScriptRequestMethodCode code '"+codeString+"'");
-        }
-        public Enumeration<TestScriptRequestMethodCode> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<TestScriptRequestMethodCode>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("delete".equals(codeString))
-          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.DELETE);
-        if ("get".equals(codeString))
-          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.GET);
-        if ("options".equals(codeString))
-          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.OPTIONS);
-        if ("patch".equals(codeString))
-          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.PATCH);
-        if ("post".equals(codeString))
-          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.POST);
-        if ("put".equals(codeString))
-          return new Enumeration<TestScriptRequestMethodCode>(this, TestScriptRequestMethodCode.PUT);
-        throw new FHIRException("Unknown TestScriptRequestMethodCode code '"+codeString+"'");
-        }
-    public String toCode(TestScriptRequestMethodCode code) {
-      if (code == TestScriptRequestMethodCode.DELETE)
-        return "delete";
-      if (code == TestScriptRequestMethodCode.GET)
-        return "get";
-      if (code == TestScriptRequestMethodCode.OPTIONS)
-        return "options";
-      if (code == TestScriptRequestMethodCode.PATCH)
-        return "patch";
-      if (code == TestScriptRequestMethodCode.POST)
-        return "post";
-      if (code == TestScriptRequestMethodCode.PUT)
-        return "put";
-      return "?";
-      }
-    public String toSystem(TestScriptRequestMethodCode code) {
       return code.getSystem();
       }
     }
@@ -3368,1275 +3384,6 @@ public class TestScript extends MetadataResource {
   }
 
     @Block()
-    public static class TestScriptRuleComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Reference to the resource (containing the contents of the rule needed for assertions).
-         */
-        @Child(name = "resource", type = {Reference.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Assert rule resource reference", formalDefinition="Reference to the resource (containing the contents of the rule needed for assertions)." )
-        protected Reference resource;
-
-        /**
-         * The actual object that is the target of the reference (Reference to the resource (containing the contents of the rule needed for assertions).)
-         */
-        protected Resource resourceTarget;
-
-        /**
-         * Each rule template can take one or more parameters for rule evaluation.
-         */
-        @Child(name = "param", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
-        protected List<RuleParamComponent> param;
-
-        private static final long serialVersionUID = -1869267735L;
-
-    /**
-     * Constructor
-     */
-      public TestScriptRuleComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public TestScriptRuleComponent(Reference resource) {
-        super();
-        this.resource = resource;
-      }
-
-        /**
-         * @return {@link #resource} (Reference to the resource (containing the contents of the rule needed for assertions).)
-         */
-        public Reference getResource() { 
-          if (this.resource == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptRuleComponent.resource");
-            else if (Configuration.doAutoCreate())
-              this.resource = new Reference(); // cc
-          return this.resource;
-        }
-
-        public boolean hasResource() { 
-          return this.resource != null && !this.resource.isEmpty();
-        }
-
-        /**
-         * @param value {@link #resource} (Reference to the resource (containing the contents of the rule needed for assertions).)
-         */
-        public TestScriptRuleComponent setResource(Reference value) { 
-          this.resource = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #resource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the rule needed for assertions).)
-         */
-        public Resource getResourceTarget() { 
-          return this.resourceTarget;
-        }
-
-        /**
-         * @param value {@link #resource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the rule needed for assertions).)
-         */
-        public TestScriptRuleComponent setResourceTarget(Resource value) { 
-          this.resourceTarget = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
-         */
-        public List<RuleParamComponent> getParam() { 
-          if (this.param == null)
-            this.param = new ArrayList<RuleParamComponent>();
-          return this.param;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public TestScriptRuleComponent setParam(List<RuleParamComponent> theParam) { 
-          this.param = theParam;
-          return this;
-        }
-
-        public boolean hasParam() { 
-          if (this.param == null)
-            return false;
-          for (RuleParamComponent item : this.param)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public RuleParamComponent addParam() { //3
-          RuleParamComponent t = new RuleParamComponent();
-          if (this.param == null)
-            this.param = new ArrayList<RuleParamComponent>();
-          this.param.add(t);
-          return t;
-        }
-
-        public TestScriptRuleComponent addParam(RuleParamComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.param == null)
-            this.param = new ArrayList<RuleParamComponent>();
-          this.param.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
-         */
-        public RuleParamComponent getParamFirstRep() { 
-          if (getParam().isEmpty()) {
-            addParam();
-          }
-          return getParam().get(0);
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the rule needed for assertions).", 0, 1, resource));
-          children.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -341064690: /*resource*/  return new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the rule needed for assertions).", 0, 1, resource);
-          case 106436749: /*param*/  return new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
-        case 106436749: /*param*/ return this.param == null ? new Base[0] : this.param.toArray(new Base[this.param.size()]); // RuleParamComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -341064690: // resource
-          this.resource = castToReference(value); // Reference
-          return value;
-        case 106436749: // param
-          this.getParam().add((RuleParamComponent) value); // RuleParamComponent
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("resource")) {
-          this.resource = castToReference(value); // Reference
-        } else if (name.equals("param")) {
-          this.getParam().add((RuleParamComponent) value);
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -341064690:  return getResource(); 
-        case 106436749:  return addParam(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -341064690: /*resource*/ return new String[] {"Reference"};
-        case 106436749: /*param*/ return new String[] {};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("resource")) {
-          this.resource = new Reference();
-          return this.resource;
-        }
-        else if (name.equals("param")) {
-          return addParam();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public TestScriptRuleComponent copy() {
-        TestScriptRuleComponent dst = new TestScriptRuleComponent();
-        copyValues(dst);
-        dst.resource = resource == null ? null : resource.copy();
-        if (param != null) {
-          dst.param = new ArrayList<RuleParamComponent>();
-          for (RuleParamComponent i : param)
-            dst.param.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof TestScriptRuleComponent))
-          return false;
-        TestScriptRuleComponent o = (TestScriptRuleComponent) other_;
-        return compareDeep(resource, o.resource, true) && compareDeep(param, o.param, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof TestScriptRuleComponent))
-          return false;
-        TestScriptRuleComponent o = (TestScriptRuleComponent) other_;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(resource, param);
-      }
-
-  public String fhirType() {
-    return "TestScript.rule";
-
-  }
-
-  }
-
-    @Block()
-    public static class RuleParamComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Descriptive name for this parameter that matches the external assert rule parameter name.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Parameter name matching external assert rule parameter", formalDefinition="Descriptive name for this parameter that matches the external assert rule parameter name." )
-        protected StringType name;
-
-        /**
-         * The explicit or dynamic value for the parameter that will be passed on to the external rule template.
-         */
-        @Child(name = "value", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The explicit or dynamic value for the parameter that will be passed on to the external rule template." )
-        protected StringType value;
-
-        private static final long serialVersionUID = 395259392L;
-
-    /**
-     * Constructor
-     */
-      public RuleParamComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public RuleParamComponent(StringType name) {
-        super();
-        this.name = name;
-      }
-
-        /**
-         * @return {@link #name} (Descriptive name for this parameter that matches the external assert rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create RuleParamComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (Descriptive name for this parameter that matches the external assert rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public RuleParamComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return Descriptive name for this parameter that matches the external assert rule parameter name.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value Descriptive name for this parameter that matches the external assert rule parameter name.
-         */
-        public RuleParamComponent setName(String value) { 
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #value} (The explicit or dynamic value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public StringType getValueElement() { 
-          if (this.value == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create RuleParamComponent.value");
-            else if (Configuration.doAutoCreate())
-              this.value = new StringType(); // bb
-          return this.value;
-        }
-
-        public boolean hasValueElement() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        public boolean hasValue() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        /**
-         * @param value {@link #value} (The explicit or dynamic value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public RuleParamComponent setValueElement(StringType value) { 
-          this.value = value;
-          return this;
-        }
-
-        /**
-         * @return The explicit or dynamic value for the parameter that will be passed on to the external rule template.
-         */
-        public String getValue() { 
-          return this.value == null ? null : this.value.getValue();
-        }
-
-        /**
-         * @param value The explicit or dynamic value for the parameter that will be passed on to the external rule template.
-         */
-        public RuleParamComponent setValue(String value) { 
-          if (Utilities.noString(value))
-            this.value = null;
-          else {
-            if (this.value == null)
-              this.value = new StringType();
-            this.value.setValue(value);
-          }
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, 1, name));
-          children.add(new Property("value", "string", "The explicit or dynamic value for the parameter that will be passed on to the external rule template.", 0, 1, value));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, 1, name);
-          case 111972721: /*value*/  return new Property("value", "string", "The explicit or dynamic value for the parameter that will be passed on to the external rule template.", 0, 1, value);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          return value;
-        case 111972721: // value
-          this.value = castToString(value); // StringType
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name")) {
-          this.name = castToString(value); // StringType
-        } else if (name.equals("value")) {
-          this.value = castToString(value); // StringType
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707:  return getNameElement();
-        case 111972721:  return getValueElement();
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return new String[] {"string"};
-        case 111972721: /*value*/ return new String[] {"string"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
-        }
-        else if (name.equals("value")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public RuleParamComponent copy() {
-        RuleParamComponent dst = new RuleParamComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        dst.value = value == null ? null : value.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof RuleParamComponent))
-          return false;
-        RuleParamComponent o = (RuleParamComponent) other_;
-        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof RuleParamComponent))
-          return false;
-        RuleParamComponent o = (RuleParamComponent) other_;
-        return compareValues(name, o.name, true) && compareValues(value, o.value, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
-      }
-
-  public String fhirType() {
-    return "TestScript.rule.param";
-
-  }
-
-  }
-
-    @Block()
-    public static class TestScriptRulesetComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Reference to the resource (containing the contents of the ruleset needed for assertions).
-         */
-        @Child(name = "resource", type = {Reference.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Assert ruleset resource reference", formalDefinition="Reference to the resource (containing the contents of the ruleset needed for assertions)." )
-        protected Reference resource;
-
-        /**
-         * The actual object that is the target of the reference (Reference to the resource (containing the contents of the ruleset needed for assertions).)
-         */
-        protected Resource resourceTarget;
-
-        /**
-         * The referenced rule within the external ruleset template.
-         */
-        @Child(name = "rule", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="The referenced rule within the ruleset", formalDefinition="The referenced rule within the external ruleset template." )
-        protected List<RulesetRuleComponent> rule;
-
-        private static final long serialVersionUID = 1260261423L;
-
-    /**
-     * Constructor
-     */
-      public TestScriptRulesetComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public TestScriptRulesetComponent(Reference resource) {
-        super();
-        this.resource = resource;
-      }
-
-        /**
-         * @return {@link #resource} (Reference to the resource (containing the contents of the ruleset needed for assertions).)
-         */
-        public Reference getResource() { 
-          if (this.resource == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create TestScriptRulesetComponent.resource");
-            else if (Configuration.doAutoCreate())
-              this.resource = new Reference(); // cc
-          return this.resource;
-        }
-
-        public boolean hasResource() { 
-          return this.resource != null && !this.resource.isEmpty();
-        }
-
-        /**
-         * @param value {@link #resource} (Reference to the resource (containing the contents of the ruleset needed for assertions).)
-         */
-        public TestScriptRulesetComponent setResource(Reference value) { 
-          this.resource = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #resource} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the ruleset needed for assertions).)
-         */
-        public Resource getResourceTarget() { 
-          return this.resourceTarget;
-        }
-
-        /**
-         * @param value {@link #resource} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to the resource (containing the contents of the ruleset needed for assertions).)
-         */
-        public TestScriptRulesetComponent setResourceTarget(Resource value) { 
-          this.resourceTarget = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #rule} (The referenced rule within the external ruleset template.)
-         */
-        public List<RulesetRuleComponent> getRule() { 
-          if (this.rule == null)
-            this.rule = new ArrayList<RulesetRuleComponent>();
-          return this.rule;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public TestScriptRulesetComponent setRule(List<RulesetRuleComponent> theRule) { 
-          this.rule = theRule;
-          return this;
-        }
-
-        public boolean hasRule() { 
-          if (this.rule == null)
-            return false;
-          for (RulesetRuleComponent item : this.rule)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public RulesetRuleComponent addRule() { //3
-          RulesetRuleComponent t = new RulesetRuleComponent();
-          if (this.rule == null)
-            this.rule = new ArrayList<RulesetRuleComponent>();
-          this.rule.add(t);
-          return t;
-        }
-
-        public TestScriptRulesetComponent addRule(RulesetRuleComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.rule == null)
-            this.rule = new ArrayList<RulesetRuleComponent>();
-          this.rule.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
-         */
-        public RulesetRuleComponent getRuleFirstRep() { 
-          if (getRule().isEmpty()) {
-            addRule();
-          }
-          return getRule().get(0);
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the ruleset needed for assertions).", 0, 1, resource));
-          children.add(new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -341064690: /*resource*/  return new Property("resource", "Reference(Any)", "Reference to the resource (containing the contents of the ruleset needed for assertions).", 0, 1, resource);
-          case 3512060: /*rule*/  return new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // Reference
-        case 3512060: /*rule*/ return this.rule == null ? new Base[0] : this.rule.toArray(new Base[this.rule.size()]); // RulesetRuleComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -341064690: // resource
-          this.resource = castToReference(value); // Reference
-          return value;
-        case 3512060: // rule
-          this.getRule().add((RulesetRuleComponent) value); // RulesetRuleComponent
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("resource")) {
-          this.resource = castToReference(value); // Reference
-        } else if (name.equals("rule")) {
-          this.getRule().add((RulesetRuleComponent) value);
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -341064690:  return getResource(); 
-        case 3512060:  return addRule(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -341064690: /*resource*/ return new String[] {"Reference"};
-        case 3512060: /*rule*/ return new String[] {};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("resource")) {
-          this.resource = new Reference();
-          return this.resource;
-        }
-        else if (name.equals("rule")) {
-          return addRule();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public TestScriptRulesetComponent copy() {
-        TestScriptRulesetComponent dst = new TestScriptRulesetComponent();
-        copyValues(dst);
-        dst.resource = resource == null ? null : resource.copy();
-        if (rule != null) {
-          dst.rule = new ArrayList<RulesetRuleComponent>();
-          for (RulesetRuleComponent i : rule)
-            dst.rule.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof TestScriptRulesetComponent))
-          return false;
-        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other_;
-        return compareDeep(resource, o.resource, true) && compareDeep(rule, o.rule, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof TestScriptRulesetComponent))
-          return false;
-        TestScriptRulesetComponent o = (TestScriptRulesetComponent) other_;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(resource, rule);
-      }
-
-  public String fhirType() {
-    return "TestScript.ruleset";
-
-  }
-
-  }
-
-    @Block()
-    public static class RulesetRuleComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Id of the referenced rule within the external ruleset template.
-         */
-        @Child(name = "ruleId", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Id of referenced rule within the ruleset", formalDefinition="Id of the referenced rule within the external ruleset template." )
-        protected IdType ruleId;
-
-        /**
-         * Each rule template can take one or more parameters for rule evaluation.
-         */
-        @Child(name = "param", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Ruleset rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
-        protected List<RulesetRuleParamComponent> param;
-
-        private static final long serialVersionUID = -1399866981L;
-
-    /**
-     * Constructor
-     */
-      public RulesetRuleComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public RulesetRuleComponent(IdType ruleId) {
-        super();
-        this.ruleId = ruleId;
-      }
-
-        /**
-         * @return {@link #ruleId} (Id of the referenced rule within the external ruleset template.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
-         */
-        public IdType getRuleIdElement() { 
-          if (this.ruleId == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create RulesetRuleComponent.ruleId");
-            else if (Configuration.doAutoCreate())
-              this.ruleId = new IdType(); // bb
-          return this.ruleId;
-        }
-
-        public boolean hasRuleIdElement() { 
-          return this.ruleId != null && !this.ruleId.isEmpty();
-        }
-
-        public boolean hasRuleId() { 
-          return this.ruleId != null && !this.ruleId.isEmpty();
-        }
-
-        /**
-         * @param value {@link #ruleId} (Id of the referenced rule within the external ruleset template.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
-         */
-        public RulesetRuleComponent setRuleIdElement(IdType value) { 
-          this.ruleId = value;
-          return this;
-        }
-
-        /**
-         * @return Id of the referenced rule within the external ruleset template.
-         */
-        public String getRuleId() { 
-          return this.ruleId == null ? null : this.ruleId.getValue();
-        }
-
-        /**
-         * @param value Id of the referenced rule within the external ruleset template.
-         */
-        public RulesetRuleComponent setRuleId(String value) { 
-            if (this.ruleId == null)
-              this.ruleId = new IdType();
-            this.ruleId.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
-         */
-        public List<RulesetRuleParamComponent> getParam() { 
-          if (this.param == null)
-            this.param = new ArrayList<RulesetRuleParamComponent>();
-          return this.param;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public RulesetRuleComponent setParam(List<RulesetRuleParamComponent> theParam) { 
-          this.param = theParam;
-          return this;
-        }
-
-        public boolean hasParam() { 
-          if (this.param == null)
-            return false;
-          for (RulesetRuleParamComponent item : this.param)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public RulesetRuleParamComponent addParam() { //3
-          RulesetRuleParamComponent t = new RulesetRuleParamComponent();
-          if (this.param == null)
-            this.param = new ArrayList<RulesetRuleParamComponent>();
-          this.param.add(t);
-          return t;
-        }
-
-        public RulesetRuleComponent addParam(RulesetRuleParamComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.param == null)
-            this.param = new ArrayList<RulesetRuleParamComponent>();
-          this.param.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
-         */
-        public RulesetRuleParamComponent getParamFirstRep() { 
-          if (getParam().isEmpty()) {
-            addParam();
-          }
-          return getParam().get(0);
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, 1, ruleId));
-          children.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -919875273: /*ruleId*/  return new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, 1, ruleId);
-          case 106436749: /*param*/  return new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -919875273: /*ruleId*/ return this.ruleId == null ? new Base[0] : new Base[] {this.ruleId}; // IdType
-        case 106436749: /*param*/ return this.param == null ? new Base[0] : this.param.toArray(new Base[this.param.size()]); // RulesetRuleParamComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -919875273: // ruleId
-          this.ruleId = castToId(value); // IdType
-          return value;
-        case 106436749: // param
-          this.getParam().add((RulesetRuleParamComponent) value); // RulesetRuleParamComponent
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("ruleId")) {
-          this.ruleId = castToId(value); // IdType
-        } else if (name.equals("param")) {
-          this.getParam().add((RulesetRuleParamComponent) value);
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -919875273:  return getRuleIdElement();
-        case 106436749:  return addParam(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -919875273: /*ruleId*/ return new String[] {"id"};
-        case 106436749: /*param*/ return new String[] {};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("ruleId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.ruleId");
-        }
-        else if (name.equals("param")) {
-          return addParam();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public RulesetRuleComponent copy() {
-        RulesetRuleComponent dst = new RulesetRuleComponent();
-        copyValues(dst);
-        dst.ruleId = ruleId == null ? null : ruleId.copy();
-        if (param != null) {
-          dst.param = new ArrayList<RulesetRuleParamComponent>();
-          for (RulesetRuleParamComponent i : param)
-            dst.param.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof RulesetRuleComponent))
-          return false;
-        RulesetRuleComponent o = (RulesetRuleComponent) other_;
-        return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof RulesetRuleComponent))
-          return false;
-        RulesetRuleComponent o = (RulesetRuleComponent) other_;
-        return compareValues(ruleId, o.ruleId, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(ruleId, param);
-      }
-
-  public String fhirType() {
-    return "TestScript.ruleset.rule";
-
-  }
-
-  }
-
-    @Block()
-    public static class RulesetRuleParamComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Parameter name matching external assert ruleset rule parameter", formalDefinition="Descriptive name for this parameter that matches the external assert ruleset rule parameter name." )
-        protected StringType name;
-
-        /**
-         * The value for the parameter that will be passed on to the external ruleset rule template.
-         */
-        @Child(name = "value", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The value for the parameter that will be passed on to the external ruleset rule template." )
-        protected StringType value;
-
-        private static final long serialVersionUID = 395259392L;
-
-    /**
-     * Constructor
-     */
-      public RulesetRuleParamComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public RulesetRuleParamComponent(StringType name) {
-        super();
-        this.name = name;
-      }
-
-        /**
-         * @return {@link #name} (Descriptive name for this parameter that matches the external assert ruleset rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create RulesetRuleParamComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (Descriptive name for this parameter that matches the external assert ruleset rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public RulesetRuleParamComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
-         */
-        public RulesetRuleParamComponent setName(String value) { 
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #value} (The value for the parameter that will be passed on to the external ruleset rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public StringType getValueElement() { 
-          if (this.value == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create RulesetRuleParamComponent.value");
-            else if (Configuration.doAutoCreate())
-              this.value = new StringType(); // bb
-          return this.value;
-        }
-
-        public boolean hasValueElement() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        public boolean hasValue() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        /**
-         * @param value {@link #value} (The value for the parameter that will be passed on to the external ruleset rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public RulesetRuleParamComponent setValueElement(StringType value) { 
-          this.value = value;
-          return this;
-        }
-
-        /**
-         * @return The value for the parameter that will be passed on to the external ruleset rule template.
-         */
-        public String getValue() { 
-          return this.value == null ? null : this.value.getValue();
-        }
-
-        /**
-         * @param value The value for the parameter that will be passed on to the external ruleset rule template.
-         */
-        public RulesetRuleParamComponent setValue(String value) { 
-          if (Utilities.noString(value))
-            this.value = null;
-          else {
-            if (this.value == null)
-              this.value = new StringType();
-            this.value.setValue(value);
-          }
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, 1, name));
-          children.add(new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, 1, value));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, 1, name);
-          case 111972721: /*value*/  return new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, 1, value);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          return value;
-        case 111972721: // value
-          this.value = castToString(value); // StringType
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name")) {
-          this.name = castToString(value); // StringType
-        } else if (name.equals("value")) {
-          this.value = castToString(value); // StringType
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707:  return getNameElement();
-        case 111972721:  return getValueElement();
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return new String[] {"string"};
-        case 111972721: /*value*/ return new String[] {"string"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
-        }
-        else if (name.equals("value")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public RulesetRuleParamComponent copy() {
-        RulesetRuleParamComponent dst = new RulesetRuleParamComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        dst.value = value == null ? null : value.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof RulesetRuleParamComponent))
-          return false;
-        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other_;
-        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof RulesetRuleParamComponent))
-          return false;
-        RulesetRuleParamComponent o = (RulesetRuleParamComponent) other_;
-        return compareValues(name, o.name, true) && compareValues(value, o.value, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
-      }
-
-  public String fhirType() {
-    return "TestScript.ruleset.rule.param";
-
-  }
-
-  }
-
-    @Block()
     public static class TestScriptSetupComponent extends BackboneElement implements IBaseBackboneElement {
         /**
          * Action would contain either an operation or an assertion.
@@ -5079,62 +3826,70 @@ public class TestScript extends MetadataResource {
         protected BooleanType encodeRequestUrl;
 
         /**
+         * The HTTP method the test engine MUST use for this operation regardless of any other operation details.
+         */
+        @Child(name = "method", type = {CodeType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="delete | get | options | patch | post | put | head", formalDefinition="The HTTP method the test engine MUST use for this operation regardless of any other operation details." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/http-operations")
+        protected Enumeration<TestScriptRequestMethodCode> method;
+
+        /**
          * The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.
          */
-        @Child(name = "origin", type = {IntegerType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "origin", type = {IntegerType.class}, order=10, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Server initiating the request", formalDefinition="The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section." )
         protected IntegerType origin;
 
         /**
          * Path plus parameters after [type].  Used to set parts of the request URL explicitly.
          */
-        @Child(name = "params", type = {StringType.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "params", type = {StringType.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Explicitly defined path parameters", formalDefinition="Path plus parameters after [type].  Used to set parts of the request URL explicitly." )
         protected StringType params;
 
         /**
          * Header elements would be used to set HTTP headers.
          */
-        @Child(name = "requestHeader", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "requestHeader", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Each operation can have one or more header elements", formalDefinition="Header elements would be used to set HTTP headers." )
         protected List<SetupActionOperationRequestHeaderComponent> requestHeader;
 
         /**
          * The fixture id (maybe new) to map to the request.
          */
-        @Child(name = "requestId", type = {IdType.class}, order=12, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "requestId", type = {IdType.class}, order=13, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Fixture Id of mapped request", formalDefinition="The fixture id (maybe new) to map to the request." )
         protected IdType requestId;
 
         /**
          * The fixture id (maybe new) to map to the response.
          */
-        @Child(name = "responseId", type = {IdType.class}, order=13, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "responseId", type = {IdType.class}, order=14, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Fixture Id of mapped response", formalDefinition="The fixture id (maybe new) to map to the response." )
         protected IdType responseId;
 
         /**
          * The id of the fixture used as the body of a PUT or POST request.
          */
-        @Child(name = "sourceId", type = {IdType.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "sourceId", type = {IdType.class}, order=15, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Fixture Id of body for PUT and POST requests", formalDefinition="The id of the fixture used as the body of a PUT or POST request." )
         protected IdType sourceId;
 
         /**
          * Id of fixture used for extracting the [id],  [type], and [vid] for GET requests.
          */
-        @Child(name = "targetId", type = {IdType.class}, order=15, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "targetId", type = {IdType.class}, order=16, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests", formalDefinition="Id of fixture used for extracting the [id],  [type], and [vid] for GET requests." )
         protected IdType targetId;
 
         /**
          * Complete request URL.
          */
-        @Child(name = "url", type = {StringType.class}, order=16, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "url", type = {StringType.class}, order=17, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Request URL", formalDefinition="Complete request URL." )
         protected StringType url;
 
-        private static final long serialVersionUID = 1998717374L;
+        private static final long serialVersionUID = 300050202L;
 
     /**
      * Constructor
@@ -5507,6 +4262,55 @@ public class TestScript extends MetadataResource {
             if (this.encodeRequestUrl == null)
               this.encodeRequestUrl = new BooleanType();
             this.encodeRequestUrl.setValue(value);
+          return this;
+        }
+
+        /**
+         * @return {@link #method} (The HTTP method the test engine MUST use for this operation regardless of any other operation details.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
+         */
+        public Enumeration<TestScriptRequestMethodCode> getMethodElement() { 
+          if (this.method == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SetupActionOperationComponent.method");
+            else if (Configuration.doAutoCreate())
+              this.method = new Enumeration<TestScriptRequestMethodCode>(new TestScriptRequestMethodCodeEnumFactory()); // bb
+          return this.method;
+        }
+
+        public boolean hasMethodElement() { 
+          return this.method != null && !this.method.isEmpty();
+        }
+
+        public boolean hasMethod() { 
+          return this.method != null && !this.method.isEmpty();
+        }
+
+        /**
+         * @param value {@link #method} (The HTTP method the test engine MUST use for this operation regardless of any other operation details.). This is the underlying object with id, value and extensions. The accessor "getMethod" gives direct access to the value
+         */
+        public SetupActionOperationComponent setMethodElement(Enumeration<TestScriptRequestMethodCode> value) { 
+          this.method = value;
+          return this;
+        }
+
+        /**
+         * @return The HTTP method the test engine MUST use for this operation regardless of any other operation details.
+         */
+        public TestScriptRequestMethodCode getMethod() { 
+          return this.method == null ? null : this.method.getValue();
+        }
+
+        /**
+         * @param value The HTTP method the test engine MUST use for this operation regardless of any other operation details.
+         */
+        public SetupActionOperationComponent setMethod(TestScriptRequestMethodCode value) { 
+          if (value == null)
+            this.method = null;
+          else {
+            if (this.method == null)
+              this.method = new Enumeration<TestScriptRequestMethodCode>(new TestScriptRequestMethodCodeEnumFactory());
+            this.method.setValue(value);
+          }
           return this;
         }
 
@@ -5912,6 +4716,7 @@ public class TestScript extends MetadataResource {
           children.add(new Property("contentType", "code", "The mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType));
           children.add(new Property("destination", "integer", "The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.", 0, 1, destination));
           children.add(new Property("encodeRequestUrl", "boolean", "Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.", 0, 1, encodeRequestUrl));
+          children.add(new Property("method", "code", "The HTTP method the test engine MUST use for this operation regardless of any other operation details.", 0, 1, method));
           children.add(new Property("origin", "integer", "The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.", 0, 1, origin));
           children.add(new Property("params", "string", "Path plus parameters after [type].  Used to set parts of the request URL explicitly.", 0, 1, params));
           children.add(new Property("requestHeader", "", "Header elements would be used to set HTTP headers.", 0, java.lang.Integer.MAX_VALUE, requestHeader));
@@ -5933,6 +4738,7 @@ public class TestScript extends MetadataResource {
           case -389131437: /*contentType*/  return new Property("contentType", "code", "The mime-type to use for RESTful operation in the 'Content-Type' header.", 0, 1, contentType);
           case -1429847026: /*destination*/  return new Property("destination", "integer", "The server where the request message is destined for.  Must be one of the server numbers listed in TestScript.destination section.", 0, 1, destination);
           case -1760554218: /*encodeRequestUrl*/  return new Property("encodeRequestUrl", "boolean", "Whether or not to implicitly send the request url in encoded format. The default is true to match the standard RESTful client behavior. Set to false when communicating with a server that does not support encoded url paths.", 0, 1, encodeRequestUrl);
+          case -1077554975: /*method*/  return new Property("method", "code", "The HTTP method the test engine MUST use for this operation regardless of any other operation details.", 0, 1, method);
           case -1008619738: /*origin*/  return new Property("origin", "integer", "The server where the request message originates from.  Must be one of the server numbers listed in TestScript.origin section.", 0, 1, origin);
           case -995427962: /*params*/  return new Property("params", "string", "Path plus parameters after [type].  Used to set parts of the request URL explicitly.", 0, 1, params);
           case 1074158076: /*requestHeader*/  return new Property("requestHeader", "", "Header elements would be used to set HTTP headers.", 0, java.lang.Integer.MAX_VALUE, requestHeader);
@@ -5957,6 +4763,7 @@ public class TestScript extends MetadataResource {
         case -389131437: /*contentType*/ return this.contentType == null ? new Base[0] : new Base[] {this.contentType}; // CodeType
         case -1429847026: /*destination*/ return this.destination == null ? new Base[0] : new Base[] {this.destination}; // IntegerType
         case -1760554218: /*encodeRequestUrl*/ return this.encodeRequestUrl == null ? new Base[0] : new Base[] {this.encodeRequestUrl}; // BooleanType
+        case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // Enumeration<TestScriptRequestMethodCode>
         case -1008619738: /*origin*/ return this.origin == null ? new Base[0] : new Base[] {this.origin}; // IntegerType
         case -995427962: /*params*/ return this.params == null ? new Base[0] : new Base[] {this.params}; // StringType
         case 1074158076: /*requestHeader*/ return this.requestHeader == null ? new Base[0] : this.requestHeader.toArray(new Base[this.requestHeader.size()]); // SetupActionOperationRequestHeaderComponent
@@ -5996,6 +4803,10 @@ public class TestScript extends MetadataResource {
           return value;
         case -1760554218: // encodeRequestUrl
           this.encodeRequestUrl = castToBoolean(value); // BooleanType
+          return value;
+        case -1077554975: // method
+          value = new TestScriptRequestMethodCodeEnumFactory().fromType(castToCode(value));
+          this.method = (Enumeration) value; // Enumeration<TestScriptRequestMethodCode>
           return value;
         case -1008619738: // origin
           this.origin = castToInteger(value); // IntegerType
@@ -6044,6 +4855,9 @@ public class TestScript extends MetadataResource {
           this.destination = castToInteger(value); // IntegerType
         } else if (name.equals("encodeRequestUrl")) {
           this.encodeRequestUrl = castToBoolean(value); // BooleanType
+        } else if (name.equals("method")) {
+          value = new TestScriptRequestMethodCodeEnumFactory().fromType(castToCode(value));
+          this.method = (Enumeration) value; // Enumeration<TestScriptRequestMethodCode>
         } else if (name.equals("origin")) {
           this.origin = castToInteger(value); // IntegerType
         } else if (name.equals("params")) {
@@ -6076,6 +4890,7 @@ public class TestScript extends MetadataResource {
         case -389131437:  return getContentTypeElement();
         case -1429847026:  return getDestinationElement();
         case -1760554218:  return getEncodeRequestUrlElement();
+        case -1077554975:  return getMethodElement();
         case -1008619738:  return getOriginElement();
         case -995427962:  return getParamsElement();
         case 1074158076:  return addRequestHeader(); 
@@ -6100,6 +4915,7 @@ public class TestScript extends MetadataResource {
         case -389131437: /*contentType*/ return new String[] {"code"};
         case -1429847026: /*destination*/ return new String[] {"integer"};
         case -1760554218: /*encodeRequestUrl*/ return new String[] {"boolean"};
+        case -1077554975: /*method*/ return new String[] {"code"};
         case -1008619738: /*origin*/ return new String[] {"integer"};
         case -995427962: /*params*/ return new String[] {"string"};
         case 1074158076: /*requestHeader*/ return new String[] {};
@@ -6140,6 +4956,9 @@ public class TestScript extends MetadataResource {
         else if (name.equals("encodeRequestUrl")) {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.encodeRequestUrl");
         }
+        else if (name.equals("method")) {
+          throw new FHIRException("Cannot call addChild on a primitive type TestScript.method");
+        }
         else if (name.equals("origin")) {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.origin");
         }
@@ -6179,6 +4998,7 @@ public class TestScript extends MetadataResource {
         dst.contentType = contentType == null ? null : contentType.copy();
         dst.destination = destination == null ? null : destination.copy();
         dst.encodeRequestUrl = encodeRequestUrl == null ? null : encodeRequestUrl.copy();
+        dst.method = method == null ? null : method.copy();
         dst.origin = origin == null ? null : origin.copy();
         dst.params = params == null ? null : params.copy();
         if (requestHeader != null) {
@@ -6204,9 +5024,10 @@ public class TestScript extends MetadataResource {
         return compareDeep(type, o.type, true) && compareDeep(resource, o.resource, true) && compareDeep(label, o.label, true)
            && compareDeep(description, o.description, true) && compareDeep(accept, o.accept, true) && compareDeep(contentType, o.contentType, true)
            && compareDeep(destination, o.destination, true) && compareDeep(encodeRequestUrl, o.encodeRequestUrl, true)
-           && compareDeep(origin, o.origin, true) && compareDeep(params, o.params, true) && compareDeep(requestHeader, o.requestHeader, true)
-           && compareDeep(requestId, o.requestId, true) && compareDeep(responseId, o.responseId, true) && compareDeep(sourceId, o.sourceId, true)
-           && compareDeep(targetId, o.targetId, true) && compareDeep(url, o.url, true);
+           && compareDeep(method, o.method, true) && compareDeep(origin, o.origin, true) && compareDeep(params, o.params, true)
+           && compareDeep(requestHeader, o.requestHeader, true) && compareDeep(requestId, o.requestId, true)
+           && compareDeep(responseId, o.responseId, true) && compareDeep(sourceId, o.sourceId, true) && compareDeep(targetId, o.targetId, true)
+           && compareDeep(url, o.url, true);
       }
 
       @Override
@@ -6218,15 +5039,15 @@ public class TestScript extends MetadataResource {
         SetupActionOperationComponent o = (SetupActionOperationComponent) other_;
         return compareValues(resource, o.resource, true) && compareValues(label, o.label, true) && compareValues(description, o.description, true)
            && compareValues(accept, o.accept, true) && compareValues(contentType, o.contentType, true) && compareValues(destination, o.destination, true)
-           && compareValues(encodeRequestUrl, o.encodeRequestUrl, true) && compareValues(origin, o.origin, true)
-           && compareValues(params, o.params, true) && compareValues(requestId, o.requestId, true) && compareValues(responseId, o.responseId, true)
-           && compareValues(sourceId, o.sourceId, true) && compareValues(targetId, o.targetId, true) && compareValues(url, o.url, true)
-          ;
+           && compareValues(encodeRequestUrl, o.encodeRequestUrl, true) && compareValues(method, o.method, true)
+           && compareValues(origin, o.origin, true) && compareValues(params, o.params, true) && compareValues(requestId, o.requestId, true)
+           && compareValues(responseId, o.responseId, true) && compareValues(sourceId, o.sourceId, true) && compareValues(targetId, o.targetId, true)
+           && compareValues(url, o.url, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, resource, label, description
-          , accept, contentType, destination, encodeRequestUrl, origin, params, requestHeader
+          , accept, contentType, destination, encodeRequestUrl, method, origin, params, requestHeader
           , requestId, responseId, sourceId, targetId, url);
       }
 
@@ -6583,7 +5404,7 @@ public class TestScript extends MetadataResource {
          * The request method or HTTP operation code to compare against that used by the client system under test.
          */
         @Child(name = "requestMethod", type = {CodeType.class}, order=14, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="delete | get | options | patch | post | put", formalDefinition="The request method or HTTP operation code to compare against that used by the client system under test." )
+        @Description(shortDefinition="delete | get | options | patch | post | put | head", formalDefinition="The request method or HTTP operation code to compare against that used by the client system under test." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/http-operations")
         protected Enumeration<TestScriptRequestMethodCode> requestMethod;
 
@@ -6618,48 +5439,34 @@ public class TestScript extends MetadataResource {
         protected StringType responseCode;
 
         /**
-         * The TestScript.rule this assert will evaluate.
-         */
-        @Child(name = "rule", type = {}, order=19, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The reference to a TestScript.rule", formalDefinition="The TestScript.rule this assert will evaluate." )
-        protected ActionAssertRuleComponent rule;
-
-        /**
-         * The TestScript.ruleset this assert will evaluate.
-         */
-        @Child(name = "ruleset", type = {}, order=20, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The reference to a TestScript.ruleset", formalDefinition="The TestScript.ruleset this assert will evaluate." )
-        protected ActionAssertRulesetComponent ruleset;
-
-        /**
          * Fixture to evaluate the XPath/JSONPath expression or the headerField  against.
          */
-        @Child(name = "sourceId", type = {IdType.class}, order=21, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "sourceId", type = {IdType.class}, order=19, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Fixture Id of source expression or headerField", formalDefinition="Fixture to evaluate the XPath/JSONPath expression or the headerField  against." )
         protected IdType sourceId;
 
         /**
          * The ID of the Profile to validate against.
          */
-        @Child(name = "validateProfileId", type = {IdType.class}, order=22, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "validateProfileId", type = {IdType.class}, order=20, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Profile Id of validation profile reference", formalDefinition="The ID of the Profile to validate against." )
         protected IdType validateProfileId;
 
         /**
          * The value to compare to.
          */
-        @Child(name = "value", type = {StringType.class}, order=23, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "value", type = {StringType.class}, order=21, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The value to compare to", formalDefinition="The value to compare to." )
         protected StringType value;
 
         /**
          * Whether or not the test execution will produce a warning only on error for this assert.
          */
-        @Child(name = "warningOnly", type = {BooleanType.class}, order=24, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "warningOnly", type = {BooleanType.class}, order=22, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Will this assert produce a warning only on error?", formalDefinition="Whether or not the test execution will produce a warning only on error for this assert." )
         protected BooleanType warningOnly;
 
-        private static final long serialVersionUID = -483432060L;
+        private static final long serialVersionUID = -1086518778L;
 
     /**
      * Constructor
@@ -7555,54 +6362,6 @@ public class TestScript extends MetadataResource {
         }
 
         /**
-         * @return {@link #rule} (The TestScript.rule this assert will evaluate.)
-         */
-        public ActionAssertRuleComponent getRule() { 
-          if (this.rule == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SetupActionAssertComponent.rule");
-            else if (Configuration.doAutoCreate())
-              this.rule = new ActionAssertRuleComponent(); // cc
-          return this.rule;
-        }
-
-        public boolean hasRule() { 
-          return this.rule != null && !this.rule.isEmpty();
-        }
-
-        /**
-         * @param value {@link #rule} (The TestScript.rule this assert will evaluate.)
-         */
-        public SetupActionAssertComponent setRule(ActionAssertRuleComponent value) { 
-          this.rule = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #ruleset} (The TestScript.ruleset this assert will evaluate.)
-         */
-        public ActionAssertRulesetComponent getRuleset() { 
-          if (this.ruleset == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SetupActionAssertComponent.ruleset");
-            else if (Configuration.doAutoCreate())
-              this.ruleset = new ActionAssertRulesetComponent(); // cc
-          return this.ruleset;
-        }
-
-        public boolean hasRuleset() { 
-          return this.ruleset != null && !this.ruleset.isEmpty();
-        }
-
-        /**
-         * @param value {@link #ruleset} (The TestScript.ruleset this assert will evaluate.)
-         */
-        public SetupActionAssertComponent setRuleset(ActionAssertRulesetComponent value) { 
-          this.ruleset = value;
-          return this;
-        }
-
-        /**
          * @return {@link #sourceId} (Fixture to evaluate the XPath/JSONPath expression or the headerField  against.). This is the underlying object with id, value and extensions. The accessor "getSourceId" gives direct access to the value
          */
         public IdType getSourceIdElement() { 
@@ -7814,8 +6573,6 @@ public class TestScript extends MetadataResource {
           children.add(new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, 1, resource));
           children.add(new Property("response", "code", "okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.", 0, 1, response));
           children.add(new Property("responseCode", "string", "The value of the HTTP response code to be tested.", 0, 1, responseCode));
-          children.add(new Property("rule", "", "The TestScript.rule this assert will evaluate.", 0, 1, rule));
-          children.add(new Property("ruleset", "", "The TestScript.ruleset this assert will evaluate.", 0, 1, ruleset));
           children.add(new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against.", 0, 1, sourceId));
           children.add(new Property("validateProfileId", "id", "The ID of the Profile to validate against.", 0, 1, validateProfileId));
           children.add(new Property("value", "string", "The value to compare to.", 0, 1, value));
@@ -7843,8 +6600,6 @@ public class TestScript extends MetadataResource {
           case -341064690: /*resource*/  return new Property("resource", "code", "The type of the resource.  See http://build.fhir.org/resourcelist.html.", 0, 1, resource);
           case -340323263: /*response*/  return new Property("response", "code", "okay | created | noContent | notModified | bad | forbidden | notFound | methodNotAllowed | conflict | gone | preconditionFailed | unprocessable.", 0, 1, response);
           case 1438723534: /*responseCode*/  return new Property("responseCode", "string", "The value of the HTTP response code to be tested.", 0, 1, responseCode);
-          case 3512060: /*rule*/  return new Property("rule", "", "The TestScript.rule this assert will evaluate.", 0, 1, rule);
-          case 1548678118: /*ruleset*/  return new Property("ruleset", "", "The TestScript.ruleset this assert will evaluate.", 0, 1, ruleset);
           case 1746327190: /*sourceId*/  return new Property("sourceId", "id", "Fixture to evaluate the XPath/JSONPath expression or the headerField  against.", 0, 1, sourceId);
           case 1555541038: /*validateProfileId*/  return new Property("validateProfileId", "id", "The ID of the Profile to validate against.", 0, 1, validateProfileId);
           case 111972721: /*value*/  return new Property("value", "string", "The value to compare to.", 0, 1, value);
@@ -7875,8 +6630,6 @@ public class TestScript extends MetadataResource {
         case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // CodeType
         case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // Enumeration<AssertionResponseTypes>
         case 1438723534: /*responseCode*/ return this.responseCode == null ? new Base[0] : new Base[] {this.responseCode}; // StringType
-        case 3512060: /*rule*/ return this.rule == null ? new Base[0] : new Base[] {this.rule}; // ActionAssertRuleComponent
-        case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : new Base[] {this.ruleset}; // ActionAssertRulesetComponent
         case 1746327190: /*sourceId*/ return this.sourceId == null ? new Base[0] : new Base[] {this.sourceId}; // IdType
         case 1555541038: /*validateProfileId*/ return this.validateProfileId == null ? new Base[0] : new Base[] {this.validateProfileId}; // IdType
         case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
@@ -7947,12 +6700,6 @@ public class TestScript extends MetadataResource {
         case 1438723534: // responseCode
           this.responseCode = castToString(value); // StringType
           return value;
-        case 3512060: // rule
-          this.rule = (ActionAssertRuleComponent) value; // ActionAssertRuleComponent
-          return value;
-        case 1548678118: // ruleset
-          this.ruleset = (ActionAssertRulesetComponent) value; // ActionAssertRulesetComponent
-          return value;
         case 1746327190: // sourceId
           this.sourceId = castToId(value); // IdType
           return value;
@@ -8012,10 +6759,6 @@ public class TestScript extends MetadataResource {
           this.response = (Enumeration) value; // Enumeration<AssertionResponseTypes>
         } else if (name.equals("responseCode")) {
           this.responseCode = castToString(value); // StringType
-        } else if (name.equals("rule")) {
-          this.rule = (ActionAssertRuleComponent) value; // ActionAssertRuleComponent
-        } else if (name.equals("ruleset")) {
-          this.ruleset = (ActionAssertRulesetComponent) value; // ActionAssertRulesetComponent
         } else if (name.equals("sourceId")) {
           this.sourceId = castToId(value); // IdType
         } else if (name.equals("validateProfileId")) {
@@ -8050,8 +6793,6 @@ public class TestScript extends MetadataResource {
         case -341064690:  return getResourceElement();
         case -340323263:  return getResponseElement();
         case 1438723534:  return getResponseCodeElement();
-        case 3512060:  return getRule(); 
-        case 1548678118:  return getRuleset(); 
         case 1746327190:  return getSourceIdElement();
         case 1555541038:  return getValidateProfileIdElement();
         case 111972721:  return getValueElement();
@@ -8082,8 +6823,6 @@ public class TestScript extends MetadataResource {
         case -341064690: /*resource*/ return new String[] {"code"};
         case -340323263: /*response*/ return new String[] {"code"};
         case 1438723534: /*responseCode*/ return new String[] {"string"};
-        case 3512060: /*rule*/ return new String[] {};
-        case 1548678118: /*ruleset*/ return new String[] {};
         case 1746327190: /*sourceId*/ return new String[] {"id"};
         case 1555541038: /*validateProfileId*/ return new String[] {"id"};
         case 111972721: /*value*/ return new String[] {"string"};
@@ -8149,14 +6888,6 @@ public class TestScript extends MetadataResource {
         else if (name.equals("responseCode")) {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.responseCode");
         }
-        else if (name.equals("rule")) {
-          this.rule = new ActionAssertRuleComponent();
-          return this.rule;
-        }
-        else if (name.equals("ruleset")) {
-          this.ruleset = new ActionAssertRulesetComponent();
-          return this.ruleset;
-        }
         else if (name.equals("sourceId")) {
           throw new FHIRException("Cannot call addChild on a primitive type TestScript.sourceId");
         }
@@ -8194,8 +6925,6 @@ public class TestScript extends MetadataResource {
         dst.resource = resource == null ? null : resource.copy();
         dst.response = response == null ? null : response.copy();
         dst.responseCode = responseCode == null ? null : responseCode.copy();
-        dst.rule = rule == null ? null : rule.copy();
-        dst.ruleset = ruleset == null ? null : ruleset.copy();
         dst.sourceId = sourceId == null ? null : sourceId.copy();
         dst.validateProfileId = validateProfileId == null ? null : validateProfileId.copy();
         dst.value = value == null ? null : value.copy();
@@ -8217,8 +6946,7 @@ public class TestScript extends MetadataResource {
            && compareDeep(minimumId, o.minimumId, true) && compareDeep(navigationLinks, o.navigationLinks, true)
            && compareDeep(operator, o.operator, true) && compareDeep(path, o.path, true) && compareDeep(requestMethod, o.requestMethod, true)
            && compareDeep(requestURL, o.requestURL, true) && compareDeep(resource, o.resource, true) && compareDeep(response, o.response, true)
-           && compareDeep(responseCode, o.responseCode, true) && compareDeep(rule, o.rule, true) && compareDeep(ruleset, o.ruleset, true)
-           && compareDeep(sourceId, o.sourceId, true) && compareDeep(validateProfileId, o.validateProfileId, true)
+           && compareDeep(responseCode, o.responseCode, true) && compareDeep(sourceId, o.sourceId, true) && compareDeep(validateProfileId, o.validateProfileId, true)
            && compareDeep(value, o.value, true) && compareDeep(warningOnly, o.warningOnly, true);
       }
 
@@ -8244,1275 +6972,12 @@ public class TestScript extends MetadataResource {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(label, description, direction
           , compareToSourceId, compareToSourceExpression, compareToSourcePath, contentType, expression
           , headerField, minimumId, navigationLinks, operator, path, requestMethod, requestURL
-          , resource, response, responseCode, rule, ruleset, sourceId, validateProfileId
-          , value, warningOnly);
+          , resource, response, responseCode, sourceId, validateProfileId, value, warningOnly
+          );
       }
 
   public String fhirType() {
     return "TestScript.setup.action.assert";
-
-  }
-
-  }
-
-    @Block()
-    public static class ActionAssertRuleComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The TestScript.rule id value this assert will evaluate.
-         */
-        @Child(name = "ruleId", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Id of the TestScript.rule", formalDefinition="The TestScript.rule id value this assert will evaluate." )
-        protected IdType ruleId;
-
-        /**
-         * Each rule template can take one or more parameters for rule evaluation.
-         */
-        @Child(name = "param", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
-        protected List<ActionAssertRuleParamComponent> param;
-
-        private static final long serialVersionUID = -1860715431L;
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRuleComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRuleComponent(IdType ruleId) {
-        super();
-        this.ruleId = ruleId;
-      }
-
-        /**
-         * @return {@link #ruleId} (The TestScript.rule id value this assert will evaluate.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
-         */
-        public IdType getRuleIdElement() { 
-          if (this.ruleId == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ActionAssertRuleComponent.ruleId");
-            else if (Configuration.doAutoCreate())
-              this.ruleId = new IdType(); // bb
-          return this.ruleId;
-        }
-
-        public boolean hasRuleIdElement() { 
-          return this.ruleId != null && !this.ruleId.isEmpty();
-        }
-
-        public boolean hasRuleId() { 
-          return this.ruleId != null && !this.ruleId.isEmpty();
-        }
-
-        /**
-         * @param value {@link #ruleId} (The TestScript.rule id value this assert will evaluate.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
-         */
-        public ActionAssertRuleComponent setRuleIdElement(IdType value) { 
-          this.ruleId = value;
-          return this;
-        }
-
-        /**
-         * @return The TestScript.rule id value this assert will evaluate.
-         */
-        public String getRuleId() { 
-          return this.ruleId == null ? null : this.ruleId.getValue();
-        }
-
-        /**
-         * @param value The TestScript.rule id value this assert will evaluate.
-         */
-        public ActionAssertRuleComponent setRuleId(String value) { 
-            if (this.ruleId == null)
-              this.ruleId = new IdType();
-            this.ruleId.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
-         */
-        public List<ActionAssertRuleParamComponent> getParam() { 
-          if (this.param == null)
-            this.param = new ArrayList<ActionAssertRuleParamComponent>();
-          return this.param;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ActionAssertRuleComponent setParam(List<ActionAssertRuleParamComponent> theParam) { 
-          this.param = theParam;
-          return this;
-        }
-
-        public boolean hasParam() { 
-          if (this.param == null)
-            return false;
-          for (ActionAssertRuleParamComponent item : this.param)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ActionAssertRuleParamComponent addParam() { //3
-          ActionAssertRuleParamComponent t = new ActionAssertRuleParamComponent();
-          if (this.param == null)
-            this.param = new ArrayList<ActionAssertRuleParamComponent>();
-          this.param.add(t);
-          return t;
-        }
-
-        public ActionAssertRuleComponent addParam(ActionAssertRuleParamComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.param == null)
-            this.param = new ArrayList<ActionAssertRuleParamComponent>();
-          this.param.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
-         */
-        public ActionAssertRuleParamComponent getParamFirstRep() { 
-          if (getParam().isEmpty()) {
-            addParam();
-          }
-          return getParam().get(0);
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("ruleId", "id", "The TestScript.rule id value this assert will evaluate.", 0, 1, ruleId));
-          children.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -919875273: /*ruleId*/  return new Property("ruleId", "id", "The TestScript.rule id value this assert will evaluate.", 0, 1, ruleId);
-          case 106436749: /*param*/  return new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -919875273: /*ruleId*/ return this.ruleId == null ? new Base[0] : new Base[] {this.ruleId}; // IdType
-        case 106436749: /*param*/ return this.param == null ? new Base[0] : this.param.toArray(new Base[this.param.size()]); // ActionAssertRuleParamComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -919875273: // ruleId
-          this.ruleId = castToId(value); // IdType
-          return value;
-        case 106436749: // param
-          this.getParam().add((ActionAssertRuleParamComponent) value); // ActionAssertRuleParamComponent
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("ruleId")) {
-          this.ruleId = castToId(value); // IdType
-        } else if (name.equals("param")) {
-          this.getParam().add((ActionAssertRuleParamComponent) value);
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -919875273:  return getRuleIdElement();
-        case 106436749:  return addParam(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -919875273: /*ruleId*/ return new String[] {"id"};
-        case 106436749: /*param*/ return new String[] {};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("ruleId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.ruleId");
-        }
-        else if (name.equals("param")) {
-          return addParam();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ActionAssertRuleComponent copy() {
-        ActionAssertRuleComponent dst = new ActionAssertRuleComponent();
-        copyValues(dst);
-        dst.ruleId = ruleId == null ? null : ruleId.copy();
-        if (param != null) {
-          dst.param = new ArrayList<ActionAssertRuleParamComponent>();
-          for (ActionAssertRuleParamComponent i : param)
-            dst.param.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRuleComponent))
-          return false;
-        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other_;
-        return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRuleComponent))
-          return false;
-        ActionAssertRuleComponent o = (ActionAssertRuleComponent) other_;
-        return compareValues(ruleId, o.ruleId, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(ruleId, param);
-      }
-
-  public String fhirType() {
-    return "TestScript.setup.action.assert.rule";
-
-  }
-
-  }
-
-    @Block()
-    public static class ActionAssertRuleParamComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Descriptive name for this parameter that matches the external assert rule parameter name.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Parameter name matching external assert rule parameter", formalDefinition="Descriptive name for this parameter that matches the external assert rule parameter name." )
-        protected StringType name;
-
-        /**
-         * The value for the parameter that will be passed on to the external rule template.
-         */
-        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The value for the parameter that will be passed on to the external rule template." )
-        protected StringType value;
-
-        private static final long serialVersionUID = 395259392L;
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRuleParamComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRuleParamComponent(StringType name, StringType value) {
-        super();
-        this.name = name;
-        this.value = value;
-      }
-
-        /**
-         * @return {@link #name} (Descriptive name for this parameter that matches the external assert rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ActionAssertRuleParamComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (Descriptive name for this parameter that matches the external assert rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public ActionAssertRuleParamComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return Descriptive name for this parameter that matches the external assert rule parameter name.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value Descriptive name for this parameter that matches the external assert rule parameter name.
-         */
-        public ActionAssertRuleParamComponent setName(String value) { 
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #value} (The value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public StringType getValueElement() { 
-          if (this.value == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ActionAssertRuleParamComponent.value");
-            else if (Configuration.doAutoCreate())
-              this.value = new StringType(); // bb
-          return this.value;
-        }
-
-        public boolean hasValueElement() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        public boolean hasValue() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        /**
-         * @param value {@link #value} (The value for the parameter that will be passed on to the external rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public ActionAssertRuleParamComponent setValueElement(StringType value) { 
-          this.value = value;
-          return this;
-        }
-
-        /**
-         * @return The value for the parameter that will be passed on to the external rule template.
-         */
-        public String getValue() { 
-          return this.value == null ? null : this.value.getValue();
-        }
-
-        /**
-         * @param value The value for the parameter that will be passed on to the external rule template.
-         */
-        public ActionAssertRuleParamComponent setValue(String value) { 
-            if (this.value == null)
-              this.value = new StringType();
-            this.value.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, 1, name));
-          children.add(new Property("value", "string", "The value for the parameter that will be passed on to the external rule template.", 0, 1, value));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this parameter that matches the external assert rule parameter name.", 0, 1, name);
-          case 111972721: /*value*/  return new Property("value", "string", "The value for the parameter that will be passed on to the external rule template.", 0, 1, value);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          return value;
-        case 111972721: // value
-          this.value = castToString(value); // StringType
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name")) {
-          this.name = castToString(value); // StringType
-        } else if (name.equals("value")) {
-          this.value = castToString(value); // StringType
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707:  return getNameElement();
-        case 111972721:  return getValueElement();
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return new String[] {"string"};
-        case 111972721: /*value*/ return new String[] {"string"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
-        }
-        else if (name.equals("value")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ActionAssertRuleParamComponent copy() {
-        ActionAssertRuleParamComponent dst = new ActionAssertRuleParamComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        dst.value = value == null ? null : value.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRuleParamComponent))
-          return false;
-        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other_;
-        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRuleParamComponent))
-          return false;
-        ActionAssertRuleParamComponent o = (ActionAssertRuleParamComponent) other_;
-        return compareValues(name, o.name, true) && compareValues(value, o.value, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
-      }
-
-  public String fhirType() {
-    return "TestScript.setup.action.assert.rule.param";
-
-  }
-
-  }
-
-    @Block()
-    public static class ActionAssertRulesetComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The TestScript.ruleset id value this assert will evaluate.
-         */
-        @Child(name = "rulesetId", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Id of the TestScript.ruleset", formalDefinition="The TestScript.ruleset id value this assert will evaluate." )
-        protected IdType rulesetId;
-
-        /**
-         * The referenced rule within the external ruleset template.
-         */
-        @Child(name = "rule", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="The referenced rule within the ruleset", formalDefinition="The referenced rule within the external ruleset template." )
-        protected List<ActionAssertRulesetRuleComponent> rule;
-
-        private static final long serialVersionUID = -976736025L;
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRulesetComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRulesetComponent(IdType rulesetId) {
-        super();
-        this.rulesetId = rulesetId;
-      }
-
-        /**
-         * @return {@link #rulesetId} (The TestScript.ruleset id value this assert will evaluate.). This is the underlying object with id, value and extensions. The accessor "getRulesetId" gives direct access to the value
-         */
-        public IdType getRulesetIdElement() { 
-          if (this.rulesetId == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ActionAssertRulesetComponent.rulesetId");
-            else if (Configuration.doAutoCreate())
-              this.rulesetId = new IdType(); // bb
-          return this.rulesetId;
-        }
-
-        public boolean hasRulesetIdElement() { 
-          return this.rulesetId != null && !this.rulesetId.isEmpty();
-        }
-
-        public boolean hasRulesetId() { 
-          return this.rulesetId != null && !this.rulesetId.isEmpty();
-        }
-
-        /**
-         * @param value {@link #rulesetId} (The TestScript.ruleset id value this assert will evaluate.). This is the underlying object with id, value and extensions. The accessor "getRulesetId" gives direct access to the value
-         */
-        public ActionAssertRulesetComponent setRulesetIdElement(IdType value) { 
-          this.rulesetId = value;
-          return this;
-        }
-
-        /**
-         * @return The TestScript.ruleset id value this assert will evaluate.
-         */
-        public String getRulesetId() { 
-          return this.rulesetId == null ? null : this.rulesetId.getValue();
-        }
-
-        /**
-         * @param value The TestScript.ruleset id value this assert will evaluate.
-         */
-        public ActionAssertRulesetComponent setRulesetId(String value) { 
-            if (this.rulesetId == null)
-              this.rulesetId = new IdType();
-            this.rulesetId.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #rule} (The referenced rule within the external ruleset template.)
-         */
-        public List<ActionAssertRulesetRuleComponent> getRule() { 
-          if (this.rule == null)
-            this.rule = new ArrayList<ActionAssertRulesetRuleComponent>();
-          return this.rule;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ActionAssertRulesetComponent setRule(List<ActionAssertRulesetRuleComponent> theRule) { 
-          this.rule = theRule;
-          return this;
-        }
-
-        public boolean hasRule() { 
-          if (this.rule == null)
-            return false;
-          for (ActionAssertRulesetRuleComponent item : this.rule)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ActionAssertRulesetRuleComponent addRule() { //3
-          ActionAssertRulesetRuleComponent t = new ActionAssertRulesetRuleComponent();
-          if (this.rule == null)
-            this.rule = new ArrayList<ActionAssertRulesetRuleComponent>();
-          this.rule.add(t);
-          return t;
-        }
-
-        public ActionAssertRulesetComponent addRule(ActionAssertRulesetRuleComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.rule == null)
-            this.rule = new ArrayList<ActionAssertRulesetRuleComponent>();
-          this.rule.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
-         */
-        public ActionAssertRulesetRuleComponent getRuleFirstRep() { 
-          if (getRule().isEmpty()) {
-            addRule();
-          }
-          return getRule().get(0);
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("rulesetId", "id", "The TestScript.ruleset id value this assert will evaluate.", 0, 1, rulesetId));
-          children.add(new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -2073977951: /*rulesetId*/  return new Property("rulesetId", "id", "The TestScript.ruleset id value this assert will evaluate.", 0, 1, rulesetId);
-          case 3512060: /*rule*/  return new Property("rule", "", "The referenced rule within the external ruleset template.", 0, java.lang.Integer.MAX_VALUE, rule);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -2073977951: /*rulesetId*/ return this.rulesetId == null ? new Base[0] : new Base[] {this.rulesetId}; // IdType
-        case 3512060: /*rule*/ return this.rule == null ? new Base[0] : this.rule.toArray(new Base[this.rule.size()]); // ActionAssertRulesetRuleComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -2073977951: // rulesetId
-          this.rulesetId = castToId(value); // IdType
-          return value;
-        case 3512060: // rule
-          this.getRule().add((ActionAssertRulesetRuleComponent) value); // ActionAssertRulesetRuleComponent
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("rulesetId")) {
-          this.rulesetId = castToId(value); // IdType
-        } else if (name.equals("rule")) {
-          this.getRule().add((ActionAssertRulesetRuleComponent) value);
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -2073977951:  return getRulesetIdElement();
-        case 3512060:  return addRule(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -2073977951: /*rulesetId*/ return new String[] {"id"};
-        case 3512060: /*rule*/ return new String[] {};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("rulesetId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.rulesetId");
-        }
-        else if (name.equals("rule")) {
-          return addRule();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ActionAssertRulesetComponent copy() {
-        ActionAssertRulesetComponent dst = new ActionAssertRulesetComponent();
-        copyValues(dst);
-        dst.rulesetId = rulesetId == null ? null : rulesetId.copy();
-        if (rule != null) {
-          dst.rule = new ArrayList<ActionAssertRulesetRuleComponent>();
-          for (ActionAssertRulesetRuleComponent i : rule)
-            dst.rule.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRulesetComponent))
-          return false;
-        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other_;
-        return compareDeep(rulesetId, o.rulesetId, true) && compareDeep(rule, o.rule, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRulesetComponent))
-          return false;
-        ActionAssertRulesetComponent o = (ActionAssertRulesetComponent) other_;
-        return compareValues(rulesetId, o.rulesetId, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(rulesetId, rule);
-      }
-
-  public String fhirType() {
-    return "TestScript.setup.action.assert.ruleset";
-
-  }
-
-  }
-
-    @Block()
-    public static class ActionAssertRulesetRuleComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Id of the referenced rule within the external ruleset template.
-         */
-        @Child(name = "ruleId", type = {IdType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Id of referenced rule within the ruleset", formalDefinition="Id of the referenced rule within the external ruleset template." )
-        protected IdType ruleId;
-
-        /**
-         * Each rule template can take one or more parameters for rule evaluation.
-         */
-        @Child(name = "param", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Rule parameter template", formalDefinition="Each rule template can take one or more parameters for rule evaluation." )
-        protected List<ActionAssertRulesetRuleParamComponent> param;
-
-        private static final long serialVersionUID = -1850698529L;
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRulesetRuleComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRulesetRuleComponent(IdType ruleId) {
-        super();
-        this.ruleId = ruleId;
-      }
-
-        /**
-         * @return {@link #ruleId} (Id of the referenced rule within the external ruleset template.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
-         */
-        public IdType getRuleIdElement() { 
-          if (this.ruleId == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ActionAssertRulesetRuleComponent.ruleId");
-            else if (Configuration.doAutoCreate())
-              this.ruleId = new IdType(); // bb
-          return this.ruleId;
-        }
-
-        public boolean hasRuleIdElement() { 
-          return this.ruleId != null && !this.ruleId.isEmpty();
-        }
-
-        public boolean hasRuleId() { 
-          return this.ruleId != null && !this.ruleId.isEmpty();
-        }
-
-        /**
-         * @param value {@link #ruleId} (Id of the referenced rule within the external ruleset template.). This is the underlying object with id, value and extensions. The accessor "getRuleId" gives direct access to the value
-         */
-        public ActionAssertRulesetRuleComponent setRuleIdElement(IdType value) { 
-          this.ruleId = value;
-          return this;
-        }
-
-        /**
-         * @return Id of the referenced rule within the external ruleset template.
-         */
-        public String getRuleId() { 
-          return this.ruleId == null ? null : this.ruleId.getValue();
-        }
-
-        /**
-         * @param value Id of the referenced rule within the external ruleset template.
-         */
-        public ActionAssertRulesetRuleComponent setRuleId(String value) { 
-            if (this.ruleId == null)
-              this.ruleId = new IdType();
-            this.ruleId.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #param} (Each rule template can take one or more parameters for rule evaluation.)
-         */
-        public List<ActionAssertRulesetRuleParamComponent> getParam() { 
-          if (this.param == null)
-            this.param = new ArrayList<ActionAssertRulesetRuleParamComponent>();
-          return this.param;
-        }
-
-        /**
-         * @return Returns a reference to <code>this</code> for easy method chaining
-         */
-        public ActionAssertRulesetRuleComponent setParam(List<ActionAssertRulesetRuleParamComponent> theParam) { 
-          this.param = theParam;
-          return this;
-        }
-
-        public boolean hasParam() { 
-          if (this.param == null)
-            return false;
-          for (ActionAssertRulesetRuleParamComponent item : this.param)
-            if (!item.isEmpty())
-              return true;
-          return false;
-        }
-
-        public ActionAssertRulesetRuleParamComponent addParam() { //3
-          ActionAssertRulesetRuleParamComponent t = new ActionAssertRulesetRuleParamComponent();
-          if (this.param == null)
-            this.param = new ArrayList<ActionAssertRulesetRuleParamComponent>();
-          this.param.add(t);
-          return t;
-        }
-
-        public ActionAssertRulesetRuleComponent addParam(ActionAssertRulesetRuleParamComponent t) { //3
-          if (t == null)
-            return this;
-          if (this.param == null)
-            this.param = new ArrayList<ActionAssertRulesetRuleParamComponent>();
-          this.param.add(t);
-          return this;
-        }
-
-        /**
-         * @return The first repetition of repeating field {@link #param}, creating it if it does not already exist
-         */
-        public ActionAssertRulesetRuleParamComponent getParamFirstRep() { 
-          if (getParam().isEmpty()) {
-            addParam();
-          }
-          return getParam().get(0);
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, 1, ruleId));
-          children.add(new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -919875273: /*ruleId*/  return new Property("ruleId", "id", "Id of the referenced rule within the external ruleset template.", 0, 1, ruleId);
-          case 106436749: /*param*/  return new Property("param", "", "Each rule template can take one or more parameters for rule evaluation.", 0, java.lang.Integer.MAX_VALUE, param);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case -919875273: /*ruleId*/ return this.ruleId == null ? new Base[0] : new Base[] {this.ruleId}; // IdType
-        case 106436749: /*param*/ return this.param == null ? new Base[0] : this.param.toArray(new Base[this.param.size()]); // ActionAssertRulesetRuleParamComponent
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case -919875273: // ruleId
-          this.ruleId = castToId(value); // IdType
-          return value;
-        case 106436749: // param
-          this.getParam().add((ActionAssertRulesetRuleParamComponent) value); // ActionAssertRulesetRuleParamComponent
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("ruleId")) {
-          this.ruleId = castToId(value); // IdType
-        } else if (name.equals("param")) {
-          this.getParam().add((ActionAssertRulesetRuleParamComponent) value);
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -919875273:  return getRuleIdElement();
-        case 106436749:  return addParam(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -919875273: /*ruleId*/ return new String[] {"id"};
-        case 106436749: /*param*/ return new String[] {};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("ruleId")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.ruleId");
-        }
-        else if (name.equals("param")) {
-          return addParam();
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ActionAssertRulesetRuleComponent copy() {
-        ActionAssertRulesetRuleComponent dst = new ActionAssertRulesetRuleComponent();
-        copyValues(dst);
-        dst.ruleId = ruleId == null ? null : ruleId.copy();
-        if (param != null) {
-          dst.param = new ArrayList<ActionAssertRulesetRuleParamComponent>();
-          for (ActionAssertRulesetRuleParamComponent i : param)
-            dst.param.add(i.copy());
-        };
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRulesetRuleComponent))
-          return false;
-        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other_;
-        return compareDeep(ruleId, o.ruleId, true) && compareDeep(param, o.param, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRulesetRuleComponent))
-          return false;
-        ActionAssertRulesetRuleComponent o = (ActionAssertRulesetRuleComponent) other_;
-        return compareValues(ruleId, o.ruleId, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(ruleId, param);
-      }
-
-  public String fhirType() {
-    return "TestScript.setup.action.assert.ruleset.rule";
-
-  }
-
-  }
-
-    @Block()
-    public static class ActionAssertRulesetRuleParamComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
-         */
-        @Child(name = "name", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Parameter name matching external assert ruleset rule parameter", formalDefinition="Descriptive name for this parameter that matches the external assert ruleset rule parameter name." )
-        protected StringType name;
-
-        /**
-         * The value for the parameter that will be passed on to the external ruleset rule template.
-         */
-        @Child(name = "value", type = {StringType.class}, order=2, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Parameter value defined either explicitly or dynamically", formalDefinition="The value for the parameter that will be passed on to the external ruleset rule template." )
-        protected StringType value;
-
-        private static final long serialVersionUID = 395259392L;
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRulesetRuleParamComponent() {
-        super();
-      }
-
-    /**
-     * Constructor
-     */
-      public ActionAssertRulesetRuleParamComponent(StringType name, StringType value) {
-        super();
-        this.name = name;
-        this.value = value;
-      }
-
-        /**
-         * @return {@link #name} (Descriptive name for this parameter that matches the external assert ruleset rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public StringType getNameElement() { 
-          if (this.name == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ActionAssertRulesetRuleParamComponent.name");
-            else if (Configuration.doAutoCreate())
-              this.name = new StringType(); // bb
-          return this.name;
-        }
-
-        public boolean hasNameElement() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        public boolean hasName() { 
-          return this.name != null && !this.name.isEmpty();
-        }
-
-        /**
-         * @param value {@link #name} (Descriptive name for this parameter that matches the external assert ruleset rule parameter name.). This is the underlying object with id, value and extensions. The accessor "getName" gives direct access to the value
-         */
-        public ActionAssertRulesetRuleParamComponent setNameElement(StringType value) { 
-          this.name = value;
-          return this;
-        }
-
-        /**
-         * @return Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
-         */
-        public String getName() { 
-          return this.name == null ? null : this.name.getValue();
-        }
-
-        /**
-         * @param value Descriptive name for this parameter that matches the external assert ruleset rule parameter name.
-         */
-        public ActionAssertRulesetRuleParamComponent setName(String value) { 
-            if (this.name == null)
-              this.name = new StringType();
-            this.name.setValue(value);
-          return this;
-        }
-
-        /**
-         * @return {@link #value} (The value for the parameter that will be passed on to the external ruleset rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public StringType getValueElement() { 
-          if (this.value == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create ActionAssertRulesetRuleParamComponent.value");
-            else if (Configuration.doAutoCreate())
-              this.value = new StringType(); // bb
-          return this.value;
-        }
-
-        public boolean hasValueElement() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        public boolean hasValue() { 
-          return this.value != null && !this.value.isEmpty();
-        }
-
-        /**
-         * @param value {@link #value} (The value for the parameter that will be passed on to the external ruleset rule template.). This is the underlying object with id, value and extensions. The accessor "getValue" gives direct access to the value
-         */
-        public ActionAssertRulesetRuleParamComponent setValueElement(StringType value) { 
-          this.value = value;
-          return this;
-        }
-
-        /**
-         * @return The value for the parameter that will be passed on to the external ruleset rule template.
-         */
-        public String getValue() { 
-          return this.value == null ? null : this.value.getValue();
-        }
-
-        /**
-         * @param value The value for the parameter that will be passed on to the external ruleset rule template.
-         */
-        public ActionAssertRulesetRuleParamComponent setValue(String value) { 
-            if (this.value == null)
-              this.value = new StringType();
-            this.value.setValue(value);
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, 1, name));
-          children.add(new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, 1, value));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case 3373707: /*name*/  return new Property("name", "string", "Descriptive name for this parameter that matches the external assert ruleset rule parameter name.", 0, 1, name);
-          case 111972721: /*value*/  return new Property("value", "string", "The value for the parameter that will be passed on to the external ruleset rule template.", 0, 1, value);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
-        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // StringType
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 3373707: // name
-          this.name = castToString(value); // StringType
-          return value;
-        case 111972721: // value
-          this.value = castToString(value); // StringType
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("name")) {
-          this.name = castToString(value); // StringType
-        } else if (name.equals("value")) {
-          this.value = castToString(value); // StringType
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707:  return getNameElement();
-        case 111972721:  return getValueElement();
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 3373707: /*name*/ return new String[] {"string"};
-        case 111972721: /*value*/ return new String[] {"string"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("name")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.name");
-        }
-        else if (name.equals("value")) {
-          throw new FHIRException("Cannot call addChild on a primitive type TestScript.value");
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public ActionAssertRulesetRuleParamComponent copy() {
-        ActionAssertRulesetRuleParamComponent dst = new ActionAssertRulesetRuleParamComponent();
-        copyValues(dst);
-        dst.name = name == null ? null : name.copy();
-        dst.value = value == null ? null : value.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRulesetRuleParamComponent))
-          return false;
-        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other_;
-        return compareDeep(name, o.name, true) && compareDeep(value, o.value, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof ActionAssertRulesetRuleParamComponent))
-          return false;
-        ActionAssertRulesetRuleParamComponent o = (ActionAssertRulesetRuleParamComponent) other_;
-        return compareValues(name, o.name, true) && compareValues(value, o.value, true);
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(name, value);
-      }
-
-  public String fhirType() {
-    return "TestScript.setup.action.assert.ruleset.rule.param";
 
   }
 
@@ -10451,41 +7916,27 @@ public class TestScript extends MetadataResource {
     protected List<TestScriptVariableComponent> variable;
 
     /**
-     * Assert rule to be used in one or more asserts within the test script.
-     */
-    @Child(name = "rule", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Assert rule used within the test script", formalDefinition="Assert rule to be used in one or more asserts within the test script." )
-    protected List<TestScriptRuleComponent> rule;
-
-    /**
-     * Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.
-     */
-    @Child(name = "ruleset", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Assert ruleset used within the test script", formalDefinition="Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied." )
-    protected List<TestScriptRulesetComponent> ruleset;
-
-    /**
      * A series of required setup operations before tests are executed.
      */
-    @Child(name = "setup", type = {}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "setup", type = {}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required setup operations before tests are executed", formalDefinition="A series of required setup operations before tests are executed." )
     protected TestScriptSetupComponent setup;
 
     /**
      * A test in this script.
      */
-    @Child(name = "test", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "test", type = {}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="A test in this script", formalDefinition="A test in this script." )
     protected List<TestScriptTestComponent> test;
 
     /**
      * A series of operations required to clean up after all the tests are executed (successfully or otherwise).
      */
-    @Child(name = "teardown", type = {}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "teardown", type = {}, order=11, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="A series of required clean up steps", formalDefinition="A series of operations required to clean up after all the tests are executed (successfully or otherwise)." )
     protected TestScriptTeardownComponent teardown;
 
-    private static final long serialVersionUID = 1164952373L;
+    private static final long serialVersionUID = -1433230137L;
 
   /**
    * Constructor
@@ -11007,7 +8458,7 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate test script instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -11510,112 +8961,6 @@ public class TestScript extends MetadataResource {
     }
 
     /**
-     * @return {@link #rule} (Assert rule to be used in one or more asserts within the test script.)
-     */
-    public List<TestScriptRuleComponent> getRule() { 
-      if (this.rule == null)
-        this.rule = new ArrayList<TestScriptRuleComponent>();
-      return this.rule;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public TestScript setRule(List<TestScriptRuleComponent> theRule) { 
-      this.rule = theRule;
-      return this;
-    }
-
-    public boolean hasRule() { 
-      if (this.rule == null)
-        return false;
-      for (TestScriptRuleComponent item : this.rule)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public TestScriptRuleComponent addRule() { //3
-      TestScriptRuleComponent t = new TestScriptRuleComponent();
-      if (this.rule == null)
-        this.rule = new ArrayList<TestScriptRuleComponent>();
-      this.rule.add(t);
-      return t;
-    }
-
-    public TestScript addRule(TestScriptRuleComponent t) { //3
-      if (t == null)
-        return this;
-      if (this.rule == null)
-        this.rule = new ArrayList<TestScriptRuleComponent>();
-      this.rule.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #rule}, creating it if it does not already exist
-     */
-    public TestScriptRuleComponent getRuleFirstRep() { 
-      if (getRule().isEmpty()) {
-        addRule();
-      }
-      return getRule().get(0);
-    }
-
-    /**
-     * @return {@link #ruleset} (Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.)
-     */
-    public List<TestScriptRulesetComponent> getRuleset() { 
-      if (this.ruleset == null)
-        this.ruleset = new ArrayList<TestScriptRulesetComponent>();
-      return this.ruleset;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public TestScript setRuleset(List<TestScriptRulesetComponent> theRuleset) { 
-      this.ruleset = theRuleset;
-      return this;
-    }
-
-    public boolean hasRuleset() { 
-      if (this.ruleset == null)
-        return false;
-      for (TestScriptRulesetComponent item : this.ruleset)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public TestScriptRulesetComponent addRuleset() { //3
-      TestScriptRulesetComponent t = new TestScriptRulesetComponent();
-      if (this.ruleset == null)
-        this.ruleset = new ArrayList<TestScriptRulesetComponent>();
-      this.ruleset.add(t);
-      return t;
-    }
-
-    public TestScript addRuleset(TestScriptRulesetComponent t) { //3
-      if (t == null)
-        return this;
-      if (this.ruleset == null)
-        this.ruleset = new ArrayList<TestScriptRulesetComponent>();
-      this.ruleset.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #ruleset}, creating it if it does not already exist
-     */
-    public TestScriptRulesetComponent getRulesetFirstRep() { 
-      if (getRuleset().isEmpty()) {
-        addRuleset();
-      }
-      return getRuleset().get(0);
-    }
-
-    /**
      * @return {@link #setup} (A series of required setup operations before tests are executed.)
      */
     public TestScriptSetupComponent getSetup() { 
@@ -11729,7 +9074,7 @@ public class TestScript extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the test script.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the test script from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the test script is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this test script is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the test script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the test script.", 0, 1, copyright));
@@ -11739,8 +9084,6 @@ public class TestScript extends MetadataResource {
         children.add(new Property("fixture", "", "Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.", 0, java.lang.Integer.MAX_VALUE, fixture));
         children.add(new Property("profile", "Reference(Any)", "Reference to the profile to be used for validation.", 0, java.lang.Integer.MAX_VALUE, profile));
         children.add(new Property("variable", "", "Variable is set based either on element value in response body or on header field value in the response headers.", 0, java.lang.Integer.MAX_VALUE, variable));
-        children.add(new Property("rule", "", "Assert rule to be used in one or more asserts within the test script.", 0, java.lang.Integer.MAX_VALUE, rule));
-        children.add(new Property("ruleset", "", "Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.", 0, java.lang.Integer.MAX_VALUE, ruleset));
         children.add(new Property("setup", "", "A series of required setup operations before tests are executed.", 0, 1, setup));
         children.add(new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test));
         children.add(new Property("teardown", "", "A series of operations required to clean up after all the tests are executed (successfully or otherwise).", 0, 1, teardown));
@@ -11760,7 +9103,7 @@ public class TestScript extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the test script.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the test script from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate test script instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the test script is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this test script is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the test script and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the test script.", 0, 1, copyright);
@@ -11770,8 +9113,6 @@ public class TestScript extends MetadataResource {
         case -843449847: /*fixture*/  return new Property("fixture", "", "Fixture in the test script - by reference (uri). All fixtures are required for the test script to execute.", 0, java.lang.Integer.MAX_VALUE, fixture);
         case -309425751: /*profile*/  return new Property("profile", "Reference(Any)", "Reference to the profile to be used for validation.", 0, java.lang.Integer.MAX_VALUE, profile);
         case -1249586564: /*variable*/  return new Property("variable", "", "Variable is set based either on element value in response body or on header field value in the response headers.", 0, java.lang.Integer.MAX_VALUE, variable);
-        case 3512060: /*rule*/  return new Property("rule", "", "Assert rule to be used in one or more asserts within the test script.", 0, java.lang.Integer.MAX_VALUE, rule);
-        case 1548678118: /*ruleset*/  return new Property("ruleset", "", "Contains one or more rules.  Offers a way to group rules so assertions could reference the group of rules and have them all applied.", 0, java.lang.Integer.MAX_VALUE, ruleset);
         case 109329021: /*setup*/  return new Property("setup", "", "A series of required setup operations before tests are executed.", 0, 1, setup);
         case 3556498: /*test*/  return new Property("test", "", "A test in this script.", 0, java.lang.Integer.MAX_VALUE, test);
         case -1663474172: /*teardown*/  return new Property("teardown", "", "A series of operations required to clean up after all the tests are executed (successfully or otherwise).", 0, 1, teardown);
@@ -11804,8 +9145,6 @@ public class TestScript extends MetadataResource {
         case -843449847: /*fixture*/ return this.fixture == null ? new Base[0] : this.fixture.toArray(new Base[this.fixture.size()]); // TestScriptFixtureComponent
         case -309425751: /*profile*/ return this.profile == null ? new Base[0] : this.profile.toArray(new Base[this.profile.size()]); // Reference
         case -1249586564: /*variable*/ return this.variable == null ? new Base[0] : this.variable.toArray(new Base[this.variable.size()]); // TestScriptVariableComponent
-        case 3512060: /*rule*/ return this.rule == null ? new Base[0] : this.rule.toArray(new Base[this.rule.size()]); // TestScriptRuleComponent
-        case 1548678118: /*ruleset*/ return this.ruleset == null ? new Base[0] : this.ruleset.toArray(new Base[this.ruleset.size()]); // TestScriptRulesetComponent
         case 109329021: /*setup*/ return this.setup == null ? new Base[0] : new Base[] {this.setup}; // TestScriptSetupComponent
         case 3556498: /*test*/ return this.test == null ? new Base[0] : this.test.toArray(new Base[this.test.size()]); // TestScriptTestComponent
         case -1663474172: /*teardown*/ return this.teardown == null ? new Base[0] : new Base[] {this.teardown}; // TestScriptTeardownComponent
@@ -11881,12 +9220,6 @@ public class TestScript extends MetadataResource {
         case -1249586564: // variable
           this.getVariable().add((TestScriptVariableComponent) value); // TestScriptVariableComponent
           return value;
-        case 3512060: // rule
-          this.getRule().add((TestScriptRuleComponent) value); // TestScriptRuleComponent
-          return value;
-        case 1548678118: // ruleset
-          this.getRuleset().add((TestScriptRulesetComponent) value); // TestScriptRulesetComponent
-          return value;
         case 109329021: // setup
           this.setup = (TestScriptSetupComponent) value; // TestScriptSetupComponent
           return value;
@@ -11946,10 +9279,6 @@ public class TestScript extends MetadataResource {
           this.getProfile().add(castToReference(value));
         } else if (name.equals("variable")) {
           this.getVariable().add((TestScriptVariableComponent) value);
-        } else if (name.equals("rule")) {
-          this.getRule().add((TestScriptRuleComponent) value);
-        } else if (name.equals("ruleset")) {
-          this.getRuleset().add((TestScriptRulesetComponent) value);
         } else if (name.equals("setup")) {
           this.setup = (TestScriptSetupComponent) value; // TestScriptSetupComponent
         } else if (name.equals("test")) {
@@ -11985,8 +9314,6 @@ public class TestScript extends MetadataResource {
         case -843449847:  return addFixture(); 
         case -309425751:  return addProfile(); 
         case -1249586564:  return addVariable(); 
-        case 3512060:  return addRule(); 
-        case 1548678118:  return addRuleset(); 
         case 109329021:  return getSetup(); 
         case 3556498:  return addTest(); 
         case -1663474172:  return getTeardown(); 
@@ -12019,8 +9346,6 @@ public class TestScript extends MetadataResource {
         case -843449847: /*fixture*/ return new String[] {};
         case -309425751: /*profile*/ return new String[] {"Reference"};
         case -1249586564: /*variable*/ return new String[] {};
-        case 3512060: /*rule*/ return new String[] {};
-        case 1548678118: /*ruleset*/ return new String[] {};
         case 109329021: /*setup*/ return new String[] {};
         case 3556498: /*test*/ return new String[] {};
         case -1663474172: /*teardown*/ return new String[] {};
@@ -12095,12 +9420,6 @@ public class TestScript extends MetadataResource {
         }
         else if (name.equals("variable")) {
           return addVariable();
-        }
-        else if (name.equals("rule")) {
-          return addRule();
-        }
-        else if (name.equals("ruleset")) {
-          return addRuleset();
         }
         else if (name.equals("setup")) {
           this.setup = new TestScriptSetupComponent();
@@ -12178,16 +9497,6 @@ public class TestScript extends MetadataResource {
           for (TestScriptVariableComponent i : variable)
             dst.variable.add(i.copy());
         };
-        if (rule != null) {
-          dst.rule = new ArrayList<TestScriptRuleComponent>();
-          for (TestScriptRuleComponent i : rule)
-            dst.rule.add(i.copy());
-        };
-        if (ruleset != null) {
-          dst.ruleset = new ArrayList<TestScriptRulesetComponent>();
-          for (TestScriptRulesetComponent i : ruleset)
-            dst.ruleset.add(i.copy());
-        };
         dst.setup = setup == null ? null : setup.copy();
         if (test != null) {
           dst.test = new ArrayList<TestScriptTestComponent>();
@@ -12212,8 +9521,8 @@ public class TestScript extends MetadataResource {
         return compareDeep(identifier, o.identifier, true) && compareDeep(purpose, o.purpose, true) && compareDeep(copyright, o.copyright, true)
            && compareDeep(origin, o.origin, true) && compareDeep(destination, o.destination, true) && compareDeep(metadata, o.metadata, true)
            && compareDeep(fixture, o.fixture, true) && compareDeep(profile, o.profile, true) && compareDeep(variable, o.variable, true)
-           && compareDeep(rule, o.rule, true) && compareDeep(ruleset, o.ruleset, true) && compareDeep(setup, o.setup, true)
-           && compareDeep(test, o.test, true) && compareDeep(teardown, o.teardown, true);
+           && compareDeep(setup, o.setup, true) && compareDeep(test, o.test, true) && compareDeep(teardown, o.teardown, true)
+          ;
       }
 
       @Override
@@ -12228,8 +9537,8 @@ public class TestScript extends MetadataResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, purpose, copyright
-          , origin, destination, metadata, fixture, profile, variable, rule, ruleset, setup
-          , test, teardown);
+          , origin, destination, metadata, fixture, profile, variable, setup, test, teardown
+          );
       }
 
   @Override

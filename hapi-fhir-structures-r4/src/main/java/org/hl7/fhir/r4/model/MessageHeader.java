@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -188,7 +188,7 @@ public class MessageHeader extends DomainResource {
         /**
          * Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.
          */
-        @Child(name = "receiver", type = {Practitioner.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "receiver", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Intended \"real-world\" recipient for the data", formalDefinition="Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient." )
         protected Reference receiver;
 
@@ -396,7 +396,7 @@ public class MessageHeader extends DomainResource {
           children.add(new Property("name", "string", "Human-readable name for the target system.", 0, 1, name));
           children.add(new Property("target", "Reference(Device)", "Identifies the target end system in situations where the initial message transmission is to an intermediary system.", 0, 1, target));
           children.add(new Property("endpoint", "url", "Indicates where the message should be routed to.", 0, 1, endpoint));
-          children.add(new Property("receiver", "Reference(Practitioner|Organization)", "Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.", 0, 1, receiver));
+          children.add(new Property("receiver", "Reference(Practitioner|PractitionerRole|Organization)", "Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.", 0, 1, receiver));
         }
 
         @Override
@@ -405,7 +405,7 @@ public class MessageHeader extends DomainResource {
           case 3373707: /*name*/  return new Property("name", "string", "Human-readable name for the target system.", 0, 1, name);
           case -880905839: /*target*/  return new Property("target", "Reference(Device)", "Identifies the target end system in situations where the initial message transmission is to an intermediary system.", 0, 1, target);
           case 1741102485: /*endpoint*/  return new Property("endpoint", "url", "Indicates where the message should be routed to.", 0, 1, endpoint);
-          case -808719889: /*receiver*/  return new Property("receiver", "Reference(Practitioner|Organization)", "Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.", 0, 1, receiver);
+          case -808719889: /*receiver*/  return new Property("receiver", "Reference(Practitioner|PractitionerRole|Organization)", "Allows data conveyed by a message to be addressed to a particular person or department when routing to a specific application isn't sufficient.", 0, 1, receiver);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1323,7 +1323,7 @@ public class MessageHeader extends DomainResource {
     /**
      * Identifies the sending system to allow the use of a trust relationship.
      */
-    @Child(name = "sender", type = {Practitioner.class, Organization.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "sender", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Real world sender of the message", formalDefinition="Identifies the sending system to allow the use of a trust relationship." )
     protected Reference sender;
 
@@ -1335,26 +1335,26 @@ public class MessageHeader extends DomainResource {
     /**
      * The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.
      */
-    @Child(name = "enterer", type = {Practitioner.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "enterer", type = {Practitioner.class, PractitionerRole.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The source of the data entry", formalDefinition="The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions." )
     protected Reference enterer;
 
     /**
      * The actual object that is the target of the reference (The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
      */
-    protected Practitioner entererTarget;
+    protected Resource entererTarget;
 
     /**
      * The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.
      */
-    @Child(name = "author", type = {Practitioner.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Practitioner.class, PractitionerRole.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The source of the decision", formalDefinition="The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions." )
     protected Reference author;
 
     /**
      * The actual object that is the target of the reference (The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
      */
-    protected Practitioner authorTarget;
+    protected Resource authorTarget;
 
     /**
      * The source application from which this message originated.
@@ -1366,7 +1366,7 @@ public class MessageHeader extends DomainResource {
     /**
      * The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party.
      */
-    @Child(name = "responsible", type = {Practitioner.class, Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "responsible", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Final responsibility for event", formalDefinition="The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party." )
     protected Reference responsible;
 
@@ -1409,7 +1409,7 @@ public class MessageHeader extends DomainResource {
     @Description(shortDefinition="Link to the definition for this message", formalDefinition="Permanent link to the MessageDefinition for this message." )
     protected CanonicalType definition;
 
-    private static final long serialVersionUID = -784318107L;
+    private static final long serialVersionUID = -1039408819L;
 
   /**
    * Constructor
@@ -1439,7 +1439,7 @@ public class MessageHeader extends DomainResource {
      */
     public Coding getEventCoding() throws FHIRException { 
       if (this.event == null)
-        return null;
+        this.event = new Coding();
       if (!(this.event instanceof Coding))
         throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.event.getClass().getName()+" was encountered");
       return (Coding) this.event;
@@ -1454,7 +1454,7 @@ public class MessageHeader extends DomainResource {
      */
     public UriType getEventUriType() throws FHIRException { 
       if (this.event == null)
-        return null;
+        this.event = new UriType();
       if (!(this.event instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.event.getClass().getName()+" was encountered");
       return (UriType) this.event;
@@ -1597,19 +1597,14 @@ public class MessageHeader extends DomainResource {
     /**
      * @return {@link #enterer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
      */
-    public Practitioner getEntererTarget() { 
-      if (this.entererTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MessageHeader.enterer");
-        else if (Configuration.doAutoCreate())
-          this.entererTarget = new Practitioner(); // aa
+    public Resource getEntererTarget() { 
       return this.entererTarget;
     }
 
     /**
      * @param value {@link #enterer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.)
      */
-    public MessageHeader setEntererTarget(Practitioner value) { 
+    public MessageHeader setEntererTarget(Resource value) { 
       this.entererTarget = value;
       return this;
     }
@@ -1641,19 +1636,14 @@ public class MessageHeader extends DomainResource {
     /**
      * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
      */
-    public Practitioner getAuthorTarget() { 
-      if (this.authorTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create MessageHeader.author");
-        else if (Configuration.doAutoCreate())
-          this.authorTarget = new Practitioner(); // aa
+    public Resource getAuthorTarget() { 
       return this.authorTarget;
     }
 
     /**
      * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.)
      */
-    public MessageHeader setAuthorTarget(Practitioner value) { 
+    public MessageHeader setAuthorTarget(Resource value) { 
       this.authorTarget = value;
       return this;
     }
@@ -1885,11 +1875,11 @@ public class MessageHeader extends DomainResource {
         super.listChildren(children);
         children.add(new Property("event[x]", "Coding|uri", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://terminology.hl7.org/CodeSystem/message-events\".  Alternatively uri to the EventDefinition.", 0, 1, event));
         children.add(new Property("destination", "", "The destination application which the message is intended for.", 0, java.lang.Integer.MAX_VALUE, destination));
-        children.add(new Property("sender", "Reference(Practitioner|Organization)", "Identifies the sending system to allow the use of a trust relationship.", 0, 1, sender));
-        children.add(new Property("enterer", "Reference(Practitioner)", "The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.", 0, 1, enterer));
-        children.add(new Property("author", "Reference(Practitioner)", "The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.", 0, 1, author));
+        children.add(new Property("sender", "Reference(Practitioner|PractitionerRole|Organization)", "Identifies the sending system to allow the use of a trust relationship.", 0, 1, sender));
+        children.add(new Property("enterer", "Reference(Practitioner|PractitionerRole)", "The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.", 0, 1, enterer));
+        children.add(new Property("author", "Reference(Practitioner|PractitionerRole)", "The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.", 0, 1, author));
         children.add(new Property("source", "", "The source application from which this message originated.", 0, 1, source));
-        children.add(new Property("responsible", "Reference(Practitioner|Organization)", "The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party.", 0, 1, responsible));
+        children.add(new Property("responsible", "Reference(Practitioner|PractitionerRole|Organization)", "The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party.", 0, 1, responsible));
         children.add(new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.", 0, 1, reason));
         children.add(new Property("response", "", "Information about the message that this message is a response to.  Only present if this message is a response.", 0, 1, response));
         children.add(new Property("focus", "Reference(Any)", "The actual data of the message - a reference to the root/focus class of the event.", 0, java.lang.Integer.MAX_VALUE, focus));
@@ -1904,11 +1894,11 @@ public class MessageHeader extends DomainResource {
         case -355957084: /*eventCoding*/  return new Property("event[x]", "Coding|uri", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://terminology.hl7.org/CodeSystem/message-events\".  Alternatively uri to the EventDefinition.", 0, 1, event);
         case 278109298: /*eventUri*/  return new Property("event[x]", "Coding|uri", "Code that identifies the event this message represents and connects it with its definition. Events defined as part of the FHIR specification have the system value \"http://terminology.hl7.org/CodeSystem/message-events\".  Alternatively uri to the EventDefinition.", 0, 1, event);
         case -1429847026: /*destination*/  return new Property("destination", "", "The destination application which the message is intended for.", 0, java.lang.Integer.MAX_VALUE, destination);
-        case -905962955: /*sender*/  return new Property("sender", "Reference(Practitioner|Organization)", "Identifies the sending system to allow the use of a trust relationship.", 0, 1, sender);
-        case -1591951995: /*enterer*/  return new Property("enterer", "Reference(Practitioner)", "The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.", 0, 1, enterer);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner)", "The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.", 0, 1, author);
+        case -905962955: /*sender*/  return new Property("sender", "Reference(Practitioner|PractitionerRole|Organization)", "Identifies the sending system to allow the use of a trust relationship.", 0, 1, sender);
+        case -1591951995: /*enterer*/  return new Property("enterer", "Reference(Practitioner|PractitionerRole)", "The person or device that performed the data entry leading to this message. When there is more than one candidate, pick the most proximal to the message. Can provide other enterers in extensions.", 0, 1, enterer);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|PractitionerRole)", "The logical author of the message - the person or device that decided the described event should happen. When there is more than one candidate, pick the most proximal to the MessageHeader. Can provide other authors in extensions.", 0, 1, author);
         case -896505829: /*source*/  return new Property("source", "", "The source application from which this message originated.", 0, 1, source);
-        case 1847674614: /*responsible*/  return new Property("responsible", "Reference(Practitioner|Organization)", "The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party.", 0, 1, responsible);
+        case 1847674614: /*responsible*/  return new Property("responsible", "Reference(Practitioner|PractitionerRole|Organization)", "The person or organization that accepts overall responsibility for the contents of the message. The implication is that the message event happened under the policies of the responsible party.", 0, 1, responsible);
         case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Coded indication of the cause for the event - indicates  a reason for the occurrence of the event that is a focus of this message.", 0, 1, reason);
         case -340323263: /*response*/  return new Property("response", "", "Information about the message that this message is a response to.  Only present if this message is a response.", 0, 1, response);
         case 97604824: /*focus*/  return new Property("focus", "Reference(Any)", "The actual data of the message - a reference to the root/focus class of the event.", 0, java.lang.Integer.MAX_VALUE, focus);
@@ -2193,7 +2183,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.destination.receiver</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="receiver", path="MessageHeader.destination.receiver", description="Intended \"real-world\" recipient for the data", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class } )
+  @SearchParamDefinition(name="receiver", path="MessageHeader.destination.receiver", description="Intended \"real-world\" recipient for the data", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_RECEIVER = "receiver";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>receiver</b>
@@ -2219,7 +2209,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="MessageHeader.author", description="The source of the decision", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="author", path="MessageHeader.author", description="The source of the decision", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class, PractitionerRole.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>
@@ -2377,7 +2367,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.sender</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="sender", path="MessageHeader.sender", description="Real world sender of the message", type="reference", target={Organization.class, Practitioner.class } )
+  @SearchParamDefinition(name="sender", path="MessageHeader.sender", description="Real world sender of the message", type="reference", target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_SENDER = "sender";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>sender</b>
@@ -2403,7 +2393,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.responsible</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class } )
+  @SearchParamDefinition(name="responsible", path="MessageHeader.responsible", description="Final responsibility for event", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_RESPONSIBLE = "responsible";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>responsible</b>
@@ -2429,7 +2419,7 @@ public class MessageHeader extends DomainResource {
    * Path: <b>MessageHeader.enterer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="enterer", path="MessageHeader.enterer", description="The source of the data entry", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="enterer", path="MessageHeader.enterer", description="The source of the data entry", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class, PractitionerRole.class } )
   public static final String SP_ENTERER = "enterer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>enterer</b>

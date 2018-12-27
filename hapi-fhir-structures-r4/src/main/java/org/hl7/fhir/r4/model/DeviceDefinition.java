@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1272,9 +1272,9 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         /**
          * Property value as a quantity.
          */
-        @Child(name = "valueQuanity", type = {Quantity.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "valueQuantity", type = {Quantity.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Property value as a quantity", formalDefinition="Property value as a quantity." )
-        protected List<Quantity> valueQuanity;
+        protected List<Quantity> valueQuantity;
 
         /**
          * Property value as a code, e.g., NTP4 (synced to NTP).
@@ -1283,7 +1283,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         @Description(shortDefinition="Property value as a code, e.g., NTP4 (synced to NTP)", formalDefinition="Property value as a code, e.g., NTP4 (synced to NTP)." )
         protected List<CodeableConcept> valueCode;
 
-        private static final long serialVersionUID = 1035620625L;
+        private static final long serialVersionUID = 1512172633L;
 
     /**
      * Constructor
@@ -1325,56 +1325,56 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         }
 
         /**
-         * @return {@link #valueQuanity} (Property value as a quantity.)
+         * @return {@link #valueQuantity} (Property value as a quantity.)
          */
-        public List<Quantity> getValueQuanity() { 
-          if (this.valueQuanity == null)
-            this.valueQuanity = new ArrayList<Quantity>();
-          return this.valueQuanity;
+        public List<Quantity> getValueQuantity() { 
+          if (this.valueQuantity == null)
+            this.valueQuantity = new ArrayList<Quantity>();
+          return this.valueQuantity;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public DeviceDefinitionPropertyComponent setValueQuanity(List<Quantity> theValueQuanity) { 
-          this.valueQuanity = theValueQuanity;
+        public DeviceDefinitionPropertyComponent setValueQuantity(List<Quantity> theValueQuantity) { 
+          this.valueQuantity = theValueQuantity;
           return this;
         }
 
-        public boolean hasValueQuanity() { 
-          if (this.valueQuanity == null)
+        public boolean hasValueQuantity() { 
+          if (this.valueQuantity == null)
             return false;
-          for (Quantity item : this.valueQuanity)
+          for (Quantity item : this.valueQuantity)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public Quantity addValueQuanity() { //3
+        public Quantity addValueQuantity() { //3
           Quantity t = new Quantity();
-          if (this.valueQuanity == null)
-            this.valueQuanity = new ArrayList<Quantity>();
-          this.valueQuanity.add(t);
+          if (this.valueQuantity == null)
+            this.valueQuantity = new ArrayList<Quantity>();
+          this.valueQuantity.add(t);
           return t;
         }
 
-        public DeviceDefinitionPropertyComponent addValueQuanity(Quantity t) { //3
+        public DeviceDefinitionPropertyComponent addValueQuantity(Quantity t) { //3
           if (t == null)
             return this;
-          if (this.valueQuanity == null)
-            this.valueQuanity = new ArrayList<Quantity>();
-          this.valueQuanity.add(t);
+          if (this.valueQuantity == null)
+            this.valueQuantity = new ArrayList<Quantity>();
+          this.valueQuantity.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #valueQuanity}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #valueQuantity}, creating it if it does not already exist
          */
-        public Quantity getValueQuanityFirstRep() { 
-          if (getValueQuanity().isEmpty()) {
-            addValueQuanity();
+        public Quantity getValueQuantityFirstRep() { 
+          if (getValueQuantity().isEmpty()) {
+            addValueQuantity();
           }
-          return getValueQuanity().get(0);
+          return getValueQuantity().get(0);
         }
 
         /**
@@ -1433,7 +1433,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "Code that specifies the property DeviceDefinitionPropetyCode (Extensible).", 0, 1, type));
-          children.add(new Property("valueQuanity", "Quantity", "Property value as a quantity.", 0, java.lang.Integer.MAX_VALUE, valueQuanity));
+          children.add(new Property("valueQuantity", "Quantity", "Property value as a quantity.", 0, java.lang.Integer.MAX_VALUE, valueQuantity));
           children.add(new Property("valueCode", "CodeableConcept", "Property value as a code, e.g., NTP4 (synced to NTP).", 0, java.lang.Integer.MAX_VALUE, valueCode));
         }
 
@@ -1441,7 +1441,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Code that specifies the property DeviceDefinitionPropetyCode (Extensible).", 0, 1, type);
-          case 1319984908: /*valueQuanity*/  return new Property("valueQuanity", "Quantity", "Property value as a quantity.", 0, java.lang.Integer.MAX_VALUE, valueQuanity);
+          case -2029823716: /*valueQuantity*/  return new Property("valueQuantity", "Quantity", "Property value as a quantity.", 0, java.lang.Integer.MAX_VALUE, valueQuantity);
           case -766209282: /*valueCode*/  return new Property("valueCode", "CodeableConcept", "Property value as a code, e.g., NTP4 (synced to NTP).", 0, java.lang.Integer.MAX_VALUE, valueCode);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1452,7 +1452,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case 1319984908: /*valueQuanity*/ return this.valueQuanity == null ? new Base[0] : this.valueQuanity.toArray(new Base[this.valueQuanity.size()]); // Quantity
+        case -2029823716: /*valueQuantity*/ return this.valueQuantity == null ? new Base[0] : this.valueQuantity.toArray(new Base[this.valueQuantity.size()]); // Quantity
         case -766209282: /*valueCode*/ return this.valueCode == null ? new Base[0] : this.valueCode.toArray(new Base[this.valueCode.size()]); // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1465,8 +1465,8 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case 1319984908: // valueQuanity
-          this.getValueQuanity().add(castToQuantity(value)); // Quantity
+        case -2029823716: // valueQuantity
+          this.getValueQuantity().add(castToQuantity(value)); // Quantity
           return value;
         case -766209282: // valueCode
           this.getValueCode().add(castToCodeableConcept(value)); // CodeableConcept
@@ -1480,8 +1480,8 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("valueQuanity")) {
-          this.getValueQuanity().add(castToQuantity(value));
+        } else if (name.equals("valueQuantity")) {
+          this.getValueQuantity().add(castToQuantity(value));
         } else if (name.equals("valueCode")) {
           this.getValueCode().add(castToCodeableConcept(value));
         } else
@@ -1493,7 +1493,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610:  return getType(); 
-        case 1319984908:  return addValueQuanity(); 
+        case -2029823716:  return addValueQuantity(); 
         case -766209282:  return addValueCode(); 
         default: return super.makeProperty(hash, name);
         }
@@ -1504,7 +1504,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 1319984908: /*valueQuanity*/ return new String[] {"Quantity"};
+        case -2029823716: /*valueQuantity*/ return new String[] {"Quantity"};
         case -766209282: /*valueCode*/ return new String[] {"CodeableConcept"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1517,8 +1517,8 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
           this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("valueQuanity")) {
-          return addValueQuanity();
+        else if (name.equals("valueQuantity")) {
+          return addValueQuantity();
         }
         else if (name.equals("valueCode")) {
           return addValueCode();
@@ -1531,10 +1531,10 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         DeviceDefinitionPropertyComponent dst = new DeviceDefinitionPropertyComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
-        if (valueQuanity != null) {
-          dst.valueQuanity = new ArrayList<Quantity>();
-          for (Quantity i : valueQuanity)
-            dst.valueQuanity.add(i.copy());
+        if (valueQuantity != null) {
+          dst.valueQuantity = new ArrayList<Quantity>();
+          for (Quantity i : valueQuantity)
+            dst.valueQuantity.add(i.copy());
         };
         if (valueCode != null) {
           dst.valueCode = new ArrayList<CodeableConcept>();
@@ -1551,7 +1551,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         if (!(other_ instanceof DeviceDefinitionPropertyComponent))
           return false;
         DeviceDefinitionPropertyComponent o = (DeviceDefinitionPropertyComponent) other_;
-        return compareDeep(type, o.type, true) && compareDeep(valueQuanity, o.valueQuanity, true) && compareDeep(valueCode, o.valueCode, true)
+        return compareDeep(type, o.type, true) && compareDeep(valueQuantity, o.valueQuantity, true) && compareDeep(valueCode, o.valueCode, true)
           ;
       }
 
@@ -1566,7 +1566,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, valueQuanity, valueCode
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, valueQuantity, valueCode
           );
       }
 
@@ -1922,10 +1922,10 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     protected List<DeviceDefinitionSpecializationComponent> specialization;
 
     /**
-     * The actual design of the device or software version running on the device.
+     * The available versions of the device, e.g., software versions.
      */
     @Child(name = "version", type = {StringType.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="The actual design of the device or software version running on the device", formalDefinition="The actual design of the device or software version running on the device." )
+    @Description(shortDefinition="Available versions", formalDefinition="The available versions of the device, e.g., software versions." )
     protected List<StringType> version;
 
     /**
@@ -1933,6 +1933,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
      */
     @Child(name = "safety", type = {CodeableConcept.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Safety characteristics of the device", formalDefinition="Safety characteristics of the device." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-safety")
     protected List<CodeableConcept> safety;
 
     /**
@@ -2163,7 +2164,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
      */
     public StringType getManufacturerStringType() throws FHIRException { 
       if (this.manufacturer == null)
-        return null;
+        this.manufacturer = new StringType();
       if (!(this.manufacturer instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.manufacturer.getClass().getName()+" was encountered");
       return (StringType) this.manufacturer;
@@ -2178,7 +2179,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
      */
     public Reference getManufacturerReference() throws FHIRException { 
       if (this.manufacturer == null)
-        return null;
+        this.manufacturer = new Reference();
       if (!(this.manufacturer instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.manufacturer.getClass().getName()+" was encountered");
       return (Reference) this.manufacturer;
@@ -2382,7 +2383,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     }
 
     /**
-     * @return {@link #version} (The actual design of the device or software version running on the device.)
+     * @return {@link #version} (The available versions of the device, e.g., software versions.)
      */
     public List<StringType> getVersion() { 
       if (this.version == null)
@@ -2408,7 +2409,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     }
 
     /**
-     * @return {@link #version} (The actual design of the device or software version running on the device.)
+     * @return {@link #version} (The available versions of the device, e.g., software versions.)
      */
     public StringType addVersionElement() {//2 
       StringType t = new StringType();
@@ -2419,7 +2420,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     }
 
     /**
-     * @param value {@link #version} (The actual design of the device or software version running on the device.)
+     * @param value {@link #version} (The available versions of the device, e.g., software versions.)
      */
     public DeviceDefinition addVersion(String value) { //1
       StringType t = new StringType();
@@ -2431,7 +2432,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     }
 
     /**
-     * @param value {@link #version} (The actual design of the device or software version running on the device.)
+     * @param value {@link #version} (The available versions of the device, e.g., software versions.)
      */
     public boolean hasVersion(String value) { 
       if (this.version == null)
@@ -3109,7 +3110,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         children.add(new Property("modelNumber", "string", "The model number for the device.", 0, 1, modelNumber));
         children.add(new Property("type", "CodeableConcept", "What kind of device or device system this is.", 0, 1, type));
         children.add(new Property("specialization", "", "The capabilities supported on a  device, the standards to which the device conforms for a particular purpose, and used for the communication.", 0, java.lang.Integer.MAX_VALUE, specialization));
-        children.add(new Property("version", "string", "The actual design of the device or software version running on the device.", 0, java.lang.Integer.MAX_VALUE, version));
+        children.add(new Property("version", "string", "The available versions of the device, e.g., software versions.", 0, java.lang.Integer.MAX_VALUE, version));
         children.add(new Property("safety", "CodeableConcept", "Safety characteristics of the device.", 0, java.lang.Integer.MAX_VALUE, safety));
         children.add(new Property("shelfLifeStorage", "ProductShelfLife", "Shelf Life and storage information.", 0, java.lang.Integer.MAX_VALUE, shelfLifeStorage));
         children.add(new Property("physicalCharacteristics", "ProdCharacteristic", "Dimensions, color etc.", 0, 1, physicalCharacteristics));
@@ -3139,7 +3140,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         case 346619858: /*modelNumber*/  return new Property("modelNumber", "string", "The model number for the device.", 0, 1, modelNumber);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "What kind of device or device system this is.", 0, 1, type);
         case 682815883: /*specialization*/  return new Property("specialization", "", "The capabilities supported on a  device, the standards to which the device conforms for a particular purpose, and used for the communication.", 0, java.lang.Integer.MAX_VALUE, specialization);
-        case 351608024: /*version*/  return new Property("version", "string", "The actual design of the device or software version running on the device.", 0, java.lang.Integer.MAX_VALUE, version);
+        case 351608024: /*version*/  return new Property("version", "string", "The available versions of the device, e.g., software versions.", 0, java.lang.Integer.MAX_VALUE, version);
         case -909893934: /*safety*/  return new Property("safety", "CodeableConcept", "Safety characteristics of the device.", 0, java.lang.Integer.MAX_VALUE, safety);
         case 172049237: /*shelfLifeStorage*/  return new Property("shelfLifeStorage", "ProductShelfLife", "Shelf Life and storage information.", 0, java.lang.Integer.MAX_VALUE, shelfLifeStorage);
         case -1599676319: /*physicalCharacteristics*/  return new Property("physicalCharacteristics", "ProdCharacteristic", "Dimensions, color etc.", 0, 1, physicalCharacteristics);

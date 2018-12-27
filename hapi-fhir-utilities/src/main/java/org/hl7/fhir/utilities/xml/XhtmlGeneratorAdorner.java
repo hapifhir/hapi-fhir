@@ -29,7 +29,6 @@ POSSIBILITY OF SUCH DAMAGE.
 package org.hl7.fhir.utilities.xml;
 
 import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.xml.XhtmlGeneratorAdorner.XhtmlGeneratorAdornerState;
 import org.w3c.dom.Element;
 
 public interface XhtmlGeneratorAdorner {
