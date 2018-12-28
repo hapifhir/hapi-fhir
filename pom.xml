@@ -556,6 +556,9 @@
 
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
+
+		<!-- Site properties -->
+		<fontawesomeVersion>5.4.1</fontawesomeVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -805,9 +808,9 @@
 				<version>4.12</version>
 			</dependency>
 			<dependency>
-				<groupId>lt.velykis.maven.skins</groupId>
+				<groupId>io.github.devacfr.maven.skins</groupId>
 				<artifactId>reflow-velocity-tools</artifactId>
-				<version>1.1.1</version>
+				<version>2.0.0-beta2</version>
 			</dependency>
 			<dependency>
 				<groupId>mysql</groupId>
@@ -911,7 +914,7 @@
 			<dependency>
 				<groupId>org.apache.maven.doxia</groupId>
 				<artifactId>doxia-module-markdown</artifactId>
-				<version>1.6</version>
+				<version>1.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
@@ -1421,7 +1424,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jxr-plugin</artifactId>
-					<version>2.5</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1526,7 +1529,7 @@
 					<artifactId>maven-site-plugin</artifactId>
 					<!-- Be careful upgrading the version of this plugin- 3.5 breaks the relow-maven-skin that we use currently. Also once we move to 3.5 the site.xml <head> tag needs to have its contents put in a CDATA 
 						block. What an unpleasant misadventure to figure that all out...... -->
-					<version>3.4</version>
+					<version>3.7.1</version>
 					<configuration>
 						<skip>false</skip>
 						<skipDeploy>true</skipDeploy>
@@ -1557,7 +1560,7 @@
 							<artifactId>doxia-module-markdown</artifactId>
 						</dependency>
 						<dependency>
-							<groupId>lt.velykis.maven.skins</groupId>
+							<groupId>io.github.devacfr.maven.skins</groupId>
 							<artifactId>reflow-velocity-tools</artifactId>
 						</dependency>
 						<dependency>
@@ -1807,8 +1810,7 @@
 								<replace dir="target/site" summary="true">
 									<include name="index.html"/>
 									<replacetoken><![CDATA[<h2 id="Welcome">Welcome</h2>]]></replacetoken>
-									<replacevalue><![CDATA[<div class="jumbotron subhead">
-		<div class="row" id="banner">
+									<replacevalue><![CDATA[
 			<div class="span12">
 				<div class="pull-left">
 					<a href="./" id="bannerLeft"><img src="images/hapi_fhir_banner.png" alt='"'HAPI'"' /></a>
@@ -1817,8 +1819,8 @@
 					<a href="./" id="bannerRight"><img src="images/hapi_fhir_banner_right.png" alt='"'FHIR'"' /></a>
 				</div>
 			</div>
-		</div>
-	</div>]]></replacevalue>
+			<br clear="both"/>
+	]]></replacevalue>
 								</replace>
 								<!--<replaceregexp file="target/site/checkstyle.html" byline="false" match="&lt;ul class=&quot;breadcrumb.*?&lt;/ul&gt;" replace="" flags="s"/> -->
 							</target>
@@ -2004,12 +2006,12 @@
 					<dependency>
 						<groupId>org.apache.maven.doxia</groupId>
 						<artifactId>doxia-module-markdown</artifactId>
-						<version>1.6</version>
+						<version>1.8</version>
 					</dependency>
 					<dependency>
-						<groupId>lt.velykis.maven.skins</groupId>
+						<groupId>io.github.devacfr.maven.skins</groupId>
 						<artifactId>reflow-velocity-tools</artifactId>
-						<version>1.1.1</version>
+						<version>2.0.0-beta2</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.velocity</groupId>
@@ -2088,11 +2090,12 @@
 					</reportsDirectories>
 				</configuration>
 			</plugin>
-			<!--			<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>3.0.0</version>
 				<inherited>false</inherited>
+				<!--
 				<reportSets>
 					<reportSet>
 						<reports>
@@ -2103,8 +2106,8 @@
 						</reports>
 					</reportSet>
 				</reportSets>
+				-->
 			</plugin>
-			-->
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> <version>1.1</version> </plugin> -->
 		</plugins>
 	</reporting>

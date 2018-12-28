@@ -189,7 +189,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-jxr-plugin</artifactId>
-						<version>${maven_jxr_plugin_version}</version>
 						<reportSets>
 							<reportSet>
 								<id>normal</id>
