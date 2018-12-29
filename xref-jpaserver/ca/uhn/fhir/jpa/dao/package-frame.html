@@ -1,245 +1,215 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xml:lang="en" lang="en">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-		<title>HAPI FHIR JPA Server 3.6.0 Reference Package ca.uhn.fhir.jpa.dao</title>
-		<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="style" />
-	</head>
-	<body>
-
-		<h3>
-        	<a href="package-summary.html" target="classFrame">ca.uhn.fhir.jpa.dao</a>
-      	</h3>
-
-      	<h3>Classes</h3>
-
-      	<ul>
-      		          	<li>
-            	<a href="BaseHapiFhirDao.html" target="classFrame">BaseHapiFhirDao</a>
-          	</li>
-          	          	<li>
-            	<a href="BaseHapiFhirResourceDao.html" target="classFrame">BaseHapiFhirResourceDao</a>
-          	</li>
-          	          	<li>
-            	<a href="BaseHapiFhirSystemDao.html" target="classFrame">BaseHapiFhirSystemDao</a>
-          	</li>
-          	          	<li>
-            	<a href="BaseSearchParamExtractor.html" target="classFrame">BaseSearchParamExtractor</a>
-          	</li>
-          	          	<li>
-            	<a href="BaseSearchParamRegistry.html" target="classFrame">BaseSearchParamRegistry</a>
-          	</li>
-          	          	<li>
-            	<a href="TransactionProcessor.html" target="classFrame">BaseServerResponseExceptionHolder</a>
-          	</li>
-          	          	<li>
-            	<a href="DaoConfig.html" target="classFrame">ClientIdStrategyEnum</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchBuilder.html" target="classFrame">CountQueryIterator</a>
-          	</li>
-          	          	<li>
-            	<a href="DaoConfig.html" target="classFrame">DaoConfig</a>
-          	</li>
-          	          	<li>
-            	<a href="DaoMethodOutcome.html" target="classFrame">DaoMethodOutcome</a>
-          	</li>
-          	          	<li>
-            	<a href="DaoRegistry.html" target="classFrame">DaoRegistry</a>
-          	</li>
-          	          	<li>
-            	<a href="DeleteMethodOutcome.html" target="classFrame">DeleteMethodOutcome</a>
-          	</li>
-          	          	<li>
-            	<a href="EncodedResource.html" target="classFrame">EncodedResource</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchParameterMap.html" target="classFrame">EverythingModeEnum</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoBundleDstu2.html" target="classFrame">FhirResourceDaoBundleDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoCompositionDstu2.html" target="classFrame">FhirResourceDaoCompositionDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoDstu2.html" target="classFrame">FhirResourceDaoDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoEncounterDstu2.html" target="classFrame">FhirResourceDaoEncounterDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoMessageHeaderDstu2.html" target="classFrame">FhirResourceDaoMessageHeaderDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoPatientDstu2.html" target="classFrame">FhirResourceDaoPatientDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoQuestionnaireResponseDstu2.html" target="classFrame">FhirResourceDaoQuestionnaireResponseDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoSearchParameterDstu2.html" target="classFrame">FhirResourceDaoSearchParameterDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoSubscriptionDstu2.html" target="classFrame">FhirResourceDaoSubscriptionDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoValueSetDstu2.html" target="classFrame">FhirResourceDaoValueSetDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirSystemDaoDstu2.html" target="classFrame">FhirSystemDaoDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="FulltextSearchSvcImpl.html" target="classFrame">FulltextSearchSvcImpl</a>
-          	</li>
-          	          	<li>
-            	<a href="GZipUtil.html" target="classFrame">GZipUtil</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchBuilder.html" target="classFrame">HandlerTypeEnum</a>
-          	</li>
-          	          	<li>
-            	<a href="IDao.html" target="classFrame">IDao</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDao.html" target="classFrame">IFhirResourceDao</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoCodeSystem.html" target="classFrame">IFhirResourceDaoCodeSystem</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoComposition.html" target="classFrame">IFhirResourceDaoComposition</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoConceptMap.html" target="classFrame">IFhirResourceDaoConceptMap</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoEncounter.html" target="classFrame">IFhirResourceDaoEncounter</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoMessageHeader.html" target="classFrame">IFhirResourceDaoMessageHeader</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoPatient.html" target="classFrame">IFhirResourceDaoPatient</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoSearchParameter.html" target="classFrame">IFhirResourceDaoSearchParameter</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoSubscription.html" target="classFrame">IFhirResourceDaoSubscription</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoValueSet.html" target="classFrame">IFhirResourceDaoValueSet</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirSystemDao.html" target="classFrame">IFhirSystemDao</a>
-          	</li>
-          	          	<li>
-            	<a href="IFulltextSearchSvc.html" target="classFrame">IFulltextSearchSvc</a>
-          	</li>
-          	          	<li>
-            	<a href="IJpaValidationSupportDstu2.html" target="classFrame">IJpaValidationSupportDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="IResultIterator.html" target="classFrame">IResultIterator</a>
-          	</li>
-          	          	<li>
-            	<a href="ISearchBuilder.html" target="classFrame">ISearchBuilder</a>
-          	</li>
-          	          	<li>
-            	<a href="ISearchParamExtractor.html" target="classFrame">ISearchParamExtractor</a>
-          	</li>
-          	          	<li>
-            	<a href="ISearchParamRegistry.html" target="classFrame">ISearchParamRegistry</a>
-          	</li>
-          	          	<li>
-            	<a href="TransactionProcessor.html" target="classFrame">ITransactionProcessorVersionAdapter</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoDstu2.html" target="classFrame">IdChecker</a>
-          	</li>
-          	          	<li>
-            	<a href="DaoConfig.html" target="classFrame">IdStrategyEnum</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchParameterMap.html" target="classFrame">IncludeComparator</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchBuilder.html" target="classFrame">IncludesIterator</a>
-          	</li>
-          	          	<li>
-            	<a href="DaoConfig.html" target="classFrame">IndexEnabledEnum</a>
-          	</li>
-          	          	<li>
-            	<a href="IndexedParam.html" target="classFrame">IndexedParam</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchBuilder.html" target="classFrame">JoinEnum</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchBuilder.html" target="classFrame">JoinKey</a>
-          	</li>
-          	          	<li>
-            	<a href="FhirResourceDaoQuestionnaireResponseDstu2.html" target="classFrame">JpaResourceLoader</a>
-          	</li>
-          	          	<li>
-            	<a href="JpaValidationSupportDstu2.html" target="classFrame">JpaValidationSupportDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoCodeSystem.html" target="classFrame">LookupCodeResult</a>
-          	</li>
-          	          	<li>
-            	<a href="MetadataKeyCurrentlyReindexing.html" target="classFrame">MetadataKeyCurrentlyReindexing</a>
-          	</li>
-          	          	<li>
-            	<a href="MetadataKeyResourcePid.html" target="classFrame">MetadataKeyResourcePid</a>
-          	</li>
-          	          	<li>
-            	<a href="FulltextSearchSvcImpl.html" target="classFrame">MySuggestionFormatter</a>
-          	</li>
-          	          	<li>
-            	<a href="PathAndRef.html" target="classFrame">PathAndRef</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchBuilder.html" target="classFrame">QueryIterator</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchParameterMap.html" target="classFrame">QueryParameterOrComparator</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchParameterMap.html" target="classFrame">QueryParameterTypeComparator</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchBuilder.html" target="classFrame">SearchBuilder</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchParamExtractorDstu2.html" target="classFrame">SearchParamExtractorDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchParamRegistryDstu2.html" target="classFrame">SearchParamRegistryDstu2</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchParameterMap.html" target="classFrame">SearchParameterMap</a>
-          	</li>
-          	          	<li>
-            	<a href="FulltextSearchSvcImpl.html" target="classFrame">Suggestion</a>
-          	</li>
-          	          	<li>
-            	<a href="TransactionProcessor.html" target="classFrame">TransactionProcessor</a>
-          	</li>
-          	          	<li>
-            	<a href="TransactionProcessor.html" target="classFrame">TransactionSorter</a>
-          	</li>
-          	          	<li>
-            	<a href="SearchBuilder.html" target="classFrame">UniqueIndexIterator</a>
-          	</li>
-          	          	<li>
-            	<a href="IFhirResourceDaoValueSet.html" target="classFrame">ValidateCodeResult</a>
-          	</li>
-          	      	</ul>
-
-	<script>
+    <!-- generated by Apache Maven JXR (jdk8) -->
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <title>HAPI FHIR JPA Server 3.7.0-SNAPSHOT Reference Package ca.uhn.fhir.jpa.dao</title>
+        <link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="style" />
+    </head>
+    <body>
+        <h1 class="bar"><a href="package-summary.html" target="classFrame">ca.uhn.fhir.jpa.dao</a></h1>
+        <div class="indexContainer">
+            <h2 title="Classes">Classes</h2>
+            <ul title="Classes">
+                                <li>
+                    <a href="BaseHapiFhirDao.html#BaseHapiFhirDao" target="classFrame">BaseHapiFhirDao</a>
+                </li>
+                                <li>
+                    <a href="BaseHapiFhirResourceDao.html#BaseHapiFhirResourceDao" target="classFrame">BaseHapiFhirResourceDao</a>
+                </li>
+                                <li>
+                    <a href="BaseHapiFhirSystemDao.html#BaseHapiFhirSystemDao" target="classFrame">BaseHapiFhirSystemDao</a>
+                </li>
+                                <li>
+                    <a href="DaoConfig.html#DaoConfig" target="classFrame">DaoConfig</a>
+                </li>
+                                <li>
+                    <a href="DaoConfig.html#DaoConfig.ClientIdStrategyEnum" target="classFrame">DaoConfig.ClientIdStrategyEnum</a>
+                </li>
+                                <li>
+                    <a href="DaoConfig.html#DaoConfig.IdStrategyEnum" target="classFrame">DaoConfig.IdStrategyEnum</a>
+                </li>
+                                <li>
+                    <a href="DaoConfig.html#DaoConfig.IndexEnabledEnum" target="classFrame">DaoConfig.IndexEnabledEnum</a>
+                </li>
+                                <li>
+                    <a href="DaoMethodOutcome.html#DaoMethodOutcome" target="classFrame">DaoMethodOutcome</a>
+                </li>
+                                <li>
+                    <a href="DaoRegistry.html#DaoRegistry" target="classFrame">DaoRegistry</a>
+                </li>
+                                <li>
+                    <a href="DaoSearchParamProvider.html#DaoSearchParamProvider" target="classFrame">DaoSearchParamProvider</a>
+                </li>
+                                <li>
+                    <a href="DeleteMethodOutcome.html#DeleteMethodOutcome" target="classFrame">DeleteMethodOutcome</a>
+                </li>
+                                <li>
+                    <a href="EncodedResource.html#EncodedResource" target="classFrame">EncodedResource</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoBundleDstu2.html#FhirResourceDaoBundleDstu2" target="classFrame">FhirResourceDaoBundleDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoCompositionDstu2.html#FhirResourceDaoCompositionDstu2" target="classFrame">FhirResourceDaoCompositionDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoDstu2.html#FhirResourceDaoDstu2" target="classFrame">FhirResourceDaoDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoDstu2.html#FhirResourceDaoDstu2.IdChecker" target="classFrame">FhirResourceDaoDstu2.IdChecker</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoEncounterDstu2.html#FhirResourceDaoEncounterDstu2" target="classFrame">FhirResourceDaoEncounterDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoMessageHeaderDstu2.html#FhirResourceDaoMessageHeaderDstu2" target="classFrame">FhirResourceDaoMessageHeaderDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoPatientDstu2.html#FhirResourceDaoPatientDstu2" target="classFrame">FhirResourceDaoPatientDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoQuestionnaireResponseDstu2.html#FhirResourceDaoQuestionnaireResponseDstu2" target="classFrame">FhirResourceDaoQuestionnaireResponseDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoQuestionnaireResponseDstu2.html#FhirResourceDaoQuestionnaireResponseDstu2.JpaResourceLoader" target="classFrame">FhirResourceDaoQuestionnaireResponseDstu2.JpaResourceLoader</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoSearchParameterDstu2.html#FhirResourceDaoSearchParameterDstu2" target="classFrame">FhirResourceDaoSearchParameterDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoSubscriptionDstu2.html#FhirResourceDaoSubscriptionDstu2" target="classFrame">FhirResourceDaoSubscriptionDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirResourceDaoValueSetDstu2.html#FhirResourceDaoValueSetDstu2" target="classFrame">FhirResourceDaoValueSetDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirSystemDaoDstu2.html#FhirSystemDaoDstu2" target="classFrame">FhirSystemDaoDstu2</a>
+                </li>
+                                <li>
+                    <a href="FhirSystemDaoDstu2.html#FhirSystemDaoDstu2.TransactionSorter" target="classFrame">FhirSystemDaoDstu2.TransactionSorter</a>
+                </li>
+                                <li>
+                    <a href="FulltextSearchSvcImpl.html#FulltextSearchSvcImpl" target="classFrame">FulltextSearchSvcImpl</a>
+                </li>
+                                <li>
+                    <a href="FulltextSearchSvcImpl.html#FulltextSearchSvcImpl.MySuggestionFormatter" target="classFrame">FulltextSearchSvcImpl.MySuggestionFormatter</a>
+                </li>
+                                <li>
+                    <a href="FulltextSearchSvcImpl.html#FulltextSearchSvcImpl.Suggestion" target="classFrame">FulltextSearchSvcImpl.Suggestion</a>
+                </li>
+                                <li>
+                    <a href="GZipUtil.html#GZipUtil" target="classFrame">GZipUtil</a>
+                </li>
+                                <li>
+                    <a href="IDao.html#IDao" target="classFrame">IDao</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDao.html#IFhirResourceDao" target="classFrame">IFhirResourceDao</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoCodeSystem.html#IFhirResourceDaoCodeSystem" target="classFrame">IFhirResourceDaoCodeSystem</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoCodeSystem.html#IFhirResourceDaoCodeSystem.LookupCodeResult" target="classFrame">IFhirResourceDaoCodeSystem.LookupCodeResult</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoComposition.html#IFhirResourceDaoComposition" target="classFrame">IFhirResourceDaoComposition</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoConceptMap.html#IFhirResourceDaoConceptMap" target="classFrame">IFhirResourceDaoConceptMap</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoEncounter.html#IFhirResourceDaoEncounter" target="classFrame">IFhirResourceDaoEncounter</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoMessageHeader.html#IFhirResourceDaoMessageHeader" target="classFrame">IFhirResourceDaoMessageHeader</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoPatient.html#IFhirResourceDaoPatient" target="classFrame">IFhirResourceDaoPatient</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoSearchParameter.html#IFhirResourceDaoSearchParameter" target="classFrame">IFhirResourceDaoSearchParameter</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoSubscription.html#IFhirResourceDaoSubscription" target="classFrame">IFhirResourceDaoSubscription</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoValueSet.html#IFhirResourceDaoValueSet" target="classFrame">IFhirResourceDaoValueSet</a>
+                </li>
+                                <li>
+                    <a href="IFhirResourceDaoValueSet.html#IFhirResourceDaoValueSet.ValidateCodeResult" target="classFrame">IFhirResourceDaoValueSet.ValidateCodeResult</a>
+                </li>
+                                <li>
+                    <a href="IFhirSystemDao.html#IFhirSystemDao" target="classFrame">IFhirSystemDao</a>
+                </li>
+                                <li>
+                    <a href="IFulltextSearchSvc.html#IFulltextSearchSvc" target="classFrame">IFulltextSearchSvc</a>
+                </li>
+                                <li>
+                    <a href="IJpaValidationSupportDstu2.html#IJpaValidationSupportDstu2" target="classFrame">IJpaValidationSupportDstu2</a>
+                </li>
+                                <li>
+                    <a href="IResultIterator.html#IResultIterator" target="classFrame">IResultIterator</a>
+                </li>
+                                <li>
+                    <a href="ISearchBuilder.html#ISearchBuilder" target="classFrame">ISearchBuilder</a>
+                </li>
+                                <li>
+                    <a href="IndexedParam.html#IndexedParam" target="classFrame">IndexedParam</a>
+                </li>
+                                <li>
+                    <a href="JpaValidationSupportDstu2.html#JpaValidationSupportDstu2" target="classFrame">JpaValidationSupportDstu2</a>
+                </li>
+                                <li>
+                    <a href="MetadataKeyCurrentlyReindexing.html#MetadataKeyCurrentlyReindexing" target="classFrame">MetadataKeyCurrentlyReindexing</a>
+                </li>
+                                <li>
+                    <a href="MetadataKeyResourcePid.html#MetadataKeyResourcePid" target="classFrame">MetadataKeyResourcePid</a>
+                </li>
+                                <li>
+                    <a href="SearchBuilder.html#SearchBuilder" target="classFrame">SearchBuilder</a>
+                </li>
+                                <li>
+                    <a href="SearchBuilder.html#SearchBuilder.CountQueryIterator" target="classFrame">SearchBuilder.CountQueryIterator</a>
+                </li>
+                                <li>
+                    <a href="SearchBuilder.html#SearchBuilder.HandlerTypeEnum" target="classFrame">SearchBuilder.HandlerTypeEnum</a>
+                </li>
+                                <li>
+                    <a href="SearchBuilder.html#SearchBuilder.IncludesIterator" target="classFrame">SearchBuilder.IncludesIterator</a>
+                </li>
+                                <li>
+                    <a href="SearchBuilder.html#SearchBuilder.JoinEnum" target="classFrame">SearchBuilder.JoinEnum</a>
+                </li>
+                                <li>
+                    <a href="SearchBuilder.html#SearchBuilder.JoinKey" target="classFrame">SearchBuilder.JoinKey</a>
+                </li>
+                                <li>
+                    <a href="SearchBuilder.html#SearchBuilder.QueryIterator" target="classFrame">SearchBuilder.QueryIterator</a>
+                </li>
+                                <li>
+                    <a href="SearchBuilder.html#SearchBuilder.UniqueIndexIterator" target="classFrame">SearchBuilder.UniqueIndexIterator</a>
+                </li>
+                                <li>
+                    <a href="SearchBuilderFactory.html#SearchBuilderFactory" target="classFrame">SearchBuilderFactory</a>
+                </li>
+                                <li>
+                    <a href="TransactionProcessor.html#TransactionProcessor" target="classFrame">TransactionProcessor</a>
+                </li>
+                                <li>
+                    <a href="TransactionProcessor.html#TransactionProcessor.BaseServerResponseExceptionHolder" target="classFrame">TransactionProcessor.BaseServerResponseExceptionHolder</a>
+                </li>
+                                <li>
+                    <a href="TransactionProcessor.html#TransactionProcessor.ITransactionProcessorVersionAdapter" target="classFrame">TransactionProcessor.ITransactionProcessorVersionAdapter</a>
+                </li>
+                                <li>
+                    <a href="TransactionProcessor.html#TransactionProcessor.TransactionSorter" target="classFrame">TransactionProcessor.TransactionSorter</a>
+                </li>
+                            </ul>
+        </div>
+    <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)

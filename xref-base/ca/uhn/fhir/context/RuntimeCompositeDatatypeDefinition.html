@@ -18,7 +18,7 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -38,18 +38,18 @@
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.DatatypeDef;
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.ResourceDef;
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeCompositeDatatypeDefinition.html">RuntimeCompositeDatatypeDefinition</a> <strong class="jxr_keyword">extends</strong> BaseRuntimeElementCompositeDefinition&lt;ICompositeType&gt; <strong class="jxr_keyword">implements</strong> <a href="../../../../ca/uhn/fhir/context/IRuntimeDatatypeDefinition.html">IRuntimeDatatypeDefinition</a> {
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="RuntimeCompositeDatatypeDefinition" href="../../../../ca/uhn/fhir/context/RuntimeCompositeDatatypeDefinition.html#RuntimeCompositeDatatypeDefinition">RuntimeCompositeDatatypeDefinition</a> <strong class="jxr_keyword">extends</strong> BaseRuntimeElementCompositeDefinition&lt;ICompositeType&gt; <strong class="jxr_keyword">implements</strong> <a name="IRuntimeDatatypeDefinition" href="../../../../ca/uhn/fhir/context/IRuntimeDatatypeDefinition.html#IRuntimeDatatypeDefinition">IRuntimeDatatypeDefinition</a> {
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> mySpecialization;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  	<strong class="jxr_keyword">private</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseDatatype&gt; myProfileOfType;
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">private</strong> BaseRuntimeElementDefinition&lt;?&gt; myProfileOf;
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeCompositeDatatypeDefinition.html">RuntimeCompositeDatatypeDefinition</a>(<a href="../../../../ca/uhn/fhir/model/api/annotation/DatatypeDef.html">DatatypeDef</a> theDef, Class&lt;? <strong class="jxr_keyword">extends</strong> ICompositeType&gt; theImplementingClass, <strong class="jxr_keyword">boolean</strong> theStandardType, <a href="../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<strong class="jxr_keyword">public</strong> <a name="RuntimeCompositeDatatypeDefinition" href="../../../../ca/uhn/fhir/context/RuntimeCompositeDatatypeDefinition.html#RuntimeCompositeDatatypeDefinition">RuntimeCompositeDatatypeDefinition</a>(DatatypeDef theDef, Class&lt;? <strong class="jxr_keyword">extends</strong> ICompositeType&gt; theImplementingClass, <strong class="jxr_keyword">boolean</strong> theStandardType, <a name="FhirContext" href="../../../../ca/uhn/fhir/context/FhirContext.html#FhirContext">FhirContext</a> theContext, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  		<strong class="jxr_keyword">super</strong>(theDef.name(), theImplementingClass, theStandardType, theContext, theClassToElementDefinitions);
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  		
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  		String resourceName = theDef.name();
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  		<strong class="jxr_keyword">if</strong> (isBlank(resourceName)) {
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Resource type @"</span> + ResourceDef.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation contains no resource name: "</span> + theImplementingClass.getCanonicalName());
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Resource type @"</span> + ResourceDef.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" annotation contains no resource name: "</span> + theImplementingClass.getCanonicalName());
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  		}
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  		
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  		mySpecialization = theDef.isSpecialization();
@@ -61,13 +61,13 @@
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  	}
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  	@Override
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> sealAndInitialize(<a href="../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> sealAndInitialize(<a name="FhirContext" href="../../../../ca/uhn/fhir/context/FhirContext.html#FhirContext">FhirContext</a> theContext, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  		<strong class="jxr_keyword">super</strong>.sealAndInitialize(theContext, theClassToElementDefinitions);
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  		
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  		<strong class="jxr_keyword">if</strong> (myProfileOfType != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  			myProfileOf = theClassToElementDefinitions.get(myProfileOfType);
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  			<strong class="jxr_keyword">if</strong> (myProfileOf == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Unknown profileOf value: "</span> + myProfileOfType);
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Unknown profileOf value: "</span> + myProfileOfType);
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  			}
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  		}
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  	}
@@ -93,8 +93,8 @@
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  		<strong class="jxr_keyword">if</strong> (myProfileOfType != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  			<strong class="jxr_keyword">if</strong> (myProfileOfType.equals(theType)) {
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myProfileOf instanceof IRuntimeDatatypeDefinition) {
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  				<strong class="jxr_keyword">return</strong> ((IRuntimeDatatypeDefinition) myProfileOf).isProfileOf(theType);
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (myProfileOf instanceof <a name="IRuntimeDatatypeDefinition" href="../../../../ca/uhn/fhir/context/IRuntimeDatatypeDefinition.html#IRuntimeDatatypeDefinition">IRuntimeDatatypeDefinition</a>) {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  				<strong class="jxr_keyword">return</strong> ((<a name="IRuntimeDatatypeDefinition" href="../../../../ca/uhn/fhir/context/IRuntimeDatatypeDefinition.html#IRuntimeDatatypeDefinition">IRuntimeDatatypeDefinition</a>) myProfileOf).isProfileOf(theType);
 <a class="jxr_linenumber" name="L90" href="#L90">90</a>  			}
 <a class="jxr_linenumber" name="L91" href="#L91">91</a>  		}
 <a class="jxr_linenumber" name="L92" href="#L92">92</a>  		<strong class="jxr_keyword">return</strong> false;

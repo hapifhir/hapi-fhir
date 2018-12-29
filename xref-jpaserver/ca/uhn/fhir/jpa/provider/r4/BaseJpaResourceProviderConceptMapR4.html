@@ -18,7 +18,7 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -41,7 +41,7 @@
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> javax.servlet.http.HttpServletRequest;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/jpa/provider/r4/BaseJpaResourceProviderConceptMapR4.html">BaseJpaResourceProviderConceptMapR4</a> <strong class="jxr_keyword">extends</strong> JpaResourceProviderR4&lt;ConceptMap&gt; {
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="BaseJpaResourceProviderConceptMapR4" href="../../../../../../ca/uhn/fhir/jpa/provider/r4/BaseJpaResourceProviderConceptMapR4.html#BaseJpaResourceProviderConceptMapR4">BaseJpaResourceProviderConceptMapR4</a> <strong class="jxr_keyword">extends</strong> JpaResourceProviderR4&lt;ConceptMap&gt; {
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  	@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = <strong class="jxr_keyword">true</strong>, returnParameters = {
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  		@OperationParam(name = <span class="jxr_string">"result"</span>, type = BooleanType.<strong class="jxr_keyword">class</strong>, min = 1, max = 1),
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  		@OperationParam(name = <span class="jxr_string">"message"</span>, type = StringType.<strong class="jxr_keyword">class</strong>, min = 0, max = 1),
@@ -86,7 +86,7 @@
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"One (and only one) of the in parameters (code, coding, codeableConcept) must be provided, to identify the code that is to be translated."</span>);
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  		}
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		TranslationRequest translationRequest = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/TranslationRequest.html">TranslationRequest</a>();
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		TranslationRequest translationRequest = <strong class="jxr_keyword">new</strong> <a name="TranslationRequest" href="../../../../../../ca/uhn/fhir/jpa/term/TranslationRequest.html#TranslationRequest">TranslationRequest</a>();
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<strong class="jxr_keyword">if</strong> (haveSourceCode) {
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  			translationRequest.getCodeableConcept().addCoding().setCodeElement(theSourceCode);

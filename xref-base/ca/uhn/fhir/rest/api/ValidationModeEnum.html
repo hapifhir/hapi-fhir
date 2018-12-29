@@ -22,7 +22,7 @@
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -35,7 +35,7 @@
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment"> * Validation mode parameter for the $validate operation (DSTU2+ only) </em>
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment"> */</em>
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">public</strong> enum <a href="../../../../../ca/uhn/fhir/rest/api/ValidationModeEnum.html">ValidationModeEnum</a> {
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">public</strong> enum <a name="ValidationModeEnum" href="../../../../../ca/uhn/fhir/rest/api/ValidationModeEnum.html#ValidationModeEnum">ValidationModeEnum</a> {
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment">	 * The server checks the content, and then checks that the content would be acceptable as a create (e.g. that the content would not validate any uniqueness constraints)</em>
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment">	 */</em>
@@ -56,12 +56,12 @@
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  	<strong class="jxr_keyword">static</strong> {
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  		myCodeToValue = <strong class="jxr_keyword">new</strong> HashMap&lt;String, ValidationModeEnum&gt;();
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  		<strong class="jxr_keyword">for</strong> (ValidationModeEnum next : values()) {
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  		<strong class="jxr_keyword">for</strong> (<a name="ValidationModeEnum" href="../../../../../ca/uhn/fhir/rest/api/ValidationModeEnum.html#ValidationModeEnum">ValidationModeEnum</a> next : values()) {
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  			myCodeToValue.put(next.getCode(), next);
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  		}
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	}
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  	
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../../ca/uhn/fhir/rest/api/ValidationModeEnum.html">ValidationModeEnum</a> forCode(String theCode) {
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a name="ValidationModeEnum" href="../../../../../ca/uhn/fhir/rest/api/ValidationModeEnum.html#ValidationModeEnum">ValidationModeEnum</a> forCode(String theCode) {
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  		Validate.notBlank(theCode, <span class="jxr_string">"theCode must not be blank"</span>);
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  		<strong class="jxr_keyword">return</strong> myCodeToValue.get(theCode);
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  	}
@@ -70,7 +70,7 @@
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<strong class="jxr_keyword">return</strong> myCode;
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  	}
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/rest/api/ValidationModeEnum.html">ValidationModeEnum</a>(String theCode) {
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	<strong class="jxr_keyword">private</strong> <a name="ValidationModeEnum" href="../../../../../ca/uhn/fhir/rest/api/ValidationModeEnum.html#ValidationModeEnum">ValidationModeEnum</a>(String theCode) {
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  		myCode = theCode;
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  	}
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  	

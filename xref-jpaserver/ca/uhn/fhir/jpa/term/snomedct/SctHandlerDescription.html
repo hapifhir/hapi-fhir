@@ -18,7 +18,7 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -37,13 +37,13 @@
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> java.util.Set;
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/snomedct/SctHandlerDescription.html">SctHandlerDescription</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/IRecordHandler.html">IRecordHandler</a> {
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a name="SctHandlerDescription" href="../../../../../../ca/uhn/fhir/jpa/term/snomedct/SctHandlerDescription.html#SctHandlerDescription">SctHandlerDescription</a> <strong class="jxr_keyword">implements</strong> <a name="IRecordHandler" href="../../../../../../ca/uhn/fhir/jpa/term/IRecordHandler.html#IRecordHandler">IRecordHandler</a> {
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Map&lt;String, TermConcept&gt; myCode2concept;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../../../ca/uhn/fhir/jpa/entity/TermCodeSystemVersion.html">TermCodeSystemVersion</a> myCodeSystemVersion;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <a name="TermCodeSystemVersion" href="../../../../../../ca/uhn/fhir/jpa/entity/TermCodeSystemVersion.html#TermCodeSystemVersion">TermCodeSystemVersion</a> myCodeSystemVersion;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>     <strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Map&lt;String, TermConcept&gt; myId2concept;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>     <strong class="jxr_keyword">private</strong> Set&lt;String&gt; myValidConceptIds;
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>     <strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/jpa/term/snomedct/SctHandlerDescription.html">SctHandlerDescription</a>(Set&lt;String&gt; theValidConceptIds, Map&lt;String, TermConcept&gt; theCode2concept, Map&lt;String, TermConcept&gt; theId2concept, <a href="../../../../../../ca/uhn/fhir/jpa/entity/TermCodeSystemVersion.html">TermCodeSystemVersion</a> theCodeSystemVersion) {
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>     <strong class="jxr_keyword">public</strong> <a name="SctHandlerDescription" href="../../../../../../ca/uhn/fhir/jpa/term/snomedct/SctHandlerDescription.html#SctHandlerDescription">SctHandlerDescription</a>(Set&lt;String&gt; theValidConceptIds, Map&lt;String, TermConcept&gt; theCode2concept, Map&lt;String, TermConcept&gt; theId2concept, <a name="TermCodeSystemVersion" href="../../../../../../ca/uhn/fhir/jpa/entity/TermCodeSystemVersion.html#TermCodeSystemVersion">TermCodeSystemVersion</a> theCodeSystemVersion) {
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>        myCode2concept = theCode2concept;
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>        myId2concept = theId2concept;
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>        myCodeSystemVersion = theCodeSystemVersion;
@@ -64,7 +64,7 @@
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>        String term = theRecord.get(<span class="jxr_string">"term"</span>);
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>        <a href="../../../../../../ca/uhn/fhir/jpa/entity/TermConcept.html">TermConcept</a> concept = TerminologyLoaderSvcImpl.getOrCreateConcept(myCodeSystemVersion, myId2concept, id);
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>        TermConcept concept = TerminologyLoaderSvcImpl.getOrCreateConcept(myCodeSystemVersion, myId2concept, id);
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>        concept.setCode(conceptId);
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>        concept.setDisplay(term);
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>        myCode2concept.put(conceptId, concept);

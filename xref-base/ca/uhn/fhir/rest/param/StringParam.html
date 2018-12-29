@@ -18,7 +18,7 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -37,7 +37,7 @@
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.StringDt;
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants;
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/rest/param/StringParam.html">StringParam</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../ca/uhn/fhir/rest/param/BaseParam.html">BaseParam</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../../ca/uhn/fhir/model/api/IQueryParameterType.html">IQueryParameterType</a> {
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="StringParam" href="../../../../../ca/uhn/fhir/rest/param/StringParam.html#StringParam">StringParam</a> <strong class="jxr_keyword">extends</strong> <a name="BaseParam" href="../../../../../ca/uhn/fhir/rest/param/BaseParam.html#BaseParam">BaseParam</a> <strong class="jxr_keyword">implements</strong> <a name="IQueryParameterType" href="../../../../../ca/uhn/fhir/model/api/IQueryParameterType.html#IQueryParameterType">IQueryParameterType</a> {
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myContains;
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myExact;
@@ -46,20 +46,20 @@
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment">	 * Constructor</em>
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/param/StringParam.html">StringParam</a>() {
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<strong class="jxr_keyword">public</strong> <a name="StringParam" href="../../../../../ca/uhn/fhir/rest/param/StringParam.html#StringParam">StringParam</a>() {
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  	}
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">	 * Constructor</em>
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/param/StringParam.html">StringParam</a>(String theValue) {
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	<strong class="jxr_keyword">public</strong> <a name="StringParam" href="../../../../../ca/uhn/fhir/rest/param/StringParam.html#StringParam">StringParam</a>(String theValue) {
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  		setValue(theValue);
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  	}
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment">	 * Constructor</em>
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/param/StringParam.html">StringParam</a>(String theValue, <strong class="jxr_keyword">boolean</strong> theExact) {
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<strong class="jxr_keyword">public</strong> <a name="StringParam" href="../../../../../ca/uhn/fhir/rest/param/StringParam.html#StringParam">StringParam</a>(String theValue, <strong class="jxr_keyword">boolean</strong> theExact) {
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  		setValue(theValue);
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  		setExact(theExact);
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  	}
@@ -76,12 +76,12 @@
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  	}
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  	@Override
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	String doGetValueAsQueryToken(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext) {
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	String doGetValueAsQueryToken(<a name="FhirContext" href="../../../../../ca/uhn/fhir/context/FhirContext.html#FhirContext">FhirContext</a> theContext) {
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  		<strong class="jxr_keyword">return</strong> ParameterUtil.escape(myValue);
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  	}
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  	@Override
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">void</strong> doSetValueAsQueryToken(<a href="../../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, String theParamName, String theQualifier, String theValue) {
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">void</strong> doSetValueAsQueryToken(<a name="FhirContext" href="../../../../../ca/uhn/fhir/context/FhirContext.html#FhirContext">FhirContext</a> theContext, String theParamName, String theQualifier, String theValue) {
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">if</strong> (Constants.PARAMQUALIFIER_STRING_EXACT.equals(theQualifier)) {
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  			setExact(<strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  		} <strong class="jxr_keyword">else</strong> {
@@ -103,11 +103,11 @@
 <a class="jxr_linenumber" name="L95" href="#L95">95</a>  		<strong class="jxr_keyword">if</strong> (obj == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  			<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L97" href="#L97">97</a>  		}
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		<strong class="jxr_keyword">if</strong> (!(obj instanceof StringParam)) {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		<strong class="jxr_keyword">if</strong> (!(obj instanceof <a name="StringParam" href="../../../../../ca/uhn/fhir/rest/param/StringParam.html#StringParam">StringParam</a>)) {
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  			<strong class="jxr_keyword">return</strong> false;
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 		}
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> 
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		StringParam other = (StringParam) obj;
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		StringParam other = (<a name="StringParam" href="../../../../../ca/uhn/fhir/rest/param/StringParam.html#StringParam">StringParam</a>) obj;
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 		EqualsBuilder eb = <strong class="jxr_keyword">new</strong> EqualsBuilder();
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 		eb.append(myExact, other.myExact);
@@ -122,8 +122,8 @@
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 		<strong class="jxr_keyword">return</strong> myValue;
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 	}
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a> getValueAsStringDt() {
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/StringDt.html">StringDt</a>(myValue);
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 	<strong class="jxr_keyword">public</strong> <a name="StringDt" href="../../../../../ca/uhn/fhir/model/primitive/StringDt.html#StringDt">StringDt</a> getValueAsStringDt() {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a name="StringDt" href="../../../../../ca/uhn/fhir/model/primitive/StringDt.html#StringDt">StringDt</a>(myValue);
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 	}
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> 
 <a class="jxr_linenumber" name="L121" href="#L121">121</a> 	<strong class="jxr_keyword">public</strong> String getValueNotNull() {
@@ -148,7 +148,7 @@
 <a class="jxr_linenumber" name="L140" href="#L140">140</a> 	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> <em class="jxr_javadoccomment">	 * String parameter modifier &lt;code&gt;:contains&lt;/code&gt;</em>
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/param/StringParam.html">StringParam</a> setContains(<strong class="jxr_keyword">boolean</strong> theContains) {
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 	<strong class="jxr_keyword">public</strong> <a name="StringParam" href="../../../../../ca/uhn/fhir/rest/param/StringParam.html#StringParam">StringParam</a> setContains(<strong class="jxr_keyword">boolean</strong> theContains) {
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 		myContains = theContains;
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 		<strong class="jxr_keyword">if</strong> (myContains) {
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> 			setExact(false);
@@ -157,7 +157,7 @@
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 	}
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/param/StringParam.html">StringParam</a> setExact(<strong class="jxr_keyword">boolean</strong> theExact) {
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 	<strong class="jxr_keyword">public</strong> <a name="StringParam" href="../../../../../ca/uhn/fhir/rest/param/StringParam.html#StringParam">StringParam</a> setExact(<strong class="jxr_keyword">boolean</strong> theExact) {
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 		myExact = theExact;
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 		<strong class="jxr_keyword">if</strong> (myExact) {
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 			setContains(false);
@@ -166,7 +166,7 @@
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> 	}
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> 
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/rest/param/StringParam.html">StringParam</a> setValue(String theValue) {
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 	<strong class="jxr_keyword">public</strong> <a name="StringParam" href="../../../../../ca/uhn/fhir/rest/param/StringParam.html#StringParam">StringParam</a> setValue(String theValue) {
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 		myValue = theValue;
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">this</strong>;
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 	}

@@ -22,7 +22,7 @@
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -38,7 +38,7 @@
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.DatatypeDef;
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  @DatatypeDef(name = <span class="jxr_string">"code"</span>, isSpecialization = <strong class="jxr_keyword">true</strong>)
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> BoundCodeDt&lt;T <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt; <strong class="jxr_keyword">extends</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/CodeDt.html">CodeDt</a> {
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> BoundCodeDt&lt;T <strong class="jxr_keyword">extends</strong> Enum&lt;?&gt;&gt; <strong class="jxr_keyword">extends</strong> <a name="CodeDt" href="../../../../../ca/uhn/fhir/model/primitive/CodeDt.html#CodeDt">CodeDt</a> {
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">private</strong> IValueSetEnumBinder&lt;T&gt; myBinder;
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  
@@ -46,16 +46,16 @@
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  <em class="jxr_javadoccomment">	 * @deprecated This constructor is provided only for serialization support. Do not call it directly!</em>
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  	@Deprecated
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/BoundCodeDt.html">BoundCodeDt</a>() {
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<strong class="jxr_keyword">public</strong> <a name="BoundCodeDt" href="../../../../../ca/uhn/fhir/model/primitive/BoundCodeDt.html#BoundCodeDt">BoundCodeDt</a>() {
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  		<em class="jxr_comment">// nothing</em>
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  	}
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/BoundCodeDt.html">BoundCodeDt</a>(IValueSetEnumBinder&lt;T&gt; theBinder) {
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	<strong class="jxr_keyword">public</strong> <a name="BoundCodeDt" href="../../../../../ca/uhn/fhir/model/primitive/BoundCodeDt.html#BoundCodeDt">BoundCodeDt</a>(IValueSetEnumBinder&lt;T&gt; theBinder) {
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  		Validate.notNull(theBinder, <span class="jxr_string">"theBinder must not be null"</span>);
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  		myBinder = theBinder;
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  	}
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../ca/uhn/fhir/model/primitive/BoundCodeDt.html">BoundCodeDt</a>(IValueSetEnumBinder&lt;T&gt; theBinder, T theValue) {
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">public</strong> <a name="BoundCodeDt" href="../../../../../ca/uhn/fhir/model/primitive/BoundCodeDt.html#BoundCodeDt">BoundCodeDt</a>(IValueSetEnumBinder&lt;T&gt; theBinder, T theValue) {
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  		Validate.notNull(theBinder, <span class="jxr_string">"theBinder must not be null"</span>);
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  		myBinder = theBinder;
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  		setValueAsEnum(theValue);

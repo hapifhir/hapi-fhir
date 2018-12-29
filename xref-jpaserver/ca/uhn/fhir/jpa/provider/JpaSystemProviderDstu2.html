@@ -50,7 +50,7 @@
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -60,14 +60,14 @@
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_comment"> * #L%</em>
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../ca/uhn/fhir/jpa/provider/JpaSystemProviderDstu2.html">JpaSystemProviderDstu2</a> <strong class="jxr_keyword">extends</strong> BaseJpaSystemProviderDstu2Plus&lt;Bundle, MetaDt&gt; {
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="JpaSystemProviderDstu2" href="../../../../../ca/uhn/fhir/jpa/provider/JpaSystemProviderDstu2.html#JpaSystemProviderDstu2">JpaSystemProviderDstu2</a> <strong class="jxr_keyword">extends</strong> BaseJpaSystemProviderDstu2Plus&lt;Bundle, MetaDt&gt; {
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  	@Autowired()
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  	@Qualifier(<span class="jxr_string">"mySystemDaoDstu2"</span>)
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  	<strong class="jxr_keyword">private</strong> IFhirSystemDao&lt;Bundle, MetaDt&gt; mySystemDao;
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  	@Autowired(required = false)
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	<strong class="jxr_keyword">private</strong> <a href="../../../../../ca/uhn/fhir/jpa/dao/IFulltextSearchSvc.html">IFulltextSearchSvc</a> mySearchDao;
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	<strong class="jxr_keyword">private</strong> <a name="IFulltextSearchSvc" href="../../../../../ca/uhn/fhir/jpa/dao/IFulltextSearchSvc.html#IFulltextSearchSvc">IFulltextSearchSvc</a> mySearchDao;
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  	@Operation(name = JpaConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerDt.<strong class="jxr_keyword">class</strong>)

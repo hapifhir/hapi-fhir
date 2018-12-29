@@ -1,8 +1,24 @@
+/*
+ * Copyright 2012-2018 Christophe Friederich
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 .navbar,
 .breadcrumb,
 .toc-separator
-#toc-bar,
-#toc-sidebar,
+#m-toc-topbar,
+#m-toc-sidebar,
 footer,
 .subfooter {
 	display: none !important;
@@ -20,8 +36,7 @@ body {
   text-shadow: none !important;
 }
 
-a,
-a:visited {
+a, a:visited {
   text-decoration: underline;
 }
 
@@ -37,15 +52,11 @@ abbr[title]:after {
  * Don't show links for images, or javascript/internal links, or header links
  */
 
-header a:after,
-.ir a:after,
-a[href^="javascript:"]:after,
-a[href^="#"]:after {
+.header a:after, .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after {
   content: "" !important;
 }
 
-pre,
-blockquote {
+pre, blockquote {
   border: 1px solid #999;
   page-break-inside: avoid;
 }
@@ -54,8 +65,7 @@ thead {
   display: table-header-group; /* h5bp.com/t */
 }
 
-tr,
-img {
+tr, img {
   page-break-inside: avoid;
 }
 
@@ -67,14 +77,11 @@ img {
   margin: 0.5cm;
 }
 
-p,
-h2,
-h3 {
+p, h2, h3 {
   orphans: 3;
   widows: 3;
 }
 
-h2,
-h3 {
+h2, h3 {
   page-break-after: avoid;
 }

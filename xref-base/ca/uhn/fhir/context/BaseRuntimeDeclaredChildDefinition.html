@@ -18,7 +18,7 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -40,8 +40,8 @@
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.Description;
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.ValidateUtil;
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html">BaseRuntimeDeclaredChildDefinition</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">BaseRuntimeChildDefinition</a> {
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IAccessor</a> myAccessor;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">abstract</strong> <strong class="jxr_keyword">class</strong> <a name="BaseRuntimeDeclaredChildDefinition" href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html#BaseRuntimeDeclaredChildDefinition">BaseRuntimeDeclaredChildDefinition</a> <strong class="jxr_keyword">extends</strong> <a name="BaseRuntimeChildDefinition" href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html#BaseRuntimeChildDefinition">BaseRuntimeChildDefinition</a> {
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> IAccessor myAccessor;
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">private</strong> String myBindingValueSet;
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String myElementName;
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> Field myField;
@@ -50,10 +50,10 @@
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> myMin;
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myModifier;
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> myMutator;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> IMutator myMutator;
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String myShortDefinition;
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> mySummary;
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	BaseRuntimeDeclaredChildDefinition(Field theField, <a href="../../../../ca/uhn/fhir/model/api/annotation/Child.html">Child</a> theChildAnnotation, <a href="../../../../ca/uhn/fhir/model/api/annotation/Description.html">Description</a> theDescriptionAnnotation, String theElementName) <strong class="jxr_keyword">throws</strong> ConfigurationException {
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	BaseRuntimeDeclaredChildDefinition(Field theField, Child theChildAnnotation, Description theDescriptionAnnotation, String theElementName) <strong class="jxr_keyword">throws</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a> {
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  		<strong class="jxr_keyword">super</strong>();
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  		Validate.notNull(theField, <span class="jxr_string">"No field speficied"</span>);
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  		ValidateUtil.isGreaterThanOrEqualTo(theChildAnnotation.min(), 0, <span class="jxr_string">"Min must be &gt;= 0"</span>);
@@ -77,17 +77,17 @@
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  		myField.setAccessible(<strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  		<strong class="jxr_keyword">if</strong> (List.<strong class="jxr_keyword">class</strong>.equals(myField.getType())) {
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  			<em class="jxr_comment">// TODO: verify that generic type is IElement</em>
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			myAccessor = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html">FieldListAccessor</a>();
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  			myMutator = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html">FieldListMutator</a>();
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			myAccessor = <strong class="jxr_keyword">new</strong> FieldListAccessor();
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  			myMutator = <strong class="jxr_keyword">new</strong> FieldListMutator();
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			myAccessor = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html">FieldPlainAccessor</a>();
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			myMutator = <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html">FieldPlainMutator</a>();
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			myAccessor = <strong class="jxr_keyword">new</strong> FieldPlainAccessor();
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  			myMutator = <strong class="jxr_keyword">new</strong> FieldPlainMutator();
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  		}
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  	}
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  	@Override
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IAccessor</a> getAccessor() {
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<strong class="jxr_keyword">public</strong> IAccessor getAccessor() {
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<strong class="jxr_keyword">return</strong> myAccessor;
 <a class="jxr_linenumber" name="L84" href="#L84">84</a>  	}
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  
@@ -119,7 +119,7 @@
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 	}
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 	@Override
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> getMutator() {
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 	<strong class="jxr_keyword">public</strong> IMutator getMutator() {
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 		<strong class="jxr_keyword">return</strong> myMutator;
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 	}
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 
@@ -151,7 +151,7 @@
 <a class="jxr_linenumber" name="L143" href="#L143">143</a> 		myModifier = theModifier;
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 	}
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html">FieldListAccessor</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IAccessor</a> {
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> FieldListAccessor <strong class="jxr_keyword">implements</strong> IAccessor {
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> 		@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
 <a class="jxr_linenumber" name="L148" href="#L148">148</a> 		@Override
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 		<strong class="jxr_keyword">public</strong> List&lt;IBase&gt; getValues(Object theTarget) {
@@ -159,7 +159,7 @@
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 			<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> 				retVal = (List&lt;IBase&gt;) myField.get(theTarget);
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 			} <strong class="jxr_keyword">catch</strong> (Exception e) {
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Failed to get value"</span>, e);
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Failed to get value"</span>, e);
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 			}
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 			
 <a class="jxr_linenumber" name="L157" href="#L157">157</a> 			<strong class="jxr_keyword">if</strong> (retVal == <strong class="jxr_keyword">null</strong>) {
@@ -169,13 +169,13 @@
 <a class="jxr_linenumber" name="L161" href="#L161">161</a> 		}
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 	}
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html">FieldListMutator</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> {
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> FieldListMutator <strong class="jxr_keyword">implements</strong> IMutator {
 <a class="jxr_linenumber" name="L165" href="#L165">165</a> 		@Override
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addValue(Object theTarget, <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> theValue) {
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addValue(Object theTarget, <a name="IBase" href="../../../../org/hl7/fhir/instance/model/api/IBase.html#IBase">IBase</a> theValue) {
 <a class="jxr_linenumber" name="L167" href="#L167">167</a> 			addValue(theTarget, theValue, false);
 <a class="jxr_linenumber" name="L168" href="#L168">168</a> 		}
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> 
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addValue(Object theTarget, <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> theValue, <strong class="jxr_keyword">boolean</strong> theClear) {
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 		<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addValue(Object theTarget, <a name="IBase" href="../../../../org/hl7/fhir/instance/model/api/IBase.html#IBase">IBase</a> theValue, <strong class="jxr_keyword">boolean</strong> theClear) {
 <a class="jxr_linenumber" name="L171" href="#L171">171</a> 			<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> 				@SuppressWarnings(<span class="jxr_string">"unchecked"</span>)
 <a class="jxr_linenumber" name="L173" href="#L173">173</a> 				List&lt;IBase&gt; existingList = (List&lt;IBase&gt;) myField.get(theTarget);
@@ -188,17 +188,17 @@
 <a class="jxr_linenumber" name="L180" href="#L180">180</a> 				}
 <a class="jxr_linenumber" name="L181" href="#L181">181</a> 				existingList.add(theValue);
 <a class="jxr_linenumber" name="L182" href="#L182">182</a> 			} <strong class="jxr_keyword">catch</strong> (Exception e) {
-<a class="jxr_linenumber" name="L183" href="#L183">183</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Failed to set value"</span>, e);
+<a class="jxr_linenumber" name="L183" href="#L183">183</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Failed to set value"</span>, e);
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> 			}
 <a class="jxr_linenumber" name="L185" href="#L185">185</a> 		}
 <a class="jxr_linenumber" name="L186" href="#L186">186</a> 
 <a class="jxr_linenumber" name="L187" href="#L187">187</a> 		@Override
-<a class="jxr_linenumber" name="L188" href="#L188">188</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValue(Object theTarget, <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> theValue) {
+<a class="jxr_linenumber" name="L188" href="#L188">188</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValue(Object theTarget, <a name="IBase" href="../../../../org/hl7/fhir/instance/model/api/IBase.html#IBase">IBase</a> theValue) {
 <a class="jxr_linenumber" name="L189" href="#L189">189</a> 			addValue(theTarget, theValue, <strong class="jxr_keyword">true</strong>);
 <a class="jxr_linenumber" name="L190" href="#L190">190</a> 		}
 <a class="jxr_linenumber" name="L191" href="#L191">191</a> 	}
 <a class="jxr_linenumber" name="L192" href="#L192">192</a> 
-<a class="jxr_linenumber" name="L193" href="#L193">193</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html">FieldPlainAccessor</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IAccessor</a> {
+<a class="jxr_linenumber" name="L193" href="#L193">193</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> FieldPlainAccessor <strong class="jxr_keyword">implements</strong> IAccessor {
 <a class="jxr_linenumber" name="L194" href="#L194">194</a> 		@Override
 <a class="jxr_linenumber" name="L195" href="#L195">195</a> 		<strong class="jxr_keyword">public</strong> List&lt;IBase&gt; getValues(Object theTarget) {
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> 			<strong class="jxr_keyword">try</strong> {
@@ -206,26 +206,26 @@
 <a class="jxr_linenumber" name="L198" href="#L198">198</a> 				<strong class="jxr_keyword">if</strong> (values == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L199" href="#L199">199</a> 					<strong class="jxr_keyword">return</strong> Collections.emptyList();
 <a class="jxr_linenumber" name="L200" href="#L200">200</a> 				}
-<a class="jxr_linenumber" name="L201" href="#L201">201</a> 				List&lt;IBase&gt; retVal = Collections.singletonList((IBase) values);
+<a class="jxr_linenumber" name="L201" href="#L201">201</a> 				List&lt;IBase&gt; retVal = Collections.singletonList((<a name="IBase" href="../../../../org/hl7/fhir/instance/model/api/IBase.html#IBase">IBase</a>) values);
 <a class="jxr_linenumber" name="L202" href="#L202">202</a> 				<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L203" href="#L203">203</a> 			} <strong class="jxr_keyword">catch</strong> (Exception e) {
-<a class="jxr_linenumber" name="L204" href="#L204">204</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Failed to get value"</span>, e);
+<a class="jxr_linenumber" name="L204" href="#L204">204</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Failed to get value"</span>, e);
 <a class="jxr_linenumber" name="L205" href="#L205">205</a> 			}
 <a class="jxr_linenumber" name="L206" href="#L206">206</a> 		}
 <a class="jxr_linenumber" name="L207" href="#L207">207</a> 	}
 <a class="jxr_linenumber" name="L208" href="#L208">208</a> 
-<a class="jxr_linenumber" name="L209" href="#L209">209</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeDeclaredChildDefinition.html">FieldPlainMutator</a> <strong class="jxr_keyword">implements</strong> <a href="../../../../ca/uhn/fhir/context/BaseRuntimeChildDefinition.html">IMutator</a> {
+<a class="jxr_linenumber" name="L209" href="#L209">209</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> FieldPlainMutator <strong class="jxr_keyword">implements</strong> IMutator {
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> 		@Override
-<a class="jxr_linenumber" name="L211" href="#L211">211</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addValue(Object theTarget, <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> theValue) {
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> addValue(Object theTarget, <a name="IBase" href="../../../../org/hl7/fhir/instance/model/api/IBase.html#IBase">IBase</a> theValue) {
 <a class="jxr_linenumber" name="L212" href="#L212">212</a> 			<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L213" href="#L213">213</a> 				myField.set(theTarget, theValue);
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> 			} <strong class="jxr_keyword">catch</strong> (Exception e) {
-<a class="jxr_linenumber" name="L215" href="#L215">215</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a>(<span class="jxr_string">"Failed to set value"</span>, e);
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Failed to set value"</span>, e);
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 			}
 <a class="jxr_linenumber" name="L217" href="#L217">217</a> 		}
 <a class="jxr_linenumber" name="L218" href="#L218">218</a> 
 <a class="jxr_linenumber" name="L219" href="#L219">219</a> 		@Override
-<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValue(Object theTarget, <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> theValue) {
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setValue(Object theTarget, <a name="IBase" href="../../../../org/hl7/fhir/instance/model/api/IBase.html#IBase">IBase</a> theValue) {
 <a class="jxr_linenumber" name="L221" href="#L221">221</a> 			addValue(theTarget, theValue);
 <a class="jxr_linenumber" name="L222" href="#L222">222</a> 		}
 <a class="jxr_linenumber" name="L223" href="#L223">223</a> 	}

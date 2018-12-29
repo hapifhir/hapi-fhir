@@ -1,150 +1,151 @@
+/*
+ * Copyright 2012-2018 Christophe Friederich
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /* Add additional stylesheets below
 -------------------------------------------------- */
-/*
-  Bootstrap's documentation styles
-  Special styles for presenting Bootstrap's documentation and examples
-*/
 
-/* Body and structure
--------------------------------------------------- */
-
-body {
-  position: relative;
-  padding-top: 40px;
+/** add external character for external link in body */
+.main-body .externalLink:after, footer .externalLink:after {
+    font-family: 'Font Awesome 5 Free';
+    display: inline-block;
+    content: "\f35d";
+    font-size: .6rem;
+    font-weight: 900;
+    margin-left: 3px;
 }
+
+/** add external character for external link in footer */
+footer .externalLink:after {
+    font-family: 'Font Awesome 5 Free';
+    display: inline-block;
+    content: "\f35d";
+    font-size: .7rem;
+    font-weight: 900;
+    margin-left: 5px;
+}
+
 
 /* Code in headings */
 h3 code {
-  font-size: 14px;
-  font-weight: normal;
+	font-size: 14px;
+	font-weight: normal;
 }
 
 /* Jumbotrons
 -------------------------------------------------- */
 .jumbotron {
-  position: relative;
-  padding: 40px 0;
-}
-.jumbotron h1 {
-  font-size: 80px;
-  font-weight: bold;
-  letter-spacing: -1px;
-  line-height: 1;
-}
-.jumbotron p {
-  font-size: 24px;
-  font-weight: 300;
-  line-height: 30px;
-  margin-bottom: 30px;
-}
-.jumbotron .btn-large {
-  font-size: 20px;
-  font-weight: normal;
-  padding: 14px 24px;
-  margin-right: 10px;
-  -webkit-border-radius: 6px;
-     -moz-border-radius: 6px;
-          border-radius: 6px;
-}
-.jumbotron .btn-large small {
-  font-size: 14px;
+	position: relative;
+	padding: 40px 0;
 }
 
+.jumbotron h1 {
+	font-size: 80px;
+	font-weight: bold;
+	letter-spacing: -1px;
+	line-height: 1;
+}
+
+.jumbotron p {
+	font-size: 24px;
+	font-weight: 300;
+	line-height: 30px;
+	margin-bottom: 30px;
+}
+
+.jumbotron .btn-large {
+	font-size: 20px;
+	font-weight: normal;
+	padding: 14px 24px;
+	margin-right: 10px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+}
+
+.jumbotron .btn-large small {
+	font-size: 14px;
+}
 
 /* Specific jumbotrons
 ------------------------- */
 /* supporting docs pages */
 .subhead {
-  padding-bottom: 0;
-  margin-bottom: 9px;
+	padding-bottom: 0;
+	margin-bottom: 9px;
+	padding-top: 10px;
 }
+
 .subhead h1 {
-  font-size: 54px;
-}
-
-/* Responsive Docs
--------------------------------------------------- */
-@media (max-width: 480px) {
-
-  /* Reduce padding above jumbotron */
-  body {
-    padding-top: 70px;
-  }
-
-  /* Adjust the jumbotron */
-  .jumbotron h1,
-  .jumbotron p {
-    text-align: center;
-    margin-right: 0;
-  }
-  .jumbotron h1 {
-    font-size: 45px;
-    margin-right: 0;
-  }
-  .jumbotron p {
-    margin-right: 0;
-    margin-left: 0;
-    font-size: 18px;
-    line-height: 24px;
-  }
-  .jumbotron .btn {
-    display: block;
-    font-size: 18px;
-    padding: 10px 14px;
-    margin: 0 auto 10px;
-  }
-
+	font-size: 54px;
 }
 
 
-@media (max-width: 768px) {
+/*--------------------------------------------------
+ * Responsive Docs
+ *-------------------------------------------------- */
+@media ( max-width : 480px) {
 
-  /* Remove any padding from the body */
-  body {
-    padding-top: 0;
-  }
-
-  /* Jumbotron buttons */
-  .jumbotron .btn {
-    margin-bottom: 10px;
-  }
+	/* Adjust the jumbotron */
+	.jumbotron h1, .jumbotron p {
+		text-align: center;
+		margin-right: 0;
+	}
+	.jumbotron h1 {
+		font-size: 45px;
+		margin-right: 0;
+	}
+	.jumbotron p {
+		margin-right: 0;
+		margin-left: 0;
+		font-size: 18px;
+		line-height: 24px;
+	}
+	.jumbotron .btn {
+		display: block;
+		font-size: 18px;
+		padding: 10px 14px;
+		margin: 0 auto 10px;
+	}
 }
 
+@media ( max-width : 768px) {
 
-@media (min-width: 480px) and (max-width: 768px) {
 
-  /* Scale down the jumbotron content */
-  .jumbotron h1 {
-    font-size: 54px;
-  }
-  .jumbotron p {
-    margin-right: 0;
-    margin-left: 0;
-  }
+	/* Jumbotron buttons */
+	.jumbotron .btn {
+		margin-bottom: 10px;
+	}
 }
 
-
-@media (min-width: 768px) and (max-width: 980px) {
-
-  /* Remove any padding from the body */
-  body {
-    padding-top: 0;
-  }
-
-  /* Scale down the jumbotron content */
-  .jumbotron h1 {
-    font-size: 72px;
-  }
+@media ( min-width : 480px) and (max-width: 768px) {
+	/* Scale down the jumbotron content */
+	.jumbotron h1 {
+		font-size: 54px;
+	}
+	.jumbotron p {
+		margin-right: 0;
+		margin-left: 0;
+	}
 }
 
+@media ( min-width : 768px) and (max-width: 980px) {
 
-@media (max-width: 980px) {
-
-  /* Unfloat brand */
-  .navbar-fixed-top .brand {
-    float: left;
-    margin-left: 0;
-    padding-left: 10px;
-    padding-right: 10px;
-  }
+	/* Scale down the jumbotron content */
+	.jumbotron h1 {
+		font-size: 72px;
+	}
 }
+

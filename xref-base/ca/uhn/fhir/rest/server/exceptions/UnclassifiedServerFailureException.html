@@ -22,7 +22,7 @@
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L19" href="#L19">19</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -37,7 +37,7 @@
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_javadoccomment"> * case of a server implementation.</em>
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  @CoverageIgnore
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/rest/server/exceptions/UnclassifiedServerFailureException.html">UnclassifiedServerFailureException</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../../../ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html">BaseServerResponseException</a> {
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="UnclassifiedServerFailureException" href="../../../../../../ca/uhn/fhir/rest/server/exceptions/UnclassifiedServerFailureException.html#UnclassifiedServerFailureException">UnclassifiedServerFailureException</a> <strong class="jxr_keyword">extends</strong> <a name="BaseServerResponseException" href="../../../../../../ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html#BaseServerResponseException">BaseServerResponseException</a> {
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment">	 * Constructor</em>
@@ -47,7 +47,7 @@
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  <em class="jxr_javadoccomment">	 * @param theMessage</em>
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  <em class="jxr_javadoccomment">	 *            The message to add to the status line</em>
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/rest/server/exceptions/UnclassifiedServerFailureException.html">UnclassifiedServerFailureException</a>(<strong class="jxr_keyword">int</strong> theStatusCode, String theMessage) {
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  	<strong class="jxr_keyword">public</strong> <a name="UnclassifiedServerFailureException" href="../../../../../../ca/uhn/fhir/rest/server/exceptions/UnclassifiedServerFailureException.html#UnclassifiedServerFailureException">UnclassifiedServerFailureException</a>(<strong class="jxr_keyword">int</strong> theStatusCode, String theMessage) {
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  		<strong class="jxr_keyword">super</strong>(theStatusCode, theMessage);
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  	}
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  
@@ -60,7 +60,7 @@
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  <em class="jxr_javadoccomment">	 *            The message to add to the status line</em>
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  <em class="jxr_javadoccomment">	 *  @param theOperationOutcome The OperationOutcome resource to return to the client</em>
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  	<strong class="jxr_keyword">public</strong> <a href="../../../../../../ca/uhn/fhir/rest/server/exceptions/UnclassifiedServerFailureException.html">UnclassifiedServerFailureException</a>(<strong class="jxr_keyword">int</strong> theStatusCode, String theMessage, <a href="../../../../../../org/hl7/fhir/instance/model/api/IBaseOperationOutcome.html">IBaseOperationOutcome</a> theOperationOutcome) {
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  	<strong class="jxr_keyword">public</strong> <a name="UnclassifiedServerFailureException" href="../../../../../../ca/uhn/fhir/rest/server/exceptions/UnclassifiedServerFailureException.html#UnclassifiedServerFailureException">UnclassifiedServerFailureException</a>(<strong class="jxr_keyword">int</strong> theStatusCode, String theMessage, <a name="IBaseOperationOutcome" href="../../../../../../org/hl7/fhir/instance/model/api/IBaseOperationOutcome.html#IBaseOperationOutcome">IBaseOperationOutcome</a> theOperationOutcome) {
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  		<strong class="jxr_keyword">super</strong>(theStatusCode, theMessage, theOperationOutcome);
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  	}
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  

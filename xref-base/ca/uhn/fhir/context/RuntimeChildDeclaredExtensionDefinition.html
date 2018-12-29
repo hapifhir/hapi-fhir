@@ -18,7 +18,7 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -45,7 +45,7 @@
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.Extension;
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.util.ReflectionUtil;
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeChildDeclaredExtensionDefinition.html">RuntimeChildDeclaredExtensionDefinition</a> <strong class="jxr_keyword">extends</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeChildChoiceDefinition.html">RuntimeChildChoiceDefinition</a> {
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="RuntimeChildDeclaredExtensionDefinition" href="../../../../ca/uhn/fhir/context/RuntimeChildDeclaredExtensionDefinition.html#RuntimeChildDeclaredExtensionDefinition">RuntimeChildDeclaredExtensionDefinition</a> <strong class="jxr_keyword">extends</strong> <a name="RuntimeChildChoiceDefinition" href="../../../../ca/uhn/fhir/context/RuntimeChildChoiceDefinition.html#RuntimeChildChoiceDefinition">RuntimeChildChoiceDefinition</a> {
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">boolean</strong> myDefinedLocally;
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  	<strong class="jxr_keyword">private</strong> String myExtensionUrl;
@@ -54,7 +54,7 @@
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">volatile</strong> Object myInstanceConstructorArguments;
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  	<strong class="jxr_keyword">private</strong> Class&lt;?&gt; myEnumerationType;
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  	<strong class="jxr_keyword">private</strong> Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; myChildType;
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeResourceBlockDefinition.html">RuntimeResourceBlockDefinition</a> myChildResourceBlock;
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	<strong class="jxr_keyword">private</strong> <a name="RuntimeResourceBlockDefinition" href="../../../../ca/uhn/fhir/context/RuntimeResourceBlockDefinition.html#RuntimeResourceBlockDefinition">RuntimeResourceBlockDefinition</a> myChildResourceBlock;
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">private</strong> BaseRuntimeElementDefinition&lt;?&gt; myChildDef;
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<em class="jxr_javadoccomment">/**</em>
@@ -64,9 +64,9 @@
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  <em class="jxr_javadoccomment">	 * @param theDefinedLocally</em>
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment">	 *           See {@link Extension#definedLocally()}</em>
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	RuntimeChildDeclaredExtensionDefinition(Field theField, <a href="../../../../ca/uhn/fhir/model/api/annotation/Child.html">Child</a> theChild, <a href="../../../../ca/uhn/fhir/model/api/annotation/Description.html">Description</a> theDescriptionAnnotation, <a href="../../../../ca/uhn/fhir/model/api/annotation/Extension.html">Extension</a> theExtension, String theElementName, String theExtensionUrl,
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	RuntimeChildDeclaredExtensionDefinition(Field theField, Child theChild, Description theDescriptionAnnotation, Extension theExtension, String theElementName, String theExtensionUrl,
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  			Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; theChildType, Object theBoundTypeBinder)
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			<strong class="jxr_keyword">throws</strong> <a href="../../../../ca/uhn/fhir/context/ConfigurationException.html">ConfigurationException</a> {
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  			<strong class="jxr_keyword">throws</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a> {
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<strong class="jxr_keyword">super</strong>(theField, theElementName, theChild, theDescriptionAnnotation);
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  		assert isNotBlank(theExtensionUrl);
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  		myExtensionUrl = theExtensionUrl;
@@ -113,7 +113,7 @@
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 		<strong class="jxr_keyword">if</strong> (retVal != <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 			BaseRuntimeElementDefinition&lt;?&gt; childDef = <strong class="jxr_keyword">super</strong>.getChildElementDefinitionByDatatype(theDatatype);
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			<strong class="jxr_keyword">if</strong> (childDef instanceof RuntimeResourceBlockDefinition) {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			<strong class="jxr_keyword">if</strong> (childDef instanceof <a name="RuntimeResourceBlockDefinition" href="../../../../ca/uhn/fhir/context/RuntimeResourceBlockDefinition.html#RuntimeResourceBlockDefinition">RuntimeResourceBlockDefinition</a>) {
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 				<em class="jxr_comment">// Child is a newted extension</em>
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 				retVal = <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 			}
@@ -158,7 +158,7 @@
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">super</strong>.getChildElementDefinitionByDatatype(theDatatype);
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 	}
 <a class="jxr_linenumber" name="L152" href="#L152">152</a> 
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../ca/uhn/fhir/context/RuntimeChildDeclaredExtensionDefinition.html">RuntimeChildDeclaredExtensionDefinition</a> getChildExtensionForUrl(String theUrl) {
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 	<strong class="jxr_keyword">public</strong> <a name="RuntimeChildDeclaredExtensionDefinition" href="../../../../ca/uhn/fhir/context/RuntimeChildDeclaredExtensionDefinition.html#RuntimeChildDeclaredExtensionDefinition">RuntimeChildDeclaredExtensionDefinition</a> getChildExtensionForUrl(String theUrl) {
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 		<strong class="jxr_keyword">return</strong> myUrlToChildExtension.get(theUrl);
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 	}
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 
@@ -177,7 +177,7 @@
 <a class="jxr_linenumber" name="L169" href="#L169">169</a> 	}
 <a class="jxr_linenumber" name="L170" href="#L170">170</a> 
 <a class="jxr_linenumber" name="L171" href="#L171">171</a> 	@Override
-<a class="jxr_linenumber" name="L172" href="#L172">172</a> 	<strong class="jxr_keyword">void</strong> sealAndInitialize(<a href="../../../../ca/uhn/fhir/context/FhirContext.html">FhirContext</a> theContext, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> 	<strong class="jxr_keyword">void</strong> sealAndInitialize(<a name="FhirContext" href="../../../../ca/uhn/fhir/context/FhirContext.html#FhirContext">FhirContext</a> theContext, Map&lt;Class&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt;, BaseRuntimeElementDefinition&lt;?&gt;&gt; theClassToElementDefinitions) {
 <a class="jxr_linenumber" name="L173" href="#L173">173</a> 		myUrlToChildExtension = <strong class="jxr_keyword">new</strong> HashMap&lt;String, RuntimeChildDeclaredExtensionDefinition&gt;();
 <a class="jxr_linenumber" name="L174" href="#L174">174</a> 
 <a class="jxr_linenumber" name="L175" href="#L175">175</a> 		BaseRuntimeElementDefinition&lt;?&gt; elementDef = theClassToElementDefinitions.get(myChildType);
@@ -192,7 +192,7 @@
 <a class="jxr_linenumber" name="L184" href="#L184">184</a> 			}
 <a class="jxr_linenumber" name="L185" href="#L185">185</a> 		}
 <a class="jxr_linenumber" name="L186" href="#L186">186</a> 
-<a class="jxr_linenumber" name="L187" href="#L187">187</a> 		<strong class="jxr_keyword">if</strong> (elementDef instanceof RuntimePrimitiveDatatypeDefinition || elementDef instanceof RuntimeCompositeDatatypeDefinition) {
+<a class="jxr_linenumber" name="L187" href="#L187">187</a> 		<strong class="jxr_keyword">if</strong> (elementDef instanceof <a name="RuntimePrimitiveDatatypeDefinition" href="../../../../ca/uhn/fhir/context/RuntimePrimitiveDatatypeDefinition.html#RuntimePrimitiveDatatypeDefinition">RuntimePrimitiveDatatypeDefinition</a> || elementDef instanceof <a name="RuntimeCompositeDatatypeDefinition" href="../../../../ca/uhn/fhir/context/RuntimeCompositeDatatypeDefinition.html#RuntimeCompositeDatatypeDefinition">RuntimeCompositeDatatypeDefinition</a>) {
 <a class="jxr_linenumber" name="L188" href="#L188">188</a> <em class="jxr_comment">//			myDatatypeChildName = "value" + elementDef.getName().substring(0, 1).toUpperCase() + elementDef.getName().substring(1);</em>
 <a class="jxr_linenumber" name="L189" href="#L189">189</a> <em class="jxr_comment">//			if ("valueResourceReference".equals(myDatatypeChildName)) {</em>
 <a class="jxr_linenumber" name="L190" href="#L190">190</a> 				<em class="jxr_comment">// Per one of the examples here: http://hl7.org/implement/standards/fhir/extensibility.html#extension</em>
@@ -203,12 +203,12 @@
 <a class="jxr_linenumber" name="L195" href="#L195">195</a> <em class="jxr_comment">//			} else {</em>
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> 				myChildDef = elementDef;
 <a class="jxr_linenumber" name="L197" href="#L197">197</a> <em class="jxr_comment">//			}</em>
-<a class="jxr_linenumber" name="L198" href="#L198">198</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (elementDef instanceof RuntimeResourceBlockDefinition) {
-<a class="jxr_linenumber" name="L199" href="#L199">199</a> 			RuntimeResourceBlockDefinition extDef = ((RuntimeResourceBlockDefinition) elementDef);
-<a class="jxr_linenumber" name="L200" href="#L200">200</a> 			<strong class="jxr_keyword">for</strong> (RuntimeChildDeclaredExtensionDefinition next : extDef.getExtensions()) {
+<a class="jxr_linenumber" name="L198" href="#L198">198</a> 		} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (elementDef instanceof <a name="RuntimeResourceBlockDefinition" href="../../../../ca/uhn/fhir/context/RuntimeResourceBlockDefinition.html#RuntimeResourceBlockDefinition">RuntimeResourceBlockDefinition</a>) {
+<a class="jxr_linenumber" name="L199" href="#L199">199</a> 			RuntimeResourceBlockDefinition extDef = ((<a name="RuntimeResourceBlockDefinition" href="../../../../ca/uhn/fhir/context/RuntimeResourceBlockDefinition.html#RuntimeResourceBlockDefinition">RuntimeResourceBlockDefinition</a>) elementDef);
+<a class="jxr_linenumber" name="L200" href="#L200">200</a> 			<strong class="jxr_keyword">for</strong> (<a name="RuntimeChildDeclaredExtensionDefinition" href="../../../../ca/uhn/fhir/context/RuntimeChildDeclaredExtensionDefinition.html#RuntimeChildDeclaredExtensionDefinition">RuntimeChildDeclaredExtensionDefinition</a> next : extDef.getExtensions()) {
 <a class="jxr_linenumber" name="L201" href="#L201">201</a> 				myUrlToChildExtension.put(next.getExtensionUrl(), next);
 <a class="jxr_linenumber" name="L202" href="#L202">202</a> 			}
-<a class="jxr_linenumber" name="L203" href="#L203">203</a> 			myChildResourceBlock = (RuntimeResourceBlockDefinition) elementDef;
+<a class="jxr_linenumber" name="L203" href="#L203">203</a> 			myChildResourceBlock = (<a name="RuntimeResourceBlockDefinition" href="../../../../ca/uhn/fhir/context/RuntimeResourceBlockDefinition.html#RuntimeResourceBlockDefinition">RuntimeResourceBlockDefinition</a>) elementDef;
 <a class="jxr_linenumber" name="L204" href="#L204">204</a> 		}
 <a class="jxr_linenumber" name="L205" href="#L205">205</a> 
 <a class="jxr_linenumber" name="L206" href="#L206">206</a> 		myUrlToChildExtension = Collections.unmodifiableMap(myUrlToChildExtension);
@@ -216,7 +216,7 @@
 <a class="jxr_linenumber" name="L208" href="#L208">208</a> 		<strong class="jxr_keyword">super</strong>.sealAndInitialize(theContext, theClassToElementDefinitions);
 <a class="jxr_linenumber" name="L209" href="#L209">209</a> 	}
 <a class="jxr_linenumber" name="L210" href="#L210">210</a> 
-<a class="jxr_linenumber" name="L211" href="#L211">211</a> 	<strong class="jxr_keyword">public</strong> <a href="../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> newInstance() {
+<a class="jxr_linenumber" name="L211" href="#L211">211</a> 	<strong class="jxr_keyword">public</strong> <a name="IBase" href="../../../../org/hl7/fhir/instance/model/api/IBase.html#IBase">IBase</a> newInstance() {
 <a class="jxr_linenumber" name="L212" href="#L212">212</a> 		<strong class="jxr_keyword">return</strong> ReflectionUtil.newInstance(myChildType);
 <a class="jxr_linenumber" name="L213" href="#L213">213</a> 	}
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> 

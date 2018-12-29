@@ -14,7 +14,7 @@
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.dstu3.*;
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.dstu3.model.*;
@@ -24,7 +24,7 @@
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.SummaryEnum;
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.SearchTotalModeEnum;
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/jpa/rp/dstu3/PatientResourceProvider.html">PatientResourceProvider</a> <strong class="jxr_keyword">extends</strong> 
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="PatientResourceProvider" href="../../../../../../ca/uhn/fhir/jpa/rp/dstu3/PatientResourceProvider.html#PatientResourceProvider">PatientResourceProvider</a> <strong class="jxr_keyword">extends</strong> 
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  	BaseJpaResourceProviderPatientDstu3
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  	{
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
@@ -200,7 +200,7 @@
 <a class="jxr_linenumber" name="L192" href="#L192">192</a> 			) {
 <a class="jxr_linenumber" name="L193" href="#L193">193</a> 		startRequest(theServletRequest);
 <a class="jxr_linenumber" name="L194" href="#L194">194</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L195" href="#L195">195</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
+<a class="jxr_linenumber" name="L195" href="#L195">195</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> SearchParameterMap();
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_CONTENT, theFtContent);
 <a class="jxr_linenumber" name="L197" href="#L197">197</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_TEXT, theFtText);
 <a class="jxr_linenumber" name="L198" href="#L198">198</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_TAG, theSearchForTag);

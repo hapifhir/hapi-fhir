@@ -20,7 +20,7 @@
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -34,7 +34,7 @@
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IQueryParameterType;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IOperationUntyped.html">IOperationUntyped</a> {
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="IOperationUntyped" href="../../../../../ca/uhn/fhir/rest/gclient/IOperationUntyped.html#IOperationUntyped">IOperationUntyped</a> {
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment">	 * Use the given parameters resource as the input to the operation</em>
@@ -73,7 +73,7 @@
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  <em class="jxr_javadoccomment">	 * @param theName The first parameter name</em>
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  <em class="jxr_javadoccomment">	 * @param theValue The first parameter value</em>
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	&lt;T <strong class="jxr_keyword">extends</strong> IBaseParameters&gt; IOperationUntypedWithInputAndPartialOutput&lt;T&gt; withParameter(Class&lt;T&gt; theParameterType, String theName, <a href="../../../../../org/hl7/fhir/instance/model/api/IBase.html">IBase</a> theValue);
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  	&lt;T <strong class="jxr_keyword">extends</strong> IBaseParameters&gt; IOperationUntypedWithInputAndPartialOutput&lt;T&gt; withParameter(Class&lt;T&gt; theParameterType, String theName, <a name="IBase" href="../../../../../org/hl7/fhir/instance/model/api/IBase.html#IBase">IBase</a> theValue);
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment">	 * Use chained method calls to construct a Parameters input. This form is a convenience</em>
@@ -85,7 +85,7 @@
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment">	 * @param theName The first parameter name</em>
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment">	 * @param theValue The first parameter value</em>
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	&lt;T <strong class="jxr_keyword">extends</strong> IBaseParameters&gt; IOperationUntypedWithInputAndPartialOutput&lt;T&gt; withSearchParameter(Class&lt;T&gt; theParameterType, String theName, <a href="../../../../../ca/uhn/fhir/model/api/IQueryParameterType.html">IQueryParameterType</a> theValue);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	&lt;T <strong class="jxr_keyword">extends</strong> IBaseParameters&gt; IOperationUntypedWithInputAndPartialOutput&lt;T&gt; withSearchParameter(Class&lt;T&gt; theParameterType, String theName, <a name="IQueryParameterType" href="../../../../../ca/uhn/fhir/model/api/IQueryParameterType.html#IQueryParameterType">IQueryParameterType</a> theValue);
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  }
 </pre>

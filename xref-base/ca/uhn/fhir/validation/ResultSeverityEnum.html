@@ -18,7 +18,7 @@
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -32,7 +32,7 @@
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> java.util.HashMap;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> java.util.Map;
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">public</strong> enum <a href="../../../../ca/uhn/fhir/validation/ResultSeverityEnum.html">ResultSeverityEnum</a> {
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">public</strong> enum <a name="ResultSeverityEnum" href="../../../../ca/uhn/fhir/validation/ResultSeverityEnum.html#ResultSeverityEnum">ResultSeverityEnum</a> {
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_javadoccomment">	 * The issue has no relation to the degree of success of the action</em>
@@ -57,7 +57,7 @@
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, ResultSeverityEnum&gt; ourValues;
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">private</strong> String myCode;
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">private</strong> <a href="../../../../ca/uhn/fhir/validation/ResultSeverityEnum.html">ResultSeverityEnum</a>(String theCode) {
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">private</strong> <a name="ResultSeverityEnum" href="../../../../ca/uhn/fhir/validation/ResultSeverityEnum.html#ResultSeverityEnum">ResultSeverityEnum</a>(String theCode) {
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  		myCode = theCode;
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	}
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  
@@ -65,10 +65,10 @@
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  		<strong class="jxr_keyword">return</strong> myCode;
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  	}
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a href="../../../../ca/uhn/fhir/validation/ResultSeverityEnum.html">ResultSeverityEnum</a> fromCode(String theCode) {
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <a name="ResultSeverityEnum" href="../../../../ca/uhn/fhir/validation/ResultSeverityEnum.html#ResultSeverityEnum">ResultSeverityEnum</a> fromCode(String theCode) {
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  		<strong class="jxr_keyword">if</strong> (ourValues == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  			HashMap&lt;String, ResultSeverityEnum&gt; values = <strong class="jxr_keyword">new</strong> HashMap&lt;String, ResultSeverityEnum&gt;();
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  			<strong class="jxr_keyword">for</strong> (ResultSeverityEnum next : values()) {
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  			<strong class="jxr_keyword">for</strong> (<a name="ResultSeverityEnum" href="../../../../ca/uhn/fhir/validation/ResultSeverityEnum.html#ResultSeverityEnum">ResultSeverityEnum</a> next : values()) {
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  				values.put(next.getCode(), next);
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  			}
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  			ourValues = Collections.unmodifiableMap(values);
@@ -83,7 +83,7 @@
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  <em class="jxr_javadoccomment">	 *</em>
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  <em class="jxr_javadoccomment">	 * &lt;code&gt;ResultSeverityEnum resultSeverityEnum = ResultSeverityEnum.values[ordinal];&lt;/code&gt;</em>
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a href="../../../../ca/uhn/fhir/validation/ResultSeverityEnum.html">ResultSeverityEnum</a> values[] = values();
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <a name="ResultSeverityEnum" href="../../../../ca/uhn/fhir/validation/ResultSeverityEnum.html#ResultSeverityEnum">ResultSeverityEnum</a> values[] = values();
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  }
 </pre>
 <hr/>

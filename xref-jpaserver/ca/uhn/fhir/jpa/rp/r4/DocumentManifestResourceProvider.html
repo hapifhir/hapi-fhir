@@ -14,7 +14,7 @@
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.StringUtils;
 <a class="jxr_linenumber" name="L7" href="#L7">7</a>   
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.r4.*;
-<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.SearchParameterMap;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.Include;
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.annotation.*;
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.model.*;
@@ -24,7 +24,7 @@
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.SummaryEnum;
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.SearchTotalModeEnum;
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  
-<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../../ca/uhn/fhir/jpa/rp/r4/DocumentManifestResourceProvider.html">DocumentManifestResourceProvider</a> <strong class="jxr_keyword">extends</strong> 
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="DocumentManifestResourceProvider" href="../../../../../../ca/uhn/fhir/jpa/rp/r4/DocumentManifestResourceProvider.html#DocumentManifestResourceProvider">DocumentManifestResourceProvider</a> <strong class="jxr_keyword">extends</strong> 
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  	JpaResourceProviderR4&lt;DocumentManifest&gt;
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  	{
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
@@ -73,9 +73,9 @@
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  			@OptionalParam(name=<span class="jxr_string">"_language"</span>)
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  			StringAndListParam the_language, 
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>    
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  			@Description(shortDefinition=<span class="jxr_string">"Who and/or what had an agent participation"</span>)
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  			@OptionalParam(name=<span class="jxr_string">"agent"</span>, targetTypes={  } )
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			ReferenceAndListParam theAgent, 
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  			@Description(shortDefinition=<span class="jxr_string">"Who and/or what authored the DocumentManifest"</span>)
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  			@OptionalParam(name=<span class="jxr_string">"author"</span>, targetTypes={  } )
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			ReferenceAndListParam theAuthor, 
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>    
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  			@Description(shortDefinition=<span class="jxr_string">"When this document manifest created"</span>)
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  			@OptionalParam(name=<span class="jxr_string">"created"</span>)
@@ -135,7 +135,7 @@
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 			DateRangeParam theLastUpdated, 
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 			@IncludeParam(allow= {
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 					<span class="jxr_string">"DocumentManifest:agent"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:agent"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:agent"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:agent"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:agent"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:agent"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> 					, <span class="jxr_string">"*"</span>
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 					<span class="jxr_string">"DocumentManifest:author"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:author"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:author"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:author"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:author"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> , 						<span class="jxr_string">"DocumentManifest:author"</span> , 					<span class="jxr_string">"DocumentManifest:item"</span> , 					<span class="jxr_string">"DocumentManifest:patient"</span> , 					<span class="jxr_string">"DocumentManifest:recipient"</span> , 					<span class="jxr_string">"DocumentManifest:related-ref"</span> , 					<span class="jxr_string">"DocumentManifest:subject"</span> 					, <span class="jxr_string">"*"</span>
 <a class="jxr_linenumber" name="L131" href="#L131">131</a> 			}) 
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> 			Set&lt;Include&gt; theIncludes,
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 			
@@ -152,7 +152,7 @@
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 			) {
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 		startRequest(theServletRequest);
 <a class="jxr_linenumber" name="L146" href="#L146">146</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> <a href="../../../../../../ca/uhn/fhir/jpa/dao/SearchParameterMap.html">SearchParameterMap</a>();
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			SearchParameterMap paramMap = <strong class="jxr_keyword">new</strong> SearchParameterMap();
 <a class="jxr_linenumber" name="L148" href="#L148">148</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_CONTENT, theFtContent);
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_TEXT, theFtText);
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 			paramMap.add(ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.Constants.PARAM_TAG, theSearchForTag);
@@ -161,7 +161,7 @@
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 			paramMap.add(<span class="jxr_string">"_has"</span>, theHas);
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 			paramMap.add(<span class="jxr_string">"_id"</span>, the_id);
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 			paramMap.add(<span class="jxr_string">"_language"</span>, the_language);
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			paramMap.add(<span class="jxr_string">"agent"</span>, theAgent);
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			paramMap.add(<span class="jxr_string">"author"</span>, theAuthor);
 <a class="jxr_linenumber" name="L157" href="#L157">157</a> 			paramMap.add(<span class="jxr_string">"created"</span>, theCreated);
 <a class="jxr_linenumber" name="L158" href="#L158">158</a> 			paramMap.add(<span class="jxr_string">"description"</span>, theDescription);
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> 			paramMap.add(<span class="jxr_string">"identifier"</span>, theIdentifier);

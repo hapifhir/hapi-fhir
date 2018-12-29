@@ -19,10 +19,8 @@ ca.uhn.fhir.jpa.search.reindex
 ca.uhn.fhir.jpa.search.warm
 ca.uhn.fhir.jpa.sp
 ca.uhn.fhir.jpa.subscription
-ca.uhn.fhir.jpa.subscription.email
-ca.uhn.fhir.jpa.subscription.matcher
-ca.uhn.fhir.jpa.subscription.resthook
-ca.uhn.fhir.jpa.subscription.websocket
+ca.uhn.fhir.jpa.subscription.dbcache
+ca.uhn.fhir.jpa.subscription.dbmatcher
 ca.uhn.fhir.jpa.term
 ca.uhn.fhir.jpa.term.loinc
 ca.uhn.fhir.jpa.term.snomedct

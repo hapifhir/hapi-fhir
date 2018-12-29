@@ -20,7 +20,7 @@
 <a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
 <a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
-<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2." target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.</a>0</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * </em>
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L18" href="#L18">18</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
@@ -29,15 +29,15 @@
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> * limitations under the License.</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_comment"> * #L%</em>
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_comment"> */</em>
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a href="../../../../../ca/uhn/fhir/rest/gclient/IOperation.html">IOperation</a> <strong class="jxr_keyword">extends</strong> IBaseOn&lt;IOperationUnnamed&gt; {
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="IOperation" href="../../../../../ca/uhn/fhir/rest/gclient/IOperation.html#IOperation">IOperation</a> <strong class="jxr_keyword">extends</strong> IBaseOn&lt;IOperationUnnamed&gt; {
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  	<em class="jxr_javadoccomment">/**</em>
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment">	 * This operation operates on a specific version of a resource</em>
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  	IOperationUnnamed onInstanceVersion(<a href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html">IIdType</a> theId);
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  	IOperationUnnamed onInstanceVersion(<a name="IIdType" href="../../../../../org/hl7/fhir/instance/model/api/IIdType.html#IIdType">IIdType</a> theId);
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment">	 * This operation is called &lt;b&gt;&lt;a href="https://www.hl7.org/fhir/messaging.html"&gt;$process-message&lt;/a&gt;&lt;/b&gt; as defined by the FHIR</em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_javadoccomment">	 * This operation is called &lt;b&gt;&lt;a href="<a href="https://www.hl7.org/fhir/messaging.html" target="alexandria_uri">https://www.hl7.org/fhir/messaging.html</a>"&gt;$process-message&lt;/a&gt;&lt;/b&gt; as defined by the FHIR</em>
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_javadoccomment">	 * specification.&lt;br&gt;&lt;br&gt;</em>
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_javadoccomment">	 * Usage :&lt;br&gt;</em>
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_javadoccomment">	 * &lt;code&gt;</em>
@@ -65,7 +65,7 @@
 <a class="jxr_linenumber" name="L57" href="#L57">57</a>  <em class="jxr_javadoccomment">	 *</em>
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">	 * @return An interface that defines the operation related to sending</em>
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">	 * Messages to a Messaging Server</em>
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment">	 * @see &lt;a href="https://www.hl7.org/fhir/messaging.html"&gt;2.4 Messaging</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment">	 * @see &lt;a href="<a href="https://www.hl7.org/fhir/messaging.html" target="alexandria_uri">https://www.hl7.org/fhir/messaging.html</a>"&gt;2.4 Messaging</em>
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment">	 * using FHIR Resources&lt;/a&gt;</em>
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment">	 */</em>
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  	IOperationProcessMsg processMessage();
