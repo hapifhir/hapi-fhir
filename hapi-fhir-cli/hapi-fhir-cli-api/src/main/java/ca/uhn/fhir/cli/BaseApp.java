@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,6 @@ public abstract class BaseApp {
 		PrintWriter pw = new PrintWriter(System.out);
 		fmt.printOptions(pw, columns, theCommand.getOptions(), 2, 2);
 		pw.flush();
-		pw.close();
 
 		// That's it!
 		System.out.println();
@@ -199,7 +198,9 @@ public abstract class BaseApp {
 				}
 			}
 			if (command == null) {
-				System.err.println("Unknown command: " + theArgs[1]);
+				String message = "Unknown command: " + theArgs[1];
+				System.err.println(message);
+				exitDueToProblem(message);
 				return;
 			}
 			logCommandUsage(command);
@@ -215,9 +216,11 @@ public abstract class BaseApp {
 		}
 
 		if (command == null) {
-			System.out.println("Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE));
+			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
+			System.out.println(message);
 			System.out.println();
 			logUsage();
+			exitDueToProblem(message);
 			return;
 		}
 
@@ -250,7 +253,9 @@ public abstract class BaseApp {
 			}
 
 		} catch (ParseException e) {
-			loggingConfigOff();
+			if (!"true".equals(System.getProperty("test"))) {
+				loggingConfigOff();
+			}
 			System.err.println("Invalid command options for command: " + command.getCommandName());
 			System.err.println("  " + ansi().fg(Ansi.Color.RED).bold() + e.getMessage());
 			System.err.println("" + ansi().fg(Ansi.Color.WHITE).boldOff());
@@ -267,6 +272,14 @@ public abstract class BaseApp {
 			exitDueToException(new CommandFailureException("Error: " + t.toString(), t));
 		}
 
+	}
+
+	private void exitDueToProblem(String theDescription) {
+		if ("true".equals(System.getProperty("test"))) {
+			throw new Error(theDescription);
+		} else {
+			System.exit(1);
+		}
 	}
 
 	private void exitDueToException(Throwable e) {
@@ -323,7 +336,7 @@ public abstract class BaseApp {
 	private class MyShutdownHook extends Thread {
 		private final BaseCommand myFinalCommand;
 
-		public MyShutdownHook(BaseCommand theFinalCommand) {
+		MyShutdownHook(BaseCommand theFinalCommand) {
 			myFinalCommand = theFinalCommand;
 		}
 

@@ -80,6 +80,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.util.ListUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -2060,7 +2061,8 @@ public class SearchBuilder implements ISearchBuilder {
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
 						String sql;
-						boolean haveTargetTypesDefinedByParam = param != null && param.getTargets() != null && param.getTargets().isEmpty() == false;
+
+						boolean haveTargetTypesDefinedByParam = param.getTargets() != null && param.getTargets().isEmpty() == false;
 						if (targetResourceType != null) {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
 						} else if (haveTargetTypesDefinedByParam) {
@@ -2068,6 +2070,7 @@ public class SearchBuilder implements ISearchBuilder {
 						} else {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						}
+
 						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
 						q.setParameter("src_path", nextPath);
 						q.setParameter("target_pids", nextRoundMatches);
