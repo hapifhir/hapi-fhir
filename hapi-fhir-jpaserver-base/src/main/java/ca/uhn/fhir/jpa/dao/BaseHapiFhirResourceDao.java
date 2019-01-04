@@ -380,7 +380,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			} else if (match.size() == 1) {
 				Long pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid);
-				return toMethodOutcome(entity, null).setCreated(false);
+				IBaseResource resource = toResource(entity, false);
+				return toMethodOutcome(entity, resource).setCreated(false);
 			}
 		}
 
@@ -1141,15 +1142,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	private DaoMethodOutcome toMethodOutcome(@Nonnull final ResourceTable theEntity, @Nullable IBaseResource theResource) {
+	private DaoMethodOutcome toMethodOutcome(@Nonnull final ResourceTable theEntity, @Nonnull IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		IIdType id = null;
-		if (theResource != null) {
+		if (theResource.getIdElement().getValue() != null) {
 			id = theResource.getIdElement();
 		}
 		if (id == null) {
-			id = ((BaseHasResource) theEntity).getIdDt();
+			id = theEntity.getIdDt();
 			if (getContext().getVersion().getVersion().isRi()) {
 				id = getContext().getVersion().newIdType().setValue(id.getValue());
 			}
@@ -1294,7 +1295,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * directly. So we just bail now.
 		 */
 		if (!thePerformIndexing) {
-			DaoMethodOutcome outcome = toMethodOutcome(entity, null).setCreated(false);
+			theResource.setId(entity.getIdDt().getValue());
+			DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(false);
 			outcome.setPreviousResource(oldResource);
 			return outcome;
 		}
