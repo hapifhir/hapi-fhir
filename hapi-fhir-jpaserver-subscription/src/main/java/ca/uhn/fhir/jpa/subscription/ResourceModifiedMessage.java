@@ -51,7 +51,6 @@ public class ResourceModifiedMessage {
 	@JsonIgnore
 	private transient IBaseResource myPayloadDecoded;
 
-	@Override
 	public String getPayloadId() {
 		return myPayloadId;
 	}
@@ -94,7 +93,7 @@ public class ResourceModifiedMessage {
 		}
 	}
 
-	private void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
+	public void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
 		/*
 		 * Note: Don't set myPayloadDecoded in here- This is a false optimization since
 		 * it doesn't actually get used if anyone is doing subscriptions at any

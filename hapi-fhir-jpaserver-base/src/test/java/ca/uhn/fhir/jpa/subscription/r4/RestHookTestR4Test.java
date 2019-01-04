@@ -1,36 +1,17 @@
 package ca.uhn.fhir.jpa.subscription.r4;
 
-import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
+
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.PortUtil;
-import net.ttddyy.dsproxy.QueryCount;
-import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -71,7 +52,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		String criteria1 = "Observation?";
 
 		createSubscription(criteria1, payload);
-		waitForActivatedSubscriptionCount(1);
+		waitForRegisteredSubscriptionCount(1);
 
 		/*
 		 * Send version 1
@@ -97,7 +78,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		 */
 
 		obs.getIdentifierFirstRep().setSystem("foo").setValue("2");
-		myObservationDao.update(obs);
+		ourLog.info("** Sending an update");
+		ourClient.update().resource(obs).execute();
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 
 		// Should see 1 subscription notification
@@ -122,7 +104,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		String criteria1 = "Observation?";
 
 		createSubscription(criteria1, payload);
-		waitForActivatedSubscriptionCount(1);
+		waitForRegisteredSubscriptionCount(1);
 
 		/*
 		 * Send version 1
@@ -162,7 +144,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(obs.getIdElement().toUnqualifiedVersionless().getValue());
-		mySystemDao.transaction(null,bundle);
+		ourClient.transaction().withBundle(bundle).execute();
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 
 		// Should see 1 subscription notification
@@ -176,7 +158,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals("2", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
 	}
-
 
 
 	@Test
@@ -787,7 +768,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		}
 
 	}
-
 
 
 }

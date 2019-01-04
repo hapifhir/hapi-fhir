@@ -459,9 +459,6 @@ public abstract class BaseSubscriptionInterceptor<S extends IBaseResource> exten
 		msg.setId(theNewResource.getIdElement());
 		msg.setOperationType(theOperationType);
 		msg.setNewPayload(myCtx, theNewResource);
-		if (ourForcePayloadEncodeAndDecodeForUnitTests) {
-			msg.clearPayloadDecoded();
-		}
 		submitResourceModified(msg);
 	}
 

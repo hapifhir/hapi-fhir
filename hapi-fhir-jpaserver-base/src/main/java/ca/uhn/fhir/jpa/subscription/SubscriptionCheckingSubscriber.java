@@ -87,7 +87,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 		List<CanonicalSubscription> subscriptions = getSubscriptionInterceptor().getRegisteredSubscriptions();
 
-		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
+		ourLog.info("Testing {} subscriptions for applicability", subscriptions.size());
 
 		for (CanonicalSubscription nextSubscription : subscriptions) {
 
@@ -96,7 +96,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 
 			if (isNotBlank(msg.getSubscriptionId())) {
 				if (!msg.getSubscriptionId().equals(nextSubscriptionId)) {
-					ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, msg.getSubscriptionId());
+					ourLog.info("Ignoring subscription {} because it is not {}", nextSubscriptionId, msg.getSubscriptionId());
 					continue;
 				}
 			}
@@ -106,7 +106,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 			}
 
 			// see if the criteria matches the created object
-			ourLog.trace("Checking subscription {} for {} with criteria {}", nextSubscriptionId, resourceType, nextCriteriaString);
+			ourLog.info("Checking subscription {} for {} with criteria {}", nextSubscriptionId, resourceType, nextCriteriaString);
 			String criteriaResource = nextCriteriaString;
 			int index = criteriaResource.indexOf("?");
 			if (index != -1) {
@@ -122,7 +122,7 @@ public class SubscriptionCheckingSubscriber extends BaseSubscriptionSubscriber {
 				continue;
 			}
 
-			ourLog.debug("Found match: queueing rest-hook notification for resource: {}", id.toUnqualifiedVersionless().getValue());
+			ourLog.info("Found match: queueing rest-hook notification for resource: {}", id.toUnqualifiedVersionless().getValue());
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
 			deliveryMsg.setPayload(getContext(), msg.getNewPayload(getContext()));
