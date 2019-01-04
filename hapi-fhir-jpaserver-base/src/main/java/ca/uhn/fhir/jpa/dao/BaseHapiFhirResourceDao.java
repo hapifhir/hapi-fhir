@@ -148,7 +148,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			theResource.setId(UUID.randomUUID().toString());
 		}
 
-		// FIXME: this is where one date is created
 		return doCreate(theResource, theIfNoneExist, thePerformIndexing, theUpdateTimestamp, theRequestDetails);
 	}
 

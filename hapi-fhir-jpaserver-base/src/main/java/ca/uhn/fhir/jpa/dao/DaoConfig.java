@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
@@ -25,9 +26,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -98,6 +99,7 @@ public class DaoConfig {
 	private boolean myUniqueIndexesEnabled = true;
 	private boolean myUniqueIndexesCheckedBeforeSave = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
+	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
 	/**
 	 * update setter javadoc if default changes
@@ -141,7 +143,6 @@ public class DaoConfig {
 	private boolean myDisableHashBasedSearches;
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
-
 	/**
 	 * Constructor
 	 */
@@ -157,6 +158,30 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * If a non-null value is supplied (default is <code>null</code>), a default
+	 * for the <code>_total</code> parameter may be specified here. For example,
+	 * setting this value to {@link SearchTotalModeEnum#ACCURATE} will force a
+	 * count to always be calculated for all searches. This can have a performance impact
+	 * since it means that a count query will always be performed, but this is desirable
+	 * for some solutions.
+	 */
+	public SearchTotalModeEnum getDefaultTotalMode() {
+		return myDefaultTotalMode;
+	}
+
+	/**
+	 * If a non-null value is supplied (default is <code>null</code>), a default
+	 * for the <code>_total</code> parameter may be specified here. For example,
+	 * setting this value to {@link SearchTotalModeEnum#ACCURATE} will force a
+	 * count to always be calculated for all searches. This can have a performance impact
+	 * since it means that a count query will always be performed, but this is desirable
+	 * for some solutions.
+	 */
+	public void setDefaultTotalMode(SearchTotalModeEnum theDefaultTotalMode) {
+		myDefaultTotalMode = theDefaultTotalMode;
 	}
 
 	/**
@@ -492,18 +517,6 @@ public class DaoConfig {
 		return myInterceptors;
 	}
 
-	public void registerInterceptor(IServerInterceptor theInterceptor) {
-		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		if (!myInterceptors.contains(theInterceptor)) {
-			myInterceptors.add(theInterceptor);
-		}
-	}
-
-	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
-		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		myInterceptors.remove(theInterceptor);
-	}
-
 	/**
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
@@ -519,6 +532,18 @@ public class DaoConfig {
 		if (theInterceptor != null && theInterceptor.length != 0) {
 			getInterceptors().addAll(Arrays.asList(theInterceptor));
 		}
+	}
+
+	public void registerInterceptor(IServerInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		if (!myInterceptors.contains(theInterceptor)) {
+			myInterceptors.add(theInterceptor);
+		}
+	}
+
+	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
+		Validate.notNull(theInterceptor, "Interceptor can not be null");
+		myInterceptors.remove(theInterceptor);
 	}
 
 	/**
@@ -1477,7 +1502,6 @@ public class DaoConfig {
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
 	 * to the server matching these types will be activated.
-	 *
 	 */
 	public DaoConfig addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
 		myModelConfig.addSupportedSubscriptionType(theSubscriptionChannelType);
@@ -1487,7 +1511,6 @@ public class DaoConfig {
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
 	 * to the server matching these types will be activated.
-	 *
 	 */
 	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
 		return myModelConfig.getSupportedSubscriptionTypes();
@@ -1513,7 +1536,6 @@ public class DaoConfig {
 	public void setEmailFromAddress(String theEmailFromAddress) {
 		myModelConfig.setEmailFromAddress(theEmailFromAddress);
 	}
-
 
 
 	public enum IndexEnabledEnum {

@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -341,7 +342,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
 		
-		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] {ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart()});
+		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
 		
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
@@ -433,7 +434,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
 		
-		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] {ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart()});
+		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
 		
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
@@ -485,7 +486,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testSearchDontReindexForUpdateWithIndexDisabled() {
-		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(true);
+		BaseHapiFhirDao.setDisableIncrementOnUpdateForUnitTest(true);
 		Patient patient;
 		SearchParameterMap map;
 
