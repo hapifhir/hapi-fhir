@@ -146,7 +146,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			theResource.setId(UUID.randomUUID().toString());
 		}
 
-		// FIXME: this is where one date is created
 		return doCreate(theResource, theIfNoneExist, thePerformIndexing, theUpdateTimestamp, theRequestDetails);
 	}
 
@@ -378,7 +377,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			} else if (match.size() == 1) {
 				Long pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid);
-				return toMethodOutcome(entity, theResource).setCreated(false);
+				return toMethodOutcome(entity, toResource(entity, false)).setCreated(false);
 			}
 		}
 
