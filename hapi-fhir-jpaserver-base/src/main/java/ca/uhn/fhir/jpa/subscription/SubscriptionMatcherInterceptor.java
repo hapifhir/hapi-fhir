@@ -47,7 +47,6 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
-	private static boolean ourForcePayloadEncodeAndDecodeForUnitTests;
 	private SubscribableChannel myProcessingChannel;
 
 	@Autowired
@@ -95,9 +94,6 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 
 	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
-		if (ourForcePayloadEncodeAndDecodeForUnitTests) {
-			msg.clearPayloadDecoded();
-		}
 		submitResourceModified(msg);
 	}
 
@@ -115,11 +111,6 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	 */
 	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		sendToProcessingChannel(theMsg);
-	}
-
-	@VisibleForTesting
-	public static void setForcePayloadEncodeAndDecodeForUnitTests(boolean theForcePayloadEncodeAndDecodeForUnitTests) {
-		ourForcePayloadEncodeAndDecodeForUnitTests = theForcePayloadEncodeAndDecodeForUnitTests;
 	}
 
 	@VisibleForTesting

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,8 +34,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ResourceModifiedMessage implements IResourceMessage {
-
-	private static final long serialVersionUID = 1L;
 
 	@JsonProperty("resourceId")
 	private String myId;
@@ -66,6 +64,7 @@ public class ResourceModifiedMessage implements IResourceMessage {
 		}
 	}
 
+	@Override
 	public String getPayloadId() {
 		return myPayloadId;
 	}
@@ -108,20 +107,16 @@ public class ResourceModifiedMessage implements IResourceMessage {
 		}
 	}
 
-	public void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
+	private void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
+		/*
+		 * Note: Don't set myPayloadDecoded in here- This is a false optimization since
+		 * it doesn't actually get used if anyone is doing subscriptions at any
+		 * scale using a queue engine, and not going through the serialize/deserialize
+		 * as we would in a queue engine can mask bugs.
+		 * -JA
+		 */
 		myPayload = theCtx.newJsonParser().encodeResourceToString(theNewPayload);
 		myPayloadId = theNewPayload.getIdElement().toUnqualified().getValue();
-		myPayloadDecoded = theNewPayload;
-	}
-
-	/**
-	 * This is mostly useful for unit tests - Clear the decoded payload so that
-	 * we force the encoded version to be used later. This proves that we get the same
-	 * behaviour in environments with serializing queues as we do with in-memory
-	 * queues.
-	 */
-	public void clearPayloadDecoded() {
-		myPayloadDecoded = null;
 	}
 
 
@@ -129,7 +124,7 @@ public class ResourceModifiedMessage implements IResourceMessage {
 		CREATE,
 		UPDATE,
 		DELETE,
-		MANUALLY_TRIGGERED;
+		MANUALLY_TRIGGERED
 
 	}
 

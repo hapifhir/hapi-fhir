@@ -227,6 +227,10 @@
 				_included resources failed with an SQL exception stating that too many parameters were used. Search
 				include logic has been reworked to avoid this.
 			</action>
+			<action type="fix">
+				JPA Subscription deliveries did not always include the accurate versionId if the Subscription
+				module was configured to use an external queuing engine. This has been corrected.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
