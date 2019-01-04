@@ -222,6 +222,11 @@
 				FHIR Servers now support the HTTP HEAD method for FHIR read operations. Thanks
 				to GitHub user Cory00 for the pull request!
 			</action>
+			<action type="fix">
+				When running the JPA server on Oracle, certain search queries that return a very large number of
+				_included resources failed with an SQL exception stating that too many parameters were used. Search
+				include logic has been reworked to avoid this.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
