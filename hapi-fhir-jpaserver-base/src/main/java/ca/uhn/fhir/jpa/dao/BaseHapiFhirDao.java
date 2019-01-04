@@ -58,6 +58,7 @@ import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.*;
@@ -95,9 +97,9 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -323,43 +325,45 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	private void doExpungeEverything() {
 
-		ourLog.info("** BEGINNING GLOBAL $expunge **");
+		final AtomicInteger counter = new AtomicInteger();
+
+		ourLog.info("BEGINNING GLOBAL $expunge");
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		txTemplate.execute(t -> {
-			doExpungeEverythingQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null");
-			doExpungeEverythingQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null");
-			doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null");
+			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null"));
+			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null"));
+			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 			return null;
 		});
 		txTemplate.execute(t -> {
-			doExpungeEverythingQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ForcedId.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceIndexedCompositeStringUnique.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + SearchResult.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d");
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ForcedId.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedCompositeStringUnique.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + SearchResult.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d"));
 			return null;
 		});
 		txTemplate.execute(t -> {
-			doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElementTarget.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElement.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + TermConceptMapGroup.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + TermConceptMap.class.getSimpleName() + " d");
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElementTarget.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElement.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptMapGroup.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptMap.class.getSimpleName() + " d"));
 			return null;
 		});
 		txTemplate.execute(t -> {
-			doExpungeEverythingQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + TermConcept.class.getSimpleName() + " d");
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConcept.class.getSimpleName() + " d"));
 			for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
 				next.setCurrentVersion(null);
 				myEntityManager.merge(next);
@@ -367,28 +371,33 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			return null;
 		});
 		txTemplate.execute(t -> {
-			doExpungeEverythingQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d");
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d"));
 			return null;
 		});
 		txTemplate.execute(t -> {
-			doExpungeEverythingQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d");
-			doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d");
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d"));
 			return null;
 		});
 
-		ourLog.info("** COMPLETED GLOBAL $expunge **");
+		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
 	}
 
-	private void doExpungeEverythingQuery(String theQuery) {
+	private int doExpungeEverythingQuery(String theQuery) {
 		StopWatch sw = new StopWatch();
 		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
-		ourLog.info("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
+		if (outcome > 0) {
+			ourLog.debug("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
+		} else {
+			ourLog.debug("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
+		}
+		return outcome;
 	}
 
 	private void expungeCurrentVersionOfResource(Long theResourceId, AtomicInteger theRemainingCount) {
@@ -746,6 +755,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return LogicalReferenceHelper.isLogicalReference(myConfig.getModelConfig(), theId);
 	}
 
+	// TODO KHS inject a searchBuilderFactory into callers of this method and delete this method
 	@Override
 	public SearchBuilder newSearchBuilder() {
 		return beanFactory.getBean(SearchBuilder.class, this);
@@ -766,14 +776,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		for (IServerInterceptor next : interceptors) {
 			next.incomingRequestPreHandled(theOperationType, theRequestDetails);
 		}
-	}
-
-	private void populateResourceIdFromEntity(IBaseResourceEntity theEntity, final IBaseResource theResource) {
-		IIdType id = theEntity.getIdDt();
-		if (getContext().getVersion().getVersion().isRi()) {
-			id = getContext().getVersion().newIdType().setValue(id.getValue());
-		}
-		theResource.setId(id);
 	}
 
 	/**
@@ -983,7 +985,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		res.getMeta().setLastUpdated(null);
 		res.getMeta().setVersionId(null);
 
-		populateResourceIdFromEntity(theEntity, res);
+		updateResourceMetadata(theEntity, res);
 		res.setId(res.getIdElement().withVersion(theVersion.toString()));
 
 		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
@@ -1306,6 +1308,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 
+				// FIXME: remove
+				ourLog.info("** Updated setting to: " + new InstantType(theUpdateTime).getValueAsString());
+
 				theEntity.setUpdated(theUpdateTime);
 				if (theResource instanceof IResource) {
 					theEntity.setLanguage(((IResource) theResource).getLanguage().getValue());
@@ -1320,6 +1325,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, false);
 
+				// FIXME: remove
+				ourLog.info("** Updated setting to: " + new InstantType(theUpdateTime).getValueAsString());
+
 				theEntity.setUpdated(theUpdateTime);
 				// theEntity.setLanguage(theResource.getLanguage().getValue());
 				theEntity.setIndexStatus(null);
@@ -1331,7 +1339,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		if (!changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange()) {
 			ourLog.debug("Resource {} has not changed", theEntity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
-				populateResourceIdFromEntity(theEntity, theResource);
+				updateResourceMetadata(theEntity, theResource);
 			}
 			theEntity.setUnchangedInCurrentOperation(true);
 			return theEntity;
@@ -1411,7 +1419,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 
 		if (theResource != null) {
-			populateResourceIdFromEntity(theEntity, theResource);
+			updateResourceMetadata(theEntity, theResource);
 		}
 
 
@@ -1458,6 +1466,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			incrementId(theResource, savedEntity, theResourceId);
 		}
 
+		// Update version/lastUpdated so that interceptors see the correct version
+		updateResourceMetadata(savedEntity, theResource);
+
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
 			if (theRequestDetails != null) {
@@ -1472,6 +1483,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 		}
 		return savedEntity;
+	}
+
+	protected void updateResourceMetadata(IBaseResourceEntity theEntity, IBaseResource theResource) {
+		IIdType id = theEntity.getIdDt();
+		if (getContext().getVersion().getVersion().isRi()) {
+			id = getContext().getVersion().newIdType().setValue(id.getValue());
+		}
+
+		theResource.setId(id);
+		if (theResource instanceof IResource) {
+			ResourceMetadataKeyEnum.VERSION.put((IResource) theResource, id.getVersionIdPart());
+			ResourceMetadataKeyEnum.UPDATED.put((IResource) theResource, theEntity.getUpdated());
+		} else {
+			IBaseMetaType meta = theResource.getMeta();
+			meta.setVersionId(id.getVersionIdPart());
+			meta.setLastUpdated(theEntity.getUpdatedDate());
+		}
 	}
 
 	private void validateChildReferences(IBase theElement, String thePath) {

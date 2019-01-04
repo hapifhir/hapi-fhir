@@ -156,6 +156,55 @@
 				resources could start reindexing before the new search parameter had been saved, meaning that
 				it was not applied to all resources. This has been corrected.
 			</action>
+			<action type="change">
+				In example-projects/README.md and hapi-fhir-jpaserver-example/README.md, incidate that these examples projects
+				are no longer maintained.  The README.md points users to a starter project they should use for examples.
+			</action>
+			<action type="change">
+				Replaced use of BeanFactory with custom factory classes that Spring @Lookup the @Scope("prototype") beans
+				(e.g. SearchBuilderFactory).
+			</action>
+			<action type="change">
+				Moved e-mail from address configuration from EmailInterceptor (which doesn't exist any more) to DaoConfig.
+			</action>
+			<action type="add">
+				Added 3 interfaces for services required by the standalone subscription server.  The standalone subscription
+				server doesn't have access to a database and so needs to get its resources using a FhirClient.  Thus
+				for each of these interfaces, there are two implementations: a Dao implementaiton and a FhirClient
+				implementation.  The interfaces thus introduced are ISubscriptionProvider (used to load subscriptions
+				into the SubscriptionRegistry), the IResourceProvider (used to get the latest version of a resource
+				if the "get latest version" flag is set on the subscription) and ISearchParamProvider used to load
+				custom search parameters.
+			</action>
+			<action type="change">
+				Separated active subscription cache from the interceptors into a new Spring component called the
+				SubscriptionRegistry.  This component maintains a cache of ActiveSubscriptions.  An ActiveSubscription
+				contains the subscription, it's delivery channel, and a list of delivery handlers.
+			</action>
+			<action type="change">
+				Introduced a new Spring factory interface ISubscribableChannelFactory that is used to create delivery
+				channels and handlers.  By default, HAPI FHIR ships with a LinkedBlockingQueue implementation of the
+				delivery channel factory.  If a different type of channel factory is required (e.g. JMS or Kafka), add it
+				to your application context and mark it as @Primary.
+			</action>
+			<action type="fix" issue="980">
+				When using the HL7.org DSTU2 structures, a QuestionnaireResponse with a 
+				value of type reference would fail to parse. Thanks to David Gileadi for
+				the pull request!
+			</action>
+			<action type="add" issue="1051">
+				FHIR Servers now support the HTTP HEAD method for FHIR read operations. Thanks
+				to GitHub user Cory00 for the pull request!
+			</action>
+			<action type="fix">
+				When running the JPA server on Oracle, certain search queries that return a very large number of
+				_included resources failed with an SQL exception stating that too many parameters were used. Search
+				include logic has been reworked to avoid this.
+			</action>
+			<action type="fix">
+				JPA Subscription deliveries did not always include the accurate versionId if the Subscription
+				module was configured to use an external queuing engine. This has been corrected.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
