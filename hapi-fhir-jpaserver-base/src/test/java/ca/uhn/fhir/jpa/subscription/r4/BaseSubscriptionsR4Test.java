@@ -39,9 +39,6 @@ import java.util.List;
 public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR4Test.class);
 
-
-	private static int ourListenerPort;
-	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	protected static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
@@ -58,15 +55,13 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	protected static String ourListenerServerBase;
+	private static String ourListenerServerBase;
 
-	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
+	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 
 
 	@After
 	public void afterUnregisterRestHookListener() {
-		BaseSubscriptionInterceptor.setForcePayloadEncodeAndDecodeForUnitTests(false);
-
 		for (IIdType next : mySubscriptionIds) {
 			IIdType nextId = next.toUnqualifiedVersionless();
 			ourLog.info("Deleting: {}", nextId);
@@ -110,7 +105,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 
-	protected Subscription createSubscription(String theCriteria, String thePayload) throws InterruptedException {
+	protected Subscription createSubscription(String theCriteria, String thePayload) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
@@ -148,6 +143,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
+		observation.getIdentifierFirstRep().setSystem("foo").setValue("1");
 		Coding coding = codeableConcept.addCoding();
 		coding.setCode(code);
 		coding.setSystem(system);
@@ -214,8 +210,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
-		ourListenerPort = PortUtil.findFreePort();
-		ourListenerRestServer = new RestfulServer(FhirContext.forR4());
+		int ourListenerPort = PortUtil.findFreePort();
+		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR4());
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 
 		ObservationListener obsListener = new ObservationListener();
