@@ -59,6 +59,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -378,7 +380,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			} else if (match.size() == 1) {
 				Long pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid);
-				return toMethodOutcome(entity, theResource).setCreated(false);
+				return toMethodOutcome(entity, null).setCreated(false);
 			}
 		}
 
@@ -1139,10 +1141,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	private DaoMethodOutcome toMethodOutcome(final ResourceTable theEntity, IBaseResource theResource) {
+	private DaoMethodOutcome toMethodOutcome(@Nonnull final ResourceTable theEntity, @Nullable IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
-
-		// FIXME: can theResource ever be null? why?
 
 		IIdType id = null;
 		if (theResource != null) {
@@ -1294,7 +1294,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * directly. So we just bail now.
 		 */
 		if (!thePerformIndexing) {
-			DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(false);
+			DaoMethodOutcome outcome = toMethodOutcome(entity, null).setCreated(false);
 			outcome.setPreviousResource(oldResource);
 			return outcome;
 		}
