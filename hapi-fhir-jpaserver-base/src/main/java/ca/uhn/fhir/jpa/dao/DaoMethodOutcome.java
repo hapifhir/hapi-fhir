@@ -29,6 +29,13 @@ public class DaoMethodOutcome extends MethodOutcome {
 	private ResourceTable myEntity;
 	private IBaseResource myPreviousResource;
 
+	/**
+	 * Constructor
+	 */
+	public DaoMethodOutcome() {
+		super();
+	}
+
 	public ResourceTable getEntity() {
 		return myEntity;
 	}
