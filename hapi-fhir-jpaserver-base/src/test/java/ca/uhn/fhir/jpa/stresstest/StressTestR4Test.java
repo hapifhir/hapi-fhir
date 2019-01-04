@@ -1,21 +1,22 @@
 package ca.uhn.fhir.jpa.stresstest;
 
-import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
+import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Bundle.BundleType;
-import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -26,11 +27,12 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 
-public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
+public class StressTestR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
 	private RequestValidatingInterceptor myRequestValidatingInterceptor;
 
+	@Override
 	@After
 	public void after() throws Exception {
 		super.after();
@@ -38,6 +40,7 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourRestServer.unregisterInterceptor(myRequestValidatingInterceptor);
 	}
 
+	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
@@ -47,6 +50,56 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 		module.setValidationSupport(myValidationSupport);
 		myRequestValidatingInterceptor.addValidatorModule(module);
 	}
+
+	@Test
+	public void testSearchWithLargeNumberOfIncludes() {
+
+		Bundle bundle = new Bundle();
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId(IdType.newRandomUuid());
+		bundle.addEntry().setFullUrl(dr.getId()).setResource(dr).getRequest().setMethod(HTTPVerb.POST).setUrl("DiagnosticReport");
+
+		for (int i = 0; i < 1200; i++) {
+			Observation o = new Observation();
+			o.setId(IdType.newRandomUuid());
+			o.setStatus(Observation.ObservationStatus.FINAL);
+			bundle.addEntry().setFullUrl(o.getId()).setResource(o).getRequest().setMethod(HTTPVerb.POST).setUrl("Observation");
+			dr.addResult().setReference(o.getId());
+
+			if (i == 0) {
+				Observation o2 = new Observation();
+				o2.setId(IdType.newRandomUuid());
+				o2.setStatus(Observation.ObservationStatus.FINAL);
+				bundle.addEntry().setFullUrl(o2.getId()).setResource(o2).getRequest().setMethod(HTTPVerb.POST).setUrl("Observation");
+				o.addHasMember(new Reference(o2.getId()));
+			}
+		}
+
+		StopWatch sw = new StopWatch();
+		ourLog.info("Saving {} resources", bundle.getEntry().size());
+		mySystemDao.transaction(null, bundle);
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+
+		// Using _include=*
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(IBaseResource.INCLUDE_ALL.asRecursive());
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myDiagnosticReportDao.search(map);
+		List<IBaseResource> resultsAndIncludes = results.getResources(0, 999999);
+		assertEquals(1202, resultsAndIncludes.size());
+
+		// Using focused includes
+		map = new SearchParameterMap();
+		map.addInclude(DiagnosticReport.INCLUDE_RESULT.asRecursive());
+		map.addInclude(Observation.INCLUDE_HAS_MEMBER.asRecursive());
+		map.setLoadSynchronous(true);
+		results = myDiagnosticReportDao.search(map);
+		resultsAndIncludes = results.getResources(0, 999999);
+		assertEquals(1202, resultsAndIncludes.size());
+	}
+
+
 
 	@Test
 	public void testMultithreadedSearch() throws Exception {
@@ -213,7 +266,7 @@ public class StressTestDstu3Test extends BaseResourceProviderDstu3Test {
 				try {
 					Patient p = new Patient();
 					p.addIdentifier().setSystem("http://test").setValue("BAR").setType(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("bar")));
-					p.setGender(org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender.MALE);
+					p.setGender(org.hl7.fhir.r4.model.Enumerations.AdministrativeGender.MALE);
 					ourClient.create().resource(p).execute();
 
 					ourSearchParamRegistry.forceRefresh();
