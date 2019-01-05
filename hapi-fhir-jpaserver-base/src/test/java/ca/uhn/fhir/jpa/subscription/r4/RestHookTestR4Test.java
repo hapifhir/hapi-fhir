@@ -117,7 +117,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
-		Bundle responseBundle = mySystemDao.transaction(null, bundle);
+		Bundle responseBundle = ourClient.transaction().withBundle(bundle).execute();
 
 		Observation obs = myObservationDao.read(new IdType(responseBundle.getEntry().get(0).getResponse().getLocation()));
 

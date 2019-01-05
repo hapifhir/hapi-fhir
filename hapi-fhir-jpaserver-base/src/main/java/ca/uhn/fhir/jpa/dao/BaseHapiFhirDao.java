@@ -1308,9 +1308,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 
-				// FIXME: remove
-				ourLog.info("** Updated setting to: " + new InstantType(theUpdateTime).getValueAsString());
-
 				theEntity.setUpdated(theUpdateTime);
 				if (theResource instanceof IResource) {
 					theEntity.setLanguage(((IResource) theResource).getLanguage().getValue());
@@ -1324,9 +1321,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			} else {
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, false);
-
-				// FIXME: remove
-				ourLog.info("** Updated setting to: " + new InstantType(theUpdateTime).getValueAsString());
 
 				theEntity.setUpdated(theUpdateTime);
 				// theEntity.setLanguage(theResource.getLanguage().getValue());
@@ -1699,12 +1693,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		IParser parser = theEncoding.newParser(theContext);
 		parser.setDontEncodeElements(theExcludeElements);
 		String encoded = parser.encodeResourceToString(theResource);
-
-		// FIXME: remove
-		if (theResource.toString().contains("Obs")) {
-			ourLog.info("ENCODED: " + encoded);
-		}
-
 
 		switch (theEncoding) {
 			case JSON:

@@ -61,6 +61,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -1292,7 +1293,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * directly. So we just bail now.
 		 */
 		if (!thePerformIndexing) {
-			theResource.setId(entity.getIdDt().getValue());
+			theResource.setId(entity.getIdDt());
 			DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(false);
 			outcome.setPreviousResource(oldResource);
 			return outcome;

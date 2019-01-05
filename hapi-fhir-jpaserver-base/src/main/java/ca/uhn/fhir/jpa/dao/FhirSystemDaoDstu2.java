@@ -186,14 +186,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 		Set<IdDt> allIds = new LinkedHashSet<IdDt>();
 		Map<IdDt, IdDt> idSubstitutions = new HashMap<IdDt, IdDt>();
-		Map<IdDt, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdDt, DaoMethodOutcome>(){
-			// FIXME: remove
-
-			@Override
-			public DaoMethodOutcome put(IdDt key, DaoMethodOutcome value) {
-				return super.put(key, value);
-			}
-		};
+		Map<IdDt, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdDt, DaoMethodOutcome>();
 
 		/*
 		 * We want to execute the transaction request bundle elements in the order
@@ -375,7 +368,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					// CREATE
 					@SuppressWarnings("rawtypes")
 					IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(res.getClass());
-					res.getId().setValue(null);
+					res.setId((IdDt)null);
 					DaoMethodOutcome outcome;
 					outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theUpdateTime, theRequestDetails);
 					handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);

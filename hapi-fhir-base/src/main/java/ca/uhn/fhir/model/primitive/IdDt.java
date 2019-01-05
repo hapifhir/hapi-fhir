@@ -194,7 +194,9 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 			return false;
 		}
 		IdDt id = (IdDt) theArg0;
-		return StringUtils.equals(getValueAsString(), id.getValueAsString());
+		String valueAsString = getValueAsString();
+		String otherValue = id.getValueAsString();
+		return StringUtils.equals(valueAsString, otherValue);
 	}
 
 	/**
