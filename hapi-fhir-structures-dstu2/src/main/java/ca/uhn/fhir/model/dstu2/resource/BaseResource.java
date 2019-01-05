@@ -303,14 +303,12 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	}
 	
 	public void setId(IdDt theId) {
-		myId = theId;
+		getId().setValue(theId.getValue());
 	}
 
 	public BaseResource setId(IIdType theId) {
-		if (theId instanceof IdDt) {
-			myId = (IdDt) theId;
-		} else if (theId != null) {
-			myId = new IdDt(theId.getValue());
+		if (theId != null) {
+			getIdElement().setValue(theId.getValue());
 		} else {
 			myId = null;
 		}
@@ -321,7 +319,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		if (theId == null) {
 			myId = null;
 		} else {
-			myId = new IdDt(theId);
+			getIdElement().setValue(theId);
 		}
 		return this;
 	}
