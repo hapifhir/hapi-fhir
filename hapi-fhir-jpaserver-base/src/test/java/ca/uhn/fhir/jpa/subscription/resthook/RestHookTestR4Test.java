@@ -176,6 +176,27 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 
+	@Test
+	public void testRepeatedDeliveries() throws Exception {
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?";
+
+		createSubscription(criteria1, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		for (int i = 0; i < 100; i++) {
+			Observation observation = new Observation();
+			observation.getIdentifierFirstRep().setSystem("foo").setValue("ID" + i);
+			observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			myObservationDao.create(observation);
+		}
+
+		waitForSize(100, ourUpdatedObservations);
+	}
+
 
 	@Test
 	public void testActiveSubscriptionShouldntReActivate() throws Exception {

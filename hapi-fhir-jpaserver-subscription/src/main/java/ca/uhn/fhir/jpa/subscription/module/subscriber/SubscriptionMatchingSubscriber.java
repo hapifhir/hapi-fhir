@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -113,11 +114,12 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				continue;
 			}
 
-			if (!mySubscriptionMatcher.match(nextCriteriaString, theMsg).matched()) {
+			SubscriptionMatchResult matchResult = mySubscriptionMatcher.match(nextCriteriaString, theMsg);
+			if (!matchResult.matched()) {
 				continue;
 			}
 
-			ourLog.debug("Found match: queueing rest-hook notification for resource: {}", id.toUnqualifiedVersionless().getValue());
+			ourLog.info("Subscription {} was matched by resource {} using matcher {}", nextActiveSubscription.getSubscription().getIdElement(myFhirContext).getValue(), id.toUnqualifiedVersionless().getValue(), matchResult.matcherShortName());
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
 			deliveryMsg.setPayload(myFhirContext, theMsg.getNewPayload(myFhirContext));
@@ -130,7 +132,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			if (deliveryChannel != null) {
 				deliveryChannel.send(wrappedMsg);
 			} else {
-				ourLog.warn("Do not have deliovery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
+				ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
 			}
 		}
 	}

@@ -1,9 +1,6 @@
 package org.hl7.fhir.r4.utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
@@ -243,7 +240,7 @@ public class LiquidEngine implements IEvaluationContext {
         n.closeUp();
       if (terminators.length > 0)
         if (!Utilities.existsInList(close, terminators))
-          throw new FHIRException("Script "+name+": Script "+name+": Found end of script looking for "+terminators);
+          throw new FHIRException("Script "+name+": Script "+name+": Found end of script looking for "+ Arrays.asList(terminators));
       return close;
     }
 
