@@ -186,7 +186,14 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 		Set<IdDt> allIds = new LinkedHashSet<IdDt>();
 		Map<IdDt, IdDt> idSubstitutions = new HashMap<IdDt, IdDt>();
-		Map<IdDt, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdDt, DaoMethodOutcome>();
+		Map<IdDt, DaoMethodOutcome> idToPersistedOutcome = new HashMap<IdDt, DaoMethodOutcome>(){
+			// FIXME: remove
+
+			@Override
+			public DaoMethodOutcome put(IdDt key, DaoMethodOutcome value) {
+				return super.put(key, value);
+			}
+		};
 
 		/*
 		 * We want to execute the transaction request bundle elements in the order

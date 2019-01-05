@@ -317,7 +317,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 
 	public BaseResource setId(String theId) {
 		if (theId == null) {
-			myId = null;
+			getIdElement().setValue(null);
 		} else {
 			getIdElement().setValue(theId);
 		}

@@ -1700,6 +1700,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		parser.setDontEncodeElements(theExcludeElements);
 		String encoded = parser.encodeResourceToString(theResource);
 
+		// FIXME: remove
+		if (theResource.toString().contains("Obs")) {
+			ourLog.info("ENCODED: " + encoded);
+		}
+
 
 		switch (theEncoding) {
 			case JSON:

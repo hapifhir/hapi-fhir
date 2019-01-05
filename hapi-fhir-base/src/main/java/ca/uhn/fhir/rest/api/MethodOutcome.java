@@ -52,7 +52,7 @@ public class MethodOutcome {
 	 */
 	@CoverageIgnore
 	public MethodOutcome(IIdType theId, Boolean theCreated) {
-		myId = theId;
+		setId(theId);
 		myCreated = theCreated;
 	}
 
@@ -63,7 +63,7 @@ public class MethodOutcome {
 	 * @param theBaseOperationOutcome The operation outcome to return with the response (or null for none)
 	 */
 	public MethodOutcome(IIdType theId, IBaseOperationOutcome theBaseOperationOutcome) {
-		myId = theId;
+		setId(theId);
 		myOperationOutcome = theBaseOperationOutcome;
 	}
 
@@ -76,7 +76,7 @@ public class MethodOutcome {
 	 *                                whether the result was a creation or an update. However, it can be useful if you are implementing an update method that does a create if the ID doesn't already exist.
 	 */
 	public MethodOutcome(IIdType theId, IBaseOperationOutcome theBaseOperationOutcome, Boolean theCreated) {
-		myId = theId;
+		setId(theId);
 		myOperationOutcome = theBaseOperationOutcome;
 		myCreated = theCreated;
 	}
@@ -87,7 +87,7 @@ public class MethodOutcome {
 	 * @param theId The ID of the created/updated resource
 	 */
 	public MethodOutcome(IIdType theId) {
-		myId = theId;
+		setId(theId);
 	}
 
 	/**
