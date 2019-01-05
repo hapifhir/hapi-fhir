@@ -340,7 +340,12 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
         return BundleInclusionRule.BASED_ON_INCLUDES;
     }
 
-    /**
+	@Override
+	public PreferReturnEnum getDefaultPreferReturn() {
+		return PreferReturnEnum.REPRESENTATION;
+	}
+
+	/**
      * The resource type should return conform to the generic resource included
      * in the topic
      */

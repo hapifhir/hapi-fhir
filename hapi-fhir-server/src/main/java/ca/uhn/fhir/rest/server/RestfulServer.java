@@ -1660,7 +1660,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 *
 	 * @see <a href="http://hl7.org/fhir/http.html#ops">HL7 FHIR Specification</a> section on the Prefer header
 	 */
-	@Override
 	public void setDefaultPreferReturn(PreferReturnEnum theDefaultPreferReturn) {
 		Validate.notNull(theDefaultPreferReturn, "theDefaultPreferReturn must not be null");
 		myDefaultPreferReturn = theDefaultPreferReturn;

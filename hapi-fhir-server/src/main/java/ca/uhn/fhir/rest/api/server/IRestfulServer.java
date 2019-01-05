@@ -31,7 +31,6 @@ public interface IRestfulServer<T extends RequestDetails> extends IRestfulServer
 
 	BundleInclusionRule getBundleInclusionRule();
 
-	void setDefaultPreferReturn(PreferReturnEnum theDefaultPreferReturn);
-
 	PreferReturnEnum getDefaultPreferReturn();
+
 }

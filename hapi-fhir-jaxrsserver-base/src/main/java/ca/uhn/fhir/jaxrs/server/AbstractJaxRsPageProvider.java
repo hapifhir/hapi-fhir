@@ -111,4 +111,9 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 		return BundleInclusionRule.BASED_ON_INCLUDES;
 	}
 
+	@Override
+	public PreferReturnEnum getDefaultPreferReturn() {
+		return PreferReturnEnum.REPRESENTATION;
+	}
+
 }
