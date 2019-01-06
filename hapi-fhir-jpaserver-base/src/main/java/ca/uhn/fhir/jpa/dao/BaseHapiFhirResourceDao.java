@@ -61,6 +61,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -377,7 +378,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			} else if (match.size() == 1) {
 				Long pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid);
-				return toMethodOutcome(entity, toResource(entity, false)).setCreated(false);
+				IBaseResource resource = toResource(entity, false);
+				return toMethodOutcome(entity, resource).setCreated(false);
 			}
 		}
 
@@ -1138,17 +1140,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	private DaoMethodOutcome toMethodOutcome(final ResourceTable theEntity, IBaseResource theResource) {
+	private DaoMethodOutcome toMethodOutcome(@Nonnull final ResourceTable theEntity, @Nonnull IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
-		// FIXME: can theResource ever be null? why?
-
 		IIdType id = null;
-		if (theResource != null) {
+		if (theResource.getIdElement().getValue() != null) {
 			id = theResource.getIdElement();
 		}
 		if (id == null) {
-			id = ((BaseHasResource) theEntity).getIdDt();
+			id = theEntity.getIdDt();
 			if (getContext().getVersion().getVersion().isRi()) {
 				id = getContext().getVersion().newIdType().setValue(id.getValue());
 			}
@@ -1293,6 +1293,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * directly. So we just bail now.
 		 */
 		if (!thePerformIndexing) {
+			theResource.setId(entity.getIdDt());
 			DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(false);
 			outcome.setPreviousResource(oldResource);
 			return outcome;

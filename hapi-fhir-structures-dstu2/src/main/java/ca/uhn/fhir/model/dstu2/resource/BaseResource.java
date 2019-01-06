@@ -303,11 +303,13 @@ public abstract class BaseResource extends BaseElement implements IResource {
 	}
 	
 	public void setId(IdDt theId) {
-		getId().setValue(theId.getValue());
+		myId = theId;
 	}
 
 	public BaseResource setId(IIdType theId) {
-		if (theId != null) {
+		if (theId instanceof IdDt) {
+			myId = (IdDt) theId;
+		} else if (theId != null) {
 			getIdElement().setValue(theId.getValue());
 		} else {
 			myId = null;

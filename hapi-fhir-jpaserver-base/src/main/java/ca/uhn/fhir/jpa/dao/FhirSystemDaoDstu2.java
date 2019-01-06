@@ -368,7 +368,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					// CREATE
 					@SuppressWarnings("rawtypes")
 					IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(res.getClass());
-					res.getId().setValue(null);
+					res.setId((IdDt)null);
 					DaoMethodOutcome outcome;
 					outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theUpdateTime, theRequestDetails);
 					handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
