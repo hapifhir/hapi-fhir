@@ -243,6 +243,10 @@
 				new setting on the DaoConfig. This can be used to force a total to
 				always be calculated for searches, including large ones.
 			</action>
+			<action type="add">
+				AuthorizationInterceptor now rejects transactions with an invalid or unset request
+				using an HTTP 422 response	Bundle type instead of silently refusing to authorize them.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
