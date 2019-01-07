@@ -563,8 +563,7 @@ public class AuthorizationInterceptorDstu3Test {
 		httpPost.setEntity(createFhirResourceEntity(input));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
+		assertEquals(422, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
