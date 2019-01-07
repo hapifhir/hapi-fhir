@@ -1,0 +1,79 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"fullUrl": "urn:uuid:447193a6-2bdb-40b7-a93f-1fd7ede09bbc",
+			"resource": {
+				"resourceType": "Patient",
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "MR"
+								}
+							]
+						},
+						"system": "UHN",
+						"value": "7007474"
+					}
+				],
+				"name": [
+					{
+						"family": "Test",
+						"given": [
+							"Physician-IP-TG"
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Patient",
+				"ifNoneExist": "Patient?identifier=UHN%7C7007474"
+			}
+		},
+		{
+			"request": {
+				"method": "DELETE",
+				"url": "Observation?_lastUpdated=gt2011"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:7493cc2a-f2c0-4035-a6f2-cd5226ddaa32",
+			"resource": {
+				"resourceType": "Observation",
+				"status": "final",
+				"code": {
+					"coding": [
+						{
+							"system": "HL70396",
+							"code": "Q",
+							"display": "Test Comment"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:447193a6-2bdb-40b7-a93f-1fd7ede09bbc"
+				},
+				"effectiveDateTime": "2011-12-01T09:49:00+08:00",
+				"valueString": "This specimen was documented as collected but not received by the Microbiology Laboratory after 7 days. If this test is still required, please place a new order.",
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "N"
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Observation"
+			}
+		}
+	]
+}

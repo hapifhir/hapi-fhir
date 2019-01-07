@@ -380,6 +380,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				Long pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid);
 				IBaseResource resource = toResource(entity, false);
+				theResource.setId(resource.getIdElement().getValue());
 				return toMethodOutcome(entity, resource).setCreated(false);
 			}
 		}
