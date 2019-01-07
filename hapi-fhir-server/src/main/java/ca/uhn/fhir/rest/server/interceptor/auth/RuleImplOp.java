@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
@@ -38,9 +37,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -198,7 +197,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					for (BundleEntryParts nextPart : inputResources) {
 
 						IBaseResource inputResource = nextPart.getResource();
-						RestOperationTypeEnum operation = null;
+						RestOperationTypeEnum operation;
 						if (nextPart.getRequestType() == RequestTypeEnum.GET) {
 							continue;
 						} else {
@@ -208,18 +207,22 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							operation = RestOperationTypeEnum.CREATE;
 						} else if (nextPart.getRequestType() == RequestTypeEnum.PUT) {
 							operation = RestOperationTypeEnum.UPDATE;
+						} else if (nextPart.getRequestType() == RequestTypeEnum.DELETE) {
+							operation = RestOperationTypeEnum.DELETE;
 						} else {
 							throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
 						}
 
 						/*
 						 * This is basically just being conservative - Be careful of transactions containing
-						 * nested operations and nested transactions. We block the by default. At some point
+						 * nested operations and nested transactions. We block them by default. At some point
 						 * it would be nice to be more nuanced here.
 						 */
-						RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
-						if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
-							throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
+						if (nextPart.getResource() != null) {
+							RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
+							if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
+								throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
+							}
 						}
 
 						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null, null);

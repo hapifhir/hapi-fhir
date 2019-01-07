@@ -247,6 +247,10 @@
 				AuthorizationInterceptor now rejects transactions with an invalid or unset request
 				using an HTTP 422 response	Bundle type instead of silently refusing to authorize them.
 			</action>
+			<action type="add">
+				AuthorizationInterceptor is now able to authorize DELETE operations performed via a
+				transaction operation. Previously these were always denied.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

@@ -4,8 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -46,7 +46,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.containsString;
@@ -62,6 +61,7 @@ public class AuthorizationInterceptorDstu3Test {
 	private static boolean ourHitMethod;
 	private static int ourPort;
 	private static List<Resource> ourReturn;
+	private static List<IBaseResource> ourDeleted;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
 
@@ -73,6 +73,7 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 		ourServlet.setTenantIdentificationStrategy(null);
 		ourReturn = null;
+		ourDeleted = null;
 		ourHitMethod = false;
 		ourConditionalCreateId = "1123";
 	}
@@ -595,6 +596,75 @@ public class AuthorizationInterceptorDstu3Test {
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
 		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
+
+	@Test
+	public void testDeleteByCompartmentUsingTransaction() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").delete().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.allow("Rule 2").delete().resourcesOfType(Observation.class).inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.build();
+			}
+		});
+
+		HttpPost httpPost;
+		HttpResponse status;
+		String responseString;
+
+		Bundle responseBundle = new Bundle();
+		responseBundle.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+
+		ourHitMethod = false;
+		Bundle bundle = new Bundle();
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createPatient(2));
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/2");
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString,403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		bundle.getEntry().clear();
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/1");
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createPatient(1));
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString,200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		bundle.getEntry().clear();
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?subject=Patient/2");
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createObservation(99, "Patient/2"));
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString,403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		bundle.getEntry().clear();
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?subject=Patient/1");
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createObservation(99, "Patient/1"));
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString,200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
 
@@ -3519,11 +3589,18 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 
 		@Transaction()
-		public Bundle search(@TransactionParam Bundle theInput) {
+		public Bundle search(IRequestOperationCallback theRequestOperationCallback, @TransactionParam Bundle theInput) {
 			ourHitMethod = true;
+			if (ourDeleted != null){
+				for (IBaseResource next : ourDeleted) {
+					theRequestOperationCallback.resourceDeleted(next);
+				}
+			}
 			return (Bundle) ourReturn.get(0);
 		}
 
 	}
+
+
 
 }
