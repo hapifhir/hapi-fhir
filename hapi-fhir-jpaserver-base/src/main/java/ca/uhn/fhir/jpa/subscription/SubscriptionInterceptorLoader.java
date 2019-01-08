@@ -53,8 +53,11 @@ public class SubscriptionInterceptorLoader {
 		if (!supportedSubscriptionTypes.isEmpty()) {
 			loadSubscriptions();
 
-			ourLog.info("Registering subscription interceptors");
+			ourLog.info("Registering subscription activating interceptor");
 			myDaoConfig.registerInterceptor(mySubscriptionActivatingInterceptor);
+		}
+		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
+			ourLog.info("Registering subscription matcher interceptor");
 			myDaoConfig.registerInterceptor(mySubscriptionMatcherInterceptor);
 		}
 	}

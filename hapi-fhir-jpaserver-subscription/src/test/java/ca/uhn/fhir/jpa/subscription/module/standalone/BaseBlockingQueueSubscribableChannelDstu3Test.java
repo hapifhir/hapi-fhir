@@ -79,16 +79,16 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		return theResource;
 	}
 
-	protected Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
-		Subscription subscription = newSubscription(theCriteria, thePayload, theEndpoint);
+	protected Subscription sendSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
+		Subscription subscription = returnedActiveSubscription(theCriteria, thePayload, theEndpoint);
 
 		return sendResource(subscription);
 	}
 
-	protected Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint) {
+	protected Subscription returnedActiveSubscription(String theCriteria, String thePayload, String theEndpoint) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 		subscription.setCriteria(theCriteria);
 		++idCounter;
 		IdType id = new IdType("Subscription", idCounter);

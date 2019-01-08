@@ -143,6 +143,8 @@ public class DaoConfig {
 	private boolean myDisableHashBasedSearches;
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
+	private boolean mySubscriptionMatchingEnabled = true;
+
 	/**
 	 * Constructor
 	 */
@@ -1387,6 +1389,24 @@ public class DaoConfig {
 
 	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
 		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is true) the server will not match incoming resources against active subscriptions.
+	 * @since 3.7.0
+	 */
+
+	public boolean isSubscriptionMatchingEnabled() {
+		return mySubscriptionMatchingEnabled;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is true) the server will not match incoming resources against active subscriptions.
+	 * @since 3.7.0
+	 */
+
+	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
+		mySubscriptionMatchingEnabled = theSubscriptionMatchingEnabled;
 	}
 
 	public ModelConfig getModelConfig() {
