@@ -74,7 +74,6 @@ import org.hl7.fhir.dstu3.model.SimpleQuantity;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Assert;
@@ -3197,8 +3196,8 @@ public class Dstu3XmlParserTest {
 		try {
 			ourCtx.newXmlParser().parseResource(Patient.class, input);
 			fail();
-		} catch (FHIRFormatError e) {
-			assertThat(e.toString(), containsString("unable to parse character reference "));
+		} catch (DataFormatException e) {
+			assertThat(e.toString(), containsString("Undeclared general entity"));
 		}
 
 	}
