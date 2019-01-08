@@ -72,6 +72,8 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
 
 	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
+	private static final String REQUESTED_STATUS = Subscription.SubscriptionStatus.REQUESTED.toCode();
+	private static final String ACTIVE_STATUS = Subscription.SubscriptionStatus.ACTIVE.toCode();
 
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
@@ -108,9 +110,7 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 		final IPrimitiveType<?> status = myFhirContext.newTerser().getSingleValueOrNull(theSubscription, SubscriptionMatcherInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
 		String statusString = status.getValueAsString();
 
-		final String requestedStatus = Subscription.SubscriptionStatus.REQUESTED.toCode();
-		final String activeStatus = Subscription.SubscriptionStatus.ACTIVE.toCode();
-		if (requestedStatus.equals(statusString)) {
+		if (REQUESTED_STATUS.equals(statusString)) {
 			if (TransactionSynchronizationManager.isSynchronizationActive()) {
 				/*
 				 * If we're in a transaction, we don't want to try and change the status from
@@ -127,7 +127,7 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 						Future<?> activationFuture = myTaskExecutor.submit(new Runnable() {
 							@Override
 							public void run() {
-								activateSubscription(activeStatus, theSubscription, requestedStatus);
+								activateSubscription(ACTIVE_STATUS, theSubscription, REQUESTED_STATUS);
 							}
 						});
 
@@ -146,9 +146,9 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 				});
 				return true;
 			} else {
-				return activateSubscription(activeStatus, theSubscription, requestedStatus);
+				return activateSubscription(ACTIVE_STATUS, theSubscription, REQUESTED_STATUS);
 			}
-		} else if (activeStatus.equals(statusString)) {
+		} else if (ACTIVE_STATUS.equals(statusString)) {
 			return mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(theSubscription);
 		} else {
 			// Status isn't "active" or "requested"

@@ -22,8 +22,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		createSubscription(criteria1, payload, ourListenerServerBase);
-		createSubscription(criteria2, payload, ourListenerServerBase);
+		sendSubscription(criteria1, payload, ourListenerServerBase);
+		sendSubscription(criteria2, payload, ourListenerServerBase);
 
 		sendObservation(code, "SNOMED-CT");
 
@@ -40,8 +40,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
 
-		createSubscription(criteria1, payload, ourListenerServerBase);
-		createSubscription(criteria2, payload, ourListenerServerBase);
+		sendSubscription(criteria1, payload, ourListenerServerBase);
+		sendSubscription(criteria2, payload, ourListenerServerBase);
 
 		sendObservation(code, "SNOMED-CT");
 
@@ -58,8 +58,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		String criteria1 = "Observation?code=SNOMED-CT|" + code;
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111";
 
-		createSubscription(criteria1, payload, ourListenerServerBase);
-		createSubscription(criteria2, payload, ourListenerServerBase);
+		sendSubscription(criteria1, payload, ourListenerServerBase);
+		sendSubscription(criteria2, payload, ourListenerServerBase);
 
 		sendObservation(code, "SNOMED-CT");
 
