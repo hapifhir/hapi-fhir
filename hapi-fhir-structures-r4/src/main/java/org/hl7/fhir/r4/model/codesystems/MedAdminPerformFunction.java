@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedAdminPerformFunction {
 
         /**
-         * A person, non-person living subject, organization or device that who actually and principally carries out the action.
+         * A person, non-person living subject, organization or device that who actually and principally carries out the action
          */
         PERFORMER, 
         /**
@@ -76,7 +76,7 @@ public enum MedAdminPerformFunction {
         }
         public String getDefinition() {
           switch (this) {
-            case PERFORMER: return "A person, non-person living subject, organization or device that who actually and principally carries out the action.";
+            case PERFORMER: return "A person, non-person living subject, organization or device that who actually and principally carries out the action";
             case VERIFIER: return "A person who verifies the correctness and appropriateness of the service (plan, order, event, etc.) and hence takes on accountability.";
             case WITNESS: return "A person witnessing the action happening without doing anything. A witness is not necessarily aware, much less approves of anything stated in the service event. Example for a witness is students watching an operation or an advanced directive witness.";
             default: return "?";

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -49,98 +49,6 @@ import org.hl7.fhir.exceptions.FHIRException;
 @ResourceDef(name="Measure", profile="http://hl7.org/fhir/StructureDefinition/Measure")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "subtitle", "status", "experimental", "subject[x]", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "usage", "copyright", "approvalDate", "lastReviewDate", "effectivePeriod", "topic", "author", "editor", "reviewer", "endorser", "relatedArtifact", "library", "disclaimer", "scoring", "compositeScoring", "type", "riskAdjustment", "rateAggregation", "rationale", "clinicalRecommendationStatement", "improvementNotation", "definition", "guidance", "group", "supplementalData"})
 public class Measure extends MetadataResource {
-
-    public enum MeasureImprovementNotation {
-        /**
-         * Improvement in the measure is noted as an increase in the measure score.
-         */
-        INCREASE, 
-        /**
-         * Improvement in the measure is noted as a decrease in the measure score.
-         */
-        DECREASE, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static MeasureImprovementNotation fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("increase".equals(codeString))
-          return INCREASE;
-        if ("decrease".equals(codeString))
-          return DECREASE;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown MeasureImprovementNotation code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case INCREASE: return "increase";
-            case DECREASE: return "decrease";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case INCREASE: return "http://hl7.org/fhir/measure-improvement-notation";
-            case DECREASE: return "http://hl7.org/fhir/measure-improvement-notation";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case INCREASE: return "Improvement in the measure is noted as an increase in the measure score.";
-            case DECREASE: return "Improvement in the measure is noted as a decrease in the measure score.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case INCREASE: return "Increase";
-            case DECREASE: return "Decrease";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class MeasureImprovementNotationEnumFactory implements EnumFactory<MeasureImprovementNotation> {
-    public MeasureImprovementNotation fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("increase".equals(codeString))
-          return MeasureImprovementNotation.INCREASE;
-        if ("decrease".equals(codeString))
-          return MeasureImprovementNotation.DECREASE;
-        throw new IllegalArgumentException("Unknown MeasureImprovementNotation code '"+codeString+"'");
-        }
-        public Enumeration<MeasureImprovementNotation> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<MeasureImprovementNotation>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("increase".equals(codeString))
-          return new Enumeration<MeasureImprovementNotation>(this, MeasureImprovementNotation.INCREASE);
-        if ("decrease".equals(codeString))
-          return new Enumeration<MeasureImprovementNotation>(this, MeasureImprovementNotation.DECREASE);
-        throw new FHIRException("Unknown MeasureImprovementNotation code '"+codeString+"'");
-        }
-    public String toCode(MeasureImprovementNotation code) {
-      if (code == MeasureImprovementNotation.INCREASE)
-        return "increase";
-      if (code == MeasureImprovementNotation.DECREASE)
-        return "decrease";
-      return "?";
-      }
-    public String toSystem(MeasureImprovementNotation code) {
-      return code.getSystem();
-      }
-    }
 
     @Block()
     public static class MeasureGroupComponent extends BackboneElement implements IBaseBackboneElement {
@@ -818,25 +726,24 @@ public class Measure extends MetadataResource {
         /**
          * An expression that specifies the criteria for the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element.
          */
-        @Child(name = "criteria", type = {Expression.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "criteria", type = {Expression.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="How the measure should be stratified", formalDefinition="An expression that specifies the criteria for the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element." )
         protected Expression criteria;
 
-        private static final long serialVersionUID = 2107514056L;
+        /**
+         * A component of the stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path.
+         */
+        @Child(name = "component", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Stratifier criteria component for the measure", formalDefinition="A component of the stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path." )
+        protected List<MeasureGroupStratifierComponentComponent> component;
+
+        private static final long serialVersionUID = -1706793609L;
 
     /**
      * Constructor
      */
       public MeasureGroupStratifierComponent() {
         super();
-      }
-
-    /**
-     * Constructor
-     */
-      public MeasureGroupStratifierComponent(Expression criteria) {
-        super();
-        this.criteria = criteria;
       }
 
         /**
@@ -936,11 +843,65 @@ public class Measure extends MetadataResource {
           return this;
         }
 
+        /**
+         * @return {@link #component} (A component of the stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path.)
+         */
+        public List<MeasureGroupStratifierComponentComponent> getComponent() { 
+          if (this.component == null)
+            this.component = new ArrayList<MeasureGroupStratifierComponentComponent>();
+          return this.component;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public MeasureGroupStratifierComponent setComponent(List<MeasureGroupStratifierComponentComponent> theComponent) { 
+          this.component = theComponent;
+          return this;
+        }
+
+        public boolean hasComponent() { 
+          if (this.component == null)
+            return false;
+          for (MeasureGroupStratifierComponentComponent item : this.component)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public MeasureGroupStratifierComponentComponent addComponent() { //3
+          MeasureGroupStratifierComponentComponent t = new MeasureGroupStratifierComponentComponent();
+          if (this.component == null)
+            this.component = new ArrayList<MeasureGroupStratifierComponentComponent>();
+          this.component.add(t);
+          return t;
+        }
+
+        public MeasureGroupStratifierComponent addComponent(MeasureGroupStratifierComponentComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.component == null)
+            this.component = new ArrayList<MeasureGroupStratifierComponentComponent>();
+          this.component.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #component}, creating it if it does not already exist
+         */
+        public MeasureGroupStratifierComponentComponent getComponentFirstRep() { 
+          if (getComponent().isEmpty()) {
+            addComponent();
+          }
+          return getComponent().get(0);
+        }
+
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("code", "CodeableConcept", "Indicates a meaning for the stratifier. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.", 0, 1, code));
           children.add(new Property("description", "string", "The human readable description of this stratifier criteria.", 0, 1, description));
           children.add(new Property("criteria", "Expression", "An expression that specifies the criteria for the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element.", 0, 1, criteria));
+          children.add(new Property("component", "", "A component of the stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, component));
         }
 
         @Override
@@ -949,6 +910,300 @@ public class Measure extends MetadataResource {
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Indicates a meaning for the stratifier. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.", 0, 1, code);
           case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this stratifier criteria.", 0, 1, description);
           case 1952046943: /*criteria*/  return new Property("criteria", "Expression", "An expression that specifies the criteria for the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element.", 0, 1, criteria);
+          case -1399907075: /*component*/  return new Property("component", "", "A component of the stratifier criteria for the measure report, specified as either the name of a valid CQL expression defined within a referenced library or a valid FHIR Resource Path.", 0, java.lang.Integer.MAX_VALUE, component);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
+        case 1952046943: /*criteria*/ return this.criteria == null ? new Base[0] : new Base[] {this.criteria}; // Expression
+        case -1399907075: /*component*/ return this.component == null ? new Base[0] : this.component.toArray(new Base[this.component.size()]); // MeasureGroupStratifierComponentComponent
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1724546052: // description
+          this.description = castToString(value); // StringType
+          return value;
+        case 1952046943: // criteria
+          this.criteria = castToExpression(value); // Expression
+          return value;
+        case -1399907075: // component
+          this.getComponent().add((MeasureGroupStratifierComponentComponent) value); // MeasureGroupStratifierComponentComponent
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("description")) {
+          this.description = castToString(value); // StringType
+        } else if (name.equals("criteria")) {
+          this.criteria = castToExpression(value); // Expression
+        } else if (name.equals("component")) {
+          this.getComponent().add((MeasureGroupStratifierComponentComponent) value);
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181:  return getCode(); 
+        case -1724546052:  return getDescriptionElement();
+        case 1952046943:  return getCriteria(); 
+        case -1399907075:  return addComponent(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case -1724546052: /*description*/ return new String[] {"string"};
+        case 1952046943: /*criteria*/ return new String[] {"Expression"};
+        case -1399907075: /*component*/ return new String[] {};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("description")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Measure.description");
+        }
+        else if (name.equals("criteria")) {
+          this.criteria = new Expression();
+          return this.criteria;
+        }
+        else if (name.equals("component")) {
+          return addComponent();
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public MeasureGroupStratifierComponent copy() {
+        MeasureGroupStratifierComponent dst = new MeasureGroupStratifierComponent();
+        copyValues(dst);
+        dst.code = code == null ? null : code.copy();
+        dst.description = description == null ? null : description.copy();
+        dst.criteria = criteria == null ? null : criteria.copy();
+        if (component != null) {
+          dst.component = new ArrayList<MeasureGroupStratifierComponentComponent>();
+          for (MeasureGroupStratifierComponentComponent i : component)
+            dst.component.add(i.copy());
+        };
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof MeasureGroupStratifierComponent))
+          return false;
+        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other_;
+        return compareDeep(code, o.code, true) && compareDeep(description, o.description, true) && compareDeep(criteria, o.criteria, true)
+           && compareDeep(component, o.component, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof MeasureGroupStratifierComponent))
+          return false;
+        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other_;
+        return compareValues(description, o.description, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, description, criteria
+          , component);
+      }
+
+  public String fhirType() {
+    return "Measure.group.stratifier";
+
+  }
+
+  }
+
+    @Block()
+    public static class MeasureGroupStratifierComponentComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Indicates a meaning for the stratifier component. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.
+         */
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Meaning of the stratifier component", formalDefinition="Indicates a meaning for the stratifier component. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures." )
+        protected CodeableConcept code;
+
+        /**
+         * The human readable description of this stratifier criteria component.
+         */
+        @Child(name = "description", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The human readable description of this stratifier component", formalDefinition="The human readable description of this stratifier criteria component." )
+        protected StringType description;
+
+        /**
+         * An expression that specifies the criteria for this component of the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element.
+         */
+        @Child(name = "criteria", type = {Expression.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Component of how the measure should be stratified", formalDefinition="An expression that specifies the criteria for this component of the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element." )
+        protected Expression criteria;
+
+        private static final long serialVersionUID = 2107514056L;
+
+    /**
+     * Constructor
+     */
+      public MeasureGroupStratifierComponentComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public MeasureGroupStratifierComponentComponent(Expression criteria) {
+        super();
+        this.criteria = criteria;
+      }
+
+        /**
+         * @return {@link #code} (Indicates a meaning for the stratifier component. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.)
+         */
+        public CodeableConcept getCode() { 
+          if (this.code == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MeasureGroupStratifierComponentComponent.code");
+            else if (Configuration.doAutoCreate())
+              this.code = new CodeableConcept(); // cc
+          return this.code;
+        }
+
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
+        }
+
+        /**
+         * @param value {@link #code} (Indicates a meaning for the stratifier component. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.)
+         */
+        public MeasureGroupStratifierComponentComponent setCode(CodeableConcept value) { 
+          this.code = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #description} (The human readable description of this stratifier criteria component.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public StringType getDescriptionElement() { 
+          if (this.description == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MeasureGroupStratifierComponentComponent.description");
+            else if (Configuration.doAutoCreate())
+              this.description = new StringType(); // bb
+          return this.description;
+        }
+
+        public boolean hasDescriptionElement() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        public boolean hasDescription() { 
+          return this.description != null && !this.description.isEmpty();
+        }
+
+        /**
+         * @param value {@link #description} (The human readable description of this stratifier criteria component.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+         */
+        public MeasureGroupStratifierComponentComponent setDescriptionElement(StringType value) { 
+          this.description = value;
+          return this;
+        }
+
+        /**
+         * @return The human readable description of this stratifier criteria component.
+         */
+        public String getDescription() { 
+          return this.description == null ? null : this.description.getValue();
+        }
+
+        /**
+         * @param value The human readable description of this stratifier criteria component.
+         */
+        public MeasureGroupStratifierComponentComponent setDescription(String value) { 
+          if (Utilities.noString(value))
+            this.description = null;
+          else {
+            if (this.description == null)
+              this.description = new StringType();
+            this.description.setValue(value);
+          }
+          return this;
+        }
+
+        /**
+         * @return {@link #criteria} (An expression that specifies the criteria for this component of the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element.)
+         */
+        public Expression getCriteria() { 
+          if (this.criteria == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create MeasureGroupStratifierComponentComponent.criteria");
+            else if (Configuration.doAutoCreate())
+              this.criteria = new Expression(); // cc
+          return this.criteria;
+        }
+
+        public boolean hasCriteria() { 
+          return this.criteria != null && !this.criteria.isEmpty();
+        }
+
+        /**
+         * @param value {@link #criteria} (An expression that specifies the criteria for this component of the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element.)
+         */
+        public MeasureGroupStratifierComponentComponent setCriteria(Expression value) { 
+          this.criteria = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "CodeableConcept", "Indicates a meaning for the stratifier component. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.", 0, 1, code));
+          children.add(new Property("description", "string", "The human readable description of this stratifier criteria component.", 0, 1, description));
+          children.add(new Property("criteria", "Expression", "An expression that specifies the criteria for this component of the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element.", 0, 1, criteria));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Indicates a meaning for the stratifier component. This can be as simple as a unique identifier, or it can establish meaning in a broader context by drawing from a terminology, allowing stratifiers to be correlated across measures.", 0, 1, code);
+          case -1724546052: /*description*/  return new Property("description", "string", "The human readable description of this stratifier criteria component.", 0, 1, description);
+          case 1952046943: /*criteria*/  return new Property("criteria", "Expression", "An expression that specifies the criteria for this component of the stratifier. This is typically the name of an expression defined within a referenced library, but it may also be a path to a stratifier element.", 0, 1, criteria);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1034,8 +1289,8 @@ public class Measure extends MetadataResource {
           return super.addChild(name);
       }
 
-      public MeasureGroupStratifierComponent copy() {
-        MeasureGroupStratifierComponent dst = new MeasureGroupStratifierComponent();
+      public MeasureGroupStratifierComponentComponent copy() {
+        MeasureGroupStratifierComponentComponent dst = new MeasureGroupStratifierComponentComponent();
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
         dst.description = description == null ? null : description.copy();
@@ -1047,9 +1302,9 @@ public class Measure extends MetadataResource {
       public boolean equalsDeep(Base other_) {
         if (!super.equalsDeep(other_))
           return false;
-        if (!(other_ instanceof MeasureGroupStratifierComponent))
+        if (!(other_ instanceof MeasureGroupStratifierComponentComponent))
           return false;
-        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other_;
+        MeasureGroupStratifierComponentComponent o = (MeasureGroupStratifierComponentComponent) other_;
         return compareDeep(code, o.code, true) && compareDeep(description, o.description, true) && compareDeep(criteria, o.criteria, true)
           ;
       }
@@ -1058,9 +1313,9 @@ public class Measure extends MetadataResource {
       public boolean equalsShallow(Base other_) {
         if (!super.equalsShallow(other_))
           return false;
-        if (!(other_ instanceof MeasureGroupStratifierComponent))
+        if (!(other_ instanceof MeasureGroupStratifierComponentComponent))
           return false;
-        MeasureGroupStratifierComponent o = (MeasureGroupStratifierComponent) other_;
+        MeasureGroupStratifierComponentComponent o = (MeasureGroupStratifierComponentComponent) other_;
         return compareValues(description, o.description, true);
       }
 
@@ -1070,7 +1325,7 @@ public class Measure extends MetadataResource {
       }
 
   public String fhirType() {
-    return "Measure.group.stratifier";
+    return "Measure.group.stratifier.component";
 
   }
 
@@ -1608,10 +1863,10 @@ public class Measure extends MetadataResource {
     /**
      * Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).
      */
-    @Child(name = "improvementNotation", type = {CodeType.class}, order=24, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "improvementNotation", type = {CodeableConcept.class}, order=24, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="increase | decrease", formalDefinition="Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range)." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-improvement-notation")
-    protected Enumeration<MeasureImprovementNotation> improvementNotation;
+    protected CodeableConcept improvementNotation;
 
     /**
      * Provides a description of an individual term used within the measure.
@@ -1641,7 +1896,7 @@ public class Measure extends MetadataResource {
     @Description(shortDefinition="What other data should be reported with the measure", formalDefinition="The supplemental data criteria for the measure report, specified as either the name of a valid CQL expression within a referenced library, or a valid FHIR Resource Path." )
     protected List<MeasureSupplementalDataComponent> supplementalData;
 
-    private static final long serialVersionUID = 1924929078L;
+    private static final long serialVersionUID = 341731972L;
 
   /**
    * Constructor
@@ -2058,7 +2313,7 @@ public class Measure extends MetadataResource {
      */
     public CodeableConcept getSubjectCodeableConcept() throws FHIRException { 
       if (this.subject == null)
-        return null;
+        this.subject = new CodeableConcept();
       if (!(this.subject instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.subject.getClass().getName()+" was encountered");
       return (CodeableConcept) this.subject;
@@ -2073,7 +2328,7 @@ public class Measure extends MetadataResource {
      */
     public Reference getSubjectReference() throws FHIRException { 
       if (this.subject == null)
-        return null;
+        this.subject = new Reference();
       if (!(this.subject instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.subject.getClass().getName()+" was encountered");
       return (Reference) this.subject;
@@ -2298,7 +2553,7 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate measure instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -3398,19 +3653,15 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @return {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     * @return {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).)
      */
-    public Enumeration<MeasureImprovementNotation> getImprovementNotationElement() { 
+    public CodeableConcept getImprovementNotation() { 
       if (this.improvementNotation == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create Measure.improvementNotation");
         else if (Configuration.doAutoCreate())
-          this.improvementNotation = new Enumeration<MeasureImprovementNotation>(new MeasureImprovementNotationEnumFactory()); // bb
+          this.improvementNotation = new CodeableConcept(); // cc
       return this.improvementNotation;
-    }
-
-    public boolean hasImprovementNotationElement() { 
-      return this.improvementNotation != null && !this.improvementNotation.isEmpty();
     }
 
     public boolean hasImprovementNotation() { 
@@ -3418,31 +3669,10 @@ public class Measure extends MetadataResource {
     }
 
     /**
-     * @param value {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     * @param value {@link #improvementNotation} (Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).)
      */
-    public Measure setImprovementNotationElement(Enumeration<MeasureImprovementNotation> value) { 
+    public Measure setImprovementNotation(CodeableConcept value) { 
       this.improvementNotation = value;
-      return this;
-    }
-
-    /**
-     * @return Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).
-     */
-    public MeasureImprovementNotation getImprovementNotation() { 
-      return this.improvementNotation == null ? null : this.improvementNotation.getValue();
-    }
-
-    /**
-     * @param value Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).
-     */
-    public Measure setImprovementNotation(MeasureImprovementNotation value) { 
-      if (value == null)
-        this.improvementNotation = null;
-      else {
-        if (this.improvementNotation == null)
-          this.improvementNotation = new Enumeration<MeasureImprovementNotation>(new MeasureImprovementNotationEnumFactory());
-        this.improvementNotation.setValue(value);
-      }
       return this;
     }
 
@@ -3677,7 +3907,7 @@ public class Measure extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the measure.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the measure from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this measure is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("usage", "string", "A detailed description, from a clinical perspective, of how the measure is used.", 0, 1, usage));
@@ -3700,7 +3930,7 @@ public class Measure extends MetadataResource {
         children.add(new Property("rateAggregation", "string", "Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.", 0, 1, rateAggregation));
         children.add(new Property("rationale", "markdown", "Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, 1, rationale));
         children.add(new Property("clinicalRecommendationStatement", "markdown", "Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.", 0, 1, clinicalRecommendationStatement));
-        children.add(new Property("improvementNotation", "code", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).", 0, 1, improvementNotation));
+        children.add(new Property("improvementNotation", "CodeableConcept", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).", 0, 1, improvementNotation));
         children.add(new Property("definition", "markdown", "Provides a description of an individual term used within the measure.", 0, java.lang.Integer.MAX_VALUE, definition));
         children.add(new Property("guidance", "markdown", "Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.", 0, 1, guidance));
         children.add(new Property("group", "", "A group of population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, group));
@@ -3726,7 +3956,7 @@ public class Measure extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the measure.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the measure from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate measure instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the measure is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this measure is needed and why it has been designed as it has.", 0, 1, purpose);
         case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description, from a clinical perspective, of how the measure is used.", 0, 1, usage);
@@ -3749,7 +3979,7 @@ public class Measure extends MetadataResource {
         case 1254503906: /*rateAggregation*/  return new Property("rateAggregation", "string", "Describes how to combine the information calculated, based on logic in each of several populations, into one summarized result.", 0, 1, rateAggregation);
         case 345689335: /*rationale*/  return new Property("rationale", "markdown", "Provides a succinct statement of the need for the measure. Usually includes statements pertaining to importance criterion: impact, gap in care, and evidence.", 0, 1, rationale);
         case -18631389: /*clinicalRecommendationStatement*/  return new Property("clinicalRecommendationStatement", "markdown", "Provides a summary of relevant clinical guidelines or other clinical recommendations supporting the measure.", 0, 1, clinicalRecommendationStatement);
-        case -2085456136: /*improvementNotation*/  return new Property("improvementNotation", "code", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).", 0, 1, improvementNotation);
+        case -2085456136: /*improvementNotation*/  return new Property("improvementNotation", "CodeableConcept", "Information on whether an increase or decrease in score is the preferred result (e.g., a higher score indicates better quality OR a lower score indicates better quality OR quality is within a range).", 0, 1, improvementNotation);
         case -1014418093: /*definition*/  return new Property("definition", "markdown", "Provides a description of an individual term used within the measure.", 0, java.lang.Integer.MAX_VALUE, definition);
         case -1314002088: /*guidance*/  return new Property("guidance", "markdown", "Additional guidance for the measure including how it can be used in a clinical context, and the intent of the measure.", 0, 1, guidance);
         case 98629247: /*group*/  return new Property("group", "", "A group of population criteria for the measure.", 0, java.lang.Integer.MAX_VALUE, group);
@@ -3798,7 +4028,7 @@ public class Measure extends MetadataResource {
         case 1254503906: /*rateAggregation*/ return this.rateAggregation == null ? new Base[0] : new Base[] {this.rateAggregation}; // StringType
         case 345689335: /*rationale*/ return this.rationale == null ? new Base[0] : new Base[] {this.rationale}; // MarkdownType
         case -18631389: /*clinicalRecommendationStatement*/ return this.clinicalRecommendationStatement == null ? new Base[0] : new Base[] {this.clinicalRecommendationStatement}; // MarkdownType
-        case -2085456136: /*improvementNotation*/ return this.improvementNotation == null ? new Base[0] : new Base[] {this.improvementNotation}; // Enumeration<MeasureImprovementNotation>
+        case -2085456136: /*improvementNotation*/ return this.improvementNotation == null ? new Base[0] : new Base[] {this.improvementNotation}; // CodeableConcept
         case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : this.definition.toArray(new Base[this.definition.size()]); // MarkdownType
         case -1314002088: /*guidance*/ return this.guidance == null ? new Base[0] : new Base[] {this.guidance}; // MarkdownType
         case 98629247: /*group*/ return this.group == null ? new Base[0] : this.group.toArray(new Base[this.group.size()]); // MeasureGroupComponent
@@ -3921,8 +4151,7 @@ public class Measure extends MetadataResource {
           this.clinicalRecommendationStatement = castToMarkdown(value); // MarkdownType
           return value;
         case -2085456136: // improvementNotation
-          value = new MeasureImprovementNotationEnumFactory().fromType(castToCode(value));
-          this.improvementNotation = (Enumeration) value; // Enumeration<MeasureImprovementNotation>
+          this.improvementNotation = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -1014418093: // definition
           this.getDefinition().add(castToMarkdown(value)); // MarkdownType
@@ -4017,8 +4246,7 @@ public class Measure extends MetadataResource {
         } else if (name.equals("clinicalRecommendationStatement")) {
           this.clinicalRecommendationStatement = castToMarkdown(value); // MarkdownType
         } else if (name.equals("improvementNotation")) {
-          value = new MeasureImprovementNotationEnumFactory().fromType(castToCode(value));
-          this.improvementNotation = (Enumeration) value; // Enumeration<MeasureImprovementNotation>
+          this.improvementNotation = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("definition")) {
           this.getDefinition().add(castToMarkdown(value));
         } else if (name.equals("guidance")) {
@@ -4072,7 +4300,7 @@ public class Measure extends MetadataResource {
         case 1254503906:  return getRateAggregationElement();
         case 345689335:  return getRationaleElement();
         case -18631389:  return getClinicalRecommendationStatementElement();
-        case -2085456136:  return getImprovementNotationElement();
+        case -2085456136:  return getImprovementNotation(); 
         case -1014418093:  return addDefinitionElement();
         case -1314002088:  return getGuidanceElement();
         case 98629247:  return addGroup(); 
@@ -4121,7 +4349,7 @@ public class Measure extends MetadataResource {
         case 1254503906: /*rateAggregation*/ return new String[] {"string"};
         case 345689335: /*rationale*/ return new String[] {"markdown"};
         case -18631389: /*clinicalRecommendationStatement*/ return new String[] {"markdown"};
-        case -2085456136: /*improvementNotation*/ return new String[] {"code"};
+        case -2085456136: /*improvementNotation*/ return new String[] {"CodeableConcept"};
         case -1014418093: /*definition*/ return new String[] {"markdown"};
         case -1314002088: /*guidance*/ return new String[] {"markdown"};
         case 98629247: /*group*/ return new String[] {};
@@ -4250,7 +4478,8 @@ public class Measure extends MetadataResource {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.clinicalRecommendationStatement");
         }
         else if (name.equals("improvementNotation")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Measure.improvementNotation");
+          this.improvementNotation = new CodeableConcept();
+          return this.improvementNotation;
         }
         else if (name.equals("definition")) {
           throw new FHIRException("Cannot call addChild on a primitive type Measure.definition");
@@ -4417,8 +4646,7 @@ public class Measure extends MetadataResource {
            && compareValues(lastReviewDate, o.lastReviewDate, true) && compareValues(disclaimer, o.disclaimer, true)
            && compareValues(riskAdjustment, o.riskAdjustment, true) && compareValues(rateAggregation, o.rateAggregation, true)
            && compareValues(rationale, o.rationale, true) && compareValues(clinicalRecommendationStatement, o.clinicalRecommendationStatement, true)
-           && compareValues(improvementNotation, o.improvementNotation, true) && compareValues(definition, o.definition, true)
-           && compareValues(guidance, o.guidance, true);
+           && compareValues(definition, o.definition, true) && compareValues(guidance, o.guidance, true);
       }
 
       public boolean isEmpty() {

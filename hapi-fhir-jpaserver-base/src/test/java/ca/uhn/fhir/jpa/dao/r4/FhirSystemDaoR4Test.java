@@ -329,7 +329,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ep.setId(IdType.newRandomUuid());
 
 		enc.getEpisodeOfCareFirstRep().setReference(ep.getId());
-		cond.getContext().setReference(enc.getId());
+		cond.getEncounter().setReference(enc.getId());
 		ep.getDiagnosisFirstRep().getCondition().setReference(cond.getId());
 
 		Bundle inputBundle = new Bundle();
@@ -2345,6 +2345,62 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionWithRefsToConditionalCreate() {
+
+		Bundle b = createTransactionBundleForTestTransactionWithRefsToConditionalCreate();
+		mySystemDao.transaction(mySrd, b);
+
+		IBundleProvider history = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		Bundle list = toBundleR4(history);
+		assertEquals(1, list.getEntry().size());
+		Observation o = find(list, Observation.class, 0);
+		assertThat(o.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+
+		b = createTransactionBundleForTestTransactionWithRefsToConditionalCreate();
+		mySystemDao.transaction(mySrd, b);
+
+		history = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		list = toBundleR4(history);
+		assertEquals(1, list.getEntry().size());
+		o = find(list, Observation.class, 0);
+		assertThat(o.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+
+	}
+
+	private Bundle createTransactionBundleForTestTransactionWithRefsToConditionalCreate() {
+		Bundle b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+
+		Patient p = new Patient();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("foo").setValue("bar");
+		b.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+
+		b.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.DELETE)
+			.setUrl("Observation?status=final");
+
+		Observation o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.setStatus(ObservationStatus.FINAL);
+		o.getSubject().setResource(p);
+		b.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation");
+		return b;
+	}
+
+	@Test
 	public void testTransactionWithUnknownTemnporaryIdReference() {
 		String methodName = "testTransactionWithUnknownTemnporaryIdReference";
 
@@ -2573,8 +2629,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertThat(nextEntry.getResponse().getLocation(), (containsString("test")));
 		assertEquals(id.toVersionless(), new IdType(nextEntry.getResponse().getLocation()).toVersionless());
-		assertNotEquals(id, new IdType(nextEntry.getResponse().getLocation()));
 		assertThat(nextEntry.getResponse().getLocation(), endsWith("/_history/2"));
+		assertNotEquals(id, new IdType(nextEntry.getResponse().getLocation()));
 
 		nextEntry = resp.getEntry().get(1);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", nextEntry.getResponse().getStatus());
@@ -2693,7 +2749,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		cond.setId(IdType.newRandomUuid());
 
 		enc.addDiagnosis().getCondition().setReference(cond.getId());
-		cond.getContext().setReference(enc.getId());
+		cond.getEncounter().setReference(enc.getId());
 
 		request
 			.addEntry()
@@ -2738,7 +2794,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithCircularReferences3() throws IOException {
-		Bundle request = loadResourceFromClasspath(Bundle.class, "/dstu3_transaction2.xml");
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/r4/r4_transaction2.xml");
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(3, resp.getEntry().size());
@@ -3601,7 +3657,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void testUpdatePreviouslyDeletedResourceInBatch() {
 		AllergyIntolerance ai = new AllergyIntolerance();
 		ai.setId("AIA1914009");
-		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai.addNote().setText("Hello");
 		IIdType id = myAllergyIntoleranceDao.update(ai).getId();
 		assertEquals("1", id.getVersionIdPart());
 
@@ -3619,7 +3675,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		batch.setType(BundleType.BATCH);
 		ai = new AllergyIntolerance();
 		ai.setId("AIA1914009");
-		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai.addNote().setText("Hello");
 		batch
 			.addEntry()
 			.setFullUrl("AllergyIntolerance/AIA1914009")

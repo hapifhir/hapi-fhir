@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -536,7 +536,7 @@ public class ImmunizationRecommendation extends DomainResource {
          */
         public PositiveIntType getDoseNumberPositiveIntType() throws FHIRException { 
           if (this.doseNumber == null)
-            return null;
+            this.doseNumber = new PositiveIntType();
           if (!(this.doseNumber instanceof PositiveIntType))
             throw new FHIRException("Type mismatch: the type PositiveIntType was expected, but "+this.doseNumber.getClass().getName()+" was encountered");
           return (PositiveIntType) this.doseNumber;
@@ -551,7 +551,7 @@ public class ImmunizationRecommendation extends DomainResource {
          */
         public StringType getDoseNumberStringType() throws FHIRException { 
           if (this.doseNumber == null)
-            return null;
+            this.doseNumber = new StringType();
           if (!(this.doseNumber instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.doseNumber.getClass().getName()+" was encountered");
           return (StringType) this.doseNumber;
@@ -587,7 +587,7 @@ public class ImmunizationRecommendation extends DomainResource {
          */
         public PositiveIntType getSeriesDosesPositiveIntType() throws FHIRException { 
           if (this.seriesDoses == null)
-            return null;
+            this.seriesDoses = new PositiveIntType();
           if (!(this.seriesDoses instanceof PositiveIntType))
             throw new FHIRException("Type mismatch: the type PositiveIntType was expected, but "+this.seriesDoses.getClass().getName()+" was encountered");
           return (PositiveIntType) this.seriesDoses;
@@ -602,7 +602,7 @@ public class ImmunizationRecommendation extends DomainResource {
          */
         public StringType getSeriesDosesStringType() throws FHIRException { 
           if (this.seriesDoses == null)
-            return null;
+            this.seriesDoses = new StringType();
           if (!(this.seriesDoses instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.seriesDoses.getClass().getName()+" was encountered");
           return (StringType) this.seriesDoses;
@@ -1820,26 +1820,6 @@ public class ImmunizationRecommendation extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
-   * Search parameter: <b>dose-sequence</b>
-   * <p>
-   * Description: <b>Recommended number of doses for immunity</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ImmunizationRecommendation.recommendation.seriesDoses[x]</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="dose-sequence", path="ImmunizationRecommendation.recommendation.seriesDoses", description="Recommended number of doses for immunity", type="token" )
-  public static final String SP_DOSE_SEQUENCE = "dose-sequence";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>dose-sequence</b>
-   * <p>
-   * Description: <b>Recommended number of doses for immunity</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ImmunizationRecommendation.recommendation.seriesDoses[x]</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam DOSE_SEQUENCE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_DOSE_SEQUENCE);
-
- /**
    * Search parameter: <b>target-disease</b>
    * <p>
    * Description: <b>Disease to be immunized against</b><br>
@@ -1904,26 +1884,6 @@ public class ImmunizationRecommendation extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam VACCINE_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_VACCINE_TYPE);
-
- /**
-   * Search parameter: <b>dose-number</b>
-   * <p>
-   * Description: <b>Recommended dose number within series</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ImmunizationRecommendation.recommendation.doseNumber[x]</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="dose-number", path="ImmunizationRecommendation.recommendation.doseNumber", description="Recommended dose number within series", type="token" )
-  public static final String SP_DOSE_NUMBER = "dose-number";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>dose-number</b>
-   * <p>
-   * Description: <b>Recommended dose number within series</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>ImmunizationRecommendation.recommendation.doseNumber[x]</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam DOSE_NUMBER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_DOSE_NUMBER);
 
  /**
    * Search parameter: <b>information</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1774,7 +1774,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public Quantity getDetailQuantity() throws FHIRException { 
           if (this.detail == null)
-            return null;
+            this.detail = new Quantity();
           if (!(this.detail instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.detail.getClass().getName()+" was encountered");
           return (Quantity) this.detail;
@@ -1789,7 +1789,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public Range getDetailRange() throws FHIRException { 
           if (this.detail == null)
-            return null;
+            this.detail = new Range();
           if (!(this.detail instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.detail.getClass().getName()+" was encountered");
           return (Range) this.detail;
@@ -1804,7 +1804,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public CodeableConcept getDetailCodeableConcept() throws FHIRException { 
           if (this.detail == null)
-            return null;
+            this.detail = new CodeableConcept();
           if (!(this.detail instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.detail.getClass().getName()+" was encountered");
           return (CodeableConcept) this.detail;
@@ -2072,58 +2072,66 @@ public class PlanDefinition extends MetadataResource {
         protected List<IdType> goalId;
 
         /**
+         * A code or group definition that describes the intended subject of the action and its children, if any.
+         */
+        @Child(name = "subject", type = {CodeableConcept.class, Group.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Type of individual the action is focused on", formalDefinition="A code or group definition that describes the intended subject of the action and its children, if any." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subject-type")
+        protected Type subject;
+
+        /**
          * A description of when the action should be triggered.
          */
-        @Child(name = "trigger", type = {TriggerDefinition.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "trigger", type = {TriggerDefinition.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="When the action should be triggered", formalDefinition="A description of when the action should be triggered." )
         protected List<TriggerDefinition> trigger;
 
         /**
          * An expression that describes applicability criteria or start/stop conditions for the action.
          */
-        @Child(name = "condition", type = {}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "condition", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Whether or not the action is applicable", formalDefinition="An expression that describes applicability criteria or start/stop conditions for the action." )
         protected List<PlanDefinitionActionConditionComponent> condition;
 
         /**
          * Defines input data requirements for the action.
          */
-        @Child(name = "input", type = {DataRequirement.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "input", type = {DataRequirement.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Input data requirements", formalDefinition="Defines input data requirements for the action." )
         protected List<DataRequirement> input;
 
         /**
          * Defines the outputs of the action, if any.
          */
-        @Child(name = "output", type = {DataRequirement.class}, order=13, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "output", type = {DataRequirement.class}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Output data definition", formalDefinition="Defines the outputs of the action, if any." )
         protected List<DataRequirement> output;
 
         /**
          * A relationship to another action such as "before" or "30-60 minutes after start of".
          */
-        @Child(name = "relatedAction", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "relatedAction", type = {}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Relationship to another action", formalDefinition="A relationship to another action such as \"before\" or \"30-60 minutes after start of\"." )
         protected List<PlanDefinitionActionRelatedActionComponent> relatedAction;
 
         /**
          * An optional value describing when the action should be performed.
          */
-        @Child(name = "timing", type = {DateTimeType.class, Age.class, Period.class, Duration.class, Range.class, Timing.class}, order=15, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "timing", type = {DateTimeType.class, Age.class, Period.class, Duration.class, Range.class, Timing.class}, order=16, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When the action should take place", formalDefinition="An optional value describing when the action should be performed." )
         protected Type timing;
 
         /**
          * Indicates who should participate in performing the action described.
          */
-        @Child(name = "participant", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "participant", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Who should participate in the action", formalDefinition="Indicates who should participate in performing the action described." )
         protected List<PlanDefinitionActionParticipantComponent> participant;
 
         /**
          * The type of action to perform (create, update, remove).
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=17, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "type", type = {CodeableConcept.class}, order=18, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="create | update | remove | fire-event", formalDefinition="The type of action to perform (create, update, remove)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-type")
         protected CodeableConcept type;
@@ -2131,7 +2139,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines the grouping behavior for the action and its children.
          */
-        @Child(name = "groupingBehavior", type = {CodeType.class}, order=18, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "groupingBehavior", type = {CodeType.class}, order=19, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="visual-group | logical-group | sentence-group", formalDefinition="Defines the grouping behavior for the action and its children." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-grouping-behavior")
         protected Enumeration<ActionGroupingBehavior> groupingBehavior;
@@ -2139,7 +2147,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines the selection behavior for the action and its children.
          */
-        @Child(name = "selectionBehavior", type = {CodeType.class}, order=19, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "selectionBehavior", type = {CodeType.class}, order=20, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="any | all | all-or-none | exactly-one | at-most-one | one-or-more", formalDefinition="Defines the selection behavior for the action and its children." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-selection-behavior")
         protected Enumeration<ActionSelectionBehavior> selectionBehavior;
@@ -2147,7 +2155,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines the required behavior for the action.
          */
-        @Child(name = "requiredBehavior", type = {CodeType.class}, order=20, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "requiredBehavior", type = {CodeType.class}, order=21, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="must | could | must-unless-documented", formalDefinition="Defines the required behavior for the action." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-required-behavior")
         protected Enumeration<ActionRequiredBehavior> requiredBehavior;
@@ -2155,7 +2163,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines whether the action should usually be preselected.
          */
-        @Child(name = "precheckBehavior", type = {CodeType.class}, order=21, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "precheckBehavior", type = {CodeType.class}, order=22, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="yes | no", formalDefinition="Defines whether the action should usually be preselected." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-precheck-behavior")
         protected Enumeration<ActionPrecheckBehavior> precheckBehavior;
@@ -2163,7 +2171,7 @@ public class PlanDefinition extends MetadataResource {
         /**
          * Defines whether the action can be selected multiple times.
          */
-        @Child(name = "cardinalityBehavior", type = {CodeType.class}, order=22, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "cardinalityBehavior", type = {CodeType.class}, order=23, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="single | multiple", formalDefinition="Defines whether the action can be selected multiple times." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/action-cardinality-behavior")
         protected Enumeration<ActionCardinalityBehavior> cardinalityBehavior;
@@ -2171,32 +2179,32 @@ public class PlanDefinition extends MetadataResource {
         /**
          * A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.
          */
-        @Child(name = "definition", type = {CanonicalType.class}, order=23, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "definition", type = {CanonicalType.class, UriType.class}, order=24, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Description of the activity to be performed", formalDefinition="A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken." )
-        protected CanonicalType definition;
+        protected Type definition;
 
         /**
          * A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.
          */
-        @Child(name = "transform", type = {CanonicalType.class}, order=24, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "transform", type = {CanonicalType.class}, order=25, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Transform to apply the template", formalDefinition="A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input." )
         protected CanonicalType transform;
 
         /**
          * Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.
          */
-        @Child(name = "dynamicValue", type = {}, order=25, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "dynamicValue", type = {}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Dynamic aspects of the definition", formalDefinition="Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result." )
         protected List<PlanDefinitionActionDynamicValueComponent> dynamicValue;
 
         /**
          * Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.
          */
-        @Child(name = "action", type = {PlanDefinitionActionComponent.class}, order=26, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "action", type = {PlanDefinitionActionComponent.class}, order=27, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A sub-action", formalDefinition="Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition." )
         protected List<PlanDefinitionActionComponent> action;
 
-        private static final long serialVersionUID = 1636345786L;
+        private static final long serialVersionUID = 158605540L;
 
     /**
      * Constructor
@@ -2671,6 +2679,57 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
+         * @return {@link #subject} (A code or group definition that describes the intended subject of the action and its children, if any.)
+         */
+        public Type getSubject() { 
+          return this.subject;
+        }
+
+        /**
+         * @return {@link #subject} (A code or group definition that describes the intended subject of the action and its children, if any.)
+         */
+        public CodeableConcept getSubjectCodeableConcept() throws FHIRException { 
+          if (this.subject == null)
+            this.subject = new CodeableConcept();
+          if (!(this.subject instanceof CodeableConcept))
+            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.subject.getClass().getName()+" was encountered");
+          return (CodeableConcept) this.subject;
+        }
+
+        public boolean hasSubjectCodeableConcept() { 
+          return this != null && this.subject instanceof CodeableConcept;
+        }
+
+        /**
+         * @return {@link #subject} (A code or group definition that describes the intended subject of the action and its children, if any.)
+         */
+        public Reference getSubjectReference() throws FHIRException { 
+          if (this.subject == null)
+            this.subject = new Reference();
+          if (!(this.subject instanceof Reference))
+            throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.subject.getClass().getName()+" was encountered");
+          return (Reference) this.subject;
+        }
+
+        public boolean hasSubjectReference() { 
+          return this != null && this.subject instanceof Reference;
+        }
+
+        public boolean hasSubject() { 
+          return this.subject != null && !this.subject.isEmpty();
+        }
+
+        /**
+         * @param value {@link #subject} (A code or group definition that describes the intended subject of the action and its children, if any.)
+         */
+        public PlanDefinitionActionComponent setSubject(Type value) { 
+          if (value != null && !(value instanceof CodeableConcept || value instanceof Reference))
+            throw new Error("Not the right type for PlanDefinition.action.subject[x]: "+value.fhirType());
+          this.subject = value;
+          return this;
+        }
+
+        /**
          * @return {@link #trigger} (A description of when the action should be triggered.)
          */
         public List<TriggerDefinition> getTrigger() { 
@@ -2947,7 +3006,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public DateTimeType getTimingDateTimeType() throws FHIRException { 
           if (this.timing == null)
-            return null;
+            this.timing = new DateTimeType();
           if (!(this.timing instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (DateTimeType) this.timing;
@@ -2962,7 +3021,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public Age getTimingAge() throws FHIRException { 
           if (this.timing == null)
-            return null;
+            this.timing = new Age();
           if (!(this.timing instanceof Age))
             throw new FHIRException("Type mismatch: the type Age was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Age) this.timing;
@@ -2977,7 +3036,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public Period getTimingPeriod() throws FHIRException { 
           if (this.timing == null)
-            return null;
+            this.timing = new Period();
           if (!(this.timing instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Period) this.timing;
@@ -2992,7 +3051,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public Duration getTimingDuration() throws FHIRException { 
           if (this.timing == null)
-            return null;
+            this.timing = new Duration();
           if (!(this.timing instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Duration) this.timing;
@@ -3007,7 +3066,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public Range getTimingRange() throws FHIRException { 
           if (this.timing == null)
-            return null;
+            this.timing = new Range();
           if (!(this.timing instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Range) this.timing;
@@ -3022,7 +3081,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public Timing getTimingTiming() throws FHIRException { 
           if (this.timing == null)
-            return null;
+            this.timing = new Timing();
           if (!(this.timing instanceof Timing))
             throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
           return (Timing) this.timing;
@@ -3369,19 +3428,40 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         * @return {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
          */
-        public CanonicalType getDefinitionElement() { 
-          if (this.definition == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create PlanDefinitionActionComponent.definition");
-            else if (Configuration.doAutoCreate())
-              this.definition = new CanonicalType(); // bb
+        public Type getDefinition() { 
           return this.definition;
         }
 
-        public boolean hasDefinitionElement() { 
-          return this.definition != null && !this.definition.isEmpty();
+        /**
+         * @return {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
+         */
+        public CanonicalType getDefinitionCanonicalType() throws FHIRException { 
+          if (this.definition == null)
+            this.definition = new CanonicalType();
+          if (!(this.definition instanceof CanonicalType))
+            throw new FHIRException("Type mismatch: the type CanonicalType was expected, but "+this.definition.getClass().getName()+" was encountered");
+          return (CanonicalType) this.definition;
+        }
+
+        public boolean hasDefinitionCanonicalType() { 
+          return this != null && this.definition instanceof CanonicalType;
+        }
+
+        /**
+         * @return {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
+         */
+        public UriType getDefinitionUriType() throws FHIRException { 
+          if (this.definition == null)
+            this.definition = new UriType();
+          if (!(this.definition instanceof UriType))
+            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.definition.getClass().getName()+" was encountered");
+          return (UriType) this.definition;
+        }
+
+        public boolean hasDefinitionUriType() { 
+          return this != null && this.definition instanceof UriType;
         }
 
         public boolean hasDefinition() { 
@@ -3389,31 +3469,12 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         * @param value {@link #definition} (A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.)
          */
-        public PlanDefinitionActionComponent setDefinitionElement(CanonicalType value) { 
+        public PlanDefinitionActionComponent setDefinition(Type value) { 
+          if (value != null && !(value instanceof CanonicalType || value instanceof UriType))
+            throw new Error("Not the right type for PlanDefinition.action.definition[x]: "+value.fhirType());
           this.definition = value;
-          return this;
-        }
-
-        /**
-         * @return A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.
-         */
-        public String getDefinition() { 
-          return this.definition == null ? null : this.definition.getValue();
-        }
-
-        /**
-         * @param value A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.
-         */
-        public PlanDefinitionActionComponent setDefinition(String value) { 
-          if (Utilities.noString(value))
-            this.definition = null;
-          else {
-            if (this.definition == null)
-              this.definition = new CanonicalType();
-            this.definition.setValue(value);
-          }
           return this;
         }
 
@@ -3583,6 +3644,7 @@ public class PlanDefinition extends MetadataResource {
           children.add(new Property("reason", "CodeableConcept", "A description of why this action is necessary or appropriate.", 0, java.lang.Integer.MAX_VALUE, reason));
           children.add(new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation));
           children.add(new Property("goalId", "id", "Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.", 0, java.lang.Integer.MAX_VALUE, goalId));
+          children.add(new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the action and its children, if any.", 0, 1, subject));
           children.add(new Property("trigger", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, trigger));
           children.add(new Property("condition", "", "An expression that describes applicability criteria or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition));
           children.add(new Property("input", "DataRequirement", "Defines input data requirements for the action.", 0, java.lang.Integer.MAX_VALUE, input));
@@ -3596,7 +3658,7 @@ public class PlanDefinition extends MetadataResource {
           children.add(new Property("requiredBehavior", "code", "Defines the required behavior for the action.", 0, 1, requiredBehavior));
           children.add(new Property("precheckBehavior", "code", "Defines whether the action should usually be preselected.", 0, 1, precheckBehavior));
           children.add(new Property("cardinalityBehavior", "code", "Defines whether the action can be selected multiple times.", 0, 1, cardinalityBehavior));
-          children.add(new Property("definition", "canonical(ActivityDefinition|PlanDefinition|Questionnaire)", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition));
+          children.add(new Property("definition[x]", "canonical(ActivityDefinition|PlanDefinition|Questionnaire)|uri", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition));
           children.add(new Property("transform", "canonical(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, 1, transform));
           children.add(new Property("dynamicValue", "", "Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue));
           children.add(new Property("action", "@PlanDefinition.action", "Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.", 0, java.lang.Integer.MAX_VALUE, action));
@@ -3614,6 +3676,10 @@ public class PlanDefinition extends MetadataResource {
           case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "A description of why this action is necessary or appropriate.", 0, java.lang.Integer.MAX_VALUE, reason);
           case 1587405498: /*documentation*/  return new Property("documentation", "RelatedArtifact", "Didactic or other informational resources associated with the action that can be provided to the CDS recipient. Information resources can include inline text commentary and links to web resources.", 0, java.lang.Integer.MAX_VALUE, documentation);
           case -1240658034: /*goalId*/  return new Property("goalId", "id", "Identifies goals that this action supports. The reference must be to a goal element defined within this plan definition.", 0, java.lang.Integer.MAX_VALUE, goalId);
+          case -573640748: /*subject[x]*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the action and its children, if any.", 0, 1, subject);
+          case -1867885268: /*subject*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the action and its children, if any.", 0, 1, subject);
+          case -1257122603: /*subjectCodeableConcept*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the action and its children, if any.", 0, 1, subject);
+          case 772938623: /*subjectReference*/  return new Property("subject[x]", "CodeableConcept|Reference(Group)", "A code or group definition that describes the intended subject of the action and its children, if any.", 0, 1, subject);
           case -1059891784: /*trigger*/  return new Property("trigger", "TriggerDefinition", "A description of when the action should be triggered.", 0, java.lang.Integer.MAX_VALUE, trigger);
           case -861311717: /*condition*/  return new Property("condition", "", "An expression that describes applicability criteria or start/stop conditions for the action.", 0, java.lang.Integer.MAX_VALUE, condition);
           case 100358090: /*input*/  return new Property("input", "DataRequirement", "Defines input data requirements for the action.", 0, java.lang.Integer.MAX_VALUE, input);
@@ -3634,7 +3700,10 @@ public class PlanDefinition extends MetadataResource {
           case -1163906287: /*requiredBehavior*/  return new Property("requiredBehavior", "code", "Defines the required behavior for the action.", 0, 1, requiredBehavior);
           case -1174249033: /*precheckBehavior*/  return new Property("precheckBehavior", "code", "Defines whether the action should usually be preselected.", 0, 1, precheckBehavior);
           case -922577408: /*cardinalityBehavior*/  return new Property("cardinalityBehavior", "code", "Defines whether the action can be selected multiple times.", 0, 1, cardinalityBehavior);
-          case -1014418093: /*definition*/  return new Property("definition", "canonical(ActivityDefinition|PlanDefinition|Questionnaire)", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition);
+          case -1139422643: /*definition[x]*/  return new Property("definition[x]", "canonical(ActivityDefinition|PlanDefinition|Questionnaire)|uri", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition);
+          case -1014418093: /*definition*/  return new Property("definition[x]", "canonical(ActivityDefinition|PlanDefinition|Questionnaire)|uri", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition);
+          case 933485793: /*definitionCanonical*/  return new Property("definition[x]", "canonical(ActivityDefinition|PlanDefinition|Questionnaire)|uri", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition);
+          case -1139428583: /*definitionUri*/  return new Property("definition[x]", "canonical(ActivityDefinition|PlanDefinition|Questionnaire)|uri", "A reference to an ActivityDefinition that describes the action to be taken in detail, or a PlanDefinition that describes a series of actions to be taken.", 0, 1, definition);
           case 1052666732: /*transform*/  return new Property("transform", "canonical(StructureMap)", "A reference to a StructureMap resource that defines a transform that can be executed to produce the intent resource using the ActivityDefinition instance as the input.", 0, 1, transform);
           case 572625010: /*dynamicValue*/  return new Property("dynamicValue", "", "Customizations that should be applied to the statically defined resource. For example, if the dosage of a medication must be computed based on the patient's weight, a customization would be used to specify an expression that calculated the weight, and the path on the resource that would contain the result.", 0, java.lang.Integer.MAX_VALUE, dynamicValue);
           case -1422950858: /*action*/  return new Property("action", "@PlanDefinition.action", "Sub actions that are contained within the action. The behavior of this action determines the functionality of the sub-actions. For example, a selection behavior of at-most-one indicates that of the sub-actions, at most one may be chosen as part of realizing the action definition.", 0, java.lang.Integer.MAX_VALUE, action);
@@ -3655,6 +3724,7 @@ public class PlanDefinition extends MetadataResource {
         case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
         case 1587405498: /*documentation*/ return this.documentation == null ? new Base[0] : this.documentation.toArray(new Base[this.documentation.size()]); // RelatedArtifact
         case -1240658034: /*goalId*/ return this.goalId == null ? new Base[0] : this.goalId.toArray(new Base[this.goalId.size()]); // IdType
+        case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Type
         case -1059891784: /*trigger*/ return this.trigger == null ? new Base[0] : this.trigger.toArray(new Base[this.trigger.size()]); // TriggerDefinition
         case -861311717: /*condition*/ return this.condition == null ? new Base[0] : this.condition.toArray(new Base[this.condition.size()]); // PlanDefinitionActionConditionComponent
         case 100358090: /*input*/ return this.input == null ? new Base[0] : this.input.toArray(new Base[this.input.size()]); // DataRequirement
@@ -3668,7 +3738,7 @@ public class PlanDefinition extends MetadataResource {
         case -1163906287: /*requiredBehavior*/ return this.requiredBehavior == null ? new Base[0] : new Base[] {this.requiredBehavior}; // Enumeration<ActionRequiredBehavior>
         case -1174249033: /*precheckBehavior*/ return this.precheckBehavior == null ? new Base[0] : new Base[] {this.precheckBehavior}; // Enumeration<ActionPrecheckBehavior>
         case -922577408: /*cardinalityBehavior*/ return this.cardinalityBehavior == null ? new Base[0] : new Base[] {this.cardinalityBehavior}; // Enumeration<ActionCardinalityBehavior>
-        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // CanonicalType
+        case -1014418093: /*definition*/ return this.definition == null ? new Base[0] : new Base[] {this.definition}; // Type
         case 1052666732: /*transform*/ return this.transform == null ? new Base[0] : new Base[] {this.transform}; // CanonicalType
         case 572625010: /*dynamicValue*/ return this.dynamicValue == null ? new Base[0] : this.dynamicValue.toArray(new Base[this.dynamicValue.size()]); // PlanDefinitionActionDynamicValueComponent
         case -1422950858: /*action*/ return this.action == null ? new Base[0] : this.action.toArray(new Base[this.action.size()]); // PlanDefinitionActionComponent
@@ -3707,6 +3777,9 @@ public class PlanDefinition extends MetadataResource {
           return value;
         case -1240658034: // goalId
           this.getGoalId().add(castToId(value)); // IdType
+          return value;
+        case -1867885268: // subject
+          this.subject = castToType(value); // Type
           return value;
         case -1059891784: // trigger
           this.getTrigger().add(castToTriggerDefinition(value)); // TriggerDefinition
@@ -3753,7 +3826,7 @@ public class PlanDefinition extends MetadataResource {
           this.cardinalityBehavior = (Enumeration) value; // Enumeration<ActionCardinalityBehavior>
           return value;
         case -1014418093: // definition
-          this.definition = castToCanonical(value); // CanonicalType
+          this.definition = castToType(value); // Type
           return value;
         case 1052666732: // transform
           this.transform = castToCanonical(value); // CanonicalType
@@ -3790,6 +3863,8 @@ public class PlanDefinition extends MetadataResource {
           this.getDocumentation().add(castToRelatedArtifact(value));
         } else if (name.equals("goalId")) {
           this.getGoalId().add(castToId(value));
+        } else if (name.equals("subject[x]")) {
+          this.subject = castToType(value); // Type
         } else if (name.equals("trigger")) {
           this.getTrigger().add(castToTriggerDefinition(value));
         } else if (name.equals("condition")) {
@@ -3821,8 +3896,8 @@ public class PlanDefinition extends MetadataResource {
         } else if (name.equals("cardinalityBehavior")) {
           value = new ActionCardinalityBehaviorEnumFactory().fromType(castToCode(value));
           this.cardinalityBehavior = (Enumeration) value; // Enumeration<ActionCardinalityBehavior>
-        } else if (name.equals("definition")) {
-          this.definition = castToCanonical(value); // CanonicalType
+        } else if (name.equals("definition[x]")) {
+          this.definition = castToType(value); // Type
         } else if (name.equals("transform")) {
           this.transform = castToCanonical(value); // CanonicalType
         } else if (name.equals("dynamicValue")) {
@@ -3846,6 +3921,8 @@ public class PlanDefinition extends MetadataResource {
         case -934964668:  return addReason(); 
         case 1587405498:  return addDocumentation(); 
         case -1240658034:  return addGoalIdElement();
+        case -573640748:  return getSubject(); 
+        case -1867885268:  return getSubject(); 
         case -1059891784:  return addTrigger(); 
         case -861311717:  return addCondition(); 
         case 100358090:  return addInput(); 
@@ -3860,7 +3937,8 @@ public class PlanDefinition extends MetadataResource {
         case -1163906287:  return getRequiredBehaviorElement();
         case -1174249033:  return getPrecheckBehaviorElement();
         case -922577408:  return getCardinalityBehaviorElement();
-        case -1014418093:  return getDefinitionElement();
+        case -1139422643:  return getDefinition(); 
+        case -1014418093:  return getDefinition(); 
         case 1052666732:  return getTransformElement();
         case 572625010:  return addDynamicValue(); 
         case -1422950858:  return addAction(); 
@@ -3881,6 +3959,7 @@ public class PlanDefinition extends MetadataResource {
         case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
         case 1587405498: /*documentation*/ return new String[] {"RelatedArtifact"};
         case -1240658034: /*goalId*/ return new String[] {"id"};
+        case -1867885268: /*subject*/ return new String[] {"CodeableConcept", "Reference"};
         case -1059891784: /*trigger*/ return new String[] {"TriggerDefinition"};
         case -861311717: /*condition*/ return new String[] {};
         case 100358090: /*input*/ return new String[] {"DataRequirement"};
@@ -3894,7 +3973,7 @@ public class PlanDefinition extends MetadataResource {
         case -1163906287: /*requiredBehavior*/ return new String[] {"code"};
         case -1174249033: /*precheckBehavior*/ return new String[] {"code"};
         case -922577408: /*cardinalityBehavior*/ return new String[] {"code"};
-        case -1014418093: /*definition*/ return new String[] {"canonical"};
+        case -1014418093: /*definition*/ return new String[] {"canonical", "uri"};
         case 1052666732: /*transform*/ return new String[] {"canonical"};
         case 572625010: /*dynamicValue*/ return new String[] {};
         case -1422950858: /*action*/ return new String[] {"@PlanDefinition.action"};
@@ -3931,6 +4010,14 @@ public class PlanDefinition extends MetadataResource {
         }
         else if (name.equals("goalId")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.goalId");
+        }
+        else if (name.equals("subjectCodeableConcept")) {
+          this.subject = new CodeableConcept();
+          return this.subject;
+        }
+        else if (name.equals("subjectReference")) {
+          this.subject = new Reference();
+          return this.subject;
         }
         else if (name.equals("trigger")) {
           return addTrigger();
@@ -3993,8 +4080,11 @@ public class PlanDefinition extends MetadataResource {
         else if (name.equals("cardinalityBehavior")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.cardinalityBehavior");
         }
-        else if (name.equals("definition")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.definition");
+        else if (name.equals("definitionCanonical")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.definition[x]");
+        }
+        else if (name.equals("definitionUri")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.definition[x]");
         }
         else if (name.equals("transform")) {
           throw new FHIRException("Cannot call addChild on a primitive type PlanDefinition.transform");
@@ -4037,6 +4127,7 @@ public class PlanDefinition extends MetadataResource {
           for (IdType i : goalId)
             dst.goalId.add(i.copy());
         };
+        dst.subject = subject == null ? null : subject.copy();
         if (trigger != null) {
           dst.trigger = new ArrayList<TriggerDefinition>();
           for (TriggerDefinition i : trigger)
@@ -4099,10 +4190,10 @@ public class PlanDefinition extends MetadataResource {
         return compareDeep(prefix, o.prefix, true) && compareDeep(title, o.title, true) && compareDeep(description, o.description, true)
            && compareDeep(textEquivalent, o.textEquivalent, true) && compareDeep(priority, o.priority, true)
            && compareDeep(code, o.code, true) && compareDeep(reason, o.reason, true) && compareDeep(documentation, o.documentation, true)
-           && compareDeep(goalId, o.goalId, true) && compareDeep(trigger, o.trigger, true) && compareDeep(condition, o.condition, true)
-           && compareDeep(input, o.input, true) && compareDeep(output, o.output, true) && compareDeep(relatedAction, o.relatedAction, true)
-           && compareDeep(timing, o.timing, true) && compareDeep(participant, o.participant, true) && compareDeep(type, o.type, true)
-           && compareDeep(groupingBehavior, o.groupingBehavior, true) && compareDeep(selectionBehavior, o.selectionBehavior, true)
+           && compareDeep(goalId, o.goalId, true) && compareDeep(subject, o.subject, true) && compareDeep(trigger, o.trigger, true)
+           && compareDeep(condition, o.condition, true) && compareDeep(input, o.input, true) && compareDeep(output, o.output, true)
+           && compareDeep(relatedAction, o.relatedAction, true) && compareDeep(timing, o.timing, true) && compareDeep(participant, o.participant, true)
+           && compareDeep(type, o.type, true) && compareDeep(groupingBehavior, o.groupingBehavior, true) && compareDeep(selectionBehavior, o.selectionBehavior, true)
            && compareDeep(requiredBehavior, o.requiredBehavior, true) && compareDeep(precheckBehavior, o.precheckBehavior, true)
            && compareDeep(cardinalityBehavior, o.cardinalityBehavior, true) && compareDeep(definition, o.definition, true)
            && compareDeep(transform, o.transform, true) && compareDeep(dynamicValue, o.dynamicValue, true)
@@ -4126,10 +4217,10 @@ public class PlanDefinition extends MetadataResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(prefix, title, description
-          , textEquivalent, priority, code, reason, documentation, goalId, trigger, condition
-          , input, output, relatedAction, timing, participant, type, groupingBehavior, selectionBehavior
-          , requiredBehavior, precheckBehavior, cardinalityBehavior, definition, transform, dynamicValue
-          , action);
+          , textEquivalent, priority, code, reason, documentation, goalId, subject, trigger
+          , condition, input, output, relatedAction, timing, participant, type, groupingBehavior
+          , selectionBehavior, requiredBehavior, precheckBehavior, cardinalityBehavior, definition
+          , transform, dynamicValue, action);
       }
 
   public String fhirType() {
@@ -4511,7 +4602,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public Duration getOffsetDuration() throws FHIRException { 
           if (this.offset == null)
-            return null;
+            this.offset = new Duration();
           if (!(this.offset instanceof Duration))
             throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.offset.getClass().getName()+" was encountered");
           return (Duration) this.offset;
@@ -4526,7 +4617,7 @@ public class PlanDefinition extends MetadataResource {
          */
         public Range getOffsetRange() throws FHIRException { 
           if (this.offset == null)
-            return null;
+            this.offset = new Range();
           if (!(this.offset instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.offset.getClass().getName()+" was encountered");
           return (Range) this.offset;
@@ -4932,10 +5023,10 @@ public class PlanDefinition extends MetadataResource {
     @Block()
     public static class PlanDefinitionActionDynamicValueComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
+         * The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).
          */
         @Child(name = "path", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The path to the element to be set dynamically", formalDefinition="The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression." )
+        @Description(shortDefinition="The path to the element to be set dynamically", formalDefinition="The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details)." )
         protected StringType path;
 
         /**
@@ -4955,7 +5046,7 @@ public class PlanDefinition extends MetadataResource {
       }
 
         /**
-         * @return {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @return {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public StringType getPathElement() { 
           if (this.path == null)
@@ -4975,7 +5066,7 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @param value {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public PlanDefinitionActionDynamicValueComponent setPathElement(StringType value) { 
           this.path = value;
@@ -4983,14 +5074,14 @@ public class PlanDefinition extends MetadataResource {
         }
 
         /**
-         * @return The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
+         * @return The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).
          */
         public String getPath() { 
           return this.path == null ? null : this.path.getValue();
         }
 
         /**
-         * @param value The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
+         * @param value The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).
          */
         public PlanDefinitionActionDynamicValueComponent setPath(String value) { 
           if (Utilities.noString(value))
@@ -5029,14 +5120,14 @@ public class PlanDefinition extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.", 0, 1, path));
+          children.add(new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).", 0, 1, path));
           children.add(new Property("expression", "Expression", "An expression specifying the value of the customized element.", 0, 1, expression));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3433509: /*path*/  return new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.", 0, 1, path);
+          case 3433509: /*path*/  return new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).", 0, 1, path);
           case -1795452264: /*expression*/  return new Property("expression", "Expression", "An expression specifying the value of the customized element.", 0, 1, expression);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -5727,7 +5818,7 @@ public class PlanDefinition extends MetadataResource {
      */
     public CodeableConcept getSubjectCodeableConcept() throws FHIRException { 
       if (this.subject == null)
-        return null;
+        this.subject = new CodeableConcept();
       if (!(this.subject instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.subject.getClass().getName()+" was encountered");
       return (CodeableConcept) this.subject;
@@ -5742,7 +5833,7 @@ public class PlanDefinition extends MetadataResource {
      */
     public Reference getSubjectReference() throws FHIRException { 
       if (this.subject == null)
-        return null;
+        this.subject = new Reference();
       if (!(this.subject instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.subject.getClass().getName()+" was encountered");
       return (Reference) this.subject;
@@ -5967,7 +6058,7 @@ public class PlanDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate plan definition instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate plan definition instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -6842,7 +6933,7 @@ public class PlanDefinition extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the plan definition.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the plan definition from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate plan definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate plan definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the plan definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this plan definition is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("usage", "string", "A detailed description of how the plan definition is used from a clinical perspective.", 0, 1, usage));
@@ -6881,7 +6972,7 @@ public class PlanDefinition extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the plan definition.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the plan definition from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate plan definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate plan definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the plan definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this plan definition is needed and why it has been designed as it has.", 0, 1, purpose);
         case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the plan definition is used from a clinical perspective.", 0, 1, usage);
@@ -7893,7 +7984,7 @@ public class PlanDefinition extends MetadataResource {
    * <p>
    * Description: <b>Activity or plan definitions used by plan definition</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>PlanDefinition.action.definition</b><br>
+   * Path: <b>PlanDefinition.action.definition[x]</b><br>
    * </p>
    */
   @SearchParamDefinition(name="definition", path="PlanDefinition.action.definition", description="Activity or plan definitions used by plan definition", type="reference", target={ActivityDefinition.class, PlanDefinition.class, Questionnaire.class } )
@@ -7903,7 +7994,7 @@ public class PlanDefinition extends MetadataResource {
    * <p>
    * Description: <b>Activity or plan definitions used by plan definition</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>PlanDefinition.action.definition</b><br>
+   * Path: <b>PlanDefinition.action.definition[x]</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam DEFINITION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_DEFINITION);

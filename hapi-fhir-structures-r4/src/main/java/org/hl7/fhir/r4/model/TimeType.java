@@ -66,7 +66,9 @@ public class TimeType extends PrimitiveType<String> {
 
 	@Override
 	public TimeType copy() {
-		return new TimeType(getValue());
+		TimeType ret = new TimeType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

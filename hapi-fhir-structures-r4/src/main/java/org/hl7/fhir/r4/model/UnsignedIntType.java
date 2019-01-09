@@ -89,7 +89,9 @@ public class UnsignedIntType extends IntegerType {
 
 	@Override
 	public UnsignedIntType copy() {
-		return new UnsignedIntType(getValue());
+		UnsignedIntType ret = new UnsignedIntType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

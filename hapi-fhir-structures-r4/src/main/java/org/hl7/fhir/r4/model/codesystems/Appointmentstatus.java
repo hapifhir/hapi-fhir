@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,7 @@ public enum Appointmentstatus {
          */
         ARRIVED, 
         /**
-         * This appointment has completed and may have resulted in an encounter.
+         * The planning stages of the appointment are now complete, the encounter resource will exist and will track further status changes. Note that an encounter may exist before the appointment status is fulfilled for many reasons.
          */
         FULFILLED, 
         /**
@@ -72,6 +72,11 @@ public enum Appointmentstatus {
          * When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present).
          */
         CHECKEDIN, 
+        /**
+         * The appointment has been placed on a waitlist, to be scheduled/confirmed in the future when a slot/service is available.
+A specific time might or might not be pre-allocated.
+         */
+        WAITLIST, 
         /**
          * added to help the parsers
          */
@@ -97,6 +102,8 @@ public enum Appointmentstatus {
           return ENTEREDINERROR;
         if ("checked-in".equals(codeString))
           return CHECKEDIN;
+        if ("waitlist".equals(codeString))
+          return WAITLIST;
         throw new FHIRException("Unknown Appointmentstatus code '"+codeString+"'");
         }
         public String toCode() {
@@ -110,6 +117,7 @@ public enum Appointmentstatus {
             case NOSHOW: return "noshow";
             case ENTEREDINERROR: return "entered-in-error";
             case CHECKEDIN: return "checked-in";
+            case WAITLIST: return "waitlist";
             default: return "?";
           }
         }
@@ -122,11 +130,12 @@ public enum Appointmentstatus {
             case PENDING: return "Some or all of the participant(s) have not finalized their acceptance of the appointment request.";
             case BOOKED: return "All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified.";
             case ARRIVED: return "The patient/patients has/have arrived and is/are waiting to be seen.";
-            case FULFILLED: return "This appointment has completed and may have resulted in an encounter.";
+            case FULFILLED: return "The planning stages of the appointment are now complete, the encounter resource will exist and will track further status changes. Note that an encounter may exist before the appointment status is fulfilled for many reasons.";
             case CANCELLED: return "The appointment has been cancelled.";
             case NOSHOW: return "Some or all of the participant(s) have not/did not appear for the appointment (usually the patient).";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
             case CHECKEDIN: return "When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present).";
+            case WAITLIST: return "The appointment has been placed on a waitlist, to be scheduled/confirmed in the future when a slot/service is available.\nA specific time might or might not be pre-allocated.";
             default: return "?";
           }
         }
@@ -141,6 +150,7 @@ public enum Appointmentstatus {
             case NOSHOW: return "No Show";
             case ENTEREDINERROR: return "Entered in error";
             case CHECKEDIN: return "Checked In";
+            case WAITLIST: return "Waitlisted";
             default: return "?";
           }
     }

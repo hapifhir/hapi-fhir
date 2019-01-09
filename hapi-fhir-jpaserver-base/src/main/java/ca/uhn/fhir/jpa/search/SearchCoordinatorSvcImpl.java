@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,8 +103,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private IPagingProvider myPagingProvider;
 
 	private int mySyncSize = DEFAULT_SYNC_SIZE;
-	/** Set in {@link #start()} */
+	/**
+	 * Set in {@link #start()}
+	 */
 	private boolean myCustomIsolationSupported;
+
+	/**
+	 * Constructor
+	 */
+	public SearchCoordinatorSvcImpl() {
+		CustomizableThreadFactory threadFactory = new CustomizableThreadFactory("search_coord_");
+		myExecutor = Executors.newCachedThreadPool(threadFactory);
+	}
 
 	@PostConstruct
 	public void start() {
@@ -117,14 +127,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		if (myCustomIsolationSupported == false) {
 			ourLog.warn("JPA dialect does not support transaction isolation! This can have an impact on search performance.");
 		}
-	}
-
-	/**
-	 * Constructor
-	 */
-	public SearchCoordinatorSvcImpl() {
-		CustomizableThreadFactory threadFactory = new CustomizableThreadFactory("search_coord_");
-		myExecutor = Executors.newCachedThreadPool(threadFactory);
 	}
 
 	@Override
@@ -466,6 +468,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private List<Long> myPreviouslyAddedResourcePids;
 		private Integer myMaxResultsToFetch;
 		private int myCountFetchedDuringThisPass;
+
 		/**
 		 * Constructor
 		 */
@@ -763,7 +766,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * before doing anything else.
 			 */
 			boolean wantOnlyCount = SummaryEnum.COUNT.equals(myParams.getSummaryMode());
-			boolean wantCount = wantOnlyCount || SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode());
+			boolean wantCount =
+				wantOnlyCount ||
+					SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
+					(myParams.getSearchTotalMode() == null && SearchTotalModeEnum.ACCURATE.equals(myDaoConfig.getDefaultTotalMode()));
 			if (wantCount) {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();

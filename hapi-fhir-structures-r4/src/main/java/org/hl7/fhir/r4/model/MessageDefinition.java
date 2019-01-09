@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1002,10 +1002,10 @@ public class MessageDefinition extends MetadataResource {
     protected List<MessageDefinitionAllowedResponseComponent> allowedResponse;
 
     /**
-     * Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.
+     * Canonical reference to a GraphDefinition. If a URL is provided, it is the canonical reference to a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.
      */
     @Child(name = "graph", type = {CanonicalType.class}, order=11, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Canonical URL for a GraphDefinition", formalDefinition="Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources." )
+    @Description(shortDefinition="Canonical reference to a GraphDefinition", formalDefinition="Canonical reference to a GraphDefinition. If a URL is provided, it is the canonical reference to a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources." )
     protected List<CanonicalType> graph;
 
     private static final long serialVersionUID = 927775347L;
@@ -1624,7 +1624,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate message definition instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate message definition instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -1949,7 +1949,7 @@ public class MessageDefinition extends MetadataResource {
      */
     public Coding getEventCoding() throws FHIRException { 
       if (this.event == null)
-        return null;
+        this.event = new Coding();
       if (!(this.event instanceof Coding))
         throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.event.getClass().getName()+" was encountered");
       return (Coding) this.event;
@@ -1964,7 +1964,7 @@ public class MessageDefinition extends MetadataResource {
      */
     public UriType getEventUriType() throws FHIRException { 
       if (this.event == null)
-        return null;
+        this.event = new UriType();
       if (!(this.event instanceof UriType))
         throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.event.getClass().getName()+" was encountered");
       return (UriType) this.event;
@@ -2193,7 +2193,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #graph} (Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
+     * @return {@link #graph} (Canonical reference to a GraphDefinition. If a URL is provided, it is the canonical reference to a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
      */
     public List<CanonicalType> getGraph() { 
       if (this.graph == null)
@@ -2219,7 +2219,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #graph} (Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
+     * @return {@link #graph} (Canonical reference to a GraphDefinition. If a URL is provided, it is the canonical reference to a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
      */
     public CanonicalType addGraphElement() {//2 
       CanonicalType t = new CanonicalType();
@@ -2230,7 +2230,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #graph} (Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
+     * @param value {@link #graph} (Canonical reference to a GraphDefinition. If a URL is provided, it is the canonical reference to a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
      */
     public MessageDefinition addGraph(String value) { //1
       CanonicalType t = new CanonicalType();
@@ -2242,7 +2242,7 @@ public class MessageDefinition extends MetadataResource {
     }
 
     /**
-     * @param value {@link #graph} (Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
+     * @param value {@link #graph} (Canonical reference to a GraphDefinition. If a URL is provided, it is the canonical reference to a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.)
      */
     public boolean hasGraph(String value) { 
       if (this.graph == null)
@@ -2267,7 +2267,7 @@ public class MessageDefinition extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the message definition.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the message definition from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate message definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate message definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the message definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this message definition is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the message definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the message definition.", 0, 1, copyright));
@@ -2278,7 +2278,7 @@ public class MessageDefinition extends MetadataResource {
         children.add(new Property("focus", "", "Identifies the resource (or resources) that are being addressed by the event.  For example, the Encounter for an admit message or two Account records for a merge.", 0, java.lang.Integer.MAX_VALUE, focus));
         children.add(new Property("responseRequired", "code", "Declare at a message definition level whether a response is required or only upon error or success, or never.", 0, 1, responseRequired));
         children.add(new Property("allowedResponse", "", "Indicates what types of messages may be sent as an application-level response to this message.", 0, java.lang.Integer.MAX_VALUE, allowedResponse));
-        children.add(new Property("graph", "canonical(GraphDefinition)", "Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.", 0, java.lang.Integer.MAX_VALUE, graph));
+        children.add(new Property("graph", "canonical(GraphDefinition)", "Canonical reference to a GraphDefinition. If a URL is provided, it is the canonical reference to a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.", 0, java.lang.Integer.MAX_VALUE, graph));
       }
 
       @Override
@@ -2296,7 +2296,7 @@ public class MessageDefinition extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the message definition.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the message definition from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate message definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate message definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the message definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this message definition is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the message definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the message definition.", 0, 1, copyright);
@@ -2310,7 +2310,7 @@ public class MessageDefinition extends MetadataResource {
         case 97604824: /*focus*/  return new Property("focus", "", "Identifies the resource (or resources) that are being addressed by the event.  For example, the Encounter for an admit message or two Account records for a merge.", 0, java.lang.Integer.MAX_VALUE, focus);
         case 791597824: /*responseRequired*/  return new Property("responseRequired", "code", "Declare at a message definition level whether a response is required or only upon error or success, or never.", 0, 1, responseRequired);
         case -1130933751: /*allowedResponse*/  return new Property("allowedResponse", "", "Indicates what types of messages may be sent as an application-level response to this message.", 0, java.lang.Integer.MAX_VALUE, allowedResponse);
-        case 98615630: /*graph*/  return new Property("graph", "canonical(GraphDefinition)", "Canonical URL for a GraphDefinition. If a URL is provided, it is the canonical URL for a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.", 0, java.lang.Integer.MAX_VALUE, graph);
+        case 98615630: /*graph*/  return new Property("graph", "canonical(GraphDefinition)", "Canonical reference to a GraphDefinition. If a URL is provided, it is the canonical reference to a [[[GraphDefinition]]] that it controls what resources are to be added to the bundle when building the document. The GraphDefinition can also specify profiles that apply to the various resources.", 0, java.lang.Integer.MAX_VALUE, graph);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -2792,21 +2792,27 @@ public class MessageDefinition extends MetadataResource {
    * Search parameter: <b>parent</b>
    * <p>
    * Description: <b>A resource that is the parent of the definition</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b></b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MessageDefinition.parent</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="parent", path="", description="A resource that is the parent of the definition", type="token" )
+  @SearchParamDefinition(name="parent", path="MessageDefinition.parent", description="A resource that is the parent of the definition", type="reference", target={ActivityDefinition.class, PlanDefinition.class } )
   public static final String SP_PARENT = "parent";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>parent</b>
    * <p>
    * Description: <b>A resource that is the parent of the definition</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b></b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>MessageDefinition.parent</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PARENT = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PARENT);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PARENT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PARENT);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>MessageDefinition:parent</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PARENT = new ca.uhn.fhir.model.api.Include("MessageDefinition:parent").toLocked();
 
  /**
    * Search parameter: <b>context-type-value</b>

@@ -239,6 +239,52 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		}
 	}
 
+	@Test
+	public void testDeleteIsAllowedForCompartmentUsingTransaction() {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		final IIdType id = ourClient.create().resource(patient).execute().getId();
+
+		Observation obsInCompartment = new Observation();
+		obsInCompartment.setStatus(ObservationStatus.FINAL);
+		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
+		IIdType obsInCompartmentId = ourClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
+
+		Observation obsNotInCompartment = new Observation();
+		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
+		IIdType obsNotInCompartmentId = ourClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().delete().resourcesOfType(Observation.class).inCompartment("Patient", id).andThen()
+					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		Bundle bundle;
+
+		bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsInCompartmentId.toUnqualifiedVersionless().getValue());
+		ourClient.transaction().withBundle(bundle).execute();
+
+		try {
+			bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsNotInCompartmentId.toUnqualifiedVersionless().getValue());
+			ourClient.transaction().withBundle(bundle).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
+
 	/**
 	 * See #503
 	 */
@@ -447,7 +493,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		encounter.addDiagnosis(dc);
 		CodeableConcept reason = new CodeableConcept();
 		reason.setText("SLIPPED ON FLOOR,PAIN L) ELBOW");
-		encounter.addReason(reason);
+		encounter.addReasonCode(reason);
 
 		// add encounter to bundle so its created
 		bundle.addEntry()

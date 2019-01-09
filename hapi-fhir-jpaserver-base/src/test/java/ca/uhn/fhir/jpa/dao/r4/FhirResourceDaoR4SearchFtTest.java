@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -42,7 +43,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
 		obs1.setValue(new Quantity(123));
-		obs1.setComment("obs1");
+		obs1.getNoteFirstRep().setText("obs1");
 		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
@@ -79,7 +80,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
 		obs1.setValue(new Quantity(123));
-		obs1.setComment("obs1");
+		obs1.getNoteFirstRep().setText("obs1");
 		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 		
 		Observation obs2 = new Observation();
@@ -97,10 +98,6 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("blood"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
-
-		map = new SearchParameterMap();
-		map.add(Constants.PARAM_CONTENT, new StringParam("obs1"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
 
 	}
 
@@ -345,7 +342,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
 		
-		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] {ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart()});
+		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
 		
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
@@ -437,7 +434,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
 		
-		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] {ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart()});
+		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
 		
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
@@ -489,7 +486,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 	 */
 	@Test
 	public void testSearchDontReindexForUpdateWithIndexDisabled() {
-		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(true);
+		BaseHapiFhirDao.setDisableIncrementOnUpdateForUnitTest(true);
 		Patient patient;
 		SearchParameterMap map;
 
@@ -500,11 +497,12 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
+		String[] pidTypeArray = toValues(pId1);
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pidTypeArray));
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_TEXT, new StringParam("DIVAAA"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pidTypeArray));
 
 		/*
 		 * Update but don't reindex
@@ -518,10 +516,10 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEAAA"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pidTypeArray));
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), not(contains(toValues(pId1))));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), not(contains(pidTypeArray)));
 
 		myPatientDao.update(patient, null, true, mockSrd());
 
@@ -531,15 +529,15 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.add(Patient.SP_NAME, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pidTypeArray));
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pidTypeArray));
 
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_TEXT, new StringParam("DIVBBB"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(toValues(pId1)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pidTypeArray));
 
 	}
 

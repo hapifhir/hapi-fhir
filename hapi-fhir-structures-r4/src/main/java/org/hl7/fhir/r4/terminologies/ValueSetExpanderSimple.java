@@ -271,6 +271,10 @@ public class ValueSetExpanderSimple implements ValueSetExpander {
   public ValueSetExpansionOutcome expand(ValueSet source, Parameters expParams) {
     try {
       return doExpand(source, expParams);
+    } catch (NoTerminologyServiceException e) {
+      // well, we couldn't expand, so we'll return an interface to a checker that can check membership of the set
+      // that might fail too, but it might not, later.
+      return new ValueSetExpansionOutcome(e.getMessage(), TerminologyServiceErrorClass.NOSERVICE);
     } catch (RuntimeException e) {
       // TODO: we should put something more specific instead of just Exception below, since
       // it swallows bugs.. what would be expected to be caught there?

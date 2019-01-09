@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -78,7 +78,7 @@ public class Observation extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, but the authoring system does not know which.
+         * The authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which.
          */
         UNKNOWN, 
         /**
@@ -144,7 +144,7 @@ public class Observation extends DomainResource {
             case CORRECTED: return "Subsequent to being Final, the observation has been modified to correct an error in the test result.";
             case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
             case ENTEREDINERROR: return "The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring system does not know which.";
+            case UNKNOWN: return "The authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which.";
             default: return "?";
           }
         }
@@ -261,10 +261,10 @@ public class Observation extends DomainResource {
         protected CodeableConcept type;
 
         /**
-         * Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.
+         * Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.  Multiple `appliesTo`  are interpreted as an "AND" of the target populations.  For example, to represent a target population of African American females, both a code of female and a code for African American would be used.
          */
         @Child(name = "appliesTo", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Reference range population", formalDefinition="Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race." )
+        @Description(shortDefinition="Reference range population", formalDefinition="Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.  Multiple `appliesTo`  are interpreted as an \"AND\" of the target populations.  For example, to represent a target population of African American females, both a code of female and a code for African American would be used." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/referencerange-appliesto")
         protected List<CodeableConcept> appliesTo;
 
@@ -364,7 +364,7 @@ public class Observation extends DomainResource {
         }
 
         /**
-         * @return {@link #appliesTo} (Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.)
+         * @return {@link #appliesTo} (Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.  Multiple `appliesTo`  are interpreted as an "AND" of the target populations.  For example, to represent a target population of African American females, both a code of female and a code for African American would be used.)
          */
         public List<CodeableConcept> getAppliesTo() { 
           if (this.appliesTo == null)
@@ -494,7 +494,7 @@ public class Observation extends DomainResource {
           children.add(new Property("low", "SimpleQuantity", "The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9). If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).", 0, 1, low));
           children.add(new Property("high", "SimpleQuantity", "The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9). If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).", 0, 1, high));
           children.add(new Property("type", "CodeableConcept", "Codes to indicate the what part of the targeted reference population it applies to. For example, the normal or therapeutic range.", 0, 1, type));
-          children.add(new Property("appliesTo", "CodeableConcept", "Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.", 0, java.lang.Integer.MAX_VALUE, appliesTo));
+          children.add(new Property("appliesTo", "CodeableConcept", "Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.  Multiple `appliesTo`  are interpreted as an \"AND\" of the target populations.  For example, to represent a target population of African American females, both a code of female and a code for African American would be used.", 0, java.lang.Integer.MAX_VALUE, appliesTo));
           children.add(new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, 1, age));
           children.add(new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of \"Negative\" or a list or table of \"normals\".", 0, 1, text));
         }
@@ -505,7 +505,7 @@ public class Observation extends DomainResource {
           case 107348: /*low*/  return new Property("low", "SimpleQuantity", "The value of the low bound of the reference range.  The low bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9). If the low bound is omitted,  it is assumed to be meaningless (e.g. reference range is <=2.3).", 0, 1, low);
           case 3202466: /*high*/  return new Property("high", "SimpleQuantity", "The value of the high bound of the reference range.  The high bound of the reference range endpoint is inclusive of the value (e.g.  reference range is >=5 - <=9). If the high bound is omitted,  it is assumed to be meaningless (e.g. reference range is >= 2.3).", 0, 1, high);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Codes to indicate the what part of the targeted reference population it applies to. For example, the normal or therapeutic range.", 0, 1, type);
-          case -2089924569: /*appliesTo*/  return new Property("appliesTo", "CodeableConcept", "Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.", 0, java.lang.Integer.MAX_VALUE, appliesTo);
+          case -2089924569: /*appliesTo*/  return new Property("appliesTo", "CodeableConcept", "Codes to indicate the target population this reference range applies to.  For example, a reference range may be based on the normal population or a particular sex or race.  Multiple `appliesTo`  are interpreted as an \"AND\" of the target populations.  For example, to represent a target population of African American females, both a code of female and a code for African American would be used.", 0, java.lang.Integer.MAX_VALUE, appliesTo);
           case 96511: /*age*/  return new Property("age", "Range", "The age at which this reference range is applicable. This is a neonatal age (e.g. number of weeks at term) if the meaning says so.", 0, 1, age);
           case 3556653: /*text*/  return new Property("text", "string", "Text based reference range in an observation which may be used when a quantitative range is not appropriate for an observation.  An example would be a reference value of \"Negative\" or a list or table of \"normals\".", 0, 1, text);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -771,7 +771,7 @@ public class Observation extends DomainResource {
          */
         public Quantity getValueQuantity() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Quantity();
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
@@ -786,7 +786,7 @@ public class Observation extends DomainResource {
          */
         public CodeableConcept getValueCodeableConcept() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new CodeableConcept();
           if (!(this.value instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
           return (CodeableConcept) this.value;
@@ -801,7 +801,7 @@ public class Observation extends DomainResource {
          */
         public StringType getValueStringType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new StringType();
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
@@ -816,7 +816,7 @@ public class Observation extends DomainResource {
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new BooleanType();
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
@@ -831,7 +831,7 @@ public class Observation extends DomainResource {
          */
         public IntegerType getValueIntegerType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new IntegerType();
           if (!(this.value instanceof IntegerType))
             throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IntegerType) this.value;
@@ -846,7 +846,7 @@ public class Observation extends DomainResource {
          */
         public Range getValueRange() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Range();
           if (!(this.value instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Range) this.value;
@@ -861,7 +861,7 @@ public class Observation extends DomainResource {
          */
         public Ratio getValueRatio() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Ratio();
           if (!(this.value instanceof Ratio))
             throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Ratio) this.value;
@@ -876,7 +876,7 @@ public class Observation extends DomainResource {
          */
         public SampledData getValueSampledData() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new SampledData();
           if (!(this.value instanceof SampledData))
             throw new FHIRException("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
           return (SampledData) this.value;
@@ -891,7 +891,7 @@ public class Observation extends DomainResource {
          */
         public TimeType getValueTimeType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new TimeType();
           if (!(this.value instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (TimeType) this.value;
@@ -906,7 +906,7 @@ public class Observation extends DomainResource {
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new DateTimeType();
           if (!(this.value instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
@@ -921,7 +921,7 @@ public class Observation extends DomainResource {
          */
         public Period getValuePeriod() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Period();
           if (!(this.value instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Period) this.value;
@@ -1447,11 +1447,11 @@ public class Observation extends DomainResource {
     protected List<CodeableConcept> interpretation;
 
     /**
-     * Comments about the test result value may include statements about significant, unexpected or unreliable results values, or information about the its source when this is relevant to its interpretation.
+     * Comments about the observation or the results.
      */
-    @Child(name = "comment", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Comments about the test result value", formalDefinition="Comments about the test result value may include statements about significant, unexpected or unreliable results values, or information about the its source when this is relevant to its interpretation." )
-    protected StringType comment;
+    @Child(name = "note", type = {Annotation.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Comments about the observation", formalDefinition="Comments about the observation or the results." )
+    protected List<Annotation> note;
 
     /**
      * Indicates the site on the subject's body where the observation was made (i.e. the target site).
@@ -1494,16 +1494,16 @@ public class Observation extends DomainResource {
     protected Resource deviceTarget;
 
     /**
-     * Guidance on how to interpret the value by comparison to a normal or recommended range.
+     * Guidance on how to interpret the value by comparison to a normal or recommended range.  Multiple reference ranges are interpreted as an "OR".   In other words, to represent two distinct target populations, two `referenceRange` elements would be used.
      */
     @Child(name = "referenceRange", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Provides guide for interpretation", formalDefinition="Guidance on how to interpret the value by comparison to a normal or recommended range." )
+    @Description(shortDefinition="Provides guide for interpretation", formalDefinition="Guidance on how to interpret the value by comparison to a normal or recommended range.  Multiple reference ranges are interpreted as an \"OR\".   In other words, to represent two distinct target populations, two `referenceRange` elements would be used." )
     protected List<ObservationReferenceRangeComponent> referenceRange;
 
     /**
      * This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.
      */
-    @Child(name = "hasMember", type = {Observation.class, QuestionnaireResponse.class, Sequence.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "hasMember", type = {Observation.class, QuestionnaireResponse.class, MolecularSequence.class}, order=21, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Related resource that belongs to the Observation group", formalDefinition="This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group." )
     protected List<Reference> hasMember;
     /**
@@ -1515,7 +1515,7 @@ public class Observation extends DomainResource {
     /**
      * The target resource that represents a measurement from which this observation value is derived. For example, a calculated anion gap or a fetal measurement based on an ultrasound image.
      */
-    @Child(name = "derivedFrom", type = {DocumentReference.class, ImagingStudy.class, Media.class, QuestionnaireResponse.class, Observation.class, Sequence.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "derivedFrom", type = {DocumentReference.class, ImagingStudy.class, Media.class, QuestionnaireResponse.class, Observation.class, MolecularSequence.class}, order=22, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Related measurements the observation is made from", formalDefinition="The target resource that represents a measurement from which this observation value is derived. For example, a calculated anion gap or a fetal measurement based on an ultrasound image." )
     protected List<Reference> derivedFrom;
     /**
@@ -1531,7 +1531,7 @@ public class Observation extends DomainResource {
     @Description(shortDefinition="Component results", formalDefinition="Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations." )
     protected List<ObservationComponentComponent> component;
 
-    private static final long serialVersionUID = 1014801256L;
+    private static final long serialVersionUID = -2036786355L;
 
   /**
    * Constructor
@@ -2008,7 +2008,7 @@ public class Observation extends DomainResource {
      */
     public DateTimeType getEffectiveDateTimeType() throws FHIRException { 
       if (this.effective == null)
-        return null;
+        this.effective = new DateTimeType();
       if (!(this.effective instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (DateTimeType) this.effective;
@@ -2023,7 +2023,7 @@ public class Observation extends DomainResource {
      */
     public Period getEffectivePeriod() throws FHIRException { 
       if (this.effective == null)
-        return null;
+        this.effective = new Period();
       if (!(this.effective instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Period) this.effective;
@@ -2038,7 +2038,7 @@ public class Observation extends DomainResource {
      */
     public Timing getEffectiveTiming() throws FHIRException { 
       if (this.effective == null)
-        return null;
+        this.effective = new Timing();
       if (!(this.effective instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (Timing) this.effective;
@@ -2053,7 +2053,7 @@ public class Observation extends DomainResource {
      */
     public InstantType getEffectiveInstantType() throws FHIRException { 
       if (this.effective == null)
-        return null;
+        this.effective = new InstantType();
       if (!(this.effective instanceof InstantType))
         throw new FHIRException("Type mismatch: the type InstantType was expected, but "+this.effective.getClass().getName()+" was encountered");
       return (InstantType) this.effective;
@@ -2201,7 +2201,7 @@ public class Observation extends DomainResource {
      */
     public Quantity getValueQuantity() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new Quantity();
       if (!(this.value instanceof Quantity))
         throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Quantity) this.value;
@@ -2216,7 +2216,7 @@ public class Observation extends DomainResource {
      */
     public CodeableConcept getValueCodeableConcept() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new CodeableConcept();
       if (!(this.value instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
       return (CodeableConcept) this.value;
@@ -2231,7 +2231,7 @@ public class Observation extends DomainResource {
      */
     public StringType getValueStringType() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new StringType();
       if (!(this.value instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (StringType) this.value;
@@ -2246,7 +2246,7 @@ public class Observation extends DomainResource {
      */
     public BooleanType getValueBooleanType() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new BooleanType();
       if (!(this.value instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (BooleanType) this.value;
@@ -2261,7 +2261,7 @@ public class Observation extends DomainResource {
      */
     public IntegerType getValueIntegerType() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new IntegerType();
       if (!(this.value instanceof IntegerType))
         throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (IntegerType) this.value;
@@ -2276,7 +2276,7 @@ public class Observation extends DomainResource {
      */
     public Range getValueRange() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new Range();
       if (!(this.value instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Range) this.value;
@@ -2291,7 +2291,7 @@ public class Observation extends DomainResource {
      */
     public Ratio getValueRatio() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new Ratio();
       if (!(this.value instanceof Ratio))
         throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Ratio) this.value;
@@ -2306,7 +2306,7 @@ public class Observation extends DomainResource {
      */
     public SampledData getValueSampledData() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new SampledData();
       if (!(this.value instanceof SampledData))
         throw new FHIRException("Type mismatch: the type SampledData was expected, but "+this.value.getClass().getName()+" was encountered");
       return (SampledData) this.value;
@@ -2321,7 +2321,7 @@ public class Observation extends DomainResource {
      */
     public TimeType getValueTimeType() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new TimeType();
       if (!(this.value instanceof TimeType))
         throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (TimeType) this.value;
@@ -2336,7 +2336,7 @@ public class Observation extends DomainResource {
      */
     public DateTimeType getValueDateTimeType() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new DateTimeType();
       if (!(this.value instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
       return (DateTimeType) this.value;
@@ -2351,7 +2351,7 @@ public class Observation extends DomainResource {
      */
     public Period getValuePeriod() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new Period();
       if (!(this.value instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Period) this.value;
@@ -2453,52 +2453,56 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #comment} (Comments about the test result value may include statements about significant, unexpected or unreliable results values, or information about the its source when this is relevant to its interpretation.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+     * @return {@link #note} (Comments about the observation or the results.)
      */
-    public StringType getCommentElement() { 
-      if (this.comment == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Observation.comment");
-        else if (Configuration.doAutoCreate())
-          this.comment = new StringType(); // bb
-      return this.comment;
-    }
-
-    public boolean hasCommentElement() { 
-      return this.comment != null && !this.comment.isEmpty();
-    }
-
-    public boolean hasComment() { 
-      return this.comment != null && !this.comment.isEmpty();
+    public List<Annotation> getNote() { 
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      return this.note;
     }
 
     /**
-     * @param value {@link #comment} (Comments about the test result value may include statements about significant, unexpected or unreliable results values, or information about the its source when this is relevant to its interpretation.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+     * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Observation setCommentElement(StringType value) { 
-      this.comment = value;
+    public Observation setNote(List<Annotation> theNote) { 
+      this.note = theNote;
+      return this;
+    }
+
+    public boolean hasNote() { 
+      if (this.note == null)
+        return false;
+      for (Annotation item : this.note)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Annotation addNote() { //3
+      Annotation t = new Annotation();
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
+      return t;
+    }
+
+    public Observation addNote(Annotation t) { //3
+      if (t == null)
+        return this;
+      if (this.note == null)
+        this.note = new ArrayList<Annotation>();
+      this.note.add(t);
       return this;
     }
 
     /**
-     * @return Comments about the test result value may include statements about significant, unexpected or unreliable results values, or information about the its source when this is relevant to its interpretation.
+     * @return The first repetition of repeating field {@link #note}, creating it if it does not already exist
      */
-    public String getComment() { 
-      return this.comment == null ? null : this.comment.getValue();
-    }
-
-    /**
-     * @param value Comments about the test result value may include statements about significant, unexpected or unreliable results values, or information about the its source when this is relevant to its interpretation.
-     */
-    public Observation setComment(String value) { 
-      if (Utilities.noString(value))
-        this.comment = null;
-      else {
-        if (this.comment == null)
-          this.comment = new StringType();
-        this.comment.setValue(value);
+    public Annotation getNoteFirstRep() { 
+      if (getNote().isEmpty()) {
+        addNote();
       }
-      return this;
+      return getNote().get(0);
     }
 
     /**
@@ -2633,7 +2637,7 @@ public class Observation extends DomainResource {
     }
 
     /**
-     * @return {@link #referenceRange} (Guidance on how to interpret the value by comparison to a normal or recommended range.)
+     * @return {@link #referenceRange} (Guidance on how to interpret the value by comparison to a normal or recommended range.  Multiple reference ranges are interpreted as an "OR".   In other words, to represent two distinct target populations, two `referenceRange` elements would be used.)
      */
     public List<ObservationReferenceRangeComponent> getReferenceRange() { 
       if (this.referenceRange == null)
@@ -2881,14 +2885,14 @@ public class Observation extends DomainResource {
         children.add(new Property("value[x]", "Quantity|CodeableConcept|string|boolean|integer|Range|Ratio|SampledData|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value));
         children.add(new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, 1, dataAbsentReason));
         children.add(new Property("interpretation", "CodeableConcept", "A categorical assessment of an observation value.  For example, high, low, normal.", 0, java.lang.Integer.MAX_VALUE, interpretation));
-        children.add(new Property("comment", "string", "Comments about the test result value may include statements about significant, unexpected or unreliable results values, or information about the its source when this is relevant to its interpretation.", 0, 1, comment));
+        children.add(new Property("note", "Annotation", "Comments about the observation or the results.", 0, java.lang.Integer.MAX_VALUE, note));
         children.add(new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made (i.e. the target site).", 0, 1, bodySite));
         children.add(new Property("method", "CodeableConcept", "Indicates the mechanism used to perform the observation.", 0, 1, method));
         children.add(new Property("specimen", "Reference(Specimen)", "The specimen that was used when this observation was made.", 0, 1, specimen));
         children.add(new Property("device", "Reference(Device|DeviceMetric)", "The device used to generate the observation data.", 0, 1, device));
-        children.add(new Property("referenceRange", "", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange));
-        children.add(new Property("hasMember", "Reference(Observation|QuestionnaireResponse|Sequence)", "This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.", 0, java.lang.Integer.MAX_VALUE, hasMember));
-        children.add(new Property("derivedFrom", "Reference(DocumentReference|ImagingStudy|Media|QuestionnaireResponse|Observation|Sequence)", "The target resource that represents a measurement from which this observation value is derived. For example, a calculated anion gap or a fetal measurement based on an ultrasound image.", 0, java.lang.Integer.MAX_VALUE, derivedFrom));
+        children.add(new Property("referenceRange", "", "Guidance on how to interpret the value by comparison to a normal or recommended range.  Multiple reference ranges are interpreted as an \"OR\".   In other words, to represent two distinct target populations, two `referenceRange` elements would be used.", 0, java.lang.Integer.MAX_VALUE, referenceRange));
+        children.add(new Property("hasMember", "Reference(Observation|QuestionnaireResponse|MolecularSequence)", "This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.", 0, java.lang.Integer.MAX_VALUE, hasMember));
+        children.add(new Property("derivedFrom", "Reference(DocumentReference|ImagingStudy|Media|QuestionnaireResponse|Observation|MolecularSequence)", "The target resource that represents a measurement from which this observation value is derived. For example, a calculated anion gap or a fetal measurement based on an ultrasound image.", 0, java.lang.Integer.MAX_VALUE, derivedFrom));
         children.add(new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component));
       }
 
@@ -2927,14 +2931,14 @@ public class Observation extends DomainResource {
         case -1524344174: /*valuePeriod*/  return new Property("value[x]", "Quantity|CodeableConcept|string|boolean|integer|Range|Ratio|SampledData|time|dateTime|Period", "The information determined as a result of making the observation, if the information has a simple value.", 0, 1, value);
         case 1034315687: /*dataAbsentReason*/  return new Property("dataAbsentReason", "CodeableConcept", "Provides a reason why the expected value in the element Observation.value[x] is missing.", 0, 1, dataAbsentReason);
         case -297950712: /*interpretation*/  return new Property("interpretation", "CodeableConcept", "A categorical assessment of an observation value.  For example, high, low, normal.", 0, java.lang.Integer.MAX_VALUE, interpretation);
-        case 950398559: /*comment*/  return new Property("comment", "string", "Comments about the test result value may include statements about significant, unexpected or unreliable results values, or information about the its source when this is relevant to its interpretation.", 0, 1, comment);
+        case 3387378: /*note*/  return new Property("note", "Annotation", "Comments about the observation or the results.", 0, java.lang.Integer.MAX_VALUE, note);
         case 1702620169: /*bodySite*/  return new Property("bodySite", "CodeableConcept", "Indicates the site on the subject's body where the observation was made (i.e. the target site).", 0, 1, bodySite);
         case -1077554975: /*method*/  return new Property("method", "CodeableConcept", "Indicates the mechanism used to perform the observation.", 0, 1, method);
         case -2132868344: /*specimen*/  return new Property("specimen", "Reference(Specimen)", "The specimen that was used when this observation was made.", 0, 1, specimen);
         case -1335157162: /*device*/  return new Property("device", "Reference(Device|DeviceMetric)", "The device used to generate the observation data.", 0, 1, device);
-        case -1912545102: /*referenceRange*/  return new Property("referenceRange", "", "Guidance on how to interpret the value by comparison to a normal or recommended range.", 0, java.lang.Integer.MAX_VALUE, referenceRange);
-        case -458019372: /*hasMember*/  return new Property("hasMember", "Reference(Observation|QuestionnaireResponse|Sequence)", "This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.", 0, java.lang.Integer.MAX_VALUE, hasMember);
-        case 1077922663: /*derivedFrom*/  return new Property("derivedFrom", "Reference(DocumentReference|ImagingStudy|Media|QuestionnaireResponse|Observation|Sequence)", "The target resource that represents a measurement from which this observation value is derived. For example, a calculated anion gap or a fetal measurement based on an ultrasound image.", 0, java.lang.Integer.MAX_VALUE, derivedFrom);
+        case -1912545102: /*referenceRange*/  return new Property("referenceRange", "", "Guidance on how to interpret the value by comparison to a normal or recommended range.  Multiple reference ranges are interpreted as an \"OR\".   In other words, to represent two distinct target populations, two `referenceRange` elements would be used.", 0, java.lang.Integer.MAX_VALUE, referenceRange);
+        case -458019372: /*hasMember*/  return new Property("hasMember", "Reference(Observation|QuestionnaireResponse|MolecularSequence)", "This observation is a group observation (e.g. a battery, a panel of tests, a set of vital sign measurements) that includes the target as a member of the group.", 0, java.lang.Integer.MAX_VALUE, hasMember);
+        case 1077922663: /*derivedFrom*/  return new Property("derivedFrom", "Reference(DocumentReference|ImagingStudy|Media|QuestionnaireResponse|Observation|MolecularSequence)", "The target resource that represents a measurement from which this observation value is derived. For example, a calculated anion gap or a fetal measurement based on an ultrasound image.", 0, java.lang.Integer.MAX_VALUE, derivedFrom);
         case -1399907075: /*component*/  return new Property("component", "", "Some observations have multiple component observations.  These component observations are expressed as separate code value pairs that share the same attributes.  Examples include systolic and diastolic component observations for blood pressure measurement and multiple component observations for genetics observations.", 0, java.lang.Integer.MAX_VALUE, component);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -2959,7 +2963,7 @@ public class Observation extends DomainResource {
         case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // Type
         case 1034315687: /*dataAbsentReason*/ return this.dataAbsentReason == null ? new Base[0] : new Base[] {this.dataAbsentReason}; // CodeableConcept
         case -297950712: /*interpretation*/ return this.interpretation == null ? new Base[0] : this.interpretation.toArray(new Base[this.interpretation.size()]); // CodeableConcept
-        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
+        case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         case 1702620169: /*bodySite*/ return this.bodySite == null ? new Base[0] : new Base[] {this.bodySite}; // CodeableConcept
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
         case -2132868344: /*specimen*/ return this.specimen == null ? new Base[0] : new Base[] {this.specimen}; // Reference
@@ -3022,8 +3026,8 @@ public class Observation extends DomainResource {
         case -297950712: // interpretation
           this.getInterpretation().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case 950398559: // comment
-          this.comment = castToString(value); // StringType
+        case 3387378: // note
+          this.getNote().add(castToAnnotation(value)); // Annotation
           return value;
         case 1702620169: // bodySite
           this.bodySite = castToCodeableConcept(value); // CodeableConcept
@@ -3087,8 +3091,8 @@ public class Observation extends DomainResource {
           this.dataAbsentReason = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("interpretation")) {
           this.getInterpretation().add(castToCodeableConcept(value));
-        } else if (name.equals("comment")) {
-          this.comment = castToString(value); // StringType
+        } else if (name.equals("note")) {
+          this.getNote().add(castToAnnotation(value));
         } else if (name.equals("bodySite")) {
           this.bodySite = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("method")) {
@@ -3130,7 +3134,7 @@ public class Observation extends DomainResource {
         case 111972721:  return getValue(); 
         case 1034315687:  return getDataAbsentReason(); 
         case -297950712:  return addInterpretation(); 
-        case 950398559:  return getCommentElement();
+        case 3387378:  return addNote(); 
         case 1702620169:  return getBodySite(); 
         case -1077554975:  return getMethod(); 
         case -2132868344:  return getSpecimen(); 
@@ -3162,7 +3166,7 @@ public class Observation extends DomainResource {
         case 111972721: /*value*/ return new String[] {"Quantity", "CodeableConcept", "string", "boolean", "integer", "Range", "Ratio", "SampledData", "time", "dateTime", "Period"};
         case 1034315687: /*dataAbsentReason*/ return new String[] {"CodeableConcept"};
         case -297950712: /*interpretation*/ return new String[] {"CodeableConcept"};
-        case 950398559: /*comment*/ return new String[] {"string"};
+        case 3387378: /*note*/ return new String[] {"Annotation"};
         case 1702620169: /*bodySite*/ return new String[] {"CodeableConcept"};
         case -1077554975: /*method*/ return new String[] {"CodeableConcept"};
         case -2132868344: /*specimen*/ return new String[] {"Reference"};
@@ -3281,8 +3285,8 @@ public class Observation extends DomainResource {
         else if (name.equals("interpretation")) {
           return addInterpretation();
         }
-        else if (name.equals("comment")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Observation.comment");
+        else if (name.equals("note")) {
+          return addNote();
         }
         else if (name.equals("bodySite")) {
           this.bodySite = new CodeableConcept();
@@ -3367,7 +3371,11 @@ public class Observation extends DomainResource {
           for (CodeableConcept i : interpretation)
             dst.interpretation.add(i.copy());
         };
-        dst.comment = comment == null ? null : comment.copy();
+        if (note != null) {
+          dst.note = new ArrayList<Annotation>();
+          for (Annotation i : note)
+            dst.note.add(i.copy());
+        };
         dst.bodySite = bodySite == null ? null : bodySite.copy();
         dst.method = method == null ? null : method.copy();
         dst.specimen = specimen == null ? null : specimen.copy();
@@ -3411,9 +3419,9 @@ public class Observation extends DomainResource {
            && compareDeep(subject, o.subject, true) && compareDeep(focus, o.focus, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(effective, o.effective, true) && compareDeep(issued, o.issued, true) && compareDeep(performer, o.performer, true)
            && compareDeep(value, o.value, true) && compareDeep(dataAbsentReason, o.dataAbsentReason, true)
-           && compareDeep(interpretation, o.interpretation, true) && compareDeep(comment, o.comment, true)
-           && compareDeep(bodySite, o.bodySite, true) && compareDeep(method, o.method, true) && compareDeep(specimen, o.specimen, true)
-           && compareDeep(device, o.device, true) && compareDeep(referenceRange, o.referenceRange, true) && compareDeep(hasMember, o.hasMember, true)
+           && compareDeep(interpretation, o.interpretation, true) && compareDeep(note, o.note, true) && compareDeep(bodySite, o.bodySite, true)
+           && compareDeep(method, o.method, true) && compareDeep(specimen, o.specimen, true) && compareDeep(device, o.device, true)
+           && compareDeep(referenceRange, o.referenceRange, true) && compareDeep(hasMember, o.hasMember, true)
            && compareDeep(derivedFrom, o.derivedFrom, true) && compareDeep(component, o.component, true);
       }
 
@@ -3424,15 +3432,14 @@ public class Observation extends DomainResource {
         if (!(other_ instanceof Observation))
           return false;
         Observation o = (Observation) other_;
-        return compareValues(status, o.status, true) && compareValues(issued, o.issued, true) && compareValues(comment, o.comment, true)
-          ;
+        return compareValues(status, o.status, true) && compareValues(issued, o.issued, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, partOf
           , status, category, code, subject, focus, encounter, effective, issued, performer
-          , value, dataAbsentReason, interpretation, comment, bodySite, method, specimen
-          , device, referenceRange, hasMember, derivedFrom, component);
+          , value, dataAbsentReason, interpretation, note, bodySite, method, specimen, device
+          , referenceRange, hasMember, derivedFrom, component);
       }
 
   @Override
@@ -3640,7 +3647,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.derivedFrom</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="derived-from", path="Observation.derivedFrom", description="Related measurements the observation is made from", type="reference", target={DocumentReference.class, ImagingStudy.class, Media.class, Observation.class, QuestionnaireResponse.class, Sequence.class } )
+  @SearchParamDefinition(name="derived-from", path="Observation.derivedFrom", description="Related measurements the observation is made from", type="reference", target={DocumentReference.class, ImagingStudy.class, Media.class, MolecularSequence.class, Observation.class, QuestionnaireResponse.class } )
   public static final String SP_DERIVED_FROM = "derived-from";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>derived-from</b>
@@ -3692,7 +3699,7 @@ public class Observation extends DomainResource {
    * Path: <b>Observation.hasMember</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="has-member", path="Observation.hasMember", description="Related resource that belongs to the Observation group", type="reference", target={Observation.class, QuestionnaireResponse.class, Sequence.class } )
+  @SearchParamDefinition(name="has-member", path="Observation.hasMember", description="Related resource that belongs to the Observation group", type="reference", target={MolecularSequence.class, Observation.class, QuestionnaireResponse.class } )
   public static final String SP_HAS_MEMBER = "has-member";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>has-member</b>
@@ -3913,17 +3920,17 @@ public class Observation extends DomainResource {
    * <p>
    * Description: <b>The value of the observation, if the value is a string, and also searches in CodeableConcept.text</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Observation.valueString</b><br>
+   * Path: <b>Observation.value[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value-string", path="(Observation.value as string)", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string" )
+  @SearchParamDefinition(name="value-string", path="(Observation.value as string) | (Observation.value as CodeableConcept).text", description="The value of the observation, if the value is a string, and also searches in CodeableConcept.text", type="string" )
   public static final String SP_VALUE_STRING = "value-string";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value-string</b>
    * <p>
    * Description: <b>The value of the observation, if the value is a string, and also searches in CodeableConcept.text</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Observation.valueString</b><br>
+   * Path: <b>Observation.value[x]</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam VALUE_STRING = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_VALUE_STRING);
@@ -4019,17 +4026,17 @@ public class Observation extends DomainResource {
    * <p>
    * Description: <b>The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br>
    * Type: <b>quantity</b><br>
-   * Path: <b>Observation.valueQuantity</b><br>
+   * Path: <b>Observation.value[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="value-quantity", path="(Observation.value as Quantity)", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
+  @SearchParamDefinition(name="value-quantity", path="(Observation.value as Quantity) | (Observation.value as SampledData)", description="The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
   public static final String SP_VALUE_QUANTITY = "value-quantity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>value-quantity</b>
    * <p>
    * Description: <b>The value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br>
    * Type: <b>quantity</b><br>
-   * Path: <b>Observation.valueQuantity</b><br>
+   * Path: <b>Observation.value[x]</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.QuantityClientParam VALUE_QUANTITY = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_VALUE_QUANTITY);
@@ -4039,17 +4046,17 @@ public class Observation extends DomainResource {
    * <p>
    * Description: <b>The value of the component observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br>
    * Type: <b>quantity</b><br>
-   * Path: <b>Observation.component.valueQuantity</b><br>
+   * Path: <b>Observation.component.value[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="component-value-quantity", path="(Observation.component.value as Quantity)", description="The value of the component observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
+  @SearchParamDefinition(name="component-value-quantity", path="(Observation.component.value as Quantity) | (Observation.component.value as SampledData)", description="The value of the component observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
   public static final String SP_COMPONENT_VALUE_QUANTITY = "component-value-quantity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>component-value-quantity</b>
    * <p>
    * Description: <b>The value of the component observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br>
    * Type: <b>quantity</b><br>
-   * Path: <b>Observation.component.valueQuantity</b><br>
+   * Path: <b>Observation.component.value[x]</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.QuantityClientParam COMPONENT_VALUE_QUANTITY = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_COMPONENT_VALUE_QUANTITY);
@@ -4079,17 +4086,17 @@ public class Observation extends DomainResource {
    * <p>
    * Description: <b>The value or component value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br>
    * Type: <b>quantity</b><br>
-   * Path: <b>Observation.valueQuantity, Observation.component.valueQuantity</b><br>
+   * Path: <b>Observation.value[x]</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="combo-value-quantity", path="(Observation.value as Quantity) | (Observation.component.value as Quantity)", description="The value or component value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
+  @SearchParamDefinition(name="combo-value-quantity", path="(Observation.value as Quantity) | (Observation.value as SampledData) | (Observation.component.value as Quantity) | (Observation.component.value as SampledData)", description="The value or component value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)", type="quantity" )
   public static final String SP_COMBO_VALUE_QUANTITY = "combo-value-quantity";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>combo-value-quantity</b>
    * <p>
    * Description: <b>The value or component value of the observation, if the value is a Quantity, or a SampledData (just search on the bounds of the values in sampled data)</b><br>
    * Type: <b>quantity</b><br>
-   * Path: <b>Observation.valueQuantity, Observation.component.valueQuantity</b><br>
+   * Path: <b>Observation.value[x]</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.QuantityClientParam COMBO_VALUE_QUANTITY = new ca.uhn.fhir.rest.gclient.QuantityClientParam(SP_COMBO_VALUE_QUANTITY);

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -117,7 +117,7 @@ public class MedicinalProductContraindication extends DomainResource {
          */
         public CodeableConcept getMedicationCodeableConcept() throws FHIRException { 
           if (this.medication == null)
-            return null;
+            this.medication = new CodeableConcept();
           if (!(this.medication instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.medication.getClass().getName()+" was encountered");
           return (CodeableConcept) this.medication;
@@ -132,7 +132,7 @@ public class MedicinalProductContraindication extends DomainResource {
          */
         public Reference getMedicationReference() throws FHIRException { 
           if (this.medication == null)
-            return null;
+            this.medication = new Reference();
           if (!(this.medication instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.medication.getClass().getName()+" was encountered");
           return (Reference) this.medication;
@@ -290,332 +290,6 @@ public class MedicinalProductContraindication extends DomainResource {
 
   }
 
-    @Block()
-    public static class MedicinalProductContraindicationPopulationComponent extends BackboneElement implements IBaseBackboneElement {
-        /**
-         * The age of the specific population.
-         */
-        @Child(name = "age", type = {Range.class, CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The age of the specific population", formalDefinition="The age of the specific population." )
-        protected Type age;
-
-        /**
-         * The gender of the specific population.
-         */
-        @Child(name = "gender", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The gender of the specific population", formalDefinition="The gender of the specific population." )
-        protected CodeableConcept gender;
-
-        /**
-         * Race of the specific population.
-         */
-        @Child(name = "race", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Race of the specific population", formalDefinition="Race of the specific population." )
-        protected CodeableConcept race;
-
-        /**
-         * The existing physiological conditions of the specific population to which this applies.
-         */
-        @Child(name = "physiologicalCondition", type = {CodeableConcept.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The existing physiological conditions of the specific population to which this applies", formalDefinition="The existing physiological conditions of the specific population to which this applies." )
-        protected CodeableConcept physiologicalCondition;
-
-        private static final long serialVersionUID = -394311584L;
-
-    /**
-     * Constructor
-     */
-      public MedicinalProductContraindicationPopulationComponent() {
-        super();
-      }
-
-        /**
-         * @return {@link #age} (The age of the specific population.)
-         */
-        public Type getAge() { 
-          return this.age;
-        }
-
-        /**
-         * @return {@link #age} (The age of the specific population.)
-         */
-        public Range getAgeRange() throws FHIRException { 
-          if (this.age == null)
-            return null;
-          if (!(this.age instanceof Range))
-            throw new FHIRException("Type mismatch: the type Range was expected, but "+this.age.getClass().getName()+" was encountered");
-          return (Range) this.age;
-        }
-
-        public boolean hasAgeRange() { 
-          return this != null && this.age instanceof Range;
-        }
-
-        /**
-         * @return {@link #age} (The age of the specific population.)
-         */
-        public CodeableConcept getAgeCodeableConcept() throws FHIRException { 
-          if (this.age == null)
-            return null;
-          if (!(this.age instanceof CodeableConcept))
-            throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.age.getClass().getName()+" was encountered");
-          return (CodeableConcept) this.age;
-        }
-
-        public boolean hasAgeCodeableConcept() { 
-          return this != null && this.age instanceof CodeableConcept;
-        }
-
-        public boolean hasAge() { 
-          return this.age != null && !this.age.isEmpty();
-        }
-
-        /**
-         * @param value {@link #age} (The age of the specific population.)
-         */
-        public MedicinalProductContraindicationPopulationComponent setAge(Type value) { 
-          if (value != null && !(value instanceof Range || value instanceof CodeableConcept))
-            throw new Error("Not the right type for MedicinalProductContraindication.population.age[x]: "+value.fhirType());
-          this.age = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #gender} (The gender of the specific population.)
-         */
-        public CodeableConcept getGender() { 
-          if (this.gender == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductContraindicationPopulationComponent.gender");
-            else if (Configuration.doAutoCreate())
-              this.gender = new CodeableConcept(); // cc
-          return this.gender;
-        }
-
-        public boolean hasGender() { 
-          return this.gender != null && !this.gender.isEmpty();
-        }
-
-        /**
-         * @param value {@link #gender} (The gender of the specific population.)
-         */
-        public MedicinalProductContraindicationPopulationComponent setGender(CodeableConcept value) { 
-          this.gender = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #race} (Race of the specific population.)
-         */
-        public CodeableConcept getRace() { 
-          if (this.race == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductContraindicationPopulationComponent.race");
-            else if (Configuration.doAutoCreate())
-              this.race = new CodeableConcept(); // cc
-          return this.race;
-        }
-
-        public boolean hasRace() { 
-          return this.race != null && !this.race.isEmpty();
-        }
-
-        /**
-         * @param value {@link #race} (Race of the specific population.)
-         */
-        public MedicinalProductContraindicationPopulationComponent setRace(CodeableConcept value) { 
-          this.race = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #physiologicalCondition} (The existing physiological conditions of the specific population to which this applies.)
-         */
-        public CodeableConcept getPhysiologicalCondition() { 
-          if (this.physiologicalCondition == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MedicinalProductContraindicationPopulationComponent.physiologicalCondition");
-            else if (Configuration.doAutoCreate())
-              this.physiologicalCondition = new CodeableConcept(); // cc
-          return this.physiologicalCondition;
-        }
-
-        public boolean hasPhysiologicalCondition() { 
-          return this.physiologicalCondition != null && !this.physiologicalCondition.isEmpty();
-        }
-
-        /**
-         * @param value {@link #physiologicalCondition} (The existing physiological conditions of the specific population to which this applies.)
-         */
-        public MedicinalProductContraindicationPopulationComponent setPhysiologicalCondition(CodeableConcept value) { 
-          this.physiologicalCondition = value;
-          return this;
-        }
-
-        protected void listChildren(List<Property> children) {
-          super.listChildren(children);
-          children.add(new Property("age[x]", "Range|CodeableConcept", "The age of the specific population.", 0, 1, age));
-          children.add(new Property("gender", "CodeableConcept", "The gender of the specific population.", 0, 1, gender));
-          children.add(new Property("race", "CodeableConcept", "Race of the specific population.", 0, 1, race));
-          children.add(new Property("physiologicalCondition", "CodeableConcept", "The existing physiological conditions of the specific population to which this applies.", 0, 1, physiologicalCondition));
-        }
-
-        @Override
-        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
-          switch (_hash) {
-          case -1419716831: /*age[x]*/  return new Property("age[x]", "Range|CodeableConcept", "The age of the specific population.", 0, 1, age);
-          case 96511: /*age*/  return new Property("age[x]", "Range|CodeableConcept", "The age of the specific population.", 0, 1, age);
-          case 1442748286: /*ageRange*/  return new Property("age[x]", "Range|CodeableConcept", "The age of the specific population.", 0, 1, age);
-          case -1452658526: /*ageCodeableConcept*/  return new Property("age[x]", "Range|CodeableConcept", "The age of the specific population.", 0, 1, age);
-          case -1249512767: /*gender*/  return new Property("gender", "CodeableConcept", "The gender of the specific population.", 0, 1, gender);
-          case 3492561: /*race*/  return new Property("race", "CodeableConcept", "Race of the specific population.", 0, 1, race);
-          case -62715190: /*physiologicalCondition*/  return new Property("physiologicalCondition", "CodeableConcept", "The existing physiological conditions of the specific population to which this applies.", 0, 1, physiologicalCondition);
-          default: return super.getNamedProperty(_hash, _name, _checkValid);
-          }
-
-        }
-
-      @Override
-      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
-        switch (hash) {
-        case 96511: /*age*/ return this.age == null ? new Base[0] : new Base[] {this.age}; // Type
-        case -1249512767: /*gender*/ return this.gender == null ? new Base[0] : new Base[] {this.gender}; // CodeableConcept
-        case 3492561: /*race*/ return this.race == null ? new Base[0] : new Base[] {this.race}; // CodeableConcept
-        case -62715190: /*physiologicalCondition*/ return this.physiologicalCondition == null ? new Base[0] : new Base[] {this.physiologicalCondition}; // CodeableConcept
-        default: return super.getProperty(hash, name, checkValid);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(int hash, String name, Base value) throws FHIRException {
-        switch (hash) {
-        case 96511: // age
-          this.age = castToType(value); // Type
-          return value;
-        case -1249512767: // gender
-          this.gender = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 3492561: // race
-          this.race = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case -62715190: // physiologicalCondition
-          this.physiologicalCondition = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        default: return super.setProperty(hash, name, value);
-        }
-
-      }
-
-      @Override
-      public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("age[x]")) {
-          this.age = castToType(value); // Type
-        } else if (name.equals("gender")) {
-          this.gender = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("race")) {
-          this.race = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("physiologicalCondition")) {
-          this.physiologicalCondition = castToCodeableConcept(value); // CodeableConcept
-        } else
-          return super.setProperty(name, value);
-        return value;
-      }
-
-      @Override
-      public Base makeProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case -1419716831:  return getAge(); 
-        case 96511:  return getAge(); 
-        case -1249512767:  return getGender(); 
-        case 3492561:  return getRace(); 
-        case -62715190:  return getPhysiologicalCondition(); 
-        default: return super.makeProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
-        switch (hash) {
-        case 96511: /*age*/ return new String[] {"Range", "CodeableConcept"};
-        case -1249512767: /*gender*/ return new String[] {"CodeableConcept"};
-        case 3492561: /*race*/ return new String[] {"CodeableConcept"};
-        case -62715190: /*physiologicalCondition*/ return new String[] {"CodeableConcept"};
-        default: return super.getTypesForProperty(hash, name);
-        }
-
-      }
-
-      @Override
-      public Base addChild(String name) throws FHIRException {
-        if (name.equals("ageRange")) {
-          this.age = new Range();
-          return this.age;
-        }
-        else if (name.equals("ageCodeableConcept")) {
-          this.age = new CodeableConcept();
-          return this.age;
-        }
-        else if (name.equals("gender")) {
-          this.gender = new CodeableConcept();
-          return this.gender;
-        }
-        else if (name.equals("race")) {
-          this.race = new CodeableConcept();
-          return this.race;
-        }
-        else if (name.equals("physiologicalCondition")) {
-          this.physiologicalCondition = new CodeableConcept();
-          return this.physiologicalCondition;
-        }
-        else
-          return super.addChild(name);
-      }
-
-      public MedicinalProductContraindicationPopulationComponent copy() {
-        MedicinalProductContraindicationPopulationComponent dst = new MedicinalProductContraindicationPopulationComponent();
-        copyValues(dst);
-        dst.age = age == null ? null : age.copy();
-        dst.gender = gender == null ? null : gender.copy();
-        dst.race = race == null ? null : race.copy();
-        dst.physiologicalCondition = physiologicalCondition == null ? null : physiologicalCondition.copy();
-        return dst;
-      }
-
-      @Override
-      public boolean equalsDeep(Base other_) {
-        if (!super.equalsDeep(other_))
-          return false;
-        if (!(other_ instanceof MedicinalProductContraindicationPopulationComponent))
-          return false;
-        MedicinalProductContraindicationPopulationComponent o = (MedicinalProductContraindicationPopulationComponent) other_;
-        return compareDeep(age, o.age, true) && compareDeep(gender, o.gender, true) && compareDeep(race, o.race, true)
-           && compareDeep(physiologicalCondition, o.physiologicalCondition, true);
-      }
-
-      @Override
-      public boolean equalsShallow(Base other_) {
-        if (!super.equalsShallow(other_))
-          return false;
-        if (!(other_ instanceof MedicinalProductContraindicationPopulationComponent))
-          return false;
-        MedicinalProductContraindicationPopulationComponent o = (MedicinalProductContraindicationPopulationComponent) other_;
-        return true;
-      }
-
-      public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(age, gender, race, physiologicalCondition
-          );
-      }
-
-  public String fhirType() {
-    return "MedicinalProductContraindication.population";
-
-  }
-
-  }
-
     /**
      * The medication for which this is an indication.
      */
@@ -671,11 +345,11 @@ public class MedicinalProductContraindication extends DomainResource {
     /**
      * The population group to which this applies.
      */
-    @Child(name = "population", type = {}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "population", type = {Population.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The population group to which this applies", formalDefinition="The population group to which this applies." )
-    protected List<MedicinalProductContraindicationPopulationComponent> population;
+    protected List<Population> population;
 
-    private static final long serialVersionUID = 1540231813L;
+    private static final long serialVersionUID = -1746103034L;
 
   /**
    * Constructor
@@ -979,16 +653,16 @@ public class MedicinalProductContraindication extends DomainResource {
     /**
      * @return {@link #population} (The population group to which this applies.)
      */
-    public List<MedicinalProductContraindicationPopulationComponent> getPopulation() { 
+    public List<Population> getPopulation() { 
       if (this.population == null)
-        this.population = new ArrayList<MedicinalProductContraindicationPopulationComponent>();
+        this.population = new ArrayList<Population>();
       return this.population;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public MedicinalProductContraindication setPopulation(List<MedicinalProductContraindicationPopulationComponent> thePopulation) { 
+    public MedicinalProductContraindication setPopulation(List<Population> thePopulation) { 
       this.population = thePopulation;
       return this;
     }
@@ -996,25 +670,25 @@ public class MedicinalProductContraindication extends DomainResource {
     public boolean hasPopulation() { 
       if (this.population == null)
         return false;
-      for (MedicinalProductContraindicationPopulationComponent item : this.population)
+      for (Population item : this.population)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public MedicinalProductContraindicationPopulationComponent addPopulation() { //3
-      MedicinalProductContraindicationPopulationComponent t = new MedicinalProductContraindicationPopulationComponent();
+    public Population addPopulation() { //3
+      Population t = new Population();
       if (this.population == null)
-        this.population = new ArrayList<MedicinalProductContraindicationPopulationComponent>();
+        this.population = new ArrayList<Population>();
       this.population.add(t);
       return t;
     }
 
-    public MedicinalProductContraindication addPopulation(MedicinalProductContraindicationPopulationComponent t) { //3
+    public MedicinalProductContraindication addPopulation(Population t) { //3
       if (t == null)
         return this;
       if (this.population == null)
-        this.population = new ArrayList<MedicinalProductContraindicationPopulationComponent>();
+        this.population = new ArrayList<Population>();
       this.population.add(t);
       return this;
     }
@@ -1022,7 +696,7 @@ public class MedicinalProductContraindication extends DomainResource {
     /**
      * @return The first repetition of repeating field {@link #population}, creating it if it does not already exist
      */
-    public MedicinalProductContraindicationPopulationComponent getPopulationFirstRep() { 
+    public Population getPopulationFirstRep() { 
       if (getPopulation().isEmpty()) {
         addPopulation();
       }
@@ -1037,7 +711,7 @@ public class MedicinalProductContraindication extends DomainResource {
         children.add(new Property("comorbidity", "CodeableConcept", "A comorbidity (concurrent condition) or coinfection.", 0, java.lang.Integer.MAX_VALUE, comorbidity));
         children.add(new Property("therapeuticIndication", "Reference(MedicinalProductIndication)", "Information about the use of the medicinal product in relation to other therapies as part of the indication.", 0, java.lang.Integer.MAX_VALUE, therapeuticIndication));
         children.add(new Property("otherTherapy", "", "Information about the use of the medicinal product in relation to other therapies described as part of the indication.", 0, java.lang.Integer.MAX_VALUE, otherTherapy));
-        children.add(new Property("population", "", "The population group to which this applies.", 0, java.lang.Integer.MAX_VALUE, population));
+        children.add(new Property("population", "Population", "The population group to which this applies.", 0, java.lang.Integer.MAX_VALUE, population));
       }
 
       @Override
@@ -1049,7 +723,7 @@ public class MedicinalProductContraindication extends DomainResource {
         case -406395211: /*comorbidity*/  return new Property("comorbidity", "CodeableConcept", "A comorbidity (concurrent condition) or coinfection.", 0, java.lang.Integer.MAX_VALUE, comorbidity);
         case -1925150262: /*therapeuticIndication*/  return new Property("therapeuticIndication", "Reference(MedicinalProductIndication)", "Information about the use of the medicinal product in relation to other therapies as part of the indication.", 0, java.lang.Integer.MAX_VALUE, therapeuticIndication);
         case -544509127: /*otherTherapy*/  return new Property("otherTherapy", "", "Information about the use of the medicinal product in relation to other therapies described as part of the indication.", 0, java.lang.Integer.MAX_VALUE, otherTherapy);
-        case -2023558323: /*population*/  return new Property("population", "", "The population group to which this applies.", 0, java.lang.Integer.MAX_VALUE, population);
+        case -2023558323: /*population*/  return new Property("population", "Population", "The population group to which this applies.", 0, java.lang.Integer.MAX_VALUE, population);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1064,7 +738,7 @@ public class MedicinalProductContraindication extends DomainResource {
         case -406395211: /*comorbidity*/ return this.comorbidity == null ? new Base[0] : this.comorbidity.toArray(new Base[this.comorbidity.size()]); // CodeableConcept
         case -1925150262: /*therapeuticIndication*/ return this.therapeuticIndication == null ? new Base[0] : this.therapeuticIndication.toArray(new Base[this.therapeuticIndication.size()]); // Reference
         case -544509127: /*otherTherapy*/ return this.otherTherapy == null ? new Base[0] : this.otherTherapy.toArray(new Base[this.otherTherapy.size()]); // MedicinalProductContraindicationOtherTherapyComponent
-        case -2023558323: /*population*/ return this.population == null ? new Base[0] : this.population.toArray(new Base[this.population.size()]); // MedicinalProductContraindicationPopulationComponent
+        case -2023558323: /*population*/ return this.population == null ? new Base[0] : this.population.toArray(new Base[this.population.size()]); // Population
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1092,7 +766,7 @@ public class MedicinalProductContraindication extends DomainResource {
           this.getOtherTherapy().add((MedicinalProductContraindicationOtherTherapyComponent) value); // MedicinalProductContraindicationOtherTherapyComponent
           return value;
         case -2023558323: // population
-          this.getPopulation().add((MedicinalProductContraindicationPopulationComponent) value); // MedicinalProductContraindicationPopulationComponent
+          this.getPopulation().add(castToPopulation(value)); // Population
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1114,7 +788,7 @@ public class MedicinalProductContraindication extends DomainResource {
         } else if (name.equals("otherTherapy")) {
           this.getOtherTherapy().add((MedicinalProductContraindicationOtherTherapyComponent) value);
         } else if (name.equals("population")) {
-          this.getPopulation().add((MedicinalProductContraindicationPopulationComponent) value);
+          this.getPopulation().add(castToPopulation(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -1144,7 +818,7 @@ public class MedicinalProductContraindication extends DomainResource {
         case -406395211: /*comorbidity*/ return new String[] {"CodeableConcept"};
         case -1925150262: /*therapeuticIndication*/ return new String[] {"Reference"};
         case -544509127: /*otherTherapy*/ return new String[] {};
-        case -2023558323: /*population*/ return new String[] {};
+        case -2023558323: /*population*/ return new String[] {"Population"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1210,8 +884,8 @@ public class MedicinalProductContraindication extends DomainResource {
             dst.otherTherapy.add(i.copy());
         };
         if (population != null) {
-          dst.population = new ArrayList<MedicinalProductContraindicationPopulationComponent>();
-          for (MedicinalProductContraindicationPopulationComponent i : population)
+          dst.population = new ArrayList<Population>();
+          for (Population i : population)
             dst.population.add(i.copy());
         };
         return dst;

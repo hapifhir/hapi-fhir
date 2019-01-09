@@ -252,12 +252,12 @@ public class InMemorySubscriptionMatcherTestR4 {
 
 	@Test
 	public void testSearchNumberWrongParam() {
-		ImmunizationRecommendation ir1 = new ImmunizationRecommendation();
-		ir1.addRecommendation().setDoseNumber(new PositiveIntType(1));
+		MolecularSequence ir1 = new MolecularSequence();
+		ir1.addVariant().setStart(1);
 
-		SearchParameterMap params = new SearchParameterMap().add(ImmunizationRecommendation.SP_DOSE_NUMBER, new NumberParam("1"));
+		SearchParameterMap params = new SearchParameterMap().add(MolecularSequence.SP_VARIANT_START, new NumberParam("1"));
 		assertMatched(ir1, params);
-		params = new SearchParameterMap().add(ImmunizationRecommendation.SP_DOSE_SEQUENCE, new NumberParam("1"));
+		params = new SearchParameterMap().add(MolecularSequence.SP_VARIANT_END, new NumberParam("1"));
 		assertNotMatched(ir1, params);
 	}
 

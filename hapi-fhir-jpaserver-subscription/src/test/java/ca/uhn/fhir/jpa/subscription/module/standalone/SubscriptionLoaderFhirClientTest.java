@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
-public class SubscriptionLoaderFhirClientTest extends BaseSubscriptionChannelDstu3Test {
+public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
 	private String myCode = "1000000050";
 
 	@Before

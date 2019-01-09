@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -39,10 +39,8 @@ public class GuideParameterCodeEnumFactory implements EnumFactory<GuideParameter
   public GuideParameterCode fromCode(String codeString) throws IllegalArgumentException {
     if (codeString == null || "".equals(codeString))
       return null;
-    if ("apply-business-version".equals(codeString))
-      return GuideParameterCode.APPLYBUSINESSVERSION;
-    if ("apply-jurisdiction".equals(codeString))
-      return GuideParameterCode.APPLYJURISDICTION;
+    if ("apply".equals(codeString))
+      return GuideParameterCode.APPLY;
     if ("path-resource".equals(codeString))
       return GuideParameterCode.PATHRESOURCE;
     if ("path-pages".equals(codeString))
@@ -65,10 +63,8 @@ public class GuideParameterCodeEnumFactory implements EnumFactory<GuideParameter
   }
 
   public String toCode(GuideParameterCode code) {
-    if (code == GuideParameterCode.APPLYBUSINESSVERSION)
-      return "apply-business-version";
-    if (code == GuideParameterCode.APPLYJURISDICTION)
-      return "apply-jurisdiction";
+    if (code == GuideParameterCode.APPLY)
+      return "apply";
     if (code == GuideParameterCode.PATHRESOURCE)
       return "path-resource";
     if (code == GuideParameterCode.PATHPAGES)

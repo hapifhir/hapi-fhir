@@ -3,8 +3,6 @@ package org.hl7.fhir.utilities.graphql;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.utilities.graphql.Argument.ArgumentListStatus;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

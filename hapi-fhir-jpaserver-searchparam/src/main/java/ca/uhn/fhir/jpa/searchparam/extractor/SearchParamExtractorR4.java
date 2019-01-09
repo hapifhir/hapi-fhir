@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -756,8 +756,9 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 
 	private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
+
 		@Override
-		public Base resolveConstant(Object appContext, String name) throws PathEngineException {
+		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
 			return null;
 		}
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -43,16 +43,26 @@ public class ContainerCapEnumFactory implements EnumFactory<ContainerCap> {
       return ContainerCap.RED;
     if ("yellow".equals(codeString))
       return ContainerCap.YELLOW;
+    if ("dark-yellow".equals(codeString))
+      return ContainerCap.DARKYELLOW;
     if ("grey".equals(codeString))
       return ContainerCap.GREY;
-    if ("violet".equals(codeString))
-      return ContainerCap.VIOLET;
-    if ("blue".equals(codeString))
-      return ContainerCap.BLUE;
+    if ("light-blue".equals(codeString))
+      return ContainerCap.LIGHTBLUE;
     if ("black".equals(codeString))
       return ContainerCap.BLACK;
     if ("green".equals(codeString))
       return ContainerCap.GREEN;
+    if ("light-green".equals(codeString))
+      return ContainerCap.LIGHTGREEN;
+    if ("lavender".equals(codeString))
+      return ContainerCap.LAVENDER;
+    if ("brown".equals(codeString))
+      return ContainerCap.BROWN;
+    if ("white".equals(codeString))
+      return ContainerCap.WHITE;
+    if ("pink".equals(codeString))
+      return ContainerCap.PINK;
     throw new IllegalArgumentException("Unknown ContainerCap code '"+codeString+"'");
   }
 
@@ -61,16 +71,26 @@ public class ContainerCapEnumFactory implements EnumFactory<ContainerCap> {
       return "red";
     if (code == ContainerCap.YELLOW)
       return "yellow";
+    if (code == ContainerCap.DARKYELLOW)
+      return "dark-yellow";
     if (code == ContainerCap.GREY)
       return "grey";
-    if (code == ContainerCap.VIOLET)
-      return "violet";
-    if (code == ContainerCap.BLUE)
-      return "blue";
+    if (code == ContainerCap.LIGHTBLUE)
+      return "light-blue";
     if (code == ContainerCap.BLACK)
       return "black";
     if (code == ContainerCap.GREEN)
       return "green";
+    if (code == ContainerCap.LIGHTGREEN)
+      return "light-green";
+    if (code == ContainerCap.LAVENDER)
+      return "lavender";
+    if (code == ContainerCap.BROWN)
+      return "brown";
+    if (code == ContainerCap.WHITE)
+      return "white";
+    if (code == ContainerCap.PINK)
+      return "pink";
     return "?";
   }
 

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -209,14 +209,14 @@ public class VerificationResult extends DomainResource {
         /**
          * Reference to the primary source.
          */
-        @Child(name = "organization", type = {Organization.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "who", type = {Organization.class, Practitioner.class, PractitionerRole.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Reference to the primary source", formalDefinition="Reference to the primary source." )
-        protected Reference organization;
+        protected Reference who;
 
         /**
          * The actual object that is the target of the reference (Reference to the primary source.)
          */
-        protected Organization organizationTarget;
+        protected Resource whoTarget;
 
         /**
          * Type of primary source (License Board; Primary Education; Continuing Education; Postal Service; Relationship owner; Registration Authority; legal source; issuing source; authoritative source).
@@ -229,9 +229,10 @@ public class VerificationResult extends DomainResource {
         /**
          * Method for communicating with the primary source (manual; API; Push).
          */
-        @Child(name = "validationProcess", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="The process(es) by which the target is validated", formalDefinition="Method for communicating with the primary source (manual; API; Push)." )
-        protected List<CodeableConcept> validationProcess;
+        @Child(name = "communicationMethod", type = {CodeableConcept.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+        @Description(shortDefinition="Method for exchanging information with the primary source", formalDefinition="Method for communicating with the primary source (manual; API; Push)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-communication-method")
+        protected List<CodeableConcept> communicationMethod;
 
         /**
          * Status of the validation of the target against the primary source (successful; failed; unknown).
@@ -264,7 +265,7 @@ public class VerificationResult extends DomainResource {
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-push-type-available")
         protected List<CodeableConcept> pushTypeAvailable;
 
-        private static final long serialVersionUID = 1288479702L;
+        private static final long serialVersionUID = -928858332L;
 
     /**
      * Constructor
@@ -274,46 +275,41 @@ public class VerificationResult extends DomainResource {
       }
 
         /**
-         * @return {@link #organization} (Reference to the primary source.)
+         * @return {@link #who} (Reference to the primary source.)
          */
-        public Reference getOrganization() { 
-          if (this.organization == null)
+        public Reference getWho() { 
+          if (this.who == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultPrimarySourceComponent.organization");
+              throw new Error("Attempt to auto-create VerificationResultPrimarySourceComponent.who");
             else if (Configuration.doAutoCreate())
-              this.organization = new Reference(); // cc
-          return this.organization;
+              this.who = new Reference(); // cc
+          return this.who;
         }
 
-        public boolean hasOrganization() { 
-          return this.organization != null && !this.organization.isEmpty();
+        public boolean hasWho() { 
+          return this.who != null && !this.who.isEmpty();
         }
 
         /**
-         * @param value {@link #organization} (Reference to the primary source.)
+         * @param value {@link #who} (Reference to the primary source.)
          */
-        public VerificationResultPrimarySourceComponent setOrganization(Reference value) { 
-          this.organization = value;
+        public VerificationResultPrimarySourceComponent setWho(Reference value) { 
+          this.who = value;
           return this;
         }
 
         /**
-         * @return {@link #organization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to the primary source.)
+         * @return {@link #who} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Reference to the primary source.)
          */
-        public Organization getOrganizationTarget() { 
-          if (this.organizationTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultPrimarySourceComponent.organization");
-            else if (Configuration.doAutoCreate())
-              this.organizationTarget = new Organization(); // aa
-          return this.organizationTarget;
+        public Resource getWhoTarget() { 
+          return this.whoTarget;
         }
 
         /**
-         * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to the primary source.)
+         * @param value {@link #who} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Reference to the primary source.)
          */
-        public VerificationResultPrimarySourceComponent setOrganizationTarget(Organization value) { 
-          this.organizationTarget = value;
+        public VerificationResultPrimarySourceComponent setWhoTarget(Resource value) { 
+          this.whoTarget = value;
           return this;
         }
 
@@ -371,56 +367,56 @@ public class VerificationResult extends DomainResource {
         }
 
         /**
-         * @return {@link #validationProcess} (Method for communicating with the primary source (manual; API; Push).)
+         * @return {@link #communicationMethod} (Method for communicating with the primary source (manual; API; Push).)
          */
-        public List<CodeableConcept> getValidationProcess() { 
-          if (this.validationProcess == null)
-            this.validationProcess = new ArrayList<CodeableConcept>();
-          return this.validationProcess;
+        public List<CodeableConcept> getCommunicationMethod() { 
+          if (this.communicationMethod == null)
+            this.communicationMethod = new ArrayList<CodeableConcept>();
+          return this.communicationMethod;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public VerificationResultPrimarySourceComponent setValidationProcess(List<CodeableConcept> theValidationProcess) { 
-          this.validationProcess = theValidationProcess;
+        public VerificationResultPrimarySourceComponent setCommunicationMethod(List<CodeableConcept> theCommunicationMethod) { 
+          this.communicationMethod = theCommunicationMethod;
           return this;
         }
 
-        public boolean hasValidationProcess() { 
-          if (this.validationProcess == null)
+        public boolean hasCommunicationMethod() { 
+          if (this.communicationMethod == null)
             return false;
-          for (CodeableConcept item : this.validationProcess)
+          for (CodeableConcept item : this.communicationMethod)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public CodeableConcept addValidationProcess() { //3
+        public CodeableConcept addCommunicationMethod() { //3
           CodeableConcept t = new CodeableConcept();
-          if (this.validationProcess == null)
-            this.validationProcess = new ArrayList<CodeableConcept>();
-          this.validationProcess.add(t);
+          if (this.communicationMethod == null)
+            this.communicationMethod = new ArrayList<CodeableConcept>();
+          this.communicationMethod.add(t);
           return t;
         }
 
-        public VerificationResultPrimarySourceComponent addValidationProcess(CodeableConcept t) { //3
+        public VerificationResultPrimarySourceComponent addCommunicationMethod(CodeableConcept t) { //3
           if (t == null)
             return this;
-          if (this.validationProcess == null)
-            this.validationProcess = new ArrayList<CodeableConcept>();
-          this.validationProcess.add(t);
+          if (this.communicationMethod == null)
+            this.communicationMethod = new ArrayList<CodeableConcept>();
+          this.communicationMethod.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #validationProcess}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #communicationMethod}, creating it if it does not already exist
          */
-        public CodeableConcept getValidationProcessFirstRep() { 
-          if (getValidationProcess().isEmpty()) {
-            addValidationProcess();
+        public CodeableConcept getCommunicationMethodFirstRep() { 
+          if (getCommunicationMethod().isEmpty()) {
+            addCommunicationMethod();
           }
-          return getValidationProcess().get(0);
+          return getCommunicationMethod().get(0);
         }
 
         /**
@@ -575,9 +571,9 @@ public class VerificationResult extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("organization", "Reference(Organization)", "Reference to the primary source.", 0, 1, organization));
+          children.add(new Property("who", "Reference(Organization|Practitioner|PractitionerRole)", "Reference to the primary source.", 0, 1, who));
           children.add(new Property("type", "CodeableConcept", "Type of primary source (License Board; Primary Education; Continuing Education; Postal Service; Relationship owner; Registration Authority; legal source; issuing source; authoritative source).", 0, java.lang.Integer.MAX_VALUE, type));
-          children.add(new Property("validationProcess", "CodeableConcept", "Method for communicating with the primary source (manual; API; Push).", 0, java.lang.Integer.MAX_VALUE, validationProcess));
+          children.add(new Property("communicationMethod", "CodeableConcept", "Method for communicating with the primary source (manual; API; Push).", 0, java.lang.Integer.MAX_VALUE, communicationMethod));
           children.add(new Property("validationStatus", "CodeableConcept", "Status of the validation of the target against the primary source (successful; failed; unknown).", 0, 1, validationStatus));
           children.add(new Property("validationDate", "dateTime", "When the target was validated against the primary source.", 0, 1, validationDate));
           children.add(new Property("canPushUpdates", "CodeableConcept", "Ability of the primary source to push updates/alerts (yes; no; undetermined).", 0, 1, canPushUpdates));
@@ -587,9 +583,9 @@ public class VerificationResult extends DomainResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "Reference to the primary source.", 0, 1, organization);
+          case 117694: /*who*/  return new Property("who", "Reference(Organization|Practitioner|PractitionerRole)", "Reference to the primary source.", 0, 1, who);
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Type of primary source (License Board; Primary Education; Continuing Education; Postal Service; Relationship owner; Registration Authority; legal source; issuing source; authoritative source).", 0, java.lang.Integer.MAX_VALUE, type);
-          case 797680566: /*validationProcess*/  return new Property("validationProcess", "CodeableConcept", "Method for communicating with the primary source (manual; API; Push).", 0, java.lang.Integer.MAX_VALUE, validationProcess);
+          case 1314116695: /*communicationMethod*/  return new Property("communicationMethod", "CodeableConcept", "Method for communicating with the primary source (manual; API; Push).", 0, java.lang.Integer.MAX_VALUE, communicationMethod);
           case 1775633867: /*validationStatus*/  return new Property("validationStatus", "CodeableConcept", "Status of the validation of the target against the primary source (successful; failed; unknown).", 0, 1, validationStatus);
           case -280180793: /*validationDate*/  return new Property("validationDate", "dateTime", "When the target was validated against the primary source.", 0, 1, validationDate);
           case 1463787104: /*canPushUpdates*/  return new Property("canPushUpdates", "CodeableConcept", "Ability of the primary source to push updates/alerts (yes; no; undetermined).", 0, 1, canPushUpdates);
@@ -602,9 +598,9 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
+        case 117694: /*who*/ return this.who == null ? new Base[0] : new Base[] {this.who}; // Reference
         case 3575610: /*type*/ return this.type == null ? new Base[0] : this.type.toArray(new Base[this.type.size()]); // CodeableConcept
-        case 797680566: /*validationProcess*/ return this.validationProcess == null ? new Base[0] : this.validationProcess.toArray(new Base[this.validationProcess.size()]); // CodeableConcept
+        case 1314116695: /*communicationMethod*/ return this.communicationMethod == null ? new Base[0] : this.communicationMethod.toArray(new Base[this.communicationMethod.size()]); // CodeableConcept
         case 1775633867: /*validationStatus*/ return this.validationStatus == null ? new Base[0] : new Base[] {this.validationStatus}; // CodeableConcept
         case -280180793: /*validationDate*/ return this.validationDate == null ? new Base[0] : new Base[] {this.validationDate}; // DateTimeType
         case 1463787104: /*canPushUpdates*/ return this.canPushUpdates == null ? new Base[0] : new Base[] {this.canPushUpdates}; // CodeableConcept
@@ -617,14 +613,14 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case 1178922291: // organization
-          this.organization = castToReference(value); // Reference
+        case 117694: // who
+          this.who = castToReference(value); // Reference
           return value;
         case 3575610: // type
           this.getType().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case 797680566: // validationProcess
-          this.getValidationProcess().add(castToCodeableConcept(value)); // CodeableConcept
+        case 1314116695: // communicationMethod
+          this.getCommunicationMethod().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 1775633867: // validationStatus
           this.validationStatus = castToCodeableConcept(value); // CodeableConcept
@@ -645,12 +641,12 @@ public class VerificationResult extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("organization")) {
-          this.organization = castToReference(value); // Reference
+        if (name.equals("who")) {
+          this.who = castToReference(value); // Reference
         } else if (name.equals("type")) {
           this.getType().add(castToCodeableConcept(value));
-        } else if (name.equals("validationProcess")) {
-          this.getValidationProcess().add(castToCodeableConcept(value));
+        } else if (name.equals("communicationMethod")) {
+          this.getCommunicationMethod().add(castToCodeableConcept(value));
         } else if (name.equals("validationStatus")) {
           this.validationStatus = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("validationDate")) {
@@ -667,9 +663,9 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1178922291:  return getOrganization(); 
+        case 117694:  return getWho(); 
         case 3575610:  return addType(); 
-        case 797680566:  return addValidationProcess(); 
+        case 1314116695:  return addCommunicationMethod(); 
         case 1775633867:  return getValidationStatus(); 
         case -280180793:  return getValidationDateElement();
         case 1463787104:  return getCanPushUpdates(); 
@@ -682,9 +678,9 @@ public class VerificationResult extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 1178922291: /*organization*/ return new String[] {"Reference"};
+        case 117694: /*who*/ return new String[] {"Reference"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 797680566: /*validationProcess*/ return new String[] {"CodeableConcept"};
+        case 1314116695: /*communicationMethod*/ return new String[] {"CodeableConcept"};
         case 1775633867: /*validationStatus*/ return new String[] {"CodeableConcept"};
         case -280180793: /*validationDate*/ return new String[] {"dateTime"};
         case 1463787104: /*canPushUpdates*/ return new String[] {"CodeableConcept"};
@@ -696,15 +692,15 @@ public class VerificationResult extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("organization")) {
-          this.organization = new Reference();
-          return this.organization;
+        if (name.equals("who")) {
+          this.who = new Reference();
+          return this.who;
         }
         else if (name.equals("type")) {
           return addType();
         }
-        else if (name.equals("validationProcess")) {
-          return addValidationProcess();
+        else if (name.equals("communicationMethod")) {
+          return addCommunicationMethod();
         }
         else if (name.equals("validationStatus")) {
           this.validationStatus = new CodeableConcept();
@@ -727,16 +723,16 @@ public class VerificationResult extends DomainResource {
       public VerificationResultPrimarySourceComponent copy() {
         VerificationResultPrimarySourceComponent dst = new VerificationResultPrimarySourceComponent();
         copyValues(dst);
-        dst.organization = organization == null ? null : organization.copy();
+        dst.who = who == null ? null : who.copy();
         if (type != null) {
           dst.type = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : type)
             dst.type.add(i.copy());
         };
-        if (validationProcess != null) {
-          dst.validationProcess = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : validationProcess)
-            dst.validationProcess.add(i.copy());
+        if (communicationMethod != null) {
+          dst.communicationMethod = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : communicationMethod)
+            dst.communicationMethod.add(i.copy());
         };
         dst.validationStatus = validationStatus == null ? null : validationStatus.copy();
         dst.validationDate = validationDate == null ? null : validationDate.copy();
@@ -756,7 +752,7 @@ public class VerificationResult extends DomainResource {
         if (!(other_ instanceof VerificationResultPrimarySourceComponent))
           return false;
         VerificationResultPrimarySourceComponent o = (VerificationResultPrimarySourceComponent) other_;
-        return compareDeep(organization, o.organization, true) && compareDeep(type, o.type, true) && compareDeep(validationProcess, o.validationProcess, true)
+        return compareDeep(who, o.who, true) && compareDeep(type, o.type, true) && compareDeep(communicationMethod, o.communicationMethod, true)
            && compareDeep(validationStatus, o.validationStatus, true) && compareDeep(validationDate, o.validationDate, true)
            && compareDeep(canPushUpdates, o.canPushUpdates, true) && compareDeep(pushTypeAvailable, o.pushTypeAvailable, true)
           ;
@@ -773,7 +769,7 @@ public class VerificationResult extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, type, validationProcess
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(who, type, communicationMethod
           , validationStatus, validationDate, canPushUpdates, pushTypeAvailable);
       }
 
@@ -787,35 +783,36 @@ public class VerificationResult extends DomainResource {
     @Block()
     public static class VerificationResultAttestationComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The individual attesting to information.
+         * The individual or organization attesting to information.
          */
-        @Child(name = "source", type = {Practitioner.class}, order=1, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The individual attesting to information", formalDefinition="The individual attesting to information." )
-        protected Reference source;
+        @Child(name = "who", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=1, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The individual or organization attesting to information", formalDefinition="The individual or organization attesting to information." )
+        protected Reference who;
 
         /**
-         * The actual object that is the target of the reference (The individual attesting to information.)
+         * The actual object that is the target of the reference (The individual or organization attesting to information.)
          */
-        protected Practitioner sourceTarget;
+        protected Resource whoTarget;
 
         /**
-         * The organization attesting to information.
+         * When the who is asserting on behalf of another (organization or individual).
          */
-        @Child(name = "organization", type = {Organization.class}, order=2, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The organization attesting to information", formalDefinition="The organization attesting to information." )
-        protected Reference organization;
+        @Child(name = "onBehalfOf", type = {Organization.class, Practitioner.class, PractitionerRole.class}, order=2, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="When the who is asserting on behalf of another (organization or individual)", formalDefinition="When the who is asserting on behalf of another (organization or individual)." )
+        protected Reference onBehalfOf;
 
         /**
-         * The actual object that is the target of the reference (The organization attesting to information.)
+         * The actual object that is the target of the reference (When the who is asserting on behalf of another (organization or individual).)
          */
-        protected Organization organizationTarget;
+        protected Resource onBehalfOfTarget;
 
         /**
-         * Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source).
+         * The method by which attested information was submitted/retrieved (manual; API; Push).
          */
-        @Child(name = "method", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source)", formalDefinition="Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source)." )
-        protected CodeableConcept method;
+        @Child(name = "communicationMethod", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="The method by which attested information was submitted/retrieved", formalDefinition="The method by which attested information was submitted/retrieved (manual; API; Push)." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/verificationresult-communication-method")
+        protected CodeableConcept communicationMethod;
 
         /**
          * The date the information was attested to.
@@ -841,18 +838,18 @@ public class VerificationResult extends DomainResource {
         /**
          * Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.
          */
-        @Child(name = "signedProxyRight", type = {StringType.class, UriType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "proxySignature", type = {Signature.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Proxy signature", formalDefinition="Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source." )
-        protected Type signedProxyRight;
+        protected Signature proxySignature;
 
         /**
          * Signed assertion by the attestation source that they have attested to the information.
          */
-        @Child(name = "signedSourceAttestation", type = {StringType.class, UriType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "sourceSignature", type = {Signature.class}, order=8, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Attester signature", formalDefinition="Signed assertion by the attestation source that they have attested to the information." )
-        protected Type signedSourceAttestation;
+        protected Signature sourceSignature;
 
-        private static final long serialVersionUID = 1956485939L;
+        private static final long serialVersionUID = -900018800L;
 
     /**
      * Constructor
@@ -862,114 +859,104 @@ public class VerificationResult extends DomainResource {
       }
 
         /**
-         * @return {@link #source} (The individual attesting to information.)
+         * @return {@link #who} (The individual or organization attesting to information.)
          */
-        public Reference getSource() { 
-          if (this.source == null)
+        public Reference getWho() { 
+          if (this.who == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.source");
+              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.who");
             else if (Configuration.doAutoCreate())
-              this.source = new Reference(); // cc
-          return this.source;
+              this.who = new Reference(); // cc
+          return this.who;
         }
 
-        public boolean hasSource() { 
-          return this.source != null && !this.source.isEmpty();
+        public boolean hasWho() { 
+          return this.who != null && !this.who.isEmpty();
         }
 
         /**
-         * @param value {@link #source} (The individual attesting to information.)
+         * @param value {@link #who} (The individual or organization attesting to information.)
          */
-        public VerificationResultAttestationComponent setSource(Reference value) { 
-          this.source = value;
+        public VerificationResultAttestationComponent setWho(Reference value) { 
+          this.who = value;
           return this;
         }
 
         /**
-         * @return {@link #source} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The individual attesting to information.)
+         * @return {@link #who} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The individual or organization attesting to information.)
          */
-        public Practitioner getSourceTarget() { 
-          if (this.sourceTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.source");
-            else if (Configuration.doAutoCreate())
-              this.sourceTarget = new Practitioner(); // aa
-          return this.sourceTarget;
+        public Resource getWhoTarget() { 
+          return this.whoTarget;
         }
 
         /**
-         * @param value {@link #source} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The individual attesting to information.)
+         * @param value {@link #who} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The individual or organization attesting to information.)
          */
-        public VerificationResultAttestationComponent setSourceTarget(Practitioner value) { 
-          this.sourceTarget = value;
+        public VerificationResultAttestationComponent setWhoTarget(Resource value) { 
+          this.whoTarget = value;
           return this;
         }
 
         /**
-         * @return {@link #organization} (The organization attesting to information.)
+         * @return {@link #onBehalfOf} (When the who is asserting on behalf of another (organization or individual).)
          */
-        public Reference getOrganization() { 
-          if (this.organization == null)
+        public Reference getOnBehalfOf() { 
+          if (this.onBehalfOf == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.organization");
+              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.onBehalfOf");
             else if (Configuration.doAutoCreate())
-              this.organization = new Reference(); // cc
-          return this.organization;
+              this.onBehalfOf = new Reference(); // cc
+          return this.onBehalfOf;
         }
 
-        public boolean hasOrganization() { 
-          return this.organization != null && !this.organization.isEmpty();
+        public boolean hasOnBehalfOf() { 
+          return this.onBehalfOf != null && !this.onBehalfOf.isEmpty();
         }
 
         /**
-         * @param value {@link #organization} (The organization attesting to information.)
+         * @param value {@link #onBehalfOf} (When the who is asserting on behalf of another (organization or individual).)
          */
-        public VerificationResultAttestationComponent setOrganization(Reference value) { 
-          this.organization = value;
+        public VerificationResultAttestationComponent setOnBehalfOf(Reference value) { 
+          this.onBehalfOf = value;
           return this;
         }
 
         /**
-         * @return {@link #organization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization attesting to information.)
+         * @return {@link #onBehalfOf} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (When the who is asserting on behalf of another (organization or individual).)
          */
-        public Organization getOrganizationTarget() { 
-          if (this.organizationTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.organization");
-            else if (Configuration.doAutoCreate())
-              this.organizationTarget = new Organization(); // aa
-          return this.organizationTarget;
+        public Resource getOnBehalfOfTarget() { 
+          return this.onBehalfOfTarget;
         }
 
         /**
-         * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization attesting to information.)
+         * @param value {@link #onBehalfOf} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (When the who is asserting on behalf of another (organization or individual).)
          */
-        public VerificationResultAttestationComponent setOrganizationTarget(Organization value) { 
-          this.organizationTarget = value;
+        public VerificationResultAttestationComponent setOnBehalfOfTarget(Resource value) { 
+          this.onBehalfOfTarget = value;
           return this;
         }
 
         /**
-         * @return {@link #method} (Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source).)
+         * @return {@link #communicationMethod} (The method by which attested information was submitted/retrieved (manual; API; Push).)
          */
-        public CodeableConcept getMethod() { 
-          if (this.method == null)
+        public CodeableConcept getCommunicationMethod() { 
+          if (this.communicationMethod == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.method");
+              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.communicationMethod");
             else if (Configuration.doAutoCreate())
-              this.method = new CodeableConcept(); // cc
-          return this.method;
+              this.communicationMethod = new CodeableConcept(); // cc
+          return this.communicationMethod;
         }
 
-        public boolean hasMethod() { 
-          return this.method != null && !this.method.isEmpty();
+        public boolean hasCommunicationMethod() { 
+          return this.communicationMethod != null && !this.communicationMethod.isEmpty();
         }
 
         /**
-         * @param value {@link #method} (Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source).)
+         * @param value {@link #communicationMethod} (The method by which attested information was submitted/retrieved (manual; API; Push).)
          */
-        public VerificationResultAttestationComponent setMethod(CodeableConcept value) { 
-          this.method = value;
+        public VerificationResultAttestationComponent setCommunicationMethod(CodeableConcept value) { 
+          this.communicationMethod = value;
           return this;
         }
 
@@ -1121,136 +1108,76 @@ public class VerificationResult extends DomainResource {
         }
 
         /**
-         * @return {@link #signedProxyRight} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
+         * @return {@link #proxySignature} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
          */
-        public Type getSignedProxyRight() { 
-          return this.signedProxyRight;
+        public Signature getProxySignature() { 
+          if (this.proxySignature == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.proxySignature");
+            else if (Configuration.doAutoCreate())
+              this.proxySignature = new Signature(); // cc
+          return this.proxySignature;
+        }
+
+        public boolean hasProxySignature() { 
+          return this.proxySignature != null && !this.proxySignature.isEmpty();
         }
 
         /**
-         * @return {@link #signedProxyRight} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
+         * @param value {@link #proxySignature} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
          */
-        public StringType getSignedProxyRightStringType() throws FHIRException { 
-          if (this.signedProxyRight == null)
-            return null;
-          if (!(this.signedProxyRight instanceof StringType))
-            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.signedProxyRight.getClass().getName()+" was encountered");
-          return (StringType) this.signedProxyRight;
-        }
-
-        public boolean hasSignedProxyRightStringType() { 
-          return this != null && this.signedProxyRight instanceof StringType;
-        }
-
-        /**
-         * @return {@link #signedProxyRight} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
-         */
-        public UriType getSignedProxyRightUriType() throws FHIRException { 
-          if (this.signedProxyRight == null)
-            return null;
-          if (!(this.signedProxyRight instanceof UriType))
-            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.signedProxyRight.getClass().getName()+" was encountered");
-          return (UriType) this.signedProxyRight;
-        }
-
-        public boolean hasSignedProxyRightUriType() { 
-          return this != null && this.signedProxyRight instanceof UriType;
-        }
-
-        public boolean hasSignedProxyRight() { 
-          return this.signedProxyRight != null && !this.signedProxyRight.isEmpty();
-        }
-
-        /**
-         * @param value {@link #signedProxyRight} (Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.)
-         */
-        public VerificationResultAttestationComponent setSignedProxyRight(Type value) { 
-          if (value != null && !(value instanceof StringType || value instanceof UriType))
-            throw new Error("Not the right type for VerificationResult.attestation.signedProxyRight[x]: "+value.fhirType());
-          this.signedProxyRight = value;
+        public VerificationResultAttestationComponent setProxySignature(Signature value) { 
+          this.proxySignature = value;
           return this;
         }
 
         /**
-         * @return {@link #signedSourceAttestation} (Signed assertion by the attestation source that they have attested to the information.)
+         * @return {@link #sourceSignature} (Signed assertion by the attestation source that they have attested to the information.)
          */
-        public Type getSignedSourceAttestation() { 
-          return this.signedSourceAttestation;
+        public Signature getSourceSignature() { 
+          if (this.sourceSignature == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create VerificationResultAttestationComponent.sourceSignature");
+            else if (Configuration.doAutoCreate())
+              this.sourceSignature = new Signature(); // cc
+          return this.sourceSignature;
+        }
+
+        public boolean hasSourceSignature() { 
+          return this.sourceSignature != null && !this.sourceSignature.isEmpty();
         }
 
         /**
-         * @return {@link #signedSourceAttestation} (Signed assertion by the attestation source that they have attested to the information.)
+         * @param value {@link #sourceSignature} (Signed assertion by the attestation source that they have attested to the information.)
          */
-        public StringType getSignedSourceAttestationStringType() throws FHIRException { 
-          if (this.signedSourceAttestation == null)
-            return null;
-          if (!(this.signedSourceAttestation instanceof StringType))
-            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.signedSourceAttestation.getClass().getName()+" was encountered");
-          return (StringType) this.signedSourceAttestation;
-        }
-
-        public boolean hasSignedSourceAttestationStringType() { 
-          return this != null && this.signedSourceAttestation instanceof StringType;
-        }
-
-        /**
-         * @return {@link #signedSourceAttestation} (Signed assertion by the attestation source that they have attested to the information.)
-         */
-        public UriType getSignedSourceAttestationUriType() throws FHIRException { 
-          if (this.signedSourceAttestation == null)
-            return null;
-          if (!(this.signedSourceAttestation instanceof UriType))
-            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.signedSourceAttestation.getClass().getName()+" was encountered");
-          return (UriType) this.signedSourceAttestation;
-        }
-
-        public boolean hasSignedSourceAttestationUriType() { 
-          return this != null && this.signedSourceAttestation instanceof UriType;
-        }
-
-        public boolean hasSignedSourceAttestation() { 
-          return this.signedSourceAttestation != null && !this.signedSourceAttestation.isEmpty();
-        }
-
-        /**
-         * @param value {@link #signedSourceAttestation} (Signed assertion by the attestation source that they have attested to the information.)
-         */
-        public VerificationResultAttestationComponent setSignedSourceAttestation(Type value) { 
-          if (value != null && !(value instanceof StringType || value instanceof UriType))
-            throw new Error("Not the right type for VerificationResult.attestation.signedSourceAttestation[x]: "+value.fhirType());
-          this.signedSourceAttestation = value;
+        public VerificationResultAttestationComponent setSourceSignature(Signature value) { 
+          this.sourceSignature = value;
           return this;
         }
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("source", "Reference(Practitioner)", "The individual attesting to information.", 0, 1, source));
-          children.add(new Property("organization", "Reference(Organization)", "The organization attesting to information.", 0, 1, organization));
-          children.add(new Property("method", "CodeableConcept", "Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source).", 0, 1, method));
+          children.add(new Property("who", "Reference(Practitioner|PractitionerRole|Organization)", "The individual or organization attesting to information.", 0, 1, who));
+          children.add(new Property("onBehalfOf", "Reference(Organization|Practitioner|PractitionerRole)", "When the who is asserting on behalf of another (organization or individual).", 0, 1, onBehalfOf));
+          children.add(new Property("communicationMethod", "CodeableConcept", "The method by which attested information was submitted/retrieved (manual; API; Push).", 0, 1, communicationMethod));
           children.add(new Property("date", "date", "The date the information was attested to.", 0, 1, date));
           children.add(new Property("sourceIdentityCertificate", "string", "A digital identity certificate associated with the attestation source.", 0, 1, sourceIdentityCertificate));
           children.add(new Property("proxyIdentityCertificate", "string", "A digital identity certificate associated with the proxy entity submitting attested information on behalf of the attestation source.", 0, 1, proxyIdentityCertificate));
-          children.add(new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight));
-          children.add(new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation));
+          children.add(new Property("proxySignature", "Signature", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, proxySignature));
+          children.add(new Property("sourceSignature", "Signature", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, sourceSignature));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -896505829: /*source*/  return new Property("source", "Reference(Practitioner)", "The individual attesting to information.", 0, 1, source);
-          case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The organization attesting to information.", 0, 1, organization);
-          case -1077554975: /*method*/  return new Property("method", "CodeableConcept", "Who is providing the attested information (owner; authorized representative; authorized intermediary; non-authorized source).", 0, 1, method);
+          case 117694: /*who*/  return new Property("who", "Reference(Practitioner|PractitionerRole|Organization)", "The individual or organization attesting to information.", 0, 1, who);
+          case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf", "Reference(Organization|Practitioner|PractitionerRole)", "When the who is asserting on behalf of another (organization or individual).", 0, 1, onBehalfOf);
+          case 1314116695: /*communicationMethod*/  return new Property("communicationMethod", "CodeableConcept", "The method by which attested information was submitted/retrieved (manual; API; Push).", 0, 1, communicationMethod);
           case 3076014: /*date*/  return new Property("date", "date", "The date the information was attested to.", 0, 1, date);
           case -799067682: /*sourceIdentityCertificate*/  return new Property("sourceIdentityCertificate", "string", "A digital identity certificate associated with the attestation source.", 0, 1, sourceIdentityCertificate);
           case 431558827: /*proxyIdentityCertificate*/  return new Property("proxyIdentityCertificate", "string", "A digital identity certificate associated with the proxy entity submitting attested information on behalf of the attestation source.", 0, 1, proxyIdentityCertificate);
-          case -589878346: /*signedProxyRight[x]*/  return new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight);
-          case -979078006: /*signedProxyRight*/  return new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight);
-          case 1708372283: /*signedProxyRightString*/  return new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight);
-          case -589884286: /*signedProxyRightUri*/  return new Property("signedProxyRight[x]", "string|uri", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, signedProxyRight);
-          case -1441752601: /*signedSourceAttestation[x]*/  return new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation);
-          case 564665337: /*signedSourceAttestation*/  return new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation);
-          case -1810773654: /*signedSourceAttestationString*/  return new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation);
-          case -1441758541: /*signedSourceAttestationUri*/  return new Property("signedSourceAttestation[x]", "string|uri", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, signedSourceAttestation);
+          case 1455540714: /*proxySignature*/  return new Property("proxySignature", "Signature", "Signed assertion by the proxy entity indicating that they have the right to submit attested information on behalf of the attestation source.", 0, 1, proxySignature);
+          case 1754480349: /*sourceSignature*/  return new Property("sourceSignature", "Signature", "Signed assertion by the attestation source that they have attested to the information.", 0, 1, sourceSignature);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1259,14 +1186,14 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case -896505829: /*source*/ return this.source == null ? new Base[0] : new Base[] {this.source}; // Reference
-        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
-        case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
+        case 117694: /*who*/ return this.who == null ? new Base[0] : new Base[] {this.who}; // Reference
+        case -14402964: /*onBehalfOf*/ return this.onBehalfOf == null ? new Base[0] : new Base[] {this.onBehalfOf}; // Reference
+        case 1314116695: /*communicationMethod*/ return this.communicationMethod == null ? new Base[0] : new Base[] {this.communicationMethod}; // CodeableConcept
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateType
         case -799067682: /*sourceIdentityCertificate*/ return this.sourceIdentityCertificate == null ? new Base[0] : new Base[] {this.sourceIdentityCertificate}; // StringType
         case 431558827: /*proxyIdentityCertificate*/ return this.proxyIdentityCertificate == null ? new Base[0] : new Base[] {this.proxyIdentityCertificate}; // StringType
-        case -979078006: /*signedProxyRight*/ return this.signedProxyRight == null ? new Base[0] : new Base[] {this.signedProxyRight}; // Type
-        case 564665337: /*signedSourceAttestation*/ return this.signedSourceAttestation == null ? new Base[0] : new Base[] {this.signedSourceAttestation}; // Type
+        case 1455540714: /*proxySignature*/ return this.proxySignature == null ? new Base[0] : new Base[] {this.proxySignature}; // Signature
+        case 1754480349: /*sourceSignature*/ return this.sourceSignature == null ? new Base[0] : new Base[] {this.sourceSignature}; // Signature
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1275,14 +1202,14 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
-        case -896505829: // source
-          this.source = castToReference(value); // Reference
+        case 117694: // who
+          this.who = castToReference(value); // Reference
           return value;
-        case 1178922291: // organization
-          this.organization = castToReference(value); // Reference
+        case -14402964: // onBehalfOf
+          this.onBehalfOf = castToReference(value); // Reference
           return value;
-        case -1077554975: // method
-          this.method = castToCodeableConcept(value); // CodeableConcept
+        case 1314116695: // communicationMethod
+          this.communicationMethod = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 3076014: // date
           this.date = castToDate(value); // DateType
@@ -1293,11 +1220,11 @@ public class VerificationResult extends DomainResource {
         case 431558827: // proxyIdentityCertificate
           this.proxyIdentityCertificate = castToString(value); // StringType
           return value;
-        case -979078006: // signedProxyRight
-          this.signedProxyRight = castToType(value); // Type
+        case 1455540714: // proxySignature
+          this.proxySignature = castToSignature(value); // Signature
           return value;
-        case 564665337: // signedSourceAttestation
-          this.signedSourceAttestation = castToType(value); // Type
+        case 1754480349: // sourceSignature
+          this.sourceSignature = castToSignature(value); // Signature
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1306,22 +1233,22 @@ public class VerificationResult extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("source")) {
-          this.source = castToReference(value); // Reference
-        } else if (name.equals("organization")) {
-          this.organization = castToReference(value); // Reference
-        } else if (name.equals("method")) {
-          this.method = castToCodeableConcept(value); // CodeableConcept
+        if (name.equals("who")) {
+          this.who = castToReference(value); // Reference
+        } else if (name.equals("onBehalfOf")) {
+          this.onBehalfOf = castToReference(value); // Reference
+        } else if (name.equals("communicationMethod")) {
+          this.communicationMethod = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("date")) {
           this.date = castToDate(value); // DateType
         } else if (name.equals("sourceIdentityCertificate")) {
           this.sourceIdentityCertificate = castToString(value); // StringType
         } else if (name.equals("proxyIdentityCertificate")) {
           this.proxyIdentityCertificate = castToString(value); // StringType
-        } else if (name.equals("signedProxyRight[x]")) {
-          this.signedProxyRight = castToType(value); // Type
-        } else if (name.equals("signedSourceAttestation[x]")) {
-          this.signedSourceAttestation = castToType(value); // Type
+        } else if (name.equals("proxySignature")) {
+          this.proxySignature = castToSignature(value); // Signature
+        } else if (name.equals("sourceSignature")) {
+          this.sourceSignature = castToSignature(value); // Signature
         } else
           return super.setProperty(name, value);
         return value;
@@ -1330,16 +1257,14 @@ public class VerificationResult extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -896505829:  return getSource(); 
-        case 1178922291:  return getOrganization(); 
-        case -1077554975:  return getMethod(); 
+        case 117694:  return getWho(); 
+        case -14402964:  return getOnBehalfOf(); 
+        case 1314116695:  return getCommunicationMethod(); 
         case 3076014:  return getDateElement();
         case -799067682:  return getSourceIdentityCertificateElement();
         case 431558827:  return getProxyIdentityCertificateElement();
-        case -589878346:  return getSignedProxyRight(); 
-        case -979078006:  return getSignedProxyRight(); 
-        case -1441752601:  return getSignedSourceAttestation(); 
-        case 564665337:  return getSignedSourceAttestation(); 
+        case 1455540714:  return getProxySignature(); 
+        case 1754480349:  return getSourceSignature(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1348,14 +1273,14 @@ public class VerificationResult extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case -896505829: /*source*/ return new String[] {"Reference"};
-        case 1178922291: /*organization*/ return new String[] {"Reference"};
-        case -1077554975: /*method*/ return new String[] {"CodeableConcept"};
+        case 117694: /*who*/ return new String[] {"Reference"};
+        case -14402964: /*onBehalfOf*/ return new String[] {"Reference"};
+        case 1314116695: /*communicationMethod*/ return new String[] {"CodeableConcept"};
         case 3076014: /*date*/ return new String[] {"date"};
         case -799067682: /*sourceIdentityCertificate*/ return new String[] {"string"};
         case 431558827: /*proxyIdentityCertificate*/ return new String[] {"string"};
-        case -979078006: /*signedProxyRight*/ return new String[] {"string", "uri"};
-        case 564665337: /*signedSourceAttestation*/ return new String[] {"string", "uri"};
+        case 1455540714: /*proxySignature*/ return new String[] {"Signature"};
+        case 1754480349: /*sourceSignature*/ return new String[] {"Signature"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1363,17 +1288,17 @@ public class VerificationResult extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("source")) {
-          this.source = new Reference();
-          return this.source;
+        if (name.equals("who")) {
+          this.who = new Reference();
+          return this.who;
         }
-        else if (name.equals("organization")) {
-          this.organization = new Reference();
-          return this.organization;
+        else if (name.equals("onBehalfOf")) {
+          this.onBehalfOf = new Reference();
+          return this.onBehalfOf;
         }
-        else if (name.equals("method")) {
-          this.method = new CodeableConcept();
-          return this.method;
+        else if (name.equals("communicationMethod")) {
+          this.communicationMethod = new CodeableConcept();
+          return this.communicationMethod;
         }
         else if (name.equals("date")) {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.date");
@@ -1384,21 +1309,13 @@ public class VerificationResult extends DomainResource {
         else if (name.equals("proxyIdentityCertificate")) {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.proxyIdentityCertificate");
         }
-        else if (name.equals("signedProxyRightString")) {
-          this.signedProxyRight = new StringType();
-          return this.signedProxyRight;
+        else if (name.equals("proxySignature")) {
+          this.proxySignature = new Signature();
+          return this.proxySignature;
         }
-        else if (name.equals("signedProxyRightUri")) {
-          this.signedProxyRight = new UriType();
-          return this.signedProxyRight;
-        }
-        else if (name.equals("signedSourceAttestationString")) {
-          this.signedSourceAttestation = new StringType();
-          return this.signedSourceAttestation;
-        }
-        else if (name.equals("signedSourceAttestationUri")) {
-          this.signedSourceAttestation = new UriType();
-          return this.signedSourceAttestation;
+        else if (name.equals("sourceSignature")) {
+          this.sourceSignature = new Signature();
+          return this.sourceSignature;
         }
         else
           return super.addChild(name);
@@ -1407,14 +1324,14 @@ public class VerificationResult extends DomainResource {
       public VerificationResultAttestationComponent copy() {
         VerificationResultAttestationComponent dst = new VerificationResultAttestationComponent();
         copyValues(dst);
-        dst.source = source == null ? null : source.copy();
-        dst.organization = organization == null ? null : organization.copy();
-        dst.method = method == null ? null : method.copy();
+        dst.who = who == null ? null : who.copy();
+        dst.onBehalfOf = onBehalfOf == null ? null : onBehalfOf.copy();
+        dst.communicationMethod = communicationMethod == null ? null : communicationMethod.copy();
         dst.date = date == null ? null : date.copy();
         dst.sourceIdentityCertificate = sourceIdentityCertificate == null ? null : sourceIdentityCertificate.copy();
         dst.proxyIdentityCertificate = proxyIdentityCertificate == null ? null : proxyIdentityCertificate.copy();
-        dst.signedProxyRight = signedProxyRight == null ? null : signedProxyRight.copy();
-        dst.signedSourceAttestation = signedSourceAttestation == null ? null : signedSourceAttestation.copy();
+        dst.proxySignature = proxySignature == null ? null : proxySignature.copy();
+        dst.sourceSignature = sourceSignature == null ? null : sourceSignature.copy();
         return dst;
       }
 
@@ -1425,10 +1342,10 @@ public class VerificationResult extends DomainResource {
         if (!(other_ instanceof VerificationResultAttestationComponent))
           return false;
         VerificationResultAttestationComponent o = (VerificationResultAttestationComponent) other_;
-        return compareDeep(source, o.source, true) && compareDeep(organization, o.organization, true) && compareDeep(method, o.method, true)
+        return compareDeep(who, o.who, true) && compareDeep(onBehalfOf, o.onBehalfOf, true) && compareDeep(communicationMethod, o.communicationMethod, true)
            && compareDeep(date, o.date, true) && compareDeep(sourceIdentityCertificate, o.sourceIdentityCertificate, true)
-           && compareDeep(proxyIdentityCertificate, o.proxyIdentityCertificate, true) && compareDeep(signedProxyRight, o.signedProxyRight, true)
-           && compareDeep(signedSourceAttestation, o.signedSourceAttestation, true);
+           && compareDeep(proxyIdentityCertificate, o.proxyIdentityCertificate, true) && compareDeep(proxySignature, o.proxySignature, true)
+           && compareDeep(sourceSignature, o.sourceSignature, true);
       }
 
       @Override
@@ -1443,8 +1360,8 @@ public class VerificationResult extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(source, organization, method
-          , date, sourceIdentityCertificate, proxyIdentityCertificate, signedProxyRight, signedSourceAttestation
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(who, onBehalfOf, communicationMethod
+          , date, sourceIdentityCertificate, proxyIdentityCertificate, proxySignature, sourceSignature
           );
       }
 
@@ -1479,11 +1396,11 @@ public class VerificationResult extends DomainResource {
         /**
          * Signed assertion by the validator that they have validated the information.
          */
-        @Child(name = "signedValidatorAttestation", type = {StringType.class, UriType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "attestationSignature", type = {Signature.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Validator signature", formalDefinition="Signed assertion by the validator that they have validated the information." )
-        protected Type signedValidatorAttestation;
+        protected Signature attestationSignature;
 
-        private static final long serialVersionUID = 394395029L;
+        private static final long serialVersionUID = 35580619L;
 
     /**
      * Constructor
@@ -1594,53 +1511,26 @@ public class VerificationResult extends DomainResource {
         }
 
         /**
-         * @return {@link #signedValidatorAttestation} (Signed assertion by the validator that they have validated the information.)
+         * @return {@link #attestationSignature} (Signed assertion by the validator that they have validated the information.)
          */
-        public Type getSignedValidatorAttestation() { 
-          return this.signedValidatorAttestation;
+        public Signature getAttestationSignature() { 
+          if (this.attestationSignature == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create VerificationResultValidatorComponent.attestationSignature");
+            else if (Configuration.doAutoCreate())
+              this.attestationSignature = new Signature(); // cc
+          return this.attestationSignature;
+        }
+
+        public boolean hasAttestationSignature() { 
+          return this.attestationSignature != null && !this.attestationSignature.isEmpty();
         }
 
         /**
-         * @return {@link #signedValidatorAttestation} (Signed assertion by the validator that they have validated the information.)
+         * @param value {@link #attestationSignature} (Signed assertion by the validator that they have validated the information.)
          */
-        public StringType getSignedValidatorAttestationStringType() throws FHIRException { 
-          if (this.signedValidatorAttestation == null)
-            return null;
-          if (!(this.signedValidatorAttestation instanceof StringType))
-            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.signedValidatorAttestation.getClass().getName()+" was encountered");
-          return (StringType) this.signedValidatorAttestation;
-        }
-
-        public boolean hasSignedValidatorAttestationStringType() { 
-          return this != null && this.signedValidatorAttestation instanceof StringType;
-        }
-
-        /**
-         * @return {@link #signedValidatorAttestation} (Signed assertion by the validator that they have validated the information.)
-         */
-        public UriType getSignedValidatorAttestationUriType() throws FHIRException { 
-          if (this.signedValidatorAttestation == null)
-            return null;
-          if (!(this.signedValidatorAttestation instanceof UriType))
-            throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.signedValidatorAttestation.getClass().getName()+" was encountered");
-          return (UriType) this.signedValidatorAttestation;
-        }
-
-        public boolean hasSignedValidatorAttestationUriType() { 
-          return this != null && this.signedValidatorAttestation instanceof UriType;
-        }
-
-        public boolean hasSignedValidatorAttestation() { 
-          return this.signedValidatorAttestation != null && !this.signedValidatorAttestation.isEmpty();
-        }
-
-        /**
-         * @param value {@link #signedValidatorAttestation} (Signed assertion by the validator that they have validated the information.)
-         */
-        public VerificationResultValidatorComponent setSignedValidatorAttestation(Type value) { 
-          if (value != null && !(value instanceof StringType || value instanceof UriType))
-            throw new Error("Not the right type for VerificationResult.validator.signedValidatorAttestation[x]: "+value.fhirType());
-          this.signedValidatorAttestation = value;
+        public VerificationResultValidatorComponent setAttestationSignature(Signature value) { 
+          this.attestationSignature = value;
           return this;
         }
 
@@ -1648,7 +1538,7 @@ public class VerificationResult extends DomainResource {
           super.listChildren(children);
           children.add(new Property("organization", "Reference(Organization)", "Reference to the organization validating information.", 0, 1, organization));
           children.add(new Property("identityCertificate", "string", "A digital identity certificate associated with the validator.", 0, 1, identityCertificate));
-          children.add(new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation));
+          children.add(new Property("attestationSignature", "Signature", "Signed assertion by the validator that they have validated the information.", 0, 1, attestationSignature));
         }
 
         @Override
@@ -1656,10 +1546,7 @@ public class VerificationResult extends DomainResource {
           switch (_hash) {
           case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "Reference to the organization validating information.", 0, 1, organization);
           case -854379015: /*identityCertificate*/  return new Property("identityCertificate", "string", "A digital identity certificate associated with the validator.", 0, 1, identityCertificate);
-          case -791479066: /*signedValidatorAttestation[x]*/  return new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation);
-          case -1532120742: /*signedValidatorAttestation*/  return new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation);
-          case 185602571: /*signedValidatorAttestationString*/  return new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation);
-          case -791485006: /*signedValidatorAttestationUri*/  return new Property("signedValidatorAttestation[x]", "string|uri", "Signed assertion by the validator that they have validated the information.", 0, 1, signedValidatorAttestation);
+          case -184196152: /*attestationSignature*/  return new Property("attestationSignature", "Signature", "Signed assertion by the validator that they have validated the information.", 0, 1, attestationSignature);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1670,7 +1557,7 @@ public class VerificationResult extends DomainResource {
         switch (hash) {
         case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
         case -854379015: /*identityCertificate*/ return this.identityCertificate == null ? new Base[0] : new Base[] {this.identityCertificate}; // StringType
-        case -1532120742: /*signedValidatorAttestation*/ return this.signedValidatorAttestation == null ? new Base[0] : new Base[] {this.signedValidatorAttestation}; // Type
+        case -184196152: /*attestationSignature*/ return this.attestationSignature == null ? new Base[0] : new Base[] {this.attestationSignature}; // Signature
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1685,8 +1572,8 @@ public class VerificationResult extends DomainResource {
         case -854379015: // identityCertificate
           this.identityCertificate = castToString(value); // StringType
           return value;
-        case -1532120742: // signedValidatorAttestation
-          this.signedValidatorAttestation = castToType(value); // Type
+        case -184196152: // attestationSignature
+          this.attestationSignature = castToSignature(value); // Signature
           return value;
         default: return super.setProperty(hash, name, value);
         }
@@ -1699,8 +1586,8 @@ public class VerificationResult extends DomainResource {
           this.organization = castToReference(value); // Reference
         } else if (name.equals("identityCertificate")) {
           this.identityCertificate = castToString(value); // StringType
-        } else if (name.equals("signedValidatorAttestation[x]")) {
-          this.signedValidatorAttestation = castToType(value); // Type
+        } else if (name.equals("attestationSignature")) {
+          this.attestationSignature = castToSignature(value); // Signature
         } else
           return super.setProperty(name, value);
         return value;
@@ -1711,8 +1598,7 @@ public class VerificationResult extends DomainResource {
         switch (hash) {
         case 1178922291:  return getOrganization(); 
         case -854379015:  return getIdentityCertificateElement();
-        case -791479066:  return getSignedValidatorAttestation(); 
-        case -1532120742:  return getSignedValidatorAttestation(); 
+        case -184196152:  return getAttestationSignature(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1723,7 +1609,7 @@ public class VerificationResult extends DomainResource {
         switch (hash) {
         case 1178922291: /*organization*/ return new String[] {"Reference"};
         case -854379015: /*identityCertificate*/ return new String[] {"string"};
-        case -1532120742: /*signedValidatorAttestation*/ return new String[] {"string", "uri"};
+        case -184196152: /*attestationSignature*/ return new String[] {"Signature"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1738,13 +1624,9 @@ public class VerificationResult extends DomainResource {
         else if (name.equals("identityCertificate")) {
           throw new FHIRException("Cannot call addChild on a primitive type VerificationResult.identityCertificate");
         }
-        else if (name.equals("signedValidatorAttestationString")) {
-          this.signedValidatorAttestation = new StringType();
-          return this.signedValidatorAttestation;
-        }
-        else if (name.equals("signedValidatorAttestationUri")) {
-          this.signedValidatorAttestation = new UriType();
-          return this.signedValidatorAttestation;
+        else if (name.equals("attestationSignature")) {
+          this.attestationSignature = new Signature();
+          return this.attestationSignature;
         }
         else
           return super.addChild(name);
@@ -1755,7 +1637,7 @@ public class VerificationResult extends DomainResource {
         copyValues(dst);
         dst.organization = organization == null ? null : organization.copy();
         dst.identityCertificate = identityCertificate == null ? null : identityCertificate.copy();
-        dst.signedValidatorAttestation = signedValidatorAttestation == null ? null : signedValidatorAttestation.copy();
+        dst.attestationSignature = attestationSignature == null ? null : attestationSignature.copy();
         return dst;
       }
 
@@ -1767,7 +1649,7 @@ public class VerificationResult extends DomainResource {
           return false;
         VerificationResultValidatorComponent o = (VerificationResultValidatorComponent) other_;
         return compareDeep(organization, o.organization, true) && compareDeep(identityCertificate, o.identityCertificate, true)
-           && compareDeep(signedValidatorAttestation, o.signedValidatorAttestation, true);
+           && compareDeep(attestationSignature, o.attestationSignature, true);
       }
 
       @Override
@@ -1782,7 +1664,7 @@ public class VerificationResult extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(organization, identityCertificate
-          , signedValidatorAttestation);
+          , attestationSignature);
       }
 
   public String fhirType() {
@@ -1858,10 +1740,10 @@ public class VerificationResult extends DomainResource {
     protected Timing frequency;
 
     /**
-     * The date/time validation was last completed (incl. failed validations).
+     * The date/time validation was last completed (including failed validations).
      */
     @Child(name = "lastPerformed", type = {DateTimeType.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The date/time validation was last completed (incl. failed validations)", formalDefinition="The date/time validation was last completed (incl. failed validations)." )
+    @Description(shortDefinition="The date/time validation was last completed (including failed validations)", formalDefinition="The date/time validation was last completed (including failed validations)." )
     protected DateTimeType lastPerformed;
 
     /**
@@ -2261,7 +2143,7 @@ public class VerificationResult extends DomainResource {
     }
 
     /**
-     * @return {@link #lastPerformed} (The date/time validation was last completed (incl. failed validations).). This is the underlying object with id, value and extensions. The accessor "getLastPerformed" gives direct access to the value
+     * @return {@link #lastPerformed} (The date/time validation was last completed (including failed validations).). This is the underlying object with id, value and extensions. The accessor "getLastPerformed" gives direct access to the value
      */
     public DateTimeType getLastPerformedElement() { 
       if (this.lastPerformed == null)
@@ -2281,7 +2163,7 @@ public class VerificationResult extends DomainResource {
     }
 
     /**
-     * @param value {@link #lastPerformed} (The date/time validation was last completed (incl. failed validations).). This is the underlying object with id, value and extensions. The accessor "getLastPerformed" gives direct access to the value
+     * @param value {@link #lastPerformed} (The date/time validation was last completed (including failed validations).). This is the underlying object with id, value and extensions. The accessor "getLastPerformed" gives direct access to the value
      */
     public VerificationResult setLastPerformedElement(DateTimeType value) { 
       this.lastPerformed = value;
@@ -2289,14 +2171,14 @@ public class VerificationResult extends DomainResource {
     }
 
     /**
-     * @return The date/time validation was last completed (incl. failed validations).
+     * @return The date/time validation was last completed (including failed validations).
      */
     public Date getLastPerformed() { 
       return this.lastPerformed == null ? null : this.lastPerformed.getValue();
     }
 
     /**
-     * @param value The date/time validation was last completed (incl. failed validations).
+     * @param value The date/time validation was last completed (including failed validations).
      */
     public VerificationResult setLastPerformed(Date value) { 
       if (value == null)
@@ -2522,7 +2404,7 @@ public class VerificationResult extends DomainResource {
         children.add(new Property("validationType", "CodeableConcept", "What the target is validated against (nothing; primary source; multiple sources).", 0, 1, validationType));
         children.add(new Property("validationProcess", "CodeableConcept", "The primary process by which the target is validated (edit check; value set; primary source; multiple sources; standalone; in context).", 0, java.lang.Integer.MAX_VALUE, validationProcess));
         children.add(new Property("frequency", "Timing", "Frequency of revalidation.", 0, 1, frequency));
-        children.add(new Property("lastPerformed", "dateTime", "The date/time validation was last completed (incl. failed validations).", 0, 1, lastPerformed));
+        children.add(new Property("lastPerformed", "dateTime", "The date/time validation was last completed (including failed validations).", 0, 1, lastPerformed));
         children.add(new Property("nextScheduled", "date", "The date when target is next validated, if appropriate.", 0, 1, nextScheduled));
         children.add(new Property("failureAction", "CodeableConcept", "The result if validation fails (fatal; warning; record only; none).", 0, 1, failureAction));
         children.add(new Property("primarySource", "", "Information about the primary source(s) involved in validation.", 0, java.lang.Integer.MAX_VALUE, primarySource));
@@ -2541,7 +2423,7 @@ public class VerificationResult extends DomainResource {
         case -279681197: /*validationType*/  return new Property("validationType", "CodeableConcept", "What the target is validated against (nothing; primary source; multiple sources).", 0, 1, validationType);
         case 797680566: /*validationProcess*/  return new Property("validationProcess", "CodeableConcept", "The primary process by which the target is validated (edit check; value set; primary source; multiple sources; standalone; in context).", 0, java.lang.Integer.MAX_VALUE, validationProcess);
         case -70023844: /*frequency*/  return new Property("frequency", "Timing", "Frequency of revalidation.", 0, 1, frequency);
-        case -1313229366: /*lastPerformed*/  return new Property("lastPerformed", "dateTime", "The date/time validation was last completed (incl. failed validations).", 0, 1, lastPerformed);
+        case -1313229366: /*lastPerformed*/  return new Property("lastPerformed", "dateTime", "The date/time validation was last completed (including failed validations).", 0, 1, lastPerformed);
         case 1874589434: /*nextScheduled*/  return new Property("nextScheduled", "date", "The date when target is next validated, if appropriate.", 0, 1, nextScheduled);
         case 1816382560: /*failureAction*/  return new Property("failureAction", "CodeableConcept", "The result if validation fails (fatal; warning; record only; none).", 0, 1, failureAction);
         case -528721731: /*primarySource*/  return new Property("primarySource", "", "Information about the primary source(s) involved in validation.", 0, java.lang.Integer.MAX_VALUE, primarySource);

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * This special resource type is used to represent an operation request and response (operations.html). It has no other use, and there is no RESTful endpoint associated with it.
+ * This resource is a non-persisted resource used to pass information into and back from an [operation](operations.html). It has no other use, and there is no RESTful endpoint associated with it.
  */
 @ResourceDef(name="Parameters", profile="http://hl7.org/fhir/StructureDefinition/Parameters")
 public class Parameters extends Resource implements IBaseParameters {
@@ -525,18 +525,6 @@ public class Parameters extends Resource implements IBaseParameters {
           this.value = new Timing();
           return this.value;
         }
-        else if (name.equals("valueParameterDefinition")) {
-          this.value = new ParameterDefinition();
-          return this.value;
-        }
-        else if (name.equals("valueDataRequirement")) {
-          this.value = new DataRequirement();
-          return this.value;
-        }
-        else if (name.equals("valueRelatedArtifact")) {
-          this.value = new RelatedArtifact();
-          return this.value;
-        }
         else if (name.equals("valueContactDetail")) {
           this.value = new ContactDetail();
           return this.value;
@@ -545,12 +533,24 @@ public class Parameters extends Resource implements IBaseParameters {
           this.value = new Contributor();
           return this.value;
         }
-        else if (name.equals("valueTriggerDefinition")) {
-          this.value = new TriggerDefinition();
+        else if (name.equals("valueDataRequirement")) {
+          this.value = new DataRequirement();
           return this.value;
         }
         else if (name.equals("valueExpression")) {
           this.value = new Expression();
+          return this.value;
+        }
+        else if (name.equals("valueParameterDefinition")) {
+          this.value = new ParameterDefinition();
+          return this.value;
+        }
+        else if (name.equals("valueRelatedArtifact")) {
+          this.value = new RelatedArtifact();
+          return this.value;
+        }
+        else if (name.equals("valueTriggerDefinition")) {
+          this.value = new TriggerDefinition();
           return this.value;
         }
         else if (name.equals("valueUsageContext")) {

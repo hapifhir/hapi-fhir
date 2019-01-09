@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module.standalone;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionCheckingSubscriber;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
-	SubscriptionCheckingSubscriber mySubscriptionCheckingSubscriber;
+	SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
 
@@ -53,13 +53,16 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 			ourLog.warn("Unexpected message payload type: {}", theMessage);
 			return;
 		}
-		ResourceModifiedMessage resourceModifiedMessage = ((ResourceModifiedJsonMessage) theMessage).getPayload();
-		IBaseResource resource = resourceModifiedMessage.getNewPayload(myFhirContext);
+		updateSubscriptionRegistryAndPerformMatching(((ResourceModifiedJsonMessage) theMessage).getPayload());
+	}
+
+	public void updateSubscriptionRegistryAndPerformMatching(ResourceModifiedMessage theResourceModifiedMessage) {
+		IBaseResource resource = theResourceModifiedMessage.getNewPayload(myFhirContext);
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resource);
 
 		if (resourceDef.getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
 		}
-		mySubscriptionCheckingSubscriber.handleMessage(theMessage);
+		mySubscriptionMatchingSubscriber.matchActiveSubscriptionsAndDeliver(theResourceModifiedMessage);
 	}
 }

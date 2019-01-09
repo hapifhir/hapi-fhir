@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.dbmatcher;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 
 		ourLog.debug("Subscription check found {} results for query: {}", results.size(), criteria);
 
-		return new SubscriptionMatchResult(results.size() > 0);
+		return new SubscriptionMatchResult(results.size() > 0, "DATABASE");
 	}
 	
 	/**

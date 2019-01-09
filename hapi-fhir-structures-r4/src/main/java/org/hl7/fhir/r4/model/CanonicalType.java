@@ -30,6 +30,8 @@ package org.hl7.fhir.r4.model;
 
 import java.net.URI;
 
+import org.hl7.fhir.exceptions.FHIRException;
+
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
 /**
@@ -66,10 +68,14 @@ public class CanonicalType extends UriType {
 	 */
 	@Override
 	public CanonicalType copy() {
-		return new CanonicalType(getValue());
+		CanonicalType ret = new CanonicalType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {
 		return "canonical";		
 	}
+	
+
 }

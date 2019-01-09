@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -96,7 +96,7 @@ public class Annotation extends Type implements ICompositeType {
      */
     public Reference getAuthorReference() throws FHIRException { 
       if (this.author == null)
-        return null;
+        this.author = new Reference();
       if (!(this.author instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.author.getClass().getName()+" was encountered");
       return (Reference) this.author;
@@ -111,7 +111,7 @@ public class Annotation extends Type implements ICompositeType {
      */
     public StringType getAuthorStringType() throws FHIRException { 
       if (this.author == null)
-        return null;
+        this.author = new StringType();
       if (!(this.author instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.author.getClass().getName()+" was encountered");
       return (StringType) this.author;

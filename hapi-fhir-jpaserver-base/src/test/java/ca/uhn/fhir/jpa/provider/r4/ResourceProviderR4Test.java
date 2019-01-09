@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -402,6 +403,38 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(50, found.getEntry().size());
 
 	}
+
+	@Test
+	public void testCreateConditionalWithPreferRepresentation() {
+		Patient p = new Patient();
+		p.setActive(false);
+		p.addIdentifier().setSystem("foo").setValue("bar");
+		IIdType id = ourClient.create().resource(p).execute().getId();
+
+		p = new Patient();
+		p.setId(id);
+		p.setActive(true);
+		p.addIdentifier().setSystem("foo").setValue("bar");
+		ourClient.update().resource(p).execute().getId();
+
+		// Now conditional create
+		p = new Patient();
+		p.setActive(true);
+		p.setBirthDateElement(new DateType("2011-01-01"));
+		p.addIdentifier().setSystem("foo").setValue("bar");
+		MethodOutcome outcome = ourClient
+			.create()
+			.resource(p)
+			.conditionalByUrl("Patient?identifier=foo|bar")
+			.prefer(PreferReturnEnum.REPRESENTATION)
+			.execute();
+
+		assertEquals(id.getIdPart(), outcome.getId().getIdPart());
+		assertEquals("2", outcome.getId().getVersionIdPart());
+		p = (Patient) outcome.getResource();
+		assertNull(p.getBirthDate());
+	}
+
 
 	/**
 	 * See #438
@@ -1801,7 +1834,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
 		obs1.setValue(new Quantity(123));
-		obs1.setComment("obs1");
 		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
@@ -3853,8 +3885,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			ourClient
 				.search()
-				.forResource(Sequence.class)
-				.where(Sequence.END.withPrefix(ParamPrefixEnum.ENDS_BEFORE).number(100))
+				.forResource(MolecularSequence.class)
+				.where(MolecularSequence.VARIANT_END.withPrefix(ParamPrefixEnum.ENDS_BEFORE).number(100))
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.execute();

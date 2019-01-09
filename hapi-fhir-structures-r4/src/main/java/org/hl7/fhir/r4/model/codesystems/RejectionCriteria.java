@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -100,8 +100,8 @@ public enum RejectionCriteria {
         }
         public String getDisplay() {
           switch (this) {
-            case HEMOLIZED: return "specimen hemolized";
-            case INSUFFICIENT: return "specimen volume insufficient";
+            case HEMOLIZED: return "hemolized specimen";
+            case INSUFFICIENT: return "insufficient specimen volume";
             case BROKEN: return "broken specimen container";
             case CLOTTED: return "specimen clotted";
             case WRONGTEMPERATURE: return "specimen temperature inappropriate";

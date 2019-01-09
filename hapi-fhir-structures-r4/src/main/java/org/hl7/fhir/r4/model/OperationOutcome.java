@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -43,14 +43,14 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A collection of error, warning or information messages that result from a system action.
+ * A collection of error, warning, or information messages that result from a system action.
  */
 @ResourceDef(name="OperationOutcome", profile="http://hl7.org/fhir/StructureDefinition/OperationOutcome")
 public class OperationOutcome extends DomainResource implements IBaseOperationOutcome {
 
     public enum IssueSeverity {
         /**
-         * The issue caused the action to fail, and no further checking could be performed.
+         * The issue caused the action to fail and no further checking could be performed.
          */
         FATAL, 
         /**
@@ -105,7 +105,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         }
         public String getDefinition() {
           switch (this) {
-            case FATAL: return "The issue caused the action to fail, and no further checking could be performed.";
+            case FATAL: return "The issue caused the action to fail and no further checking could be performed.";
             case ERROR: return "The issue is sufficiently important to cause the action to fail.";
             case WARNING: return "The issue is not important enough to cause the action to fail but may cause it to be performed suboptimally or in a way that is not as desired.";
             case INFORMATION: return "The issue has no relation to the degree of success of the action.";
@@ -178,7 +178,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         INVALID, 
         /**
-         * A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax.
+         * A structural issue in the content such as wrong namespace, unable to parse the content completely, invalid syntax, etc.
          */
         STRUCTURE, 
         /**
@@ -266,7 +266,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
          */
         CONFLICT, 
         /**
-         * Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.
+         * Transient processing issues. The system receiving the message may be able to resubmit the same content once an underlying issue is resolved.
          */
         TRANSIENT, 
         /**
@@ -446,7 +446,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         public String getDefinition() {
           switch (this) {
             case INVALID: return "Content invalid against the specification or a profile.";
-            case STRUCTURE: return "A structural issue in the content such as wrong namespace, or unable to parse the content completely, or invalid json syntax.";
+            case STRUCTURE: return "A structural issue in the content such as wrong namespace, unable to parse the content completely, invalid syntax, etc.";
             case REQUIRED: return "A required element is missing.";
             case VALUE: return "An element or header value is invalid.";
             case INVARIANT: return "A content validation rule failed - e.g. a schematron rule.";
@@ -468,7 +468,7 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
             case TOOCOSTLY: return "The operation was stopped to protect server resources; e.g. a request for a value set expansion on all of SNOMED CT.";
             case BUSINESSRULE: return "The content/operation failed to pass some business rule and so could not proceed.";
             case CONFLICT: return "Content could not be accepted because of an edit conflict (i.e. version aware updates). (In a pure RESTful environment, this would be an HTTP 409 error, but this code may be used where the conflict is discovered further into the application architecture.).";
-            case TRANSIENT: return "Transient processing issues. The system receiving the error may be able to resubmit the same content once an underlying issue is resolved.";
+            case TRANSIENT: return "Transient processing issues. The system receiving the message may be able to resubmit the same content once an underlying issue is resolved.";
             case LOCKERROR: return "A resource/record locking failure (usually in an underlying database).";
             case NOSTORE: return "The persistent store is unavailable; e.g. the database is down for maintenance or similar action, and the interaction or operation cannot be processed.";
             case EXCEPTION: return "y.";
@@ -747,34 +747,34 @@ public class OperationOutcome extends DomainResource implements IBaseOperationOu
         protected Enumeration<IssueType> code;
 
         /**
-         * Additional details about the error. This may be a text description of the error, or a system code that identifies the error.
+         * Additional details about the error. This may be a text description of the error or a system code that identifies the error.
          */
         @Child(name = "details", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Additional details about the error", formalDefinition="Additional details about the error. This may be a text description of the error, or a system code that identifies the error." )
+        @Description(shortDefinition="Additional details about the error", formalDefinition="Additional details about the error. This may be a text description of the error or a system code that identifies the error." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/operation-outcome")
         protected CodeableConcept details;
 
         /**
-         * Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.
+         * Additional diagnostic information about the issue.
          */
         @Child(name = "diagnostics", type = {StringType.class}, order=4, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Additional diagnostic information about the issue", formalDefinition="Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue." )
+        @Description(shortDefinition="Additional diagnostic information about the issue", formalDefinition="Additional diagnostic information about the issue." )
         protected StringType diagnostics;
 
         /**
-         * This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+         * This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
 
-For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.
          */
         @Child(name = "location", type = {StringType.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="Deprecated: Path of element(s) related to issue", formalDefinition="This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name." )
+        @Description(shortDefinition="Deprecated: Path of element(s) related to issue", formalDefinition="This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name." )
         protected List<StringType> location;
 
         /**
-         * A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.
+         * A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.
          */
         @Child(name = "expression", type = {StringType.class}, order=6, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-        @Description(shortDefinition="FHIRPath of element(s) related to issue", formalDefinition="A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised." )
+        @Description(shortDefinition="FHIRPath of element(s) related to issue", formalDefinition="A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised." )
         protected List<StringType> expression;
 
         private static final long serialVersionUID = -1681095438L;
@@ -886,7 +886,7 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @return {@link #details} (Additional details about the error. This may be a text description of the error, or a system code that identifies the error.)
+         * @return {@link #details} (Additional details about the error. This may be a text description of the error or a system code that identifies the error.)
          */
         public CodeableConcept getDetails() { 
           if (this.details == null)
@@ -902,7 +902,7 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @param value {@link #details} (Additional details about the error. This may be a text description of the error, or a system code that identifies the error.)
+         * @param value {@link #details} (Additional details about the error. This may be a text description of the error or a system code that identifies the error.)
          */
         public OperationOutcomeIssueComponent setDetails(CodeableConcept value) { 
           this.details = value;
@@ -910,7 +910,7 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @return {@link #diagnostics} (Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.). This is the underlying object with id, value and extensions. The accessor "getDiagnostics" gives direct access to the value
+         * @return {@link #diagnostics} (Additional diagnostic information about the issue.). This is the underlying object with id, value and extensions. The accessor "getDiagnostics" gives direct access to the value
          */
         public StringType getDiagnosticsElement() { 
           if (this.diagnostics == null)
@@ -930,7 +930,7 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @param value {@link #diagnostics} (Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.). This is the underlying object with id, value and extensions. The accessor "getDiagnostics" gives direct access to the value
+         * @param value {@link #diagnostics} (Additional diagnostic information about the issue.). This is the underlying object with id, value and extensions. The accessor "getDiagnostics" gives direct access to the value
          */
         public OperationOutcomeIssueComponent setDiagnosticsElement(StringType value) { 
           this.diagnostics = value;
@@ -938,14 +938,14 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @return Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.
+         * @return Additional diagnostic information about the issue.
          */
         public String getDiagnostics() { 
           return this.diagnostics == null ? null : this.diagnostics.getValue();
         }
 
         /**
-         * @param value Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.
+         * @param value Additional diagnostic information about the issue.
          */
         public OperationOutcomeIssueComponent setDiagnostics(String value) { 
           if (Utilities.noString(value))
@@ -959,9 +959,9 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @return {@link #location} (This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+         * @return {@link #location} (This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
 
-For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public List<StringType> getLocation() { 
           if (this.location == null)
@@ -987,9 +987,9 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @return {@link #location} (This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+         * @return {@link #location} (This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
 
-For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public StringType addLocationElement() {//2 
           StringType t = new StringType();
@@ -1000,9 +1000,9 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @param value {@link #location} (This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+         * @param value {@link #location} (This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
 
-For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public OperationOutcomeIssueComponent addLocation(String value) { //1
           StringType t = new StringType();
@@ -1014,9 +1014,9 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @param value {@link #location} (This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
+         * @param value {@link #location} (This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. 
 
-For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
+For resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be "http." + the parameter name.)
          */
         public boolean hasLocation(String value) { 
           if (this.location == null)
@@ -1028,7 +1028,7 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @return {@link #expression} (A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @return {@link #expression} (A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.)
          */
         public List<StringType> getExpression() { 
           if (this.expression == null)
@@ -1054,7 +1054,7 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @return {@link #expression} (A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @return {@link #expression} (A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.)
          */
         public StringType addExpressionElement() {//2 
           StringType t = new StringType();
@@ -1065,7 +1065,7 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @param value {@link #expression} (A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @param value {@link #expression} (A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.)
          */
         public OperationOutcomeIssueComponent addExpression(String value) { //1
           StringType t = new StringType();
@@ -1077,7 +1077,7 @@ For resource issues, this will be a simple XPath limited to element names, repet
         }
 
         /**
-         * @param value {@link #expression} (A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.)
+         * @param value {@link #expression} (A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.)
          */
         public boolean hasExpression(String value) { 
           if (this.expression == null)
@@ -1092,10 +1092,10 @@ For resource issues, this will be a simple XPath limited to element names, repet
           super.listChildren(children);
           children.add(new Property("severity", "code", "Indicates whether the issue indicates a variation from successful processing.", 0, 1, severity));
           children.add(new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.", 0, 1, code));
-          children.add(new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error, or a system code that identifies the error.", 0, 1, details));
-          children.add(new Property("diagnostics", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.", 0, 1, diagnostics));
-          children.add(new Property("location", "string", "This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location));
-          children.add(new Property("expression", "string", "A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression));
+          children.add(new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error or a system code that identifies the error.", 0, 1, details));
+          children.add(new Property("diagnostics", "string", "Additional diagnostic information about the issue.", 0, 1, diagnostics));
+          children.add(new Property("location", "string", "This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location));
+          children.add(new Property("expression", "string", "A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression));
         }
 
         @Override
@@ -1103,10 +1103,10 @@ For resource issues, this will be a simple XPath limited to element names, repet
           switch (_hash) {
           case 1478300413: /*severity*/  return new Property("severity", "code", "Indicates whether the issue indicates a variation from successful processing.", 0, 1, severity);
           case 3059181: /*code*/  return new Property("code", "code", "Describes the type of the issue. The system that creates an OperationOutcome SHALL choose the most applicable code from the IssueType value set, and may additional provide its own code for the error in the details element.", 0, 1, code);
-          case 1557721666: /*details*/  return new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error, or a system code that identifies the error.", 0, 1, details);
-          case -740386388: /*diagnostics*/  return new Property("diagnostics", "string", "Additional diagnostic information about the issue.  Typically, this may be a description of how a value is erroneous, or a stack dump to help trace the issue.", 0, 1, diagnostics);
-          case 1901043637: /*location*/  return new Property("location", "string", "This element is depracated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location);
-          case -1795452264: /*expression*/  return new Property("expression", "string", "A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child access that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression);
+          case 1557721666: /*details*/  return new Property("details", "CodeableConcept", "Additional details about the error. This may be a text description of the error or a system code that identifies the error.", 0, 1, details);
+          case -740386388: /*diagnostics*/  return new Property("diagnostics", "string", "Additional diagnostic information about the issue.", 0, 1, diagnostics);
+          case 1901043637: /*location*/  return new Property("location", "string", "This element is deprecated because it is XML specific. It is replaced by issue.expression, which is format independent, and simpler to parse. \n\nFor resource issues, this will be a simple XPath limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.  For HTTP errors, will be \"http.\" + the parameter name.", 0, java.lang.Integer.MAX_VALUE, location);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "A [simple subset of FHIRPath](fhirpath.html#simple) limited to element names, repetition indicators and the default child accessor that identifies one of the elements in the resource that caused this issue to be raised.", 0, java.lang.Integer.MAX_VALUE, expression);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1284,10 +1284,10 @@ For resource issues, this will be a simple XPath limited to element names, repet
   }
 
     /**
-     * An error, warning or information message that results from a system action.
+     * An error, warning, or information message that results from a system action.
      */
     @Child(name = "issue", type = {}, order=0, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="A single issue associated with the action", formalDefinition="An error, warning or information message that results from a system action." )
+    @Description(shortDefinition="A single issue associated with the action", formalDefinition="An error, warning, or information message that results from a system action." )
     protected List<OperationOutcomeIssueComponent> issue;
 
     private static final long serialVersionUID = -152150052L;
@@ -1300,7 +1300,7 @@ For resource issues, this will be a simple XPath limited to element names, repet
     }
 
     /**
-     * @return {@link #issue} (An error, warning or information message that results from a system action.)
+     * @return {@link #issue} (An error, warning, or information message that results from a system action.)
      */
     public List<OperationOutcomeIssueComponent> getIssue() { 
       if (this.issue == null)
@@ -1354,13 +1354,13 @@ For resource issues, this will be a simple XPath limited to element names, repet
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("issue", "", "An error, warning or information message that results from a system action.", 0, java.lang.Integer.MAX_VALUE, issue));
+        children.add(new Property("issue", "", "An error, warning, or information message that results from a system action.", 0, java.lang.Integer.MAX_VALUE, issue));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case 100509913: /*issue*/  return new Property("issue", "", "An error, warning or information message that results from a system action.", 0, java.lang.Integer.MAX_VALUE, issue);
+        case 100509913: /*issue*/  return new Property("issue", "", "An error, warning, or information message that results from a system action.", 0, java.lang.Integer.MAX_VALUE, issue);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 

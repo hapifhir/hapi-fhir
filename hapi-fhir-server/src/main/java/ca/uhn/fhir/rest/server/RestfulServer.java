@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IFhirVersionServer;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.ParseAction;
@@ -55,6 +52,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -96,8 +95,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE = "ca.uhn.fhir.rest.server.RestfulServer.servlet_context";
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
 	private static final long serialVersionUID = 1L;
+	/**
+	 * Default value for {@link #setDefaultPreferReturn(PreferReturnEnum)}
+	 */
+	public static final PreferReturnEnum DEFAULT_PREFER_RETURN = PreferReturnEnum.REPRESENTATION;
 	private final List<IServerInterceptor> myInterceptors = new ArrayList<>();
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
@@ -126,6 +129,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private boolean myUseBrowserFriendlyContentTypes;
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
 	private Date myConformanceDate;
+	private PreferReturnEnum myDefaultPreferReturn = DEFAULT_PREFER_RETURN;
 
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
@@ -823,7 +827,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			String completeUrl;
 			Map<String, String[]> params = null;
-			if (StringUtils.isNotBlank(theRequest.getQueryString())) {
+			if (isNotBlank(theRequest.getQueryString())) {
 				completeUrl = requestUrl + "?" + theRequest.getQueryString();
 				/*
 				 * By default, we manually parse the request params (the URL params, or the body for
@@ -1627,6 +1631,38 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		theResponse.setContentType("text/plain");
 		theResponse.setCharacterEncoding("UTF-8");
 		theResponse.getWriter().write(theException.getMessage());
+	}
+
+	/**
+	 * By default, server create/update/patch/transaction methods return a copy of the resource
+	 * as it was stored. This may be overridden by the client using the
+	 * <code>Prefer</code> header.
+	 * <p>
+	 * This setting changes the default behaviour if no Prefer header is supplied by the client.
+	 * The default is {@link PreferReturnEnum#REPRESENTATION}
+	 * </p>
+	 *
+	 * @see <a href="http://hl7.org/fhir/http.html#ops">HL7 FHIR Specification</a> section on the Prefer header
+	 */
+	@Override
+	public PreferReturnEnum getDefaultPreferReturn() {
+		return myDefaultPreferReturn;
+	}
+
+	/**
+	 * By default, server create/update/patch/transaction methods return a copy of the resource
+	 * as it was stored. This may be overridden by the client using the
+	 * <code>Prefer</code> header.
+	 * <p>
+	 * This setting changes the default behaviour if no Prefer header is supplied by the client.
+	 * The default is {@link PreferReturnEnum#REPRESENTATION}
+	 * </p>
+	 *
+	 * @see <a href="http://hl7.org/fhir/http.html#ops">HL7 FHIR Specification</a> section on the Prefer header
+	 */
+	public void setDefaultPreferReturn(PreferReturnEnum theDefaultPreferReturn) {
+		Validate.notNull(theDefaultPreferReturn, "theDefaultPreferReturn must not be null");
+		myDefaultPreferReturn = theDefaultPreferReturn;
 	}
 
 	/**

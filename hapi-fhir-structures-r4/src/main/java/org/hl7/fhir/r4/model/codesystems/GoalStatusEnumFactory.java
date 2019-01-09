@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -41,24 +41,16 @@ public class GoalStatusEnumFactory implements EnumFactory<GoalStatus> {
       return null;
     if ("proposed".equals(codeString))
       return GoalStatus.PROPOSED;
-    if ("accepted".equals(codeString))
-      return GoalStatus.ACCEPTED;
     if ("planned".equals(codeString))
       return GoalStatus.PLANNED;
-    if ("in-progress".equals(codeString))
-      return GoalStatus.INPROGRESS;
-    if ("on-target".equals(codeString))
-      return GoalStatus.ONTARGET;
-    if ("ahead-of-target".equals(codeString))
-      return GoalStatus.AHEADOFTARGET;
-    if ("behind-target".equals(codeString))
-      return GoalStatus.BEHINDTARGET;
-    if ("sustaining".equals(codeString))
-      return GoalStatus.SUSTAINING;
-    if ("achieved".equals(codeString))
-      return GoalStatus.ACHIEVED;
+    if ("accepted".equals(codeString))
+      return GoalStatus.ACCEPTED;
+    if ("active".equals(codeString))
+      return GoalStatus.ACTIVE;
     if ("on-hold".equals(codeString))
       return GoalStatus.ONHOLD;
+    if ("completed".equals(codeString))
+      return GoalStatus.COMPLETED;
     if ("cancelled".equals(codeString))
       return GoalStatus.CANCELLED;
     if ("entered-in-error".equals(codeString))
@@ -71,24 +63,16 @@ public class GoalStatusEnumFactory implements EnumFactory<GoalStatus> {
   public String toCode(GoalStatus code) {
     if (code == GoalStatus.PROPOSED)
       return "proposed";
-    if (code == GoalStatus.ACCEPTED)
-      return "accepted";
     if (code == GoalStatus.PLANNED)
       return "planned";
-    if (code == GoalStatus.INPROGRESS)
-      return "in-progress";
-    if (code == GoalStatus.ONTARGET)
-      return "on-target";
-    if (code == GoalStatus.AHEADOFTARGET)
-      return "ahead-of-target";
-    if (code == GoalStatus.BEHINDTARGET)
-      return "behind-target";
-    if (code == GoalStatus.SUSTAINING)
-      return "sustaining";
-    if (code == GoalStatus.ACHIEVED)
-      return "achieved";
+    if (code == GoalStatus.ACCEPTED)
+      return "accepted";
+    if (code == GoalStatus.ACTIVE)
+      return "active";
     if (code == GoalStatus.ONHOLD)
       return "on-hold";
+    if (code == GoalStatus.COMPLETED)
+      return "completed";
     if (code == GoalStatus.CANCELLED)
       return "cancelled";
     if (code == GoalStatus.ENTEREDINERROR)

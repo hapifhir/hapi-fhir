@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -121,7 +121,7 @@ public enum Hl7WorkGroup {
          */
         SEC, 
         /**
-         * US Realm Taskforce (http://wiki.hl7.org/index.php?title=US_Realm_Task_Force).
+         * US Realm Taskforce (http://www.hl7.org/Special/committees/usrealm/index.cfm).
          */
         US, 
         /**
@@ -244,7 +244,7 @@ public enum Hl7WorkGroup {
             case BRR: return "Biomedical Research and Regulation (http://www.hl7.org/Special/committees/rcrim/index.cfm).";
             case SD: return "Structured Documents (http://www.hl7.org/Special/committees/structure/index.cfm).";
             case SEC: return "Security (http://www.hl7.org/Special/committees/secure/index.cfm).";
-            case US: return "US Realm Taskforce (http://wiki.hl7.org/index.php?title=US_Realm_Task_Force).";
+            case US: return "US Realm Taskforce (http://www.hl7.org/Special/committees/usrealm/index.cfm).";
             case VOCAB: return "Vocabulary (http://www.hl7.org/Special/committees/Vocab/index.cfm).";
             case AID: return "Application Implementation and Design (http://www.hl7.org/Special/committees/java/index.cfm).";
             default: return "?";

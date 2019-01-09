@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -66,6 +67,7 @@ import java.util.concurrent.TimeUnit;
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
 @Service
+@Lazy
 public class SubscriptionActivatingInterceptor extends ServerOperationInterceptorAdapter {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
 

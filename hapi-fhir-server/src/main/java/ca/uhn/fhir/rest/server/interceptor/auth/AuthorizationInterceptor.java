@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -407,7 +407,13 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 		@Override
 		public String toString() {
 			ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-			b.append("rule", myDecidingRule.getName());
+			String ruleName;
+			if (myDecidingRule != null) {
+				ruleName = myDecidingRule.getName();
+			} else {
+				ruleName = "(none)";
+			}
+			b.append("rule", ruleName);
 			b.append("decision", myDecision.name());
 			return b.build();
 		}

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum ConditionCategory {
 
         /**
-         * An item on a problem list which can be managed over time and can be expressed by a practitioner (e.g. physician, nurse), patient, or related person.
+         * An item on a problem list that can be managed over time and can be expressed by a practitioner (e.g. physician, nurse), patient, or related person.
          */
         PROBLEMLISTITEM, 
         /**
@@ -69,7 +69,7 @@ public enum ConditionCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case PROBLEMLISTITEM: return "An item on a problem list which can be managed over time and can be expressed by a practitioner (e.g. physician, nurse), patient, or related person.";
+            case PROBLEMLISTITEM: return "An item on a problem list that can be managed over time and can be expressed by a practitioner (e.g. physician, nurse), patient, or related person.";
             case ENCOUNTERDIAGNOSIS: return "A point in time diagnosis (e.g. from a physician or nurse) in context of an encounter.";
             default: return "?";
           }

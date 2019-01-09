@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum EpisodeOfCareStatus {
          */
         ACTIVE, 
         /**
-         * This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite).
+         * This episode of care is on hold; the organization has limited responsibility for the patient (such as while on respite).
          */
         ONHOLD, 
         /**
@@ -107,7 +107,7 @@ public enum EpisodeOfCareStatus {
             case PLANNED: return "This episode of care is planned to start at the date specified in the period.start. During this status, an organization may perform assessments to determine if the patient is eligible to receive services, or be organizing to make resources available to provide care services.";
             case WAITLIST: return "This episode has been placed on a waitlist, pending the episode being made active (or cancelled).";
             case ACTIVE: return "This episode of care is current.";
-            case ONHOLD: return "This episode of care is on hold, the organization has limited responsibility for the patient (such as while on respite).";
+            case ONHOLD: return "This episode of care is on hold; the organization has limited responsibility for the patient (such as while on respite).";
             case FINISHED: return "This episode of care is finished and the organization is not expecting to be providing further care to the patient. Can also be known as \"closed\", \"completed\" or other similar terms.";
             case CANCELLED: return "The episode of care was cancelled, or withdrawn from service, often selected during the planned stage as the patient may have gone elsewhere, or the circumstances have changed and the organization is unable to provide the care. It indicates that services terminated outside the planned/expected workflow.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";

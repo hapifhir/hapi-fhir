@@ -270,7 +270,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
-		v.addExtensionDomains(extensionDomains);
+		v.getExtensionDomains().addAll(extensionDomains);
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
@@ -630,6 +630,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public org.hl7.fhir.r4.model.StructureDefinition fetchTypeDefinition(String typeName) {
 			return fetchResource(org.hl7.fhir.r4.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
+		}
+
+		@Override
+		public void setUcumService(UcumService ucumService) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

@@ -4,7 +4,7 @@ package org.hl7.fhir.convertors;
  * #%L
  * HAPI FHIR - Converter
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ package org.hl7.fhir.convertors;
  */
 
 
-import org.hl7.fhir.utilities.Utilities;
-
 public class VersionConvertorConstants {
 
   public final static String IG_DEPENDSON_PACKAGE_EXTENSION = "http://hl7.org/fhir/4.0/StructureDefinition/extension-ImplentationGuide.dependency.packageId";
   public final static String IG_DEPENDSON_VERSION_EXTENSION = "http://hl7.org/fhir/4.0/StructureDefinition/extension-ImplentationGuide.dependency.version";
   public final static String MODIFIER_REASON_EXTENSION = "http://hl7.org/fhir/4.0/StructureDefinition/extension-ElementDefinition.isModifierReason";
+  public final static String MODIFIER_TAKEN = "http://hl7.org/fhir/4.0/StructureDefinition/extension-MedicationStatment.taken";
   public final static String MODIFIER_REASON_LEGACY = "No Modifier Reason provideed in previous versions of FHIR";
   
   public static String refToVS(String url) {

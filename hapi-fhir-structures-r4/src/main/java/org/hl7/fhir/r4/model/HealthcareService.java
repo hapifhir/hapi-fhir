@@ -29,11 +29,12 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.r4.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -219,6 +220,227 @@ public class HealthcareService extends DomainResource {
       return code.getSystem();
       }
     }
+
+    @Block()
+    public static class HealthcareServiceEligibilityComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * Coded value for the eligibility.
+         */
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Coded value for the eligibility", formalDefinition="Coded value for the eligibility." )
+        protected CodeableConcept code;
+
+        /**
+         * Describes the eligibility conditions for the service.
+         */
+        @Child(name = "comment", type = {MarkdownType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Describes the eligibility conditions for the service", formalDefinition="Describes the eligibility conditions for the service." )
+        protected MarkdownType comment;
+
+        private static final long serialVersionUID = 1078065348L;
+
+    /**
+     * Constructor
+     */
+      public HealthcareServiceEligibilityComponent() {
+        super();
+      }
+
+        /**
+         * @return {@link #code} (Coded value for the eligibility.)
+         */
+        public CodeableConcept getCode() { 
+          if (this.code == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create HealthcareServiceEligibilityComponent.code");
+            else if (Configuration.doAutoCreate())
+              this.code = new CodeableConcept(); // cc
+          return this.code;
+        }
+
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
+        }
+
+        /**
+         * @param value {@link #code} (Coded value for the eligibility.)
+         */
+        public HealthcareServiceEligibilityComponent setCode(CodeableConcept value) { 
+          this.code = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #comment} (Describes the eligibility conditions for the service.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+         */
+        public MarkdownType getCommentElement() { 
+          if (this.comment == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create HealthcareServiceEligibilityComponent.comment");
+            else if (Configuration.doAutoCreate())
+              this.comment = new MarkdownType(); // bb
+          return this.comment;
+        }
+
+        public boolean hasCommentElement() { 
+          return this.comment != null && !this.comment.isEmpty();
+        }
+
+        public boolean hasComment() { 
+          return this.comment != null && !this.comment.isEmpty();
+        }
+
+        /**
+         * @param value {@link #comment} (Describes the eligibility conditions for the service.). This is the underlying object with id, value and extensions. The accessor "getComment" gives direct access to the value
+         */
+        public HealthcareServiceEligibilityComponent setCommentElement(MarkdownType value) { 
+          this.comment = value;
+          return this;
+        }
+
+        /**
+         * @return Describes the eligibility conditions for the service.
+         */
+        public String getComment() { 
+          return this.comment == null ? null : this.comment.getValue();
+        }
+
+        /**
+         * @param value Describes the eligibility conditions for the service.
+         */
+        public HealthcareServiceEligibilityComponent setComment(String value) { 
+          if (value == null)
+            this.comment = null;
+          else {
+            if (this.comment == null)
+              this.comment = new MarkdownType();
+            this.comment.setValue(value);
+          }
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "CodeableConcept", "Coded value for the eligibility.", 0, 1, code));
+          children.add(new Property("comment", "markdown", "Describes the eligibility conditions for the service.", 0, 1, comment));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Coded value for the eligibility.", 0, 1, code);
+          case 950398559: /*comment*/  return new Property("comment", "markdown", "Describes the eligibility conditions for the service.", 0, 1, comment);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // MarkdownType
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 950398559: // comment
+          this.comment = castToMarkdown(value); // MarkdownType
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("comment")) {
+          this.comment = castToMarkdown(value); // MarkdownType
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181:  return getCode(); 
+        case 950398559:  return getCommentElement();
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case 950398559: /*comment*/ return new String[] {"markdown"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("comment")) {
+          throw new FHIRException("Cannot call addChild on a primitive type HealthcareService.comment");
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public HealthcareServiceEligibilityComponent copy() {
+        HealthcareServiceEligibilityComponent dst = new HealthcareServiceEligibilityComponent();
+        copyValues(dst);
+        dst.code = code == null ? null : code.copy();
+        dst.comment = comment == null ? null : comment.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof HealthcareServiceEligibilityComponent))
+          return false;
+        HealthcareServiceEligibilityComponent o = (HealthcareServiceEligibilityComponent) other_;
+        return compareDeep(code, o.code, true) && compareDeep(comment, o.comment, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof HealthcareServiceEligibilityComponent))
+          return false;
+        HealthcareServiceEligibilityComponent o = (HealthcareServiceEligibilityComponent) other_;
+        return compareValues(comment, o.comment, true);
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, comment);
+      }
+
+  public String fhirType() {
+    return "HealthcareService.eligibility";
+
+  }
+
+  }
 
     @Block()
     public static class HealthcareServiceAvailableTimeComponent extends BackboneElement implements IBaseBackboneElement {
@@ -927,9 +1149,9 @@ public class HealthcareService extends DomainResource {
     /**
      * Extra details about the service that can't be placed in the other fields.
      */
-    @Child(name = "extraDetails", type = {StringType.class}, order=9, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "extraDetails", type = {MarkdownType.class}, order=9, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Extra details about the service that can't be placed in the other fields", formalDefinition="Extra details about the service that can't be placed in the other fields." )
-    protected StringType extraDetails;
+    protected MarkdownType extraDetails;
 
     /**
      * If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list.
@@ -968,30 +1190,32 @@ public class HealthcareService extends DomainResource {
     /**
      * Does this service have specific eligibility requirements that need to be met in order to use the service?
      */
-    @Child(name = "eligibility", type = {CodeableConcept.class}, order=14, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "eligibility", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Specific eligibility requirements required to use the service", formalDefinition="Does this service have specific eligibility requirements that need to be met in order to use the service?" )
-    protected CodeableConcept eligibility;
+    protected List<HealthcareServiceEligibilityComponent> eligibility;
 
     /**
-     * Describes the eligibility conditions for the service.
+     * Programs that this service is applicable to.
      */
-    @Child(name = "eligibilityNote", type = {StringType.class}, order=15, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Describes the eligibility conditions for the service", formalDefinition="Describes the eligibility conditions for the service." )
-    protected StringType eligibilityNote;
-
-    /**
-     * Program Names that can be used to categorize the service.
-     */
-    @Child(name = "programName", type = {StringType.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Program Names that categorize the service", formalDefinition="Program Names that can be used to categorize the service." )
-    protected List<StringType> programName;
+    @Child(name = "program", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Programs that this service is applicable to", formalDefinition="Programs that this service is applicable to." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/program")
+    protected List<CodeableConcept> program;
 
     /**
      * Collection of characteristics (attributes).
      */
-    @Child(name = "characteristic", type = {CodeableConcept.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "characteristic", type = {CodeableConcept.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="Collection of characteristics (attributes)", formalDefinition="Collection of characteristics (attributes)." )
     protected List<CodeableConcept> characteristic;
+
+    /**
+     * Some services are specifically made available in multiple languages, this property permits a directory to declare the languages this is offered in. Typically this is only provided where a service operates in communities with mixed languages used.
+     */
+    @Child(name = "communication", type = {CodeableConcept.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="The language that this service is offered in", formalDefinition="Some services are specifically made available in multiple languages, this property permits a directory to declare the languages this is offered in. Typically this is only provided where a service operates in communities with mixed languages used." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/languages")
+    protected List<CodeableConcept> communication;
 
     /**
      * Ways that the service accepts referrals, if this is not provided then it is implied that no referral is required.
@@ -1033,7 +1257,7 @@ public class HealthcareService extends DomainResource {
      * Technical endpoints providing access to services operated for the specific healthcare services defined at this resource.
      */
     @Child(name = "endpoint", type = {Endpoint.class}, order=23, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Technical endpoints providing access to services operated for the location", formalDefinition="Technical endpoints providing access to services operated for the specific healthcare services defined at this resource." )
+    @Description(shortDefinition="Technical endpoints providing access to electronic services operated for the healthcare service", formalDefinition="Technical endpoints providing access to services operated for the specific healthcare services defined at this resource." )
     protected List<Reference> endpoint;
     /**
      * The actual objects that are the target of the reference (Technical endpoints providing access to services operated for the specific healthcare services defined at this resource.)
@@ -1041,7 +1265,7 @@ public class HealthcareService extends DomainResource {
     protected List<Endpoint> endpointTarget;
 
 
-    private static final long serialVersionUID = 1984827757L;
+    private static final long serialVersionUID = -2002412666L;
 
   /**
    * Constructor
@@ -1527,12 +1751,12 @@ public class HealthcareService extends DomainResource {
     /**
      * @return {@link #extraDetails} (Extra details about the service that can't be placed in the other fields.). This is the underlying object with id, value and extensions. The accessor "getExtraDetails" gives direct access to the value
      */
-    public StringType getExtraDetailsElement() { 
+    public MarkdownType getExtraDetailsElement() { 
       if (this.extraDetails == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create HealthcareService.extraDetails");
         else if (Configuration.doAutoCreate())
-          this.extraDetails = new StringType(); // bb
+          this.extraDetails = new MarkdownType(); // bb
       return this.extraDetails;
     }
 
@@ -1547,7 +1771,7 @@ public class HealthcareService extends DomainResource {
     /**
      * @param value {@link #extraDetails} (Extra details about the service that can't be placed in the other fields.). This is the underlying object with id, value and extensions. The accessor "getExtraDetails" gives direct access to the value
      */
-    public HealthcareService setExtraDetailsElement(StringType value) { 
+    public HealthcareService setExtraDetailsElement(MarkdownType value) { 
       this.extraDetails = value;
       return this;
     }
@@ -1563,11 +1787,11 @@ public class HealthcareService extends DomainResource {
      * @param value Extra details about the service that can't be placed in the other fields.
      */
     public HealthcareService setExtraDetails(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.extraDetails = null;
       else {
         if (this.extraDetails == null)
-          this.extraDetails = new StringType();
+          this.extraDetails = new MarkdownType();
         this.extraDetails.setValue(value);
       }
       return this;
@@ -1781,135 +2005,107 @@ public class HealthcareService extends DomainResource {
     /**
      * @return {@link #eligibility} (Does this service have specific eligibility requirements that need to be met in order to use the service?)
      */
-    public CodeableConcept getEligibility() { 
+    public List<HealthcareServiceEligibilityComponent> getEligibility() { 
       if (this.eligibility == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create HealthcareService.eligibility");
-        else if (Configuration.doAutoCreate())
-          this.eligibility = new CodeableConcept(); // cc
+        this.eligibility = new ArrayList<HealthcareServiceEligibilityComponent>();
       return this.eligibility;
-    }
-
-    public boolean hasEligibility() { 
-      return this.eligibility != null && !this.eligibility.isEmpty();
-    }
-
-    /**
-     * @param value {@link #eligibility} (Does this service have specific eligibility requirements that need to be met in order to use the service?)
-     */
-    public HealthcareService setEligibility(CodeableConcept value) { 
-      this.eligibility = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #eligibilityNote} (Describes the eligibility conditions for the service.). This is the underlying object with id, value and extensions. The accessor "getEligibilityNote" gives direct access to the value
-     */
-    public StringType getEligibilityNoteElement() { 
-      if (this.eligibilityNote == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create HealthcareService.eligibilityNote");
-        else if (Configuration.doAutoCreate())
-          this.eligibilityNote = new StringType(); // bb
-      return this.eligibilityNote;
-    }
-
-    public boolean hasEligibilityNoteElement() { 
-      return this.eligibilityNote != null && !this.eligibilityNote.isEmpty();
-    }
-
-    public boolean hasEligibilityNote() { 
-      return this.eligibilityNote != null && !this.eligibilityNote.isEmpty();
-    }
-
-    /**
-     * @param value {@link #eligibilityNote} (Describes the eligibility conditions for the service.). This is the underlying object with id, value and extensions. The accessor "getEligibilityNote" gives direct access to the value
-     */
-    public HealthcareService setEligibilityNoteElement(StringType value) { 
-      this.eligibilityNote = value;
-      return this;
-    }
-
-    /**
-     * @return Describes the eligibility conditions for the service.
-     */
-    public String getEligibilityNote() { 
-      return this.eligibilityNote == null ? null : this.eligibilityNote.getValue();
-    }
-
-    /**
-     * @param value Describes the eligibility conditions for the service.
-     */
-    public HealthcareService setEligibilityNote(String value) { 
-      if (Utilities.noString(value))
-        this.eligibilityNote = null;
-      else {
-        if (this.eligibilityNote == null)
-          this.eligibilityNote = new StringType();
-        this.eligibilityNote.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #programName} (Program Names that can be used to categorize the service.)
-     */
-    public List<StringType> getProgramName() { 
-      if (this.programName == null)
-        this.programName = new ArrayList<StringType>();
-      return this.programName;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public HealthcareService setProgramName(List<StringType> theProgramName) { 
-      this.programName = theProgramName;
+    public HealthcareService setEligibility(List<HealthcareServiceEligibilityComponent> theEligibility) { 
+      this.eligibility = theEligibility;
       return this;
     }
 
-    public boolean hasProgramName() { 
-      if (this.programName == null)
+    public boolean hasEligibility() { 
+      if (this.eligibility == null)
         return false;
-      for (StringType item : this.programName)
+      for (HealthcareServiceEligibilityComponent item : this.eligibility)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    /**
-     * @return {@link #programName} (Program Names that can be used to categorize the service.)
-     */
-    public StringType addProgramNameElement() {//2 
-      StringType t = new StringType();
-      if (this.programName == null)
-        this.programName = new ArrayList<StringType>();
-      this.programName.add(t);
+    public HealthcareServiceEligibilityComponent addEligibility() { //3
+      HealthcareServiceEligibilityComponent t = new HealthcareServiceEligibilityComponent();
+      if (this.eligibility == null)
+        this.eligibility = new ArrayList<HealthcareServiceEligibilityComponent>();
+      this.eligibility.add(t);
       return t;
     }
 
-    /**
-     * @param value {@link #programName} (Program Names that can be used to categorize the service.)
-     */
-    public HealthcareService addProgramName(String value) { //1
-      StringType t = new StringType();
-      t.setValue(value);
-      if (this.programName == null)
-        this.programName = new ArrayList<StringType>();
-      this.programName.add(t);
+    public HealthcareService addEligibility(HealthcareServiceEligibilityComponent t) { //3
+      if (t == null)
+        return this;
+      if (this.eligibility == null)
+        this.eligibility = new ArrayList<HealthcareServiceEligibilityComponent>();
+      this.eligibility.add(t);
       return this;
     }
 
     /**
-     * @param value {@link #programName} (Program Names that can be used to categorize the service.)
+     * @return The first repetition of repeating field {@link #eligibility}, creating it if it does not already exist
      */
-    public boolean hasProgramName(String value) { 
-      if (this.programName == null)
+    public HealthcareServiceEligibilityComponent getEligibilityFirstRep() { 
+      if (getEligibility().isEmpty()) {
+        addEligibility();
+      }
+      return getEligibility().get(0);
+    }
+
+    /**
+     * @return {@link #program} (Programs that this service is applicable to.)
+     */
+    public List<CodeableConcept> getProgram() { 
+      if (this.program == null)
+        this.program = new ArrayList<CodeableConcept>();
+      return this.program;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setProgram(List<CodeableConcept> theProgram) { 
+      this.program = theProgram;
+      return this;
+    }
+
+    public boolean hasProgram() { 
+      if (this.program == null)
         return false;
-      for (StringType v : this.programName)
-        if (v.getValue().equals(value)) // string
+      for (CodeableConcept item : this.program)
+        if (!item.isEmpty())
           return true;
       return false;
+    }
+
+    public CodeableConcept addProgram() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.program == null)
+        this.program = new ArrayList<CodeableConcept>();
+      this.program.add(t);
+      return t;
+    }
+
+    public HealthcareService addProgram(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.program == null)
+        this.program = new ArrayList<CodeableConcept>();
+      this.program.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #program}, creating it if it does not already exist
+     */
+    public CodeableConcept getProgramFirstRep() { 
+      if (getProgram().isEmpty()) {
+        addProgram();
+      }
+      return getProgram().get(0);
     }
 
     /**
@@ -1963,6 +2159,59 @@ public class HealthcareService extends DomainResource {
         addCharacteristic();
       }
       return getCharacteristic().get(0);
+    }
+
+    /**
+     * @return {@link #communication} (Some services are specifically made available in multiple languages, this property permits a directory to declare the languages this is offered in. Typically this is only provided where a service operates in communities with mixed languages used.)
+     */
+    public List<CodeableConcept> getCommunication() { 
+      if (this.communication == null)
+        this.communication = new ArrayList<CodeableConcept>();
+      return this.communication;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public HealthcareService setCommunication(List<CodeableConcept> theCommunication) { 
+      this.communication = theCommunication;
+      return this;
+    }
+
+    public boolean hasCommunication() { 
+      if (this.communication == null)
+        return false;
+      for (CodeableConcept item : this.communication)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public CodeableConcept addCommunication() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.communication == null)
+        this.communication = new ArrayList<CodeableConcept>();
+      this.communication.add(t);
+      return t;
+    }
+
+    public HealthcareService addCommunication(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.communication == null)
+        this.communication = new ArrayList<CodeableConcept>();
+      this.communication.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #communication}, creating it if it does not already exist
+     */
+    public CodeableConcept getCommunicationFirstRep() { 
+      if (getCommunication().isEmpty()) {
+        addCommunication();
+      }
+      return getCommunication().get(0);
     }
 
     /**
@@ -2304,15 +2553,15 @@ public class HealthcareService extends DomainResource {
         children.add(new Property("location", "Reference(Location)", "The location(s) where this healthcare service may be provided.", 0, java.lang.Integer.MAX_VALUE, location));
         children.add(new Property("name", "string", "Further description of the service as it would be presented to a consumer while searching.", 0, 1, name));
         children.add(new Property("comment", "string", "Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName.", 0, 1, comment));
-        children.add(new Property("extraDetails", "string", "Extra details about the service that can't be placed in the other fields.", 0, 1, extraDetails));
+        children.add(new Property("extraDetails", "markdown", "Extra details about the service that can't be placed in the other fields.", 0, 1, extraDetails));
         children.add(new Property("photo", "Attachment", "If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list.", 0, 1, photo));
         children.add(new Property("telecom", "ContactPoint", "List of contacts related to this specific healthcare service.", 0, java.lang.Integer.MAX_VALUE, telecom));
         children.add(new Property("coverageArea", "Reference(Location)", "The location(s) that this service is available to (not where the service is provided).", 0, java.lang.Integer.MAX_VALUE, coverageArea));
         children.add(new Property("serviceProvisionCode", "CodeableConcept", "The code(s) that detail the conditions under which the healthcare service is available/offered.", 0, java.lang.Integer.MAX_VALUE, serviceProvisionCode));
-        children.add(new Property("eligibility", "CodeableConcept", "Does this service have specific eligibility requirements that need to be met in order to use the service?", 0, 1, eligibility));
-        children.add(new Property("eligibilityNote", "string", "Describes the eligibility conditions for the service.", 0, 1, eligibilityNote));
-        children.add(new Property("programName", "string", "Program Names that can be used to categorize the service.", 0, java.lang.Integer.MAX_VALUE, programName));
+        children.add(new Property("eligibility", "", "Does this service have specific eligibility requirements that need to be met in order to use the service?", 0, java.lang.Integer.MAX_VALUE, eligibility));
+        children.add(new Property("program", "CodeableConcept", "Programs that this service is applicable to.", 0, java.lang.Integer.MAX_VALUE, program));
         children.add(new Property("characteristic", "CodeableConcept", "Collection of characteristics (attributes).", 0, java.lang.Integer.MAX_VALUE, characteristic));
+        children.add(new Property("communication", "CodeableConcept", "Some services are specifically made available in multiple languages, this property permits a directory to declare the languages this is offered in. Typically this is only provided where a service operates in communities with mixed languages used.", 0, java.lang.Integer.MAX_VALUE, communication));
         children.add(new Property("referralMethod", "CodeableConcept", "Ways that the service accepts referrals, if this is not provided then it is implied that no referral is required.", 0, java.lang.Integer.MAX_VALUE, referralMethod));
         children.add(new Property("appointmentRequired", "boolean", "Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service.", 0, 1, appointmentRequired));
         children.add(new Property("availableTime", "", "A collection of times that the Service Site is available.", 0, java.lang.Integer.MAX_VALUE, availableTime));
@@ -2333,15 +2582,15 @@ public class HealthcareService extends DomainResource {
         case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The location(s) where this healthcare service may be provided.", 0, java.lang.Integer.MAX_VALUE, location);
         case 3373707: /*name*/  return new Property("name", "string", "Further description of the service as it would be presented to a consumer while searching.", 0, 1, name);
         case 950398559: /*comment*/  return new Property("comment", "string", "Any additional description of the service and/or any specific issues not covered by the other attributes, which can be displayed as further detail under the serviceName.", 0, 1, comment);
-        case -1469168622: /*extraDetails*/  return new Property("extraDetails", "string", "Extra details about the service that can't be placed in the other fields.", 0, 1, extraDetails);
+        case -1469168622: /*extraDetails*/  return new Property("extraDetails", "markdown", "Extra details about the service that can't be placed in the other fields.", 0, 1, extraDetails);
         case 106642994: /*photo*/  return new Property("photo", "Attachment", "If there is a photo/symbol associated with this HealthcareService, it may be included here to facilitate quick identification of the service in a list.", 0, 1, photo);
         case -1429363305: /*telecom*/  return new Property("telecom", "ContactPoint", "List of contacts related to this specific healthcare service.", 0, java.lang.Integer.MAX_VALUE, telecom);
         case -1532328299: /*coverageArea*/  return new Property("coverageArea", "Reference(Location)", "The location(s) that this service is available to (not where the service is provided).", 0, java.lang.Integer.MAX_VALUE, coverageArea);
         case 1504575405: /*serviceProvisionCode*/  return new Property("serviceProvisionCode", "CodeableConcept", "The code(s) that detail the conditions under which the healthcare service is available/offered.", 0, java.lang.Integer.MAX_VALUE, serviceProvisionCode);
-        case -930847859: /*eligibility*/  return new Property("eligibility", "CodeableConcept", "Does this service have specific eligibility requirements that need to be met in order to use the service?", 0, 1, eligibility);
-        case 1635973407: /*eligibilityNote*/  return new Property("eligibilityNote", "string", "Describes the eligibility conditions for the service.", 0, 1, eligibilityNote);
-        case 1010379567: /*programName*/  return new Property("programName", "string", "Program Names that can be used to categorize the service.", 0, java.lang.Integer.MAX_VALUE, programName);
+        case -930847859: /*eligibility*/  return new Property("eligibility", "", "Does this service have specific eligibility requirements that need to be met in order to use the service?", 0, java.lang.Integer.MAX_VALUE, eligibility);
+        case -309387644: /*program*/  return new Property("program", "CodeableConcept", "Programs that this service is applicable to.", 0, java.lang.Integer.MAX_VALUE, program);
         case 366313883: /*characteristic*/  return new Property("characteristic", "CodeableConcept", "Collection of characteristics (attributes).", 0, java.lang.Integer.MAX_VALUE, characteristic);
+        case -1035284522: /*communication*/  return new Property("communication", "CodeableConcept", "Some services are specifically made available in multiple languages, this property permits a directory to declare the languages this is offered in. Typically this is only provided where a service operates in communities with mixed languages used.", 0, java.lang.Integer.MAX_VALUE, communication);
         case -2092740898: /*referralMethod*/  return new Property("referralMethod", "CodeableConcept", "Ways that the service accepts referrals, if this is not provided then it is implied that no referral is required.", 0, java.lang.Integer.MAX_VALUE, referralMethod);
         case 427220062: /*appointmentRequired*/  return new Property("appointmentRequired", "boolean", "Indicates whether or not a prospective consumer will require an appointment for a particular service at a site to be provided by the Organization. Indicates if an appointment is required for access to this service.", 0, 1, appointmentRequired);
         case 1873069366: /*availableTime*/  return new Property("availableTime", "", "A collection of times that the Service Site is available.", 0, java.lang.Integer.MAX_VALUE, availableTime);
@@ -2365,15 +2614,15 @@ public class HealthcareService extends DomainResource {
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : this.location.toArray(new Base[this.location.size()]); // Reference
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case 950398559: /*comment*/ return this.comment == null ? new Base[0] : new Base[] {this.comment}; // StringType
-        case -1469168622: /*extraDetails*/ return this.extraDetails == null ? new Base[0] : new Base[] {this.extraDetails}; // StringType
+        case -1469168622: /*extraDetails*/ return this.extraDetails == null ? new Base[0] : new Base[] {this.extraDetails}; // MarkdownType
         case 106642994: /*photo*/ return this.photo == null ? new Base[0] : new Base[] {this.photo}; // Attachment
         case -1429363305: /*telecom*/ return this.telecom == null ? new Base[0] : this.telecom.toArray(new Base[this.telecom.size()]); // ContactPoint
         case -1532328299: /*coverageArea*/ return this.coverageArea == null ? new Base[0] : this.coverageArea.toArray(new Base[this.coverageArea.size()]); // Reference
         case 1504575405: /*serviceProvisionCode*/ return this.serviceProvisionCode == null ? new Base[0] : this.serviceProvisionCode.toArray(new Base[this.serviceProvisionCode.size()]); // CodeableConcept
-        case -930847859: /*eligibility*/ return this.eligibility == null ? new Base[0] : new Base[] {this.eligibility}; // CodeableConcept
-        case 1635973407: /*eligibilityNote*/ return this.eligibilityNote == null ? new Base[0] : new Base[] {this.eligibilityNote}; // StringType
-        case 1010379567: /*programName*/ return this.programName == null ? new Base[0] : this.programName.toArray(new Base[this.programName.size()]); // StringType
+        case -930847859: /*eligibility*/ return this.eligibility == null ? new Base[0] : this.eligibility.toArray(new Base[this.eligibility.size()]); // HealthcareServiceEligibilityComponent
+        case -309387644: /*program*/ return this.program == null ? new Base[0] : this.program.toArray(new Base[this.program.size()]); // CodeableConcept
         case 366313883: /*characteristic*/ return this.characteristic == null ? new Base[0] : this.characteristic.toArray(new Base[this.characteristic.size()]); // CodeableConcept
+        case -1035284522: /*communication*/ return this.communication == null ? new Base[0] : this.communication.toArray(new Base[this.communication.size()]); // CodeableConcept
         case -2092740898: /*referralMethod*/ return this.referralMethod == null ? new Base[0] : this.referralMethod.toArray(new Base[this.referralMethod.size()]); // CodeableConcept
         case 427220062: /*appointmentRequired*/ return this.appointmentRequired == null ? new Base[0] : new Base[] {this.appointmentRequired}; // BooleanType
         case 1873069366: /*availableTime*/ return this.availableTime == null ? new Base[0] : this.availableTime.toArray(new Base[this.availableTime.size()]); // HealthcareServiceAvailableTimeComponent
@@ -2416,7 +2665,7 @@ public class HealthcareService extends DomainResource {
           this.comment = castToString(value); // StringType
           return value;
         case -1469168622: // extraDetails
-          this.extraDetails = castToString(value); // StringType
+          this.extraDetails = castToMarkdown(value); // MarkdownType
           return value;
         case 106642994: // photo
           this.photo = castToAttachment(value); // Attachment
@@ -2431,16 +2680,16 @@ public class HealthcareService extends DomainResource {
           this.getServiceProvisionCode().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -930847859: // eligibility
-          this.eligibility = castToCodeableConcept(value); // CodeableConcept
+          this.getEligibility().add((HealthcareServiceEligibilityComponent) value); // HealthcareServiceEligibilityComponent
           return value;
-        case 1635973407: // eligibilityNote
-          this.eligibilityNote = castToString(value); // StringType
-          return value;
-        case 1010379567: // programName
-          this.getProgramName().add(castToString(value)); // StringType
+        case -309387644: // program
+          this.getProgram().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 366313883: // characteristic
           this.getCharacteristic().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1035284522: // communication
+          this.getCommunication().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -2092740898: // referralMethod
           this.getReferralMethod().add(castToCodeableConcept(value)); // CodeableConcept
@@ -2486,7 +2735,7 @@ public class HealthcareService extends DomainResource {
         } else if (name.equals("comment")) {
           this.comment = castToString(value); // StringType
         } else if (name.equals("extraDetails")) {
-          this.extraDetails = castToString(value); // StringType
+          this.extraDetails = castToMarkdown(value); // MarkdownType
         } else if (name.equals("photo")) {
           this.photo = castToAttachment(value); // Attachment
         } else if (name.equals("telecom")) {
@@ -2496,13 +2745,13 @@ public class HealthcareService extends DomainResource {
         } else if (name.equals("serviceProvisionCode")) {
           this.getServiceProvisionCode().add(castToCodeableConcept(value));
         } else if (name.equals("eligibility")) {
-          this.eligibility = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("eligibilityNote")) {
-          this.eligibilityNote = castToString(value); // StringType
-        } else if (name.equals("programName")) {
-          this.getProgramName().add(castToString(value));
+          this.getEligibility().add((HealthcareServiceEligibilityComponent) value);
+        } else if (name.equals("program")) {
+          this.getProgram().add(castToCodeableConcept(value));
         } else if (name.equals("characteristic")) {
           this.getCharacteristic().add(castToCodeableConcept(value));
+        } else if (name.equals("communication")) {
+          this.getCommunication().add(castToCodeableConcept(value));
         } else if (name.equals("referralMethod")) {
           this.getReferralMethod().add(castToCodeableConcept(value));
         } else if (name.equals("appointmentRequired")) {
@@ -2537,10 +2786,10 @@ public class HealthcareService extends DomainResource {
         case -1429363305:  return addTelecom(); 
         case -1532328299:  return addCoverageArea(); 
         case 1504575405:  return addServiceProvisionCode(); 
-        case -930847859:  return getEligibility(); 
-        case 1635973407:  return getEligibilityNoteElement();
-        case 1010379567:  return addProgramNameElement();
+        case -930847859:  return addEligibility(); 
+        case -309387644:  return addProgram(); 
         case 366313883:  return addCharacteristic(); 
+        case -1035284522:  return addCommunication(); 
         case -2092740898:  return addReferralMethod(); 
         case 427220062:  return getAppointmentRequiredElement();
         case 1873069366:  return addAvailableTime(); 
@@ -2564,15 +2813,15 @@ public class HealthcareService extends DomainResource {
         case 1901043637: /*location*/ return new String[] {"Reference"};
         case 3373707: /*name*/ return new String[] {"string"};
         case 950398559: /*comment*/ return new String[] {"string"};
-        case -1469168622: /*extraDetails*/ return new String[] {"string"};
+        case -1469168622: /*extraDetails*/ return new String[] {"markdown"};
         case 106642994: /*photo*/ return new String[] {"Attachment"};
         case -1429363305: /*telecom*/ return new String[] {"ContactPoint"};
         case -1532328299: /*coverageArea*/ return new String[] {"Reference"};
         case 1504575405: /*serviceProvisionCode*/ return new String[] {"CodeableConcept"};
-        case -930847859: /*eligibility*/ return new String[] {"CodeableConcept"};
-        case 1635973407: /*eligibilityNote*/ return new String[] {"string"};
-        case 1010379567: /*programName*/ return new String[] {"string"};
+        case -930847859: /*eligibility*/ return new String[] {};
+        case -309387644: /*program*/ return new String[] {"CodeableConcept"};
         case 366313883: /*characteristic*/ return new String[] {"CodeableConcept"};
+        case -1035284522: /*communication*/ return new String[] {"CodeableConcept"};
         case -2092740898: /*referralMethod*/ return new String[] {"CodeableConcept"};
         case 427220062: /*appointmentRequired*/ return new String[] {"boolean"};
         case 1873069366: /*availableTime*/ return new String[] {};
@@ -2631,17 +2880,16 @@ public class HealthcareService extends DomainResource {
           return addServiceProvisionCode();
         }
         else if (name.equals("eligibility")) {
-          this.eligibility = new CodeableConcept();
-          return this.eligibility;
+          return addEligibility();
         }
-        else if (name.equals("eligibilityNote")) {
-          throw new FHIRException("Cannot call addChild on a primitive type HealthcareService.eligibilityNote");
-        }
-        else if (name.equals("programName")) {
-          throw new FHIRException("Cannot call addChild on a primitive type HealthcareService.programName");
+        else if (name.equals("program")) {
+          return addProgram();
         }
         else if (name.equals("characteristic")) {
           return addCharacteristic();
+        }
+        else if (name.equals("communication")) {
+          return addCommunication();
         }
         else if (name.equals("referralMethod")) {
           return addReferralMethod();
@@ -2719,17 +2967,25 @@ public class HealthcareService extends DomainResource {
           for (CodeableConcept i : serviceProvisionCode)
             dst.serviceProvisionCode.add(i.copy());
         };
-        dst.eligibility = eligibility == null ? null : eligibility.copy();
-        dst.eligibilityNote = eligibilityNote == null ? null : eligibilityNote.copy();
-        if (programName != null) {
-          dst.programName = new ArrayList<StringType>();
-          for (StringType i : programName)
-            dst.programName.add(i.copy());
+        if (eligibility != null) {
+          dst.eligibility = new ArrayList<HealthcareServiceEligibilityComponent>();
+          for (HealthcareServiceEligibilityComponent i : eligibility)
+            dst.eligibility.add(i.copy());
+        };
+        if (program != null) {
+          dst.program = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : program)
+            dst.program.add(i.copy());
         };
         if (characteristic != null) {
           dst.characteristic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : characteristic)
             dst.characteristic.add(i.copy());
+        };
+        if (communication != null) {
+          dst.communication = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : communication)
+            dst.communication.add(i.copy());
         };
         if (referralMethod != null) {
           dst.referralMethod = new ArrayList<CodeableConcept>();
@@ -2772,12 +3028,11 @@ public class HealthcareService extends DomainResource {
            && compareDeep(location, o.location, true) && compareDeep(name, o.name, true) && compareDeep(comment, o.comment, true)
            && compareDeep(extraDetails, o.extraDetails, true) && compareDeep(photo, o.photo, true) && compareDeep(telecom, o.telecom, true)
            && compareDeep(coverageArea, o.coverageArea, true) && compareDeep(serviceProvisionCode, o.serviceProvisionCode, true)
-           && compareDeep(eligibility, o.eligibility, true) && compareDeep(eligibilityNote, o.eligibilityNote, true)
-           && compareDeep(programName, o.programName, true) && compareDeep(characteristic, o.characteristic, true)
-           && compareDeep(referralMethod, o.referralMethod, true) && compareDeep(appointmentRequired, o.appointmentRequired, true)
-           && compareDeep(availableTime, o.availableTime, true) && compareDeep(notAvailable, o.notAvailable, true)
-           && compareDeep(availabilityExceptions, o.availabilityExceptions, true) && compareDeep(endpoint, o.endpoint, true)
-          ;
+           && compareDeep(eligibility, o.eligibility, true) && compareDeep(program, o.program, true) && compareDeep(characteristic, o.characteristic, true)
+           && compareDeep(communication, o.communication, true) && compareDeep(referralMethod, o.referralMethod, true)
+           && compareDeep(appointmentRequired, o.appointmentRequired, true) && compareDeep(availableTime, o.availableTime, true)
+           && compareDeep(notAvailable, o.notAvailable, true) && compareDeep(availabilityExceptions, o.availabilityExceptions, true)
+           && compareDeep(endpoint, o.endpoint, true);
       }
 
       @Override
@@ -2788,15 +3043,14 @@ public class HealthcareService extends DomainResource {
           return false;
         HealthcareService o = (HealthcareService) other_;
         return compareValues(active, o.active, true) && compareValues(name, o.name, true) && compareValues(comment, o.comment, true)
-           && compareValues(extraDetails, o.extraDetails, true) && compareValues(eligibilityNote, o.eligibilityNote, true)
-           && compareValues(programName, o.programName, true) && compareValues(appointmentRequired, o.appointmentRequired, true)
+           && compareValues(extraDetails, o.extraDetails, true) && compareValues(appointmentRequired, o.appointmentRequired, true)
            && compareValues(availabilityExceptions, o.availabilityExceptions, true);
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, active, providedBy
           , category, type, specialty, location, name, comment, extraDetails, photo, telecom
-          , coverageArea, serviceProvisionCode, eligibility, eligibilityNote, programName, characteristic
+          , coverageArea, serviceProvisionCode, eligibility, program, characteristic, communication
           , referralMethod, appointmentRequired, availableTime, notAvailable, availabilityExceptions
           , endpoint);
       }
@@ -2827,19 +3081,39 @@ public class HealthcareService extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
+   * Search parameter: <b>specialty</b>
+   * <p>
+   * Description: <b>The specialty of the service provided by this healthcare service</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>HealthcareService.specialty</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="specialty", path="HealthcareService.specialty", description="The specialty of the service provided by this healthcare service", type="token" )
+  public static final String SP_SPECIALTY = "specialty";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
+   * <p>
+   * Description: <b>The specialty of the service provided by this healthcare service</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>HealthcareService.specialty</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SPECIALTY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SPECIALTY);
+
+ /**
    * Search parameter: <b>endpoint</b>
    * <p>
-   * Description: <b>Technical endpoints providing access to services operated for the location</b><br>
+   * Description: <b>Technical endpoints providing access to electronic services operated for the healthcare service</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>HealthcareService.endpoint</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="endpoint", path="HealthcareService.endpoint", description="Technical endpoints providing access to services operated for the location", type="reference", target={Endpoint.class } )
+  @SearchParamDefinition(name="endpoint", path="HealthcareService.endpoint", description="Technical endpoints providing access to electronic services operated for the healthcare service", type="reference", target={Endpoint.class } )
   public static final String SP_ENDPOINT = "endpoint";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>endpoint</b>
    * <p>
-   * Description: <b>Technical endpoints providing access to services operated for the location</b><br>
+   * Description: <b>Technical endpoints providing access to electronic services operated for the healthcare service</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>HealthcareService.endpoint</b><br>
    * </p>
@@ -2851,6 +3125,72 @@ public class HealthcareService extends DomainResource {
    * the path value of "<b>HealthcareService:endpoint</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_ENDPOINT = new ca.uhn.fhir.model.api.Include("HealthcareService:endpoint").toLocked();
+
+ /**
+   * Search parameter: <b>service-category</b>
+   * <p>
+   * Description: <b>Service Category of the Healthcare Service</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>HealthcareService.category</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="service-category", path="HealthcareService.category", description="Service Category of the Healthcare Service", type="token" )
+  public static final String SP_SERVICE_CATEGORY = "service-category";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>service-category</b>
+   * <p>
+   * Description: <b>Service Category of the Healthcare Service</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>HealthcareService.category</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERVICE_CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERVICE_CATEGORY);
+
+ /**
+   * Search parameter: <b>coverage-area</b>
+   * <p>
+   * Description: <b>Location(s) service is intended for/available to</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>HealthcareService.coverageArea</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="coverage-area", path="HealthcareService.coverageArea", description="Location(s) service is intended for/available to", type="reference", target={Location.class } )
+  public static final String SP_COVERAGE_AREA = "coverage-area";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>coverage-area</b>
+   * <p>
+   * Description: <b>Location(s) service is intended for/available to</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>HealthcareService.coverageArea</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam COVERAGE_AREA = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_COVERAGE_AREA);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>HealthcareService:coverage-area</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_COVERAGE_AREA = new ca.uhn.fhir.model.api.Include("HealthcareService:coverage-area").toLocked();
+
+ /**
+   * Search parameter: <b>service-type</b>
+   * <p>
+   * Description: <b>The type of service provided by this healthcare service</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>HealthcareService.type</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="service-type", path="HealthcareService.type", description="The type of service provided by this healthcare service", type="token" )
+  public static final String SP_SERVICE_TYPE = "service-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>service-type</b>
+   * <p>
+   * Description: <b>The type of service provided by this healthcare service</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>HealthcareService.type</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERVICE_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERVICE_TYPE);
 
  /**
    * Search parameter: <b>organization</b>
@@ -2899,26 +3239,6 @@ public class HealthcareService extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.StringClientParam NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_NAME);
 
  /**
-   * Search parameter: <b>programname</b>
-   * <p>
-   * Description: <b>One of the Program Names serviced by this HealthcareService</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>HealthcareService.programName</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="programname", path="HealthcareService.programName", description="One of the Program Names serviced by this HealthcareService", type="string" )
-  public static final String SP_PROGRAMNAME = "programname";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>programname</b>
-   * <p>
-   * Description: <b>One of the Program Names serviced by this HealthcareService</b><br>
-   * Type: <b>string</b><br>
-   * Path: <b>HealthcareService.programName</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam PROGRAMNAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PROGRAMNAME);
-
- /**
    * Search parameter: <b>active</b>
    * <p>
    * Description: <b>The Healthcare Service is currently marked as active</b><br>
@@ -2965,44 +3285,24 @@ public class HealthcareService extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_LOCATION = new ca.uhn.fhir.model.api.Include("HealthcareService:location").toLocked();
 
  /**
-   * Search parameter: <b>category</b>
+   * Search parameter: <b>program</b>
    * <p>
-   * Description: <b>Service Category of the Healthcare Service</b><br>
+   * Description: <b>One of the Programs supported by this HealthcareService</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>HealthcareService.category</b><br>
+   * Path: <b>HealthcareService.program</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="category", path="HealthcareService.category", description="Service Category of the Healthcare Service", type="token" )
-  public static final String SP_CATEGORY = "category";
+  @SearchParamDefinition(name="program", path="HealthcareService.program", description="One of the Programs supported by this HealthcareService", type="token" )
+  public static final String SP_PROGRAM = "program";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>category</b>
+   * <b>Fluent Client</b> search parameter constant for <b>program</b>
    * <p>
-   * Description: <b>Service Category of the Healthcare Service</b><br>
+   * Description: <b>One of the Programs supported by this HealthcareService</b><br>
    * Type: <b>token</b><br>
-   * Path: <b>HealthcareService.category</b><br>
+   * Path: <b>HealthcareService.program</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CATEGORY);
-
- /**
-   * Search parameter: <b>type</b>
-   * <p>
-   * Description: <b>The type of service provided by this healthcare service</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>HealthcareService.type</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="type", path="HealthcareService.type", description="The type of service provided by this healthcare service", type="token" )
-  public static final String SP_TYPE = "type";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>type</b>
-   * <p>
-   * Description: <b>The type of service provided by this healthcare service</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>HealthcareService.type</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PROGRAM = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PROGRAM);
 
  /**
    * Search parameter: <b>characteristic</b>

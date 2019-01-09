@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -117,12 +119,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome create(final T theResource) {
-		return create(theResource, null, true, null);
+		return create(theResource, null, true, new Date(), null);
 	}
 
 	@Override
 	public DaoMethodOutcome create(final T theResource, RequestDetails theRequestDetails) {
-		return create(theResource, null, true, theRequestDetails);
+		return create(theResource, null, true, new Date(), theRequestDetails);
 	}
 
 	@Override
@@ -131,7 +133,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, RequestDetails theRequestDetails) {
+	public DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTimestamp, RequestDetails theRequestDetails) {
 		if (isNotBlank(theResource.getIdElement().getIdPart())) {
 			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 				String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getIdElement().getIdPart());
@@ -146,12 +148,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			theResource.setId(UUID.randomUUID().toString());
 		}
 
-		return doCreate(theResource, theIfNoneExist, thePerformIndexing, new Date(), theRequestDetails);
+		return doCreate(theResource, theIfNoneExist, thePerformIndexing, theUpdateTimestamp, theRequestDetails);
 	}
 
 	@Override
 	public DaoMethodOutcome create(final T theResource, String theIfNoneExist, RequestDetails theRequestDetails) {
-		return create(theResource, theIfNoneExist, true, theRequestDetails);
+		return create(theResource, theIfNoneExist, true, new Date(), theRequestDetails);
 	}
 
 	public IBaseOperationOutcome createErrorOperationOutcome(String theMessage, String theCode) {
@@ -377,7 +379,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			} else if (match.size() == 1) {
 				Long pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid);
-				return toMethodOutcome(entity, theResource).setCreated(false);
+				IBaseResource resource = toResource(entity, false);
+				theResource.setId(resource.getIdElement().getValue());
+				return toMethodOutcome(entity, resource).setCreated(false);
 			}
 		}
 
@@ -445,6 +449,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (!thePerformIndexing) {
 			incrementId(theResource, entity, theResource.getIdElement());
 		}
+
+		// Update the version/last updated in the resource so that interceptors get
+		// the correct version
+		updateResourceMetadata(entity, theResource);
 
 		// Notify JPA interceptors
 		if (!updatedEntity.isUnchangedInCurrentOperation()) {
@@ -1134,32 +1142,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	private DaoMethodOutcome toMethodOutcome(final BaseHasResource theEntity, IBaseResource theResource) {
+	private DaoMethodOutcome toMethodOutcome(@Nonnull final ResourceTable theEntity, @Nonnull IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
-		IIdType id = theEntity.getIdDt();
-		if (getContext().getVersion().getVersion().isRi()) {
-			id = getContext().getVersion().newIdType().setValue(id.getValue());
+		IIdType id = null;
+		if (theResource.getIdElement().getValue() != null) {
+			id = theResource.getIdElement();
+		}
+		if (id == null) {
+			id = theEntity.getIdDt();
+			if (getContext().getVersion().getVersion().isRi()) {
+				id = getContext().getVersion().newIdType().setValue(id.getValue());
+			}
 		}
 
 		outcome.setId(id);
 		outcome.setResource(theResource);
-		if (theResource != null) {
-			theResource.setId(id);
-			if (theResource instanceof IResource) {
-				ResourceMetadataKeyEnum.UPDATED.put((IResource) theResource, theEntity.getUpdated());
-			} else {
-				IBaseMetaType meta = theResource.getMeta();
-				meta.setLastUpdated(theEntity.getUpdatedDate());
-			}
-		}
+		outcome.setEntity(theEntity);
 		return outcome;
-	}
-
-	private DaoMethodOutcome toMethodOutcome(final ResourceTable theEntity, IBaseResource theResource) {
-		DaoMethodOutcome retVal = toMethodOutcome((BaseHasResource) theEntity, theResource);
-		retVal.setEntity(theEntity);
-		return retVal;
 	}
 
 	private ArrayList<TagDefinition> toTagList(IBaseMetaType theMeta) {
@@ -1247,7 +1247,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid);
 				resourceId = entity.getIdDt();
 			} else {
-				return create(theResource, null, thePerformIndexing, theRequestDetails);
+				return create(theResource, null, thePerformIndexing, new Date(), theRequestDetails);
 			}
 		} else {
 			/*
@@ -1295,6 +1295,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * directly. So we just bail now.
 		 */
 		if (!thePerformIndexing) {
+			theResource.setId(entity.getIdDt().getValue());
 			DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(false);
 			outcome.setPreviousResource(oldResource);
 			return outcome;

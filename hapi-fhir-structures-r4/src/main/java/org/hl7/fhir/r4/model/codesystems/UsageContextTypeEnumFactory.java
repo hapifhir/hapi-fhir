@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -55,6 +55,8 @@ public class UsageContextTypeEnumFactory implements EnumFactory<UsageContextType
       return UsageContextType.VENUE;
     if ("species".equals(codeString))
       return UsageContextType.SPECIES;
+    if ("program".equals(codeString))
+      return UsageContextType.PROGRAM;
     throw new IllegalArgumentException("Unknown UsageContextType code '"+codeString+"'");
   }
 
@@ -75,6 +77,8 @@ public class UsageContextTypeEnumFactory implements EnumFactory<UsageContextType
       return "venue";
     if (code == UsageContextType.SPECIES)
       return "species";
+    if (code == UsageContextType.PROGRAM)
+      return "program";
     return "?";
   }
 
