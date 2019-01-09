@@ -125,8 +125,8 @@ public class CanonicalSubscription implements Serializable {
 		}
 	}
 
-	public Map<String, String> getChannelExtensions() {
-		return Collections.unmodifiableMap(myChannelExtensions);
+	public String getChannelExtension(String url) {
+		return myChannelExtensions.get(url);
 	}
 
 	public void setChannelExtensions(Map<String, String> theChannelExtensions) {
