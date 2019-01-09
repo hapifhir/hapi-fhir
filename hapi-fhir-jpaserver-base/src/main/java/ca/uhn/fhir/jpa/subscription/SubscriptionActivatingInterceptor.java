@@ -30,7 +30,7 @@ import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCannonicalizer;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -87,7 +87,7 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private SubscriptionCannonicalizer mySubscriptionCannonicalizer;
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -220,7 +220,7 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 	}
 
 	public void validateCriteria(final IBaseResource theResource) {
-		CanonicalSubscription subscription = mySubscriptionCannonicalizer.canonicalize(theResource);
+		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theResource);
 		String criteria = subscription.getCriteriaString();
 		try {
 			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myFhirContext, criteria);

@@ -47,7 +47,7 @@ public class SubscriptionRegistry {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
 
 	@Autowired
-	SubscriptionCannonicalizer mySubscriptionCanonicalizer;
+	SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
 	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
 	@Autowired
