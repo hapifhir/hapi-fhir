@@ -38,9 +38,13 @@
 				by two new interceptors: SubscriptionActivatingInterceptor that is responsible for activating subscriptions
 				and SubscriptionMatchingInterceptor that is responsible for matching incoming resources against activated
 				subscriptions. Call DaoConfig.addSupportedSubscriptionType(type) to configure which subscription types
-				are supported in your environment. The helper method SubscriptionInterceptorLoader.registerInterceptors()
+				are supported in your environment.  If you are processing subscriptions on a separate server and only want
+				to activate subscriptions on this server, you should set DaoConfig.setSubscriptionMatchingEnabled to false.
+				The helper method SubscriptionInterceptorLoader.registerInterceptors()
 				will check if any subscription types are supported, and if so then load active subscriptions into the
-				SubscriptionRegistry and then register both the activating and matching interceptors.
+				SubscriptionRegistry and register the subscription activating interceptor.  This method also registers
+				the subscription matching interceptor (that matches incoming resources and sends matches to subscription
+				channels) only if DaoConfig.isSubscriptionMatchingEnabled is true.
 				See https://github.com/jamesagnew/hapi-fhir/wiki/Proposed-Subscription-Design-Change for more
 				details.
 			</action>
