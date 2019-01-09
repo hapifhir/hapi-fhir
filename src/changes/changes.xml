@@ -8,6 +8,11 @@
 	<body>
 		<release version="3.7.0" date="TBD" description="Gale">
 			<action type="add">
+				HAPI FHIR is now built using OpenJDK 11. Users are recommended to upgrade to this version
+				of Java if this is feasible. We are not yet dropping support for Java 8 (aka 1.8), although
+				we may do so in an upcoming release.
+			</action>
+			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
