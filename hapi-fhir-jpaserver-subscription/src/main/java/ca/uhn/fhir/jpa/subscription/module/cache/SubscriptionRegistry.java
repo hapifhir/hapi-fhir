@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
@@ -46,7 +47,7 @@ public class SubscriptionRegistry {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
 
 	@Autowired
-	SubscriptionCannonicalizer mySubscriptionCanonicalizer;
+	SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
 	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
 	@Autowired
@@ -117,8 +118,13 @@ public class SubscriptionRegistry {
 		} else {
 			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 		}
-		registerSubscription(theSubscription.getIdElement(), theSubscription);
-		return true;
+		if (Subscription.SubscriptionStatus.ACTIVE.equals(newSubscription.getStatus())) {
+			registerSubscription(theSubscription.getIdElement(), theSubscription);
+			return true;
+		} else {
+			return false;
+		}
+
 	}
 
 	public boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {

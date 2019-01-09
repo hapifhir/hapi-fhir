@@ -32,8 +32,7 @@ import org.hl7.fhir.r4.model.EventDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -63,6 +62,8 @@ public class CanonicalSubscription implements Serializable {
 	private EmailDetails myEmailDetails;
 	@JsonProperty("restHookDetails")
 	private RestHookDetails myRestHookDetails;
+	@JsonProperty("extensions")
+	private Map<String, String> myChannelExtensions;
 
 	/**
 	 * For now we're using the R4 TriggerDefinition, but this
@@ -105,7 +106,7 @@ public class CanonicalSubscription implements Serializable {
 	}
 
 	public List<String> getHeaders() {
-		return myHeaders;
+		return Collections.unmodifiableList(myHeaders);
 	}
 
 	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
@@ -121,6 +122,19 @@ public class CanonicalSubscription implements Serializable {
 		myHeaders = new ArrayList<>();
 		if (isNotBlank(theHeaders)) {
 			myHeaders.add(theHeaders);
+		}
+	}
+
+	public String getChannelExtension(String url) {
+		return myChannelExtensions.get(url);
+	}
+
+	public void setChannelExtensions(Map<String, String> theChannelExtensions) {
+		myChannelExtensions = new HashMap<>();
+		for (String url: theChannelExtensions.keySet()) {
+			if (isNotBlank(url) && isNotBlank(theChannelExtensions.get(url))) {
+				myChannelExtensions.put(url, theChannelExtensions.get(url));
+			}
 		}
 	}
 
