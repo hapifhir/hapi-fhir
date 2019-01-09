@@ -58,7 +58,13 @@ public class SubscriptionInterceptorLoader {
 		}
 		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
 			ourLog.info("Registering subscription matcher interceptor");
+
+			if (mySubscriptionMatcherInterceptor == null) {
+				mySubscriptionMatcherInterceptor = myAppicationContext.getBean(SubscriptionMatcherInterceptor.class);
+			}
+
 			myDaoConfig.registerInterceptor(mySubscriptionMatcherInterceptor);
+
 		}
 	}
 
@@ -71,9 +77,6 @@ public class SubscriptionInterceptorLoader {
 		// Once subscriptions have been loaded, now
 		if (mySubscriptionActivatingInterceptor == null) {
 			mySubscriptionActivatingInterceptor = myAppicationContext.getBean(SubscriptionActivatingInterceptor.class);
-		}
-		if (mySubscriptionMatcherInterceptor == null) {
-			mySubscriptionMatcherInterceptor = myAppicationContext.getBean(SubscriptionMatcherInterceptor.class);
 		}
 	}
 
