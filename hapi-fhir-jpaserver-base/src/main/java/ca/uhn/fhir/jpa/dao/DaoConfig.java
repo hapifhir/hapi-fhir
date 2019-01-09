@@ -1392,7 +1392,8 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If set to <code>false</code> (default is true) the server will not match incoming resources against active subscriptions.
+	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
+	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
 	 * @since 3.7.0
 	 */
 
@@ -1401,9 +1402,11 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If set to <code>false</code> (default is true) the server will not match incoming resources against active subscriptions.
+	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
+	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
 	 * @since 3.7.0
 	 */
+
 
 	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
 		mySubscriptionMatchingEnabled = theSubscriptionMatchingEnabled;
