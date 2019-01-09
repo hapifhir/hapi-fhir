@@ -37,7 +37,7 @@ public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscriba
 	}
 
 	@Test
-	public void testSubscriptionLoaderFhirClientRequestedDoesntMatch() throws Exception {
+	public void testSubscriptionLoaderFhirClientSubscriptionNotActive() throws Exception {
 		String payload = "application/fhir+json";
 
 		String criteria1 = "Observation?code=SNOMED-CT|" + myCode + "&_format=xml";
