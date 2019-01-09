@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum LinkageType {
 
         /**
-         * The record represents the "source of truth" (from the perspective of this Linkage resource) for the underlying event/condition/etc.
+         * The resource represents the "source of truth" (from the perspective of this Linkage resource) for the underlying event/condition/etc.
          */
         SOURCE, 
         /**
-         * The record represents the alternative view of the underlying event/condition/etc.  The record may still be actively maintained, even though it is not considered to be the source of truth.
+         * The resource represents an alternative view of the underlying event/condition/etc.  The resource may still be actively maintained, even though it is not considered to be the source of truth.
          */
         ALTERNATE, 
         /**
-         * The record represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.
+         * The resource represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.
          */
         HISTORICAL, 
         /**
@@ -76,17 +76,17 @@ public enum LinkageType {
         }
         public String getDefinition() {
           switch (this) {
-            case SOURCE: return "The record represents the \"source of truth\" (from the perspective of this Linkage resource) for the underlying event/condition/etc.";
-            case ALTERNATE: return "The record represents the alternative view of the underlying event/condition/etc.  The record may still be actively maintained, even though it is not considered to be the source of truth.";
-            case HISTORICAL: return "The record represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.";
+            case SOURCE: return "The resource represents the \"source of truth\" (from the perspective of this Linkage resource) for the underlying event/condition/etc.";
+            case ALTERNATE: return "The resource represents an alternative view of the underlying event/condition/etc.  The resource may still be actively maintained, even though it is not considered to be the source of truth.";
+            case HISTORICAL: return "The resource represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case SOURCE: return "Source of truth";
-            case ALTERNATE: return "Alternate record";
-            case HISTORICAL: return "Historical/obsolete record";
+            case SOURCE: return "Source of Truth";
+            case ALTERNATE: return "Alternate Record";
+            case HISTORICAL: return "Historical/Obsolete Record";
             default: return "?";
           }
     }

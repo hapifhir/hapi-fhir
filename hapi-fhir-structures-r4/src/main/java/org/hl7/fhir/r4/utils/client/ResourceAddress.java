@@ -214,10 +214,14 @@ public class ResourceAddress {
 			return res;
 	}
 	
-	public URI resolveMetadataUri(boolean quick) {
-		return baseServiceUri.resolve(quick ? "metadata?_summary=true" : "metadata");
-	}
-	
+  public URI resolveMetadataUri(boolean quick) {
+    return baseServiceUri.resolve(quick ? "metadata?_summary=true" : "metadata");
+  }
+  
+  public URI resolveMetadataTxCaps() {
+    return baseServiceUri.resolve("metadata?mode=terminology");
+  }
+  
 	/**
 	 * For now, assume this type of location header structure.
 	 * Generalize later: http://hl7connect.healthintersections.com.au/svc/fhir/318/_history/1

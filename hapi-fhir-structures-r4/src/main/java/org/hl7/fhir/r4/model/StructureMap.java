@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1069,10 +1069,10 @@ public class StructureMap extends MetadataResource {
     @Block()
     public static class StructureMapStructureComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The canonical URL that identifies the structure.
+         * The canonical reference to the structure.
          */
         @Child(name = "url", type = {CanonicalType.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Canonical URL for structure definition", formalDefinition="The canonical URL that identifies the structure." )
+        @Description(shortDefinition="Canonical reference to structure definition", formalDefinition="The canonical reference to the structure." )
         protected CanonicalType url;
 
         /**
@@ -1116,7 +1116,7 @@ public class StructureMap extends MetadataResource {
       }
 
         /**
-         * @return {@link #url} (The canonical URL that identifies the structure.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @return {@link #url} (The canonical reference to the structure.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
          */
         public CanonicalType getUrlElement() { 
           if (this.url == null)
@@ -1136,7 +1136,7 @@ public class StructureMap extends MetadataResource {
         }
 
         /**
-         * @param value {@link #url} (The canonical URL that identifies the structure.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
+         * @param value {@link #url} (The canonical reference to the structure.). This is the underlying object with id, value and extensions. The accessor "getUrl" gives direct access to the value
          */
         public StructureMapStructureComponent setUrlElement(CanonicalType value) { 
           this.url = value;
@@ -1144,14 +1144,14 @@ public class StructureMap extends MetadataResource {
         }
 
         /**
-         * @return The canonical URL that identifies the structure.
+         * @return The canonical reference to the structure.
          */
         public String getUrl() { 
           return this.url == null ? null : this.url.getValue();
         }
 
         /**
-         * @param value The canonical URL that identifies the structure.
+         * @param value The canonical reference to the structure.
          */
         public StructureMapStructureComponent setUrl(String value) { 
             if (this.url == null)
@@ -1305,7 +1305,7 @@ public class StructureMap extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("url", "canonical(StructureDefinition)", "The canonical URL that identifies the structure.", 0, 1, url));
+          children.add(new Property("url", "canonical(StructureDefinition)", "The canonical reference to the structure.", 0, 1, url));
           children.add(new Property("mode", "code", "How the referenced structure is used in this mapping.", 0, 1, mode));
           children.add(new Property("alias", "string", "The name used for this type in the map.", 0, 1, alias));
           children.add(new Property("documentation", "string", "Documentation that describes how the structure is used in the mapping.", 0, 1, documentation));
@@ -1314,7 +1314,7 @@ public class StructureMap extends MetadataResource {
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 116079: /*url*/  return new Property("url", "canonical(StructureDefinition)", "The canonical URL that identifies the structure.", 0, 1, url);
+          case 116079: /*url*/  return new Property("url", "canonical(StructureDefinition)", "The canonical reference to the structure.", 0, 1, url);
           case 3357091: /*mode*/  return new Property("mode", "code", "How the referenced structure is used in this mapping.", 0, 1, mode);
           case 92902992: /*alias*/  return new Property("alias", "string", "The name used for this type in the map.", 0, 1, alias);
           case 1587405498: /*documentation*/  return new Property("documentation", "string", "Documentation that describes how the structure is used in the mapping.", 0, 1, documentation);
@@ -3952,18 +3952,6 @@ public class StructureMap extends MetadataResource {
           this.defaultValue = new Timing();
           return this.defaultValue;
         }
-        else if (name.equals("defaultValueParameterDefinition")) {
-          this.defaultValue = new ParameterDefinition();
-          return this.defaultValue;
-        }
-        else if (name.equals("defaultValueDataRequirement")) {
-          this.defaultValue = new DataRequirement();
-          return this.defaultValue;
-        }
-        else if (name.equals("defaultValueRelatedArtifact")) {
-          this.defaultValue = new RelatedArtifact();
-          return this.defaultValue;
-        }
         else if (name.equals("defaultValueContactDetail")) {
           this.defaultValue = new ContactDetail();
           return this.defaultValue;
@@ -3972,12 +3960,24 @@ public class StructureMap extends MetadataResource {
           this.defaultValue = new Contributor();
           return this.defaultValue;
         }
-        else if (name.equals("defaultValueTriggerDefinition")) {
-          this.defaultValue = new TriggerDefinition();
+        else if (name.equals("defaultValueDataRequirement")) {
+          this.defaultValue = new DataRequirement();
           return this.defaultValue;
         }
         else if (name.equals("defaultValueExpression")) {
           this.defaultValue = new Expression();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueParameterDefinition")) {
+          this.defaultValue = new ParameterDefinition();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueRelatedArtifact")) {
+          this.defaultValue = new RelatedArtifact();
+          return this.defaultValue;
+        }
+        else if (name.equals("defaultValueTriggerDefinition")) {
+          this.defaultValue = new TriggerDefinition();
           return this.defaultValue;
         }
         else if (name.equals("defaultValueUsageContext")) {
@@ -4822,7 +4822,7 @@ public class StructureMap extends MetadataResource {
          */
         public IdType getValueIdType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new IdType();
           if (!(this.value instanceof IdType))
             throw new FHIRException("Type mismatch: the type IdType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IdType) this.value;
@@ -4837,7 +4837,7 @@ public class StructureMap extends MetadataResource {
          */
         public StringType getValueStringType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new StringType();
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
@@ -4852,7 +4852,7 @@ public class StructureMap extends MetadataResource {
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new BooleanType();
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
@@ -4867,7 +4867,7 @@ public class StructureMap extends MetadataResource {
          */
         public IntegerType getValueIntegerType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new IntegerType();
           if (!(this.value instanceof IntegerType))
             throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IntegerType) this.value;
@@ -4882,7 +4882,7 @@ public class StructureMap extends MetadataResource {
          */
         public DecimalType getValueDecimalType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new DecimalType();
           if (!(this.value instanceof DecimalType))
             throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DecimalType) this.value;
@@ -5905,7 +5905,7 @@ public class StructureMap extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate structure map instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate structure map instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -6288,7 +6288,7 @@ public class StructureMap extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the structure map.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the structure map from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate structure map instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate structure map instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the structure map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this structure map is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map.", 0, 1, copyright));
@@ -6311,7 +6311,7 @@ public class StructureMap extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the structure map.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the structure map from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate structure map instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate structure map instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the structure map is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this structure map is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the structure map and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the structure map.", 0, 1, copyright);

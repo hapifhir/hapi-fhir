@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -85,6 +85,14 @@ public enum ClaimInformationcategory {
          */
         EMPLOYMENTIMPACTED, 
         /**
+         * The external cause of an illness or injury.
+         */
+        EXTERNALCAUSE, 
+        /**
+         * The reason for the patient visit.
+         */
+        PATIENTREASONFORVISIT, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -115,6 +123,10 @@ public enum ClaimInformationcategory {
           return HOSPITALIZED;
         if ("employmentimpacted".equals(codeString))
           return EMPLOYMENTIMPACTED;
+        if ("externalcause".equals(codeString))
+          return EXTERNALCAUSE;
+        if ("patientreasonforvisit".equals(codeString))
+          return PATIENTREASONFORVISIT;
         throw new FHIRException("Unknown ClaimInformationcategory code '"+codeString+"'");
         }
         public String toCode() {
@@ -131,6 +143,8 @@ public enum ClaimInformationcategory {
             case OTHER: return "other";
             case HOSPITALIZED: return "hospitalized";
             case EMPLOYMENTIMPACTED: return "employmentimpacted";
+            case EXTERNALCAUSE: return "externalcause";
+            case PATIENTREASONFORVISIT: return "patientreasonforvisit";
             default: return "?";
           }
         }
@@ -151,6 +165,8 @@ public enum ClaimInformationcategory {
             case OTHER: return "Other information identified by the type.system.";
             case HOSPITALIZED: return "An indication that the patient was hospitalized, the period if known otherwise a Yes/No (boolean).";
             case EMPLOYMENTIMPACTED: return "An indication that the patient was unable to work, the period if known otherwise a Yes/No (boolean).";
+            case EXTERNALCAUSE: return "The external cause of an illness or injury.";
+            case PATIENTREASONFORVISIT: return "The reason for the patient visit.";
             default: return "?";
           }
         }
@@ -168,6 +184,8 @@ public enum ClaimInformationcategory {
             case OTHER: return "Other";
             case HOSPITALIZED: return "Hospitalized";
             case EMPLOYMENTIMPACTED: return "EmploymentImpacted";
+            case EXTERNALCAUSE: return "External Caause";
+            case PATIENTREASONFORVISIT: return "Patient Reason for Visit";
             default: return "?";
           }
     }

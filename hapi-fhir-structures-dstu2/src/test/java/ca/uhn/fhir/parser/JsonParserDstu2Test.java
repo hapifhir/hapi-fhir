@@ -2085,6 +2085,19 @@ public class JsonParserDstu2Test {
 		Assert.assertThat(message, containsString("contained"));
 	}
 
+
+	@Test
+	public void testParseQuestionnaireResponseAnswerWithValueReference() {
+		String response = "{\"resourceType\":\"QuestionnaireResponse\",\"group\":{\"question\":[{\"answer\": [{\"valueReference\": {\"reference\": \"Observation/testid\"}}]}]}}";
+		QuestionnaireResponse r = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, response);
+
+		QuestionnaireResponse.GroupQuestionAnswer answer = r.getGroup().getQuestion().get(0).getAnswer().get(0);
+		assertNotNull(answer);
+		assertNotNull(answer.getValue());
+		assertEquals("Observation/testid", ((ResourceReferenceDt)answer.getValue()).getReference().getValue());
+	}
+
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

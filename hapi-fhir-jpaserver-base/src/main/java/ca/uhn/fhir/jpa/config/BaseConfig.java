@@ -8,9 +8,12 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
-import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
-import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
-import ca.uhn.fhir.jpa.subscription.websocket.SubscriptionWebsocketInterceptor;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +37,7 @@ import javax.annotation.Nonnull;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +59,8 @@ import javax.annotation.Nonnull;
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 @ComponentScan(basePackages = "ca.uhn.fhir.jpa", excludeFilters={
 		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=BaseConfig.class),
-		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=WebSocketConfigurer.class)})
+		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=WebSocketConfigurer.class),
+			@ComponentScan.Filter(type=FilterType.REGEX, pattern="ca.uhn.fhir.jpa.subscription.module.standalone.*")})
 
 public abstract class BaseConfig implements SchedulingConfigurer {
 
@@ -88,7 +92,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	public abstract FhirContext fhirContext();
 
-	@Bean()
+	@Bean
 	public ScheduledExecutorFactoryBean scheduledExecutorService() {
 		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
 		b.setPoolSize(5);
@@ -102,7 +106,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		return new SubscriptionTriggeringProvider();
 	}
 
-	@Bean()
+	@Bean
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
 		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
@@ -128,32 +132,33 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		return new StaleSearchDeletingSvcImpl();
 	}
 
+	@Bean
+	public InMemorySubscriptionMatcher inMemorySubscriptionMatcher() {
+		return new InMemorySubscriptionMatcher();
+	}
+
+	@Bean
+	public DaoSubscriptionMatcher daoSubscriptionMatcher() {
+		return new DaoSubscriptionMatcher();
+	}
+
 	/**
-	 * Note: If you're going to use this, you need to provide a bean
-	 * of type {@link ca.uhn.fhir.jpa.subscription.email.IEmailSender}
-	 * in your own Spring config
+	 * Create a @Primary @Bean if you need a different implementation
 	 */
 	@Bean
-	@Lazy
-	public SubscriptionEmailInterceptor subscriptionEmailInterceptor() {
-		return new SubscriptionEmailInterceptor();
+	public ISubscribableChannelFactory linkedBlockingQueueSubscribableChannelFactory() {
+		return new LinkedBlockingQueueSubscribableChannelFactory();
 	}
 
 	@Bean
-	@Lazy
-	public SubscriptionRestHookInterceptor subscriptionRestHookInterceptor() {
-		return new SubscriptionRestHookInterceptor();
-	}
-
-	@Bean
-	@Lazy
-	public SubscriptionWebsocketInterceptor subscriptionWebsocketInterceptor() {
-		return new SubscriptionWebsocketInterceptor();
+	@Primary
+	public ISubscriptionMatcher subscriptionMatcherCompositeInMemoryDatabase() {
+		return new CompositeInMemoryDaoSubscriptionMatcher(daoSubscriptionMatcher(), inMemorySubscriptionMatcher());
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));
-		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.entity");
+		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
 		theFactory.setPersistenceProvider(new HibernatePersistenceProvider());
 	}
 

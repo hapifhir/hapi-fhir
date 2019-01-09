@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,16 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.MatchUrlService;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -70,35 +73,40 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc, ApplicationContextAware {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringProvider.class);
 
 	public static final int DEFAULT_MAX_SUBMIT = 10000;
-	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringProvider.class);
-	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
+
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-	private List<BaseSubscriptionInterceptor<?>> mySubscriptionInterceptorList;
-	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
+	@Autowired
+	private DaoConfig myDaoConfig;
 	@Autowired
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+
+	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
+	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
 	private ApplicationContext myAppCtx;
 	private ExecutorService myExecutorService;
 
 	@Override
 	public IBaseParameters triggerSubscription(List<UriParam> theResourceIds, List<StringParam> theSearchUrls, @IdParam IIdType theSubscriptionId) {
-		if (mySubscriptionInterceptorList.isEmpty()) {
+		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
 			throw new PreconditionFailedException("Subscription processing not active on this server");
 		}
 
 		// Throw a 404 if the subscription doesn't exist
 		if (theSubscriptionId != null) {
-			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 			IIdType subscriptionId = theSubscriptionId;
 			if (subscriptionId.hasResourceType() == false) {
-				subscriptionId = subscriptionId.withResourceType("Subscription");
+				subscriptionId = subscriptionId.withResourceType(ResourceTypeEnum.SUBSCRIPTION.getCode());
 			}
 			subscriptionDao.read(subscriptionId);
 		}
@@ -292,18 +300,13 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		ourLog.info("Submitting resource {} to subscription {}", theResourceToTrigger.getIdElement().toUnqualifiedVersionless().getValue(), theSubscriptionId);
 
-		ResourceModifiedMessage msg = new ResourceModifiedMessage();
-		msg.setId(theResourceToTrigger.getIdElement());
-		msg.setOperationType(ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theResourceToTrigger, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 		msg.setSubscriptionId(new IdType(theSubscriptionId).toUnqualifiedVersionless().getValue());
-		msg.setNewPayload(myFhirContext, theResourceToTrigger);
 
 		return myExecutorService.submit(() -> {
 			for (int i = 0; ; i++) {
 				try {
-					for (BaseSubscriptionInterceptor<?> next : mySubscriptionInterceptorList) {
-						next.submitResourceModified(msg);
-					}
+						mySubscriptionMatcherInterceptor.submitResourceModified(msg);
 					break;
 				} catch (Exception e) {
 					if (i >= 3) {
@@ -346,13 +349,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void start() {
-		mySubscriptionInterceptorList = ObjectUtils.defaultIfNull(mySubscriptionInterceptorList, Collections.emptyList());
-		mySubscriptionInterceptorList = new ArrayList<>();
-		Collection values1 = myAppCtx.getBeansOfType(BaseSubscriptionInterceptor.class).values();
-		Collection<BaseSubscriptionInterceptor<?>> values = (Collection<BaseSubscriptionInterceptor<?>>) values1;
-		mySubscriptionInterceptorList.addAll(values);
-
-
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern("SubscriptionTriggering-%d")
@@ -367,6 +363,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				try {
 					executorQueue.put(theRunnable);
 				} catch (InterruptedException theE) {
+					// Restore interrupted state...
+					Thread.currentThread().interrupt();
 					throw new RejectedExecutionException("Task " + theRunnable.toString() +
 						" rejected from " + theE.toString());
 				}

@@ -5,13 +5,11 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.hl7.fhir.r4.context.IWorkerContext;
-import org.hl7.fhir.r4.elementmodel.Element;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionConstraintComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
-import org.hl7.fhir.r4.validation.InstanceValidator.NodeStack;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
@@ -42,6 +40,7 @@ public class ProfileValidator extends BaseValidator {
     this.checkMustSupport = checkMustSupport;
   }
 
+  @Override
   protected boolean rule(List<ValidationMessage> errors, IssueType type, String path, boolean b, String msg) {
     String rn = path.contains(".") ? path.substring(0, path.indexOf(".")) : path;
     return super.rule(errors, type, path, b, msg, "<a href=\""+(rn.toLowerCase())+".html\">"+rn+"</a>: "+Utilities.escapeXml(msg));
@@ -50,7 +49,11 @@ public class ProfileValidator extends BaseValidator {
   public List<ValidationMessage> validate(StructureDefinition profile, boolean forBuild) {
     List<ValidationMessage> errors = new ArrayList<ValidationMessage>();
     
-    // first check: extensions must exist
+    // must have a FHIR version- GF#3160
+    warning(errors, IssueType.BUSINESSRULE, profile.getUrl(), profile.hasFhirVersion(), "Profiles SHOULD state the FHIR Version on which they are based");
+    warning(errors, IssueType.BUSINESSRULE, profile.getUrl(), profile.hasVersion(), "Profiles SHOULD state their own version");
+    
+    // extensions must be defined
     for (ElementDefinition ec : profile.getDifferential().getElement())
       checkExtensions(profile, errors, "differential", ec);
     rule(errors, IssueType.STRUCTURE, profile.getId(), profile.hasSnapshot(), "missing Snapshot at "+profile.getName()+"."+profile.getName());

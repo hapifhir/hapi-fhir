@@ -4,7 +4,7 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
  * #%L
  * hapi-fhir-spring-boot-autoconfigure
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,15 @@ package ca.uhn.fhir.spring.boot.autoconfigure;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
+import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
+import ca.uhn.fhir.model.dstu2.resource.AuditEvent;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -44,6 +47,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import okhttp3.OkHttpClient;
 import org.apache.http.client.HttpClient;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.*;
@@ -67,6 +71,7 @@ import org.springframework.util.CollectionUtils;
 import javax.servlet.ServletException;
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for HAPI FHIR.
@@ -162,26 +167,11 @@ public class FhirAutoConfiguration {
 	@ConditionalOnBean(DataSource.class)
 	@EnableConfigurationProperties(FhirProperties.class)
 	static class FhirJpaServerConfiguration {
-
-		@Bean
-		@ConditionalOnMissingBean
-		public ScheduledExecutorFactoryBean scheduledExecutorService() {
-			ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
-			b.setPoolSize(5);
-			return b;
-		}
-
-		@Bean(name="hapiJpaTaskExecutor")
-		public AsyncTaskExecutor taskScheduler() {
-			ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler();
-			retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
-			retVal.setScheduledExecutor(scheduledExecutorService().getObject());
-			return retVal;
-		}
+		@Autowired
+		private ScheduledExecutorService myScheduledExecutorService;
 
 		@Configuration
-		@EntityScan("ca.uhn.fhir.jpa.entity")
-		@EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
+		@EntityScan(basePackages = {"ca.uhn.fhir.jpa.entity", "ca.uhn.fhir.jpa.model.entity"})
 		static class FhirJpaDaoConfiguration {
 
 			@Bean
@@ -192,6 +182,12 @@ public class FhirAutoConfiguration {
 				return fhirDaoConfig;
 			}
 
+			@Bean
+			@ConditionalOnMissingBean
+			@ConfigurationProperties("hapi.fhir.jpa")
+			public ModelConfig fhirModelConfig() {
+				return fhirDaoConfig().getModelConfig();
+			}
 		}
 
 		@Configuration

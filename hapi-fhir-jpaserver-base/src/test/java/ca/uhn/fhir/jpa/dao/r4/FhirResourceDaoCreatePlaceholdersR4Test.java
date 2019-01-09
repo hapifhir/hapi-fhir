@@ -1,57 +1,26 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.TagTypeEnum;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
-import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
-import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
-import org.hl7.fhir.r4.model.Quantity.QuantityComparator;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.hl7.fhir.r4.model.Task;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Test;
 
-import java.util.*;
+import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
 
-@SuppressWarnings({ "unchecked", "deprecation" })
+@SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoCreatePlaceholdersR4Test.class);
@@ -59,6 +28,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	@After
 	public final void afterResetDao() {
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
+		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 	}
 
 	@Test
@@ -131,7 +101,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testUpdateWithBadReferenceIsPermitted() {
+	public void testUpdateWithBadReferenceIsPermittedAlphanumeric() {
 		assertFalse(myDaoConfig.isAutoCreatePlaceholderReferenceTargets());
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
 
@@ -139,11 +109,49 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		o.setStatus(ObservationStatus.FINAL);
 		IIdType id = myObservationDao.create(o, mySrd).getId();
 
+		try {
+			myPatientDao.read(new IdType("Patient/FOO"));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+
 		o = new Observation();
 		o.setId(id);
 		o.setStatus(ObservationStatus.FINAL);
 		o.getSubject().setReference("Patient/FOO");
 		myObservationDao.update(o, mySrd);
+
+		myPatientDao.read(new IdType("Patient/FOO"));
+
+	}
+
+	@Test
+	public void testUpdateWithBadReferenceIsPermittedNumeric() {
+		assertFalse(myDaoConfig.isAutoCreatePlaceholderReferenceTargets());
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+
+		Observation o = new Observation();
+		o.setStatus(ObservationStatus.FINAL);
+		IIdType id = myObservationDao.create(o, mySrd).getId();
+
+		try {
+			myPatientDao.read(new IdType("Patient/999999999999999"));
+			fail();
+		} catch (ResourceNotFoundException e) {
+			// good
+		}
+
+		o = new Observation();
+		o.setId(id);
+		o.setStatus(ObservationStatus.FINAL);
+		o.getSubject().setReference("Patient/999999999999999");
+		myObservationDao.update(o, mySrd);
+
+
+		myPatientDao.read(new IdType("Patient/999999999999999"));
+
 	}
 
 	@AfterClass

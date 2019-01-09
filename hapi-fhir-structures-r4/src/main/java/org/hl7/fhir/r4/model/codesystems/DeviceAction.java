@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum DeviceAction {
          */
         EXPLANTED, 
         /**
-         * The device remains in that patient, but its location, settings, or functionality was changed.
+         * The device remains in the patient, but its location, settings, or functionality was changed.
          */
         MANIPULATED, 
         /**
@@ -78,7 +78,7 @@ public enum DeviceAction {
           switch (this) {
             case IMPLANTED: return "The device was implanted in the patient during the procedure.";
             case EXPLANTED: return "The device was explanted from the patient during the procedure.";
-            case MANIPULATED: return "The device remains in that patient, but its location, settings, or functionality was changed.";
+            case MANIPULATED: return "The device remains in the patient, but its location, settings, or functionality was changed.";
             default: return "?";
           }
         }

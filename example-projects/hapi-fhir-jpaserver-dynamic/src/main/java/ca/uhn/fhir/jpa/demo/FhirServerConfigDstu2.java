@@ -57,7 +57,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
 	@SuppressWarnings("deprecation")
-	@Bean()
+	@Bean
 	public DaoConfig daoConfig() {
 	return FhirServerConfigCommon.getDaoConfig();
 	}
@@ -74,7 +74,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		return FhirServerConfigCommon.getEntityManagerFactory(env, dataSource(), fhirContextDstu2());
 	}
@@ -103,7 +103,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 		return interceptor;
 	}
 
-	@Bean()
+	@Bean
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		return FhirServerConfigCommon.getTransactionManager(entityManagerFactory);
 	}

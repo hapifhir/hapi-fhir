@@ -15,7 +15,7 @@ import org.junit.*;
 import org.mockito.ArgumentCaptor;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -306,6 +306,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		assertEquals("1", outcome.getId().getVersionIdPart());
 
+		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
 		Date now = new Date();
 		Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
 		InstantType updated = retrieved.getMeta().getLastUpdatedElement().copy();

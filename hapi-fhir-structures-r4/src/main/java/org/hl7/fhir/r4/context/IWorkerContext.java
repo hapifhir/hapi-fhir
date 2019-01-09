@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander.TerminologyServiceErrorCla
 import org.hl7.fhir.r4.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.r4.utils.INarrativeGenerator;
 import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
@@ -263,6 +264,7 @@ public interface IWorkerContext {
     private IssueSeverity severity;
     private String message;
     private TerminologyServiceErrorClass errorClass;
+    private String txLink;
     
     public ValidationResult(IssueSeverity severity, String message) {
       this.severity = severity;
@@ -322,6 +324,15 @@ public interface IWorkerContext {
 
     public ValidationResult setMessage(String message) {
       this.message = message;
+      return this;
+    }
+
+    public String getTxLink() {
+      return txLink;
+    }
+
+    public ValidationResult setTxLink(String txLink) {
+      this.txLink = txLink;
       return this;
     }
     
@@ -414,4 +425,6 @@ public interface IWorkerContext {
   public void setOverrideVersionNs(String value);
 
   public StructureDefinition fetchTypeDefinition(String typeName);
+
+  public void setUcumService(UcumService ucumService);
 }

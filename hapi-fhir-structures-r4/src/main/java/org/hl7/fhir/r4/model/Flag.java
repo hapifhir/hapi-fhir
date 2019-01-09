@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -50,15 +50,15 @@ public class Flag extends DomainResource {
 
     public enum FlagStatus {
         /**
-         * A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag.
+         * A current flag that should be displayed to a user. A system may use the category to determine which user roles should view the flag.
          */
         ACTIVE, 
         /**
-         * The flag does not need to be displayed any more.
+         * The flag no longer needs to be displayed.
          */
         INACTIVE, 
         /**
-         * The flag was added in error, and should no longer be displayed.
+         * The flag was added in error and should no longer be displayed.
          */
         ENTEREDINERROR, 
         /**
@@ -97,9 +97,9 @@ public class Flag extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag.";
-            case INACTIVE: return "The flag does not need to be displayed any more.";
-            case ENTEREDINERROR: return "The flag was added in error, and should no longer be displayed.";
+            case ACTIVE: return "A current flag that should be displayed to a user. A system may use the category to determine which user roles should view the flag.";
+            case INACTIVE: return "The flag no longer needs to be displayed.";
+            case ENTEREDINERROR: return "The flag was added in error and should no longer be displayed.";
             default: return "?";
           }
         }
@@ -221,7 +221,7 @@ public class Flag extends DomainResource {
     /**
      * The person, organization or device that created the flag.
      */
-    @Child(name = "author", type = {Device.class, Organization.class, Patient.class, Practitioner.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Flag creator", formalDefinition="The person, organization or device that created the flag." )
     protected Reference author;
 
@@ -579,7 +579,7 @@ public class Flag extends DomainResource {
         children.add(new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.", 0, 1, subject));
         children.add(new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, 1, period));
         children.add(new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, 1, encounter));
-        children.add(new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, 1, author));
+        children.add(new Property("author", "Reference(Device|Organization|Patient|Practitioner|PractitionerRole)", "The person, organization or device that created the flag.", 0, 1, author));
       }
 
       @Override
@@ -592,7 +592,7 @@ public class Flag extends DomainResource {
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Location|Group|Organization|Practitioner|PlanDefinition|Medication|Procedure)", "The patient, location, group, organization, or practitioner etc. this is about record this flag is associated with.", 0, 1, subject);
         case -991726143: /*period*/  return new Property("period", "Period", "The period of time from the activation of the flag to inactivation of the flag. If the flag is active, the end of the period should be unspecified.", 0, 1, period);
         case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "This alert is only relevant during the encounter.", 0, 1, encounter);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Device|Organization|Patient|Practitioner)", "The person, organization or device that created the flag.", 0, 1, author);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Device|Organization|Patient|Practitioner|PractitionerRole)", "The person, organization or device that created the flag.", 0, 1, author);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -901,7 +901,7 @@ public class Flag extends DomainResource {
    * Path: <b>Flag.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Patient.class, Practitioner.class } )
+  @SearchParamDefinition(name="author", path="Flag.author", description="Flag creator", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Organization.class, Patient.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

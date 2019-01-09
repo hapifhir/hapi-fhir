@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import ca.uhn.fhir.jpa.subscription.module.subscriber.email.EmailDetails;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
@@ -15,7 +17,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class JavaMailEmailSenderTest {
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1687,6 +1687,9 @@ public class XmlUtil {
 		XMLInputFactory inputFactory;
 		try {
 			inputFactory = XMLInputFactory.newInstance();
+			if (inputFactory.isPropertySupported(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)) {
+				inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
+			}
 			throwUnitTestExceptionIfConfiguredToDoSo();
 		} catch (Throwable e) {
 			throw new ConfigurationException("Unable to initialize StAX - XML processing is disabled", e);

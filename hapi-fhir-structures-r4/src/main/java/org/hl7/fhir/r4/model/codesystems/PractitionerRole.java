@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -41,7 +41,7 @@ public enum PractitionerRole {
          */
         DOCTOR, 
         /**
-         * A practitoner with nursing experience that may be qualified/registered
+         * A practitioner with nursing experience that may be qualified/registered
          */
         NURSE, 
         /**
@@ -98,7 +98,7 @@ public enum PractitionerRole {
         public String getDefinition() {
           switch (this) {
             case DOCTOR: return "A qualified/registered medical practitioner";
-            case NURSE: return "A practitoner with nursing experience that may be qualified/registered";
+            case NURSE: return "A practitioner with nursing experience that may be qualified/registered";
             case PHARMACIST: return "A qualified/registered/licensed pharmacist";
             case RESEARCHER: return "A practitioner that may perform research";
             case TEACHER: return "Someone who is able to provide educational services";

@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -85,7 +86,7 @@ import com.google.common.collect.Lists;
 
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.JpaConstants;
@@ -402,6 +403,38 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(50, found.getEntry().size());
 
 	}
+
+	@Test
+	public void testCreateConditionalWithPreferRepresentation() {
+		Patient p = new Patient();
+		p.setActive(false);
+		p.addIdentifier().setSystem("foo").setValue("bar");
+		IIdType id = ourClient.create().resource(p).execute().getId();
+
+		p = new Patient();
+		p.setId(id);
+		p.setActive(true);
+		p.addIdentifier().setSystem("foo").setValue("bar");
+		ourClient.update().resource(p).execute().getId();
+
+		// Now conditional create
+		p = new Patient();
+		p.setActive(true);
+		p.setBirthDateElement(new DateType("2011-01-01"));
+		p.addIdentifier().setSystem("foo").setValue("bar");
+		MethodOutcome outcome = ourClient
+			.create()
+			.resource(p)
+			.conditionalByUrl("Patient?identifier=foo|bar")
+			.prefer(PreferReturnEnum.REPRESENTATION)
+			.execute();
+
+		assertEquals(id.getIdPart(), outcome.getId().getIdPart());
+		assertEquals("2", outcome.getId().getVersionIdPart());
+		p = (Patient) outcome.getResource();
+		assertNull(p.getBirthDate());
+	}
+
 
 	/**
 	 * See #438
@@ -1801,7 +1834,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		obs1.getCode().setText("Systolic Blood Pressure");
 		obs1.setStatus(ObservationStatus.FINAL);
 		obs1.setValue(new Quantity(123));
-		obs1.setComment("obs1");
 		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs2 = new Observation();
@@ -2770,6 +2802,105 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Patient actual = ourClient.read(Patient.class, newId.getIdPart());
 		assertThat(actual.getText().getDiv().getValueAsString(), containsString("<td>Identifier</td><td>testSearchByResourceChain01</td>"));
+	}
+
+	@Test
+	public void testTerminologyWithCompleteCs_Expand() throws Exception {
+
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://cs");
+		CodeSystem.ConceptDefinitionComponent a = cs.addConcept()
+			.setCode("A");
+		a.addConcept().setCode("A1");
+		a.addConcept().setCode("A2");
+		CodeSystem.ConceptDefinitionComponent b = cs.addConcept()
+			.setCode("B");
+		b.addConcept().setCode("B1");
+		b.addConcept().setCode("B2");
+		ourClient.create().resource(cs).execute();
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://cs")
+			.addFilter()
+			.setProperty("concept")
+			.setOp(ValueSet.FilterOperator.ISA)
+			.setValue("A");
+		IIdType vsid = ourClient.create().resource(vs).execute().getId().toUnqualifiedVersionless();
+
+		HttpGet read = new HttpGet(ourServerBase + "/" + vsid.getValue() + "/$expand");
+		try (CloseableHttpResponse response = ourHttpClient.execute(read)) {
+			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(text);
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			assertThat(text, containsString("\"A\""));
+			assertThat(text, containsString("\"A1\""));
+			assertThat(text, not(containsString("\"B\"")));
+			assertThat(text, not(containsString("\"B1\"")));
+		}
+
+
+//		HttpGet read = new HttpGet(ourServerBase + "/Observation?patient=P5000000302&_sort:desc=code&code:in=http://fkcfhir.org/fhir/vs/ccdacapddialysisorder");
+//		try (CloseableHttpResponse response = ourHttpClient.execute(read)) {
+//			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+//			ourLog.info(text);
+//			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+//			assertThat(text, not(containsString("\"text\",\"type\"")));
+//		}
+	}
+
+	@Test
+	public void testTerminologyWithCompleteCs_SearchForConceptIn() throws Exception {
+
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://cs");
+		CodeSystem.ConceptDefinitionComponent a = cs.addConcept()
+			.setCode("A");
+		a.addConcept().setCode("A1");
+		a.addConcept().setCode("A2");
+		CodeSystem.ConceptDefinitionComponent b = cs.addConcept()
+			.setCode("B");
+		b.addConcept().setCode("B1");
+		b.addConcept().setCode("B2");
+		ourClient.create().resource(cs).execute();
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://cs")
+			.addFilter()
+			.setProperty("concept")
+			.setOp(ValueSet.FilterOperator.ISA)
+			.setValue("A");
+		ourClient.create().resource(vs).execute().getId().toUnqualifiedVersionless();
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://cs").setCode("A1");
+		obs.setValue(new StringType("OBS1"));
+		obs.setStatus(ObservationStatus.FINAL);
+		ourClient.create().resource(obs).execute();
+
+		Observation obs2 = new Observation();
+		obs2.getCode().addCoding().setSystem("http://cs").setCode("B1");
+		obs2.setStatus(ObservationStatus.FINAL);
+		obs2.setValue(new StringType("OBS2"));
+		ourClient.create().resource(obs2).execute();
+
+		HttpGet read = new HttpGet(ourServerBase + "/Observation?code:in=http://vs");
+		try (CloseableHttpResponse response = ourHttpClient.execute(read)) {
+			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(text);
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			assertThat(text, containsString("\"OBS1\""));
+			assertThat(text, not(containsString("\"OBS2\"")));
+		}
+
+
 	}
 
 	@Test
@@ -3754,8 +3885,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			ourClient
 				.search()
-				.forResource(Sequence.class)
-				.where(Sequence.END.withPrefix(ParamPrefixEnum.ENDS_BEFORE).number(100))
+				.forResource(MolecularSequence.class)
+				.where(MolecularSequence.VARIANT_END.withPrefix(ParamPrefixEnum.ENDS_BEFORE).number(100))
 				.prettyPrint()
 				.returnBundle(Bundle.class)
 				.execute();

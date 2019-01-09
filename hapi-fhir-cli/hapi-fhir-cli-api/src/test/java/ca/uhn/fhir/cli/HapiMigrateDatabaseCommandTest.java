@@ -37,6 +37,50 @@ public class HapiMigrateDatabaseCommandTest {
 	}
 
 	@Test
+	public void testMigrate_340_370() throws IOException {
+
+		File directory = new File("target/migrator_derby_test_340_360");
+		if (directory.exists()) {
+			FileUtils.deleteDirectory(directory);
+		}
+
+		String url = "jdbc:derby:directory:" + directory.getAbsolutePath() + ";create=true";
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "", "");
+
+		String initSql = "/persistence_create_derby107_340.sql";
+		executeSqlStatements(connectionProperties, initSql);
+
+		seedDatabase340(connectionProperties);
+
+		ourLog.info("**********************************************");
+		ourLog.info("Done Setup, Starting Migration...");
+		ourLog.info("**********************************************");
+
+		String[] args = new String[]{
+			"migrate-database",
+			"-d", "DERBY_EMBEDDED",
+			"-u", url,
+			"-n", "",
+			"-p", "",
+			"-f", "V3_4_0",
+			"-t", "V3_7_0"
+		};
+		App.main(args);
+
+		connectionProperties.getTxTemplate().execute(t -> {
+			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
+			List<Map<String, Object>> values = jdbcTemplate.queryForList("SELECT * FROM hfj_spidx_token");
+			assertEquals(1, values.size());
+			assertEquals("identifier", values.get(0).get("SP_NAME"));
+			assertEquals("12345678", values.get(0).get("SP_VALUE"));
+			assertTrue(values.get(0).keySet().contains("HASH_IDENTITY"));
+			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
+			return null;
+		});
+	}
+
+
+	@Test
 	public void testMigrate_340_350() throws IOException {
 
 		File directory = new File("target/migrator_derby_test_340_350");
@@ -102,49 +146,7 @@ public class HapiMigrateDatabaseCommandTest {
 		});
 	}
 
-	@Test
-	public void testMigrate_340_360() throws IOException {
 
-		File directory = new File("target/migrator_derby_test_340_360");
-		if (directory.exists()) {
-			FileUtils.deleteDirectory(directory);
-		}
-
-		String url = "jdbc:derby:directory:" + directory.getAbsolutePath() + ";create=true";
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "", "");
-
-		String initSql = "/persistence_create_derby107_340.sql";
-		executeSqlStatements(connectionProperties, initSql);
-
-		seedDatabase340(connectionProperties);
-
-		ourLog.info("**********************************************");
-		ourLog.info("Done Setup, Starting Migration...");
-		ourLog.info("**********************************************");
-
-		String[] args = new String[]{
-			"migrate-database",
-			"-d", "DERBY_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"-f", "V3_4_0",
-			"-t", "V3_6_0"
-		};
-		App.main(args);
-
-		connectionProperties.getTxTemplate().execute(t -> {
-			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
-			List<Map<String, Object>> values = jdbcTemplate.queryForList("SELECT * FROM hfj_spidx_token");
-			assertEquals(1, values.size());
-			assertEquals("identifier", values.get(0).get("SP_NAME"));
-			assertEquals("12345678", values.get(0).get("SP_VALUE"));
-			assertTrue(values.get(0).keySet().contains("HASH_IDENTITY"));
-			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
-			return null;
-		});
-	}
-	
 	private void seedDatabase340(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 		theConnectionProperties.getTxTemplate().execute(t -> {
 			JdbcTemplate jdbcTemplate = theConnectionProperties.newJdbcTemplate();

@@ -54,7 +54,6 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import net.sf.saxon.TransformerFactoryImpl;
 
 import org.apache.commons.io.FileUtils;
 
@@ -319,39 +318,7 @@ public class Utilities {
     
   }
 
-  public static String saxonTransform(String source, String xslt) throws Exception {
-    TransformerFactoryImpl f = new net.sf.saxon.TransformerFactoryImpl();
-    f.setAttribute("http://saxon.sf.net/feature/version-warning", Boolean.FALSE);
-    StreamSource xsrc = new StreamSource(new FileInputStream(xslt));
-    Transformer t = f.newTransformer(xsrc);
-    StreamSource src = new StreamSource(new FileInputStream(source));
-    StreamResult res = new StreamResult(new ByteArrayOutputStream());
-    t.transform(src, res);
-    return res.getOutputStream().toString();   
-  }
 
-  public static void saxonTransform(String xsltDir, String source, String xslt, String dest, URIResolver alt) throws Exception {
-  	saxonTransform(xsltDir, source, xslt, dest, alt, null);
-  }
-
-  public static void saxonTransform(String xsltDir, String source, String xslt, String dest, URIResolver alt, Map<String, String> params) throws Exception {
-    TransformerFactoryImpl f = new net.sf.saxon.TransformerFactoryImpl();
-    f.setAttribute("http://saxon.sf.net/feature/version-warning", Boolean.FALSE);
-    StreamSource xsrc = new StreamSource(new FileInputStream(xslt));
-    f.setURIResolver(new MyURIResolver(xsltDir, alt));
-    Transformer t = f.newTransformer(xsrc);
- 		if (params != null) {
- 			for (Map.Entry<String, String> entry : params.entrySet()) {
- 				t.setParameter(entry.getKey(), entry.getValue());
- 			}
-  	}
-    
-    t.setURIResolver(new MyURIResolver(xsltDir, alt));
-    StreamSource src = new StreamSource(new FileInputStream(source));
-    StreamResult res = new StreamResult(new FileOutputStream(dest));
-    t.transform(src, res);    
-  }
-  
   public static void transform(String xsltDir, String source, String xslt, String dest, URIResolver alt) throws Exception {
 
     TransformerFactory f = TransformerFactory.newInstance();

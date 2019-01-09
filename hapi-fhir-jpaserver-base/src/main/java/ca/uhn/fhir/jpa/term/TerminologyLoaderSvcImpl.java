@@ -43,7 +43,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink.csv";
 	public static final String LOINC_DOCUMENT_ONTOLOGY_FILE = "DocumentOntology.csv";
 	public static final String LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
-	public static final String LOINC_FILE = "Loinc.csv";
+	public static final String LOINC_FILE = "LoincTable/Loinc.csv";
 	public static final String LOINC_HIERARCHY_FILE = "MultiAxialHierarchy.csv";
 	public static final String LOINC_PART_FILE = "Part.csv";
 	public static final String LOINC_PART_LINK_FILE = "LoincPartLink.csv";
@@ -135,6 +135,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			} else {
 				matches = nextFilename.endsWith("/" + theFileNamePart) || nextFilename.equals(theFileNamePart);
 			}
+
 			if (matches) {
 				ourLog.info("Processing file {}", nextFilename);
 				foundMatch = true;

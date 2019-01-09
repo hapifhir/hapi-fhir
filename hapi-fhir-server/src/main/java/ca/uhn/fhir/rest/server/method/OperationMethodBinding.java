@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final boolean myIdempotent;
 	private final Integer myIdParamIndex;
 	private final String myName;
-	private final RestOperationTypeEnum myOtherOperatiopnType;
+	private final RestOperationTypeEnum myOtherOperationType;
 	private final ReturnTypeEnum myReturnType;
 	private BundleTypeEnum myBundleType;
 	private boolean myCanOperateAtInstanceLevel;
@@ -69,22 +69,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private List<ReturnType> myReturnParams;
 
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
-												boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
-												OperationParam[] theReturnParams, BundleTypeEnum theBundleType) {
+			boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
+			OperationParam[] theReturnParams, BundleTypeEnum theBundleType) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
 		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
-		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
-		if (myIdParamIndex != null) {
-			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
-				if (next instanceof IdParam) {
-					myCanOperateAtTypeLevel = ((IdParam) next).optional() == true;
-				}
-			}
-		} else {
-			myCanOperateAtTypeLevel = true;
-		}
 
 		Description description = theMethod.getAnnotation(Description.class);
 		if (description != null) {
@@ -99,7 +89,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		if (isBlank(theOperationName)) {
 			throw new ConfigurationException("Method '" + theMethod.getName() + "' on type " + theMethod.getDeclaringClass().getName() + " is annotated with @" + Operation.class.getSimpleName()
-				+ " but this annotation has no name defined");
+					+ " but this annotation has no name defined");
 		}
 		if (theOperationName.startsWith("$") == false) {
 			theOperationName = "$" + theOperationName;
@@ -108,13 +98,11 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		if (theReturnTypeFromRp != null) {
 			setResourceName(theContext.getResourceDefinition(theReturnTypeFromRp).getName());
-		} else {
-			if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
+		} else if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
 				setResourceName(theContext.getResourceDefinition(theOperationType).getName());
 			} else {
 				setResourceName(null);
 			}
-		}
 
 		if (theMethod.getReturnType().equals(IBundleProvider.class)) {
 			myReturnType = ReturnTypeEnum.BUNDLE;
@@ -122,12 +110,24 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myReturnType = ReturnTypeEnum.RESOURCE;
 		}
 
+    myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
 		if (getResourceName() == null) {
-			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+      myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+      myCanOperateAtServerLevel = true;
+      if (myIdParamIndex != null) {
+        myCanOperateAtInstanceLevel = true;
+      }
 		} else if (myIdParamIndex == null) {
-			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+      myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
+      myCanOperateAtTypeLevel = true;
 		} else {
-			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+      myOtherOperationType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+      myCanOperateAtInstanceLevel = true;
+      for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
+        if (next instanceof IdParam) {
+          myCanOperateAtTypeLevel = ((IdParam) next).optional() == true;
+        }
+      }
 		}
 
 		myReturnParams = new ArrayList<>();
@@ -149,20 +149,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				myReturnParams.add(type);
 			}
 		}
-
-		if (myIdParamIndex != null) {
-			myCanOperateAtInstanceLevel = true;
-		}
-		if (getResourceName() == null) {
-			myCanOperateAtServerLevel = true;
-		}
-
 	}
 
 	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
-											Operation theAnnotation) {
+			Operation theAnnotation) {
 		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.returnParameters(),
-			theAnnotation.bundleType());
+				theAnnotation.bundleType());
 	}
 
 	public String getDescription() {
@@ -188,7 +180,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
-		return myOtherOperatiopnType;
+		return myOtherOperationType;
 	}
 
 	public List<ReturnType> getReturnParams() {
@@ -230,16 +222,12 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		boolean requestHasId = theRequest.getId() != null;
 		if (requestHasId) {
-			if (isCanOperateAtInstanceLevel() == false) {
-				return false;
+      return myCanOperateAtInstanceLevel;
 			}
-		} else {
-			if (myCanOperateAtTypeLevel == false) {
-				return false;
+    if (isNotBlank(theRequest.getResourceName())) {
+      return myCanOperateAtTypeLevel;
 			}
-		}
-
-		return true;
+    return myCanOperateAtServerLevel;
 	}
 
 	@Override

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,16 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.entity.ResourceSearchView;
+import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.util.StringNormalizer;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
@@ -73,6 +80,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.util.ListUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -125,6 +133,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
+	@Autowired
+	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -243,7 +253,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			Class<? extends IBaseResource> resourceType = targetResourceDefinition.getImplementingClass();
-			Set<Long> match = myMatchUrlService.processMatchUrl(matchUrl, resourceType);
+			Set<Long> match = myMatchResourceUrlService.processMatchUrl(matchUrl, resourceType);
 			if (match.isEmpty()) {
 				// Pick a PID that can never match
 				match = Collections.singleton(-1L);
@@ -453,6 +463,11 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (def instanceof RuntimeChildResourceDefinition) {
 								RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
 								resourceTypes.addAll(resDef.getResourceTypes());
+								if (resourceTypes.size() == 1) {
+									if (resourceTypes.get(0).isInterface()) {
+										throw new InvalidRequestException("Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
+									}
+								}
 							} else {
 								throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
 							}
@@ -470,10 +485,14 @@ public class SearchBuilder implements ISearchBuilder {
 						resourceId = ref.getValue();
 
 					} else {
-						RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
-						resourceTypes = new ArrayList<>(1);
-						resourceTypes.add(resDef.getImplementingClass());
-						resourceId = ref.getIdPart();
+						try {
+							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
+							resourceTypes = new ArrayList<>(1);
+							resourceTypes.add(resDef.getImplementingClass());
+							resourceId = ref.getIdPart();
+						} catch (DataFormatException e) {
+							throw new InvalidRequestException("Invalid resource type: " + ref.getResourceType());
+						}
 					}
 
 					boolean foundChainMatch = false;
@@ -1201,7 +1220,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		if (myDontUseHashesForSearch) {
-			String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
+			String likeExpression = StringNormalizer.normalizeString(rawSearchTerm);
 			if (myDaoConfig.isAllowContainsSearches()) {
 				if (theParameter instanceof StringParam) {
 					if (((StringParam) theParameter).isContains()) {
@@ -1237,7 +1256,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			// Normalized Match
 
-			String normalizedString = BaseHapiFhirDao.normalizeString(rawSearchTerm);
+			String normalizedString = StringNormalizer.normalizeString(rawSearchTerm);
 			String likeExpression;
 			if (theParameter instanceof StringParam &&
 				((StringParam) theParameter).isContains() &&
@@ -1247,7 +1266,7 @@ public class SearchBuilder implements ISearchBuilder {
 				likeExpression = createLeftMatchLikeExpression(normalizedString);
 			}
 
-			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig, theResourceName, theParamName, normalizedString);
+			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 			Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
 			Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 			return theBuilder.and(hashCode, singleCode);
@@ -1845,11 +1864,11 @@ public class SearchBuilder implements ISearchBuilder {
 		return retVal;
 	}
 
-	private void doLoadPids(List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager entityManager, FhirContext context, IDao theDao,
-									Map<Long, Integer> position, Collection<Long> pids) {
+	private void doLoadPids(List<IBaseResource> theResourceListToPopulate, Set<Long> theIncludedPids, boolean theForHistoryOperation, EntityManager theEntityManager, FhirContext theContext, IDao theDao,
+									Map<Long, Integer> thePosition, Collection<Long> thePids) {
 
 		// -- get the resource from the searchView
-		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(pids);
+		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(thePids);
 
 		//-- preload all tags with tag definition if any
 		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
@@ -1857,7 +1876,7 @@ public class SearchBuilder implements ISearchBuilder {
 		Long resourceId;
 		for (ResourceSearchView next : resourceSearchViewList) {
 
-			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
+			Class<? extends IBaseResource> resourceType = theContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
 			resourceId = next.getId();
 
@@ -1866,20 +1885,20 @@ public class SearchBuilder implements ISearchBuilder {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
 				continue;
 			}
-			Integer index = position.get(resourceId);
+			Integer index = thePosition.get(resourceId);
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", resourceId);
 				continue;
 			}
 
 			if (resource instanceof IResource) {
-				if (theRevIncludedPids.contains(resourceId)) {
+				if (theIncludedPids.contains(resourceId)) {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.INCLUDE);
 				} else {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.MATCH);
 				}
 			} else {
-				if (theRevIncludedPids.contains(resourceId)) {
+				if (theIncludedPids.contains(resourceId)) {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
 				} else {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.MATCH.getCode());
@@ -1928,8 +1947,10 @@ public class SearchBuilder implements ISearchBuilder {
 		return tagMap;
 	}
 
+	private static final int maxLoad = 800;
+
 	@Override
-	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
+	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theIncludedPids, boolean theForHistoryOperation,
 											 EntityManager entityManager, FhirContext context, IDao theDao) {
 		if (theIncludePids.isEmpty()) {
 			ourLog.debug("The include pids are empty");
@@ -1952,13 +1973,12 @@ public class SearchBuilder implements ISearchBuilder {
 		 * if it's lots of IDs. I suppose maybe we should be doing this as a join anyhow
 		 * but this should work too. Sigh.
 		 */
-		int maxLoad = 800;
 		List<Long> pids = new ArrayList<>(theIncludePids);
 		for (int i = 0; i < pids.size(); i += maxLoad) {
 			int to = i + maxLoad;
 			to = Math.min(to, pids.size());
 			List<Long> pidsSubList = pids.subList(i, to);
-			doLoadPids(theResourceListToPopulate, theRevIncludedPids, theForHistoryOperation, entityManager, context, theDao, position, pidsSubList);
+			doLoadPids(theResourceListToPopulate, theIncludedPids, theForHistoryOperation, entityManager, context, theDao, position, pidsSubList);
 		}
 
 	}
@@ -2002,14 +2022,17 @@ public class SearchBuilder implements ISearchBuilder {
 				if (matchAll) {
 					String sql;
 					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
-					TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
-					q.setParameter("target_pids", nextRoundMatches);
-					List<ResourceLink> results = q.getResultList();
-					for (ResourceLink resourceLink : results) {
-						if (theReverseMode) {
-							pidsToInclude.add(resourceLink.getSourceResourcePid());
-						} else {
-							pidsToInclude.add(resourceLink.getTargetResourcePid());
+					List<Collection<Long>> partitions = partition(nextRoundMatches, maxLoad);
+					for (Collection<Long> nextPartition : partitions) {
+						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
+						q.setParameter("target_pids", nextPartition);
+						List<ResourceLink> results = q.getResultList();
+						for (ResourceLink resourceLink : results) {
+							if (theReverseMode) {
+								pidsToInclude.add(resourceLink.getSourceResourcePid());
+							} else {
+								pidsToInclude.add(resourceLink.getTargetResourcePid());
+							}
 						}
 					}
 				} else {
@@ -2042,7 +2065,8 @@ public class SearchBuilder implements ISearchBuilder {
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
 						String sql;
-						boolean haveTargetTypesDefinedByParam = param != null && param.getTargets() != null && param.getTargets().isEmpty() == false;
+
+						boolean haveTargetTypesDefinedByParam = param.getTargets() != null && param.getTargets().isEmpty() == false;
 						if (targetResourceType != null) {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
 						} else if (haveTargetTypesDefinedByParam) {
@@ -2050,25 +2074,29 @@ public class SearchBuilder implements ISearchBuilder {
 						} else {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						}
-						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
-						q.setParameter("src_path", nextPath);
-						q.setParameter("target_pids", nextRoundMatches);
-						if (targetResourceType != null) {
-							q.setParameter("target_resource_type", targetResourceType);
-						} else if (haveTargetTypesDefinedByParam) {
-							q.setParameter("target_resource_types", param.getTargets());
-						}
-						List<ResourceLink> results = q.getResultList();
-						for (ResourceLink resourceLink : results) {
-							if (theReverseMode) {
-								Long pid = resourceLink.getSourceResourcePid();
-								if (pid != null) {
-									pidsToInclude.add(pid);
-								}
-							} else {
-								Long pid = resourceLink.getTargetResourcePid();
-								if (pid != null) {
-									pidsToInclude.add(pid);
+
+						List<Collection<Long>> partitions = partition(nextRoundMatches, maxLoad);
+						for (Collection<Long> nextPartition : partitions) {
+							TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
+							q.setParameter("src_path", nextPath);
+							q.setParameter("target_pids", nextPartition);
+							if (targetResourceType != null) {
+								q.setParameter("target_resource_type", targetResourceType);
+							} else if (haveTargetTypesDefinedByParam) {
+								q.setParameter("target_resource_types", param.getTargets());
+							}
+							List<ResourceLink> results = q.getResultList();
+							for (ResourceLink resourceLink : results) {
+								if (theReverseMode) {
+									Long pid = resourceLink.getSourceResourcePid();
+									if (pid != null) {
+										pidsToInclude.add(pid);
+									}
+								} else {
+									Long pid = resourceLink.getTargetResourcePid();
+									if (pid != null) {
+										pidsToInclude.add(pid);
+									}
 								}
 							}
 						}
@@ -2094,6 +2122,30 @@ public class SearchBuilder implements ISearchBuilder {
 		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
 
 		return allAdded;
+	}
+
+	private List<Collection<Long>> partition(Collection<Long> theNextRoundMatches, int theMaxLoad) {
+		if (theNextRoundMatches.size() <= theMaxLoad) {
+			return Collections.singletonList(theNextRoundMatches);
+		} else {
+
+			List<Collection<Long>> retVal = new ArrayList<>();
+			Collection<Long> current = null;
+			for (Long next : theNextRoundMatches) {
+				if (current == null) {
+					current = new ArrayList<>(theMaxLoad);
+					retVal.add(current);
+				}
+
+				current.add(next);
+
+				if (current.size() >= theMaxLoad) {
+					current = null;
+				}
+			}
+
+			return retVal;
+		}
 	}
 
 	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams) {

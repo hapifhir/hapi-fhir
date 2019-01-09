@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -95,6 +95,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.PARAMETERDEFINITION;
     if ("Period".equals(codeString))
       return DataTypes.PERIOD;
+    if ("Population".equals(codeString))
+      return DataTypes.POPULATION;
     if ("ProdCharacteristic".equals(codeString))
       return DataTypes.PRODCHARACTERISTIC;
     if ("ProductShelfLife".equals(codeString))
@@ -117,8 +119,6 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return DataTypes.SIMPLEQUANTITY;
     if ("SubstanceAmount".equals(codeString))
       return DataTypes.SUBSTANCEAMOUNT;
-    if ("SubstanceMoiety".equals(codeString))
-      return DataTypes.SUBSTANCEMOIETY;
     if ("Timing".equals(codeString))
       return DataTypes.TIMING;
     if ("TriggerDefinition".equals(codeString))
@@ -225,6 +225,8 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "ParameterDefinition";
     if (code == DataTypes.PERIOD)
       return "Period";
+    if (code == DataTypes.POPULATION)
+      return "Population";
     if (code == DataTypes.PRODCHARACTERISTIC)
       return "ProdCharacteristic";
     if (code == DataTypes.PRODUCTSHELFLIFE)
@@ -247,8 +249,6 @@ public class DataTypesEnumFactory implements EnumFactory<DataTypes> {
       return "SimpleQuantity";
     if (code == DataTypes.SUBSTANCEAMOUNT)
       return "SubstanceAmount";
-    if (code == DataTypes.SUBSTANCEMOIETY)
-      return "SubstanceMoiety";
     if (code == DataTypes.TIMING)
       return "Timing";
     if (code == DataTypes.TRIGGERDEFINITION)

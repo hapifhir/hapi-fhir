@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -440,7 +440,7 @@ public class SearchParameter extends MetadataResource {
          */
         IDENTIFIER, 
         /**
-         * The search parameter has the format system|code|value, where the system and code refer to a Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present.
+         * The search parameter has the format system|code|value, where the system and code refer to an Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present.
          */
         OFTYPE, 
         /**
@@ -526,7 +526,7 @@ public class SearchParameter extends MetadataResource {
             case ABOVE: return "The search parameter tests whether the value in a resource subsumes the specified value (is-a, or hierarchical relationships).";
             case TYPE: return "The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc.).";
             case IDENTIFIER: return "The search parameter applies to the identifier on the resource, not the reference.";
-            case OFTYPE: return "The search parameter has the format system|code|value, where the system and code refer to a Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present.";
+            case OFTYPE: return "The search parameter has the format system|code|value, where the system and code refer to an Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present.";
             default: return "?";
           }
         }
@@ -1456,7 +1456,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #description} (A free text natural language description of the search parameter from a consumer's perspective. and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @return {@link #description} (And how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public MarkdownType getDescriptionElement() { 
       if (this.description == null)
@@ -1476,7 +1476,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @param value {@link #description} (A free text natural language description of the search parameter from a consumer's perspective. and how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
+     * @param value {@link #description} (And how it used.). This is the underlying object with id, value and extensions. The accessor "getDescription" gives direct access to the value
      */
     public SearchParameter setDescriptionElement(MarkdownType value) { 
       this.description = value;
@@ -1484,14 +1484,14 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return A free text natural language description of the search parameter from a consumer's perspective. and how it used.
+     * @return And how it used.
      */
     public String getDescription() { 
       return this.description == null ? null : this.description.getValue();
     }
 
     /**
-     * @param value A free text natural language description of the search parameter from a consumer's perspective. and how it used.
+     * @param value And how it used.
      */
     public SearchParameter setDescription(String value) { 
         if (this.description == null)
@@ -1501,7 +1501,7 @@ public class SearchParameter extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate search parameter instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate search parameter instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -2351,8 +2351,8 @@ public class SearchParameter extends MetadataResource {
         children.add(new Property("date", "dateTime", "The date  (and optionally time) when the search parameter was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.", 0, 1, date));
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the search parameter.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
-        children.add(new Property("description", "markdown", "A free text natural language description of the search parameter from a consumer's perspective. and how it used.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate search parameter instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("description", "markdown", "And how it used.", 0, 1, description));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate search parameter instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the search parameter is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this search parameter is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("code", "code", "The code used in the URL or the parameter name in a parameters resource for this search parameter.", 0, 1, code));
@@ -2382,8 +2382,8 @@ public class SearchParameter extends MetadataResource {
         case 3076014: /*date*/  return new Property("date", "dateTime", "The date  (and optionally time) when the search parameter was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the search parameter changes.", 0, 1, date);
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the search parameter.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
-        case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the search parameter from a consumer's perspective. and how it used.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate search parameter instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -1724546052: /*description*/  return new Property("description", "markdown", "And how it used.", 0, 1, description);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate search parameter instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the search parameter is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this search parameter is needed and why it has been designed as it has.", 0, 1, purpose);
         case 3059181: /*code*/  return new Property("code", "code", "The code used in the URL or the parameter name in a parameters resource for this search parameter.", 0, 1, code);

@@ -119,15 +119,19 @@
 			<artifactId>jaxb-api</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>com.sun.xml.bind</groupId>-->
+			<!--<artifactId>jaxb-core</artifactId>-->
+			<!--<scope>test</scope>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>com.sun.xml.bind</groupId>-->
+			<!--<artifactId>jaxb-impl</artifactId>-->
+			<!--<scope>test</scope>-->
+		<!--</dependency>-->
 		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
-			<scope>test</scope>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
 		</dependency>
 
 
@@ -207,18 +211,18 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>
-					</sourceFolders>
+					<!--<classFolders>-->
+						<!--<classFolder>${basedir}/target/classes</classFolder>-->
+						<!--<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>-->
+						<!--<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>-->
+						<!--<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>-->
+					<!--</classFolders>-->
+					<!--<sourceFolders>-->
+						<!--<sourceFolder>${basedir}/src/main/java</sourceFolder>-->
+						<!--<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>-->
+						<!--<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>-->
+						<!--<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>-->
+					<!--</sourceFolders>-->
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>
@@ -356,7 +360,8 @@
                    <package>ca.uhn.fhir.model.dstu2</package>
                    <version>dstu2</version>
                    <buildDatatypes>true</buildDatatypes>
-               </configuration>
+							<packageName>ca.uhn.fhir.model.dstu2</packageName>
+						</configuration>
            </execution>
            <!-- <execution> <id>clean_source</id> <goals> <goal>minimize-resources</goal> </goals> <configuration> <fhirVersion>DSTU2</fhirVersion> <targetDirectory>${project.baseDir}/../hapi-tinder-plugin/</targetDirectory>
                </configuration> </execution> -->
@@ -441,7 +446,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>${maven_javadoc_plugin_version}</version>
 				<configuration>
 				</configuration>
 			</plugin>

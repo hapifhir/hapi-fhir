@@ -514,6 +514,7 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
   public IdType setValue(String theValue) {
     // TODO: add validation
     super.setValue(theValue);
+
     myHaveComponentParts = false;
 
     if (StringUtils.isBlank(theValue)) {

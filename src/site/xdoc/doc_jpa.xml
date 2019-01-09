@@ -101,7 +101,7 @@ $ mvn install]]></source>
 				The Spring confguration contains a definition for a bean called <code>daoConfig</code>,
 				which will look something like the following:
 			</p>
-			<source><![CDATA[@Bean()
+			<source><![CDATA[@Bean
 public DaoConfig daoConfig() {
 	DaoConfig retVal = new DaoConfig();
 	retVal.setAllowMultipleDelete(true);
@@ -146,7 +146,7 @@ public DaoConfig daoConfig() {
 					configure the server to recognize this URL via the following DaoConfig
 					setting:
 				</p>
-				<source><![CDATA[@Bean()
+				<source><![CDATA[@Bean
 public DaoConfig daoConfig() {
 	DaoConfig retVal = new DaoConfig();
 	// ... other config ...
@@ -162,7 +162,7 @@ public DaoConfig daoConfig() {
 					external references.
 				</p>
 				
-				<source><![CDATA[@Bean()
+				<source><![CDATA[@Bean
 public DaoConfig daoConfig() {
 	DaoConfig retVal = new DaoConfig();
 	// Allow external references

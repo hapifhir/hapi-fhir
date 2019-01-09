@@ -3,10 +3,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
+import ca.uhn.fhir.jpa.subscription.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -33,6 +34,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -61,13 +63,16 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
-	protected static SubscriptionRestHookInterceptor ourReskHookSubscriptionInterceptor;
+	protected static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
 	private static Server ourServer;
 	protected IGenericClient ourClient;
 	protected ResourceCountCache ourResourceCountsCache;
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
+
+	@Autowired
+	protected SubscriptionLoader mySubscriptionLoader;
 
 	public BaseResourceProviderR4Test() {
 		super();
@@ -156,7 +161,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
-			ourReskHookSubscriptionInterceptor = wac.getBean(SubscriptionRestHookInterceptor.class);
+			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 
@@ -177,19 +182,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	/**
-	 * This is lazy created so we only ask for it if its needed
-	 */
-	protected SubscriptionRestHookInterceptor getRestHookSubscriptionInterceptor() {
-		SubscriptionRestHookInterceptor retVal = ourWebApplicationContext.getBean(SubscriptionRestHookInterceptor.class);
-		ourRestHookSubscriptionInterceptorRequested = true;
-		return retVal;
-	}
-
-	protected boolean hasRestHookSubscriptionInterceptor() {
-		return ourRestHookSubscriptionInterceptorRequested;
-	}
-
 	protected boolean shouldLogClient() {
 		return true;
 	}
@@ -206,21 +198,20 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		return names;
 	}
 
-	protected void waitForRegisteredSubscriptionCount(int theSize) throws Exception {
+	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
 		for (int i = 0; ; i++) {
 			if (i == 10) {
 				fail("Failed to init subscriptions");
 			}
 			try {
-				getRestHookSubscriptionInterceptor().doInitSubscriptions();
+				mySubscriptionLoader.initSubscriptions();
 				break;
 			} catch (ResourceVersionConflictException e) {
 				Thread.sleep(250);
 			}
 		}
 
-		SubscriptionRestHookInterceptor interceptor = getRestHookSubscriptionInterceptor();
-		TestUtil.waitForSize(theSize, () -> interceptor.getRegisteredSubscriptions().size());
+		TestUtil.waitForSize(theSize, () -> mySubscriptionRegistry.size());
 		Thread.sleep(500);
 	}
 

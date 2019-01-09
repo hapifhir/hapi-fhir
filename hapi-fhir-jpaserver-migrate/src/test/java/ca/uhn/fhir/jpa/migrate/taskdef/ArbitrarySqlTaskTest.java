@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.jpa.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import org.junit.Test;
 
 import java.util.List;

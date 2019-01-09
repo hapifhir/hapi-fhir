@@ -9,9 +9,11 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -62,6 +64,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 	@Captor
 	private ArgumentCaptor<Date> myHighCaptor;
 	private ResourceReindexJobEntity mySingleJob;
+	@Mock
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	@Override
 	protected FhirContext getContext() {
@@ -86,6 +90,7 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		mySvc.setReindexJobDaoForUnitTest(myReindexJobDao);
 		mySvc.setResourceTableDaoForUnitTest(myResourceTableDao);
 		mySvc.setTxManagerForUnitTest(myTxManager);
+		mySvc.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		mySvc.start();
 	}
 
@@ -174,6 +179,8 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		verify(myReindexJobDao, times(1)).getReindexCount(any());
 		verify(myReindexJobDao, times(1)).setReindexCount(any(), anyInt());
 		verifyNoMoreInteractions(myReindexJobDao);
+
+		verify(mySearchParamRegistry, times(1)).forceRefresh();
 	}
 
 	@Test
@@ -197,21 +204,21 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 			"Patient"
 		};
 		List<IBaseResource> resources = Arrays.asList(
-			new Patient().setId("Patient/0"),
-			new Patient().setId("Patient/1"),
-			new Patient().setId("Patient/2"),
-			new Patient().setId("Patient/3")
+			new Patient().setId("Patient/0/_history/1"),
+			new Patient().setId("Patient/1/_history/1"),
+			new Patient().setId("Patient/2/_history/1"),
+			new Patient().setId("Patient/3/_history/1")
 		);
 		mockWhenResourceTableFindById(updatedTimes, resourceTypes);
 		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
-		when(myResourceDao.toResource(any(), anyBoolean())).thenAnswer(t -> {
-			ResourceTable table = (ResourceTable) t.getArguments()[0];
-			Long id = table.getId();
-			return resources.get(id.intValue());
+		when(myResourceDao.read(any(), any(), anyBoolean())).thenAnswer(t->{
+			IIdType id = (IIdType) t.getArguments()[0];
+			return resources.get(id.getIdPartAsLong().intValue());
 		});
+
 
 		int count = mySvc.forceReindexingPass();
 		assertEquals(4, count);
@@ -258,20 +265,19 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 			"Observation"
 		};
 		List<IBaseResource> resources = Arrays.asList(
-			new Patient().setId("Patient/0"),
-			new Patient().setId("Patient/1"),
-			new Observation().setId("Observation/2"),
-			new Observation().setId("Observation/3")
+			new Patient().setId("Patient/0/_history/1"),
+			new Patient().setId("Patient/1/_history/1"),
+			new Observation().setId("Observation/2/_history/1"),
+			new Observation().setId("Observation/3/_history/1")
 		);
 		mockWhenResourceTableFindById(updatedTimes, resourceTypes);
 		when(myDaoRegistry.getResourceDao(eq("Patient"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq("Observation"))).thenReturn(myResourceDao);
 		when(myDaoRegistry.getResourceDao(eq(Observation.class))).thenReturn(myResourceDao);
-		when(myResourceDao.toResource(any(), anyBoolean())).thenAnswer(t -> {
-			ResourceTable table = (ResourceTable) t.getArguments()[0];
-			Long id = table.getId();
-			return resources.get(id.intValue());
+		when(myResourceDao.read(any(), any(), anyBoolean())).thenAnswer(t->{
+			IIdType id = (IIdType) t.getArguments()[0];
+			return resources.get(id.getIdPartAsLong().intValue());
 		});
 	}
 

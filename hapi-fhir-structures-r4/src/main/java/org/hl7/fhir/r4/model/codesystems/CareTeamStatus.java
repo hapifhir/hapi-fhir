@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CareTeamStatus {
 
         /**
-         * The care team has been drafted and proposed, but not yet participating in the coordination and delivery of care.
+         * The care team has been drafted and proposed, but not yet participating in the coordination and delivery of patient care.
          */
         PROPOSED, 
         /**
@@ -90,7 +90,7 @@ public enum CareTeamStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case PROPOSED: return "The care team has been drafted and proposed, but not yet participating in the coordination and delivery of care.";
+            case PROPOSED: return "The care team has been drafted and proposed, but not yet participating in the coordination and delivery of patient care.";
             case ACTIVE: return "The care team is currently participating in the coordination and delivery of care.";
             case SUSPENDED: return "The care team is temporarily on hold or suspended and not participating in the coordination and delivery of care.";
             case INACTIVE: return "The care team was, but is no longer, participating in the coordination and delivery of care.";
@@ -104,7 +104,7 @@ public enum CareTeamStatus {
             case ACTIVE: return "Active";
             case SUSPENDED: return "Suspended";
             case INACTIVE: return "Inactive";
-            case ENTEREDINERROR: return "Entered In Error";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
     }

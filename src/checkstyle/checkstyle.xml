@@ -39,9 +39,11 @@
 				value="LITERAL_TRY, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
 		</module>
 		<module name="NeedBraces"/>
+		<!--
 		<module name="LeftCurly">
 			<property name="maxLineLength" value="300"/>
 		</module>
+		-->
 		<module name="RightCurly"/>
 		<module name="RightCurly">
 			<property name="option" value="alone"/>

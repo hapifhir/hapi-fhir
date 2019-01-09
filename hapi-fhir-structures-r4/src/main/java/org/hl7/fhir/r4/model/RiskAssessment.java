@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -79,7 +79,7 @@ public class RiskAssessment extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, but the authoring system does not know which.
+         * The authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which.
          */
         UNKNOWN, 
         /**
@@ -145,7 +145,7 @@ public class RiskAssessment extends DomainResource {
             case CORRECTED: return "Subsequent to being Final, the observation has been modified to correct an error in the test result.";
             case CANCELLED: return "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\").";
             case ENTEREDINERROR: return "The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring system does not know which.";
+            case UNKNOWN: return "The authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which.";
             default: return "?";
           }
         }
@@ -327,7 +327,7 @@ public class RiskAssessment extends DomainResource {
          */
         public DecimalType getProbabilityDecimalType() throws FHIRException { 
           if (this.probability == null)
-            return null;
+            this.probability = new DecimalType();
           if (!(this.probability instanceof DecimalType))
             throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.probability.getClass().getName()+" was encountered");
           return (DecimalType) this.probability;
@@ -342,7 +342,7 @@ public class RiskAssessment extends DomainResource {
          */
         public Range getProbabilityRange() throws FHIRException { 
           if (this.probability == null)
-            return null;
+            this.probability = new Range();
           if (!(this.probability instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.probability.getClass().getName()+" was encountered");
           return (Range) this.probability;
@@ -469,7 +469,7 @@ public class RiskAssessment extends DomainResource {
          */
         public Period getWhenPeriod() throws FHIRException { 
           if (this.when == null)
-            return null;
+            this.when = new Period();
           if (!(this.when instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.when.getClass().getName()+" was encountered");
           return (Period) this.when;
@@ -484,7 +484,7 @@ public class RiskAssessment extends DomainResource {
          */
         public Range getWhenRange() throws FHIRException { 
           if (this.when == null)
-            return null;
+            this.when = new Range();
           if (!(this.when instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.when.getClass().getName()+" was encountered");
           return (Range) this.when;
@@ -827,14 +827,14 @@ public class RiskAssessment extends DomainResource {
     /**
      * The encounter where the assessment was performed.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=7, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "encounter", type = {Encounter.class}, order=7, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Where was assessment performed?", formalDefinition="The encounter where the assessment was performed." )
-    protected Reference context;
+    protected Reference encounter;
 
     /**
      * The actual object that is the target of the reference (The encounter where the assessment was performed.)
      */
-    protected Resource contextTarget;
+    protected Encounter encounterTarget;
 
     /**
      * The date (and possibly time) the risk assessment was performed.
@@ -858,7 +858,7 @@ public class RiskAssessment extends DomainResource {
     /**
      * The provider or software application that performed the assessment.
      */
-    @Child(name = "performer", type = {Practitioner.class, Device.class}, order=10, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "performer", type = {Practitioner.class, PractitionerRole.class, Device.class}, order=10, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who did assessment?", formalDefinition="The provider or software application that performed the assessment." )
     protected Reference performer;
 
@@ -919,7 +919,7 @@ public class RiskAssessment extends DomainResource {
     @Description(shortDefinition="Comments on the risk assessment", formalDefinition="Additional comments about the risk assessment." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = -1402022407L;
+    private static final long serialVersionUID = -2137260218L;
 
   /**
    * Constructor
@@ -1201,41 +1201,46 @@ public class RiskAssessment extends DomainResource {
     }
 
     /**
-     * @return {@link #context} (The encounter where the assessment was performed.)
+     * @return {@link #encounter} (The encounter where the assessment was performed.)
      */
-    public Reference getContext() { 
-      if (this.context == null)
+    public Reference getEncounter() { 
+      if (this.encounter == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create RiskAssessment.context");
+          throw new Error("Attempt to auto-create RiskAssessment.encounter");
         else if (Configuration.doAutoCreate())
-          this.context = new Reference(); // cc
-      return this.context;
+          this.encounter = new Reference(); // cc
+      return this.encounter;
     }
 
-    public boolean hasContext() { 
-      return this.context != null && !this.context.isEmpty();
+    public boolean hasEncounter() { 
+      return this.encounter != null && !this.encounter.isEmpty();
     }
 
     /**
-     * @param value {@link #context} (The encounter where the assessment was performed.)
+     * @param value {@link #encounter} (The encounter where the assessment was performed.)
      */
-    public RiskAssessment setContext(Reference value) { 
-      this.context = value;
+    public RiskAssessment setEncounter(Reference value) { 
+      this.encounter = value;
       return this;
     }
 
     /**
-     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
      */
-    public Resource getContextTarget() { 
-      return this.contextTarget;
+    public Encounter getEncounterTarget() { 
+      if (this.encounterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RiskAssessment.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounterTarget = new Encounter(); // aa
+      return this.encounterTarget;
     }
 
     /**
-     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The encounter where the assessment was performed.)
      */
-    public RiskAssessment setContextTarget(Resource value) { 
-      this.contextTarget = value;
+    public RiskAssessment setEncounterTarget(Encounter value) { 
+      this.encounterTarget = value;
       return this;
     }
 
@@ -1251,7 +1256,7 @@ public class RiskAssessment extends DomainResource {
      */
     public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
       if (this.occurrence == null)
-        return null;
+        this.occurrence = new DateTimeType();
       if (!(this.occurrence instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurrence;
@@ -1266,7 +1271,7 @@ public class RiskAssessment extends DomainResource {
      */
     public Period getOccurrencePeriod() throws FHIRException { 
       if (this.occurrence == null)
-        return null;
+        this.occurrence = new Period();
       if (!(this.occurrence instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
       return (Period) this.occurrence;
@@ -1716,10 +1721,10 @@ public class RiskAssessment extends DomainResource {
         children.add(new Property("method", "CodeableConcept", "The algorithm, process or mechanism used to evaluate the risk.", 0, 1, method));
         children.add(new Property("code", "CodeableConcept", "The type of the risk assessment performed.", 0, 1, code));
         children.add(new Property("subject", "Reference(Patient|Group)", "The patient or group the risk assessment applies to.", 0, 1, subject));
-        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter where the assessment was performed.", 0, 1, context));
+        children.add(new Property("encounter", "Reference(Encounter)", "The encounter where the assessment was performed.", 0, 1, encounter));
         children.add(new Property("occurrence[x]", "dateTime|Period", "The date (and possibly time) the risk assessment was performed.", 0, 1, occurrence));
         children.add(new Property("condition", "Reference(Condition)", "For assessments or prognosis specific to a particular condition, indicates the condition being assessed.", 0, 1, condition));
-        children.add(new Property("performer", "Reference(Practitioner|Device)", "The provider or software application that performed the assessment.", 0, 1, performer));
+        children.add(new Property("performer", "Reference(Practitioner|PractitionerRole|Device)", "The provider or software application that performed the assessment.", 0, 1, performer));
         children.add(new Property("reasonCode", "CodeableConcept", "The reason the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
         children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Resources supporting the reason the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         children.add(new Property("basis", "Reference(Any)", "Indicates the source data considered as part of the assessment (for example, FamilyHistory, Observations, Procedures, Conditions, etc.).", 0, java.lang.Integer.MAX_VALUE, basis));
@@ -1738,13 +1743,13 @@ public class RiskAssessment extends DomainResource {
         case -1077554975: /*method*/  return new Property("method", "CodeableConcept", "The algorithm, process or mechanism used to evaluate the risk.", 0, 1, method);
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The type of the risk assessment performed.", 0, 1, code);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient or group the risk assessment applies to.", 0, 1, subject);
-        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "The encounter where the assessment was performed.", 0, 1, context);
+        case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "The encounter where the assessment was performed.", 0, 1, encounter);
         case -2022646513: /*occurrence[x]*/  return new Property("occurrence[x]", "dateTime|Period", "The date (and possibly time) the risk assessment was performed.", 0, 1, occurrence);
         case 1687874001: /*occurrence*/  return new Property("occurrence[x]", "dateTime|Period", "The date (and possibly time) the risk assessment was performed.", 0, 1, occurrence);
         case -298443636: /*occurrenceDateTime*/  return new Property("occurrence[x]", "dateTime|Period", "The date (and possibly time) the risk assessment was performed.", 0, 1, occurrence);
         case 1397156594: /*occurrencePeriod*/  return new Property("occurrence[x]", "dateTime|Period", "The date (and possibly time) the risk assessment was performed.", 0, 1, occurrence);
         case -861311717: /*condition*/  return new Property("condition", "Reference(Condition)", "For assessments or prognosis specific to a particular condition, indicates the condition being assessed.", 0, 1, condition);
-        case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|Device)", "The provider or software application that performed the assessment.", 0, 1, performer);
+        case 481140686: /*performer*/  return new Property("performer", "Reference(Practitioner|PractitionerRole|Device)", "The provider or software application that performed the assessment.", 0, 1, performer);
         case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "The reason the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
         case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference)", "Resources supporting the reason the risk assessment was performed.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
         case 93508670: /*basis*/  return new Property("basis", "Reference(Any)", "Indicates the source data considered as part of the assessment (for example, FamilyHistory, Observations, Procedures, Conditions, etc.).", 0, java.lang.Integer.MAX_VALUE, basis);
@@ -1766,7 +1771,7 @@ public class RiskAssessment extends DomainResource {
         case -1077554975: /*method*/ return this.method == null ? new Base[0] : new Base[] {this.method}; // CodeableConcept
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
-        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case 1687874001: /*occurrence*/ return this.occurrence == null ? new Base[0] : new Base[] {this.occurrence}; // Type
         case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // Reference
         case 481140686: /*performer*/ return this.performer == null ? new Base[0] : new Base[] {this.performer}; // Reference
@@ -1806,8 +1811,8 @@ public class RiskAssessment extends DomainResource {
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           return value;
-        case 951530927: // context
-          this.context = castToReference(value); // Reference
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
           return value;
         case 1687874001: // occurrence
           this.occurrence = castToType(value); // Type
@@ -1858,8 +1863,8 @@ public class RiskAssessment extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
-        } else if (name.equals("context")) {
-          this.context = castToReference(value); // Reference
+        } else if (name.equals("encounter")) {
+          this.encounter = castToReference(value); // Reference
         } else if (name.equals("occurrence[x]")) {
           this.occurrence = castToType(value); // Type
         } else if (name.equals("condition")) {
@@ -1893,7 +1898,7 @@ public class RiskAssessment extends DomainResource {
         case -1077554975:  return getMethod(); 
         case 3059181:  return getCode(); 
         case -1867885268:  return getSubject(); 
-        case 951530927:  return getContext(); 
+        case 1524132147:  return getEncounter(); 
         case -2022646513:  return getOccurrence(); 
         case 1687874001:  return getOccurrence(); 
         case -861311717:  return getCondition(); 
@@ -1919,7 +1924,7 @@ public class RiskAssessment extends DomainResource {
         case -1077554975: /*method*/ return new String[] {"CodeableConcept"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
-        case 951530927: /*context*/ return new String[] {"Reference"};
+        case 1524132147: /*encounter*/ return new String[] {"Reference"};
         case 1687874001: /*occurrence*/ return new String[] {"dateTime", "Period"};
         case -861311717: /*condition*/ return new String[] {"Reference"};
         case 481140686: /*performer*/ return new String[] {"Reference"};
@@ -1962,9 +1967,9 @@ public class RiskAssessment extends DomainResource {
           this.subject = new Reference();
           return this.subject;
         }
-        else if (name.equals("context")) {
-          this.context = new Reference();
-          return this.context;
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
         }
         else if (name.equals("occurrenceDateTime")) {
           this.occurrence = new DateTimeType();
@@ -2023,7 +2028,7 @@ public class RiskAssessment extends DomainResource {
         dst.method = method == null ? null : method.copy();
         dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
-        dst.context = context == null ? null : context.copy();
+        dst.encounter = encounter == null ? null : encounter.copy();
         dst.occurrence = occurrence == null ? null : occurrence.copy();
         dst.condition = condition == null ? null : condition.copy();
         dst.performer = performer == null ? null : performer.copy();
@@ -2069,7 +2074,7 @@ public class RiskAssessment extends DomainResource {
         RiskAssessment o = (RiskAssessment) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(parent, o.parent, true)
            && compareDeep(status, o.status, true) && compareDeep(method, o.method, true) && compareDeep(code, o.code, true)
-           && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true) && compareDeep(occurrence, o.occurrence, true)
+           && compareDeep(subject, o.subject, true) && compareDeep(encounter, o.encounter, true) && compareDeep(occurrence, o.occurrence, true)
            && compareDeep(condition, o.condition, true) && compareDeep(performer, o.performer, true) && compareDeep(reasonCode, o.reasonCode, true)
            && compareDeep(reasonReference, o.reasonReference, true) && compareDeep(basis, o.basis, true) && compareDeep(prediction, o.prediction, true)
            && compareDeep(mitigation, o.mitigation, true) && compareDeep(note, o.note, true);
@@ -2087,8 +2092,8 @@ public class RiskAssessment extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, basedOn, parent
-          , status, method, code, subject, context, occurrence, condition, performer, reasonCode
-          , reasonReference, basis, prediction, mitigation, note);
+          , status, method, code, subject, encounter, occurrence, condition, performer
+          , reasonCode, reasonReference, basis, prediction, mitigation, note);
       }
 
   @Override
@@ -2170,7 +2175,7 @@ public class RiskAssessment extends DomainResource {
    * Path: <b>RiskAssessment.performer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="performer", path="RiskAssessment.performer", description="Who did assessment?", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Practitioner.class } )
+  @SearchParamDefinition(name="performer", path="RiskAssessment.performer", description="Who did assessment?", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Device"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Device.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_PERFORMER = "performer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>performer</b>
@@ -2305,17 +2310,17 @@ public class RiskAssessment extends DomainResource {
    * <p>
    * Description: <b>Where was assessment performed?</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>RiskAssessment.context</b><br>
+   * Path: <b>RiskAssessment.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="RiskAssessment.context.where(resolve() is Encounter)", description="Where was assessment performed?", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="encounter", path="RiskAssessment.encounter", description="Where was assessment performed?", type="reference", target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
    * <p>
    * Description: <b>Where was assessment performed?</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>RiskAssessment.context</b><br>
+   * Path: <b>RiskAssessment.encounter</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);

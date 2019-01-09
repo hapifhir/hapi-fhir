@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -1588,21 +1588,21 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchNumberWrongParam() {
-		ImmunizationRecommendation ir1 = new ImmunizationRecommendation();
-		ir1.addRecommendation().setDoseNumber(new PositiveIntType(1));
-		String id1 = myImmunizationRecommendationDao.create(ir1).getId().toUnqualifiedVersionless().getValue();
+		MolecularSequence ir1 = new MolecularSequence();
+		ir1.addVariant().setStart(1);
+		String id1 = myMolecularSequenceDao.create(ir1).getId().toUnqualifiedVersionless().getValue();
 
-		ImmunizationRecommendation ir2 = new ImmunizationRecommendation();
-		ir2.addRecommendation().setDoseNumber(new PositiveIntType(2));
-		String id2 = myImmunizationRecommendationDao.create(ir2).getId().toUnqualifiedVersionless().getValue();
+		MolecularSequence ir2 = new MolecularSequence();
+		ir2.addVariant().setStart(2);
+		String id2 = myMolecularSequenceDao.create(ir2).getId().toUnqualifiedVersionless().getValue();
 
 		{
-			IBundleProvider found = myImmunizationRecommendationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ImmunizationRecommendation.SP_DOSE_NUMBER, new NumberParam("1")));
+			IBundleProvider found = myMolecularSequenceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(MolecularSequence.SP_VARIANT_START, new NumberParam("1")));
 			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id1));
 			assertEquals(1, found.size().intValue());
 		}
 		{
-			IBundleProvider found = myImmunizationRecommendationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ImmunizationRecommendation.SP_DOSE_SEQUENCE, new NumberParam("1")));
+			IBundleProvider found = myMolecularSequenceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(MolecularSequence.SP_VARIANT_END, new NumberParam("1")));
 			assertThat(toUnqualifiedVersionlessIdValues(found), empty());
 			assertEquals(0, found.size().intValue());
 		}

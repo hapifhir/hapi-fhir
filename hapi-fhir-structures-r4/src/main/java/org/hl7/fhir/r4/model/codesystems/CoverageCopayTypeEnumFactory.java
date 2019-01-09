@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Mon, Jul 2, 2018 20:32-0400 for FHIR v3.4.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -53,6 +53,12 @@ public class CoverageCopayTypeEnumFactory implements EnumFactory<CoverageCopayTy
       return CoverageCopayType.URGENTCARE;
     if ("copaypct".equals(codeString))
       return CoverageCopayType.COPAYPCT;
+    if ("copay".equals(codeString))
+      return CoverageCopayType.COPAY;
+    if ("deductible".equals(codeString))
+      return CoverageCopayType.DEDUCTIBLE;
+    if ("maxoutofpocket".equals(codeString))
+      return CoverageCopayType.MAXOUTOFPOCKET;
     throw new IllegalArgumentException("Unknown CoverageCopayType code '"+codeString+"'");
   }
 
@@ -71,6 +77,12 @@ public class CoverageCopayTypeEnumFactory implements EnumFactory<CoverageCopayTy
       return "urgentcare";
     if (code == CoverageCopayType.COPAYPCT)
       return "copaypct";
+    if (code == CoverageCopayType.COPAY)
+      return "copay";
+    if (code == CoverageCopayType.DEDUCTIBLE)
+      return "deductible";
+    if (code == CoverageCopayType.MAXOUTOFPOCKET)
+      return "maxoutofpocket";
     return "?";
   }
 

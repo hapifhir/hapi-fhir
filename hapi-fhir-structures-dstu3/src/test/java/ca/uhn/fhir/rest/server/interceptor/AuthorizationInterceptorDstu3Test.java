@@ -4,8 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -61,6 +61,7 @@ public class AuthorizationInterceptorDstu3Test {
 	private static boolean ourHitMethod;
 	private static int ourPort;
 	private static List<Resource> ourReturn;
+	private static List<IBaseResource> ourDeleted;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
 
@@ -72,6 +73,7 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 		ourServlet.setTenantIdentificationStrategy(null);
 		ourReturn = null;
+		ourDeleted = null;
 		ourHitMethod = false;
 		ourConditionalCreateId = "1123";
 	}
@@ -562,8 +564,7 @@ public class AuthorizationInterceptorDstu3Test {
 		httpPost.setEntity(createFhirResourceEntity(input));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
+		assertEquals(422, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -595,6 +596,75 @@ public class AuthorizationInterceptorDstu3Test {
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
 		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
+
+	@Test
+	public void testDeleteByCompartmentUsingTransaction() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").delete().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.allow("Rule 2").delete().resourcesOfType(Observation.class).inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.build();
+			}
+		});
+
+		HttpPost httpPost;
+		HttpResponse status;
+		String responseString;
+
+		Bundle responseBundle = new Bundle();
+		responseBundle.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+
+		ourHitMethod = false;
+		Bundle bundle = new Bundle();
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createPatient(2));
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/2");
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString,403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		bundle.getEntry().clear();
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/1");
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createPatient(1));
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString,200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		bundle.getEntry().clear();
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?subject=Patient/2");
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createObservation(99, "Patient/2"));
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString,403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		bundle.getEntry().clear();
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?subject=Patient/1");
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createObservation(99, "Patient/1"));
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString,200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
 
@@ -645,6 +715,13 @@ public class AuthorizationInterceptorDstu3Test {
 					.denyAll("Default Rule")
 					.build();
 			}
+
+			@Override
+			protected void handleDeny(Verdict decision) {
+				// Make sure the toString() method on Verdict never fails
+				ourLog.info("Denying with decision: {}", decision);
+				super.handleDeny(decision);
+			}
 		});
 
 		HttpGet httpGet;
@@ -684,6 +761,65 @@ public class AuthorizationInterceptorDstu3Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by rule: Default Rule"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
+
+	@Test
+	public void testDenyAllByDefault() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.build();
+			}
+
+			@Override
+			protected void handleDeny(Verdict decision) {
+				// Make sure the toString() method on Verdict never fails
+				ourLog.info("Denying with decision: {}", decision);
+				super.handleDeny(decision);
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 	}
@@ -2459,6 +2595,85 @@ public class AuthorizationInterceptorDstu3Test {
 
 	}
 
+	@Test
+	public void testTransactionWithSearch() throws IOException {
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("read patient").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll("deny all")
+					.build();
+			}
+		});
+
+		// Request is a transaction with 1 search
+		Bundle requestBundle = new Bundle();
+		requestBundle.setType(Bundle.BundleType.TRANSACTION);
+		String patientId = "10000003857";
+		Bundle.BundleEntryComponent bundleEntryComponent = requestBundle.addEntry();
+		Bundle.BundleEntryRequestComponent bundleEntryRequestComponent = new Bundle.BundleEntryRequestComponent();
+		bundleEntryRequestComponent.setMethod(Bundle.HTTPVerb.GET);
+		bundleEntryRequestComponent.setUrl(ResourceType.Patient + "?identifier=" + patientId);
+		bundleEntryComponent.setRequest(bundleEntryRequestComponent);
+
+		/*
+		 * Response is a transaction response containing the search results
+		 */
+		Bundle searchResponseBundle = new Bundle();
+		Patient patent = new Patient();
+		patent.setActive(true);
+		patent.setId("Patient/123");
+		searchResponseBundle.addEntry().setResource(patent);
+
+		Bundle responseBundle = new Bundle();
+		responseBundle
+			.addEntry()
+			.setResource(searchResponseBundle);
+		ourReturn = Collections.singletonList(responseBundle);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(requestBundle));
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		String resp = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+	}
+
+	@Test
+	public void testTransactionWithNoBundleType() throws IOException {
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("read patient").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll("deny all")
+					.build();
+			}
+		});
+
+		// Request is a transaction with 1 search
+		Bundle requestBundle = new Bundle();
+		String patientId = "10000003857";
+		Bundle.BundleEntryComponent bundleEntryComponent = requestBundle.addEntry();
+		Bundle.BundleEntryRequestComponent bundleEntryRequestComponent = new Bundle.BundleEntryRequestComponent();
+		bundleEntryRequestComponent.setMethod(Bundle.HTTPVerb.GET);
+		bundleEntryRequestComponent.setUrl(ResourceType.Patient + "?identifier=" + patientId);
+		bundleEntryComponent.setRequest(bundleEntryRequestComponent);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(requestBundle));
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		String resp = extractResponseAndClose(status);
+		assertEquals(422, status.getStatusLine().getStatusCode());
+		assertThat(resp, containsString("Invalid request Bundle.type value for transaction: \\\"\\\""));
+
+	}
+
 	/**
 	 * See #762
 	 */
@@ -3374,11 +3589,18 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 
 		@Transaction()
-		public Bundle search(@TransactionParam Bundle theInput) {
+		public Bundle search(IRequestOperationCallback theRequestOperationCallback, @TransactionParam Bundle theInput) {
 			ourHitMethod = true;
+			if (ourDeleted != null){
+				for (IBaseResource next : ourDeleted) {
+					theRequestOperationCallback.resourceDeleted(next);
+				}
+			}
 			return (Bundle) ourReturn.get(0);
 		}
 
 	}
+
+
 
 }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -224,10 +224,10 @@ public class ChargeItemDefinition extends MetadataResource {
         protected StringType language;
 
         /**
-         * An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context evironment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.
+         * An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context environment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.
          */
         @Child(name = "expression", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Boolean-valued expression", formalDefinition="An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context evironment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied." )
+        @Description(shortDefinition="Boolean-valued expression", formalDefinition="An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context environment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied." )
         protected StringType expression;
 
         private static final long serialVersionUID = 1354288281L;
@@ -338,7 +338,7 @@ public class ChargeItemDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #expression} (An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context evironment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @return {@link #expression} (An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context environment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public StringType getExpressionElement() { 
           if (this.expression == null)
@@ -358,7 +358,7 @@ public class ChargeItemDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #expression} (An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context evironment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
+         * @param value {@link #expression} (An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context environment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.). This is the underlying object with id, value and extensions. The accessor "getExpression" gives direct access to the value
          */
         public ChargeItemDefinitionApplicabilityComponent setExpressionElement(StringType value) { 
           this.expression = value;
@@ -366,14 +366,14 @@ public class ChargeItemDefinition extends MetadataResource {
         }
 
         /**
-         * @return An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context evironment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.
+         * @return An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context environment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.
          */
         public String getExpression() { 
           return this.expression == null ? null : this.expression.getValue();
         }
 
         /**
-         * @param value An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context evironment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.
+         * @param value An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context environment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.
          */
         public ChargeItemDefinitionApplicabilityComponent setExpression(String value) { 
           if (Utilities.noString(value))
@@ -390,7 +390,7 @@ public class ChargeItemDefinition extends MetadataResource {
           super.listChildren(children);
           children.add(new Property("description", "string", "A brief, natural language description of the condition that effectively communicates the intended semantics.", 0, 1, description));
           children.add(new Property("language", "string", "The media type of the language for the expression, e.g. \"text/cql\" for Clinical Query Language expressions or \"text/fhirpath\" for FHIRPath expressions.", 0, 1, language));
-          children.add(new Property("expression", "string", "An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context evironment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.", 0, 1, expression));
+          children.add(new Property("expression", "string", "An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context environment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.", 0, 1, expression));
         }
 
         @Override
@@ -398,7 +398,7 @@ public class ChargeItemDefinition extends MetadataResource {
           switch (_hash) {
           case -1724546052: /*description*/  return new Property("description", "string", "A brief, natural language description of the condition that effectively communicates the intended semantics.", 0, 1, description);
           case -1613589672: /*language*/  return new Property("language", "string", "The media type of the language for the expression, e.g. \"text/cql\" for Clinical Query Language expressions or \"text/fhirpath\" for FHIRPath expressions.", 0, 1, language);
-          case -1795452264: /*expression*/  return new Property("expression", "string", "An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context evironment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.", 0, 1, expression);
+          case -1795452264: /*expression*/  return new Property("expression", "string", "An expression that returns true or false, indicating whether the condition is satisfied. When using FHIRPath expressions, the %context environment variable must be replaced at runtime with the ChargeItem resource to which this definition is applied.", 0, 1, expression);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -535,10 +535,10 @@ public class ChargeItemDefinition extends MetadataResource {
         protected List<ChargeItemDefinitionApplicabilityComponent> applicability;
 
         /**
-         * The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under developement. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated.
+         * The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under development. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated.
          */
         @Child(name = "priceComponent", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Components of total line item price", formalDefinition="The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under developement. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated." )
+        @Description(shortDefinition="Components of total line item price", formalDefinition="The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under development. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated." )
         protected List<ChargeItemDefinitionPropertyGroupPriceComponentComponent> priceComponent;
 
         private static final long serialVersionUID = 1723436176L;
@@ -604,7 +604,7 @@ public class ChargeItemDefinition extends MetadataResource {
         }
 
         /**
-         * @return {@link #priceComponent} (The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under developement. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated.)
+         * @return {@link #priceComponent} (The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under development. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated.)
          */
         public List<ChargeItemDefinitionPropertyGroupPriceComponentComponent> getPriceComponent() { 
           if (this.priceComponent == null)
@@ -659,14 +659,14 @@ public class ChargeItemDefinition extends MetadataResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("applicability", "@ChargeItemDefinition.applicability", "Expressions that describe applicability criteria for the priceComponent.", 0, java.lang.Integer.MAX_VALUE, applicability));
-          children.add(new Property("priceComponent", "", "The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under developement. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated.", 0, java.lang.Integer.MAX_VALUE, priceComponent));
+          children.add(new Property("priceComponent", "", "The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under development. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated.", 0, java.lang.Integer.MAX_VALUE, priceComponent));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -1526770491: /*applicability*/  return new Property("applicability", "@ChargeItemDefinition.applicability", "Expressions that describe applicability criteria for the priceComponent.", 0, java.lang.Integer.MAX_VALUE, applicability);
-          case 1219095988: /*priceComponent*/  return new Property("priceComponent", "", "The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under developement. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated.", 0, java.lang.Integer.MAX_VALUE, priceComponent);
+          case 1219095988: /*priceComponent*/  return new Property("priceComponent", "", "The price for a ChargeItem may be calculated as a base price with surcharges/deductions that apply in certain conditions. A ChargeItemDefinition resource that defines the prices, factors and conditions that apply to a billing code is currently under development. The priceComponent element can be used to offer transparency to the recipient of the Invoice of how the prices have been calculated.", 0, java.lang.Integer.MAX_VALUE, priceComponent);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1930,7 +1930,7 @@ public class ChargeItemDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate charge item definition instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate charge item definition instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -2414,7 +2414,7 @@ public class ChargeItemDefinition extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the charge item definition.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the charge item definition from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate charge item definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate charge item definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the charge item definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the charge item definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the charge item definition.", 0, 1, copyright));
         children.add(new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate));
@@ -2442,7 +2442,7 @@ public class ChargeItemDefinition extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the charge item definition.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the charge item definition from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate charge item definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate charge item definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the charge item definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the charge item definition and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the charge item definition.", 0, 1, copyright);
         case 223539345: /*approvalDate*/  return new Property("approvalDate", "date", "The date on which the resource content was approved by the publisher. Approval happens once when the content is officially approved for usage.", 0, 1, approvalDate);

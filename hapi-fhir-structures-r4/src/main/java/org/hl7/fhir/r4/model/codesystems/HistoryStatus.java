@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -49,7 +49,7 @@ public enum HistoryStatus {
          */
         ENTEREDINERROR, 
         /**
-         * Health information for this individual is unavailable/unknown.
+         * Health information for this family member is unavailable/unknown.
          */
         HEALTHUNKNOWN, 
         /**
@@ -86,7 +86,7 @@ public enum HistoryStatus {
             case PARTIAL: return "Some health information is known and captured, but not complete - see notes for details.";
             case COMPLETED: return "All available related health information is captured as of the date (and possibly time) when the family member history was taken.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
-            case HEALTHUNKNOWN: return "Health information for this individual is unavailable/unknown.";
+            case HEALTHUNKNOWN: return "Health information for this family member is unavailable/unknown.";
             default: return "?";
           }
         }
@@ -94,8 +94,8 @@ public enum HistoryStatus {
           switch (this) {
             case PARTIAL: return "Partial";
             case COMPLETED: return "Completed";
-            case ENTEREDINERROR: return "Entered in error";
-            case HEALTHUNKNOWN: return "Health unknown";
+            case ENTEREDINERROR: return "Entered in Error";
+            case HEALTHUNKNOWN: return "Health Unknown";
             default: return "?";
           }
     }

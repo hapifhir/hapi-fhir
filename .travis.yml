@@ -8,10 +8,12 @@ dist: trusty
 
 language: java
 jdk:
-  - oraclejdk9
+    - openjdk11
+   #- oraclejdk9
+
 env:
   global:
-    - MAVEN_OPTS="-Xmx1024m"
+    - MAVEN_OPTS="-Xmx10244M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=1024M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
 
 cache:
   directories:
@@ -29,4 +31,4 @@ before_script:
 script:
 #  - mvn -e -B clean install && cd hapi-fhir-ra && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID clean test jacoco:report coveralls:report
 #  - mvn -Dci=true -e -B -P ALLMODULES,NOPARALLEL,ERRORPRONE clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report 
-  - mvn -Dci=true -e -B -P ALLMODULES,REDUCED_JPA_TESTS,ERRORPRONE,JACOCO clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report;
+  - mvn -Dci=true -e -B -P ALLMODULES,REDUCED_JPA_TESTS,JACOCO clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report;

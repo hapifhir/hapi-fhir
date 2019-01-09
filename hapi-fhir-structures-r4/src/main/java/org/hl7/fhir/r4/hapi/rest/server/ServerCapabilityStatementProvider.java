@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.r4.model.codesystems.UnknownContentCode;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -71,13 +72,15 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
   private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerCapabilityStatementProvider.class);
   private boolean myCache = true;
   private volatile CapabilityStatement myCapabilityStatement;
+  private IdentityHashMap<SearchMethodBinding, String> myNamedSearchMethodBindingToName;
+  private HashMap<String, List<SearchMethodBinding>> mySearchNameToBindings;
   private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
   private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
   private String myPublisher = "Not provided";
   private Callable<RestulfulServerConfiguration> myServerConfiguration;
 
   /**
-   * No-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
+   * No-arg constructor and setter so that the ServerConformanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
    */
   public ServerCapabilityStatementProvider() {
     super();
@@ -119,12 +122,12 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
   }
 
   private Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {
-    Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<>();
+    Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<String, List<BaseMethodBinding<?>>>();
     for (ResourceBinding next : getServerConfiguration().getResourceBindings()) {
       String resourceName = next.getResourceName();
       for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
         if (resourceToMethods.containsKey(resourceName) == false) {
-          resourceToMethods.put(resourceName, new ArrayList<>());
+          resourceToMethods.put(resourceName, new ArrayList<BaseMethodBinding<?>>());
         }
         resourceToMethods.get(resourceName).add(nextMethodBinding);
       }
@@ -149,6 +152,17 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
       }
     }
     return DateTimeType.now();
+  }
+
+  private String createNamedQueryName(SearchMethodBinding searchMethodBinding) {
+    StringBuilder retVal = new StringBuilder();
+    if (searchMethodBinding.getResourceName() != null) {
+      retVal.append(searchMethodBinding.getResourceName());
+    }
+    retVal.append("-query-");
+    retVal.append(searchMethodBinding.getQueryName());
+
+    return retVal.toString();
   }
 
   private String createOperationName(OperationMethodBinding theMethodBinding) {
@@ -207,7 +221,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
     retVal.setPublisher(myPublisher);
     retVal.setDateElement(conformanceDate());
-    retVal.setFhirVersion(FhirVersionEnum.R4.getFhirVersionString());
+    retVal.setFhirVersion(Enumerations.FHIRVersion.fromCode(FhirVersionEnum.R4.getFhirVersionString()));
 
     ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
     String serverBase = getServerConfiguration().getServerAddressStrategy().determineServerBase(servletContext, theRequest);
@@ -230,14 +244,15 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
     Set<String> operationNames = new HashSet<>();
 
     Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
-    for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet())
+    for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+
       if (nextEntry.getKey().isEmpty() == false) {
-        Set<TypeRestfulInteraction> resourceOps = new HashSet<TypeRestfulInteraction>();
+        Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
         CapabilityStatementRestResourceComponent resource = rest.addResource();
         String resourceName = nextEntry.getKey();
         RuntimeResourceDefinition def = getServerConfiguration().getFhirContext().getResourceDefinition(resourceName);
         resource.getTypeElement().setValue(def.getName());
-        resource.getProfileElement().setValue(def.getResourceProfile(serverBase));
+        resource.getProfileElement().setValue((def.getResourceProfile(serverBase)));
 
         TreeSet<String> includes = new TreeSet<>();
 
@@ -293,13 +308,21 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
           checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
 
           if (nextMethodBinding instanceof SearchMethodBinding) {
-            handleSearchMethodBinding(rest, resource, resourceName, def, includes, (SearchMethodBinding) nextMethodBinding);
+            SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
+            if (methodBinding.getQueryName() != null) {
+              String queryName = myNamedSearchMethodBindingToName.get(methodBinding);
+              if (operationNames.add(queryName)) {
+                rest.addOperation().setName(methodBinding.getQueryName()).setDefinition(("OperationDefinition/" + queryName));
+              }
+            } else {
+              handleNamelessSearchMethodBinding(rest, resource, resourceName, def, includes, (SearchMethodBinding) nextMethodBinding);
+            }
           } else if (nextMethodBinding instanceof OperationMethodBinding) {
             OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
             String opName = myOperationBindingToName.get(methodBinding);
             if (operationNames.add(opName)) {
               // Only add each operation (by name) once
-              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition("OperationDefinition/" + opName);
+              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(("OperationDefinition/" + opName));
             }
           }
 
@@ -334,19 +357,19 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
             String opName = myOperationBindingToName.get(methodBinding);
             if (operationNames.add(opName)) {
               ourLog.debug("Found bound operation: {}", opName);
-              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition("OperationDefinition/" + opName);
+              rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(("OperationDefinition/" + opName));
             }
           }
         }
       }
+    }
 
     myCapabilityStatement = retVal;
     return retVal;
   }
 
-
-  private void handleSearchMethodBinding(CapabilityStatementRestComponent rest, CapabilityStatementRestResourceComponent resource, String resourceName, RuntimeResourceDefinition def, TreeSet<String> includes,
-                                         SearchMethodBinding searchMethodBinding) {
+  private void handleNamelessSearchMethodBinding(CapabilityStatementRestComponent rest, CapabilityStatementRestResourceComponent resource, String resourceName, RuntimeResourceDefinition def, TreeSet<String> includes,
+                                                 SearchMethodBinding searchMethodBinding) {
     includes.addAll(searchMethodBinding.getIncludes());
 
     List<IParameter> params = searchMethodBinding.getParameters();
@@ -434,6 +457,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
   @Initialize
   public void initializeOperations() {
+    myNamedSearchMethodBindingToName = new IdentityHashMap<>();
+    mySearchNameToBindings = new HashMap<>();
     myOperationBindingToName = new IdentityHashMap<>();
     myOperationNameToBindings = new HashMap<>();
 
@@ -452,9 +477,23 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
           myOperationBindingToName.put(methodBinding, name);
           if (myOperationNameToBindings.containsKey(name) == false) {
-            myOperationNameToBindings.put(name, new ArrayList<OperationMethodBinding>());
+            myOperationNameToBindings.put(name, new ArrayList<>());
           }
           myOperationNameToBindings.get(name).add(methodBinding);
+        } else if (nextMethodBinding instanceof SearchMethodBinding) {
+          SearchMethodBinding methodBinding = (SearchMethodBinding) nextMethodBinding;
+          if (myNamedSearchMethodBindingToName.containsKey(methodBinding)) {
+            continue;
+          }
+
+          String name = createNamedQueryName(methodBinding);
+          ourLog.debug("Detected named query: {}", name);
+
+          myNamedSearchMethodBindingToName.put(methodBinding, name);
+          if (!mySearchNameToBindings.containsKey(name)) {
+            mySearchNameToBindings.put(name, new ArrayList<>());
+          }
+          mySearchNameToBindings.get(name).add(methodBinding);
         }
       }
     }
@@ -465,11 +504,69 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
     if (theId == null || theId.hasIdPart() == false) {
       throw new ResourceNotFoundException(theId);
     }
-    List<OperationMethodBinding> sharedDescriptions = myOperationNameToBindings.get(theId.getIdPart());
-    if (sharedDescriptions == null || sharedDescriptions.isEmpty()) {
-      throw new ResourceNotFoundException(theId);
+    List<OperationMethodBinding> operationBindings = myOperationNameToBindings.get(theId.getIdPart());
+    if (operationBindings != null && !operationBindings.isEmpty()) {
+      return readOperationDefinitionForOperation(operationBindings);
+    }
+    List<SearchMethodBinding> searchBindings = mySearchNameToBindings.get(theId.getIdPart());
+    if (searchBindings != null && !searchBindings.isEmpty()) {
+      return readOperationDefinitionForNamedSearch(searchBindings);
+    }
+    throw new ResourceNotFoundException(theId);
+  }
+
+  private OperationDefinition readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {
+    OperationDefinition op = new OperationDefinition();
+    op.setStatus(PublicationStatus.ACTIVE);
+    op.setKind(OperationKind.QUERY);
+    op.setAffectsState(false);
+
+    op.setSystem(false);
+    op.setType(false);
+    op.setInstance(false);
+
+    Set<String> inParams = new HashSet<>();
+
+    for (SearchMethodBinding binding : bindings) {
+      if (isNotBlank(binding.getDescription())) {
+        op.setDescription(binding.getDescription());
+      }
+      if (isBlank(binding.getResourceProviderResourceName())) {
+        op.setSystem(true);
+      } else {
+        op.setType(true);
+        op.addResourceElement().setValue(binding.getResourceProviderResourceName());
+      }
+      op.setCode(binding.getQueryName());
+      for (IParameter nextParamUntyped : binding.getParameters()) {
+        if (nextParamUntyped instanceof SearchParameter) {
+          SearchParameter nextParam = (SearchParameter) nextParamUntyped;
+          if (!inParams.add(nextParam.getName())) {
+            continue;
+          }
+          OperationDefinitionParameterComponent param = op.addParameter();
+          param.setUse(OperationParameterUse.IN);
+          param.setType("string");
+          param.getSearchTypeElement().setValueAsString(nextParam.getParamType().getCode());
+          param.setMin(nextParam.isRequired() ? 1 : 0);
+          param.setMax("1");
+          param.setName(nextParam.getName());
+        }
+      }
+
+      if (isBlank(op.getName())) {
+        if (isNotBlank(op.getDescription())) {
+          op.setName(op.getDescription());
+        } else {
+          op.setName(op.getCode());
+        }
+      }
     }
 
+    return op;
+  }
+
+  private OperationDefinition readOperationDefinitionForOperation(List<OperationMethodBinding> bindings) {
     OperationDefinition op = new OperationDefinition();
     op.setStatus(PublicationStatus.ACTIVE);
     op.setKind(OperationKind.OPERATION);
@@ -480,10 +577,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
     op.setType(false);
     op.setInstance(false);
 
-    Set<String> inParams = new HashSet<String>();
-    Set<String> outParams = new HashSet<String>();
+    Set<String> inParams = new HashSet<>();
+    Set<String> outParams = new HashSet<>();
 
-    for (OperationMethodBinding sharedDescription : sharedDescriptions) {
+    for (OperationMethodBinding sharedDescription : bindings) {
       if (isNotBlank(sharedDescription.getDescription())) {
         op.setDescription(sharedDescription.getDescription());
       }
@@ -569,8 +666,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
    * See the class documentation for an important note if you are extending this class
    * </p>
    */
-  public void setCache(boolean theCache) {
+  public ServerCapabilityStatementProvider setCache(boolean theCache) {
     myCache = theCache;
+    return this;
   }
 
   @Override

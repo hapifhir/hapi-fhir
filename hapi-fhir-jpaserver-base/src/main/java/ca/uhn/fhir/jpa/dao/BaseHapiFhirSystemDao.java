@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -28,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,6 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
-	private ReentrantLock myReindexLock = new ReentrantLock(false);
-	@Autowired
-	private ITermConceptDao myTermConceptDao;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private PlatformTransactionManager myTxManager;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
