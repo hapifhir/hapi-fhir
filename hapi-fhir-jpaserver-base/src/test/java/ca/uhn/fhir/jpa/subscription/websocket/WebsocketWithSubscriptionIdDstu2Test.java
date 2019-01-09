@@ -41,7 +41,7 @@ import static org.junit.Assert.assertThat;
  * <p>
  * To execute the following test, execute it the following way:
  * 0. execute 'clean' test
- * 1. Execute the 'sendSubscription' test
+ * 1. Execute the 'createSubscription' test
  * 2. Update the subscription id in the 'attachWebSocket' test
  * 3. Execute the 'attachWebSocket' test
  * 4. Execute the 'sendObservation' test

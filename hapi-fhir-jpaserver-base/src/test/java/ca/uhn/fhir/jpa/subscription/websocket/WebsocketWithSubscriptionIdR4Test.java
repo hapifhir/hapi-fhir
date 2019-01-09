@@ -34,7 +34,7 @@ import static org.junit.Assert.assertThat;
  * 0. execute 'clean' test
  * 1. Execute the 'createPatient' test
  * 2. Update the patient id static variable
- * 3. Execute the 'sendSubscription' test
+ * 3. Execute the 'createSubscription' test
  * 4. Update the subscription id static variable
  * 5. Execute the 'attachWebSocket' test
  * 6. Execute the 'sendObservation' test
