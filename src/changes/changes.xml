@@ -251,6 +251,10 @@
 				AuthorizationInterceptor is now able to authorize DELETE operations performed via a
 				transaction operation. Previously these were always denied.
 			</action>
+			<action type="add" issue="1065">
+				OperationDefinitions are now created for named queries in server
+				module. Thanks to Stig Døssing for the pull request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

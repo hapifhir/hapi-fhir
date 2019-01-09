@@ -15,8 +15,6 @@ import org.hl7.fhir.r4.utils.FHIRPathEngine.ExpressionNodeWithOffset;
 import org.hl7.fhir.r4.utils.FHIRPathEngine.IEvaluationContext;
 import org.hl7.fhir.utilities.Utilities;
 
-import javafx.scene.Parent;
-
 public class LiquidEngine implements IEvaluationContext {
 
   public interface ILiquidEngineIcludeResolver {
