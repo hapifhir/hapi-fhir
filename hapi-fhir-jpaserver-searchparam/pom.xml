@@ -88,7 +88,6 @@
 		</dependency>
 
 		<!-- Spring -->
-
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
@@ -110,6 +109,12 @@
 		<dependency>
 			<groupId>org.jscience</groupId>
 			<artifactId>jscience</artifactId>
+		</dependency>
+
+		<!-- Java -->
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
 
 		<!-- Testing -->

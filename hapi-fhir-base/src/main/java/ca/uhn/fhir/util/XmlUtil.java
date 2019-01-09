@@ -1687,6 +1687,9 @@ public class XmlUtil {
 		XMLInputFactory inputFactory;
 		try {
 			inputFactory = XMLInputFactory.newInstance();
+			if (inputFactory.isPropertySupported(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)) {
+				inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
+			}
 			throwUnitTestExceptionIfConfiguredToDoSo();
 		} catch (Throwable e) {
 			throw new ConfigurationException("Unable to initialize StAX - XML processing is disabled", e);
