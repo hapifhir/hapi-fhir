@@ -264,6 +264,12 @@
 				OperationDefinitions are now created for named queries in server
 				module. Thanks to Stig Døssing for the pull request!
 			</action>
+			<action type="add">
+				A new server interceptor has been added called "SearchNarrowingInterceptor".
+				This interceptor can be used to automatically narrow the scope of searches
+				performed by the user to limit them to specific resources or compartments
+				that the user should have access to.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

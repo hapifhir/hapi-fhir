@@ -81,7 +81,7 @@ public abstract class BaseQueryParameter implements IParameter {
 				String paramName = isNotBlank(qualifier) ? getName() + qualifier : getName();
 				List<String> paramValues = theTargetQueryArguments.get(paramName);
 				if (paramValues == null) {
-					paramValues = new ArrayList<String>(value.size());
+					paramValues = new ArrayList<>(value.size());
 					theTargetQueryArguments.put(paramName, paramValues);
 				}
 
