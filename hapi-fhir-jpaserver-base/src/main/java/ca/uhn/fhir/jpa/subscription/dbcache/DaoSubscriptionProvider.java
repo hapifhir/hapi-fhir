@@ -42,10 +42,7 @@ public class DaoSubscriptionProvider implements ISubscriptionProvider {
 	@Override
 	public IBundleProvider search(SearchParameterMap theMap) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-		RequestDetails req = new ServletSubRequestDetails();
-		req.setSubRequest(true);
-
-		return subscriptionDao.search(theMap, req);
+		return subscriptionDao.search(theMap);
 	}
 
 	@Override

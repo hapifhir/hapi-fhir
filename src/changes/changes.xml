@@ -277,6 +277,12 @@
 				part of the chain was lost when the chain was described in the server
 				CapabilityStatement. This has been corrected.
 			</action>
+			<action type="fix">
+				In the JPA server, search/read operations being performed within a transaction bundle
+				did not pass the client request HTTP headers to the sub-request. This meant that
+				AuthorizationInterceptor could not authorize these requests if it was depending on
+				headers being present.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
