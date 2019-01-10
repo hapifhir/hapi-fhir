@@ -29,6 +29,7 @@ import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.servlet.ServletConfig;
@@ -82,6 +83,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	}
 
 	@Test
+	@Ignore
 	public void testSearchReferenceParameterWithExplicitChainsDocumentation() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
