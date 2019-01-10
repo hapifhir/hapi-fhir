@@ -270,6 +270,13 @@
 				performed by the user to limit them to specific resources or compartments
 				that the user should have access to.
 			</action>
+			<action type="add">
+				In a DSTU2 server, if search parameters are expressed with chains directly in the
+				parameter name (e.g. 
+				<![CDATA[<code>@RequiredParam(name="subject.name.family")</code>]]>) the second
+				part of the chain was lost when the chain was described in the server
+				CapabilityStatement. This has been corrected.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
