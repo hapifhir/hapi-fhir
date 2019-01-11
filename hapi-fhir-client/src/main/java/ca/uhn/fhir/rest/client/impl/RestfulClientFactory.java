@@ -301,7 +301,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 				conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
 			} catch (FhirClientConnectionException e) {
 				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) && e.getCause() instanceof DataFormatException) {
-					capabilityStatementResourceName = "Conformance";
+					capabilityStatementResourceName = "CapabilityStatement";
 					implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
 					conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
 				} else {

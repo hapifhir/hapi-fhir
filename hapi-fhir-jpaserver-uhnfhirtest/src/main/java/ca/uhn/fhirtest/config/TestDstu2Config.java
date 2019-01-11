@@ -2,6 +2,7 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -69,6 +70,11 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		retVal.setFetchSizeDefaultMaximum(10000);
 		return retVal;
+	}
+
+	@Bean
+	public ModelConfig modelConfig() {
+		return daoConfig().getModelConfig();
 	}
 
 	@Bean(name = "myPersistenceDataSourceDstu1", destroyMethod = "close")

@@ -264,6 +264,31 @@
 				OperationDefinitions are now created for named queries in server
 				module. Thanks to Stig Døssing for the pull request!
 			</action>
+			<action type="add">
+				A new server interceptor has been added called "SearchNarrowingInterceptor".
+				This interceptor can be used to automatically narrow the scope of searches
+				performed by the user to limit them to specific resources or compartments
+				that the user should have access to.
+			</action>
+			<action type="add">
+				In a DSTU2 server, if search parameters are expressed with chains directly in the
+				parameter name (e.g. 
+				<![CDATA[<code>@RequiredParam(name="subject.name.family")</code>]]>) the second
+				part of the chain was lost when the chain was described in the server
+				CapabilityStatement. This has been corrected.
+			</action>
+			<action type="fix">
+				In the JPA server, search/read operations being performed within a transaction bundle
+				did not pass the client request HTTP headers to the sub-request. This meant that
+				AuthorizationInterceptor could not authorize these requests if it was depending on
+				headers being present.
+			</action>
+			<action type="fix">
+				When using a client in DSTU3/R4 mode, if the client attempted to validate the server
+				CapabilityStatement but was not able to parse the response, the client would throw
+				an exception with a misleading error about the Conformance resource not existing. This
+				has been corrected. Thanks to Shayaan Munshi for reporting and providing a test case!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

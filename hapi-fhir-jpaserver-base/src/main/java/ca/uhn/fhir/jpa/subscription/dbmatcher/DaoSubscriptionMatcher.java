@@ -72,12 +72,9 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		RuntimeResourceDefinition responseResourceDef = subscriptionDao.validateCriteriaAndReturnResourceDefinition(theCriteria);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
 
-		RequestDetails req = new ServletSubRequestDetails();
-		req.setSubRequest(true);
-
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		return responseDao.search(responseCriteriaUrl, req);
+		return responseDao.search(responseCriteriaUrl);
 	}
 }

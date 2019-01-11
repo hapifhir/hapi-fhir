@@ -1,15 +1,11 @@
 package example;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.List;
-
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -17,6 +13,12 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("unused")
 public class AuthorizationInterceptors {
@@ -158,4 +160,47 @@ public class AuthorizationInterceptors {
 		//END SNIPPET: patchAll
 
 	}
+
+
+	//START SNIPPET: narrowing
+	public class MyPatientSearchNarrowingInterceptor extends SearchNarrowingInterceptor {
+
+		/**
+		 * This method must be overridden to provide the list of compartments
+		 * and/or resources that the current user should have access to
+		 */
+		@Override
+		protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
+			// Process authorization header - The following is a fake
+			// implementation. Obviously we'd want something more real
+			// for a production scenario.
+			//
+			// In this basic example we have two hardcoded bearer tokens,
+			// one which is for a user that has access to one patient, and
+			// another that has full access.
+			String authHeader = theRequestDetails.getHeader("Authorization");
+			if ("Bearer dfw98h38r".equals(authHeader)) {
+
+				// This user will have access to two compartments
+				return new AuthorizedList()
+					.addCompartment("Patient/123")
+					.addCompartment("Patient/456");
+
+			} else if ("Bearer 39ff939jgg".equals(authHeader)) {
+
+				// This user has access to everything
+				return new AuthorizedList();
+
+			} else {
+
+				throw new AuthenticationException("Unknown bearer token");
+
+			}
+
+		}
+
+	}
+	//END SNIPPET: narrowing
+
+
 }

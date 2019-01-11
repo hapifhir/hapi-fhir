@@ -54,6 +54,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_security.html">Documentation on Server Security</a>
  * for information on how to use this interceptor.
  * </p>
+ *
+ * @see SearchNarrowingInterceptor
  */
 public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter implements IRuleApplier {
 

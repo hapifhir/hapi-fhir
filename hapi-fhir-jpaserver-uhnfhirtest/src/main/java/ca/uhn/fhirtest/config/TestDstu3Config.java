@@ -2,6 +2,7 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
@@ -63,6 +64,12 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setExpungeEnabled(true);
 		return retVal;
 	}
+
+	@Bean
+	public ModelConfig modelConfig() {
+		return daoConfig().getModelConfig();
+	}
+
 
 	@Override
 	@Bean(autowire = Autowire.BY_TYPE)

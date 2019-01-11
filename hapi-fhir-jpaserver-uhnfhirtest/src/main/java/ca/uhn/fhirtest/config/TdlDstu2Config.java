@@ -2,6 +2,7 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu2;
@@ -70,6 +71,11 @@ public class TdlDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
 		return retVal;
+	}
+
+	@Bean
+	public ModelConfig modelConfig() {
+		return daoConfig().getModelConfig();
 	}
 
 	@Bean(name = "myPersistenceDataSourceDstu1", destroyMethod = "close")

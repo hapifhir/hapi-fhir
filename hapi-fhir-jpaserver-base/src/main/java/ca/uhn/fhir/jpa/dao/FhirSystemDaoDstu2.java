@@ -233,7 +233,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
 			Entry nextRespEntry = response.getEntry().get(originalOrder);
 
-			ServletSubRequestDetails requestDetails = new ServletSubRequestDetails();
+			ServletSubRequestDetails requestDetails = new ServletSubRequestDetails(theRequestDetails);
 			requestDetails.setServletRequest(theRequestDetails.getServletRequest());
 			requestDetails.setRequestType(RequestTypeEnum.GET);
 			requestDetails.setServer(theRequestDetails.getServer());

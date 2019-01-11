@@ -64,7 +64,13 @@ public class SubscriptionInterceptorLoader {
 				mySubscriptionMatcherInterceptor = myAppicationContext.getBean(SubscriptionMatcherInterceptor.class);
 			}
 			ourLog.info("Registering subscription matcher interceptor");
+
+			if (mySubscriptionMatcherInterceptor == null) {
+				mySubscriptionMatcherInterceptor = myAppicationContext.getBean(SubscriptionMatcherInterceptor.class);
+			}
+
 			myDaoConfig.registerInterceptor(mySubscriptionMatcherInterceptor);
+
 		}
 	}
 
