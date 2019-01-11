@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.parser.IParser;
@@ -20,7 +20,6 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory;
-import org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceClinicalStatus;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.ValueSet.*;
@@ -205,8 +204,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		validator.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = validator.validateWithResult(theResult);
 
-		assertEquals(1, result.getMessages().size());
-		assertThat(result.getMessages().get(0).getMessage(), containsString("dom-6: A resource should have narrative for robust management"));
+		assertEquals(0, result.getMessages().size());
 
 	}
 
@@ -907,42 +905,42 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchCodeBelowBuiltInCodesystem() {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
-		ai1.setClinicalStatus(AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai1.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active");
 		String id1 = myAllergyIntoleranceDao.create(ai1, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai2 = new AllergyIntolerance();
-		ai2.setClinicalStatus(AllergyIntoleranceClinicalStatus.RESOLVED);
+		ai2.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("resolved");
 		String id2 = myAllergyIntoleranceDao.create(ai2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai3 = new AllergyIntolerance();
-		ai3.setClinicalStatus(AllergyIntoleranceClinicalStatus.INACTIVE);
+		ai3.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("inactive");
 		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap params;
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://hl7.org/fhir/allergy-clinical-status", AllergyIntoleranceClinicalStatus.ACTIVE.toCode()));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "active"));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
 
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://hl7.org/fhir/allergy-clinical-status", AllergyIntoleranceClinicalStatus.ACTIVE.toCode()).setModifier(TokenParamModifier.BELOW));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "active").setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
 
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://hl7.org/fhir/allergy-clinical-status", AllergyIntoleranceClinicalStatus.RESOLVED.toCode()).setModifier(TokenParamModifier.BELOW));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved").setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id2));
 
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://hl7.org/fhir/allergy-clinical-status", AllergyIntoleranceClinicalStatus.RESOLVED.toCode()));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved"));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id2));
 
 		// Unknown code
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://hl7.org/fhir/allergy-clinical-status", "fooooo"));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "fooooo"));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
 
 		// Unknown system
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://hl7.org/fhir/allergy-clinical-status222222", "fooooo"));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical222222", "fooooo"));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
 
 	}
@@ -950,27 +948,27 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchCodeBelowBuiltInCodesystemUnqualified() {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
-		ai1.setClinicalStatus(AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai1.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active");
 		ai1.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.MEDICATION);
 		String id1 = myAllergyIntoleranceDao.create(ai1, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai2 = new AllergyIntolerance();
-		ai2.setClinicalStatus(AllergyIntoleranceClinicalStatus.RESOLVED);
-		ai1.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.BIOLOGIC);
+		ai2.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("resolved");
+		ai2.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.BIOLOGIC);
 		String id2 = myAllergyIntoleranceDao.create(ai2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai3 = new AllergyIntolerance();
-		ai3.setClinicalStatus(AllergyIntoleranceClinicalStatus.INACTIVE);
-		ai1.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.FOOD);
+		ai3.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("inactive");
+		ai3.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.FOOD);
 		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap params;
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, AllergyIntoleranceClinicalStatus.ACTIVE.toCode()));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "active"));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
 
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, AllergyIntoleranceClinicalStatus.ACTIVE.toCode()).setModifier(TokenParamModifier.BELOW));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "active").setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
 
 		params = new SearchParameterMap();
@@ -978,11 +976,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
 
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, AllergyIntoleranceClinicalStatus.RESOLVED.toCode()).setModifier(TokenParamModifier.BELOW));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "resolved").setModifier(TokenParamModifier.BELOW));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id2));
 
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, AllergyIntoleranceClinicalStatus.RESOLVED.toCode()));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "resolved"));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id2));
 
 		params = new SearchParameterMap();
@@ -1050,25 +1048,25 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchCodeInBuiltInValueSet() {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
-		ai1.setClinicalStatus(AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai1.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active");
 		String id1 = myAllergyIntoleranceDao.create(ai1, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai2 = new AllergyIntolerance();
-		ai2.setClinicalStatus(AllergyIntoleranceClinicalStatus.RESOLVED);
+		ai2.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("resolved");
 		String id2 = myAllergyIntoleranceDao.create(ai2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai3 = new AllergyIntolerance();
-		ai3.setClinicalStatus(AllergyIntoleranceClinicalStatus.INACTIVE);
+		ai3.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("inactive");
 		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap params;
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-clinical-status").setModifier(TokenParamModifier.IN));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergyintolerance-clinical").setModifier(TokenParamModifier.IN));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1, id2, id3));
 
 		// No codes in this one
 		params = new SearchParameterMap();
-		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-intolerance-criticality").setModifier(TokenParamModifier.IN));
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "http://hl7.org/fhir/ValueSet/allergy-intolerance-category").setModifier(TokenParamModifier.IN));
 		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), empty());
 
 		// Invalid VS
@@ -1240,15 +1238,15 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@Ignore
 	public void testSearchCodeNotInBuiltInValueSet() {
 		AllergyIntolerance ai1 = new AllergyIntolerance();
-		ai1.setClinicalStatus(AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai1.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("active");
 		String id1 = myAllergyIntoleranceDao.create(ai1, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai2 = new AllergyIntolerance();
-		ai2.setClinicalStatus(AllergyIntoleranceClinicalStatus.RESOLVED);
+		ai2.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("resolved");
 		String id2 = myAllergyIntoleranceDao.create(ai2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		AllergyIntolerance ai3 = new AllergyIntolerance();
-		ai3.setClinicalStatus(AllergyIntoleranceClinicalStatus.INACTIVE);
+		ai3.getClinicalStatus().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical").setCode("inactive");
 		String id3 = myAllergyIntoleranceDao.create(ai3, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		SearchParameterMap params;

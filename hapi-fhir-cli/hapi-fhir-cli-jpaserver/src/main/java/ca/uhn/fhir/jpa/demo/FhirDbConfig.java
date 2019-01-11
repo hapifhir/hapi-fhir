@@ -37,7 +37,7 @@ public class FhirDbConfig {
 		return retVal;
 	}
 
-	@Bean()
+	@Bean
 	public Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());

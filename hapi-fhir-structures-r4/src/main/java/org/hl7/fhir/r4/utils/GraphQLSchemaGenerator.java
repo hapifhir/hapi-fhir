@@ -55,7 +55,7 @@ public class GraphQLSchemaGenerator {
         tl.put(sd.getName(), sd);
       }
     }
-    writer.write("# FHIR GraphQL Schema. Version "+Constants.VERSION+"-"+Constants.REVISION+"\r\n\r\n");
+    writer.write("# FHIR GraphQL Schema. Version "+Constants.VERSION+"\r\n\r\n");
     writer.write("# FHIR Defined Primitive types\r\n");
     for (String n : sorted(pl.keySet()))
       generatePrimitive(writer, pl.get(n));
@@ -75,7 +75,7 @@ public class GraphQLSchemaGenerator {
 
   public void generateResource(OutputStream stream, StructureDefinition sd, List<SearchParameter> parameters, EnumSet<FHIROperationType> operations) throws IOException, FHIRException {
     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stream));
-    writer.write("# FHIR GraphQL Schema. Version "+Constants.VERSION+"-"+Constants.REVISION+"\r\n\r\n");
+    writer.write("# FHIR GraphQL Schema. Version "+Constants.VERSION+"\r\n\r\n");
     generateType(writer, sd);
     if (operations.contains(FHIROperationType.READ))
       generateIdAccess(writer, sd.getName());

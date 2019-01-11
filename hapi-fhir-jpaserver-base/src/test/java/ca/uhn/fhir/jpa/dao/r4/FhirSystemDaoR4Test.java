@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
@@ -36,10 +37,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -331,7 +329,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ep.setId(IdType.newRandomUuid());
 
 		enc.getEpisodeOfCareFirstRep().setReference(ep.getId());
-		cond.getContext().setReference(enc.getId());
+		cond.getEncounter().setReference(enc.getId());
 		ep.getDiagnosisFirstRep().getCondition().setReference(cond.getId());
 
 		Bundle inputBundle = new Bundle();
@@ -519,19 +517,23 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testReindexing() {
+	public void testReindexing() throws InterruptedException {
 		Patient p = new Patient();
 		p.addName().setFamily("family");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualified();
+
+		sleepUntilTimeChanges();
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://foo");
 		myValueSetDao.create(vs, mySrd);
 
+		sleepUntilTimeChanges();
+		
 		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());
 
-		myResourceReindexingSvc.markAllResourcesForReindexing();
+		Long jobId = myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
 		entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
@@ -539,6 +541,17 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Just make sure this doesn't cause a choke
 		myResourceReindexingSvc.forceReindexingPass();
+
+		/*
+		 * We expect a final reindex count of 3 because there are 2 resources to
+		 * reindex and the final pass uses the most recent time as the low threshold,
+		 * so it indexes the newest resource one more time. It wouldn't be a big deal
+		 * if this ever got fixed so that it ends up with 2 instead of 3.
+		 */
+		runInTransaction(()->{
+			Optional<Integer> reindexCount = myResourceReindexJobDao.getReindexCount(jobId);
+			assertEquals(3, reindexCount.orElseThrow(()->new NullPointerException("No job " + jobId)).intValue());
+		});
 
 		// Try making the resource unparseable
 
@@ -567,6 +580,113 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		entity = new TransactionTemplate(myTxManager).execute(theStatus -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(2), entity.getIndexStatus());
 
+	}
+
+	@Test
+	public void testReindexingCurrentVersionDeleted() {
+		Patient p = new Patient();
+		p.addName().setFamily("family1");
+		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("family1");
+		p.addName().setFamily("family2");
+		myPatientDao.update(p);
+
+		p = new Patient();
+		p.setId(id);
+		p.addName().setFamily("family1");
+		p.addName().setFamily("family2");
+		p.addName().setFamily("family3");
+		myPatientDao.update(p);
+
+		SearchParameterMap searchParamMap = new SearchParameterMap();
+		searchParamMap.setLoadSynchronous(true);
+		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family2"));
+		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+
+		runInTransaction(()->{
+			ResourceHistoryTable historyEntry = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 3);
+			assertNotNull(historyEntry);
+			myResourceHistoryTableDao.delete(historyEntry);
+		});
+
+		Long jobId = myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+
+		searchParamMap = new SearchParameterMap();
+		searchParamMap.setLoadSynchronous(true);
+		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family2"));
+		IBundleProvider search = myPatientDao.search(searchParamMap);
+		assertEquals(1, search.size().intValue());
+		p = (Patient) search.getResources(0, 1).get(0);
+		assertEquals("3", p.getIdElement().getVersionIdPart());
+	}
+
+
+	@Test
+	public void testReindexingSingleStringHashValueIsDeleted() {
+		Patient p = new Patient();
+		p.addName().setFamily("family1");
+		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap searchParamMap = new SearchParameterMap();
+		searchParamMap.setLoadSynchronous(true);
+		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family1"));
+		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+
+		runInTransaction(()->{
+			myEntityManager
+				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashNormalizedPrefix = null")
+				.executeUpdate();
+		});
+
+		assertEquals(0, myPatientDao.search(searchParamMap).size().intValue());
+
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+
+		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+	}
+
+	@Test
+	public void testReindexingSingleStringHashIdentityValueIsDeleted() {
+		Patient p = new Patient();
+		p.addName().setFamily("family1");
+		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap searchParamMap = new SearchParameterMap();
+		searchParamMap.setLoadSynchronous(true);
+		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family1"));
+		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+
+		runInTransaction(()->{
+			Long i = myEntityManager
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.getSingleResult();
+			assertEquals(0L, i.longValue());
+
+			myEntityManager
+				.createQuery("UPDATE ResourceIndexedSearchParamString s SET s.myHashIdentity = null")
+				.executeUpdate();
+
+			i = myEntityManager
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.getSingleResult();
+			assertThat(i, greaterThan(1L));
+
+		});
+
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+
+		runInTransaction(()->{
+			Long i = myEntityManager
+				.createQuery("SELECT count(s) FROM ResourceIndexedSearchParamString s WHERE s.myHashIdentity IS null", Long.class)
+				.getSingleResult();
+			assertEquals(0L, i.longValue());
+		});
 	}
 
 	@Test
@@ -812,6 +932,81 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		o = myObservationDao.read(new IdType(respEntry.getResponse().getLocationElement()), mySrd);
 		assertEquals(id.toVersionless().getValue(), o.getSubject().getReference());
 		assertEquals("1", o.getIdElement().getVersionIdPart());
+
+	}
+
+
+	@Test
+	public void testTransactionUpdatingManuallyDeletedResource() {
+
+		// Create an observation
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("urn:system").setValue("foo");
+		IIdType obId = myObservationDao.create(obs).getId();
+
+		// Manually mark it a deleted
+		runInTransaction(()->{
+			myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE SET RES_DELETED_AT = CURRENT_TIMESTAMP").executeUpdate();
+		});
+
+		runInTransaction(()->{
+			ResourceTable obsTable = myResourceTableDao.findById(obId.getIdPartAsLong()).get();
+			assertNotNull(obsTable.getDeleted());
+			assertEquals(1L, obsTable.getVersion());
+		});
+
+		// Now create a transaction
+
+		obs = new Observation();
+		obs.setId(IdType.newRandomUuid());
+		obs.addIdentifier().setSystem("urn:system").setValue("foo");
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId(IdType.newRandomUuid());
+		dr.addIdentifier().setSystem("urn:system").setValue("bar");
+		dr.addResult().setReference(obs.getId());
+
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		bundle.addEntry()
+			.setResource(obs)
+			.setFullUrl(obs.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=urn:system|foo");
+		bundle.addEntry()
+			.setResource(dr)
+			.setFullUrl(dr.getId())
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("DiagnosticReport?identifier=urn:system|bar");
+
+		Bundle resp = mySystemDao.transaction(mySrd, bundle);
+		assertEquals(2, resp.getEntry().size());
+
+		BundleEntryComponent respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/" + obId.getIdPart()));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/3"));
+		assertEquals("3", respEntry.getResponse().getEtag());
+
+		respEntry = resp.getEntry().get(1);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+		assertThat(respEntry.getResponse().getLocation(), containsString("DiagnosticReport/"));
+		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
+		IdType drId = new IdType(respEntry.getResponse().getLocation());
+		assertEquals("1", respEntry.getResponse().getEtag());
+
+		runInTransaction(()->{
+			ResourceTable obsTable = myResourceTableDao.findById(obId.getIdPartAsLong()).get();
+			assertNull(obsTable.getDeleted());
+			assertEquals(3L, obsTable.getVersion());
+		});
+
+		runInTransaction(()->{
+			DiagnosticReport savedDr = myDiagnosticReportDao.read(drId);
+			assertEquals(obId.toUnqualifiedVersionless().getValue(), savedDr.getResult().get(0).getReference());
+		});
 
 	}
 
@@ -2150,6 +2345,62 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testTransactionWithRefsToConditionalCreate() {
+
+		Bundle b = createTransactionBundleForTestTransactionWithRefsToConditionalCreate();
+		mySystemDao.transaction(mySrd, b);
+
+		IBundleProvider history = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		Bundle list = toBundleR4(history);
+		assertEquals(1, list.getEntry().size());
+		Observation o = find(list, Observation.class, 0);
+		assertThat(o.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+
+		b = createTransactionBundleForTestTransactionWithRefsToConditionalCreate();
+		mySystemDao.transaction(mySrd, b);
+
+		history = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		list = toBundleR4(history);
+		assertEquals(1, list.getEntry().size());
+		o = find(list, Observation.class, 0);
+		assertThat(o.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+
+	}
+
+	private Bundle createTransactionBundleForTestTransactionWithRefsToConditionalCreate() {
+		Bundle b = new Bundle();
+		b.setType(BundleType.TRANSACTION);
+
+		Patient p = new Patient();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("foo").setValue("bar");
+		b.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient")
+			.setIfNoneExist("Patient?identifier=foo|bar");
+
+		b.addEntry()
+			.getRequest()
+			.setMethod(HTTPVerb.DELETE)
+			.setUrl("Observation?status=final");
+
+		Observation o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.setStatus(ObservationStatus.FINAL);
+		o.getSubject().setResource(p);
+		b.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation");
+		return b;
+	}
+
+	@Test
 	public void testTransactionWithUnknownTemnporaryIdReference() {
 		String methodName = "testTransactionWithUnknownTemnporaryIdReference";
 
@@ -2378,8 +2629,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertThat(nextEntry.getResponse().getLocation(), (containsString("test")));
 		assertEquals(id.toVersionless(), new IdType(nextEntry.getResponse().getLocation()).toVersionless());
-		assertNotEquals(id, new IdType(nextEntry.getResponse().getLocation()));
 		assertThat(nextEntry.getResponse().getLocation(), endsWith("/_history/2"));
+		assertNotEquals(id, new IdType(nextEntry.getResponse().getLocation()));
 
 		nextEntry = resp.getEntry().get(1);
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", nextEntry.getResponse().getStatus());
@@ -2498,7 +2749,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		cond.setId(IdType.newRandomUuid());
 
 		enc.addDiagnosis().getCondition().setReference(cond.getId());
-		cond.getContext().setReference(enc.getId());
+		cond.getEncounter().setReference(enc.getId());
 
 		request
 			.addEntry()
@@ -2543,7 +2794,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testTransactionWithCircularReferences3() throws IOException {
-		Bundle request = loadResourceFromClasspath(Bundle.class, "/dstu3_transaction2.xml");
+		Bundle request = loadResourceFromClasspath(Bundle.class, "/r4/r4_transaction2.xml");
 
 		Bundle resp = mySystemDao.transaction(mySrd, request);
 		assertEquals(3, resp.getEntry().size());
@@ -3406,7 +3657,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void testUpdatePreviouslyDeletedResourceInBatch() {
 		AllergyIntolerance ai = new AllergyIntolerance();
 		ai.setId("AIA1914009");
-		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai.addNote().setText("Hello");
 		IIdType id = myAllergyIntoleranceDao.update(ai).getId();
 		assertEquals("1", id.getVersionIdPart());
 
@@ -3424,7 +3675,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		batch.setType(BundleType.BATCH);
 		ai = new AllergyIntolerance();
 		ai.setId("AIA1914009");
-		ai.setClinicalStatus(AllergyIntolerance.AllergyIntoleranceClinicalStatus.ACTIVE);
+		ai.addNote().setText("Hello");
 		batch
 			.addEntry()
 			.setFullUrl("AllergyIntolerance/AIA1914009")

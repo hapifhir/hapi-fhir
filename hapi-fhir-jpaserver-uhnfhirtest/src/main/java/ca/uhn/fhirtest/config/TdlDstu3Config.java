@@ -2,6 +2,7 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
@@ -43,7 +44,7 @@ public class TdlDstu3Config extends BaseJavaConfigDstu3 {
 	@Value(FHIR_LUCENE_LOCATION_DSTU3)
 	private String myFhirLuceneLocation;
 
-	@Bean()
+	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
@@ -59,6 +60,11 @@ public class TdlDstu3Config extends BaseJavaConfigDstu3 {
 		return retVal;
 	}
 
+	@Bean
+	public ModelConfig modelConfig() {
+		return daoConfig().getModelConfig();
+	}
+
 	@Bean(name = "myPersistenceDataSourceDstu3", destroyMethod = "close")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
@@ -71,7 +77,7 @@ public class TdlDstu3Config extends BaseJavaConfigDstu3 {
 	}
 	
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
@@ -151,7 +157,7 @@ public class TdlDstu3Config extends BaseJavaConfigDstu3 {
 		return new SubscriptionsRequireManualActivationInterceptorDstu3();
 	}
 
-	@Bean()
+	@Bean
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);

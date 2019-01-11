@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -145,4 +143,18 @@ public class ServletRequestDetails extends RequestDetails {
 		this.myServletResponse = myServletResponse;
 	}
 
+	public Map<String,List<String>> getHeaders() {
+		Map<String, List<String>> retVal = new HashMap<>();
+		Enumeration<String> names = myServletRequest.getHeaderNames();
+		while (names.hasMoreElements()) {
+			String nextName = names.nextElement();
+			ArrayList<String> headerValues = new ArrayList<>();
+			retVal.put(nextName, headerValues);
+			Enumeration<String> valuesEnum = myServletRequest.getHeaders(nextName);
+			while (valuesEnum.hasMoreElements()) {
+				headerValues.add(valuesEnum.nextElement());
+			}
+		}
+		return Collections.unmodifiableMap(retVal);
+	}
 }

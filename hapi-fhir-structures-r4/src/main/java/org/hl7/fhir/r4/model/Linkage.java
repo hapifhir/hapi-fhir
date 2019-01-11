@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -43,22 +43,22 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * Identifies two or more records (resource instances) that are referring to the same real-world "occurrence".
+ * Identifies two or more records (resource instances) that refer to the same real-world "occurrence".
  */
 @ResourceDef(name="Linkage", profile="http://hl7.org/fhir/StructureDefinition/Linkage")
 public class Linkage extends DomainResource {
 
     public enum LinkageType {
         /**
-         * The record represents the "source of truth" (from the perspective of this Linkage resource) for the underlying event/condition/etc.
+         * The resource represents the "source of truth" (from the perspective of this Linkage resource) for the underlying event/condition/etc.
          */
         SOURCE, 
         /**
-         * The record represents the alternative view of the underlying event/condition/etc.  The record may still be actively maintained, even though it is not considered to be the source of truth.
+         * The resource represents an alternative view of the underlying event/condition/etc.  The resource may still be actively maintained, even though it is not considered to be the source of truth.
          */
         ALTERNATE, 
         /**
-         * The record represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.
+         * The resource represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.
          */
         HISTORICAL, 
         /**
@@ -97,17 +97,17 @@ public class Linkage extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case SOURCE: return "The record represents the \"source of truth\" (from the perspective of this Linkage resource) for the underlying event/condition/etc.";
-            case ALTERNATE: return "The record represents the alternative view of the underlying event/condition/etc.  The record may still be actively maintained, even though it is not considered to be the source of truth.";
-            case HISTORICAL: return "The record represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.";
+            case SOURCE: return "The resource represents the \"source of truth\" (from the perspective of this Linkage resource) for the underlying event/condition/etc.";
+            case ALTERNATE: return "The resource represents an alternative view of the underlying event/condition/etc.  The resource may still be actively maintained, even though it is not considered to be the source of truth.";
+            case HISTORICAL: return "The resource represents an obsolete record of the underlying event/condition/etc.  It is not expected to be actively maintained.";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case SOURCE: return "Source of truth";
-            case ALTERNATE: return "Alternate record";
-            case HISTORICAL: return "Historical/obsolete record";
+            case SOURCE: return "Source of Truth";
+            case ALTERNATE: return "Alternate Record";
+            case HISTORICAL: return "Historical/Obsolete Record";
             default: return "?";
           }
         }
@@ -413,22 +413,22 @@ public class Linkage extends DomainResource {
     protected BooleanType active;
 
     /**
-     * Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.
+     * Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated.
      */
-    @Child(name = "author", type = {Practitioner.class, Organization.class}, order=1, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Who is responsible for linkages", formalDefinition="Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage." )
+    @Child(name = "author", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Who is responsible for linkages", formalDefinition="Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated." )
     protected Reference author;
 
     /**
-     * The actual object that is the target of the reference (Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.)
+     * The actual object that is the target of the reference (Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated.)
      */
     protected Resource authorTarget;
 
     /**
-     * Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.
+     * Identifies which record considered as the reference to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.
      */
     @Child(name = "item", type = {}, order=2, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Item to be linked", formalDefinition="Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items." )
+    @Description(shortDefinition="Item to be linked", formalDefinition="Identifies which record considered as the reference to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items." )
     protected List<LinkageItemComponent> item;
 
     private static final long serialVersionUID = 25900306L;
@@ -486,7 +486,7 @@ public class Linkage extends DomainResource {
     }
 
     /**
-     * @return {@link #author} (Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.)
+     * @return {@link #author} (Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated.)
      */
     public Reference getAuthor() { 
       if (this.author == null)
@@ -502,7 +502,7 @@ public class Linkage extends DomainResource {
     }
 
     /**
-     * @param value {@link #author} (Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.)
+     * @param value {@link #author} (Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated.)
      */
     public Linkage setAuthor(Reference value) { 
       this.author = value;
@@ -510,14 +510,14 @@ public class Linkage extends DomainResource {
     }
 
     /**
-     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.)
+     * @return {@link #author} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated.)
      */
     public Resource getAuthorTarget() { 
       return this.authorTarget;
     }
 
     /**
-     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.)
+     * @param value {@link #author} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated.)
      */
     public Linkage setAuthorTarget(Resource value) { 
       this.authorTarget = value;
@@ -525,7 +525,7 @@ public class Linkage extends DomainResource {
     }
 
     /**
-     * @return {@link #item} (Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.)
+     * @return {@link #item} (Identifies which record considered as the reference to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.)
      */
     public List<LinkageItemComponent> getItem() { 
       if (this.item == null)
@@ -580,16 +580,16 @@ public class Linkage extends DomainResource {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("active", "boolean", "Indicates whether the asserted set of linkages are considered to be \"in effect\".", 0, 1, active));
-        children.add(new Property("author", "Reference(Practitioner|Organization)", "Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.", 0, 1, author));
-        children.add(new Property("item", "", "Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.", 0, java.lang.Integer.MAX_VALUE, item));
+        children.add(new Property("author", "Reference(Practitioner|PractitionerRole|Organization)", "Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated.", 0, 1, author));
+        children.add(new Property("item", "", "Identifies which record considered as the reference to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.", 0, java.lang.Integer.MAX_VALUE, item));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case -1422950650: /*active*/  return new Property("active", "boolean", "Indicates whether the asserted set of linkages are considered to be \"in effect\".", 0, 1, active);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|Organization)", "Identifies the user or organization responsible for asserting the linkages and who establishes the context for evaluating the nature of each linkage.", 0, 1, author);
-        case 3242771: /*item*/  return new Property("item", "", "Identifies one of the records that is considered to refer to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.", 0, java.lang.Integer.MAX_VALUE, item);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|PractitionerRole|Organization)", "Identifies the user or organization responsible for asserting the linkages as well as the user or organization who establishes the context in which the nature of each linkage is evaluated.", 0, 1, author);
+        case 3242771: /*item*/  return new Property("item", "", "Identifies which record considered as the reference to the same real-world occurrence as well as how the items should be evaluated within the collection of linked items.", 0, java.lang.Integer.MAX_VALUE, item);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -760,7 +760,7 @@ public class Linkage extends DomainResource {
    * Path: <b>Linkage.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class } )
+  @SearchParamDefinition(name="author", path="Linkage.author", description="Author of the Linkage", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

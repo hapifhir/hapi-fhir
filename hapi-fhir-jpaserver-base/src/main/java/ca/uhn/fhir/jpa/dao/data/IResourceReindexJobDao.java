@@ -10,12 +10,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,4 +56,12 @@ public interface IResourceReindexJobDao extends JpaRepository<ResourceReindexJob
 	@Modifying
 	@Query("UPDATE ResourceReindexJobEntity j SET j.myThresholdLow = :low WHERE j.myId = :id")
 	void setThresholdLow(@Param("id") Long theId, @Param("low") Date theLow);
+
+	@Query("SELECT j.myReindexCount FROM ResourceReindexJobEntity j WHERE j.myId = :id")
+	Optional<Integer> getReindexCount(@Param("id") Long theId);
+
+	@Query("UPDATE ResourceReindexJobEntity j SET j.myReindexCount = :newCount WHERE j.myId = :id")
+	@Modifying
+	void setReindexCount(@Param("id") Long theId, @Param("newCount") int theNewCount);
+
 }

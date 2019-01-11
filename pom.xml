@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>3.6.0</version>
+	<version>3.7.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -478,6 +478,17 @@
 			<id>volsch</id>
 			<name>Volker Schmidt</name>
 		</developer>
+		<developer>
+			<id>magnuswatn</id>
+			<name>Magnus Watn</name>
+		</developer>
+		<developer>
+			<id>Cory00</id>
+		</developer>
+		<developer>
+			<id>srdo</id>
+			<name>Stig Døssing</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -499,47 +510,49 @@
 
 		<!-- Dependency Versions -->
 		<activation_api_version>1.2.0</activation_api_version>
-		<apache_karaf_version>4.1.6</apache_karaf_version>
-		<aries_spifly_version>1.0.10</aries_spifly_version>
+		<apache_karaf_version>4.2.2</apache_karaf_version>
+		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>2.6.2</caffeine_version>
 		<commons_codec_version>1.11</commons_codec_version>
-		<commons_text_version>1.4</commons_text_version>
+		<commons_text_version>1.6</commons_text_version>
 		<commons_io_version>2.6</commons_io_version>
-		<commons_lang3_version>3.8</commons_lang3_version>
+		<commons_lang3_version>3.8.1</commons_lang3_version>
 		<derby_version>10.14.2.0</derby_version>
 		<error_prone_annotations_version>2.0.18</error_prone_annotations_version>
+		<error_prone_core_version>2.3.2</error_prone_core_version>
 		<guava_version>25.0-jre</guava_version>
 		<gson_version>2.8.5</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
-		<jaxb_api_version>2.3.0</jaxb_api_version>
-		<jaxb_core_version>2.3.0</jaxb_core_version>
+		<jaxb_api_version>2.3.1</jaxb_api_version>
+		<jaxb_core_version>2.3.0.1</jaxb_core_version>
+		<jaxb_runtime_version>2.3.1</jaxb_runtime_version>
 		<jersey_version>2.25.1</jersey_version>
-		<jetty_version>9.4.12.v20180830</jetty_version>
+		<jetty_version>9.4.14.v20181114</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.3.6.Final</hibernate_version>
-		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
+		<hibernate_version>5.4.0.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.10.3.Final</hibernate_search_version>
+		<hibernate_search_version>5.11.0.Final</hibernate_search_version>
+		<lucene_version>5.5.5</lucene_version>
+		<hibernate_validator_version>5.4.1.Final</hibernate_validator_version>
 		<httpcore_version>4.4.6</httpcore_version>
 		<httpclient_version>4.5.3</httpclient_version>
 		<jackson_version>2.9.7</jackson_version>
-		<lucene_version>5.5.5</lucene_version>
-		<maven_assembly_plugin_version>2.5.3</maven_assembly_plugin_version>
+		<maven_assembly_plugin_version>3.1.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
 		<ph_schematron_version>5.0.4</ph_schematron_version>
 		<ph_commons_version>9.1.1</ph_commons_version>
-		<plexus_compiler_api_version>2.8.4</plexus_compiler_api_version>
+		<plexus_compiler_api_version>2.8.5</plexus_compiler_api_version>
 		<servicemix_saxon_version>9.5.1-5_1</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.25</slf4j_version>
-		<spring_version>5.0.8.RELEASE</spring_version>
-		<spring_data_version>2.0.7.RELEASE</spring_data_version>
+		<spring_version>5.1.3.RELEASE</spring_version>
+		<spring_data_version>2.1.3.RELEASE</spring_data_version>
+		<spring-boot.version>2.1.1.RELEASE</spring-boot.version>
 
-		<spring-boot.version>1.5.6.RELEASE</spring-boot.version>
 		<stax2_api_version>3.1.4</stax2_api_version>
-		<thymeleaf-version>3.0.9.RELEASE</thymeleaf-version>
+		<thymeleaf-version>3.0.11.RELEASE</thymeleaf-version>
 		<woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
 		<!-- We are aiming to still work on a very old version of SLF4j even though we depend on the newest, just to be nice to users of the API. This version is tested in the hapi-fhir-cobertura. -->
@@ -547,6 +560,9 @@
 
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
+
+		<!-- Site properties -->
+		<fontawesomeVersion>5.4.1</fontawesomeVersion>
 	</properties>
 
 	<dependencyManagement>
@@ -624,7 +640,7 @@
 			<dependency>
 				<groupId>com.google.errorprone</groupId>
 				<artifactId>error_prone_core</artifactId>
-				<version>2.3.1</version>
+				<version>${error_prone_core_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -655,6 +671,11 @@
 				<groupId>com.sun.activation</groupId>
 				<artifactId>javax.activation</artifactId>
 				<version>1.2.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.activation</groupId>
+				<artifactId>jakarta.activation</artifactId>
+				<version>1.2.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.mail</groupId>
@@ -746,8 +767,10 @@
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>6.2.2.jre8</version>
+				<!--<version>6.2.2.jre8</version>-->
+				<version>7.0.0.jre8</version>
 			</dependency>
+			<!--
 			<dependency>
 				<groupId>com.sun.xml.bind</groupId>
 				<artifactId>jaxb-core</artifactId>
@@ -758,6 +781,7 @@
 				<artifactId>jaxb-impl</artifactId>
 				<version>${jaxb_core_version}</version>
 			</dependency>
+			-->
 			<dependency>
 				<groupId>javax.mail</groupId>
 				<artifactId>javax.mail-api</artifactId>
@@ -776,7 +800,7 @@
 			<dependency>
 				<groupId>javax.validation</groupId>
 				<artifactId>validation-api</artifactId>
-				<version>1.1.0.Final</version>
+				<version>2.0.1.Final</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.ws.rs</groupId>
@@ -789,9 +813,9 @@
 				<version>4.12</version>
 			</dependency>
 			<dependency>
-				<groupId>lt.velykis.maven.skins</groupId>
+				<groupId>io.github.devacfr.maven.skins</groupId>
 				<artifactId>reflow-velocity-tools</artifactId>
-				<version>1.1.1</version>
+				<version>2.0.0-beta2</version>
 			</dependency>
 			<dependency>
 				<groupId>mysql</groupId>
@@ -895,7 +919,7 @@
 			<dependency>
 				<groupId>org.apache.maven.doxia</groupId>
 				<artifactId>doxia-module-markdown</artifactId>
-				<version>1.6</version>
+				<version>1.8</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
@@ -1057,13 +1081,11 @@
 				<artifactId>javax.json</artifactId>
 				<version>1.0.4</version>
 			</dependency>
-			<!--
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
 				<version>${jaxb_runtime_version}</version>
 			</dependency>
-			-->
 			<dependency>
 				<groupId>org.glassfish.jersey.core</groupId>
 				<artifactId>jersey-server</artifactId>
@@ -1147,7 +1169,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.18.3</version>
+				<version>2.23.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
@@ -1246,7 +1268,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.thymeleaf</groupId>
-				<artifactId>thymeleaf-spring4</artifactId>
+				<artifactId>thymeleaf-spring5</artifactId>
 				<version>${thymeleaf-version}</version>
 			</dependency>
 			<dependency>
@@ -1272,6 +1294,14 @@
 			<id>ossrh</id>
 			<name>Sonatype</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>maven2</id>
+			<name>Maven2</name>
+			<url>http://central.maven.org/maven2/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -1308,20 +1338,17 @@
 				<plugin>
 					<groupId>org.basepom.maven</groupId>
 					<artifactId>duplicate-finder-maven-plugin</artifactId>
-					<version>1.2.1</version>
+					<version>1.3.0</version>
 				</plugin>
 				<plugin>
-					<groupId>de.juplo</groupId>
-					<artifactId>hibernate-maven-plugin</artifactId>
-					<version>2.1.1</version>
-					<configuration>
-						<execute>false</execute>
-						<skip>false</skip>
-						<scanDependencies>false</scanDependencies>
-						<scanTestClasses>false</scanTestClasses>
-						<scanClasses>true</scanClasses>
-						<force>true</force>
-					</configuration>
+					<groupId>de.jpdigital</groupId>
+					<artifactId>hibernate52-ddl-maven-plugin</artifactId>
+					<version>2.2.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>${maven_assembly_plugin_version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.felix</groupId>
@@ -1352,10 +1379,11 @@
 						<maxmem>2000m</maxmem>
 					</configuration>
 					<dependencies>
+						<!--
 						<dependency>
 							<groupId>com.google.errorprone</groupId>
 							<artifactId>error_prone_core</artifactId>
-							<version>2.3.1</version>
+							<version>2.3.2</version>
 						</dependency>
 						<dependency>
 							<groupId>org.codehaus.plexus</groupId>
@@ -1377,6 +1405,7 @@
 							<artifactId>plexus-utils</artifactId>
 							<version>3.1.0</version>
 						</dependency>
+						-->
 					</dependencies>
 				</plugin>
 				<plugin>
@@ -1402,7 +1431,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jxr-plugin</artifactId>
-					<version>2.5</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1478,7 +1507,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>versions-maven-plugin</artifactId>
-					<version>2.6</version>
+					<version>2.7</version>
 					<configuration>
 						<processDependencyManagementTransitive>false</processDependencyManagementTransitive>
 					</configuration>
@@ -1507,7 +1536,7 @@
 					<artifactId>maven-site-plugin</artifactId>
 					<!-- Be careful upgrading the version of this plugin- 3.5 breaks the relow-maven-skin that we use currently. Also once we move to 3.5 the site.xml <head> tag needs to have its contents put in a CDATA 
 						block. What an unpleasant misadventure to figure that all out...... -->
-					<version>3.4</version>
+					<version>3.7.1</version>
 					<configuration>
 						<skip>false</skip>
 						<skipDeploy>true</skipDeploy>
@@ -1538,7 +1567,7 @@
 							<artifactId>doxia-module-markdown</artifactId>
 						</dependency>
 						<dependency>
-							<groupId>lt.velykis.maven.skins</groupId>
+							<groupId>io.github.devacfr.maven.skins</groupId>
 							<artifactId>reflow-velocity-tools</artifactId>
 						</dependency>
 						<dependency>
@@ -1788,8 +1817,7 @@
 								<replace dir="target/site" summary="true">
 									<include name="index.html"/>
 									<replacetoken><![CDATA[<h2 id="Welcome">Welcome</h2>]]></replacetoken>
-									<replacevalue><![CDATA[<div class="jumbotron subhead">
-		<div class="row" id="banner">
+									<replacevalue><![CDATA[
 			<div class="span12">
 				<div class="pull-left">
 					<a href="./" id="bannerLeft"><img src="images/hapi_fhir_banner.png" alt='"'HAPI'"' /></a>
@@ -1798,8 +1826,8 @@
 					<a href="./" id="bannerRight"><img src="images/hapi_fhir_banner_right.png" alt='"'FHIR'"' /></a>
 				</div>
 			</div>
-		</div>
-	</div>]]></replacevalue>
+			<br clear="both"/>
+	]]></replacevalue>
 								</replace>
 								<!--<replaceregexp file="target/site/checkstyle.html" byline="false" match="&lt;ul class=&quot;breadcrumb.*?&lt;/ul&gt;" replace="" flags="s"/> -->
 							</target>
@@ -1985,12 +2013,12 @@
 					<dependency>
 						<groupId>org.apache.maven.doxia</groupId>
 						<artifactId>doxia-module-markdown</artifactId>
-						<version>1.6</version>
+						<version>1.8</version>
 					</dependency>
 					<dependency>
-						<groupId>lt.velykis.maven.skins</groupId>
+						<groupId>io.github.devacfr.maven.skins</groupId>
 						<artifactId>reflow-velocity-tools</artifactId>
-						<version>1.1.1</version>
+						<version>2.0.0-beta2</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.velocity</groupId>
@@ -2069,11 +2097,12 @@
 					</reportsDirectories>
 				</configuration>
 			</plugin>
-			<!--			<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
 				<version>3.0.0</version>
 				<inherited>false</inherited>
+				<!--
 				<reportSets>
 					<reportSet>
 						<reports>
@@ -2084,8 +2113,8 @@
 						</reports>
 					</reportSet>
 				</reportSets>
+				-->
 			</plugin>
-			-->
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-linkcheck-plugin</artifactId> <version>1.1</version> </plugin> -->
 		</plugins>
 	</reporting>
@@ -2146,6 +2175,9 @@
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
+				<module>hapi-fhir-jpaserver-model</module>
+				<module>hapi-fhir-jpaserver-searchparam</module>
+				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<!-- <module>hapi-fhir-cobertura</module> -->
@@ -2156,7 +2188,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>findbugs-maven-plugin</artifactId>
-						<version>3.0.3</version>
+						<version>3.0.5</version>
 						<configuration>
 							<classFilesDirectory>./hapi-fhir-base/target/classes</classFilesDirectory>
 						</configuration>
@@ -2196,6 +2228,9 @@
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-validation-resources-r4</module>
 				<module>hapi-fhir-igpacks</module>
+				<module>hapi-fhir-jpaserver-model</module>
+				<module>hapi-fhir-jpaserver-searchparam</module>
+				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
@@ -2267,7 +2302,17 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-compiler-plugin</artifactId>
 						<configuration>
-							<compilerId>javac-with-errorprone</compilerId>
+							<compilerArgs>
+								<arg>-XDcompilePolicy=simple</arg>
+								<arg>-Xplugin:ErrorProne</arg>
+							</compilerArgs>
+							<annotationProcessorPaths>
+								<path>
+									<groupId>com.google.errorprone</groupId>
+									<artifactId>error_prone_core</artifactId>
+									<version>${error_prone_core_version}</version>
+								</path>
+							</annotationProcessorPaths>
 						</configuration>
 					</plugin>
 				</plugins>

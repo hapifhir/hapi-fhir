@@ -168,7 +168,9 @@ public class DecimalType extends PrimitiveType<BigDecimal> implements Comparable
 
 	@Override
 	public DecimalType copy() {
-		return new DecimalType(getValue());
+		DecimalType ret = new DecimalType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

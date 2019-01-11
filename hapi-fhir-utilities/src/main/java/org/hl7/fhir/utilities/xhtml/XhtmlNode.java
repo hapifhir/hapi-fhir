@@ -74,6 +74,7 @@ public class XhtmlNode implements IBaseXhtml {
   private Map<String, String> attributes = new HashMap<String, String>();
   private List<XhtmlNode> childNodes = new ArrayList<XhtmlNode>();
   private String content;
+  private boolean notPretty;
 
   public XhtmlNode() {
     super();
@@ -572,6 +573,17 @@ public class XhtmlNode implements IBaseXhtml {
         return n;
     }
     return null;
+  }
+
+
+  public XhtmlNode notPretty() {
+    notPretty = true;
+    return this;
+  }
+
+
+  public boolean isNoPretty() {
+    return notPretty;
   }
 
 }

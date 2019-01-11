@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -19,7 +20,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,14 +48,14 @@ public class SubscriptionsRequireManualActivationInterceptorDstu3 extends Server
 
 	@Override
 	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
-		if (myDao.getContext().getResourceDefinition(theResource).getName().equals("Subscription")) {
+		if (myDao.getContext().getResourceDefinition(theResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.CREATE, null, theResource);
 		}
 	}
 
 	@Override
 	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
-		if (myDao.getContext().getResourceDefinition(theNewResource).getName().equals("Subscription")) {
+		if (myDao.getContext().getResourceDefinition(theNewResource).getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
 			verifyStatusOk(RestOperationTypeEnum.UPDATE, theOldResource, theNewResource);
 		}
 	}

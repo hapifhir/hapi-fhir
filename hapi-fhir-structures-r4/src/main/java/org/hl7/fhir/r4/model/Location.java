@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1213,10 +1213,10 @@ public class Location extends DomainResource {
     protected Enumeration<LocationStatus> status;
 
     /**
-     * The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.
+     * The operational status covers operation values most relevant to beds (but can also apply to rooms/units/chairs/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping, and other activities like maintenance.
      */
     @Child(name = "operationalStatus", type = {Coding.class}, order=2, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="The Operational status of the location (typically only for a bed/room)", formalDefinition="The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance." )
+    @Description(shortDefinition="The operational status of the location (typically only for a bed/room)", formalDefinition="The operational status covers operation values most relevant to beds (but can also apply to rooms/units/chairs/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping, and other activities like maintenance." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://terminology.hl7.org/ValueSet/v2-0116")
     protected Coding operationalStatus;
 
@@ -1228,10 +1228,10 @@ public class Location extends DomainResource {
     protected StringType name;
 
     /**
-     * A list of alternate names that the location is known as or was known as in the past.
+     * A list of alternate names that the location is known as, or was known as, in the past.
      */
     @Child(name = "alias", type = {StringType.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="A list of alternate names that the location is known as or was known as in the past", formalDefinition="A list of alternate names that the location is known as or was known as in the past." )
+    @Description(shortDefinition="A list of alternate names that the location is known as, or was known as, in the past", formalDefinition="A list of alternate names that the location is known as, or was known as, in the past." )
     protected List<StringType> alias;
 
     /**
@@ -1299,14 +1299,14 @@ public class Location extends DomainResource {
     protected Organization managingOrganizationTarget;
 
     /**
-     * Another Location which this Location is physically part of.
+     * Another Location of which this Location is physically a part of.
      */
     @Child(name = "partOf", type = {Location.class}, order=13, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Another Location this one is physically part of", formalDefinition="Another Location which this Location is physically part of." )
+    @Description(shortDefinition="Another Location this one is physically a part of", formalDefinition="Another Location of which this Location is physically a part of." )
     protected Reference partOf;
 
     /**
-     * The actual object that is the target of the reference (Another Location which this Location is physically part of.)
+     * The actual object that is the target of the reference (Another Location of which this Location is physically a part of.)
      */
     protected Location partOfTarget;
 
@@ -1448,7 +1448,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
+     * @return {@link #operationalStatus} (The operational status covers operation values most relevant to beds (but can also apply to rooms/units/chairs/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping, and other activities like maintenance.)
      */
     public Coding getOperationalStatus() { 
       if (this.operationalStatus == null)
@@ -1464,7 +1464,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #operationalStatus} (The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.)
+     * @param value {@link #operationalStatus} (The operational status covers operation values most relevant to beds (but can also apply to rooms/units/chairs/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping, and other activities like maintenance.)
      */
     public Location setOperationalStatus(Coding value) { 
       this.operationalStatus = value;
@@ -1521,7 +1521,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as, in the past.)
      */
     public List<StringType> getAlias() { 
       if (this.alias == null)
@@ -1547,7 +1547,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
+     * @return {@link #alias} (A list of alternate names that the location is known as, or was known as, in the past.)
      */
     public StringType addAliasElement() {//2 
       StringType t = new StringType();
@@ -1558,7 +1558,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as, in the past.)
      */
     public Location addAlias(String value) { //1
       StringType t = new StringType();
@@ -1570,7 +1570,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #alias} (A list of alternate names that the location is known as or was known as in the past.)
+     * @param value {@link #alias} (A list of alternate names that the location is known as, or was known as, in the past.)
      */
     public boolean hasAlias(String value) { 
       if (this.alias == null)
@@ -1902,7 +1902,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #partOf} (Another Location which this Location is physically part of.)
+     * @return {@link #partOf} (Another Location of which this Location is physically a part of.)
      */
     public Reference getPartOf() { 
       if (this.partOf == null)
@@ -1918,7 +1918,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #partOf} (Another Location which this Location is physically part of.)
+     * @param value {@link #partOf} (Another Location of which this Location is physically a part of.)
      */
     public Location setPartOf(Reference value) { 
       this.partOf = value;
@@ -1926,7 +1926,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @return {@link #partOf} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Another Location which this Location is physically part of.)
+     * @return {@link #partOf} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Another Location of which this Location is physically a part of.)
      */
     public Location getPartOfTarget() { 
       if (this.partOfTarget == null)
@@ -1938,7 +1938,7 @@ public class Location extends DomainResource {
     }
 
     /**
-     * @param value {@link #partOf} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Another Location which this Location is physically part of.)
+     * @param value {@link #partOf} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Another Location of which this Location is physically a part of.)
      */
     public Location setPartOfTarget(Location value) { 
       this.partOfTarget = value;
@@ -2126,9 +2126,9 @@ public class Location extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status property covers the general availability of the resource, not the current value which may be covered by the operationStatus, or by a schedule/slots if they are configured for the location.", 0, 1, status));
-        children.add(new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus));
+        children.add(new Property("operationalStatus", "Coding", "The operational status covers operation values most relevant to beds (but can also apply to rooms/units/chairs/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping, and other activities like maintenance.", 0, 1, operationalStatus));
         children.add(new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, 1, name));
-        children.add(new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
+        children.add(new Property("alias", "string", "A list of alternate names that the location is known as, or was known as, in the past.", 0, java.lang.Integer.MAX_VALUE, alias));
         children.add(new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, 1, description));
         children.add(new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, 1, mode));
         children.add(new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type));
@@ -2137,7 +2137,7 @@ public class Location extends DomainResource {
         children.add(new Property("physicalType", "CodeableConcept", "Physical form of the location, e.g. building, room, vehicle, road.", 0, 1, physicalType));
         children.add(new Property("position", "", "The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML).", 0, 1, position));
         children.add(new Property("managingOrganization", "Reference(Organization)", "The organization responsible for the provisioning and upkeep of the location.", 0, 1, managingOrganization));
-        children.add(new Property("partOf", "Reference(Location)", "Another Location which this Location is physically part of.", 0, 1, partOf));
+        children.add(new Property("partOf", "Reference(Location)", "Another Location of which this Location is physically a part of.", 0, 1, partOf));
         children.add(new Property("hoursOfOperation", "", "What days/times during a week is this location usually open.", 0, java.lang.Integer.MAX_VALUE, hoursOfOperation));
         children.add(new Property("availabilityExceptions", "string", "A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times.", 0, 1, availabilityExceptions));
         children.add(new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the location.", 0, java.lang.Integer.MAX_VALUE, endpoint));
@@ -2148,9 +2148,9 @@ public class Location extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique code or number identifying the location to its users.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status property covers the general availability of the resource, not the current value which may be covered by the operationStatus, or by a schedule/slots if they are configured for the location.", 0, 1, status);
-        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "Coding", "The Operational status covers operation values most relevant to beds (but can also apply to rooms/units/chair/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping and other activities like maintenance.", 0, 1, operationalStatus);
+        case -2103166364: /*operationalStatus*/  return new Property("operationalStatus", "Coding", "The operational status covers operation values most relevant to beds (but can also apply to rooms/units/chairs/etc. such as an isolation unit/dialysis chair). This typically covers concepts such as contamination, housekeeping, and other activities like maintenance.", 0, 1, operationalStatus);
         case 3373707: /*name*/  return new Property("name", "string", "Name of the location as used by humans. Does not need to be unique.", 0, 1, name);
-        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the location is known as or was known as in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
+        case 92902992: /*alias*/  return new Property("alias", "string", "A list of alternate names that the location is known as, or was known as, in the past.", 0, java.lang.Integer.MAX_VALUE, alias);
         case -1724546052: /*description*/  return new Property("description", "string", "Description of the Location, which helps in finding or referencing the place.", 0, 1, description);
         case 3357091: /*mode*/  return new Property("mode", "code", "Indicates whether a resource instance represents a specific location or a class of locations.", 0, 1, mode);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Indicates the type of function performed at the location.", 0, java.lang.Integer.MAX_VALUE, type);
@@ -2159,7 +2159,7 @@ public class Location extends DomainResource {
         case -1474715471: /*physicalType*/  return new Property("physicalType", "CodeableConcept", "Physical form of the location, e.g. building, room, vehicle, road.", 0, 1, physicalType);
         case 747804969: /*position*/  return new Property("position", "", "The absolute geographic location of the Location, expressed using the WGS84 datum (This is the same co-ordinate system used in KML).", 0, 1, position);
         case -2058947787: /*managingOrganization*/  return new Property("managingOrganization", "Reference(Organization)", "The organization responsible for the provisioning and upkeep of the location.", 0, 1, managingOrganization);
-        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Location)", "Another Location which this Location is physically part of.", 0, 1, partOf);
+        case -995410646: /*partOf*/  return new Property("partOf", "Reference(Location)", "Another Location of which this Location is physically a part of.", 0, 1, partOf);
         case -1588872511: /*hoursOfOperation*/  return new Property("hoursOfOperation", "", "What days/times during a week is this location usually open.", 0, java.lang.Integer.MAX_VALUE, hoursOfOperation);
         case -1149143617: /*availabilityExceptions*/  return new Property("availabilityExceptions", "string", "A description of when the locations opening ours are different to normal, e.g. public holiday availability. Succinctly describing all possible exceptions to normal site availability as detailed in the opening hours Times.", 0, 1, availabilityExceptions);
         case 1741102485: /*endpoint*/  return new Property("endpoint", "Reference(Endpoint)", "Technical endpoints providing access to services operated for the location.", 0, java.lang.Integer.MAX_VALUE, endpoint);
@@ -2768,7 +2768,7 @@ public class Location extends DomainResource {
    * Search parameter: <b>near</b>
    * <p>
    * Description: <b>Search for locations where the location.position is near to, or within a specified distance of, the provided coordinates expressed as [latitude]|[longitude]|[distance]|[units] (using the WGS84 datum, see notes).
-If the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discression as to what distances should be considered near (and units are irrelevant)
+If the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discretion as to what distances should be considered near (and units are irrelevant)
 
 Servers may search using various techniques that might have differing accuracies, depending on implementation efficiency.
 
@@ -2777,13 +2777,13 @@ Requires the near-distance parameter to be provided also</b><br>
    * Path: <b>Location.position</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="near", path="Location.position", description="Search for locations where the location.position is near to, or within a specified distance of, the provided coordinates expressed as [latitude]|[longitude]|[distance]|[units] (using the WGS84 datum, see notes).\nIf the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discression as to what distances should be considered near (and units are irrelevant)\n\nServers may search using various techniques that might have differing accuracies, depending on implementation efficiency.\n\nRequires the near-distance parameter to be provided also", type="special" )
+  @SearchParamDefinition(name="near", path="Location.position", description="Search for locations where the location.position is near to, or within a specified distance of, the provided coordinates expressed as [latitude]|[longitude]|[distance]|[units] (using the WGS84 datum, see notes).\nIf the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discretion as to what distances should be considered near (and units are irrelevant)\n\nServers may search using various techniques that might have differing accuracies, depending on implementation efficiency.\n\nRequires the near-distance parameter to be provided also", type="special" )
   public static final String SP_NEAR = "near";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>near</b>
    * <p>
    * Description: <b>Search for locations where the location.position is near to, or within a specified distance of, the provided coordinates expressed as [latitude]|[longitude]|[distance]|[units] (using the WGS84 datum, see notes).
-If the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discression as to what distances should be considered near (and units are irrelevant)
+If the units are omitted, then kms should be assumed. If the distance is omitted, then the server can use its own discretion as to what distances should be considered near (and units are irrelevant)
 
 Servers may search using various techniques that might have differing accuracies, depending on implementation efficiency.
 

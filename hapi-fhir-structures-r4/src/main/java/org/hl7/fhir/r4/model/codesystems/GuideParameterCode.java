@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,13 +37,9 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum GuideParameterCode {
 
         /**
-         * If the value of this boolean 0..1 parameter is "true" then all conformance resources will have any specified [Resource].version overwritten with the ImplementationGuide.version.
+         * If the value of this string 0..* parameter is one of the metadata fields then all conformance resources will have any specified [Resource].[field] overwritten with the ImplementationGuide.[field], where field is one of: version, date, status, publisher, contact, copyright, experimental, jurisdiction, useContext.
          */
-        APPLYBUSINESSVERSION, 
-        /**
-         * If the value of this boolean 0..1 parameter is "true" then all conformance resources will have any specified [Resource].jurisdiction overwritten with the ImplementationGuide.jurisdiction.
-         */
-        APPLYJURISDICTION, 
+        APPLY, 
         /**
          * The value of this string 0..* parameter is a subfolder of the build context's location that is to be scanned to load resources. Scope is (if present) a particular resource type.
          */
@@ -87,10 +83,8 @@ public enum GuideParameterCode {
         public static GuideParameterCode fromCode(String codeString) throws FHIRException {
             if (codeString == null || "".equals(codeString))
                 return null;
-        if ("apply-business-version".equals(codeString))
-          return APPLYBUSINESSVERSION;
-        if ("apply-jurisdiction".equals(codeString))
-          return APPLYJURISDICTION;
+        if ("apply".equals(codeString))
+          return APPLY;
         if ("path-resource".equals(codeString))
           return PATHRESOURCE;
         if ("path-pages".equals(codeString))
@@ -113,8 +107,7 @@ public enum GuideParameterCode {
         }
         public String toCode() {
           switch (this) {
-            case APPLYBUSINESSVERSION: return "apply-business-version";
-            case APPLYJURISDICTION: return "apply-jurisdiction";
+            case APPLY: return "apply";
             case PATHRESOURCE: return "path-resource";
             case PATHPAGES: return "path-pages";
             case PATHTXCACHE: return "path-tx-cache";
@@ -132,8 +125,7 @@ public enum GuideParameterCode {
         }
         public String getDefinition() {
           switch (this) {
-            case APPLYBUSINESSVERSION: return "If the value of this boolean 0..1 parameter is \"true\" then all conformance resources will have any specified [Resource].version overwritten with the ImplementationGuide.version.";
-            case APPLYJURISDICTION: return "If the value of this boolean 0..1 parameter is \"true\" then all conformance resources will have any specified [Resource].jurisdiction overwritten with the ImplementationGuide.jurisdiction.";
+            case APPLY: return "If the value of this string 0..* parameter is one of the metadata fields then all conformance resources will have any specified [Resource].[field] overwritten with the ImplementationGuide.[field], where field is one of: version, date, status, publisher, contact, copyright, experimental, jurisdiction, useContext.";
             case PATHRESOURCE: return "The value of this string 0..* parameter is a subfolder of the build context's location that is to be scanned to load resources. Scope is (if present) a particular resource type.";
             case PATHPAGES: return "The value of this string 0..1 parameter is a subfolder of the build context's location that contains files that are part of the html content processed by the builder.";
             case PATHTXCACHE: return "The value of this string 0..1 parameter is a subfolder of the build context's location that is used as the terminology cache. If this is not present, the terminology cache is on the local system, not under version control.";
@@ -148,8 +140,7 @@ public enum GuideParameterCode {
         }
         public String getDisplay() {
           switch (this) {
-            case APPLYBUSINESSVERSION: return "Apply Business Version";
-            case APPLYJURISDICTION: return "Apply Jurisdiction";
+            case APPLY: return "Apply Metadata Value";
             case PATHRESOURCE: return "Resource Path";
             case PATHPAGES: return "Pages Path";
             case PATHTXCACHE: return "Terminology Cache Path";

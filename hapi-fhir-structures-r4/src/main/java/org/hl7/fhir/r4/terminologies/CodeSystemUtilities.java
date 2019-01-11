@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.terminologies;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import org.hl7.fhir.r4.terminologies.CodeSystemUtilities.ConceptStatus;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.utils.ToolingExtensions;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Type;
@@ -76,6 +78,14 @@ public class CodeSystemUtilities {
 
   private static void defineDeprecatedProperty(CodeSystem cs) {
     defineCodeSystemProperty(cs, "deprecationDate", "The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged", PropertyType.DATETIME);
+  }
+
+  public static void defineParentProperty(CodeSystem cs) {
+    defineCodeSystemProperty(cs, "parent", "The concept identified in this property is a parent of the concept on which it is a property. The property type will be 'code'. The meaning of parent/child relationships is defined by the hierarchyMeaning attribute", PropertyType.CODE);
+  }
+
+  public static void defineChildProperty(CodeSystem cs) {
+    defineCodeSystemProperty(cs, "child", "The concept identified in this property is a child of the concept on which it is a property. The property type will be 'code'. The meaning of parent/child relationships is defined by the hierarchyMeaning attribute", PropertyType.CODE);
   }
 
   public static boolean isDeprecated(CodeSystem cs, ConceptDefinitionComponent def)  {
@@ -183,7 +193,7 @@ public class CodeSystemUtilities {
     return null;
   }
 
-  public static void markStatus(CodeSystem cs, String wg, StandardsStatus status, String pckage, String fmm) throws FHIRException {
+  public static void markStatus(CodeSystem cs, String wg, StandardsStatus status, String pckage, String fmm, String normativeVersion) throws FHIRException {
     if (wg != null) {
       if (!ToolingExtensions.hasExtension(cs, ToolingExtensions.EXT_WORKGROUP) || 
           (Utilities.existsInList(ToolingExtensions.readStringExtension(cs, ToolingExtensions.EXT_WORKGROUP), "fhir", "vocab") && !Utilities.existsInList(wg, "fhir", "vocab"))) {
@@ -193,7 +203,7 @@ public class CodeSystemUtilities {
     if (status != null) {
       StandardsStatus ss = ToolingExtensions.getStandardsStatus(cs);
       if (ss == null || ss.isLowerThan(status)) 
-        ToolingExtensions.setStandardsStatus(cs, status);
+        ToolingExtensions.setStandardsStatus(cs, status, normativeVersion);
       if (pckage != null) {
         if (!cs.hasUserData("ballot.package"))
           cs.setUserData("ballot.package", pckage);
@@ -201,8 +211,10 @@ public class CodeSystemUtilities {
           if (!"infrastructure".equals(cs.getUserString("ballot.package")))
             System.out.println("Code System "+cs.getUrl()+": ownership clash "+pckage+" vs "+cs.getUserString("ballot.package"));
       }
-      if (ss == StandardsStatus.NORMATIVE)
+      if (status == StandardsStatus.NORMATIVE) {
         cs.setExperimental(false);
+        cs.setStatus(PublicationStatus.ACTIVE);
+      }
     }
     if (fmm != null) {
       String sfmm = ToolingExtensions.readStringExtension(cs, ToolingExtensions.EXT_FMM_LEVEL);
@@ -224,6 +236,24 @@ public class CodeSystemUtilities {
       if (p.getCode().equals(code))
         return p; 
     return null;
+  }
+
+  // see http://hl7.org/fhir/R4/codesystem.html#hierachy
+  // returns additional parents not in the heirarchy
+  public static List<String> getOtherChildren(CodeSystem cs, ConceptDefinitionComponent c) {
+    List<String> res = new ArrayList<String>();
+    for (ConceptPropertyComponent p : c.getProperty()) {
+      if ("parent".equals(p.getCode())) {
+        res.add(p.getValue().primitiveValue());
+      }
+    }
+    return res;
+  }
+
+  // see http://hl7.org/fhir/R4/codesystem.html#hierachy
+  public static void addOtherChild(CodeSystem cs, ConceptDefinitionComponent owner, String code) {
+    defineChildProperty(cs);
+    owner.addProperty().setCode("child").setValue(new CodeType(code));
   }
 
 }

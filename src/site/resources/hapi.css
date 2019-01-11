@@ -211,3 +211,22 @@ DIV.sidebar-nav UL LI UL LI {
         font-size: 0.9em;
 }
 */
+
+.pull-left {
+   float: left;
+   display: inline-block;
+}
+
+.pull-right {
+   float: right;
+   display: inline-block;
+}
+
+.span12 {
+   width: 100%;
+}
+
+.container-fluid {
+   padding-right: 0px;
+   padding-left: 0px;
+}

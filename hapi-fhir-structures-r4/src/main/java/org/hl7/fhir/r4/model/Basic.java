@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -84,7 +84,7 @@ public class Basic extends DomainResource {
     /**
      * Indicates who was responsible for creating the resource instance.
      */
-    @Child(name = "author", type = {Practitioner.class, Patient.class, RelatedPerson.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "author", type = {Practitioner.class, PractitionerRole.class, Patient.class, RelatedPerson.class, Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who created", formalDefinition="Indicates who was responsible for creating the resource instance." )
     protected Reference author;
 
@@ -320,7 +320,7 @@ public class Basic extends DomainResource {
         children.add(new Property("code", "CodeableConcept", "Identifies the 'type' of resource - equivalent to the resource name for other resources.", 0, 1, code));
         children.add(new Property("subject", "Reference(Any)", "Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource.", 0, 1, subject));
         children.add(new Property("created", "date", "Identifies when the resource was first created.", 0, 1, created));
-        children.add(new Property("author", "Reference(Practitioner|Patient|RelatedPerson|Organization)", "Indicates who was responsible for creating the resource instance.", 0, 1, author));
+        children.add(new Property("author", "Reference(Practitioner|PractitionerRole|Patient|RelatedPerson|Organization)", "Indicates who was responsible for creating the resource instance.", 0, 1, author));
       }
 
       @Override
@@ -330,7 +330,7 @@ public class Basic extends DomainResource {
         case 3059181: /*code*/  return new Property("code", "CodeableConcept", "Identifies the 'type' of resource - equivalent to the resource name for other resources.", 0, 1, code);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Any)", "Identifies the patient, practitioner, device or any other resource that is the \"focus\" of this resource.", 0, 1, subject);
         case 1028554472: /*created*/  return new Property("created", "date", "Identifies when the resource was first created.", 0, 1, created);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|Patient|RelatedPerson|Organization)", "Indicates who was responsible for creating the resource instance.", 0, 1, author);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|PractitionerRole|Patient|RelatedPerson|Organization)", "Indicates who was responsible for creating the resource instance.", 0, 1, author);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -614,7 +614,7 @@ public class Basic extends DomainResource {
    * Path: <b>Basic.author</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="author", path="Basic.author", description="Who created", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="author", path="Basic.author", description="Who created", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient"), @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_AUTHOR = "author";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>author</b>

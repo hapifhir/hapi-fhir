@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,24 @@ public interface IResourceReindexingSvc {
 
 	/**
 	 * Marks all indexes as needing fresh indexing
+	 *
+	 * @return Returns the job ID
 	 */
-	void markAllResourcesForReindexing();
+	Long markAllResourcesForReindexing();
 
 	/**
 	 * Marks all indexes of the given type as needing fresh indexing
+	 *
+	 * @return Returns the job ID
 	 */
-	void markAllResourcesForReindexing(String theType);
+	Long markAllResourcesForReindexing(String theType);
 
 	/**
 	 * Called automatically by the job scheduler
-	 *
+	 */
+	void scheduleReindexingPass();
+
+	/**
 	 * @return Returns null if the system did not attempt to perform a pass because one was
 	 * already proceeding. Otherwise, returns the number of resources affected.
 	 */
@@ -51,4 +58,6 @@ public interface IResourceReindexingSvc {
 	 * to be used by unit tests.
 	 */
 	void cancelAndPurgeAllJobs();
+
+	int countReindexJobs();
 }

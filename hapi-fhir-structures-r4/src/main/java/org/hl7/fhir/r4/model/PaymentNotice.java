@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -173,16 +173,16 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * The notice business identifier.
+     * A unique identifier assigned to this payment notice.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Business Identifier", formalDefinition="The notice business identifier." )
+    @Description(shortDefinition="Business Identifier for the payment noctice", formalDefinition="A unique identifier assigned to this payment notice." )
     protected List<Identifier> identifier;
 
     /**
      * The status of the resource instance.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | cancelled | draft | entered-in-error", formalDefinition="The status of the resource instance." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fm-status")
     protected Enumeration<PaymentNoticeStatus> status;
@@ -212,35 +212,16 @@ public class PaymentNotice extends DomainResource {
     protected Resource responseTarget;
 
     /**
-     * The date when the above payment action occurred.
-     */
-    @Child(name = "statusDate", type = {DateType.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Payment or clearing date", formalDefinition="The date when the above payment action occurred." )
-    protected DateType statusDate;
-
-    /**
      * The date when this resource was created.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "created", type = {DateTimeType.class}, order=4, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Creation date", formalDefinition="The date when this resource was created." )
     protected DateTimeType created;
 
     /**
-     * The Insurer who is target  of the request.
-     */
-    @Child(name = "target", type = {Organization.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Insurer or Regulatory body", formalDefinition="The Insurer who is target  of the request." )
-    protected Reference target;
-
-    /**
-     * The actual object that is the target of the reference (The Insurer who is target  of the request.)
-     */
-    protected Organization targetTarget;
-
-    /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "provider", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "provider", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
     protected Reference provider;
 
@@ -250,14 +231,64 @@ public class PaymentNotice extends DomainResource {
     protected Resource providerTarget;
 
     /**
-     * The payment status, typically paid: payment sent, cleared: payment received.
+     * A reference to the payment which is the subject of this notice.
      */
-    @Child(name = "paymentStatus", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Whether payment has been sent or cleared", formalDefinition="The payment status, typically paid: payment sent, cleared: payment received." )
+    @Child(name = "payment", type = {PaymentReconciliation.class}, order=6, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Payment reference", formalDefinition="A reference to the payment which is the subject of this notice." )
+    protected Reference payment;
+
+    /**
+     * The actual object that is the target of the reference (A reference to the payment which is the subject of this notice.)
+     */
+    protected PaymentReconciliation paymentTarget;
+
+    /**
+     * The date when the above payment action occurred.
+     */
+    @Child(name = "paymentDate", type = {DateType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Payment or clearing date", formalDefinition="The date when the above payment action occurred." )
+    protected DateType paymentDate;
+
+    /**
+     * The party who will receive or has received payment that is the subject of this notification.
+     */
+    @Child(name = "payee", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Party being paid", formalDefinition="The party who will receive or has received payment that is the subject of this notification." )
+    protected Reference payee;
+
+    /**
+     * The actual object that is the target of the reference (The party who will receive or has received payment that is the subject of this notification.)
+     */
+    protected Resource payeeTarget;
+
+    /**
+     * The party who is notified of the payment status.
+     */
+    @Child(name = "recipient", type = {Organization.class}, order=9, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Party being notified", formalDefinition="The party who is notified of the payment status." )
+    protected Reference recipient;
+
+    /**
+     * The actual object that is the target of the reference (The party who is notified of the payment status.)
+     */
+    protected Organization recipientTarget;
+
+    /**
+     * The amount sent to the payee.
+     */
+    @Child(name = "amount", type = {Money.class}, order=10, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Monetary amount of the payment", formalDefinition="The amount sent to the payee." )
+    protected Money amount;
+
+    /**
+     * A code indicating whether payment has been sent or cleared.
+     */
+    @Child(name = "paymentStatus", type = {CodeableConcept.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Issued or cleared Status of the payment", formalDefinition="A code indicating whether payment has been sent or cleared." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/payment-status")
     protected CodeableConcept paymentStatus;
 
-    private static final long serialVersionUID = 952123554L;
+    private static final long serialVersionUID = -545198613L;
 
   /**
    * Constructor
@@ -266,8 +297,20 @@ public class PaymentNotice extends DomainResource {
       super();
     }
 
+  /**
+   * Constructor
+   */
+    public PaymentNotice(Enumeration<PaymentNoticeStatus> status, DateTimeType created, Reference payment, Reference recipient, Money amount) {
+      super();
+      this.status = status;
+      this.created = created;
+      this.payment = payment;
+      this.recipient = recipient;
+      this.amount = amount;
+    }
+
     /**
-     * @return {@link #identifier} (The notice business identifier.)
+     * @return {@link #identifier} (A unique identifier assigned to this payment notice.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -358,13 +401,9 @@ public class PaymentNotice extends DomainResource {
      * @param value The status of the resource instance.
      */
     public PaymentNotice setStatus(PaymentNoticeStatus value) { 
-      if (value == null)
-        this.status = null;
-      else {
         if (this.status == null)
           this.status = new Enumeration<PaymentNoticeStatus>(new PaymentNoticeStatusEnumFactory());
         this.status.setValue(value);
-      }
       return this;
     }
 
@@ -447,55 +486,6 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @return {@link #statusDate} (The date when the above payment action occurred.). This is the underlying object with id, value and extensions. The accessor "getStatusDate" gives direct access to the value
-     */
-    public DateType getStatusDateElement() { 
-      if (this.statusDate == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentNotice.statusDate");
-        else if (Configuration.doAutoCreate())
-          this.statusDate = new DateType(); // bb
-      return this.statusDate;
-    }
-
-    public boolean hasStatusDateElement() { 
-      return this.statusDate != null && !this.statusDate.isEmpty();
-    }
-
-    public boolean hasStatusDate() { 
-      return this.statusDate != null && !this.statusDate.isEmpty();
-    }
-
-    /**
-     * @param value {@link #statusDate} (The date when the above payment action occurred.). This is the underlying object with id, value and extensions. The accessor "getStatusDate" gives direct access to the value
-     */
-    public PaymentNotice setStatusDateElement(DateType value) { 
-      this.statusDate = value;
-      return this;
-    }
-
-    /**
-     * @return The date when the above payment action occurred.
-     */
-    public Date getStatusDate() { 
-      return this.statusDate == null ? null : this.statusDate.getValue();
-    }
-
-    /**
-     * @param value The date when the above payment action occurred.
-     */
-    public PaymentNotice setStatusDate(Date value) { 
-      if (value == null)
-        this.statusDate = null;
-      else {
-        if (this.statusDate == null)
-          this.statusDate = new DateType();
-        this.statusDate.setValue(value);
-      }
-      return this;
-    }
-
-    /**
      * @return {@link #created} (The date when this resource was created.). This is the underlying object with id, value and extensions. The accessor "getCreated" gives direct access to the value
      */
     public DateTimeType getCreatedElement() { 
@@ -534,57 +524,9 @@ public class PaymentNotice extends DomainResource {
      * @param value The date when this resource was created.
      */
     public PaymentNotice setCreated(Date value) { 
-      if (value == null)
-        this.created = null;
-      else {
         if (this.created == null)
           this.created = new DateTimeType();
         this.created.setValue(value);
-      }
-      return this;
-    }
-
-    /**
-     * @return {@link #target} (The Insurer who is target  of the request.)
-     */
-    public Reference getTarget() { 
-      if (this.target == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentNotice.target");
-        else if (Configuration.doAutoCreate())
-          this.target = new Reference(); // cc
-      return this.target;
-    }
-
-    public boolean hasTarget() { 
-      return this.target != null && !this.target.isEmpty();
-    }
-
-    /**
-     * @param value {@link #target} (The Insurer who is target  of the request.)
-     */
-    public PaymentNotice setTarget(Reference value) { 
-      this.target = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #target} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Insurer who is target  of the request.)
-     */
-    public Organization getTargetTarget() { 
-      if (this.targetTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentNotice.target");
-        else if (Configuration.doAutoCreate())
-          this.targetTarget = new Organization(); // aa
-      return this.targetTarget;
-    }
-
-    /**
-     * @param value {@link #target} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Insurer who is target  of the request.)
-     */
-    public PaymentNotice setTargetTarget(Organization value) { 
-      this.targetTarget = value;
       return this;
     }
 
@@ -628,7 +570,207 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @return {@link #paymentStatus} (The payment status, typically paid: payment sent, cleared: payment received.)
+     * @return {@link #payment} (A reference to the payment which is the subject of this notice.)
+     */
+    public Reference getPayment() { 
+      if (this.payment == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentNotice.payment");
+        else if (Configuration.doAutoCreate())
+          this.payment = new Reference(); // cc
+      return this.payment;
+    }
+
+    public boolean hasPayment() { 
+      return this.payment != null && !this.payment.isEmpty();
+    }
+
+    /**
+     * @param value {@link #payment} (A reference to the payment which is the subject of this notice.)
+     */
+    public PaymentNotice setPayment(Reference value) { 
+      this.payment = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #payment} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the payment which is the subject of this notice.)
+     */
+    public PaymentReconciliation getPaymentTarget() { 
+      if (this.paymentTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentNotice.payment");
+        else if (Configuration.doAutoCreate())
+          this.paymentTarget = new PaymentReconciliation(); // aa
+      return this.paymentTarget;
+    }
+
+    /**
+     * @param value {@link #payment} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the payment which is the subject of this notice.)
+     */
+    public PaymentNotice setPaymentTarget(PaymentReconciliation value) { 
+      this.paymentTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #paymentDate} (The date when the above payment action occurred.). This is the underlying object with id, value and extensions. The accessor "getPaymentDate" gives direct access to the value
+     */
+    public DateType getPaymentDateElement() { 
+      if (this.paymentDate == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentNotice.paymentDate");
+        else if (Configuration.doAutoCreate())
+          this.paymentDate = new DateType(); // bb
+      return this.paymentDate;
+    }
+
+    public boolean hasPaymentDateElement() { 
+      return this.paymentDate != null && !this.paymentDate.isEmpty();
+    }
+
+    public boolean hasPaymentDate() { 
+      return this.paymentDate != null && !this.paymentDate.isEmpty();
+    }
+
+    /**
+     * @param value {@link #paymentDate} (The date when the above payment action occurred.). This is the underlying object with id, value and extensions. The accessor "getPaymentDate" gives direct access to the value
+     */
+    public PaymentNotice setPaymentDateElement(DateType value) { 
+      this.paymentDate = value;
+      return this;
+    }
+
+    /**
+     * @return The date when the above payment action occurred.
+     */
+    public Date getPaymentDate() { 
+      return this.paymentDate == null ? null : this.paymentDate.getValue();
+    }
+
+    /**
+     * @param value The date when the above payment action occurred.
+     */
+    public PaymentNotice setPaymentDate(Date value) { 
+      if (value == null)
+        this.paymentDate = null;
+      else {
+        if (this.paymentDate == null)
+          this.paymentDate = new DateType();
+        this.paymentDate.setValue(value);
+      }
+      return this;
+    }
+
+    /**
+     * @return {@link #payee} (The party who will receive or has received payment that is the subject of this notification.)
+     */
+    public Reference getPayee() { 
+      if (this.payee == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentNotice.payee");
+        else if (Configuration.doAutoCreate())
+          this.payee = new Reference(); // cc
+      return this.payee;
+    }
+
+    public boolean hasPayee() { 
+      return this.payee != null && !this.payee.isEmpty();
+    }
+
+    /**
+     * @param value {@link #payee} (The party who will receive or has received payment that is the subject of this notification.)
+     */
+    public PaymentNotice setPayee(Reference value) { 
+      this.payee = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #payee} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The party who will receive or has received payment that is the subject of this notification.)
+     */
+    public Resource getPayeeTarget() { 
+      return this.payeeTarget;
+    }
+
+    /**
+     * @param value {@link #payee} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The party who will receive or has received payment that is the subject of this notification.)
+     */
+    public PaymentNotice setPayeeTarget(Resource value) { 
+      this.payeeTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #recipient} (The party who is notified of the payment status.)
+     */
+    public Reference getRecipient() { 
+      if (this.recipient == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentNotice.recipient");
+        else if (Configuration.doAutoCreate())
+          this.recipient = new Reference(); // cc
+      return this.recipient;
+    }
+
+    public boolean hasRecipient() { 
+      return this.recipient != null && !this.recipient.isEmpty();
+    }
+
+    /**
+     * @param value {@link #recipient} (The party who is notified of the payment status.)
+     */
+    public PaymentNotice setRecipient(Reference value) { 
+      this.recipient = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #recipient} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The party who is notified of the payment status.)
+     */
+    public Organization getRecipientTarget() { 
+      if (this.recipientTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentNotice.recipient");
+        else if (Configuration.doAutoCreate())
+          this.recipientTarget = new Organization(); // aa
+      return this.recipientTarget;
+    }
+
+    /**
+     * @param value {@link #recipient} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The party who is notified of the payment status.)
+     */
+    public PaymentNotice setRecipientTarget(Organization value) { 
+      this.recipientTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #amount} (The amount sent to the payee.)
+     */
+    public Money getAmount() { 
+      if (this.amount == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentNotice.amount");
+        else if (Configuration.doAutoCreate())
+          this.amount = new Money(); // cc
+      return this.amount;
+    }
+
+    public boolean hasAmount() { 
+      return this.amount != null && !this.amount.isEmpty();
+    }
+
+    /**
+     * @param value {@link #amount} (The amount sent to the payee.)
+     */
+    public PaymentNotice setAmount(Money value) { 
+      this.amount = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #paymentStatus} (A code indicating whether payment has been sent or cleared.)
      */
     public CodeableConcept getPaymentStatus() { 
       if (this.paymentStatus == null)
@@ -644,7 +786,7 @@ public class PaymentNotice extends DomainResource {
     }
 
     /**
-     * @param value {@link #paymentStatus} (The payment status, typically paid: payment sent, cleared: payment received.)
+     * @param value {@link #paymentStatus} (A code indicating whether payment has been sent or cleared.)
      */
     public PaymentNotice setPaymentStatus(CodeableConcept value) { 
       this.paymentStatus = value;
@@ -653,29 +795,35 @@ public class PaymentNotice extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "The notice business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("identifier", "Identifier", "A unique identifier assigned to this payment notice.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
         children.add(new Property("request", "Reference(Any)", "Reference of resource for which payment is being made.", 0, 1, request));
         children.add(new Property("response", "Reference(Any)", "Reference of response to resource for which payment is being made.", 0, 1, response));
-        children.add(new Property("statusDate", "date", "The date when the above payment action occurred.", 0, 1, statusDate));
         children.add(new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created));
-        children.add(new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, target));
         children.add(new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider));
-        children.add(new Property("paymentStatus", "CodeableConcept", "The payment status, typically paid: payment sent, cleared: payment received.", 0, 1, paymentStatus));
+        children.add(new Property("payment", "Reference(PaymentReconciliation)", "A reference to the payment which is the subject of this notice.", 0, 1, payment));
+        children.add(new Property("paymentDate", "date", "The date when the above payment action occurred.", 0, 1, paymentDate));
+        children.add(new Property("payee", "Reference(Practitioner|PractitionerRole|Organization)", "The party who will receive or has received payment that is the subject of this notification.", 0, 1, payee));
+        children.add(new Property("recipient", "Reference(Organization)", "The party who is notified of the payment status.", 0, 1, recipient));
+        children.add(new Property("amount", "Money", "The amount sent to the payee.", 0, 1, amount));
+        children.add(new Property("paymentStatus", "CodeableConcept", "A code indicating whether payment has been sent or cleared.", 0, 1, paymentStatus));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The notice business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier assigned to this payment notice.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
         case 1095692943: /*request*/  return new Property("request", "Reference(Any)", "Reference of resource for which payment is being made.", 0, 1, request);
         case -340323263: /*response*/  return new Property("response", "Reference(Any)", "Reference of response to resource for which payment is being made.", 0, 1, response);
-        case 247524032: /*statusDate*/  return new Property("statusDate", "date", "The date when the above payment action occurred.", 0, 1, statusDate);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when this resource was created.", 0, 1, created);
-        case -880905839: /*target*/  return new Property("target", "Reference(Organization)", "The Insurer who is target  of the request.", 0, 1, target);
         case -987494927: /*provider*/  return new Property("provider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, provider);
-        case 1430704536: /*paymentStatus*/  return new Property("paymentStatus", "CodeableConcept", "The payment status, typically paid: payment sent, cleared: payment received.", 0, 1, paymentStatus);
+        case -786681338: /*payment*/  return new Property("payment", "Reference(PaymentReconciliation)", "A reference to the payment which is the subject of this notice.", 0, 1, payment);
+        case -1540873516: /*paymentDate*/  return new Property("paymentDate", "date", "The date when the above payment action occurred.", 0, 1, paymentDate);
+        case 106443592: /*payee*/  return new Property("payee", "Reference(Practitioner|PractitionerRole|Organization)", "The party who will receive or has received payment that is the subject of this notification.", 0, 1, payee);
+        case 820081177: /*recipient*/  return new Property("recipient", "Reference(Organization)", "The party who is notified of the payment status.", 0, 1, recipient);
+        case -1413853096: /*amount*/  return new Property("amount", "Money", "The amount sent to the payee.", 0, 1, amount);
+        case 1430704536: /*paymentStatus*/  return new Property("paymentStatus", "CodeableConcept", "A code indicating whether payment has been sent or cleared.", 0, 1, paymentStatus);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -688,10 +836,13 @@ public class PaymentNotice extends DomainResource {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PaymentNoticeStatus>
         case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
         case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // Reference
-        case 247524032: /*statusDate*/ return this.statusDate == null ? new Base[0] : new Base[] {this.statusDate}; // DateType
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
-        case -880905839: /*target*/ return this.target == null ? new Base[0] : new Base[] {this.target}; // Reference
         case -987494927: /*provider*/ return this.provider == null ? new Base[0] : new Base[] {this.provider}; // Reference
+        case -786681338: /*payment*/ return this.payment == null ? new Base[0] : new Base[] {this.payment}; // Reference
+        case -1540873516: /*paymentDate*/ return this.paymentDate == null ? new Base[0] : new Base[] {this.paymentDate}; // DateType
+        case 106443592: /*payee*/ return this.payee == null ? new Base[0] : new Base[] {this.payee}; // Reference
+        case 820081177: /*recipient*/ return this.recipient == null ? new Base[0] : new Base[] {this.recipient}; // Reference
+        case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Money
         case 1430704536: /*paymentStatus*/ return this.paymentStatus == null ? new Base[0] : new Base[] {this.paymentStatus}; // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -714,17 +865,26 @@ public class PaymentNotice extends DomainResource {
         case -340323263: // response
           this.response = castToReference(value); // Reference
           return value;
-        case 247524032: // statusDate
-          this.statusDate = castToDate(value); // DateType
-          return value;
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
           return value;
-        case -880905839: // target
-          this.target = castToReference(value); // Reference
-          return value;
         case -987494927: // provider
           this.provider = castToReference(value); // Reference
+          return value;
+        case -786681338: // payment
+          this.payment = castToReference(value); // Reference
+          return value;
+        case -1540873516: // paymentDate
+          this.paymentDate = castToDate(value); // DateType
+          return value;
+        case 106443592: // payee
+          this.payee = castToReference(value); // Reference
+          return value;
+        case 820081177: // recipient
+          this.recipient = castToReference(value); // Reference
+          return value;
+        case -1413853096: // amount
+          this.amount = castToMoney(value); // Money
           return value;
         case 1430704536: // paymentStatus
           this.paymentStatus = castToCodeableConcept(value); // CodeableConcept
@@ -745,14 +905,20 @@ public class PaymentNotice extends DomainResource {
           this.request = castToReference(value); // Reference
         } else if (name.equals("response")) {
           this.response = castToReference(value); // Reference
-        } else if (name.equals("statusDate")) {
-          this.statusDate = castToDate(value); // DateType
         } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        } else if (name.equals("target")) {
-          this.target = castToReference(value); // Reference
         } else if (name.equals("provider")) {
           this.provider = castToReference(value); // Reference
+        } else if (name.equals("payment")) {
+          this.payment = castToReference(value); // Reference
+        } else if (name.equals("paymentDate")) {
+          this.paymentDate = castToDate(value); // DateType
+        } else if (name.equals("payee")) {
+          this.payee = castToReference(value); // Reference
+        } else if (name.equals("recipient")) {
+          this.recipient = castToReference(value); // Reference
+        } else if (name.equals("amount")) {
+          this.amount = castToMoney(value); // Money
         } else if (name.equals("paymentStatus")) {
           this.paymentStatus = castToCodeableConcept(value); // CodeableConcept
         } else
@@ -767,10 +933,13 @@ public class PaymentNotice extends DomainResource {
         case -892481550:  return getStatusElement();
         case 1095692943:  return getRequest(); 
         case -340323263:  return getResponse(); 
-        case 247524032:  return getStatusDateElement();
         case 1028554472:  return getCreatedElement();
-        case -880905839:  return getTarget(); 
         case -987494927:  return getProvider(); 
+        case -786681338:  return getPayment(); 
+        case -1540873516:  return getPaymentDateElement();
+        case 106443592:  return getPayee(); 
+        case 820081177:  return getRecipient(); 
+        case -1413853096:  return getAmount(); 
         case 1430704536:  return getPaymentStatus(); 
         default: return super.makeProperty(hash, name);
         }
@@ -784,10 +953,13 @@ public class PaymentNotice extends DomainResource {
         case -892481550: /*status*/ return new String[] {"code"};
         case 1095692943: /*request*/ return new String[] {"Reference"};
         case -340323263: /*response*/ return new String[] {"Reference"};
-        case 247524032: /*statusDate*/ return new String[] {"date"};
         case 1028554472: /*created*/ return new String[] {"dateTime"};
-        case -880905839: /*target*/ return new String[] {"Reference"};
         case -987494927: /*provider*/ return new String[] {"Reference"};
+        case -786681338: /*payment*/ return new String[] {"Reference"};
+        case -1540873516: /*paymentDate*/ return new String[] {"date"};
+        case 106443592: /*payee*/ return new String[] {"Reference"};
+        case 820081177: /*recipient*/ return new String[] {"Reference"};
+        case -1413853096: /*amount*/ return new String[] {"Money"};
         case 1430704536: /*paymentStatus*/ return new String[] {"CodeableConcept"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -810,19 +982,31 @@ public class PaymentNotice extends DomainResource {
           this.response = new Reference();
           return this.response;
         }
-        else if (name.equals("statusDate")) {
-          throw new FHIRException("Cannot call addChild on a primitive type PaymentNotice.statusDate");
-        }
         else if (name.equals("created")) {
           throw new FHIRException("Cannot call addChild on a primitive type PaymentNotice.created");
-        }
-        else if (name.equals("target")) {
-          this.target = new Reference();
-          return this.target;
         }
         else if (name.equals("provider")) {
           this.provider = new Reference();
           return this.provider;
+        }
+        else if (name.equals("payment")) {
+          this.payment = new Reference();
+          return this.payment;
+        }
+        else if (name.equals("paymentDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentNotice.paymentDate");
+        }
+        else if (name.equals("payee")) {
+          this.payee = new Reference();
+          return this.payee;
+        }
+        else if (name.equals("recipient")) {
+          this.recipient = new Reference();
+          return this.recipient;
+        }
+        else if (name.equals("amount")) {
+          this.amount = new Money();
+          return this.amount;
         }
         else if (name.equals("paymentStatus")) {
           this.paymentStatus = new CodeableConcept();
@@ -848,10 +1032,13 @@ public class PaymentNotice extends DomainResource {
         dst.status = status == null ? null : status.copy();
         dst.request = request == null ? null : request.copy();
         dst.response = response == null ? null : response.copy();
-        dst.statusDate = statusDate == null ? null : statusDate.copy();
         dst.created = created == null ? null : created.copy();
-        dst.target = target == null ? null : target.copy();
         dst.provider = provider == null ? null : provider.copy();
+        dst.payment = payment == null ? null : payment.copy();
+        dst.paymentDate = paymentDate == null ? null : paymentDate.copy();
+        dst.payee = payee == null ? null : payee.copy();
+        dst.recipient = recipient == null ? null : recipient.copy();
+        dst.amount = amount == null ? null : amount.copy();
         dst.paymentStatus = paymentStatus == null ? null : paymentStatus.copy();
         return dst;
       }
@@ -868,8 +1055,9 @@ public class PaymentNotice extends DomainResource {
           return false;
         PaymentNotice o = (PaymentNotice) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(request, o.request, true)
-           && compareDeep(response, o.response, true) && compareDeep(statusDate, o.statusDate, true) && compareDeep(created, o.created, true)
-           && compareDeep(target, o.target, true) && compareDeep(provider, o.provider, true) && compareDeep(paymentStatus, o.paymentStatus, true)
+           && compareDeep(response, o.response, true) && compareDeep(created, o.created, true) && compareDeep(provider, o.provider, true)
+           && compareDeep(payment, o.payment, true) && compareDeep(paymentDate, o.paymentDate, true) && compareDeep(payee, o.payee, true)
+           && compareDeep(recipient, o.recipient, true) && compareDeep(amount, o.amount, true) && compareDeep(paymentStatus, o.paymentStatus, true)
           ;
       }
 
@@ -880,13 +1068,14 @@ public class PaymentNotice extends DomainResource {
         if (!(other_ instanceof PaymentNotice))
           return false;
         PaymentNotice o = (PaymentNotice) other_;
-        return compareValues(status, o.status, true) && compareValues(statusDate, o.statusDate, true) && compareValues(created, o.created, true)
+        return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(paymentDate, o.paymentDate, true)
           ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, request
-          , response, statusDate, created, target, provider, paymentStatus);
+          , response, created, provider, payment, paymentDate, payee, recipient, amount
+          , paymentStatus);
       }
 
   @Override
@@ -1031,26 +1220,6 @@ public class PaymentNotice extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam PAYMENT_STATUS = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PAYMENT_STATUS);
-
- /**
-   * Search parameter: <b>statusdate</b>
-   * <p>
-   * Description: <b>The date of the payment action</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>PaymentNotice.statusDate</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="statusdate", path="PaymentNotice.statusDate", description="The date of the payment action", type="date" )
-  public static final String SP_STATUSDATE = "statusdate";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>statusdate</b>
-   * <p>
-   * Description: <b>The date of the payment action</b><br>
-   * Type: <b>date</b><br>
-   * Path: <b>PaymentNotice.statusDate</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.DateClientParam STATUSDATE = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_STATUSDATE);
 
  /**
    * Search parameter: <b>status</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -62,7 +62,7 @@ public class FamilyMemberHistory extends DomainResource {
          */
         ENTEREDINERROR, 
         /**
-         * Health information for this individual is unavailable/unknown.
+         * Health information for this family member is unavailable/unknown.
          */
         HEALTHUNKNOWN, 
         /**
@@ -108,7 +108,7 @@ public class FamilyMemberHistory extends DomainResource {
             case PARTIAL: return "Some health information is known and captured, but not complete - see notes for details.";
             case COMPLETED: return "All available related health information is captured as of the date (and possibly time) when the family member history was taken.";
             case ENTEREDINERROR: return "This instance should not have been part of this patient's medical record.";
-            case HEALTHUNKNOWN: return "Health information for this individual is unavailable/unknown.";
+            case HEALTHUNKNOWN: return "Health information for this family member is unavailable/unknown.";
             default: return "?";
           }
         }
@@ -116,8 +116,8 @@ public class FamilyMemberHistory extends DomainResource {
           switch (this) {
             case PARTIAL: return "Partial";
             case COMPLETED: return "Completed";
-            case ENTEREDINERROR: return "Entered in error";
-            case HEALTHUNKNOWN: return "Health unknown";
+            case ENTEREDINERROR: return "Entered in Error";
+            case HEALTHUNKNOWN: return "Health Unknown";
             default: return "?";
           }
         }
@@ -183,28 +183,35 @@ public class FamilyMemberHistory extends DomainResource {
         protected CodeableConcept code;
 
         /**
-         * Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation.
+         * Indicates what happened following the condition.  If the condition resulted in death, deceased date is captured on the relation.
          */
         @Child(name = "outcome", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="deceased | permanent disability | etc.", formalDefinition="Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation." )
+        @Description(shortDefinition="deceased | permanent disability | etc.", formalDefinition="Indicates what happened following the condition.  If the condition resulted in death, deceased date is captured on the relation." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/condition-outcome")
         protected CodeableConcept outcome;
 
         /**
+         * This condition contributed to the cause of death of the related person. If contributedToDeath is not populated, then it is unknown.
+         */
+        @Child(name = "contributedToDeath", type = {BooleanType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Whether the condition contributed to the cause of death", formalDefinition="This condition contributed to the cause of death of the related person. If contributedToDeath is not populated, then it is unknown." )
+        protected BooleanType contributedToDeath;
+
+        /**
          * Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.
          */
-        @Child(name = "onset", type = {Age.class, Range.class, Period.class, StringType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "onset", type = {Age.class, Range.class, Period.class, StringType.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="When condition first manifested", formalDefinition="Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence." )
         protected Type onset;
 
         /**
          * An area where general notes can be placed about this specific condition.
          */
-        @Child(name = "note", type = {Annotation.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "note", type = {Annotation.class}, order=5, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Extra information about condition", formalDefinition="An area where general notes can be placed about this specific condition." )
         protected List<Annotation> note;
 
-        private static final long serialVersionUID = 598309281L;
+        private static final long serialVersionUID = 1230182301L;
 
     /**
      * Constructor
@@ -246,7 +253,7 @@ public class FamilyMemberHistory extends DomainResource {
         }
 
         /**
-         * @return {@link #outcome} (Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation.)
+         * @return {@link #outcome} (Indicates what happened following the condition.  If the condition resulted in death, deceased date is captured on the relation.)
          */
         public CodeableConcept getOutcome() { 
           if (this.outcome == null)
@@ -262,10 +269,55 @@ public class FamilyMemberHistory extends DomainResource {
         }
 
         /**
-         * @param value {@link #outcome} (Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation.)
+         * @param value {@link #outcome} (Indicates what happened following the condition.  If the condition resulted in death, deceased date is captured on the relation.)
          */
         public FamilyMemberHistoryConditionComponent setOutcome(CodeableConcept value) { 
           this.outcome = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #contributedToDeath} (This condition contributed to the cause of death of the related person. If contributedToDeath is not populated, then it is unknown.). This is the underlying object with id, value and extensions. The accessor "getContributedToDeath" gives direct access to the value
+         */
+        public BooleanType getContributedToDeathElement() { 
+          if (this.contributedToDeath == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create FamilyMemberHistoryConditionComponent.contributedToDeath");
+            else if (Configuration.doAutoCreate())
+              this.contributedToDeath = new BooleanType(); // bb
+          return this.contributedToDeath;
+        }
+
+        public boolean hasContributedToDeathElement() { 
+          return this.contributedToDeath != null && !this.contributedToDeath.isEmpty();
+        }
+
+        public boolean hasContributedToDeath() { 
+          return this.contributedToDeath != null && !this.contributedToDeath.isEmpty();
+        }
+
+        /**
+         * @param value {@link #contributedToDeath} (This condition contributed to the cause of death of the related person. If contributedToDeath is not populated, then it is unknown.). This is the underlying object with id, value and extensions. The accessor "getContributedToDeath" gives direct access to the value
+         */
+        public FamilyMemberHistoryConditionComponent setContributedToDeathElement(BooleanType value) { 
+          this.contributedToDeath = value;
+          return this;
+        }
+
+        /**
+         * @return This condition contributed to the cause of death of the related person. If contributedToDeath is not populated, then it is unknown.
+         */
+        public boolean getContributedToDeath() { 
+          return this.contributedToDeath == null || this.contributedToDeath.isEmpty() ? false : this.contributedToDeath.getValue();
+        }
+
+        /**
+         * @param value This condition contributed to the cause of death of the related person. If contributedToDeath is not populated, then it is unknown.
+         */
+        public FamilyMemberHistoryConditionComponent setContributedToDeath(boolean value) { 
+            if (this.contributedToDeath == null)
+              this.contributedToDeath = new BooleanType();
+            this.contributedToDeath.setValue(value);
           return this;
         }
 
@@ -281,7 +333,7 @@ public class FamilyMemberHistory extends DomainResource {
          */
         public Age getOnsetAge() throws FHIRException { 
           if (this.onset == null)
-            return null;
+            this.onset = new Age();
           if (!(this.onset instanceof Age))
             throw new FHIRException("Type mismatch: the type Age was expected, but "+this.onset.getClass().getName()+" was encountered");
           return (Age) this.onset;
@@ -296,7 +348,7 @@ public class FamilyMemberHistory extends DomainResource {
          */
         public Range getOnsetRange() throws FHIRException { 
           if (this.onset == null)
-            return null;
+            this.onset = new Range();
           if (!(this.onset instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.onset.getClass().getName()+" was encountered");
           return (Range) this.onset;
@@ -311,7 +363,7 @@ public class FamilyMemberHistory extends DomainResource {
          */
         public Period getOnsetPeriod() throws FHIRException { 
           if (this.onset == null)
-            return null;
+            this.onset = new Period();
           if (!(this.onset instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.onset.getClass().getName()+" was encountered");
           return (Period) this.onset;
@@ -326,7 +378,7 @@ public class FamilyMemberHistory extends DomainResource {
          */
         public StringType getOnsetStringType() throws FHIRException { 
           if (this.onset == null)
-            return null;
+            this.onset = new StringType();
           if (!(this.onset instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.onset.getClass().getName()+" was encountered");
           return (StringType) this.onset;
@@ -406,7 +458,8 @@ public class FamilyMemberHistory extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("code", "CodeableConcept", "The actual condition specified. Could be a coded condition (like MI or Diabetes) or a less specific string like 'cancer' depending on how much is known about the condition and the capabilities of the creating system.", 0, 1, code));
-          children.add(new Property("outcome", "CodeableConcept", "Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation.", 0, 1, outcome));
+          children.add(new Property("outcome", "CodeableConcept", "Indicates what happened following the condition.  If the condition resulted in death, deceased date is captured on the relation.", 0, 1, outcome));
+          children.add(new Property("contributedToDeath", "boolean", "This condition contributed to the cause of death of the related person. If contributedToDeath is not populated, then it is unknown.", 0, 1, contributedToDeath));
           children.add(new Property("onset[x]", "Age|Range|Period|string", "Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.", 0, 1, onset));
           children.add(new Property("note", "Annotation", "An area where general notes can be placed about this specific condition.", 0, java.lang.Integer.MAX_VALUE, note));
         }
@@ -415,7 +468,8 @@ public class FamilyMemberHistory extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The actual condition specified. Could be a coded condition (like MI or Diabetes) or a less specific string like 'cancer' depending on how much is known about the condition and the capabilities of the creating system.", 0, 1, code);
-          case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Indicates what happened as a result of this condition.  If the condition resulted in death, deceased date is captured on the relation.", 0, 1, outcome);
+          case -1106507950: /*outcome*/  return new Property("outcome", "CodeableConcept", "Indicates what happened following the condition.  If the condition resulted in death, deceased date is captured on the relation.", 0, 1, outcome);
+          case -363644638: /*contributedToDeath*/  return new Property("contributedToDeath", "boolean", "This condition contributed to the cause of death of the related person. If contributedToDeath is not populated, then it is unknown.", 0, 1, contributedToDeath);
           case -1886216323: /*onset[x]*/  return new Property("onset[x]", "Age|Range|Period|string", "Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.", 0, 1, onset);
           case 105901603: /*onset*/  return new Property("onset[x]", "Age|Range|Period|string", "Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.", 0, 1, onset);
           case -1886241828: /*onsetAge*/  return new Property("onset[x]", "Age|Range|Period|string", "Either the age of onset, range of approximate age or descriptive string can be recorded.  For conditions with multiple occurrences, this describes the first known occurrence.", 0, 1, onset);
@@ -433,6 +487,7 @@ public class FamilyMemberHistory extends DomainResource {
         switch (hash) {
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // CodeableConcept
+        case -363644638: /*contributedToDeath*/ return this.contributedToDeath == null ? new Base[0] : new Base[] {this.contributedToDeath}; // BooleanType
         case 105901603: /*onset*/ return this.onset == null ? new Base[0] : new Base[] {this.onset}; // Type
         case 3387378: /*note*/ return this.note == null ? new Base[0] : this.note.toArray(new Base[this.note.size()]); // Annotation
         default: return super.getProperty(hash, name, checkValid);
@@ -448,6 +503,9 @@ public class FamilyMemberHistory extends DomainResource {
           return value;
         case -1106507950: // outcome
           this.outcome = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -363644638: // contributedToDeath
+          this.contributedToDeath = castToBoolean(value); // BooleanType
           return value;
         case 105901603: // onset
           this.onset = castToType(value); // Type
@@ -466,6 +524,8 @@ public class FamilyMemberHistory extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("outcome")) {
           this.outcome = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("contributedToDeath")) {
+          this.contributedToDeath = castToBoolean(value); // BooleanType
         } else if (name.equals("onset[x]")) {
           this.onset = castToType(value); // Type
         } else if (name.equals("note")) {
@@ -480,6 +540,7 @@ public class FamilyMemberHistory extends DomainResource {
         switch (hash) {
         case 3059181:  return getCode(); 
         case -1106507950:  return getOutcome(); 
+        case -363644638:  return getContributedToDeathElement();
         case -1886216323:  return getOnset(); 
         case 105901603:  return getOnset(); 
         case 3387378:  return addNote(); 
@@ -493,6 +554,7 @@ public class FamilyMemberHistory extends DomainResource {
         switch (hash) {
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case -1106507950: /*outcome*/ return new String[] {"CodeableConcept"};
+        case -363644638: /*contributedToDeath*/ return new String[] {"boolean"};
         case 105901603: /*onset*/ return new String[] {"Age", "Range", "Period", "string"};
         case 3387378: /*note*/ return new String[] {"Annotation"};
         default: return super.getTypesForProperty(hash, name);
@@ -509,6 +571,9 @@ public class FamilyMemberHistory extends DomainResource {
         else if (name.equals("outcome")) {
           this.outcome = new CodeableConcept();
           return this.outcome;
+        }
+        else if (name.equals("contributedToDeath")) {
+          throw new FHIRException("Cannot call addChild on a primitive type FamilyMemberHistory.contributedToDeath");
         }
         else if (name.equals("onsetAge")) {
           this.onset = new Age();
@@ -538,6 +603,7 @@ public class FamilyMemberHistory extends DomainResource {
         copyValues(dst);
         dst.code = code == null ? null : code.copy();
         dst.outcome = outcome == null ? null : outcome.copy();
+        dst.contributedToDeath = contributedToDeath == null ? null : contributedToDeath.copy();
         dst.onset = onset == null ? null : onset.copy();
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
@@ -554,8 +620,8 @@ public class FamilyMemberHistory extends DomainResource {
         if (!(other_ instanceof FamilyMemberHistoryConditionComponent))
           return false;
         FamilyMemberHistoryConditionComponent o = (FamilyMemberHistoryConditionComponent) other_;
-        return compareDeep(code, o.code, true) && compareDeep(outcome, o.outcome, true) && compareDeep(onset, o.onset, true)
-           && compareDeep(note, o.note, true);
+        return compareDeep(code, o.code, true) && compareDeep(outcome, o.outcome, true) && compareDeep(contributedToDeath, o.contributedToDeath, true)
+           && compareDeep(onset, o.onset, true) && compareDeep(note, o.note, true);
       }
 
       @Override
@@ -565,12 +631,12 @@ public class FamilyMemberHistory extends DomainResource {
         if (!(other_ instanceof FamilyMemberHistoryConditionComponent))
           return false;
         FamilyMemberHistoryConditionComponent o = (FamilyMemberHistoryConditionComponent) other_;
-        return true;
+        return compareValues(contributedToDeath, o.contributedToDeath, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, outcome, onset, note
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, outcome, contributedToDeath
+          , onset, note);
       }
 
   public String fhirType() {
@@ -654,10 +720,9 @@ public class FamilyMemberHistory extends DomainResource {
     /**
      * The birth sex of the family member.
      */
-    @Child(name = "gender", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="male | female | unknown", formalDefinition="The birth sex of the family member." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/birth-sex")
-    protected CodeableConcept gender;
+    @Child(name = "sex", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="male | female | other | unknown", formalDefinition="The birth sex of the family member." )
+    protected CodeableConcept sex;
 
     /**
      * The actual or approximate date of birth of the relative.
@@ -721,7 +786,7 @@ public class FamilyMemberHistory extends DomainResource {
     @Description(shortDefinition="Condition that the related person had", formalDefinition="The significant Conditions (or condition) that the family member had. This is a repeating section to allow a system to represent more than one condition per resource, though there is nothing stopping multiple resources - one per condition." )
     protected List<FamilyMemberHistoryConditionComponent> condition;
 
-    private static final long serialVersionUID = -1337103863L;
+    private static final long serialVersionUID = -455261406L;
 
   /**
    * Constructor
@@ -1151,26 +1216,26 @@ public class FamilyMemberHistory extends DomainResource {
     }
 
     /**
-     * @return {@link #gender} (The birth sex of the family member.)
+     * @return {@link #sex} (The birth sex of the family member.)
      */
-    public CodeableConcept getGender() { 
-      if (this.gender == null)
+    public CodeableConcept getSex() { 
+      if (this.sex == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create FamilyMemberHistory.gender");
+          throw new Error("Attempt to auto-create FamilyMemberHistory.sex");
         else if (Configuration.doAutoCreate())
-          this.gender = new CodeableConcept(); // cc
-      return this.gender;
+          this.sex = new CodeableConcept(); // cc
+      return this.sex;
     }
 
-    public boolean hasGender() { 
-      return this.gender != null && !this.gender.isEmpty();
+    public boolean hasSex() { 
+      return this.sex != null && !this.sex.isEmpty();
     }
 
     /**
-     * @param value {@link #gender} (The birth sex of the family member.)
+     * @param value {@link #sex} (The birth sex of the family member.)
      */
-    public FamilyMemberHistory setGender(CodeableConcept value) { 
-      this.gender = value;
+    public FamilyMemberHistory setSex(CodeableConcept value) { 
+      this.sex = value;
       return this;
     }
 
@@ -1186,7 +1251,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public Period getBornPeriod() throws FHIRException { 
       if (this.born == null)
-        return null;
+        this.born = new Period();
       if (!(this.born instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.born.getClass().getName()+" was encountered");
       return (Period) this.born;
@@ -1201,7 +1266,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public DateType getBornDateType() throws FHIRException { 
       if (this.born == null)
-        return null;
+        this.born = new DateType();
       if (!(this.born instanceof DateType))
         throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.born.getClass().getName()+" was encountered");
       return (DateType) this.born;
@@ -1216,7 +1281,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public StringType getBornStringType() throws FHIRException { 
       if (this.born == null)
-        return null;
+        this.born = new StringType();
       if (!(this.born instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.born.getClass().getName()+" was encountered");
       return (StringType) this.born;
@@ -1252,7 +1317,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public Age getAgeAge() throws FHIRException { 
       if (this.age == null)
-        return null;
+        this.age = new Age();
       if (!(this.age instanceof Age))
         throw new FHIRException("Type mismatch: the type Age was expected, but "+this.age.getClass().getName()+" was encountered");
       return (Age) this.age;
@@ -1267,7 +1332,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public Range getAgeRange() throws FHIRException { 
       if (this.age == null)
-        return null;
+        this.age = new Range();
       if (!(this.age instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.age.getClass().getName()+" was encountered");
       return (Range) this.age;
@@ -1282,7 +1347,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public StringType getAgeStringType() throws FHIRException { 
       if (this.age == null)
-        return null;
+        this.age = new StringType();
       if (!(this.age instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.age.getClass().getName()+" was encountered");
       return (StringType) this.age;
@@ -1363,7 +1428,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public BooleanType getDeceasedBooleanType() throws FHIRException { 
       if (this.deceased == null)
-        return null;
+        this.deceased = new BooleanType();
       if (!(this.deceased instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (BooleanType) this.deceased;
@@ -1378,7 +1443,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public Age getDeceasedAge() throws FHIRException { 
       if (this.deceased == null)
-        return null;
+        this.deceased = new Age();
       if (!(this.deceased instanceof Age))
         throw new FHIRException("Type mismatch: the type Age was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (Age) this.deceased;
@@ -1393,7 +1458,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public Range getDeceasedRange() throws FHIRException { 
       if (this.deceased == null)
-        return null;
+        this.deceased = new Range();
       if (!(this.deceased instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (Range) this.deceased;
@@ -1408,7 +1473,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public DateType getDeceasedDateType() throws FHIRException { 
       if (this.deceased == null)
-        return null;
+        this.deceased = new DateType();
       if (!(this.deceased instanceof DateType))
         throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (DateType) this.deceased;
@@ -1423,7 +1488,7 @@ public class FamilyMemberHistory extends DomainResource {
      */
     public StringType getDeceasedStringType() throws FHIRException { 
       if (this.deceased == null)
-        return null;
+        this.deceased = new StringType();
       if (!(this.deceased instanceof StringType))
         throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.deceased.getClass().getName()+" was encountered");
       return (StringType) this.deceased;
@@ -1680,7 +1745,7 @@ public class FamilyMemberHistory extends DomainResource {
         children.add(new Property("date", "dateTime", "The date (and possibly time) when the family member history was recorded or last updated.", 0, 1, date));
         children.add(new Property("name", "string", "This will either be a name or a description; e.g. \"Aunt Susan\", \"my cousin with the red hair\".", 0, 1, name));
         children.add(new Property("relationship", "CodeableConcept", "The type of relationship this person has to the patient (father, mother, brother etc.).", 0, 1, relationship));
-        children.add(new Property("gender", "CodeableConcept", "The birth sex of the family member.", 0, 1, gender));
+        children.add(new Property("sex", "CodeableConcept", "The birth sex of the family member.", 0, 1, sex));
         children.add(new Property("born[x]", "Period|date|string", "The actual or approximate date of birth of the relative.", 0, 1, born));
         children.add(new Property("age[x]", "Age|Range|string", "The age of the relative at the time the family member history is recorded.", 0, 1, age));
         children.add(new Property("estimatedAge", "boolean", "If true, indicates that the age value specified is an estimated value.", 0, 1, estimatedAge));
@@ -1703,7 +1768,7 @@ public class FamilyMemberHistory extends DomainResource {
         case 3076014: /*date*/  return new Property("date", "dateTime", "The date (and possibly time) when the family member history was recorded or last updated.", 0, 1, date);
         case 3373707: /*name*/  return new Property("name", "string", "This will either be a name or a description; e.g. \"Aunt Susan\", \"my cousin with the red hair\".", 0, 1, name);
         case -261851592: /*relationship*/  return new Property("relationship", "CodeableConcept", "The type of relationship this person has to the patient (father, mother, brother etc.).", 0, 1, relationship);
-        case -1249512767: /*gender*/  return new Property("gender", "CodeableConcept", "The birth sex of the family member.", 0, 1, gender);
+        case 113766: /*sex*/  return new Property("sex", "CodeableConcept", "The birth sex of the family member.", 0, 1, sex);
         case 67532951: /*born[x]*/  return new Property("born[x]", "Period|date|string", "The actual or approximate date of birth of the relative.", 0, 1, born);
         case 3029833: /*born*/  return new Property("born[x]", "Period|date|string", "The actual or approximate date of birth of the relative.", 0, 1, born);
         case 1497711210: /*bornPeriod*/  return new Property("born[x]", "Period|date|string", "The actual or approximate date of birth of the relative.", 0, 1, born);
@@ -1743,7 +1808,7 @@ public class FamilyMemberHistory extends DomainResource {
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -261851592: /*relationship*/ return this.relationship == null ? new Base[0] : new Base[] {this.relationship}; // CodeableConcept
-        case -1249512767: /*gender*/ return this.gender == null ? new Base[0] : new Base[] {this.gender}; // CodeableConcept
+        case 113766: /*sex*/ return this.sex == null ? new Base[0] : new Base[] {this.sex}; // CodeableConcept
         case 3029833: /*born*/ return this.born == null ? new Base[0] : new Base[] {this.born}; // Type
         case 96511: /*age*/ return this.age == null ? new Base[0] : new Base[] {this.age}; // Type
         case 2130167587: /*estimatedAge*/ return this.estimatedAge == null ? new Base[0] : new Base[] {this.estimatedAge}; // BooleanType
@@ -1788,8 +1853,8 @@ public class FamilyMemberHistory extends DomainResource {
         case -261851592: // relationship
           this.relationship = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case -1249512767: // gender
-          this.gender = castToCodeableConcept(value); // CodeableConcept
+        case 113766: // sex
+          this.sex = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 3029833: // born
           this.born = castToType(value); // Type
@@ -1841,8 +1906,8 @@ public class FamilyMemberHistory extends DomainResource {
           this.name = castToString(value); // StringType
         } else if (name.equals("relationship")) {
           this.relationship = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("gender")) {
-          this.gender = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("sex")) {
+          this.sex = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("born[x]")) {
           this.born = castToType(value); // Type
         } else if (name.equals("age[x]")) {
@@ -1876,7 +1941,7 @@ public class FamilyMemberHistory extends DomainResource {
         case 3076014:  return getDateElement();
         case 3373707:  return getNameElement();
         case -261851592:  return getRelationship(); 
-        case -1249512767:  return getGender(); 
+        case 113766:  return getSex(); 
         case 67532951:  return getBorn(); 
         case 3029833:  return getBorn(); 
         case -1419716831:  return getAge(); 
@@ -1905,7 +1970,7 @@ public class FamilyMemberHistory extends DomainResource {
         case 3076014: /*date*/ return new String[] {"dateTime"};
         case 3373707: /*name*/ return new String[] {"string"};
         case -261851592: /*relationship*/ return new String[] {"CodeableConcept"};
-        case -1249512767: /*gender*/ return new String[] {"CodeableConcept"};
+        case 113766: /*sex*/ return new String[] {"CodeableConcept"};
         case 3029833: /*born*/ return new String[] {"Period", "date", "string"};
         case 96511: /*age*/ return new String[] {"Age", "Range", "string"};
         case 2130167587: /*estimatedAge*/ return new String[] {"boolean"};
@@ -1951,9 +2016,9 @@ public class FamilyMemberHistory extends DomainResource {
           this.relationship = new CodeableConcept();
           return this.relationship;
         }
-        else if (name.equals("gender")) {
-          this.gender = new CodeableConcept();
-          return this.gender;
+        else if (name.equals("sex")) {
+          this.sex = new CodeableConcept();
+          return this.sex;
         }
         else if (name.equals("bornPeriod")) {
           this.born = new Period();
@@ -2047,7 +2112,7 @@ public class FamilyMemberHistory extends DomainResource {
         dst.date = date == null ? null : date.copy();
         dst.name = name == null ? null : name.copy();
         dst.relationship = relationship == null ? null : relationship.copy();
-        dst.gender = gender == null ? null : gender.copy();
+        dst.sex = sex == null ? null : sex.copy();
         dst.born = born == null ? null : born.copy();
         dst.age = age == null ? null : age.copy();
         dst.estimatedAge = estimatedAge == null ? null : estimatedAge.copy();
@@ -2090,7 +2155,7 @@ public class FamilyMemberHistory extends DomainResource {
            && compareDeep(instantiatesUri, o.instantiatesUri, true) && compareDeep(status, o.status, true)
            && compareDeep(dataAbsentReason, o.dataAbsentReason, true) && compareDeep(patient, o.patient, true)
            && compareDeep(date, o.date, true) && compareDeep(name, o.name, true) && compareDeep(relationship, o.relationship, true)
-           && compareDeep(gender, o.gender, true) && compareDeep(born, o.born, true) && compareDeep(age, o.age, true)
+           && compareDeep(sex, o.sex, true) && compareDeep(born, o.born, true) && compareDeep(age, o.age, true)
            && compareDeep(estimatedAge, o.estimatedAge, true) && compareDeep(deceased, o.deceased, true) && compareDeep(reasonCode, o.reasonCode, true)
            && compareDeep(reasonReference, o.reasonReference, true) && compareDeep(note, o.note, true) && compareDeep(condition, o.condition, true)
           ;
@@ -2111,7 +2176,7 @@ public class FamilyMemberHistory extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiatesCanonical
           , instantiatesUri, status, dataAbsentReason, patient, date, name, relationship
-          , gender, born, age, estimatedAge, deceased, reasonCode, reasonReference, note
+          , sex, born, age, estimatedAge, deceased, reasonCode, reasonReference, note
           , condition);
       }
 
@@ -2181,26 +2246,6 @@ public class FamilyMemberHistory extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_CODE);
 
  /**
-   * Search parameter: <b>gender</b>
-   * <p>
-   * Description: <b>A search by a gender code of a family member</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>FamilyMemberHistory.gender</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="gender", path="FamilyMemberHistory.gender", description="A search by a gender code of a family member", type="token" )
-  public static final String SP_GENDER = "gender";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>gender</b>
-   * <p>
-   * Description: <b>A search by a gender code of a family member</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>FamilyMemberHistory.gender</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam GENDER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_GENDER);
-
- /**
    * Search parameter: <b>patient</b>
    * <p>
    * Description: <b>The identity of a subject to list family member history items for</b><br>
@@ -2208,7 +2253,7 @@ public class FamilyMemberHistory extends DomainResource {
    * Path: <b>FamilyMemberHistory.patient</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient.where(resolve() is Patient)", description="The identity of a subject to list family member history items for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
+  @SearchParamDefinition(name="patient", path="FamilyMemberHistory.patient", description="The identity of a subject to list family member history items for", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Patient") }, target={Patient.class } )
   public static final String SP_PATIENT = "patient";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>patient</b>
@@ -2225,6 +2270,26 @@ public class FamilyMemberHistory extends DomainResource {
    * the path value of "<b>FamilyMemberHistory:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("FamilyMemberHistory:patient").toLocked();
+
+ /**
+   * Search parameter: <b>sex</b>
+   * <p>
+   * Description: <b>A search by a sex code of a family member</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>FamilyMemberHistory.sex</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="sex", path="FamilyMemberHistory.sex", description="A search by a sex code of a family member", type="token" )
+  public static final String SP_SEX = "sex";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>sex</b>
+   * <p>
+   * Description: <b>A search by a sex code of a family member</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>FamilyMemberHistory.sex</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SEX = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SEX);
 
  /**
    * Search parameter: <b>instantiates-canonical</b>

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,59 +37,59 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum AdverseEventCategory {
 
         /**
-         * null
+         * The adverse event pertains to a product problem.
          */
         PRODUCTPROBLEM, 
         /**
-         * null
+         * The adverse event pertains to product quality.
          */
         PRODUCTQUALITY, 
         /**
-         * null
+         * The adverse event pertains to a product use error.
          */
         PRODUCTUSEERROR, 
         /**
-         * null
+         * The adverse event pertains to a wrong dose.
          */
         WRONGDOSE, 
         /**
-         * null
+         * The adverse event pertains to incorrect perscribing information.
          */
         INCORRECTPRESCRIBINGINFORMATION, 
         /**
-         * null
+         * The adverse event pertains to a wrong technique.
          */
         WRONGTECHNIQUE, 
         /**
-         * null
+         * The adverse event pertains to a wrong route of administration.
          */
         WRONGROUTEOFADMINISTRATION, 
         /**
-         * null
+         * The adverse event pertains to a wrong rate.
          */
         WRONGRATE, 
         /**
-         * null
+         * The adverse event pertains to a wrong duration.
          */
         WRONGDURATION, 
         /**
-         * null
+         * The adverse event pertains to a wrong time.
          */
         WRONGTIME, 
         /**
-         * null
+         * The adverse event pertains to an expired drug.
          */
         EXPIREDDRUG, 
         /**
-         * null
+         * The adverse event pertains to a medical device use error.
          */
         MEDICALDEVICEUSEERROR, 
         /**
-         * null
+         * The adverse event pertains to a problem with a different manufacturer of the same medication.
          */
         PROBLEMDIFFERENTMANUFACTURER, 
         /**
-         * null
+         * The adverse event pertains to an unsafe physical environment.
          */
         UNSAFEPHYSICALENVIRONMENT, 
         /**
@@ -153,20 +153,20 @@ public enum AdverseEventCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case PRODUCTPROBLEM: return "";
-            case PRODUCTQUALITY: return "";
-            case PRODUCTUSEERROR: return "";
-            case WRONGDOSE: return "";
-            case INCORRECTPRESCRIBINGINFORMATION: return "";
-            case WRONGTECHNIQUE: return "";
-            case WRONGROUTEOFADMINISTRATION: return "";
-            case WRONGRATE: return "";
-            case WRONGDURATION: return "";
-            case WRONGTIME: return "";
-            case EXPIREDDRUG: return "";
-            case MEDICALDEVICEUSEERROR: return "";
-            case PROBLEMDIFFERENTMANUFACTURER: return "";
-            case UNSAFEPHYSICALENVIRONMENT: return "";
+            case PRODUCTPROBLEM: return "The adverse event pertains to a product problem.";
+            case PRODUCTQUALITY: return "The adverse event pertains to product quality.";
+            case PRODUCTUSEERROR: return "The adverse event pertains to a product use error.";
+            case WRONGDOSE: return "The adverse event pertains to a wrong dose.";
+            case INCORRECTPRESCRIBINGINFORMATION: return "The adverse event pertains to incorrect perscribing information.";
+            case WRONGTECHNIQUE: return "The adverse event pertains to a wrong technique.";
+            case WRONGROUTEOFADMINISTRATION: return "The adverse event pertains to a wrong route of administration.";
+            case WRONGRATE: return "The adverse event pertains to a wrong rate.";
+            case WRONGDURATION: return "The adverse event pertains to a wrong duration.";
+            case WRONGTIME: return "The adverse event pertains to a wrong time.";
+            case EXPIREDDRUG: return "The adverse event pertains to an expired drug.";
+            case MEDICALDEVICEUSEERROR: return "The adverse event pertains to a medical device use error.";
+            case PROBLEMDIFFERENTMANUFACTURER: return "The adverse event pertains to a problem with a different manufacturer of the same medication.";
+            case UNSAFEPHYSICALENVIRONMENT: return "The adverse event pertains to an unsafe physical environment.";
             default: return "?";
           }
         }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1095,7 +1095,7 @@ public class Composition extends DomainResource {
          */
         public Identifier getTargetIdentifier() throws FHIRException { 
           if (this.target == null)
-            return null;
+            this.target = new Identifier();
           if (!(this.target instanceof Identifier))
             throw new FHIRException("Type mismatch: the type Identifier was expected, but "+this.target.getClass().getName()+" was encountered");
           return (Identifier) this.target;
@@ -1110,7 +1110,7 @@ public class Composition extends DomainResource {
          */
         public Reference getTargetReference() throws FHIRException { 
           if (this.target == null)
-            return null;
+            this.target = new Reference();
           if (!(this.target instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.target.getClass().getName()+" was encountered");
           return (Reference) this.target;
@@ -1621,16 +1621,28 @@ public class Composition extends DomainResource {
 
 
         /**
+         * The actual focus of the section when it is not the subject of the composition, but instead represents something or someone associated with the subject such as (for a patient subject) a spouse, parent, fetus, or donor. If not focus is specified, the focus is assumed to be focus of the parent section, or, for a section in the Composition itself, the subject of the composition. Sections with a focus SHALL only include resources where the logical subject (patient, subject, focus, etc.) matches the section focus, or the resources have no logical subject (few resources).
+         */
+        @Child(name = "focus", type = {Reference.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Who/what the section is about, when it is not about the subject of composition", formalDefinition="The actual focus of the section when it is not the subject of the composition, but instead represents something or someone associated with the subject such as (for a patient subject) a spouse, parent, fetus, or donor. If not focus is specified, the focus is assumed to be focus of the parent section, or, for a section in the Composition itself, the subject of the composition. Sections with a focus SHALL only include resources where the logical subject (patient, subject, focus, etc.) matches the section focus, or the resources have no logical subject (few resources)." )
+        protected Reference focus;
+
+        /**
+         * The actual object that is the target of the reference (The actual focus of the section when it is not the subject of the composition, but instead represents something or someone associated with the subject such as (for a patient subject) a spouse, parent, fetus, or donor. If not focus is specified, the focus is assumed to be focus of the parent section, or, for a section in the Composition itself, the subject of the composition. Sections with a focus SHALL only include resources where the logical subject (patient, subject, focus, etc.) matches the section focus, or the resources have no logical subject (few resources).)
+         */
+        protected Resource focusTarget;
+
+        /**
          * A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it "clinically safe" for a human to just read the narrative.
          */
-        @Child(name = "text", type = {Narrative.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "text", type = {Narrative.class}, order=5, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Text summary of the section, for human interpretation", formalDefinition="A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \"clinically safe\" for a human to just read the narrative." )
         protected Narrative text;
 
         /**
          * How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.
          */
-        @Child(name = "mode", type = {CodeType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "mode", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="working | snapshot | changes", formalDefinition="How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-mode")
         protected Enumeration<SectionMode> mode;
@@ -1638,7 +1650,7 @@ public class Composition extends DomainResource {
         /**
          * Specifies the order applied to the items in the section entries.
          */
-        @Child(name = "orderedBy", type = {CodeableConcept.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "orderedBy", type = {CodeableConcept.class}, order=7, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Order of section entries", formalDefinition="Specifies the order applied to the items in the section entries." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-order")
         protected CodeableConcept orderedBy;
@@ -1646,7 +1658,7 @@ public class Composition extends DomainResource {
         /**
          * A reference to the actual resource from which the narrative in the section is derived.
          */
-        @Child(name = "entry", type = {Reference.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "entry", type = {Reference.class}, order=8, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="A reference to data that supports this section", formalDefinition="A reference to the actual resource from which the narrative in the section is derived." )
         protected List<Reference> entry;
         /**
@@ -1658,7 +1670,7 @@ public class Composition extends DomainResource {
         /**
          * If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason.
          */
-        @Child(name = "emptyReason", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "emptyReason", type = {CodeableConcept.class}, order=9, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Why the section is empty", formalDefinition="If the section is empty, why the list is empty. An empty section typically has some text explaining the empty reason." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/list-empty-reason")
         protected CodeableConcept emptyReason;
@@ -1666,11 +1678,11 @@ public class Composition extends DomainResource {
         /**
          * A nested sub-section within this section.
          */
-        @Child(name = "section", type = {SectionComponent.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "section", type = {SectionComponent.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Nested Section", formalDefinition="A nested sub-section within this section." )
         protected List<SectionComponent> section;
 
-        private static final long serialVersionUID = 2045983012L;
+        private static final long serialVersionUID = -797396954L;
 
     /**
      * Constructor
@@ -1813,6 +1825,45 @@ public class Composition extends DomainResource {
           if (this.authorTarget == null)
             this.authorTarget = new ArrayList<Resource>();
           return this.authorTarget;
+        }
+
+        /**
+         * @return {@link #focus} (The actual focus of the section when it is not the subject of the composition, but instead represents something or someone associated with the subject such as (for a patient subject) a spouse, parent, fetus, or donor. If not focus is specified, the focus is assumed to be focus of the parent section, or, for a section in the Composition itself, the subject of the composition. Sections with a focus SHALL only include resources where the logical subject (patient, subject, focus, etc.) matches the section focus, or the resources have no logical subject (few resources).)
+         */
+        public Reference getFocus() { 
+          if (this.focus == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create SectionComponent.focus");
+            else if (Configuration.doAutoCreate())
+              this.focus = new Reference(); // cc
+          return this.focus;
+        }
+
+        public boolean hasFocus() { 
+          return this.focus != null && !this.focus.isEmpty();
+        }
+
+        /**
+         * @param value {@link #focus} (The actual focus of the section when it is not the subject of the composition, but instead represents something or someone associated with the subject such as (for a patient subject) a spouse, parent, fetus, or donor. If not focus is specified, the focus is assumed to be focus of the parent section, or, for a section in the Composition itself, the subject of the composition. Sections with a focus SHALL only include resources where the logical subject (patient, subject, focus, etc.) matches the section focus, or the resources have no logical subject (few resources).)
+         */
+        public SectionComponent setFocus(Reference value) { 
+          this.focus = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #focus} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The actual focus of the section when it is not the subject of the composition, but instead represents something or someone associated with the subject such as (for a patient subject) a spouse, parent, fetus, or donor. If not focus is specified, the focus is assumed to be focus of the parent section, or, for a section in the Composition itself, the subject of the composition. Sections with a focus SHALL only include resources where the logical subject (patient, subject, focus, etc.) matches the section focus, or the resources have no logical subject (few resources).)
+         */
+        public Resource getFocusTarget() { 
+          return this.focusTarget;
+        }
+
+        /**
+         * @param value {@link #focus} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The actual focus of the section when it is not the subject of the composition, but instead represents something or someone associated with the subject such as (for a patient subject) a spouse, parent, fetus, or donor. If not focus is specified, the focus is assumed to be focus of the parent section, or, for a section in the Composition itself, the subject of the composition. Sections with a focus SHALL only include resources where the logical subject (patient, subject, focus, etc.) matches the section focus, or the resources have no logical subject (few resources).)
+         */
+        public SectionComponent setFocusTarget(Resource value) { 
+          this.focusTarget = value;
+          return this;
         }
 
         /**
@@ -2057,6 +2108,7 @@ public class Composition extends DomainResource {
           children.add(new Property("title", "string", "The label for this particular section.  This will be part of the rendered content for the document, and is often used to build a table of contents.", 0, 1, title));
           children.add(new Property("code", "CodeableConcept", "A code identifying the kind of content contained within the section. This must be consistent with the section title.", 0, 1, code));
           children.add(new Property("author", "Reference(Practitioner|PractitionerRole|Device|Patient|RelatedPerson|Organization)", "Identifies who is responsible for the information in this section, not necessarily who typed it in.", 0, java.lang.Integer.MAX_VALUE, author));
+          children.add(new Property("focus", "Reference(Any)", "The actual focus of the section when it is not the subject of the composition, but instead represents something or someone associated with the subject such as (for a patient subject) a spouse, parent, fetus, or donor. If not focus is specified, the focus is assumed to be focus of the parent section, or, for a section in the Composition itself, the subject of the composition. Sections with a focus SHALL only include resources where the logical subject (patient, subject, focus, etc.) matches the section focus, or the resources have no logical subject (few resources).", 0, 1, focus));
           children.add(new Property("text", "Narrative", "A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \"clinically safe\" for a human to just read the narrative.", 0, 1, text));
           children.add(new Property("mode", "code", "How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.", 0, 1, mode));
           children.add(new Property("orderedBy", "CodeableConcept", "Specifies the order applied to the items in the section entries.", 0, 1, orderedBy));
@@ -2071,6 +2123,7 @@ public class Composition extends DomainResource {
           case 110371416: /*title*/  return new Property("title", "string", "The label for this particular section.  This will be part of the rendered content for the document, and is often used to build a table of contents.", 0, 1, title);
           case 3059181: /*code*/  return new Property("code", "CodeableConcept", "A code identifying the kind of content contained within the section. This must be consistent with the section title.", 0, 1, code);
           case -1406328437: /*author*/  return new Property("author", "Reference(Practitioner|PractitionerRole|Device|Patient|RelatedPerson|Organization)", "Identifies who is responsible for the information in this section, not necessarily who typed it in.", 0, java.lang.Integer.MAX_VALUE, author);
+          case 97604824: /*focus*/  return new Property("focus", "Reference(Any)", "The actual focus of the section when it is not the subject of the composition, but instead represents something or someone associated with the subject such as (for a patient subject) a spouse, parent, fetus, or donor. If not focus is specified, the focus is assumed to be focus of the parent section, or, for a section in the Composition itself, the subject of the composition. Sections with a focus SHALL only include resources where the logical subject (patient, subject, focus, etc.) matches the section focus, or the resources have no logical subject (few resources).", 0, 1, focus);
           case 3556653: /*text*/  return new Property("text", "Narrative", "A human-readable narrative that contains the attested content of the section, used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \"clinically safe\" for a human to just read the narrative.", 0, 1, text);
           case 3357091: /*mode*/  return new Property("mode", "code", "How the entry list was prepared - whether it is a working list that is suitable for being maintained on an ongoing basis, or if it represents a snapshot of a list of items from another source, or whether it is a prepared list where items may be marked as added, modified or deleted.", 0, 1, mode);
           case -391079516: /*orderedBy*/  return new Property("orderedBy", "CodeableConcept", "Specifies the order applied to the items in the section entries.", 0, 1, orderedBy);
@@ -2088,6 +2141,7 @@ public class Composition extends DomainResource {
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : this.author.toArray(new Base[this.author.size()]); // Reference
+        case 97604824: /*focus*/ return this.focus == null ? new Base[0] : new Base[] {this.focus}; // Reference
         case 3556653: /*text*/ return this.text == null ? new Base[0] : new Base[] {this.text}; // Narrative
         case 3357091: /*mode*/ return this.mode == null ? new Base[0] : new Base[] {this.mode}; // Enumeration<SectionMode>
         case -391079516: /*orderedBy*/ return this.orderedBy == null ? new Base[0] : new Base[] {this.orderedBy}; // CodeableConcept
@@ -2110,6 +2164,9 @@ public class Composition extends DomainResource {
           return value;
         case -1406328437: // author
           this.getAuthor().add(castToReference(value)); // Reference
+          return value;
+        case 97604824: // focus
+          this.focus = castToReference(value); // Reference
           return value;
         case 3556653: // text
           this.text = castToNarrative(value); // Narrative
@@ -2143,6 +2200,8 @@ public class Composition extends DomainResource {
           this.code = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("author")) {
           this.getAuthor().add(castToReference(value));
+        } else if (name.equals("focus")) {
+          this.focus = castToReference(value); // Reference
         } else if (name.equals("text")) {
           this.text = castToNarrative(value); // Narrative
         } else if (name.equals("mode")) {
@@ -2167,6 +2226,7 @@ public class Composition extends DomainResource {
         case 110371416:  return getTitleElement();
         case 3059181:  return getCode(); 
         case -1406328437:  return addAuthor(); 
+        case 97604824:  return getFocus(); 
         case 3556653:  return getText(); 
         case 3357091:  return getModeElement();
         case -391079516:  return getOrderedBy(); 
@@ -2184,6 +2244,7 @@ public class Composition extends DomainResource {
         case 110371416: /*title*/ return new String[] {"string"};
         case 3059181: /*code*/ return new String[] {"CodeableConcept"};
         case -1406328437: /*author*/ return new String[] {"Reference"};
+        case 97604824: /*focus*/ return new String[] {"Reference"};
         case 3556653: /*text*/ return new String[] {"Narrative"};
         case 3357091: /*mode*/ return new String[] {"code"};
         case -391079516: /*orderedBy*/ return new String[] {"CodeableConcept"};
@@ -2206,6 +2267,10 @@ public class Composition extends DomainResource {
         }
         else if (name.equals("author")) {
           return addAuthor();
+        }
+        else if (name.equals("focus")) {
+          this.focus = new Reference();
+          return this.focus;
         }
         else if (name.equals("text")) {
           this.text = new Narrative();
@@ -2242,6 +2307,7 @@ public class Composition extends DomainResource {
           for (Reference i : author)
             dst.author.add(i.copy());
         };
+        dst.focus = focus == null ? null : focus.copy();
         dst.text = text == null ? null : text.copy();
         dst.mode = mode == null ? null : mode.copy();
         dst.orderedBy = orderedBy == null ? null : orderedBy.copy();
@@ -2267,9 +2333,9 @@ public class Composition extends DomainResource {
           return false;
         SectionComponent o = (SectionComponent) other_;
         return compareDeep(title, o.title, true) && compareDeep(code, o.code, true) && compareDeep(author, o.author, true)
-           && compareDeep(text, o.text, true) && compareDeep(mode, o.mode, true) && compareDeep(orderedBy, o.orderedBy, true)
-           && compareDeep(entry, o.entry, true) && compareDeep(emptyReason, o.emptyReason, true) && compareDeep(section, o.section, true)
-          ;
+           && compareDeep(focus, o.focus, true) && compareDeep(text, o.text, true) && compareDeep(mode, o.mode, true)
+           && compareDeep(orderedBy, o.orderedBy, true) && compareDeep(entry, o.entry, true) && compareDeep(emptyReason, o.emptyReason, true)
+           && compareDeep(section, o.section, true);
       }
 
       @Override
@@ -2283,8 +2349,8 @@ public class Composition extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(title, code, author, text
-          , mode, orderedBy, entry, emptyReason, section);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(title, code, author, focus
+          , text, mode, orderedBy, entry, emptyReason, section);
       }
 
   public String fhirType() {

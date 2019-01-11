@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,15 +63,15 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 			switch (getDriverType()) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					sql = "ALTER TABLE " + getTableName() + " DROP INDEX " + myIndexName;
+					sql = "alter table " + getTableName() + " drop index " + myIndexName;
 					break;
 				case DERBY_EMBEDDED:
-					sql = "DROP INDEX " + myIndexName;
+					sql = "drop index " + myIndexName;
 					break;
 				case POSTGRES_9_4:
 				case ORACLE_12C:
 				case MSSQL_2012:
-					sql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + myIndexName;
+					sql = "alter table " + getTableName() + " drop constraint " + myIndexName;
 					break;
 			}
 		} else {
@@ -79,19 +79,19 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 			switch (getDriverType()) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					sql = "ALTER TABLE " + getTableName() + " DROP INDEX " + myIndexName;
+					sql = "alter table " + getTableName() + " drop index " + myIndexName;
 					break;
 				case POSTGRES_9_4:
 				case DERBY_EMBEDDED:
 				case ORACLE_12C:
-					sql = "DROP INDEX " + myIndexName;
+					sql = "drop index " + myIndexName;
 					break;
 				case MSSQL_2012:
-					sql = "DROP INDEX " + getTableName() + "." + myIndexName;
+					sql = "drop index " + getTableName() + "." + myIndexName;
 					break;
 			}
 		}
-		executeSql(sql);
+		executeSql(getTableName(), sql);
 
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,15 +41,33 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 			return;
 		}
 
+		String typeStatement = getTypeStatement();
+
+		String sql = "";
+		switch (getDriverType()) {
+			case DERBY_EMBEDDED:
+			case MARIADB_10_1:
+			case MYSQL_5_7:
+			case POSTGRES_9_4:
+				sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + typeStatement;
+				break;
+			case MSSQL_2012:
+			case ORACLE_12C:
+				sql = "alter table " + getTableName() + " add " + getColumnName() + " " + typeStatement;
+				break;
+		}
+
+		ourLog.info("Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
+		executeSql(getTableName(), sql);
+	}
+
+	public String getTypeStatement() {
 		String type = getSqlType();
 		String nullable = getSqlNotNull();
 		if (isNullable()) {
 			nullable = "";
 		}
-
-		String sql = "alter table " + getTableName() + " add column " + getColumnName() + " " + type + " " + nullable;
-		ourLog.info("Adding column {} of type {} to table {}", getColumnName(), type, getTableName());
-		executeSql(sql);
+		return type + " " + nullable;
 	}
 
 }

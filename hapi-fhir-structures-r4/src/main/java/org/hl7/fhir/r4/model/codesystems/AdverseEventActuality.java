@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum AdverseEventActuality {
 
         /**
-         * null
+         * The adverse event actually happened regardless of whether anyone was affected or harmed.
          */
         ACTUAL, 
         /**
-         * null
+         * A potential adverse event.
          */
         POTENTIAL, 
         /**
@@ -69,8 +69,8 @@ public enum AdverseEventActuality {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTUAL: return "";
-            case POTENTIAL: return "";
+            case ACTUAL: return "The adverse event actually happened regardless of whether anyone was affected or harmed.";
+            case POTENTIAL: return "A potential adverse event.";
             default: return "?";
           }
         }

@@ -56,12 +56,8 @@
 	<feature name='hapi-fhir-hl7org-dstu2' version='${project.version}' start-level='50'>
 		<feature version='${project.version}'>hapi-fhir</feature>
 		<feature version='${project.version}'>hapi-fhir-utilities</feature>
-		<bundle dependency='true'>
-			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/${servicemix_saxon_version}
-		</bundle>
-		<bundle dependency='true'>
-			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}
-		</bundle>
+		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/${servicemix_saxon_version}</bundle>
+		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}</bundle>
 		<bundle>mvn:ca.uhn.hapi.fhir/hapi-fhir-structures-hl7org-dstu2/${project.version}</bundle>
 	</feature>
 
@@ -84,18 +80,17 @@
 	</feature>
 
 	<feature name='hapi-fhir-ph-schematron' version='${project.version}' start-level='50'>
-		<bundle dependency='true'>
-			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/${servicemix_saxon_version}
-		</bundle>
-		<bundle dependency='true'>
-			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}
-		</bundle>
+		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/${servicemix_saxon_version}</bundle>
+		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}</bundle>
 		<bundle dependency="true">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries_spifly_version}</bundle>
 		<bundle dependency='true'>mvn:com.google.code.findbugs/jsr305/${jsr305_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-commons/${ph_commons_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-collection/${ph_commons_version}</bundle>
+		<!-- needed by ph-xml 9.1.1, will be removed in later versions -->
+		<bundle dependency='true'>mvn:javax.jws/javax.jws-api/1.1</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-xml/${ph_commons_version}</bundle>
-		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-impl/${jaxb_bundle_version}</bundle>
+		<bundle start-level="20">mvn:com.sun.xml.bind/jaxb-impl/${jaxb_core_version}</bundle>
+		<bundle start-level="20">mvn:com.sun.xml.bind/jaxb-core/${jaxb_core_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-jaxb/${ph_commons_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-schematron/${ph_schematron_version}</bundle>
 	</feature>

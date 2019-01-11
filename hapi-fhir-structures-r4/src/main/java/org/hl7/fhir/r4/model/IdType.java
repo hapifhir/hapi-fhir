@@ -259,7 +259,9 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
 
   @Override
   public IdType copy() {
-    return new IdType(getValue());
+    IdType ret = new IdType(getValue());
+    copyValues(ret);
+    return ret;
   }
 
   @Override

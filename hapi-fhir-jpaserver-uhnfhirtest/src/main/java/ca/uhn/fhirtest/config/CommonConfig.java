@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest.config;
 
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
@@ -24,20 +25,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -174,6 +176,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					return null;
 				}
 				break;
+			case GRAPHQL:
+				if (theOperation == RestOperationTypeEnum.GRAPHQL_REQUEST) {
+					return newVerdict();
+				} else {
+					return null;
+				}
 			case TRANSACTION:
 				if (!(theOperation == RestOperationTypeEnum.TRANSACTION)) {
 					return null;
@@ -189,7 +197,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					for (BundleEntryParts nextPart : inputResources) {
 
 						IBaseResource inputResource = nextPart.getResource();
-						RestOperationTypeEnum operation = null;
+						RestOperationTypeEnum operation;
 						if (nextPart.getRequestType() == RequestTypeEnum.GET) {
 							continue;
 						} else {
@@ -199,18 +207,22 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							operation = RestOperationTypeEnum.CREATE;
 						} else if (nextPart.getRequestType() == RequestTypeEnum.PUT) {
 							operation = RestOperationTypeEnum.UPDATE;
+						} else if (nextPart.getRequestType() == RequestTypeEnum.DELETE) {
+							operation = RestOperationTypeEnum.DELETE;
 						} else {
 							throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
 						}
 
 						/*
 						 * This is basically just being conservative - Be careful of transactions containing
-						 * nested operations and nested transactions. We block the by default. At some point
+						 * nested operations and nested transactions. We block them by default. At some point
 						 * it would be nice to be more nuanced here.
 						 */
-						RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
-						if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
-							throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
+						if (nextPart.getResource() != null) {
+							RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
+							if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
+								throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
+							}
 						}
 
 						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null, null);
@@ -460,16 +472,18 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		}
 
 		IBaseBundle request = (IBaseBundle) theInputResource;
-		String bundleType = BundleUtil.getBundleType(theContext, request);
+		String bundleType = defaultString(BundleUtil.getBundleType(theContext, request));
 
 		//noinspection EnumSwitchStatementWhichMissesCases
-		switch (theOp) {
-			case TRANSACTION:
-				return "transaction".equals(bundleType)
-					|| "batch".equals(bundleType);
-			default:
-				return false;
+		if (theOp == RuleOpEnum.TRANSACTION) {
+			if ("transaction".equals(bundleType) || "batch".equals(bundleType)) {
+				return true;
+			} else {
+				String msg = theContext.getLocalizer().getMessage(RuleImplOp.class, "invalidRequestBundleTypeForTransaction", '"' + bundleType + '"');
+				throw new UnprocessableEntityException(msg);
+			}
 		}
+		return false;
 	}
 
 	public void setAppliesTo(AppliesTypeEnum theAppliesTo) {

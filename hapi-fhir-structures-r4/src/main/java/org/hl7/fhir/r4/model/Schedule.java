@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -87,22 +87,22 @@ public class Schedule extends DomainResource {
     protected List<CodeableConcept> specialty;
 
     /**
-     * The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.
+     * Slots that reference this schedule resource provide the availability details to these referenced resource(s).
      */
     @Child(name = "actor", type = {Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class, Device.class, HealthcareService.class, Location.class}, order=5, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="E.g. HealthCareService, Location, Practitioner, etc.", formalDefinition="The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson." )
+    @Description(shortDefinition="Resource(s) that availability information is being provided for", formalDefinition="Slots that reference this schedule resource provide the availability details to these referenced resource(s)." )
     protected List<Reference> actor;
     /**
-     * The actual objects that are the target of the reference (The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.)
+     * The actual objects that are the target of the reference (Slots that reference this schedule resource provide the availability details to these referenced resource(s).)
      */
     protected List<Resource> actorTarget;
 
 
     /**
-     * The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a "template" for planning outside these dates.
+     * The period of time that the slots that reference this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a "template" for planning outside these dates.
      */
     @Child(name = "planningHorizon", type = {Period.class}, order=6, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Period of time covered by schedule", formalDefinition="The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates." )
+    @Description(shortDefinition="Period of time covered by schedule", formalDefinition="The period of time that the slots that reference this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates." )
     protected Period planningHorizon;
 
     /**
@@ -379,7 +379,7 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @return {@link #actor} (The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.)
+     * @return {@link #actor} (Slots that reference this schedule resource provide the availability details to these referenced resource(s).)
      */
     public List<Reference> getActor() { 
       if (this.actor == null)
@@ -442,7 +442,7 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @return {@link #planningHorizon} (The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a "template" for planning outside these dates.)
+     * @return {@link #planningHorizon} (The period of time that the slots that reference this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a "template" for planning outside these dates.)
      */
     public Period getPlanningHorizon() { 
       if (this.planningHorizon == null)
@@ -458,7 +458,7 @@ public class Schedule extends DomainResource {
     }
 
     /**
-     * @param value {@link #planningHorizon} (The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a "template" for planning outside these dates.)
+     * @param value {@link #planningHorizon} (The period of time that the slots that reference this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a "template" for planning outside these dates.)
      */
     public Schedule setPlanningHorizon(Period value) { 
       this.planningHorizon = value;
@@ -521,8 +521,8 @@ public class Schedule extends DomainResource {
         children.add(new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory));
         children.add(new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType));
         children.add(new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty));
-        children.add(new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor));
-        children.add(new Property("planningHorizon", "Period", "The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates.", 0, 1, planningHorizon));
+        children.add(new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "Slots that reference this schedule resource provide the availability details to these referenced resource(s).", 0, java.lang.Integer.MAX_VALUE, actor));
+        children.add(new Property("planningHorizon", "Period", "The period of time that the slots that reference this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates.", 0, 1, planningHorizon));
         children.add(new Property("comment", "string", "Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.", 0, 1, comment));
       }
 
@@ -534,8 +534,8 @@ public class Schedule extends DomainResource {
         case 1281188563: /*serviceCategory*/  return new Property("serviceCategory", "CodeableConcept", "A broad categorization of the service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceCategory);
         case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "The specific service that is to be performed during this appointment.", 0, java.lang.Integer.MAX_VALUE, serviceType);
         case -1694759682: /*specialty*/  return new Property("specialty", "CodeableConcept", "The specialty of a practitioner that would be required to perform the service requested in this appointment.", 0, java.lang.Integer.MAX_VALUE, specialty);
-        case 92645877: /*actor*/  return new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "The resource this Schedule resource is providing availability information for. These are usually expected to be one of HealthcareService, Location, Practitioner, PractitionerRole, Device, Patient or RelatedPerson.", 0, java.lang.Integer.MAX_VALUE, actor);
-        case -1718507650: /*planningHorizon*/  return new Property("planningHorizon", "Period", "The period of time that the slots that are attached to this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates.", 0, 1, planningHorizon);
+        case 92645877: /*actor*/  return new Property("actor", "Reference(Patient|Practitioner|PractitionerRole|RelatedPerson|Device|HealthcareService|Location)", "Slots that reference this schedule resource provide the availability details to these referenced resource(s).", 0, java.lang.Integer.MAX_VALUE, actor);
+        case -1718507650: /*planningHorizon*/  return new Property("planningHorizon", "Period", "The period of time that the slots that reference this Schedule resource cover (even if none exist). These  cover the amount of time that an organization's planning horizon; the interval for which they are currently accepting appointments. This does not define a \"template\" for planning outside these dates.", 0, 1, planningHorizon);
         case 950398559: /*comment*/  return new Property("comment", "string", "Comments on the availability to describe any extended information. Such as custom constraints on the slots that may be associated.", 0, 1, comment);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -819,6 +819,66 @@ public class Schedule extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
 
  /**
+   * Search parameter: <b>specialty</b>
+   * <p>
+   * Description: <b>Type of specialty needed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.specialty</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="specialty", path="Schedule.specialty", description="Type of specialty needed", type="token" )
+  public static final String SP_SPECIALTY = "specialty";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>specialty</b>
+   * <p>
+   * Description: <b>Type of specialty needed</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.specialty</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SPECIALTY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SPECIALTY);
+
+ /**
+   * Search parameter: <b>service-category</b>
+   * <p>
+   * Description: <b>High-level category</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.serviceCategory</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="service-category", path="Schedule.serviceCategory", description="High-level category", type="token" )
+  public static final String SP_SERVICE_CATEGORY = "service-category";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>service-category</b>
+   * <p>
+   * Description: <b>High-level category</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.serviceCategory</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERVICE_CATEGORY = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERVICE_CATEGORY);
+
+ /**
+   * Search parameter: <b>service-type</b>
+   * <p>
+   * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.serviceType</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="service-type", path="Schedule.serviceType", description="The type of appointments that can be booked into associated slot(s)", type="token" )
+  public static final String SP_SERVICE_TYPE = "service-type";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>service-type</b>
+   * <p>
+   * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Schedule.serviceType</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam SERVICE_TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_SERVICE_TYPE);
+
+ /**
    * Search parameter: <b>active</b>
    * <p>
    * Description: <b>Is the schedule in active use</b><br>
@@ -837,26 +897,6 @@ public class Schedule extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam ACTIVE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ACTIVE);
-
- /**
-   * Search parameter: <b>type</b>
-   * <p>
-   * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Schedule.serviceType</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="type", path="Schedule.serviceType", description="The type of appointments that can be booked into associated slot(s)", type="token" )
-  public static final String SP_TYPE = "type";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>type</b>
-   * <p>
-   * Description: <b>The type of appointments that can be booked into associated slot(s)</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Schedule.serviceType</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
 
 
 }

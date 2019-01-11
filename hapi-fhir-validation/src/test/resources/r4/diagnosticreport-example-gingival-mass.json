@@ -12,7 +12,7 @@
     }
   ],
   "status": "final",
-  "category": {
+  "category": [{
     "coding": [
       {
         "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
@@ -21,7 +21,7 @@
       }
     ],
     "text": "Pathology"
-  },
+  }],
   "code": {
     "coding": [
       {

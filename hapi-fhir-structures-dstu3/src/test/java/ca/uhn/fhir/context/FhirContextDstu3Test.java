@@ -3,16 +3,12 @@ package ca.uhn.fhir.context;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -146,6 +142,34 @@ public class FhirContextDstu3Test {
 		ourLog.trace(genderChild.getClass().getName());
 
 		assertEquals(null, genderChild.getBoundEnumType());
+	}
+
+	/**
+	 * See #944
+	 */
+	@Test
+	public void testNullPointerException() {
+		Bundle bundle = new Bundle();
+		MyEpisodeOfCareFHIR myEpisodeOfCare = new MyEpisodeOfCareFHIR();
+		_MyReferralInformationComponent myReferralInformation = new _MyReferralInformationComponent();
+		myReferralInformation._setReferralType(new Coding("someSystem", "someCode", "someDisplay"));
+		myReferralInformation._setFreeChoice(new Coding("someSystem2", "someCode", "someDisplay2"));
+		myReferralInformation._setReceived(new DateTimeType(createDate(2017, Calendar.JULY, 31)));
+		myReferralInformation._setReferringOrganisation(new Reference().setReference("someReference").setDisplay("someDisplay3"));
+		myEpisodeOfCare._setReferralInformation(myReferralInformation);
+		bundle.addEntry().setResource(myEpisodeOfCare);
+		FhirContext ctx = FhirContext.forDstu3();
+		ctx.newXmlParser().encodeResourceToString(bundle);
+	}
+
+	private static Date createDate(
+		int year,
+		int month,
+		int day) {
+		Calendar CAL = Calendar.getInstance();
+		CAL.clear();
+		CAL.set(year, month, day);
+		return CAL.getTime();
 	}
 
 	@AfterClass

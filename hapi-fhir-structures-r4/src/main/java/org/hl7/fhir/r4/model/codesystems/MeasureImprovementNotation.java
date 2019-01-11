@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,11 +37,11 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MeasureImprovementNotation {
 
         /**
-         * Improvement in the measure is noted as an increase in the measure score.
+         * Improvement is indicated as an increase in the score or measurement (e.g. Higher score indicates better quality).
          */
         INCREASE, 
         /**
-         * Improvement in the measure is noted as a decrease in the measure score.
+         * Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).
          */
         DECREASE, 
         /**
@@ -65,19 +65,19 @@ public enum MeasureImprovementNotation {
           }
         }
         public String getSystem() {
-          return "http://hl7.org/fhir/measure-improvement-notation";
+          return "http://terminology.hl7.org/CodeSystem/measure-improvement-notation";
         }
         public String getDefinition() {
           switch (this) {
-            case INCREASE: return "Improvement in the measure is noted as an increase in the measure score.";
-            case DECREASE: return "Improvement in the measure is noted as a decrease in the measure score.";
+            case INCREASE: return "Improvement is indicated as an increase in the score or measurement (e.g. Higher score indicates better quality).";
+            case DECREASE: return "Improvement is indicated as a decrease in the score or measurement (e.g. Lower score indicates better quality).";
             default: return "?";
           }
         }
         public String getDisplay() {
           switch (this) {
-            case INCREASE: return "Increase";
-            case DECREASE: return "Decrease";
+            case INCREASE: return "Increased score indicates improvement";
+            case DECREASE: return "Decreased score indicates improvement";
             default: return "?";
           }
     }

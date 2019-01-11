@@ -4,7 +4,7 @@ package ca.uhn.fhir.parser;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
@@ -621,6 +622,16 @@ public abstract class BaseParser implements IParser {
 	 */
 	public boolean isSuppressNarratives() {
 		return mySuppressNarratives;
+	}
+
+	@Override
+	public IBaseResource parseResource(InputStream theInputStream) throws DataFormatException {
+		return parseResource(new InputStreamReader(theInputStream, Charsets.UTF_8));
+	}
+
+	@Override
+	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, InputStream theInputStream) throws DataFormatException {
+		return parseResource(theResourceType, new InputStreamReader(theInputStream, Charsets.UTF_8));
 	}
 
 	@Override

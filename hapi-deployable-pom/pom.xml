@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>3.6.0</version>
+		<version>3.7.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -98,6 +98,10 @@
 						<dependency>
 							<groupId>javax.mail</groupId>
 							<artifactId>javax.mail-api</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>javax.activation</groupId>
+							<artifactId>javax.activation-api</artifactId>
 						</dependency>
 						<dependency>
 							<groupId>com.helger</groupId>

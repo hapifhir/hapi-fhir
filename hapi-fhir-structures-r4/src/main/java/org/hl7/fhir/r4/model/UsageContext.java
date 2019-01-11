@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -57,7 +57,7 @@ public class UsageContext extends Type implements ICompositeType {
     /**
      * A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.
      */
-    @Child(name = "value", type = {CodeableConcept.class, Quantity.class, Range.class}, order=1, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "value", type = {CodeableConcept.class, Quantity.class, Range.class, PlanDefinition.class, ResearchStudy.class, InsurancePlan.class, HealthcareService.class, Group.class, Location.class, Organization.class}, order=1, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Value that defines the context", formalDefinition="A value that defines the context specified in this context of use. The interpretation of the value is defined by the code." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/use-context")
     protected Type value;
@@ -116,7 +116,7 @@ public class UsageContext extends Type implements ICompositeType {
      */
     public CodeableConcept getValueCodeableConcept() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new CodeableConcept();
       if (!(this.value instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.value.getClass().getName()+" was encountered");
       return (CodeableConcept) this.value;
@@ -131,7 +131,7 @@ public class UsageContext extends Type implements ICompositeType {
      */
     public Quantity getValueQuantity() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new Quantity();
       if (!(this.value instanceof Quantity))
         throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Quantity) this.value;
@@ -146,7 +146,7 @@ public class UsageContext extends Type implements ICompositeType {
      */
     public Range getValueRange() throws FHIRException { 
       if (this.value == null)
-        return null;
+        this.value = new Range();
       if (!(this.value instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.value.getClass().getName()+" was encountered");
       return (Range) this.value;
@@ -154,6 +154,21 @@ public class UsageContext extends Type implements ICompositeType {
 
     public boolean hasValueRange() { 
       return this != null && this.value instanceof Range;
+    }
+
+    /**
+     * @return {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
+     */
+    public Reference getValueReference() throws FHIRException { 
+      if (this.value == null)
+        this.value = new Reference();
+      if (!(this.value instanceof Reference))
+        throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
+      return (Reference) this.value;
+    }
+
+    public boolean hasValueReference() { 
+      return this != null && this.value instanceof Reference;
     }
 
     public boolean hasValue() { 
@@ -164,7 +179,7 @@ public class UsageContext extends Type implements ICompositeType {
      * @param value {@link #value} (A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.)
      */
     public UsageContext setValue(Type value) { 
-      if (value != null && !(value instanceof CodeableConcept || value instanceof Quantity || value instanceof Range))
+      if (value != null && !(value instanceof CodeableConcept || value instanceof Quantity || value instanceof Range || value instanceof Reference))
         throw new Error("Not the right type for UsageContext.value[x]: "+value.fhirType());
       this.value = value;
       return this;
@@ -173,18 +188,19 @@ public class UsageContext extends Type implements ICompositeType {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("code", "Coding", "A code that identifies the type of context being specified by this usage context.", 0, 1, code));
-        children.add(new Property("value[x]", "CodeableConcept|Quantity|Range", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value));
+        children.add(new Property("value[x]", "CodeableConcept|Quantity|Range|Reference(PlanDefinition|ResearchStudy|InsurancePlan|HealthcareService|Group|Location|Organization)", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case 3059181: /*code*/  return new Property("code", "Coding", "A code that identifies the type of context being specified by this usage context.", 0, 1, code);
-        case -1410166417: /*value[x]*/  return new Property("value[x]", "CodeableConcept|Quantity|Range", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
-        case 111972721: /*value*/  return new Property("value[x]", "CodeableConcept|Quantity|Range", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
-        case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "CodeableConcept|Quantity|Range", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
-        case -2029823716: /*valueQuantity*/  return new Property("value[x]", "CodeableConcept|Quantity|Range", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
-        case 2030761548: /*valueRange*/  return new Property("value[x]", "CodeableConcept|Quantity|Range", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
+        case -1410166417: /*value[x]*/  return new Property("value[x]", "CodeableConcept|Quantity|Range|Reference(PlanDefinition|ResearchStudy|InsurancePlan|HealthcareService|Group|Location|Organization)", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
+        case 111972721: /*value*/  return new Property("value[x]", "CodeableConcept|Quantity|Range|Reference(PlanDefinition|ResearchStudy|InsurancePlan|HealthcareService|Group|Location|Organization)", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
+        case 924902896: /*valueCodeableConcept*/  return new Property("value[x]", "CodeableConcept|Quantity|Range|Reference(PlanDefinition|ResearchStudy|InsurancePlan|HealthcareService|Group|Location|Organization)", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
+        case -2029823716: /*valueQuantity*/  return new Property("value[x]", "CodeableConcept|Quantity|Range|Reference(PlanDefinition|ResearchStudy|InsurancePlan|HealthcareService|Group|Location|Organization)", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
+        case 2030761548: /*valueRange*/  return new Property("value[x]", "CodeableConcept|Quantity|Range|Reference(PlanDefinition|ResearchStudy|InsurancePlan|HealthcareService|Group|Location|Organization)", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
+        case 1755241690: /*valueReference*/  return new Property("value[x]", "CodeableConcept|Quantity|Range|Reference(PlanDefinition|ResearchStudy|InsurancePlan|HealthcareService|Group|Location|Organization)", "A value that defines the context specified in this context of use. The interpretation of the value is defined by the code.", 0, 1, value);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -240,7 +256,7 @@ public class UsageContext extends Type implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3059181: /*code*/ return new String[] {"Coding"};
-        case 111972721: /*value*/ return new String[] {"CodeableConcept", "Quantity", "Range"};
+        case 111972721: /*value*/ return new String[] {"CodeableConcept", "Quantity", "Range", "Reference"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -262,6 +278,10 @@ public class UsageContext extends Type implements ICompositeType {
         }
         else if (name.equals("valueRange")) {
           this.value = new Range();
+          return this.value;
+        }
+        else if (name.equals("valueReference")) {
+          this.value = new Reference();
           return this.value;
         }
         else
