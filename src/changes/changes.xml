@@ -283,6 +283,12 @@
 				AuthorizationInterceptor could not authorize these requests if it was depending on
 				headers being present.
 			</action>
+			<action type="fix">
+				When using a client in DSTU3/R4 mode, if the client attempted to validate the server
+				CapabilityStatement but was not able to parse the response, the client would throw
+				an exception with a misleading error about the Conformance resource not existing. This
+				has been corrected. Thanks to Shayaan Munshi for reporting and providing a test case!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
