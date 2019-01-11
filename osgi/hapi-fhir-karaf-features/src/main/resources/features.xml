@@ -87,7 +87,7 @@
 		<bundle dependency='true'>mvn:com.helger/ph-commons/${ph_commons_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-collection/${ph_commons_version}</bundle>
 		<!-- needed by ph-xml 9.1.1, will be removed in later versions -->
-		<bundle dependency='true'>mvn:javax.jws/javax.jws-api/2.1.1</bundle>
+		<bundle dependency='true'>mvn:javax.jws/javax.jws-api/1.1</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-xml/${ph_commons_version}</bundle>
 		<bundle start-level="20">mvn:com.sun.xml.bind/jaxb-impl/${jaxb_core_version}</bundle>
 		<bundle start-level="20">mvn:com.sun.xml.bind/jaxb-core/${jaxb_core_version}</bundle>
