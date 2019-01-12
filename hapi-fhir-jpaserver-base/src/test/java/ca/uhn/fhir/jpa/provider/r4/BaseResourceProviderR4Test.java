@@ -204,7 +204,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				fail("Failed to init subscriptions");
 			}
 			try {
-				mySubscriptionLoader.initSubscriptions();
+				mySubscriptionLoader.syncSubscriptions();
 				break;
 			} catch (ResourceVersionConflictException e) {
 				Thread.sleep(250);

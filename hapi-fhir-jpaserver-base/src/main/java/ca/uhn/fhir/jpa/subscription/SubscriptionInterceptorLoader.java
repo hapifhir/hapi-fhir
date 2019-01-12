@@ -37,7 +37,10 @@ import java.util.Set;
 public class SubscriptionInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionInterceptorLoader.class);
 
-	// TODO KHS remove side-effects of autowiring these beans
+	// TODO KHS these beans are late loaded because we don't want to run their @PostConstruct and @Scheduled method if they're
+	// not required.  Recommend removing @PostConstruct from these classes and instead call those methods in register interceptors below.
+	// @Schedule will be tricker to resolve
+
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	private SubscriptionActivatingInterceptor mySubscriptionActivatingInterceptor;
 
@@ -64,11 +67,6 @@ public class SubscriptionInterceptorLoader {
 				mySubscriptionMatcherInterceptor = myAppicationContext.getBean(SubscriptionMatcherInterceptor.class);
 			}
 			ourLog.info("Registering subscription matcher interceptor");
-
-			if (mySubscriptionMatcherInterceptor == null) {
-				mySubscriptionMatcherInterceptor = myAppicationContext.getBean(SubscriptionMatcherInterceptor.class);
-			}
-
 			myDaoConfig.registerInterceptor(mySubscriptionMatcherInterceptor);
 
 		}

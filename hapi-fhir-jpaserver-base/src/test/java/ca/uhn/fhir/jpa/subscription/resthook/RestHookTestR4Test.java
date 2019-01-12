@@ -206,7 +206,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForActivatedSubscriptionCount(1);
 		for (int i = 0; i < 5; i++) {
-			int changes = this.mySubscriptionLoader.doInitSubscriptionsForUnitTest();
+			int changes = this.mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 			assertEquals(0, changes);
 		}
 	}
@@ -874,7 +874,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(sp);
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 		createSubscription(criteria, "application/json");
 		waitForActivatedSubscriptionCount(1);
 

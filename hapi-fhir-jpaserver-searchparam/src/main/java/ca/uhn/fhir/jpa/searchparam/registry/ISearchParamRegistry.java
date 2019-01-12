@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import com.google.common.annotations.VisibleForTesting;
 
 import java.util.Collection;
 import java.util.List;
@@ -50,8 +49,6 @@ public interface ISearchParamRegistry {
 
 	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName);
 
-	void refreshCacheIfNecessary();
-
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
@@ -60,7 +57,4 @@ public interface ISearchParamRegistry {
 	RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName);
 
 	Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef);
-
-	@VisibleForTesting
-	void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider);
 }

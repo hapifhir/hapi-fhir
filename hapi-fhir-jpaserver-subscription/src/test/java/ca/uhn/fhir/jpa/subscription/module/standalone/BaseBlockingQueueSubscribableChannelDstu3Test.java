@@ -21,7 +21,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -45,6 +44,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 
+	protected String myCode = "1000000050";
+
 	private static int ourListenerPort;
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
@@ -55,11 +56,6 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	private static SubscribableChannel ourSubscribableChannel;
 	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	private long idCounter = 0;
-
-	@After
-	public void afterUnregisterRestHookListener() {
-		mySubscriptionIds.clear();
-	}
 
 	@Before
 	public void beforeReset() {
@@ -169,7 +165,5 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
-
 	}
-
 }

@@ -44,12 +44,8 @@ public class DaoSearchParamProvider implements ISearchParamProvider {
 	}
 
 	@Override
-	public <SP extends IBaseResource> void refreshCache(BaseSearchParamRegistry<SP> theSearchParamRegistry, long theRefreshInterval) {
+	public <SP extends IBaseResource> int refreshCache(BaseSearchParamRegistry<SP> theSearchParamRegistry, long theRefreshInterval) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.execute(t->{
-			theSearchParamRegistry.doRefresh(theRefreshInterval);
-			return null;
-		});
-
+		return txTemplate.execute(t-> theSearchParamRegistry.doRefresh(theRefreshInterval));
 	}
 }

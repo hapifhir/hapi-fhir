@@ -3,21 +3,18 @@ package ca.uhn.fhir.jpa.subscription.module.config;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.module.standalone.FhirClientSearchParamProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 
 public class MockFhirClientSearchParamProvider extends FhirClientSearchParamProvider {
-	private IBundleProvider myBundleProvider = new SimpleBundleProvider();
+	private final MockProvider myMockProvider = new MockProvider();
 
 	public MockFhirClientSearchParamProvider() {
 		super(null);
 	}
 
-	public void setBundleProvider(IBundleProvider theBundleProvider) {
-		myBundleProvider = theBundleProvider;
-	}
+	public void setBundleProvider(IBundleProvider theBundleProvider) { myMockProvider.setBundleProvider(theBundleProvider); }
+	public void setFailCount(int theFailCount) { myMockProvider.setFailCount(theFailCount); }
+	public int getFailCount() { return myMockProvider.getFailCount(); }
 
 	@Override
-	public IBundleProvider search(SearchParameterMap theParams) {
-		return myBundleProvider;
-	}
+	public IBundleProvider search(SearchParameterMap theParams) { return myMockProvider.search(theParams); }
 }
