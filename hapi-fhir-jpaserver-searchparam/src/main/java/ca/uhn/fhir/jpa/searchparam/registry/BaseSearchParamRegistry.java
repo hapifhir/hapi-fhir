@@ -362,6 +362,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 	@Override
 	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
+		requiresActiveSearchParams();
 		return Collections.unmodifiableMap(myActiveSearchParams);
 	}
 }
