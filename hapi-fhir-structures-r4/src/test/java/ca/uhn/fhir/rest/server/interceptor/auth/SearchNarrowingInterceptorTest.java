@@ -69,6 +69,24 @@ public class SearchNarrowingInterceptorTest {
 	}
 
 	@Test
+	public void testReturnNull() {
+
+		ourNextCompartmentList = null;
+
+		ourClient
+			.search()
+			.forResource("Patient")
+			.execute();
+
+		assertEquals("Patient.search", ourLastHitMethod);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
+	}
+
+	@Test
 	public void testNarrowObservationsByPatientContext_ClientRequestedNoParams() {
 
 		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
@@ -259,7 +277,9 @@ public class SearchNarrowingInterceptorTest {
 	private static class MySearchNarrowingInterceptor extends SearchNarrowingInterceptor {
 		@Override
 		protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
-			Validate.notNull(ourNextCompartmentList);
+			if (ourNextCompartmentList == null) {
+				return null;
+			}
 			return ourNextCompartmentList;
 		}
 	}

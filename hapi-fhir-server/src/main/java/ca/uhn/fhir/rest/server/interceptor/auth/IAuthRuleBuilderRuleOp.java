@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Collection;
+
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -58,4 +60,5 @@ public interface IAuthRuleBuilderRuleOp extends IAuthRuleBuilderAppliesTo<IAuthR
 	 */
 	IAuthRuleFinished instance(IIdType theId);
 
+	IAuthRuleFinished instances(Collection<IIdType> theInstances);
 }

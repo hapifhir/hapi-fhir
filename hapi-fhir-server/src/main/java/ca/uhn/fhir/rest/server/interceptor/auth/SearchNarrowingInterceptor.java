@@ -1,5 +1,25 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+/*-
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2019 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -51,9 +71,12 @@ public abstract class SearchNarrowingInterceptor extends InterceptorAdapter {
 	 * </p>
 	 *
 	 * @param theRequestDetails The individual request currently being applied
+	 * @return The list of allowed compartments and instances that should be used
+	 * for search narrowing. If this method returns <code>null</code>, no narrowing will
+	 * be performed
 	 */
 	protected AuthorizedList buildAuthorizedList(@SuppressWarnings("unused") RequestDetails theRequestDetails) {
-		return new AuthorizedList();
+		return null;
 	}
 
 
@@ -71,16 +94,19 @@ public abstract class SearchNarrowingInterceptor extends InterceptorAdapter {
 		RuntimeResourceDefinition resDef = ctx.getResourceDefinition(theRequestDetails.getResourceName());
 		HashMap<String, List<String>> parameterToOrValues = new HashMap<>();
 		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
+		if (authorizedList == null) {
+			return true;
+		}
 
 		/*
 		 * Create a map of search parameter values that need to be added to the
 		 * given request
 		 */
-		Collection<String> compartments = authorizedList.getCompartments();
+		Collection<String> compartments = authorizedList.getAllowedCompartments();
 		if (compartments != null) {
 			processResourcesOrCompartments(theRequestDetails, resDef, parameterToOrValues, compartments, true);
 		}
-		Collection<String> resources = authorizedList.getResources();
+		Collection<String> resources = authorizedList.getAllowedInstances();
 		if (resources != null) {
 			processResourcesOrCompartments(theRequestDetails, resDef, parameterToOrValues, resources, false);
 		}
@@ -147,7 +173,7 @@ public abstract class SearchNarrowingInterceptor extends InterceptorAdapter {
 
 	private void processResourcesOrCompartments(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, HashMap<String, List<String>> theParameterToOrValues, Collection<String> theResourcesOrCompartments, boolean theAreCompartments) {
 		String lastCompartmentName = null;
-		String lastSearchParamName=null;
+		String lastSearchParamName = null;
 		for (String nextCompartment : theResourcesOrCompartments) {
 			Validate.isTrue(StringUtils.countMatches(nextCompartment, '/') == 1, "Invalid compartment name (must be in form \"ResourceType/xxx\": %s", nextCompartment);
 			String compartmentName = nextCompartment.substring(0, nextCompartment.indexOf('/'));

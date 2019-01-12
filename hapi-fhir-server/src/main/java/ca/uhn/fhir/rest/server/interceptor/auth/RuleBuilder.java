@@ -172,7 +172,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		private PolicyEnum myRuleMode;
 		private String myRuleName;
-		private RuleOpEnum myRuleOp;
 
 		RuleBuilderRule(PolicyEnum theRuleMode, String theRuleName) {
 			myRuleMode = theRuleMode;
@@ -186,8 +185,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleOp delete() {
-			myRuleOp = RuleOpEnum.DELETE;
-			return new RuleBuilderRuleOp();
+			return new RuleBuilderRuleOp(RuleOpEnum.DELETE);
 		}
 
 		@Override
@@ -211,14 +209,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderPatch patch() {
-			myRuleOp = RuleOpEnum.PATCH;
 			return new PatchBuilder();
 		}
 
 		@Override
 		public IAuthRuleBuilderRuleOp read() {
-			myRuleOp = RuleOpEnum.READ;
-			return new RuleBuilderRuleOp();
+			return new RuleBuilderRuleOp(RuleOpEnum.READ);
 		}
 
 		@Override
@@ -233,8 +229,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		@Override
 		public IAuthRuleBuilderRuleOp write() {
-			myRuleOp = RuleOpEnum.WRITE;
-			return new RuleBuilderRuleOp();
+			return new RuleBuilderRuleOp(RuleOpEnum.WRITE);
 		}
 
 		@Override
@@ -245,7 +240,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		private class RuleBuilderRuleConditional implements IAuthRuleBuilderRuleConditional {
 
 			private AppliesTypeEnum myAppliesTo;
-
 			private Set<?> myAppliesToTypes;
 			private RestOperationTypeEnum myOperationType;
 
@@ -291,13 +285,15 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		private class RuleBuilderRuleOp implements IAuthRuleBuilderRuleOp {
 
-			private AppliesTypeEnum myAppliesTo;
-			private Set<?> myAppliesToTypes;
+			private final RuleOpEnum myRuleOp;
+
+			public RuleBuilderRuleOp(RuleOpEnum theRuleOp) {
+				myRuleOp = theRuleOp;
+			}
 
 			@Override
 			public IAuthRuleBuilderRuleOpClassifier allResources() {
-				myAppliesTo = AppliesTypeEnum.ALL_RESOURCES;
-				return new RuleBuilderRuleOpClassifier();
+				return new RuleBuilderRuleOpClassifier(AppliesTypeEnum.ALL_RESOURCES, null);
 			}
 
 			@Override
@@ -312,15 +308,22 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				Validate.notBlank(theId.getValue(), "theId.getValue() must not be null or empty");
 				Validate.notBlank(theId.getIdPart(), "theId must contain an ID part");
 
-				return new RuleBuilderRuleOpClassifier(Collections.singletonList(theId)).finished();
+				List<IIdType> instances = Collections.singletonList(theId);
+				return instances(instances);
+			}
+
+			@Override
+			public IAuthRuleFinished instances(Collection<IIdType> theInstances) {
+				Validate.notNull(theInstances, "theInstances must not be null");
+				Validate.notEmpty(theInstances, "theInstances must not be empty");
+
+				return new RuleBuilderRuleOpClassifier(theInstances).finished();
 			}
 
 			@Override
 			public IAuthRuleBuilderRuleOpClassifier resourcesOfType(Class<? extends IBaseResource> theType) {
 				Validate.notNull(theType, "theType must not be null");
-				myAppliesTo = AppliesTypeEnum.TYPES;
-				myAppliesToTypes = Collections.singleton(theType);
-				return new RuleBuilderRuleOpClassifier();
+				return new RuleBuilderRuleOpClassifier(AppliesTypeEnum.TYPES, Collections.singleton(theType));
 			}
 
 			private class RuleBuilderRuleOpClassifier implements IAuthRuleBuilderRuleOpClassifier {
@@ -328,21 +331,26 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				private ClassifierTypeEnum myClassifierType;
 				private String myInCompartmentName;
 				private Collection<? extends IIdType> myInCompartmentOwners;
-				private List<IIdType> myAppliesToInstances;
+				private Collection<IIdType> myAppliesToInstances;
+				private final AppliesTypeEnum myAppliesTo;
+				private final Set<?> myAppliesToTypes;
 
 				/**
 				 * Constructor
 				 */
-				RuleBuilderRuleOpClassifier() {
+				RuleBuilderRuleOpClassifier(AppliesTypeEnum theAppliesTo, Set<Class<? extends IBaseResource>> theAppliesToTypes) {
 					super();
+					myAppliesTo = theAppliesTo;
+					myAppliesToTypes=theAppliesToTypes;
 				}
 
 				/**
 				 * Constructor
 				 */
-				RuleBuilderRuleOpClassifier(List<IIdType> theAppliesToInstances) {
+				RuleBuilderRuleOpClassifier(Collection<IIdType> theAppliesToInstances) {
 					myAppliesToInstances = theAppliesToInstances;
 					myAppliesTo = AppliesTypeEnum.INSTANCES;
+					myAppliesToTypes = null;
 				}
 
 				private IAuthRuleBuilderRuleOpClassifierFinished finished() {
@@ -553,6 +561,10 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		private class PatchBuilder implements IAuthRuleBuilderPatch {
+
+			public PatchBuilder() {
+				super();
+			}
 
 			@Override
 			public IAuthRuleFinished allRequests() {
