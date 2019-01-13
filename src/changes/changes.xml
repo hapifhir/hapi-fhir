@@ -289,6 +289,12 @@
 				an exception with a misleading error about the Conformance resource not existing. This
 				has been corrected. Thanks to Shayaan Munshi for reporting and providing a test case!
 			</action>
+			<action type="fix">
+				It is now possible to upload a ConceptMap to the JPA server containing mappings where the
+				source or target is a StructureDefinition canonical URI. This was previously blocked, as the
+				system could not apply these mappings. It is now permitted to be stored, although
+				the system will still not apply these mappings.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
