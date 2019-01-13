@@ -13,6 +13,7 @@ import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.PostgreSQL94Dialect;
+import org.hl7.fhir.instance.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -61,6 +62,10 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setExpungeEnabled(true);
+		retVal.setSubscriptionMatchingEnabled(true);
+		retVal.setEnableInMemorySubscriptionMatching(true);
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		return retVal;
 	}
 

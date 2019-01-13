@@ -14,6 +14,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hl7.fhir.instance.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -62,6 +63,10 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setReindexThreadCount(1);
 		retVal.setExpungeEnabled(true);
+		retVal.setSubscriptionMatchingEnabled(true);
+		retVal.setEnableInMemorySubscriptionMatching(true);
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		return retVal;
 	}
 

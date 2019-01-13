@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  #%L
+  org.hl7.fhir.convertors
+  %%
+  Copyright (C) 2014 - 2019 Health Level 7
+  %%
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="org.hl7.fhir.convertors">
+    <property environment="env"/>
+    <property name="org.hl7.fhir.tools.location" value="../../../tools/java/org.hl7.fhir.tools.core"/>
+    <property name="ECLIPSE_HOME" value="../../../../../../tools/eclipse/eclipse/"/>
+    <property name="org.hl7.fhir.utilities.location" value="../org.hl7.fhir.utilities"/>
+    <property name="org.hl7.fhir.dstu3.location" value="../../../implementations/java/org.hl7.fhir.dstu3"/>
+    <property name="org.hl7.fhir.r4.location" value="../../../implementations/java/org.hl7.fhir.r4"/>
+    <property name="org.hl7.fhir.dstu2.location" value="../org.hl7.fhir.dstu2"/>
+    <property name="org.hl7.fhir.dstu14.location" value="../org.hl7.fhir.dstu2016may"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <path id="org.hl7.fhir.utilities.classpath">
+        <pathelement location="${org.hl7.fhir.utilities.location}/bin"/>
+        <pathelement location="${org.hl7.fhir.utilities.location}/../../../tools/java/imports/xpp3_xpath-1.1.4c.jar"/>
+        <pathelement location="${org.hl7.fhir.utilities.location}/../../../tools/java/imports/xpp3-1.1.4c.jar"/>
+        <pathelement location="${org.hl7.fhir.utilities.location}/../../../tools/java/imports/commons-io-1.2.jar"/>
+        <pathelement location="${org.hl7.fhir.utilities.location}/../../../tools/java/imports/commons-codec-1.9.jar"/>
+        <pathelement location="${org.hl7.fhir.utilities.location}/../../../tools/java/imports/Saxon-HE-9.5.1-5.jar"/>
+        <pathelement location="${org.hl7.fhir.utilities.location}/../../../tools/java/imports/txtmark-0.11.jar"/>
+        <pathelement location="${org.hl7.fhir.utilities.location}/../../../tools/java/imports/hapi-fhir-base-3.4.0.jar"/>
+    </path>
+    <path id="org.hl7.fhir.dstu2.classpath">
+        <pathelement location="${org.hl7.fhir.dstu2.location}/bin"/>
+        <path refid="org.hl7.fhir.utilities.classpath"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/commons-codec-1.9.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/commons-discovery-0.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/commons-httpclient-3.0.1.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/commons-io-1.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/commons-logging-1.1.1.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/commons-logging-api-1.1.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/commons-lang3-3.3.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/xpp3_xpath-1.1.4c.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/xpp3-1.1.4c.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/junit-4.11.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/hamcrest-core-1.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/fluent-hc-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/httpclient-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/httpcore-4.2.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/httpmime-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/jdom-1.1.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/gson-2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/txtmark-0.11.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/rhino-1.8R4.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/jackson-core-2.5.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/jackson-databind-2.5.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu2.location}/../../../tools/java/imports/Saxon-HE-9.5.1-5.jar"/>
+        <pathelement location="../../../tools/java/imports/ucum-1.0-SNAPSHOT.jar"/>
+    </path>
+    <path id="org.hl7.fhir.dstu14.classpath">
+        <pathelement location="${org.hl7.fhir.dstu14.location}/bin"/>
+        <path refid="org.hl7.fhir.utilities.classpath"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/commons-codec-1.9.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/commons-discovery-0.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/commons-httpclient-3.0.1.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/commons-io-1.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/commons-logging-1.1.1.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/commons-logging-api-1.1.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/commons-lang3-3.3.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/xpp3_xpath-1.1.4c.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/xpp3-1.1.4c.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/junit-4.11.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/hamcrest-core-1.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/fluent-hc-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/httpclient-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/httpcore-4.2.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/httpmime-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/jdom-1.1.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/gson-2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/txtmark-0.11.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/rhino-1.8R4.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/jackson-core-2.5.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/jackson-databind-2.5.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu14.location}/../../../tools/java/imports/Saxon-HE-9.5.1-5.jar"/>
+    </path>
+    <path id="JUnit 4.libraryclasspath">
+        <pathelement location="../../../../../../Users/Grahame Grieve/.p2/pool/plugins/org.junit_4.12.0.v201504281640/junit.jar"/>
+        <pathelement location="../../../../../../Users/Grahame Grieve/.p2/pool/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"/>
+    </path>
+    <path id="org.hl7.fhir.dstu3.classpath">
+        <pathelement location="${org.hl7.fhir.dstu3.location}/bin"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/commons-codec-1.9.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/xpp3_xpath-1.1.4c.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/xpp3-1.1.4c.jar"/>
+        <path refid="org.hl7.fhir.utilities.classpath"/>
+        <path refid="JUnit 4.libraryclasspath"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/commons-httpclient-3.0.1.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/httpclient-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/httpcore-4.2.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/httpmime-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/commons-io-1.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/commons-lang3-3.3.2.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/gson-2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/txtmark-0.11.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/rhino-1.8R4.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/pegdown-1.5.0.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/commons-logging-1.1.1.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/commons-logging-api-1.1.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/hapi-fhir-base-3.4.0.jar"/>
+        <pathelement location="${org.hl7.fhir.dstu3.location}/../../../tools/java/imports/ST4-4.0.7.jar"/>
+    </path>
+    <path id="org.hl7.fhir.r4.classpath">
+        <pathelement location="${org.hl7.fhir.r4.location}/bin"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/commons-codec-1.9.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/xpp3_xpath-1.1.4c.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/xpp3-1.1.4c.jar"/>
+        <path refid="org.hl7.fhir.utilities.classpath"/>
+        <path refid="JUnit 4.libraryclasspath"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/commons-httpclient-3.0.1.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/httpclient-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/httpcore-4.2.2.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/httpmime-4.2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/commons-io-1.2.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/commons-lang3-3.3.2.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/gson-2.3.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/txtmark-0.11.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/rhino-1.8R4.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/pegdown-1.5.0.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/commons-logging-1.1.1.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/commons-logging-api-1.1.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/hapi-fhir-base-3.4.0.jar"/>
+        <pathelement location="${org.hl7.fhir.r4.location}/../../../tools/java/imports/ST4-4.0.7.jar"/>
+    </path>
+    <path id="org.hl7.fhir.convertors.classpath">
+        <pathelement location="bin"/>
+        <path refid="org.hl7.fhir.utilities.classpath"/>
+        <pathelement location="../../../tools/java/imports/gson-2.3.jar"/>
+        <pathelement location="../../../tools/java/imports/xpp3_xpath-1.1.4c.jar"/>
+        <pathelement location="../../../tools/java/imports/xpp3-1.1.4c.jar"/>
+        <pathelement location="../../../tools/java/imports/commons-logging-1.1.1.jar"/>
+        <pathelement location="../../../tools/java/imports/commons-logging-api-1.1.jar"/>
+        <pathelement location="../../../tools/java/imports/commons-io-1.2.jar"/>
+        <pathelement location="../../../tools/java/imports/commons-lang3-3.3.2.jar"/>
+        <pathelement location="../../../tools/java/imports/commons-httpclient-3.0.1.jar"/>
+        <pathelement location="../../../tools/java/imports/javaparser-1.0.11.jar"/>
+        <path refid="org.hl7.fhir.dstu14.classpath"/>
+        <path refid="org.hl7.fhir.dstu2.classpath"/>
+        <path refid="org.hl7.fhir.dstu3.classpath"/>
+        <path refid="org.hl7.fhir.r4.classpath"/>
+        <pathelement location="../../../tools/java/imports/hapi-fhir-base-3.4.0.jar"/>
+        <pathelement location="../../../tools/java/imports/commons-codec-1.9.jar"/>
+        <pathelement location="../../../tools/java/imports/ucum-1.0-SNAPSHOT.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall">
+        <ant antfile="build.xml" dir="${org.hl7.fhir.utilities.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${org.hl7.fhir.dstu3.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${org.hl7.fhir.r4.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${org.hl7.fhir.dstu2.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${org.hl7.fhir.dstu14.location}" inheritAll="false" target="clean"/>
+    </target>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects">
+        <ant antfile="build.xml" dir="${org.hl7.fhir.utilities.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${org.hl7.fhir.dstu3.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${org.hl7.fhir.r4.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${org.hl7.fhir.dstu2.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+        <ant antfile="build.xml" dir="${org.hl7.fhir.dstu14.location}" inheritAll="false" target="build-project">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+    </target>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="org.hl7.fhir.convertors.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
+        <ant antfile="build.xml" dir="${org.hl7.fhir.tools.location}" inheritAll="false" target="clean"/>
+        <ant antfile="build.xml" dir="${org.hl7.fhir.tools.location}" inheritAll="false" target="build">
+            <propertyset>
+                <propertyref name="build.compiler"/>
+            </propertyset>
+        </ant>
+    </target>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+</project>

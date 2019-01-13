@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Meta;
 import org.springframework.web.context.ContextLoaderListener;
@@ -150,6 +151,9 @@ public class JpaServerDemo extends RestfulServer {
 		if (fhirVersion == FhirVersionEnum.DSTU3) {
 			 registerProvider(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
 		}
+
+		registerInterceptor(new ResponseHighlighterInterceptor());
+
 	}
 
 }

@@ -1,0 +1,69 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hl7.fhir</groupId>
+		<artifactId>org.hl7.fhir.core</artifactId>
+		<version>3.7.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>org.hl7.fhir.convertors</artifactId>
+	<packaging>jar</packaging>
+
+	<dependencies>
+
+		<!-- HAPI Dependencies -->
+		<dependency>
+         <groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hl7.fhir</groupId>
+			<artifactId>org.hl7.fhir.utilities</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- FHIR Versions -->
+		<dependency>
+			<groupId>org.hl7.fhir</groupId>
+			<artifactId>org.hl7.fhir.dstu2</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hl7.fhir</groupId>
+			<artifactId>org.hl7.fhir.dstu2016may</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hl7.fhir</groupId>
+			<artifactId>org.hl7.fhir.dstu3</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hl7.fhir</groupId>
+			<artifactId>org.hl7.fhir.r4</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- UCUM -->
+		<dependency>
+			<groupId>org.fhir</groupId>
+			<artifactId>ucum</artifactId>
+			<version>1.0.2</version>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- Java Parser -->
+		<dependency>
+			<groupId>com.google.code.javaparser</groupId>
+			<artifactId>javaparser</artifactId>
+			<version>1.0.11</version>
+			<optional>true</optional>
+		</dependency>
+
+	</dependencies>
+
+</project>

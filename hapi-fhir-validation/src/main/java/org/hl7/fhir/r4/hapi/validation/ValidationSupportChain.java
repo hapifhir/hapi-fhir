@@ -42,6 +42,10 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 	}
 
+	public void insertValidationSupport(IValidationSupport theValidationSupport) {
+		myChain.add(0, theValidationSupport);
+	}
+
 	public void addValidationSupport(IValidationSupport theValidationSupport) {
 		myChain.add(theValidationSupport);
 	}

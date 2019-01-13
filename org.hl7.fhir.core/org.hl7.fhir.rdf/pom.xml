@@ -1,0 +1,87 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.hl7.fhir</groupId>
+		<artifactId>org.hl7.fhir.core</artifactId>
+		<version>3.7.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>org.hl7.fhir.rdf</artifactId>
+	<packaging>jar</packaging>
+
+	<repositories>
+		<repository>
+			<id>bintray-labra</id>
+			<url>https://dl.bintray.com/labra/maven/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+
+		<!-- HAPI Dependencies -->
+		<dependency>
+         <groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hl7.fhir</groupId>
+			<artifactId>org.hl7.fhir.utilities</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- JENA -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-core</artifactId>
+			<version>3.10.0</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-arq</artifactId>
+			<version>3.10.0</version>
+			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.jsonld-java</groupId>
+					<artifactId>jsonld-java</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!--
+		<dependency>
+			<groupId>com.github.jsonld-java</groupId>
+			<artifactId>jsonld-java</artifactId>
+			<version>0.12.3</version>
+			<type>bundle</type>
+			<optional>true</optional>
+		</dependency>
+		-->
+
+		<!-- Shaclex -->
+		<dependency><groupId>org.scala-lang</groupId><artifactId>scala-compiler</artifactId><version>2.12.1</version></dependency>
+		<dependency><groupId>org.scala-lang</groupId><artifactId>scala-library</artifactId><version>2.12.1</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>schema_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>shacl_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>shex_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>manifest_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>srdfjena_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>srdf_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>utils_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>converter_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>rbe_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>typing_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>validating_2.12</artifactId><version>0.0.60</version></dependency>
+		<dependency><groupId>es.weso</groupId><artifactId>server_2.12</artifactId><version>0.0.60</version></dependency>
+
+
+
+
+
+	</dependencies>
+
+</project>

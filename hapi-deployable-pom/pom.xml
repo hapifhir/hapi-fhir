@@ -139,6 +139,10 @@
 							<groupId>org.apache.derby</groupId>
 							<artifactId>derbyclient</artifactId>
 						</dependency>
+						<dependency>
+							<groupId>org.apache.poi</groupId>
+							<artifactId>ooxml-schemas</artifactId>
+						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
 						<ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
