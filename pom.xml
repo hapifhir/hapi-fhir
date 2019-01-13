@@ -489,6 +489,10 @@
 			<id>srdo</id>
 			<name>Stig Døssing</name>
 		</developer>
+		<developer>
+			<id>ruoat</id>
+			<name>Ari Ruotsalainen</name>
+		</developer>
 	</developers>
 
 	<licenses>

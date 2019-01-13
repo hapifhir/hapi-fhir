@@ -295,6 +295,10 @@
 				system could not apply these mappings. It is now permitted to be stored, although
 				the system will still not apply these mappings.
 			</action>
+			<action type="add">
+				A wrapper script for Maven has been added, enabling new users to use Maven without having
+				to install it beforehand. Thanks to Ari Ruotsalainen for the Pull Request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
