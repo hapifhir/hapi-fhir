@@ -37,6 +37,7 @@ import java.util.Set;
 public class SubscriptionInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionInterceptorLoader.class);
 
+	// TODO KHS remove side-effects of autowiring these beans
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	private SubscriptionActivatingInterceptor mySubscriptionActivatingInterceptor;
 
@@ -52,11 +53,16 @@ public class SubscriptionInterceptorLoader {
 
 		if (!supportedSubscriptionTypes.isEmpty()) {
 			loadSubscriptions();
-
+			if (mySubscriptionActivatingInterceptor == null) {
+				mySubscriptionActivatingInterceptor = myAppicationContext.getBean(SubscriptionActivatingInterceptor.class);
+			}
 			ourLog.info("Registering subscription activating interceptor");
 			myDaoConfig.registerInterceptor(mySubscriptionActivatingInterceptor);
 		}
 		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
+			if (mySubscriptionMatcherInterceptor == null) {
+				mySubscriptionMatcherInterceptor = myAppicationContext.getBean(SubscriptionMatcherInterceptor.class);
+			}
 			ourLog.info("Registering subscription matcher interceptor");
 
 			if (mySubscriptionMatcherInterceptor == null) {
@@ -73,11 +79,6 @@ public class SubscriptionInterceptorLoader {
 		// Load subscriptions into the SubscriptionRegistry
 		myAppicationContext.getBean(SubscriptionLoader.class);
 		ourLog.info("...{} subscriptions loaded", mySubscriptionRegistry.size());
-
-		// Once subscriptions have been loaded, now
-		if (mySubscriptionActivatingInterceptor == null) {
-			mySubscriptionActivatingInterceptor = myAppicationContext.getBean(SubscriptionActivatingInterceptor.class);
-		}
 	}
 
 	@VisibleForTesting
