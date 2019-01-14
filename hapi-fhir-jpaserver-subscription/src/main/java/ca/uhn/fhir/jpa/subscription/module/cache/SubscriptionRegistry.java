@@ -82,9 +82,9 @@ public class SubscriptionRegistry {
 		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(canonicalized);
 
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, deliveryChannel);
-		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
-
 		deliveryHandler.ifPresent(handler -> activeSubscription.register(handler));
+
+		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
 		return canonicalized;
 	}

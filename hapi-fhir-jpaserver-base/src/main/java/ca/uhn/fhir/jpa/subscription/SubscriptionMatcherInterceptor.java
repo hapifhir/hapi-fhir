@@ -45,8 +45,9 @@ import javax.annotation.PreDestroy;
 public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAdapter {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
-	static final String SUBSCRIPTION_STATUS = "Subscription.status";
-	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
+	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
+	public static final String SUBSCRIPTION_STATUS = "Subscription.status";
+	public static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private SubscribableChannel myProcessingChannel;
 
 	@Autowired
@@ -66,9 +67,11 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	@PostConstruct
 	public void start() {
 		if (myProcessingChannel == null) {
-			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel("subscription-matching");
+			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 		}
 		myProcessingChannel.subscribe(mySubscriptionMatchingSubscriber);
+		ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myProcessingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+
 	}
 
 	@SuppressWarnings("unused")
