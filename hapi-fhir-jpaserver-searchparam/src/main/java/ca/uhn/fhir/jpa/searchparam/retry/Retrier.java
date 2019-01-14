@@ -22,8 +22,8 @@ public class Retrier<T> {
 	}
 
 	public T runWithRetry() {
-		RuntimeException lastException = null;
-		for (int retryCount = 0; retryCount < myMaxRetries; ++retryCount) {
+		RuntimeException lastException = new IllegalStateException("maxRetries must be above zero.");
+		for (int retryCount = 1; retryCount <= myMaxRetries; ++retryCount) {
 			try {
 				return mySupplier.get();
 			} catch(RuntimeException e) {
@@ -32,15 +32,11 @@ public class Retrier<T> {
 				try {
 					Thread.sleep(mySecondsBetweenRetries * DateUtils.MILLIS_PER_SECOND);
 				} catch (InterruptedException ie) {
-					lastException = null;
 					Thread.currentThread().interrupt();
-					break;
+					throw lastException;
 				}
 			}
 		}
-		if (lastException != null) {
-			throw lastException;
-		}
-		return null;
+		throw lastException;
 	}
 }
