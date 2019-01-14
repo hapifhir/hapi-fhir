@@ -48,7 +48,7 @@ public class SubscriptionLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 	@VisibleForTesting
 	public static final int INITIAL_SECONDS_BETWEEN_RETRIES = 5;
-	private static final int MAX_RETRIES = 60; // 5 minutes (5 seconds * 60 retries = 300 seconds)
+	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 
 	@Autowired
 	private ISubscriptionProvider mySubscriptionProvidor;
