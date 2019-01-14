@@ -6,15 +6,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
 
-public class Retryer<T> {
-	private static final Logger ourLog = LoggerFactory.getLogger(Retryer.class);
+public class Retrier<T> {
+	private static final Logger ourLog = LoggerFactory.getLogger(Retrier.class);
 
 	private final Supplier<T> mySupplier;
 	private final int myMaxRetries;
 	private final int mySecondsBetweenRetries;
 	private final String myDescription;
 
-	public Retryer(Supplier<T> theSupplier, int theMaxRetries, int theSecondsBetweenRetries, String theDescription) {
+	public Retrier(Supplier<T> theSupplier, int theMaxRetries, int theSecondsBetweenRetries, String theDescription) {
 		mySupplier = theSupplier;
 		myMaxRetries = theMaxRetries;
 		mySecondsBetweenRetries = theSecondsBetweenRetries;

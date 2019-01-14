@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.retry.Retryer;
+import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -82,8 +82,8 @@ public class SubscriptionLoader {
 	}
 
 	synchronized int doSyncSubscriptionsWithRetry() {
-		Retryer<Integer> syncSubscriptionRetryer = new Retryer(() -> doSyncSubscriptions(), MAX_RETRIES, mySecondsBetweenRetries, "sync subscriptions");
-		return syncSubscriptionRetryer.runWithRetry();
+		Retrier<Integer> syncSubscriptionRetrier = new Retrier(() -> doSyncSubscriptions(), MAX_RETRIES, mySecondsBetweenRetries, "sync subscriptions");
+		return syncSubscriptionRetrier.runWithRetry();
 	}
 
 	private int doSyncSubscriptions() {

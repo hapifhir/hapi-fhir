@@ -26,7 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.retry.Retryer;
+import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -339,8 +339,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	}
 
 	synchronized int refreshCacheWithRetry() {
-		Retryer<Integer> refreshCacheRetryer = new Retryer(() -> mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL), MAX_RETRIES, mySecondsBetweenRetries, "refresh search parameter registry");
-		return refreshCacheRetryer.runWithRetry();
+		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL), MAX_RETRIES, mySecondsBetweenRetries, "refresh search parameter registry");
+		return refreshCacheRetrier.runWithRetry();
 	}
 
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
