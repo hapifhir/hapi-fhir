@@ -56,7 +56,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
-	protected ISearchParamRegistry mySearchParamRegsitry;
+	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
@@ -180,8 +180,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoDstu2")
 	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 

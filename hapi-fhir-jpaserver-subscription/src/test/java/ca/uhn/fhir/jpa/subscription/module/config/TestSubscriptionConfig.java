@@ -6,15 +6,16 @@ import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.PortUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.test.context.TestPropertySource;
 
 @Configuration
+@TestPropertySource(properties = {
+	"scheduling_disabled=true"
+})
 public class TestSubscriptionConfig {
-
-	@Autowired
-	FhirContext myFhirContext;
 	private static int ourPort;
 	private static String ourServerBase;
 
@@ -24,15 +25,20 @@ public class TestSubscriptionConfig {
 	}
 
 	@Bean
-	public IGenericClient fhirClient() {
+	public IGenericClient fhirClient(FhirContext theFhirContext) {
 		ourPort = PortUtil.findFreePort();
 		ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
-		return myFhirContext.newRestfulGenericClient(ourServerBase);
+		return theFhirContext.newRestfulGenericClient(ourServerBase);
 	};
 
 	@Bean
 	public ISubscriptionMatcher inMemorySubscriptionMatcher() {
 		return new InMemorySubscriptionMatcher();
+	}
+
+	@Bean
+	public UnregisterScheduledProcessor unregisterScheduledProcessor(Environment theEnv) {
+		return new UnregisterScheduledProcessor(theEnv);
 	}
 }

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -44,6 +45,14 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implements ISearchParamRegistry {
+
+	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
+	@VisibleForTesting
+	public static final int INITIAL_SECONDS_BETWEEN_RETRIES = 5;
+	private static long REFRESH_INTERVAL = 60 * DateUtils.MILLIS_PER_MINUTE;
+	private static final int MAX_RETRIES = 60; // 5 minutes
+
 	@Autowired
 	private ModelConfig myModelConfig;
 	@Autowired
@@ -51,8 +60,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	@Autowired
 	private FhirContext myFhirContext;
 
-	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
+	private volatile int mySecondsBetweenRetries = INITIAL_SECONDS_BETWEEN_RETRIES;
 	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
 	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
 	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
@@ -60,37 +68,27 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	private volatile long myLastRefresh;
 
 	@Override
-	public void requestRefresh() {
-		synchronized (this) {
-			myLastRefresh = 0;
-		}
-	}
-
-	@Override
-	public void forceRefresh() {
-		requestRefresh();
-		refreshCacheIfNecessary();
-	}
-
-	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+
+		requiresActiveSearchParams();
 		RuntimeSearchParam retVal = null;
-		Map<String, RuntimeSearchParam> params = getActiveSearchParams().get(theResourceName);
+		Map<String, RuntimeSearchParam> params = myActiveSearchParams.get(theResourceName);
 		if (params != null) {
 			retVal = params.get(theParamName);
 		}
 		return retVal;
 	}
 
-
-	@Override
-	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
-		return myActiveSearchParams;
-	}
-
 	@Override
 	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+		requiresActiveSearchParams();
 		return myActiveSearchParams.get(theResourceName);
+	}
+
+	void requiresActiveSearchParams() {
+		if (myActiveSearchParams == null) {
+			refreshCacheWithRetry();
+		}
 	}
 
 	@Override
@@ -223,21 +221,10 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		}
 
 		myBuiltInSearchParams = Collections.unmodifiableMap(resourceNameToSearchParams);
-
-		refreshCacheIfNecessary();
 	}
 
-	@Override
-	public void refreshCacheIfNecessary() {
-		long refreshInterval = 60 * DateUtils.MILLIS_PER_MINUTE;
-		if (System.currentTimeMillis() - refreshInterval > myLastRefresh) {
-			synchronized (this) {
-				mySearchParamProvider.refreshCache(this, refreshInterval);
-			}
-		}
-	}
 
-	public void doRefresh(long theRefreshInterval) {
+	public int doRefresh(long theRefreshInterval) {
 		if (System.currentTimeMillis() - theRefreshInterval > myLastRefresh) {
 			StopWatch sw = new StopWatch();
 
@@ -317,13 +304,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			myLastRefresh = System.currentTimeMillis();
 			ourLog.info("Refreshed search parameter cache in {}ms", sw.getMillis());
 		}
+		return myActiveSearchParams.size();
 	}
-
-	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
-	public void refreshCacheOnSchedule() {
-		refreshCacheIfNecessary();
-	}
-
 
 	protected abstract RuntimeSearchParam toRuntimeSp(SP theNextSp);
 
@@ -338,9 +320,49 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		return getActiveSearchParams(theResourceDef.getName()).values();
 	}
 
-	@VisibleForTesting
 	@Override
+	public void requestRefresh() {
+		synchronized (this) {
+			myLastRefresh = 0;
+		}
+	}
+
+	@Override
+	public void forceRefresh() {
+		requestRefresh();
+		refreshCacheWithRetry();
+	}
+
+	@VisibleForTesting
 	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
 		mySearchParamProvider = theSearchParamProvider;
+	}
+
+	synchronized int refreshCacheWithRetry() {
+		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL), MAX_RETRIES, mySecondsBetweenRetries, "refresh search parameter registry");
+		return refreshCacheRetrier.runWithRetry();
+	}
+
+	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
+	public void refreshCacheOnSchedule() {
+		refreshCacheIfNecessary();
+	}
+
+	public void refreshCacheIfNecessary() {
+		if (myActiveSearchParams == null ||
+			System.currentTimeMillis() - REFRESH_INTERVAL > myLastRefresh) {
+			refreshCacheWithRetry();
+		}
+	}
+
+	@VisibleForTesting
+	public void setSecondsBetweenRetriesForTesting(int theSecondsBetweenRetries) {
+		mySecondsBetweenRetries = theSecondsBetweenRetries;
+	}
+
+	@Override
+	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
+		requiresActiveSearchParams();
+		return Collections.unmodifiableMap(myActiveSearchParams);
 	}
 }

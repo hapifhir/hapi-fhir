@@ -200,6 +200,7 @@ public class CanonicalSubscription implements Serializable {
 		b.append(myTrigger, that.myTrigger);
 		b.append(myEmailDetails, that.myEmailDetails);
 		b.append(myRestHookDetails, that.myRestHookDetails);
+		b.append(myChannelExtensions, that.myChannelExtensions);
 		return b.isEquals();
 	}
 
@@ -216,6 +217,7 @@ public class CanonicalSubscription implements Serializable {
 			.append(myTrigger)
 			.append(myEmailDetails)
 			.append(myRestHookDetails)
+			.append(myChannelExtensions)
 			.toHashCode();
 	}
 

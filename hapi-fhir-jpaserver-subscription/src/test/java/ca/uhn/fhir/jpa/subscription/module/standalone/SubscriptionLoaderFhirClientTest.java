@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -13,8 +12,6 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
-	private String myCode = "1000000050";
-
 	@Test
 	public void testSubscriptionLoaderFhirClient() throws Exception {
 		String payload = "application/fhir+json";
