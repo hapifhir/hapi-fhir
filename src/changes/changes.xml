@@ -299,6 +299,10 @@
 				A wrapper script for Maven has been added, enabling new users to use Maven without having
 				to install it beforehand. Thanks to Ari Ruotsalainen for the Pull Request!
 			</action>
+			<action type="add">
+				AuthorizationInterceptor can now allow a user to perform a search that is scoped to a particular
+				resource (e.g. Patient?_id=123) if the user has read access for that specific instance.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

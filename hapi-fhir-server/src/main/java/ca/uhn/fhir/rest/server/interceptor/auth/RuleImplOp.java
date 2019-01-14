@@ -3,15 +3,18 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -34,9 +37,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,6 +65,15 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	 */
 	public RuleImplOp(String theRuleName) {
 		super(theRuleName);
+	}
+
+	@VisibleForTesting
+	Collection<IIdType> getAppliesToInstances() {
+		return myAppliesToInstances;
+	}
+
+	public void setAppliesToInstances(Collection<IIdType> theAppliesToInstances) {
+		myAppliesToInstances = theAppliesToInstances;
 	}
 
 	@Override
@@ -111,14 +123,18 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							if (theRequestDetails.getParameters().containsKey("_id")) {
 								String[] idValues = theRequestDetails.getParameters().get("_id");
 								appliesToResourceId = new ArrayList<>();
-								for (String next : idValues) {
-									IIdType nextId = ctx.getVersion().newIdType().setValue(next);
-									if (nextId.hasIdPart()){
-										if (!nextId.hasResourceType()) {
-											nextId = nextId.withResourceType(appliesToResourceType);
-										}
-										if (nextId.getResourceType().equals(appliesToResourceType)) {
-											appliesToResourceId.add(nextId);
+
+								for (String nextIdValue : idValues) {
+									QualifiedParamList orParamList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextIdValue);
+									for (String next : orParamList) {
+										IIdType nextId = ctx.getVersion().newIdType().setValue(next);
+										if (nextId.hasIdPart()) {
+											if (!nextId.hasResourceType()) {
+												nextId = nextId.withResourceType(appliesToResourceType);
+											}
+											if (nextId.getResourceType().equals(appliesToResourceType)) {
+												appliesToResourceId.add(nextId);
+											}
 										}
 									}
 								}
@@ -340,6 +356,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						return newVerdict();
 					}
 				}
+
 				return null;
 			case ALL_RESOURCES:
 				if (appliesToResourceType != null) {
@@ -529,10 +546,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 	public void setAppliesTo(AppliesTypeEnum theAppliesTo) {
 		myAppliesTo = theAppliesTo;
-	}
-
-	public void setAppliesToInstances(Collection<IIdType> theAppliesToInstances) {
-		myAppliesToInstances = theAppliesToInstances;
 	}
 
 	public void setAppliesToTypes(Set<?> theAppliesToTypes) {

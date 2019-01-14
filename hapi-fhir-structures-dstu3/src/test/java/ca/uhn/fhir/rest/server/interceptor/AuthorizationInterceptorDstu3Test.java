@@ -2507,10 +2507,10 @@ public class AuthorizationInterceptorDstu3Test {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow("Rule 1").read().instance("Patient/900").andThen()
-					.allow("Rule 1").read().instance("Patient/700").andThen()
-					.build();
+				RuleBuilder ruleBuilder = new RuleBuilder();
+				ruleBuilder.allow().read().instance("Patient/900").andThen();
+				ruleBuilder.allow().read().instance("Patient/700").andThen();
+				return ruleBuilder.build();
 			}
 		});
 
@@ -2519,51 +2519,65 @@ public class AuthorizationInterceptorDstu3Test {
 		HttpGet httpGet;
 		ourReturn = Collections.singletonList(createPatient(900));
 
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=900");
+//		status = ourClient.execute(httpGet);
+//		extractResponseAndClose(status);
+//		assertEquals(200, status.getStatusLine().getStatusCode());
+//		assertTrue(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/900");
+//		status = ourClient.execute(httpGet);
+//		extractResponseAndClose(status);
+//		assertEquals(200, status.getStatusLine().getStatusCode());
+//		assertTrue(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=901");
+//		status = ourClient.execute(httpGet);
+//		response = extractResponseAndClose(status);
+//		assertEquals(403, status.getStatusLine().getStatusCode());
+//		assertEquals(ERR403, response);
+//		assertFalse(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/901");
+//		status = ourClient.execute(httpGet);
+//		response = extractResponseAndClose(status);
+//		assertEquals(403, status.getStatusLine().getStatusCode());
+//		assertEquals(ERR403, response);
+//		assertFalse(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		// technically this is invalid, but just in case..
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=Patient/901");
+//		status = ourClient.execute(httpGet);
+//		response = extractResponseAndClose(status);
+//		assertEquals(403, status.getStatusLine().getStatusCode());
+//		assertEquals(ERR403, response);
+//		assertFalse(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=901");
+//		status = ourClient.execute(httpGet);
+//		response = extractResponseAndClose(status);
+//		assertEquals(403, status.getStatusLine().getStatusCode());
+//		assertEquals(ERR403, response);
+//		assertFalse(ourHitMethod);
+
 		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=900");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/900,Patient/700");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/900");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=900,777");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=901");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
-
-		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/901");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
-
-		ourHitMethod = false;
-		// technically this is invalid, but just in case..
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=Patient/901");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
-
-		ourHitMethod = false;
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=901");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
 		assertFalse(ourHitMethod);
 	}
 
@@ -3560,7 +3574,7 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 
 		@Search()
-		public List<Resource> search(@OptionalParam(name = "_id") IdType theIdParam) {
+		public List<Resource> search(@OptionalParam(name = "_id") TokenAndListParam theIdParam) {
 			ourHitMethod = true;
 			return ourReturn;
 		}
