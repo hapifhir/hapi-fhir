@@ -37,50 +37,41 @@ import java.util.Set;
 public class SubscriptionInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionInterceptorLoader.class);
 
-	// TODO KHS these beans are late loaded because we don't want to run their @PostConstruct and @Scheduled method if they're
-	// not required.  Recommend removing @PostConstruct from these classes and instead call those methods in register interceptors below.
-	// @Schedule will be tricker to resolve
-
+	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	@Autowired
 	private SubscriptionActivatingInterceptor mySubscriptionActivatingInterceptor;
-
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
-	private ApplicationContext myAppicationContext;
-	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	private ApplicationContext myAppicationContext;
 
 	public void registerInterceptors() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
 
 		if (!supportedSubscriptionTypes.isEmpty()) {
 			loadSubscriptions();
-			if (mySubscriptionActivatingInterceptor == null) {
-				mySubscriptionActivatingInterceptor = myAppicationContext.getBean(SubscriptionActivatingInterceptor.class);
-			}
 			ourLog.info("Registering subscription activating interceptor");
 			myDaoConfig.registerInterceptor(mySubscriptionActivatingInterceptor);
 		}
 		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
-			if (mySubscriptionMatcherInterceptor == null) {
-				mySubscriptionMatcherInterceptor = myAppicationContext.getBean(SubscriptionMatcherInterceptor.class);
-			}
+			mySubscriptionMatcherInterceptor.start();
 			ourLog.info("Registering subscription matcher interceptor");
 			myDaoConfig.registerInterceptor(mySubscriptionMatcherInterceptor);
-
 		}
 	}
 
 	private void loadSubscriptions() {
 		ourLog.info("Loading subscriptions into the SubscriptionRegistry...");
-		// Load subscriptions into the SubscriptionRegistry
+		// Activate scheduled subscription loads into the SubscriptionRegistry
 		myAppicationContext.getBean(SubscriptionLoader.class);
 		ourLog.info("...{} subscriptions loaded", mySubscriptionRegistry.size());
 	}
 
 	@VisibleForTesting
-	public void unregisterInterceptorsForUnitTest() {
+	void unregisterInterceptorsForUnitTest() {
 		myDaoConfig.unregisterInterceptor(mySubscriptionActivatingInterceptor);
 		myDaoConfig.unregisterInterceptor(mySubscriptionMatcherInterceptor);
 	}

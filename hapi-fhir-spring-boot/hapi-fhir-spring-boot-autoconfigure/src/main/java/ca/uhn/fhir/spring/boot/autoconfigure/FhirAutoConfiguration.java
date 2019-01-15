@@ -112,8 +112,6 @@ public class FhirAutoConfiguration {
 
 		private final IPagingProvider pagingProvider;
 
-		private final List<IServerInterceptor> interceptors;
-
 		private final List<FhirRestfulServerCustomizer> customizers;
 
 		public FhirRestfulServerConfiguration(
@@ -127,7 +125,6 @@ public class FhirAutoConfiguration {
 			this.fhirContext = fhirContext;
 			this.resourceProviders = resourceProviders.getIfAvailable();
 			this.pagingProvider = pagingProvider.getIfAvailable();
-			this.interceptors = interceptors.getIfAvailable();
 			this.customizers = customizers.getIfAvailable();
 		}
 
@@ -154,7 +151,6 @@ public class FhirAutoConfiguration {
 			setFhirContext(this.fhirContext);
 			setResourceProviders(this.resourceProviders);
 			setPagingProvider(this.pagingProvider);
-			setInterceptors(this.interceptors);
 
 			setServerAddressStrategy(new HardcodedServerAddressStrategy(this.properties.getServer().getPath()));
 

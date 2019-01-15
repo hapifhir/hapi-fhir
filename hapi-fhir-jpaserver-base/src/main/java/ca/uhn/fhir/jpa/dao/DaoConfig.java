@@ -143,7 +143,6 @@ public class DaoConfig {
 	private boolean myDisableHashBasedSearches;
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
-	private boolean mySubscriptionMatchingEnabled = true;
 
 	/**
 	 * Constructor
@@ -530,7 +529,7 @@ public class DaoConfig {
 	 * This may be used to optionally register server interceptors directly against the DAOs.
 	 */
 	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
+		setInterceptors(new ArrayList<>());
 		if (theInterceptor != null && theInterceptor.length != 0) {
 			getInterceptors().addAll(Arrays.asList(theInterceptor));
 		}
@@ -1308,8 +1307,7 @@ public class DaoConfig {
 	public void setSearchPreFetchThresholds(List<Integer> thePreFetchThresholds) {
 		Validate.isTrue(thePreFetchThresholds.size() > 0, "thePreFetchThresholds must not be empty");
 		int last = 0;
-		for (Integer nextInteger : thePreFetchThresholds) {
-			int nextInt = nextInteger.intValue();
+		for (Integer nextInt : thePreFetchThresholds) {
 			Validate.isTrue(nextInt > 0 || nextInt == -1, nextInt + " is not a valid prefetch threshold");
 			Validate.isTrue(nextInt != last, "Prefetch thresholds must be sequential");
 			Validate.isTrue(nextInt > last || nextInt == -1, "Prefetch thresholds must be sequential");
@@ -1398,7 +1396,7 @@ public class DaoConfig {
 	 */
 
 	public boolean isSubscriptionMatchingEnabled() {
-		return mySubscriptionMatchingEnabled;
+		return myModelConfig.isSubscriptionMatchingEnabled();
 	}
 
 	/**
@@ -1407,9 +1405,8 @@ public class DaoConfig {
 	 * @since 3.7.0
 	 */
 
-
 	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
-		mySubscriptionMatchingEnabled = theSubscriptionMatchingEnabled;
+		myModelConfig.setSubscriptionMatchingEnabled(theSubscriptionMatchingEnabled);
 	}
 
 	public ModelConfig getModelConfig() {

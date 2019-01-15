@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,16 +43,19 @@ import java.util.Optional;
  * handlers are all caches in this registry so they can be removed it the subscription is deleted.
  */
 
+// TODO KHS Does jpa need a subscription registry if matching is disabled?
 @Component
 public class SubscriptionRegistry {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
 
 	@Autowired
-	SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+	SubscriptionCanonicalizer<IBaseResource> mySubscriptionCanonicalizer;
 	@Autowired
 	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
+	@Autowired
+	ModelConfig myModelConfig;
 
 	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
 
@@ -71,18 +75,26 @@ public class SubscriptionRegistry {
 	}
 
 	@SuppressWarnings("UnusedReturnValue")
-	public CanonicalSubscription registerSubscription(IIdType theId, IBaseResource theSubscription) {
+	private CanonicalSubscription registerSubscription(IIdType theId, IBaseResource theSubscription) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
 		Validate.notBlank(subscriptionId);
 		Validate.notNull(theSubscription);
 
 		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
-		SubscribableChannel deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(subscriptionId, canonicalized.getChannelType().toCode().toLowerCase());
-		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(canonicalized);
+		SubscribableChannel deliveryChannel;
+		Optional<MessageHandler> deliveryHandler;
+
+		if (myModelConfig.isSubscriptionMatchingEnabled()) {
+			deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(subscriptionId, canonicalized.getChannelType().toCode().toLowerCase());
+			deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(canonicalized);
+		} else {
+			deliveryChannel = null;
+			deliveryHandler = Optional.empty();
+		}
 
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, deliveryChannel);
-		deliveryHandler.ifPresent(handler -> activeSubscription.register(handler));
+		deliveryHandler.ifPresent(activeSubscription::register);
 
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 

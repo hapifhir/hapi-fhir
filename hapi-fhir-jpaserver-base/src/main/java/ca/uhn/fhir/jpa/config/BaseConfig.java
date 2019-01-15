@@ -8,6 +8,8 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
+import ca.uhn.fhir.jpa.subscription.ISubscriptionTriggeringSvc;
+import ca.uhn.fhir.jpa.subscription.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannelFactory;
