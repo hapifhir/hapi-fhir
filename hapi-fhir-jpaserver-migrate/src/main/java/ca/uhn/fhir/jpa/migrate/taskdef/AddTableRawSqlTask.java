@@ -35,6 +35,7 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddTableRawSqlTask.class);
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
+	private List<String> myDriverNeutralSqls = new ArrayList<>();
 
 	public void addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {
 		Validate.notNull(theDriverType);
@@ -52,9 +53,11 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 			return;
 		}
 
-		List<String> sqlStatements = myDriverToSqls.get(getDriverType());
+		List<String> sqlStatements = myDriverToSqls.computeIfAbsent(getDriverType(), t -> new ArrayList<>());
+		sqlStatements.addAll(myDriverNeutralSqls);
+
 		ourLog.info("Going to create table {} using {} SQL statements", getTableName(), sqlStatements.size());
-		getConnectionProperties().getTxTemplate().execute(t->{
+		getConnectionProperties().getTxTemplate().execute(t -> {
 
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 			for (String nextSql : sqlStatements) {
@@ -64,5 +67,10 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 			return null;
 		});
 
+	}
+
+	public void addSql(String theSql) {
+		Validate.notBlank("theSql must not be null", theSql);
+		myDriverNeutralSqls.add(theSql);
 	}
 }
