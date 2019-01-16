@@ -40,7 +40,7 @@ public class ModelConfig {
 	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
 	 * </ul>
 	 */
-	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
 		"http://hl7.org/fhir/ValueSet/*",
 		"http://hl7.org/fhir/CodeSystem/*",
 		"http://hl7.org/fhir/valueset-*",
@@ -57,6 +57,7 @@ public class ModelConfig {
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
+	private boolean mySubscriptionMatchingEnabled = true;
 
 	/**
 	 * If set to {@code true} the default search params (i.e. the search parameters that are
@@ -225,7 +226,7 @@ public class ModelConfig {
 			}
 		}
 
-		HashSet<String> treatBaseUrlsAsLocal = new HashSet<String>();
+		HashSet<String> treatBaseUrlsAsLocal = new HashSet<>();
 		for (String next : ObjectUtils.defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
 			while (next.endsWith("/")) {
 				next = next.substring(0, next.length() - 1);
@@ -318,6 +319,27 @@ public class ModelConfig {
 	 */
 	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
 		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
+	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 * @since 3.7.0
+	 */
+
+	public boolean isSubscriptionMatchingEnabled() {
+		return mySubscriptionMatchingEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
+	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 * @since 3.7.0
+	 */
+
+
+	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
+		mySubscriptionMatchingEnabled = theSubscriptionMatchingEnabled;
 	}
 
 	@VisibleForTesting

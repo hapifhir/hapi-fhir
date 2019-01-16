@@ -55,15 +55,15 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -72,10 +72,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
-public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc, ApplicationContextAware {
+public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringProvider.class);
 
-	public static final int DEFAULT_MAX_SUBMIT = 10000;
+	private static final int DEFAULT_MAX_SUBMIT = 10000;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -88,11 +88,10 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
-	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	private IResourceModifiedConsumer myResourceModifiedConsumer;
 
 	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
 	private int myMaxSubmitPerPass = DEFAULT_MAX_SUBMIT;
-	private ApplicationContext myAppCtx;
 	private ExecutorService myExecutorService;
 
 	@Override
@@ -105,7 +104,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		if (theSubscriptionId != null) {
 			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 			IIdType subscriptionId = theSubscriptionId;
-			if (subscriptionId.hasResourceType() == false) {
+			if (!subscriptionId.hasResourceType()) {
 				subscriptionId = subscriptionId.withResourceType(ResourceTypeEnum.SUBSCRIPTION.getCode());
 			}
 			subscriptionDao.read(subscriptionId);
@@ -128,7 +127,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		// Search URLs must be valid
 		for (StringParam next : searchUrls) {
-			if (next.getValue().contains("?") == false) {
+			if (!next.getValue().contains("?")) {
 				throw new InvalidRequestException("Search URL is not valid (must be in the form \"[resource type]?[optional params]\")");
 			}
 		}
@@ -163,7 +162,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				return;
 			}
 
-			String activeJobIds = myActiveJobs.stream().map(t -> t.getJobId()).collect(Collectors.joining(", "));
+			String activeJobIds = myActiveJobs.stream().map(SubscriptionTriggeringJobDetails::getJobId).collect(Collectors.joining(", "));
 			ourLog.info("Starting pass: currently have {} active job IDs: {}", myActiveJobs.size(), activeJobIds);
 
 			SubscriptionTriggeringJobDetails activeJob = myActiveJobs.get(0);
@@ -290,7 +289,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 	private Future<Void> submitResource(String theSubscriptionId, String theResourceIdToTrigger) {
 		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(theResourceIdToTrigger);
-		IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
 		IBaseResource resourceToTrigger = dao.read(resourceId);
 
 		return submitResource(theSubscriptionId, resourceToTrigger);
@@ -306,7 +305,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		return myExecutorService.submit(() -> {
 			for (int i = 0; ; i++) {
 				try {
-						mySubscriptionMatcherInterceptor.submitResourceModified(msg);
+						myResourceModifiedConsumer.submitResourceModified(msg);
 					break;
 				} catch (Exception e) {
 					if (i >= 3) {
@@ -329,11 +328,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		}
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		myAppCtx = applicationContext;
-	}
-
 	/**
 	 * Sets the maximum number of resources that will be submitted in a single pass
 	 */
@@ -346,7 +340,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		myMaxSubmitPerPass = maxSubmitPerPass;
 	}
 
-	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void start() {
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1000);
@@ -393,67 +386,67 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		private String myCurrentSearchResourceType;
 		private int myCurrentSearchLastUploadedIndex;
 
-		public Integer getCurrentSearchCount() {
+		Integer getCurrentSearchCount() {
 			return myCurrentSearchCount;
 		}
 
-		public void setCurrentSearchCount(Integer theCurrentSearchCount) {
+		void setCurrentSearchCount(Integer theCurrentSearchCount) {
 			myCurrentSearchCount = theCurrentSearchCount;
 		}
 
-		public String getCurrentSearchResourceType() {
+		String getCurrentSearchResourceType() {
 			return myCurrentSearchResourceType;
 		}
 
-		public void setCurrentSearchResourceType(String theCurrentSearchResourceType) {
+		void setCurrentSearchResourceType(String theCurrentSearchResourceType) {
 			myCurrentSearchResourceType = theCurrentSearchResourceType;
 		}
 
-		public String getJobId() {
+		String getJobId() {
 			return myJobId;
 		}
 
-		public void setJobId(String theJobId) {
+		void setJobId(String theJobId) {
 			myJobId = theJobId;
 		}
 
-		public String getSubscriptionId() {
+		String getSubscriptionId() {
 			return mySubscriptionId;
 		}
 
-		public void setSubscriptionId(String theSubscriptionId) {
+		void setSubscriptionId(String theSubscriptionId) {
 			mySubscriptionId = theSubscriptionId;
 		}
 
-		public List<String> getRemainingResourceIds() {
+		List<String> getRemainingResourceIds() {
 			return myRemainingResourceIds;
 		}
 
-		public void setRemainingResourceIds(List<String> theRemainingResourceIds) {
+		void setRemainingResourceIds(List<String> theRemainingResourceIds) {
 			myRemainingResourceIds = theRemainingResourceIds;
 		}
 
-		public List<String> getRemainingSearchUrls() {
+		List<String> getRemainingSearchUrls() {
 			return myRemainingSearchUrls;
 		}
 
-		public void setRemainingSearchUrls(List<String> theRemainingSearchUrls) {
+		void setRemainingSearchUrls(List<String> theRemainingSearchUrls) {
 			myRemainingSearchUrls = theRemainingSearchUrls;
 		}
 
-		public String getCurrentSearchUuid() {
+		String getCurrentSearchUuid() {
 			return myCurrentSearchUuid;
 		}
 
-		public void setCurrentSearchUuid(String theCurrentSearchUuid) {
+		void setCurrentSearchUuid(String theCurrentSearchUuid) {
 			myCurrentSearchUuid = theCurrentSearchUuid;
 		}
 
-		public int getCurrentSearchLastUploadedIndex() {
+		int getCurrentSearchLastUploadedIndex() {
 			return myCurrentSearchLastUploadedIndex;
 		}
 
-		public void setCurrentSearchLastUploadedIndex(int theCurrentSearchLastUploadedIndex) {
+		void setCurrentSearchLastUploadedIndex(int theCurrentSearchLastUploadedIndex) {
 			myCurrentSearchLastUploadedIndex = theCurrentSearchLastUploadedIndex;
 		}
 	}

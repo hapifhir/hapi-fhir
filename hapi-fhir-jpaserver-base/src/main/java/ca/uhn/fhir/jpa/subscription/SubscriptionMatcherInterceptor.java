@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscr
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /*-
@@ -42,12 +42,12 @@ import javax.annotation.PreDestroy;
 
 @Component
 @Lazy
-public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAdapter {
+public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAdapter implements IResourceModifiedConsumer {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
-	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
-	public static final String SUBSCRIPTION_STATUS = "Subscription.status";
-	public static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
+	private static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
+	static final String SUBSCRIPTION_STATUS = "Subscription.status";
+	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private SubscribableChannel myProcessingChannel;
 
 	@Autowired
@@ -64,7 +64,6 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 		super();
 	}
 
-	@PostConstruct
 	public void start() {
 		if (myProcessingChannel == null) {
 			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);
@@ -77,7 +76,10 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void preDestroy() {
-		myProcessingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
+
+		if (myProcessingChannel != null) {
+			myProcessingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
+		}
 	}
 
 	@Override
@@ -100,8 +102,9 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 		submitResourceModified(msg);
 	}
 
-	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
+	private void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");
+		Validate.notNull(myProcessingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		myProcessingChannel.send(new ResourceModifiedJsonMessage(theMessage));
 	}
 
@@ -117,7 +120,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	}
 
 	@VisibleForTesting
-	public LinkedBlockingQueueSubscribableChannel getProcessingChannelForUnitTest() {
+	LinkedBlockingQueueSubscribableChannel getProcessingChannelForUnitTest() {
 		return (LinkedBlockingQueueSubscribableChannel) myProcessingChannel;
 	}
 }
