@@ -303,6 +303,10 @@
 				AuthorizationInterceptor can now allow a user to perform a search that is scoped to a particular
 				resource (e.g. Patient?_id=123) if the user has read access for that specific instance.
 			</action>
+			<action type="add">
+				HAPI FHIR will now log the Git revision when it first starts up (on the ame line as the version number
+				that it already logs).
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
