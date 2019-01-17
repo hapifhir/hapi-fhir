@@ -25,10 +25,10 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
+		ourObservationListener.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -43,10 +43,10 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
+		ourObservationListener.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -61,9 +61,10 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
+		ourObservationListener.setExpectedCount(0);
+		mySubscriptionMatchingPost.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
-
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		mySubscriptionMatchingPost.awaitExpected();
+		ourObservationListener.awaitExpected();
 	}
 }

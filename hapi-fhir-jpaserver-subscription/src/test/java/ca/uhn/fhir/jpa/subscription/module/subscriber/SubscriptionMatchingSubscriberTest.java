@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
+import ca.uhn.fhir.jpa.searchparam.interceptor.InterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,10 +27,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
+		ourObservationListener.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -43,10 +45,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
+		ourObservationListener.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -61,9 +63,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
+		ourObservationListener.setExpectedCount(0);
+		mySubscriptionMatchingPost.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
-
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		mySubscriptionMatchingPost.awaitExpected();
+		ourObservationListener.awaitExpected();
 	}
 }

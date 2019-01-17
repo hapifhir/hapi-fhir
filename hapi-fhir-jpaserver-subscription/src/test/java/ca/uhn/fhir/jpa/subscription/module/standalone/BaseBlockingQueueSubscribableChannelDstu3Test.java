@@ -1,10 +1,14 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.searchparam.interceptor.InterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
+import ca.uhn.fhir.jpa.subscription.module.LatchedService;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -21,6 +25,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -36,6 +41,7 @@ import java.util.List;
 
 public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends BaseSubscriptionDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
+	protected static ObservationListener ourObservationListener;
 
 	@Autowired
 	FhirContext myFhirContext;
@@ -43,6 +49,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	StandaloneSubscriptionMessageHandler myStandaloneSubscriptionMessageHandler;
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
+	@Autowired
+	InterceptorRegistry myInterceptorRegistry;
 
 	protected String myCode = "1000000050";
 
@@ -56,6 +64,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	private static SubscribableChannel ourSubscribableChannel;
 	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	private long idCounter = 0;
+	protected LatchedService mySubscriptionMatchingPost = new LatchedService(SubscriptionMatchingSubscriber.INTERCEPTOR_POST_PROCESSED);
+	protected LatchedService mySubscriptionActivatedPost = new LatchedService(SubscriptionRegistry.INTERCEPTOR_POST_ACTIVATED);
 
 	@Before
 	public void beforeReset() {
@@ -66,6 +76,14 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
 		}
+		myInterceptorRegistry.addInterceptor(SubscriptionMatchingSubscriber.INTERCEPTOR_POST_PROCESSED, mySubscriptionMatchingPost);
+		myInterceptorRegistry.addInterceptor(SubscriptionRegistry.INTERCEPTOR_POST_ACTIVATED, mySubscriptionActivatedPost);
+	}
+
+	@After
+	public void cleanup() {
+		myInterceptorRegistry.removeInterceptor(SubscriptionRegistry.INTERCEPTOR_POST_ACTIVATED, mySubscriptionActivatedPost);
+		myInterceptorRegistry.removeInterceptor(SubscriptionMatchingSubscriber.INTERCEPTOR_POST_PROCESSED, mySubscriptionMatchingPost);
 	}
 
 	public <T extends IBaseResource> T sendResource(T theResource) {
@@ -77,8 +95,10 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 	protected Subscription sendSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
 		Subscription subscription = returnedActiveSubscription(theCriteria, thePayload, theEndpoint);
-
-		return sendResource(subscription);
+		mySubscriptionActivatedPost.setExpectedCount(1);
+		Subscription retval = sendResource(subscription);
+		mySubscriptionActivatedPost.awaitExpected();
+		return retval;
 	}
 
 	protected Subscription returnedActiveSubscription(String theCriteria, String thePayload, String theEndpoint) {
@@ -122,8 +142,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 
-		ObservationListener obsListener = new ObservationListener();
-		ourListenerRestServer.setResourceProviders(obsListener);
+		ourObservationListener = new ObservationListener();
+		ourListenerRestServer.setResourceProviders(ourObservationListener);
 
 		ourListenerServer = new Server(ourListenerPort);
 
@@ -145,6 +165,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 	public static class ObservationListener implements IResourceProvider {
 
+		private LatchedService updateLatch = new LatchedService("Observation Update");
+
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Create");
@@ -162,8 +184,17 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			ourUpdatedObservations.add(theObservation);
+			updateLatch.countdown();
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
+		}
+
+		public void setExpectedCount(int count) {
+			updateLatch.setExpectedCount(count);
+		}
+
+		public void awaitExpected() throws InterruptedException {
+			updateLatch.awaitExpected();
 		}
 	}
 }

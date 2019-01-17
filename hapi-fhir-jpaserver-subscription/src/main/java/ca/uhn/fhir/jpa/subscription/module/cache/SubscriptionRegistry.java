@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.interceptor.InterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,6 +48,7 @@ import java.util.Optional;
 @Component
 public class SubscriptionRegistry {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
+	public static final String INTERCEPTOR_POST_ACTIVATED = "SubscriptionRegistry.postActivated";
 
 	@Autowired
 	SubscriptionCanonicalizer<IBaseResource> mySubscriptionCanonicalizer;
@@ -56,6 +58,8 @@ public class SubscriptionRegistry {
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 	@Autowired
 	ModelConfig myModelConfig;
+	@Autowired
+	InterceptorRegistry myInterceptorRegistry;
 
 	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
 
@@ -97,6 +101,7 @@ public class SubscriptionRegistry {
 		deliveryHandler.ifPresent(activeSubscription::register);
 
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
+		myInterceptorRegistry.trigger(INTERCEPTOR_POST_ACTIVATED, theSubscription);
 
 		return canonicalized;
 	}

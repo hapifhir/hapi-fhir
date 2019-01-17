@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.searchparam.interceptor.InterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
@@ -30,9 +31,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,6 +45,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Service
 public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriber.class);
+	public static final String INTERCEPTOR_PRE_PROCESSED = "SubscriptionMatchingSubscriber.preProcessed";
+	public static final String INTERCEPTOR_POST_PROCESSED = "SubscriptionMatchingSubscriber.postProcessed";
 
 	@Autowired
 	private ISubscriptionMatcher mySubscriptionMatcher;
@@ -51,6 +54,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	private InterceptorRegistry myInterceptorRegistry;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -66,6 +71,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
+		if (!myInterceptorRegistry.trigger(INTERCEPTOR_PRE_PROCESSED, theMsg)) {
+			return;
+		}
 		switch (theMsg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
@@ -135,5 +143,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
 			}
 		}
+		myInterceptorRegistry.trigger(INTERCEPTOR_POST_PROCESSED, theMsg);
 	}
 }
