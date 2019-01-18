@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.EventDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.*;
 
@@ -64,6 +65,39 @@ public class CanonicalSubscription implements Serializable {
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
 	private Map<String, String> myChannelExtensions;
+
+	/**
+	 * Constructor
+	 */
+	public CanonicalSubscription() {
+		super();
+	}
+
+	/**
+	 * Copy Constructor
+	 */
+	public CanonicalSubscription(CanonicalSubscription theSubscription) {
+		myChannelExtensions = new HashMap<>(theSubscription.getChannelExtensions());
+		myChannelType = theSubscription.getChannelType();
+		myCriteriaString = theSubscription.getCriteriaString();
+		if (theSubscription.getEmailDetails() != null) {
+			myEmailDetails = new EmailDetails(theSubscription.getEmailDetails());
+		}
+		if (theSubscription.getRestHookDetails() != null) {
+			myRestHookDetails = new RestHookDetails(theSubscription.getRestHookDetails());
+		}
+		myHeaders = new ArrayList<>(theSubscription.getHeaders());
+		myEndpointUrl = theSubscription.getEndpointUrl();
+		myIdElement = theSubscription.getIdElementString();
+		myPayloadString = theSubscription.getPayloadString();
+		myStatus = theSubscription.getStatus();
+		// FIXME: is this constructor needed
+//		my
+	}
+
+	private Map<String, String> getChannelExtensions() {
+		return myChannelExtensions != null ? myChannelExtensions : Collections.emptyMap();
+	}
 
 	/**
 	 * For now we're using the R4 TriggerDefinition, but this
@@ -105,8 +139,9 @@ public class CanonicalSubscription implements Serializable {
 		myEndpointUrl = theEndpointUrl;
 	}
 
+	@Nonnull
 	public List<String> getHeaders() {
-		return Collections.unmodifiableList(myHeaders);
+		return myHeaders != null ? Collections.unmodifiableList(myHeaders) : Collections.emptyList();
 	}
 
 	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
@@ -236,6 +271,21 @@ public class CanonicalSubscription implements Serializable {
 		@JsonProperty("subjectTemplate")
 		private String mySubjectTemplate;
 
+		/**
+		 * Construcor
+		 */
+		public EmailDetails() {
+			super();
+		}
+
+		/**
+		 * Copy Constructor
+		 */
+		public EmailDetails(EmailDetails theEmailDetails) {
+			myFrom = theEmailDetails.getFrom();
+			mySubjectTemplate = theEmailDetails.getSubjectTemplate();
+		}
+
 		public String getFrom() {
 			return myFrom;
 		}
@@ -260,6 +310,21 @@ public class CanonicalSubscription implements Serializable {
 		private boolean myStripVersionId;
 		@JsonProperty("deliverLatestVersion")
 		private boolean myDeliverLatestVersion;
+
+		/**
+		 * Constructor
+		 */
+		public RestHookDetails() {
+			super();
+		}
+
+		/**
+		 * Copy constructor
+		 */
+		public RestHookDetails(RestHookDetails theRestHookDetails) {
+			myDeliverLatestVersion = theRestHookDetails.isDeliverLatestVersion();
+			myStripVersionId = theRestHookDetails.isStripVersionId();
+		}
 
 		public boolean isDeliverLatestVersion() {
 			return myDeliverLatestVersion;

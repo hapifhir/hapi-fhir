@@ -55,7 +55,9 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
 		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
-		if (payloadResource == null) return;
+		if (payloadResource == null) {
+			return;
+		}
 
 		doDelivery(theMsg, theSubscription, thePayloadType, theClient, payloadResource);
 	}
@@ -64,22 +66,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		IClientExecutable<?, ?> operation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
-				if (thePayloadResource == null || thePayloadResource.isEmpty()) {
-					if (thePayloadType != null ) {
-						operation = theClient.create().resource(thePayloadResource);
-					} else {
-						sendNotification(theMsg);
-						return;
-					}
-				} else {
-					if (thePayloadType != null ) {
-						operation = theClient.update().resource(thePayloadResource);
-					} else {
-						sendNotification(theMsg);
-						return;
-					}
-				}
-				break;
 			case UPDATE:
 				if (thePayloadResource == null || thePayloadResource.isEmpty()) {
 					if (thePayloadType != null ) {
@@ -179,10 +165,9 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 	/**
 	 * Sends a POST notification without a payload
-	 * @param theMsg
 	 */
 	protected void sendNotification(ResourceDeliveryMessage theMsg) {
-		Map<String, List<String>> params = new HashMap();
+		Map<String, List<String>> params = new HashMap<>();
 		List<Header> headers = new ArrayList<>();
 		StringBuilder url = new StringBuilder(theMsg.getSubscription().getEndpointUrl());
 		IHttpClient client = myFhirContext.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
