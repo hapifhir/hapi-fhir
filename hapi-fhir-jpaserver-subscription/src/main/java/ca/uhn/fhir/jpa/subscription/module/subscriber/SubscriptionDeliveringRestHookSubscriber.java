@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -38,10 +39,7 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -183,12 +181,28 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	 */
 	protected void sendNotification(ResourceDeliveryMessage theMsg) {
 		Map<String, List<String>> params = new HashMap();
+
 		List<Header> headers = new ArrayList<>();
+		if (theMsg.getSubscription().getHeaders() != null) {
+			theMsg.getSubscription().getHeaders().stream().filter(Objects::nonNull).forEach(h -> {
+				final int sep = h.indexOf(':');
+				if (sep > 0) {
+					final String name = h.substring(0, sep);
+					final String value = h.substring(sep + 1);
+					if (StringUtils.isNotBlank(name)) {
+						headers.add(new Header(name.trim(), value.trim()));
+					}
+				}
+			});
+		}
+
 		StringBuilder url = new StringBuilder(theMsg.getSubscription().getEndpointUrl());
 		IHttpClient client = myFhirContext.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
 		IHttpRequest request = client.createParamRequest(myFhirContext, params, null);
 		try {
 			IHttpResponse response = request.execute();
+			// close connection in order to return a possible cached connection to the connection pool
+			response.close();
 		} catch (IOException e) {
 			ourLog.error("Error trying to reach "+ theMsg.getSubscription().getEndpointUrl());
 			e.printStackTrace();
