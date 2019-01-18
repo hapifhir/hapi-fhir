@@ -303,6 +303,12 @@
 				AuthorizationInterceptor can now allow a user to perform a search that is scoped to a particular
 				resource (e.g. Patient?_id=123) if the user has read access for that specific instance.
 			</action>
+			<action type="fix" issue="1084">
+				In JPA Server REST Hook Subscriptions, any Headers defined in the
+				Subscription resource are now applied to the outgoing HTTP
+				request.
+				Thanks to Volker Schmidt for the pull request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
