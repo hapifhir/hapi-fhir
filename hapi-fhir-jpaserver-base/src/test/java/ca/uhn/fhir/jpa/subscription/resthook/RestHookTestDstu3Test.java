@@ -4,6 +4,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
+import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -51,9 +52,6 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 	private static NotificationServlet ourNotificationServlet;
 	private static String ourNotificationListenerServer;
-	private static List<Observation> ourUpdatedObservations = Lists.newArrayList();
-	private static List<String> ourContentTypes = new ArrayList<>();
-	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
 	@After
 	public void afterUnregisterRestHookListener() {

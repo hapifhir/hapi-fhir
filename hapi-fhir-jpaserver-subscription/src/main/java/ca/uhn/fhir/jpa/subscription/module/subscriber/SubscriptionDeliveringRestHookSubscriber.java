@@ -21,12 +21,6 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  */
 
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionDeliverySubscriber;
-import ca.uhn.fhir.jpa.subscription.BaseSubscriptionInterceptor;
-import ca.uhn.fhir.jpa.subscription.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.*;
@@ -45,10 +39,7 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
