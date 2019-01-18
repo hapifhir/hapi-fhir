@@ -43,14 +43,6 @@ public class SubscriptionMatchResult {
 		this.myMatcherShortName = theMatcherShortName;
 	}
 
-	public SubscriptionMatchResult(String theUnsupportedParameter, String theUnsupportedReason, String theMatcherShortName) {
-		this.myMatch = false;
-		this.mySupported = false;
-		this.myUnsupportedParameter = theUnsupportedParameter;
-		this.myUnsupportedReason = theUnsupportedReason;
-		this.myMatcherShortName = theMatcherShortName;
-	}
-
 	public boolean supported() {
 		return mySupported;
 	}
