@@ -309,6 +309,10 @@
 				request.
 				Thanks to Volker Schmidt for the pull request!
 			</action>
+			<action type="add">
+				HAPI FHIR will now log the Git revision when it first starts up (on the ame line as the version number
+				that it already logs).
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
