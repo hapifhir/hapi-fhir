@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +28,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.EventDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 
 import javax.annotation.Nonnull;
@@ -39,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class CanonicalSubscription implements Serializable {
+public class CanonicalSubscription implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -71,32 +70,6 @@ public class CanonicalSubscription implements Serializable {
 	 */
 	public CanonicalSubscription() {
 		super();
-	}
-
-	/**
-	 * Copy Constructor
-	 */
-	public CanonicalSubscription(CanonicalSubscription theSubscription) {
-		myChannelExtensions = new HashMap<>(theSubscription.getChannelExtensions());
-		myChannelType = theSubscription.getChannelType();
-		myCriteriaString = theSubscription.getCriteriaString();
-		if (theSubscription.getEmailDetails() != null) {
-			myEmailDetails = new EmailDetails(theSubscription.getEmailDetails());
-		}
-		if (theSubscription.getRestHookDetails() != null) {
-			myRestHookDetails = new RestHookDetails(theSubscription.getRestHookDetails());
-		}
-		myHeaders = new ArrayList<>(theSubscription.getHeaders());
-		myEndpointUrl = theSubscription.getEndpointUrl();
-		myIdElement = theSubscription.getIdElementString();
-		myPayloadString = theSubscription.getPayloadString();
-		myStatus = theSubscription.getStatus();
-		// FIXME: is this constructor needed
-//		my
-	}
-
-	private Map<String, String> getChannelExtensions() {
-		return myChannelExtensions != null ? myChannelExtensions : Collections.emptyMap();
 	}
 
 	/**
@@ -166,7 +139,7 @@ public class CanonicalSubscription implements Serializable {
 
 	public void setChannelExtensions(Map<String, String> theChannelExtensions) {
 		myChannelExtensions = new HashMap<>();
-		for (String url: theChannelExtensions.keySet()) {
+		for (String url : theChannelExtensions.keySet()) {
 			if (isNotBlank(url) && isNotBlank(theChannelExtensions.get(url))) {
 				myChannelExtensions.put(url, theChannelExtensions.get(url));
 			}
@@ -263,9 +236,28 @@ public class CanonicalSubscription implements Serializable {
 		}
 	}
 
+	/**
+	 * Adds a header
+	 *
+	 * @param theHeader The header, e.g. "Authorization: Bearer AAAAA"
+	 */
+	public void addHeader(String theHeader) {
+		if (isNotBlank(theHeader)) {
+			initHeaders();
+			myHeaders.add(theHeader);
+		}
+	}
+
+	private void initHeaders() {
+		if (myHeaders == null) {
+			myHeaders = new ArrayList<>();
+		}
+	}
+
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class EmailDetails {
+
 		@JsonProperty("from")
 		private String myFrom;
 		@JsonProperty("subjectTemplate")
@@ -276,14 +268,6 @@ public class CanonicalSubscription implements Serializable {
 		 */
 		public EmailDetails() {
 			super();
-		}
-
-		/**
-		 * Copy Constructor
-		 */
-		public EmailDetails(EmailDetails theEmailDetails) {
-			myFrom = theEmailDetails.getFrom();
-			mySubjectTemplate = theEmailDetails.getSubjectTemplate();
 		}
 
 		public String getFrom() {
@@ -306,6 +290,7 @@ public class CanonicalSubscription implements Serializable {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class RestHookDetails {
+
 		@JsonProperty("stripVersionId")
 		private boolean myStripVersionId;
 		@JsonProperty("deliverLatestVersion")
@@ -316,14 +301,6 @@ public class CanonicalSubscription implements Serializable {
 		 */
 		public RestHookDetails() {
 			super();
-		}
-
-		/**
-		 * Copy constructor
-		 */
-		public RestHookDetails(RestHookDetails theRestHookDetails) {
-			myDeliverLatestVersion = theRestHookDetails.isDeliverLatestVersion();
-			myStripVersionId = theRestHookDetails.isStripVersionId();
 		}
 
 		public boolean isDeliverLatestVersion() {
@@ -370,9 +347,13 @@ public class CanonicalSubscription implements Serializable {
 	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class CanonicalEventDefinition {
 
-		public CanonicalEventDefinition(EventDefinition theDef) {
+		/**
+		 * Constructor
+		 */
+		public CanonicalEventDefinition() {
 			// nothing yet
 		}
+
 	}
 
 }
