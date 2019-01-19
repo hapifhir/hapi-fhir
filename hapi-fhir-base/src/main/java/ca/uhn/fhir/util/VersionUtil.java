@@ -65,7 +65,11 @@ public class VersionUtil {
 
 			ourBuildNumber = p.getProperty("hapifhir.buildnumber");
 			ourBuildTime = p.getProperty("hapifhir.timestamp");
-			ourLog.info("HAPI FHIR version {} - Rev {}", ourVersion, StringUtils.right(ourBuildNumber, 10));
+
+			if (System.getProperty("suppress_hapi_fhir_version_log") == null) {
+				ourLog.info("HAPI FHIR version {} - Rev {}", ourVersion, StringUtils.right(ourBuildNumber, 10));
+			}
+
 		} catch (Exception e) {
 			ourLog.warn("Unable to determine HAPI version information", e);
 		}

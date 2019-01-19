@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,11 +107,15 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 			ourLog.info("Subscription {} was matched by resource {} using matcher {}", nextActiveSubscription.getSubscription().getIdElement(myFhirContext).getValue(), resourceId.toUnqualifiedVersionless().getValue(), matchResult.matcherShortName());
 
+			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
+
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-			deliveryMsg.setPayload(myFhirContext, theMsg.getNewPayload(myFhirContext));
+			deliveryMsg.setPayload(myFhirContext, payload);
 			deliveryMsg.setSubscription(nextActiveSubscription.getSubscription());
 			deliveryMsg.setOperationType(theMsg.getOperationType());
-			deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
+			if (payload == null) {
+				deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
+			}
 
 			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
 			MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
