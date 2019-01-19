@@ -58,7 +58,9 @@ public class VersionUtil {
 		try (InputStream is = VersionUtil.class.getResourceAsStream("/ca/uhn/fhir/hapi-fhir-base-build.properties")) {
 
 			Properties p = new Properties();
-			p.load(is);
+			if (is != null) {
+				p.load(is);
+			}
 
 			ourVersion = p.getProperty("hapifhir.version");
 			ourVersion = defaultIfBlank(ourVersion, "(unknown)");

@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
+import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
+import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import ca.uhn.fhir.jpa.model.subscription.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.model.subscription.interceptor.api.SubscriptionHook;
-import ca.uhn.fhir.jpa.model.subscription.interceptor.api.SubscriptionInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 /**
  * Test the rest-hook subscriptions
  */
-@ContextConfiguration(classes = {RestHookWithInterceptorR4Test.MyCtxConfig.class})
+@ContextConfiguration(classes = {RestHookWithInterceptorR4Test.MyTestCtxConfig.class})
 public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookWithInterceptorR4Test.class);
@@ -118,11 +118,11 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Configuration
-	public static class MyCtxConfig {
+	static class MyTestCtxConfig {
 
 		@Bean
-		public MyInterceptor interceptor() {
-			return new MyInterceptor();
+		public MyTestInterceptor interceptor() {
+			return new MyTestInterceptor();
 		}
 
 	}
@@ -130,17 +130,17 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	/**
 	 * Interceptor class
 	 */
-	@SubscriptionInterceptor
-	public static class MyInterceptor {
+	@Interceptor
+	public static class MyTestInterceptor {
 
 		/**
 		 * Constructor
 		 */
-		public MyInterceptor() {
+		public MyTestInterceptor() {
 			ourLog.info("Creating interceptor");
 		}
 
-		@SubscriptionHook(Pointcut.BEFORE_REST_HOOK_DELIVERY)
+		@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
 		public boolean beforeRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 			if (ourNextModifyResourceId) {
 				theDeliveryMessage.getPayload(ourCtx).setId(new IdType("Observation/A"));
@@ -153,7 +153,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			return ourNextBeforeRestHookDeliveryReturn;
 		}
 
-		@SubscriptionHook(Pointcut.AFTER_REST_HOOK_DELIVERY)
+		@Hook(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY)
 		public boolean afterRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 			ourHitAfterRestHookDelivery = true;
 			return ourNextAfterRestHookDeliveryReturn;

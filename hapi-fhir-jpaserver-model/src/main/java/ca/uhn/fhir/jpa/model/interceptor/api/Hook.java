@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.subscription.interceptor.api;
+package ca.uhn.fhir.jpa.model.interceptor.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,18 +7,18 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation should be placed on
- * {@link SubscriptionInterceptor Subscription Interceptor}
+ * {@link Interceptor Subscription Interceptor}
  * bean methods.
  * <p>
- *     Methods with this annotation are invoked immediately before a REST HOOK
- *     subscription delivery
+ * Methods with this annotation are invoked immediately before a REST HOOK
+ * subscription delivery
  * </p>
  *
- * @see SubscriptionInterceptor
+ * @see Interceptor
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SubscriptionHook {
+public @interface Hook {
 
 	/**
 	 * Provides the specific point where this method should be invoked

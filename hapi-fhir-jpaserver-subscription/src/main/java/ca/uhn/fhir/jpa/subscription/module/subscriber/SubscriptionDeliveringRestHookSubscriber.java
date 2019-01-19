@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  */
 
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import ca.uhn.fhir.jpa.model.subscription.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.model.subscription.interceptor.executor.ISubscriptionInterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.*;
@@ -52,7 +52,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	IResourceRetriever myResourceRetriever;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
 	@Autowired
-	private ISubscriptionInterceptorRegistry mySubscriptionInterceptorRegistry;
+	private IInterceptorRegistry myInterceptorRegistry;
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
 		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
@@ -132,8 +132,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException {
 		CanonicalSubscription subscription = theMessage.getSubscription();
 
-		// Interceptor call: BEFORE_REST_HOOK_DELIVERY
-		if (!mySubscriptionInterceptorRegistry.callHooks(Pointcut.BEFORE_REST_HOOK_DELIVERY, theMessage, subscription)) {
+		// Interceptor call: SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY
+		if (!myInterceptorRegistry.callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, theMessage, subscription)) {
 			return;
 		}
 
@@ -168,8 +168,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 		deliverPayload(theMessage, subscription, payloadType, client);
 
-		// Interceptor call: AFTER_REST_HOOK_DELIVERY
-		if (!mySubscriptionInterceptorRegistry.callHooks(Pointcut.AFTER_REST_HOOK_DELIVERY, theMessage, subscription)) {
+		// Interceptor call: SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY
+		if (!myInterceptorRegistry.callHooks(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, theMessage, subscription)) {
 			//noinspection UnnecessaryReturnStatement
 			return;
 		}

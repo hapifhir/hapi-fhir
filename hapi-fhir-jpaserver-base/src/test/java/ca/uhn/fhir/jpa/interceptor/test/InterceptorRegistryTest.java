@@ -1,8 +1,10 @@
-package ca.uhn.fhir.jpa.model.subscription.interceptor.executor;
+package ca.uhn.fhir.jpa.interceptor.test;
 
-import ca.uhn.fhir.jpa.model.subscription.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.model.subscription.interceptor.api.SubscriptionHook;
-import ca.uhn.fhir.jpa.model.subscription.interceptor.api.SubscriptionInterceptor;
+import ca.uhn.fhir.jpa.model.interceptor.executor.InterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,24 +23,25 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {SubscriptionInterceptorRegistryTest.MyCtxConfig.class})
-public class SubscriptionInterceptorRegistryTest {
+@ContextConfiguration(classes = {InterceptorRegistryTest.InterceptorRegistryTestCtxConfig.class})
+public class InterceptorRegistryTest {
 
 	private static boolean ourNext_beforeRestHookDelivery_Return2;
 	private static boolean ourNext_beforeRestHookDelivery_Return1;
 	private static List<String> ourInvocations = new ArrayList<>();
 	private static CanonicalSubscription ourLastCanonicalSubscription;
-	private static ResourceDeliveryMessage ourLastResourceDeliveryMessage;
+	private static ResourceDeliveryMessage ourLastResourceDeliveryMessage0;
+	private static ResourceDeliveryMessage ourLastResourceDeliveryMessage1;
 
 	@Autowired
-	private SubscriptionInterceptorRegistry mySubscriptionInterceptorRegistry;
+	private InterceptorRegistry myInterceptorRegistry;
 
 	@Test
 	public void testGlobalInterceptorsAreFound() {
-		List<Object> globalInterceptors = mySubscriptionInterceptorRegistry.getGlobalInterceptors();
+		List<Object> globalInterceptors = myInterceptorRegistry.getGlobalInterceptorsForUnitTest();
 		assertEquals(2, globalInterceptors.size());
-		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyInterceptorOne);
-		assertTrue(globalInterceptors.get(1).getClass().toString(), globalInterceptors.get(1) instanceof MyInterceptorTwo);
+		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
+		assertTrue(globalInterceptors.get(1).getClass().toString(), globalInterceptors.get(1) instanceof MyTestInterceptorTwo);
 	}
 
 	@Test
@@ -46,11 +49,12 @@ public class SubscriptionInterceptorRegistryTest {
 		ResourceDeliveryMessage msg = new ResourceDeliveryMessage();
 		CanonicalSubscription subs = new CanonicalSubscription();
 		HookParams params = new HookParams(msg, subs);
-		boolean outcome = mySubscriptionInterceptorRegistry.callHooks(Pointcut.BEFORE_REST_HOOK_DELIVERY, params);
+		boolean outcome = myInterceptorRegistry.callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, params);
 		assertTrue(outcome);
 
-		assertThat(ourInvocations, contains("MyInterceptorOne.beforeRestHookDelivery", "MyInterceptorTwo.beforeRestHookDelivery"));
-		assertSame(msg, ourLastResourceDeliveryMessage);
+		assertThat(ourInvocations, contains("MyTestInterceptorOne.beforeRestHookDelivery", "MyTestInterceptorTwo.beforeRestHookDelivery"));
+		assertSame(msg, ourLastResourceDeliveryMessage0);
+		assertNull(ourLastResourceDeliveryMessage1);
 		assertSame(subs, ourLastCanonicalSubscription);
 	}
 
@@ -61,10 +65,10 @@ public class SubscriptionInterceptorRegistryTest {
 		ResourceDeliveryMessage msg = new ResourceDeliveryMessage();
 		CanonicalSubscription subs = new CanonicalSubscription();
 		HookParams params = new HookParams(msg, subs);
-		boolean outcome = mySubscriptionInterceptorRegistry.callHooks(Pointcut.BEFORE_REST_HOOK_DELIVERY, params);
+		boolean outcome = myInterceptorRegistry.callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, params);
 		assertFalse(outcome);
 
-		assertThat(ourInvocations, contains("MyInterceptorOne.beforeRestHookDelivery"));
+		assertThat(ourInvocations, contains("MyTestInterceptorOne.beforeRestHookDelivery"));
 	}
 
 	@Test
@@ -73,10 +77,10 @@ public class SubscriptionInterceptorRegistryTest {
 		CanonicalSubscription subs = new CanonicalSubscription();
 		HookParams params = new HookParams(msg, subs);
 		try {
-			mySubscriptionInterceptorRegistry.callHooks(Pointcut.BEFORE_REST_HOOK_DELIVERY, params);
+			myInterceptorRegistry.callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, params);
 			fail();
 		} catch (AssertionError e) {
-			// good
+			assertEquals("Wrong hook parameters, wanted [CanonicalSubscription, ResourceDeliveryMessage] and found [CanonicalSubscription, Integer]", e.getMessage());
 		}
 	}
 
@@ -86,17 +90,22 @@ public class SubscriptionInterceptorRegistryTest {
 		ourNext_beforeRestHookDelivery_Return1 = true;
 		ourNext_beforeRestHookDelivery_Return2 = true;
 		ourLastCanonicalSubscription = null;
-		ourLastResourceDeliveryMessage = null;
+		ourLastResourceDeliveryMessage0 = null;
+		ourLastResourceDeliveryMessage1 = null;
 		ourInvocations.clear();
 	}
 
 	@Configuration
 	@ComponentScan(basePackages = "ca.uhn.fhir.jpa.model")
-	public static class MyCtxConfig {
+	static class InterceptorRegistryTestCtxConfig {
 
+		/**
+		 * Note: Orders are deliberately reversed to make sure we get the orders right
+		 * using the @Order annotation
+		 */
 		@Bean
-		public SubscriptionInterceptorRegistry subscriptionInterceptorRegistry() {
-			return new SubscriptionInterceptorRegistry();
+		public MyTestInterceptorTwo interceptor1() {
+			return new MyTestInterceptorTwo();
 		}
 
 		/**
@@ -104,41 +113,37 @@ public class SubscriptionInterceptorRegistryTest {
 		 * using the @Order annotation
 		 */
 		@Bean
-		public MyInterceptorTwo interceptor1() {
-			return new MyInterceptorTwo();
-		}
-
-		/**
-		 * Note: Orders are deliberately reversed to make sure we get the orders right
-		 * using the @Order annotation
-		 */
-		@Bean
-		public MyInterceptorOne interceptor2() {
-			return new MyInterceptorOne();
+		public MyTestInterceptorOne interceptor2() {
+			return new MyTestInterceptorOne();
 		}
 
 	}
 
-	@SubscriptionInterceptor
+	@Interceptor
 	@Order(100)
-	public static class MyInterceptorOne {
+	public static class MyTestInterceptorOne {
 
-		@SubscriptionHook(Pointcut.BEFORE_REST_HOOK_DELIVERY)
+		public MyTestInterceptorOne() {
+			super();
+		}
+
+		@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
 		public boolean beforeRestHookDelivery(CanonicalSubscription theCanonicalSubscription) {
 			ourLastCanonicalSubscription = theCanonicalSubscription;
-			ourInvocations.add("MyInterceptorOne.beforeRestHookDelivery");
+			ourInvocations.add("MyTestInterceptorOne.beforeRestHookDelivery");
 			return ourNext_beforeRestHookDelivery_Return1;
 		}
 
 	}
 
-	@SubscriptionInterceptor
+	@Interceptor
 	@Order(200)
-	public static class MyInterceptorTwo {
-		@SubscriptionHook(Pointcut.BEFORE_REST_HOOK_DELIVERY)
-		public boolean beforeRestHookDelivery(ResourceDeliveryMessage theResourceDeliveryMessage) {
-			ourLastResourceDeliveryMessage = theResourceDeliveryMessage;
-			ourInvocations.add("MyInterceptorTwo.beforeRestHookDelivery");
+	public static class MyTestInterceptorTwo {
+		@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
+		public boolean beforeRestHookDelivery(ResourceDeliveryMessage theResourceDeliveryMessage0, ResourceDeliveryMessage theResourceDeliveryMessage1) {
+			ourLastResourceDeliveryMessage0 = theResourceDeliveryMessage0;
+			ourLastResourceDeliveryMessage1 = theResourceDeliveryMessage1;
+			ourInvocations.add("MyTestInterceptorTwo.beforeRestHookDelivery");
 			return ourNext_beforeRestHookDelivery_Return2;
 		}
 	}

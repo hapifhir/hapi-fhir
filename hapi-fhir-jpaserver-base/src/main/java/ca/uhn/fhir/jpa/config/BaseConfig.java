@@ -42,9 +42,9 @@ import javax.annotation.Nonnull;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,10 +57,12 @@ import javax.annotation.Nonnull;
 @Configuration
 @EnableScheduling
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
-@ComponentScan(basePackages = "ca.uhn.fhir.jpa", excludeFilters={
-		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=BaseConfig.class),
-		  @ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value=WebSocketConfigurer.class),
-			@ComponentScan.Filter(type=FilterType.REGEX, pattern="ca.uhn.fhir.jpa.subscription.module.standalone.*")})
+@ComponentScan(basePackages = "ca.uhn.fhir.jpa", excludeFilters = {
+	@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = BaseConfig.class),
+	@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = WebSocketConfigurer.class),
+	@ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*\\.test\\..*"),
+	@ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*Test.*"),
+	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.subscription.module.standalone.*")})
 
 public abstract class BaseConfig implements SchedulingConfigurer {
 
