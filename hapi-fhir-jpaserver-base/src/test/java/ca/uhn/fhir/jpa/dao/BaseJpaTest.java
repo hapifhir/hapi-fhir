@@ -52,6 +52,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
@@ -428,6 +429,20 @@ public abstract class BaseJpaTest {
 				})
 				.collect(Collectors.joining(", "));
 			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+		}
+	}
+
+	public static void waitForTrue(Supplier<Boolean> theList) {
+		StopWatch sw = new StopWatch();
+		while (!theList.get() && sw.getMillis() <= 16000) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= 16000) {
+			fail("Waited " + sw.toString() + " and is still false");
 		}
 	}
 

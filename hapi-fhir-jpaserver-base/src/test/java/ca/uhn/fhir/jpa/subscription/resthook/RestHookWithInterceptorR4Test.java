@@ -23,7 +23,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Test the rest-hook subscriptions
@@ -74,8 +75,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 		assertEquals("Observation/A", ourUpdatedObservations.get(0).getId());
-		assertTrue(ourHitBeforeRestHookDelivery);
-		assertTrue(ourHitAfterRestHookDelivery);
+		// TODO: JA a latch would be even better but we'd need to allow customizable orders since the ad-hoc ones run first
+		waitForTrue(() -> ourHitBeforeRestHookDelivery);
+		waitForTrue(() -> ourHitAfterRestHookDelivery);
 	}
 
 	@Test
@@ -90,8 +92,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
-		assertTrue(ourHitBeforeRestHookDelivery);
-		assertTrue(ourHitAfterRestHookDelivery);
+		// TODO: JA a latch would be even better but we'd need to allow customizable orders since the ad-hoc ones run first
+		waitForTrue(() -> ourHitBeforeRestHookDelivery);
+		waitForTrue(() -> ourHitAfterRestHookDelivery);
 		assertThat(ourHeaders, hasItem("X-Foo: Bar"));
 	}
 
