@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -51,6 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -85,6 +88,8 @@ public abstract class BaseJpaTest {
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
 	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
+	@Autowired
+	protected IInterceptorRegistry myInterceptorRegistry;
 
 	@After
 	public void afterPerformCleanup() {
@@ -127,6 +132,12 @@ public abstract class BaseJpaTest {
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
+	}
+
+	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
+		CountDownLatch deliveryLatch = new CountDownLatch(theCount);
+		myInterceptorRegistry.registerAnonymousHookForUnitTest(theLatchPointcut, Integer.MAX_VALUE, t -> deliveryLatch.countDown());
+		return deliveryLatch;
 	}
 
 	protected abstract FhirContext getContext();

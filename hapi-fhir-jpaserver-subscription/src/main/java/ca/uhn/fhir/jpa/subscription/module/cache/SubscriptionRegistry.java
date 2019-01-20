@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,7 +39,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 /**
- *
  * Cache of active subscriptions.  When a new subscription is added to the cache, a new Spring Channel is created
  * and a new MessageHandler for that subscription is subscribed to that channel.  These subscriptions, channels, and
  * handlers are all caches in this registry so they can be removed it the subscription is deleted.
@@ -47,7 +48,7 @@ import java.util.Optional;
 @Component
 public class SubscriptionRegistry {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
-
+	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
 	@Autowired
 	SubscriptionCanonicalizer<IBaseResource> mySubscriptionCanonicalizer;
 	@Autowired
@@ -56,8 +57,8 @@ public class SubscriptionRegistry {
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 	@Autowired
 	ModelConfig myModelConfig;
-
-	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
+	@Autowired
+	private IInterceptorRegistry myInterceptorRegistry;
 
 	public ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
@@ -97,6 +98,9 @@ public class SubscriptionRegistry {
 		deliveryHandler.ifPresent(activeSubscription::register);
 
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
+
+		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
+		myInterceptorRegistry.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, canonicalized);
 
 		return canonicalized;
 	}

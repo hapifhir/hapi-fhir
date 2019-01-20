@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.interceptor.executor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,10 +66,15 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 	@Override
 	@VisibleForTesting
 	public void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook) {
+		registerAnonymousHookForUnitTest(thePointcut, DEFAULT_ORDER, theHook);
+	}
+
+	@Override
+	public void registerAnonymousHookForUnitTest(Pointcut thePointcut, int theOrder, IAnonymousLambdaHook theHook) {
 		Validate.notNull(thePointcut);
 		Validate.notNull(theHook);
 
-		myAnonymousInvokers.put(thePointcut, new AnonymousLambdaInvoker(theHook));
+		myAnonymousInvokers.put(thePointcut, new AnonymousLambdaInvoker(theHook, theOrder));
 	}
 
 	@Override
@@ -88,15 +93,27 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 			myGlobalInterceptors.add(nextGlobalInterceptor);
 		}
 
-		// Sort them
-		sortByOrderAnnotation(myGlobalInterceptors);
-
 		// Pull out the hook methods
 		for (Object nextInterceptor : myGlobalInterceptors) {
+
+			int typeOrder = DEFAULT_ORDER;
+			Order typeOrderAnnotation = AnnotationUtils.findAnnotation(nextInterceptor.getClass(), Order.class);
+			if (typeOrderAnnotation != null) {
+				typeOrder = typeOrderAnnotation.value();
+			}
+
 			for (Method nextMethod : nextInterceptor.getClass().getDeclaredMethods()) {
 				Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
+
 				if (hook != null) {
-					HookInvoker invoker = new HookInvoker(hook, nextInterceptor, nextMethod);
+
+					int methodOrder = typeOrder;
+					Order methodOrderAnnotation = AnnotationUtils.findAnnotation(nextMethod, Order.class);
+					if (methodOrderAnnotation != null) {
+						methodOrder = methodOrderAnnotation.value();
+					}
+
+					HookInvoker invoker = new HookInvoker(hook, nextInterceptor, nextMethod, methodOrder);
 					for (Pointcut nextPointcut : hook.value()) {
 						myInvokers.put(nextPointcut, invoker);
 					}
@@ -104,6 +121,12 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 			}
 		}
 
+		// Sort everything by declared order
+		sortByOrderAnnotation(myGlobalInterceptors);
+		for (Pointcut nextPointcut : myInvokers.keys()) {
+			List<BaseInvoker> nextInvokerList = myInvokers.get(nextPointcut);
+			nextInvokerList.sort(Comparator.naturalOrder());
+		}
 	}
 
 	private void sortByOrderAnnotation(List<Object> theObjects) {
@@ -130,10 +153,16 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 	public boolean callHooks(Pointcut thePointcut, HookParams theParams) {
 		assert haveAppropriateParams(thePointcut, theParams);
 
-		// Anonymous hooks first
-		List<BaseInvoker> invokers = ListUtils.union(
-			myAnonymousInvokers.get(thePointcut),
-			myInvokers.get(thePointcut));
+		List<BaseInvoker> globalInvokers = myInvokers.get(thePointcut);
+		List<BaseInvoker> anonymousInvokers = myAnonymousInvokers.get(thePointcut);
+
+		List<BaseInvoker> invokers = globalInvokers;
+		if (anonymousInvokers.isEmpty() == false) {
+			invokers = ListUtils.union(
+				anonymousInvokers,
+				globalInvokers);
+			invokers.sort(Comparator.naturalOrder());
+		}
 
 		/*
 		 * Call each hook in order
@@ -167,14 +196,27 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 		return callHooks(thePointcut, new HookParams(theParams));
 	}
 
-	private abstract class BaseInvoker {
+	private abstract class BaseInvoker implements Comparable<BaseInvoker> {
+
+		private final int myOrder;
+
+		protected BaseInvoker(int theOrder) {
+			myOrder = theOrder;
+		}
+
 		abstract boolean invoke(HookParams theParams);
+
+		@Override
+		public int compareTo(BaseInvoker o) {
+			return myOrder - o.myOrder;
+		}
 	}
 
 	private class AnonymousLambdaInvoker extends BaseInvoker {
 		private final IAnonymousLambdaHook myHook;
 
-		public AnonymousLambdaInvoker(IAnonymousLambdaHook theHook) {
+		public AnonymousLambdaInvoker(IAnonymousLambdaHook theHook, int theOrder) {
+			super(theOrder);
 			myHook = theHook;
 		}
 
@@ -196,7 +238,8 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 		/**
 		 * Constructor
 		 */
-		private HookInvoker(Hook theHook, @Nonnull Object theInterceptor, @Nonnull Method theHookMethod) {
+		private HookInvoker(Hook theHook, @Nonnull Object theInterceptor, @Nonnull Method theHookMethod, int theOrder) {
+			super(theOrder);
 			myInterceptor = theInterceptor;
 			myParameterTypes = theHookMethod.getParameterTypes();
 			myMethod = theHookMethod;

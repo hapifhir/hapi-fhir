@@ -24,8 +24,13 @@ import com.google.common.annotations.VisibleForTesting;
 
 public interface IInterceptorRegistry {
 
+	int DEFAULT_ORDER = 0;
+
 	@VisibleForTesting
 	void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook);
+
+	@VisibleForTesting
+	void registerAnonymousHookForUnitTest(Pointcut thePointcut, int theOrder, IAnonymousLambdaHook theHook);
 
 	@VisibleForTesting
 	void clearAnonymousHookForUnitTest();
