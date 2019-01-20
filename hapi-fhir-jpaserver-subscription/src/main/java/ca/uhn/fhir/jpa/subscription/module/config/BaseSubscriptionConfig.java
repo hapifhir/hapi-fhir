@@ -30,7 +30,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableScheduling
-@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam", "ca.uhn.fhir.jpa.subscription.module"})
+@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam", "ca.uhn.fhir.jpa.subscription.module", "ca.uhn.fhir.jpa.model.interceptor.executor"})
 public abstract class BaseSubscriptionConfig {
 	public abstract FhirContext fhirContext();
 

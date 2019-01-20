@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.model.interceptor.api.IAnonymousLambdaHook;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,24 +11,26 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class LatchedService implements Predicate<Object> {
+public class LatchedService implements IAnonymousLambdaHook {
 	private static final Logger ourLog = LoggerFactory.getLogger(LatchedService.class);
 	private final String name;
 
 	private CountDownLatch myCountdownLatch;
 	private AtomicReference<String> myFailure;
-	private AtomicReference<List<Object>> myCalledWith;
+	private AtomicReference<List<HookParams>> myCalledWith;
 
-	public LatchedService(String name) {
-		this.name = name;
+	public LatchedService(Pointcut thePointcut) {
+		this.name = thePointcut.name();
+	}
+
+	public LatchedService(String theName) {
+		this.name = theName;
 	}
 
 	public void countdown() {
@@ -49,7 +54,7 @@ public class LatchedService implements Predicate<Object> {
 	}
 
 	public void awaitExpectedWithTimeout(int timeoutSecond) throws InterruptedException {
-		assertTrue(name+" latch timed out waiting "+timeoutSecond+" seconds for latch to be triggered.", myCountdownLatch.await(timeoutSecond, TimeUnit.SECONDS));
+		assertTrue(name +" latch timed out waiting "+timeoutSecond+" seconds for latch to be triggered.", myCountdownLatch.await(timeoutSecond, TimeUnit.SECONDS));
 
 		if (myFailure.get() != null) {
 			String error = myFailure.get();
@@ -59,11 +64,10 @@ public class LatchedService implements Predicate<Object> {
 	}
 
 	@Override
-	public boolean test(Object object) {
+	public void invoke(HookParams theArgs) {
 		this.countdown();
 		if (myCalledWith.get() != null) {
-			myCalledWith.get().add(object);
+			myCalledWith.get().add(theArgs);
 		}
-		return true;
 	}
 }

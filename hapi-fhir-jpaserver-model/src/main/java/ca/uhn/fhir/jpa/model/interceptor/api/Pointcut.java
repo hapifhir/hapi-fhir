@@ -67,9 +67,12 @@ public enum Pointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage</li>
 	 * </ul>
 	 */
-	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED("ResourceModifiedMessage")
+	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED("ResourceModifiedMessage"),
 
-	;
+	// FIXME KHS
+	SUBSCRIPTION_AFTER_SUBSCRIPTION_MATCHING("ResourceModifiedMessage"),
+	// FIXME KHS
+	SUBSCRIPTION_AFTER_SUBSCRIPTION_ACTIVATED("CanonicalSubscription");
 
 	private final List<String> myParameterTypes;
 

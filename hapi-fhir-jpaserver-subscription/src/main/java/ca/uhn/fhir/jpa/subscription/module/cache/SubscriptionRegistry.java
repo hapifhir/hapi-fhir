@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.interceptor.InterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.interceptor.executor.InterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -101,7 +102,8 @@ public class SubscriptionRegistry {
 		deliveryHandler.ifPresent(activeSubscription::register);
 
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
-		myInterceptorRegistry.trigger(INTERCEPTOR_POST_ACTIVATED, theSubscription);
+
+		myInterceptorRegistry.callHooks(Pointcut.SUBSCRIPTION_AFTER_SUBSCRIPTION_ACTIVATED, canonicalized);
 
 		return canonicalized;
 	}

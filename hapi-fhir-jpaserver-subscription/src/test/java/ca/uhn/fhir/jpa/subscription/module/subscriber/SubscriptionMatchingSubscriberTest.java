@@ -1,12 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
-import ca.uhn.fhir.jpa.searchparam.interceptor.InterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;
 

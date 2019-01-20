@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.searchparam.interceptor.InterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.interceptor.executor.InterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.LatchedService;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
@@ -64,8 +65,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	private static SubscribableChannel ourSubscribableChannel;
 	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	private long idCounter = 0;
-	protected LatchedService mySubscriptionMatchingPost = new LatchedService(SubscriptionMatchingSubscriber.INTERCEPTOR_POST_PROCESSED);
-	protected LatchedService mySubscriptionActivatedPost = new LatchedService(SubscriptionRegistry.INTERCEPTOR_POST_ACTIVATED);
+	protected LatchedService mySubscriptionMatchingPost = new LatchedService(Pointcut.SUBSCRIPTION_AFTER_SUBSCRIPTION_MATCHING);
+	protected LatchedService mySubscriptionActivatedPost = new LatchedService(Pointcut.SUBSCRIPTION_AFTER_SUBSCRIPTION_ACTIVATED);
 
 	@Before
 	public void beforeReset() {
@@ -76,14 +77,13 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
 		}
-		myInterceptorRegistry.addInterceptor(SubscriptionMatchingSubscriber.INTERCEPTOR_POST_PROCESSED, mySubscriptionMatchingPost);
-		myInterceptorRegistry.addInterceptor(SubscriptionRegistry.INTERCEPTOR_POST_ACTIVATED, mySubscriptionActivatedPost);
+		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_SUBSCRIPTION_MATCHING, mySubscriptionMatchingPost);
+		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_SUBSCRIPTION_ACTIVATED, mySubscriptionActivatedPost);
 	}
 
 	@After
 	public void cleanup() {
-		myInterceptorRegistry.removeInterceptor(SubscriptionRegistry.INTERCEPTOR_POST_ACTIVATED, mySubscriptionActivatedPost);
-		myInterceptorRegistry.removeInterceptor(SubscriptionMatchingSubscriber.INTERCEPTOR_POST_PROCESSED, mySubscriptionMatchingPost);
+		myInterceptorRegistry.clearAnonymousHookForUnitTest();
 	}
 
 	public <T extends IBaseResource> T sendResource(T theResource) {
