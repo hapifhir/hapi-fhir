@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
@@ -22,9 +23,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -66,35 +69,43 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	public void testBeforeRestHookDelivery_ModifyResourceId() throws Exception {
 		ourNextModifyResourceId = true;
 
+		// Create a subscription
+		CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 		createSubscription("Observation?status=final", "application/fhir+json");
-		waitForActivatedSubscriptionCount(1);
+		registerLatch.await(10, TimeUnit.SECONDS);
 
+		// Creating a matching resource
+		CountDownLatch deliveryLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 		sendObservation();
+		deliveryLatch.await(10, TimeUnit.SECONDS);
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(0, ourCreatedObservations.size());
+		assertEquals(1, ourUpdatedObservations.size());
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 		assertEquals("Observation/A", ourUpdatedObservations.get(0).getId());
-		// TODO: JA a latch would be even better but we'd need to allow customizable orders since the ad-hoc ones run first
-		waitForTrue(() -> ourHitBeforeRestHookDelivery);
-		waitForTrue(() -> ourHitAfterRestHookDelivery);
+		assertTrue(ourHitBeforeRestHookDelivery);
+		assertTrue(ourHitAfterRestHookDelivery);
 	}
 
 	@Test
 	public void testBeforeRestHookDelivery_AddHeader() throws Exception {
 		ourNextAddHeader = true;
 
+		// Create a subscription
+		CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 		createSubscription("Observation?status=final", "application/fhir+json");
-		waitForActivatedSubscriptionCount(1);
+		registerLatch.await(10, TimeUnit.SECONDS);
 
+		// Creating a matching resource
+		CountDownLatch deliveryLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY);
 		sendObservation();
+		deliveryLatch.await(10, TimeUnit.SECONDS);
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		assertEquals(0, ourCreatedObservations.size());
+		assertEquals(1, ourUpdatedObservations.size());
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
-		// TODO: JA a latch would be even better but we'd need to allow customizable orders since the ad-hoc ones run first
-		waitForTrue(() -> ourHitBeforeRestHookDelivery);
-		waitForTrue(() -> ourHitAfterRestHookDelivery);
+		assertTrue(ourHitBeforeRestHookDelivery);
+		assertTrue(ourHitAfterRestHookDelivery);
 		assertThat(ourHeaders, hasItem("X-Foo: Bar"));
 	}
 
@@ -103,8 +114,10 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	public void testBeforeRestHookDelivery_AbortDelivery() throws Exception {
 		ourNextBeforeRestHookDeliveryReturn = false;
 
+		// Create a subscription
+		CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 		createSubscription("Observation?status=final", "application/fhir+json");
-		waitForActivatedSubscriptionCount(1);
+		registerLatch.await(10, TimeUnit.SECONDS);
 
 		sendObservation();
 

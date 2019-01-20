@@ -69,10 +69,21 @@ public enum Pointcut {
 	 */
 	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED("ResourceModifiedMessage"),
 
-	// FIXME KHS
-	SUBSCRIPTION_AFTER_SUBSCRIPTION_MATCHING("ResourceModifiedMessage"),
-	// FIXME KHS
-	SUBSCRIPTION_AFTER_SUBSCRIPTION_ACTIVATED("CanonicalSubscription");
+
+	/**
+	 * Invoked immediately after an active subscription is "registered". In HAPI FHIR, when
+	 * a subscription
+	 * <p>
+	 * Hooks may make changes to the canonicalized subscription and this will have an effect
+	 * on processing across this server. Note however that timing issues may occur, since the
+	 * subscription is already technically live by the time this hook is called.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
+	 * </ul>
+	 */
+	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED("CanonicalSubscription");
 
 	private final List<String> myParameterTypes;
 
