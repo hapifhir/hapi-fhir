@@ -28,9 +28,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.EventDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.*;
 
@@ -38,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class CanonicalSubscription implements Serializable {
+public class CanonicalSubscription implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -64,6 +64,13 @@ public class CanonicalSubscription implements Serializable {
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
 	private Map<String, String> myChannelExtensions;
+
+	/**
+	 * Constructor
+	 */
+	public CanonicalSubscription() {
+		super();
+	}
 
 	/**
 	 * For now we're using the R4 TriggerDefinition, but this
@@ -105,8 +112,9 @@ public class CanonicalSubscription implements Serializable {
 		myEndpointUrl = theEndpointUrl;
 	}
 
+	@Nonnull
 	public List<String> getHeaders() {
-		return Collections.unmodifiableList(myHeaders);
+		return myHeaders != null ? Collections.unmodifiableList(myHeaders) : Collections.emptyList();
 	}
 
 	public void setHeaders(List<? extends IPrimitiveType<String>> theHeader) {
@@ -131,7 +139,7 @@ public class CanonicalSubscription implements Serializable {
 
 	public void setChannelExtensions(Map<String, String> theChannelExtensions) {
 		myChannelExtensions = new HashMap<>();
-		for (String url: theChannelExtensions.keySet()) {
+		for (String url : theChannelExtensions.keySet()) {
 			if (isNotBlank(url) && isNotBlank(theChannelExtensions.get(url))) {
 				myChannelExtensions.put(url, theChannelExtensions.get(url));
 			}
@@ -228,13 +236,39 @@ public class CanonicalSubscription implements Serializable {
 		}
 	}
 
+	/**
+	 * Adds a header
+	 *
+	 * @param theHeader The header, e.g. "Authorization: Bearer AAAAA"
+	 */
+	public void addHeader(String theHeader) {
+		if (isNotBlank(theHeader)) {
+			initHeaders();
+			myHeaders.add(theHeader);
+		}
+	}
+
+	private void initHeaders() {
+		if (myHeaders == null) {
+			myHeaders = new ArrayList<>();
+		}
+	}
+
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class EmailDetails {
+
 		@JsonProperty("from")
 		private String myFrom;
 		@JsonProperty("subjectTemplate")
 		private String mySubjectTemplate;
+
+		/**
+		 * Construcor
+		 */
+		public EmailDetails() {
+			super();
+		}
 
 		public String getFrom() {
 			return myFrom;
@@ -256,10 +290,18 @@ public class CanonicalSubscription implements Serializable {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class RestHookDetails {
+
 		@JsonProperty("stripVersionId")
 		private boolean myStripVersionId;
 		@JsonProperty("deliverLatestVersion")
 		private boolean myDeliverLatestVersion;
+
+		/**
+		 * Constructor
+		 */
+		public RestHookDetails() {
+			super();
+		}
 
 		public boolean isDeliverLatestVersion() {
 			return myDeliverLatestVersion;
@@ -305,9 +347,13 @@ public class CanonicalSubscription implements Serializable {
 	@JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 	public static class CanonicalEventDefinition {
 
-		public CanonicalEventDefinition(EventDefinition theDef) {
+		/**
+		 * Constructor
+		 */
+		public CanonicalEventDefinition() {
 			// nothing yet
 		}
+
 	}
 
 }

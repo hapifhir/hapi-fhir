@@ -33,11 +33,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@SuppressWarnings("WeakerAccess")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class ResourceDeliveryMessage implements IResourceMessage {
-
-	private static final long serialVersionUID = 1L;
 
 	@JsonIgnore
 	private transient CanonicalSubscription mySubscription;
@@ -52,15 +51,15 @@ public class ResourceDeliveryMessage implements IResourceMessage {
 	@JsonProperty("operationType")
 	private ResourceModifiedMessage.OperationTypeEnum myOperationType;
 
-	public ResourceModifiedMessage.OperationTypeEnum getOperationType() {
-		return myOperationType;
-	}
-
 	/**
 	 * Constructor
 	 */
 	public ResourceDeliveryMessage() {
 		super();
+	}
+
+	public ResourceModifiedMessage.OperationTypeEnum getOperationType() {
+		return myOperationType;
 	}
 
 	public void setOperationType(ResourceModifiedMessage.OperationTypeEnum theOperationType) {
@@ -104,14 +103,15 @@ public class ResourceDeliveryMessage implements IResourceMessage {
 		myPayloadId = thePayload.getIdElement().toUnqualified().getValue();
 	}
 
+	@Override
+	public String getPayloadId() {
+		return myPayloadId;
+	}
+
 	public void setPayloadId(IIdType thePayloadId) {
 		myPayloadId = null;
 		if (thePayloadId != null) {
 			myPayloadId = thePayloadId.getValue();
 		}
-	}
-	@Override
-	public String getPayloadId() {
-		return myPayloadId;
 	}
 }

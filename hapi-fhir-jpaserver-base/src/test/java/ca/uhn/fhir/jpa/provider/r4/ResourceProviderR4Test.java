@@ -945,6 +945,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+
+	@Test
+	@Ignore
+	public void testQuery() throws IOException {
+		ourLog.info("** Performing Search");
+		HttpGet read = new HttpGet(ourServerBase + "/MedicationRequest?category=community&identifier=urn:oid:2.16.840.1.113883.3.7418.12.3%7C&intent=order&medication.code:text=calcitriol,hectorol,Zemplar,rocaltrol,vectical,vitamin%20D,doxercalciferol,paricalcitol&status=active,completed");
+		try (CloseableHttpResponse response = ourHttpClient.execute(read)) {
+			ourLog.info(response.toString());
+		}
+		ourLog.info("** DONE Performing Search");
+
+	}
+
 	@Test
 	public void testDeleteResourceConditional1() throws IOException {
 		String methodName = "testDeleteResourceConditional1";

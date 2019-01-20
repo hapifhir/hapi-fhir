@@ -52,11 +52,15 @@ public class ResourceModifiedMessage implements IResourceMessage {
 	@JsonIgnore
 	private transient IBaseResource myPayloadDecoded;
 
-	// For JSON
+	/**
+	 * Constructor
+	 */
 	public ResourceModifiedMessage() {
+		super();
 	}
 
 	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
+		this();
 		setId(theResource.getIdElement());
 		setOperationType(theOperationType);
 		if (theOperationType != OperationTypeEnum.DELETE) {

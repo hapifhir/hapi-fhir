@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.model.interceptor.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,8 +20,17 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import com.google.common.annotations.VisibleForTesting;
 
-public interface IResourceModifiedConsumer {
-	void submitResourceModified(ResourceModifiedMessage theMsg);
+/**
+ * This is currently only here for unit tests!
+ *
+ * DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
+ */
+@FunctionalInterface
+@VisibleForTesting
+public interface IAnonymousLambdaHook {
+
+	void invoke(HookParams theArgs);
+
 }

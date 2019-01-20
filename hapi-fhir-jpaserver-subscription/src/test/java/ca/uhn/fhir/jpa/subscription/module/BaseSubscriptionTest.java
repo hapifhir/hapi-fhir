@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.junit.After;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -23,6 +25,15 @@ public abstract class BaseSubscriptionTest {
 
 	@Autowired
 	SubscriptionLoader mySubscriptionLoader;
+
+	@Autowired
+	protected
+	IInterceptorRegistry myInterceptorRegistry;
+
+	@After
+	public void afterClearAnonymousLambdas() {
+		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+	}
 
 	public void initSearchParamRegistry(IBundleProvider theBundleProvider) {
 		myMockFhirClientSearchParamProvider.setBundleProvider(theBundleProvider);

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.model.interceptor.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,8 +20,15 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface IResourceModifiedConsumer {
-	void submitResourceModified(ResourceModifiedMessage theMsg);
+/**
+ * This annotation declares a bean as a subscription interceptor
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Interceptor {
 }

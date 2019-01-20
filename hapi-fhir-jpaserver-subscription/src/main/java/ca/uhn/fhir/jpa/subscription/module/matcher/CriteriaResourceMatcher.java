@@ -57,7 +57,7 @@ public class CriteriaResourceMatcher {
 		}
 		searchParameterMap.clean();
 		if (searchParameterMap.getLastUpdated() != null) {
-			return new SubscriptionMatchResult(Constants.PARAM_LASTUPDATED, "Qualifiers not supported");
+			return new SubscriptionMatchResult(Constants.PARAM_LASTUPDATED, "Standard Parameters not supported");
 		}
 
 		for (Map.Entry<String, List<List<? extends IQueryParameterType>>> entry : searchParameterMap.entrySet()) {
@@ -79,7 +79,7 @@ public class CriteriaResourceMatcher {
 
 		if (hasQualifiers(theAndOrParams)) {
 
-			return new SubscriptionMatchResult(theParamName, "Qualifiers not supported.");
+			return new SubscriptionMatchResult(theParamName, "Standard Parameters not supported.");
 
 		}
 		if (hasPrefixes(theAndOrParams)) {

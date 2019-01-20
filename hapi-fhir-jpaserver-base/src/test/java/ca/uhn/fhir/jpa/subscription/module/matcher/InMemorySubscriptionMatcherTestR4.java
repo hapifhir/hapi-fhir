@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -380,10 +381,13 @@ public class InMemorySubscriptionMatcherTestR4 {
 		params.add(Patient.SP_FAMILY, new StringParam("testSearchNameParam01Fam"));
 		try {
 			String criteria = params.toNormalizedQueryString(myContext);
+			CanonicalSubscription subscription = new CanonicalSubscription();
+			subscription.setCriteriaString(criteria);
+			subscription.setIdElement(new IdType("Subscription", 123L));
 			ResourceModifiedMessage msg = new ResourceModifiedMessage(myContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 			msg.setSubscriptionId("Subscription/123");
 			msg.setId(new IdType("Patient/ABC"));
-			SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(criteria, msg);
+			SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 			fail();
 		} catch (InternalErrorException e){
 			assertEquals("Failure processing resource ID[Patient/ABC] for subscription ID[Subscription/123]: Invalid resource reference found at path[Patient.managingOrganization] - Does not contain resource type - urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());

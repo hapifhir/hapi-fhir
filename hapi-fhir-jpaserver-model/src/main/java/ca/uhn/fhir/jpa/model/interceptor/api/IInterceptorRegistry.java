@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription;
+package ca.uhn.fhir.jpa.model.interceptor.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,8 +20,24 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import com.google.common.annotations.VisibleForTesting;
 
-public interface IResourceModifiedConsumer {
-	void submitResourceModified(ResourceModifiedMessage theMsg);
+public interface IInterceptorRegistry {
+
+	@VisibleForTesting
+	void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook);
+
+	@VisibleForTesting
+	void clearAnonymousHookForUnitTest();
+
+	/**
+	 * Invoke the interceptor methods
+	 */
+	boolean callHooks(Pointcut thePointcut, HookParams theParams);
+
+	/**
+	 * Invoke the interceptor methods
+	 */
+	boolean callHooks(Pointcut thePointcut, Object... theParams);
+
 }
