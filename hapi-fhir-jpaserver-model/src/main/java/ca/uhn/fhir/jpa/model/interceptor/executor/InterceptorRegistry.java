@@ -95,14 +95,17 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 
 	}
 
-	private void registerGlobalInterceptor(Object theNextInterceptor) {
+	@Override
+	public boolean registerGlobalInterceptor(Object theInterceptor) {
+		boolean retVal = false;
+
 		int typeOrder = DEFAULT_ORDER;
-		Order typeOrderAnnotation = AnnotationUtils.findAnnotation(theNextInterceptor.getClass(), Order.class);
+		Order typeOrderAnnotation = AnnotationUtils.findAnnotation(theInterceptor.getClass(), Order.class);
 		if (typeOrderAnnotation != null) {
 			typeOrder = typeOrderAnnotation.value();
 		}
 
-		for (Method nextMethod : theNextInterceptor.getClass().getDeclaredMethods()) {
+		for (Method nextMethod : theInterceptor.getClass().getDeclaredMethods()) {
 			Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
 
 			if (hook != null) {
@@ -113,14 +116,16 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 					methodOrder = methodOrderAnnotation.value();
 				}
 
-				HookInvoker invoker = new HookInvoker(hook, theNextInterceptor, nextMethod, methodOrder);
+				HookInvoker invoker = new HookInvoker(hook, theInterceptor, nextMethod, methodOrder);
 				for (Pointcut nextPointcut : hook.value()) {
 					myInvokers.put(nextPointcut, invoker);
 				}
+
+				retVal = true;
 			}
 		}
 
-		myGlobalInterceptors.add(theNextInterceptor);
+		myGlobalInterceptors.add(theInterceptor);
 
 		// Make sure we're always sorted according to the order declared in
 		// @Order
@@ -129,6 +134,8 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 			List<BaseInvoker> nextInvokerList = myInvokers.get(nextPointcut);
 			nextInvokerList.sort(Comparator.naturalOrder());
 		}
+
+		return retVal;
 	}
 
 	private void sortByOrderAnnotation(List<Object> theObjects) {
