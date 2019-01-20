@@ -46,9 +46,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class InterceptorRegistry implements IInterceptorRegistry, ApplicationContextAware {
 	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorRegistry.class);
 	private ApplicationContext myAppCtx;
-	private List<Object> myGlobalInterceptors = new ArrayList<>();
-	private ListMultimap<Pointcut, BaseInvoker> myInvokers = ArrayListMultimap.create();
-	private ListMultimap<Pointcut, BaseInvoker> myAnonymousInvokers = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
+	private final List<Object> myGlobalInterceptors = new ArrayList<>();
+	private final ListMultimap<Pointcut, BaseInvoker> myInvokers = ArrayListMultimap.create();
+	private final ListMultimap<Pointcut, BaseInvoker> myAnonymousInvokers = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
 
 	/**
 	 * Constructor
@@ -89,39 +89,41 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 		// Grab the global interceptors
 		String[] globalInterceptorNames = myAppCtx.getBeanNamesForAnnotation(Interceptor.class);
 		for (String nextName : globalInterceptorNames) {
-			Object nextGlobalInterceptor = myAppCtx.getBean(nextName);
-			myGlobalInterceptors.add(nextGlobalInterceptor);
+			Object nextInterceptor = myAppCtx.getBean(nextName);
+			registerGlobalInterceptor(nextInterceptor);
 		}
 
-		// Pull out the hook methods
-		for (Object nextInterceptor : myGlobalInterceptors) {
+	}
 
-			int typeOrder = DEFAULT_ORDER;
-			Order typeOrderAnnotation = AnnotationUtils.findAnnotation(nextInterceptor.getClass(), Order.class);
-			if (typeOrderAnnotation != null) {
-				typeOrder = typeOrderAnnotation.value();
-			}
+	private void registerGlobalInterceptor(Object theNextInterceptor) {
+		int typeOrder = DEFAULT_ORDER;
+		Order typeOrderAnnotation = AnnotationUtils.findAnnotation(theNextInterceptor.getClass(), Order.class);
+		if (typeOrderAnnotation != null) {
+			typeOrder = typeOrderAnnotation.value();
+		}
 
-			for (Method nextMethod : nextInterceptor.getClass().getDeclaredMethods()) {
-				Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
+		for (Method nextMethod : theNextInterceptor.getClass().getDeclaredMethods()) {
+			Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
 
-				if (hook != null) {
+			if (hook != null) {
 
-					int methodOrder = typeOrder;
-					Order methodOrderAnnotation = AnnotationUtils.findAnnotation(nextMethod, Order.class);
-					if (methodOrderAnnotation != null) {
-						methodOrder = methodOrderAnnotation.value();
-					}
+				int methodOrder = typeOrder;
+				Order methodOrderAnnotation = AnnotationUtils.findAnnotation(nextMethod, Order.class);
+				if (methodOrderAnnotation != null) {
+					methodOrder = methodOrderAnnotation.value();
+				}
 
-					HookInvoker invoker = new HookInvoker(hook, nextInterceptor, nextMethod, methodOrder);
-					for (Pointcut nextPointcut : hook.value()) {
-						myInvokers.put(nextPointcut, invoker);
-					}
+				HookInvoker invoker = new HookInvoker(hook, theNextInterceptor, nextMethod, methodOrder);
+				for (Pointcut nextPointcut : hook.value()) {
+					myInvokers.put(nextPointcut, invoker);
 				}
 			}
 		}
 
-		// Sort everything by declared order
+		myGlobalInterceptors.add(theNextInterceptor);
+
+		// Make sure we're always sorted according to the order declared in
+		// @Order
 		sortByOrderAnnotation(myGlobalInterceptors);
 		for (Pointcut nextPointcut : myInvokers.keys()) {
 			List<BaseInvoker> nextInvokerList = myInvokers.get(nextPointcut);
