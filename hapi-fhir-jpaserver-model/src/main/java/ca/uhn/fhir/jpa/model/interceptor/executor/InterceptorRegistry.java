@@ -254,10 +254,10 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 			myMethod = theHookMethod;
 
 			Class<?> returnType = theHookMethod.getReturnType();
-			if (returnType.equals(boolean.class) || returnType.equals(Boolean.class)) {
+			if (returnType.equals(boolean.class)) {
 				myReturnsBoolean = true;
 			} else {
-				Validate.isTrue(Void.class.equals(returnType), "Method does not return boolean or void: %s", theHookMethod);
+				Validate.isTrue(void.class.equals(returnType), "Method does not return boolean or void: %s", theHookMethod);
 				myReturnsBoolean = false;
 			}
 

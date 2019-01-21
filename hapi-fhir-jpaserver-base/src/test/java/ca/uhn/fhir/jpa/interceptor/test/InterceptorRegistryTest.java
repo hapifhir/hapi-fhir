@@ -26,7 +26,6 @@ import static org.junit.Assert.*;
 @ContextConfiguration(classes = {InterceptorRegistryTest.InterceptorRegistryTestCtxConfig.class})
 public class InterceptorRegistryTest {
 
-	private static boolean ourNext_beforeRestHookDelivery_Return2;
 	private static boolean ourNext_beforeRestHookDelivery_Return1;
 	private static List<String> ourInvocations = new ArrayList<>();
 	private static CanonicalSubscription ourLastCanonicalSubscription;
@@ -88,7 +87,6 @@ public class InterceptorRegistryTest {
 	@Before
 	public void before() {
 		ourNext_beforeRestHookDelivery_Return1 = true;
-		ourNext_beforeRestHookDelivery_Return2 = true;
 		ourLastCanonicalSubscription = null;
 		ourLastResourceDeliveryMessage0 = null;
 		ourLastResourceDeliveryMessage1 = null;
@@ -140,11 +138,10 @@ public class InterceptorRegistryTest {
 	@Order(200)
 	public static class MyTestInterceptorTwo {
 		@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
-		public boolean beforeRestHookDelivery(ResourceDeliveryMessage theResourceDeliveryMessage0, ResourceDeliveryMessage theResourceDeliveryMessage1) {
+		public void beforeRestHookDelivery(ResourceDeliveryMessage theResourceDeliveryMessage0, ResourceDeliveryMessage theResourceDeliveryMessage1) {
 			ourLastResourceDeliveryMessage0 = theResourceDeliveryMessage0;
 			ourLastResourceDeliveryMessage1 = theResourceDeliveryMessage1;
 			ourInvocations.add("MyTestInterceptorTwo.beforeRestHookDelivery");
-			return ourNext_beforeRestHookDelivery_Return2;
 		}
 	}
 
