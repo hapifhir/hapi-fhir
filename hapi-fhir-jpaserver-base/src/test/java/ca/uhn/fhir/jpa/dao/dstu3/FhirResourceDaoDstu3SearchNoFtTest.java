@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.*;
@@ -40,7 +41,6 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.TestUtil;
 
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
@@ -667,6 +667,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 		long betweenTime = System.currentTimeMillis();
+
+		TestUtil.sleepOneClick();
+
 		IIdType id2;
 		{
 			Patient patient = new Patient();
@@ -1199,7 +1202,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		int sleep = 100;
 
 		long start = System.currentTimeMillis();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(sleep);
+		TestUtil.sleepAtLeast(sleep);
 
 		IIdType id1a;
 		{
@@ -1218,7 +1221,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		ourLog.info("Res 2: {}", myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 		ourLog.info("Res 3: {}", myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(sleep);
+		TestUtil.sleepAtLeast(sleep);
 		long end = System.currentTimeMillis();
 
 		SearchParameterMap map;
@@ -1615,18 +1618,18 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		obs01.setSubject(new Reference(patientId01));
 		IIdType obsId01 = myObservationDao.create(obs01, mySrd).getId().toUnqualifiedVersionless();
 
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 		Date between = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
 		Observation obs02 = new Observation();
 		obs02.setEffective(new DateTimeType(new Date()));
 		obs02.setSubject(new Reference(locId01));
 		IIdType obsId02 = myObservationDao.create(obs02, mySrd).getId().toUnqualifiedVersionless();
 
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 		Date after = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(1);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
 		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]", new Object[] { patientId01, locId01, obsId01, obsId02 });
 

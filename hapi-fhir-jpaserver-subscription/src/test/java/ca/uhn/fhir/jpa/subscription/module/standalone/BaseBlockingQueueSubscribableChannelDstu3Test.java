@@ -65,8 +65,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	private static SubscribableChannel ourSubscribableChannel;
 	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	private long idCounter = 0;
-	protected LatchedService mySubscriptionMatchingPost = new LatchedService(Pointcut.SUBSCRIPTION_AFTER_SUBSCRIPTION_MATCHING);
-	protected LatchedService mySubscriptionActivatedPost = new LatchedService(Pointcut.SUBSCRIPTION_AFTER_SUBSCRIPTION_ACTIVATED);
+	protected LatchedService mySubscriptionMatchingPost = new LatchedService(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
+	protected LatchedService mySubscriptionActivatedPost = new LatchedService(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 
 	@Before
 	public void beforeReset() {
@@ -77,8 +77,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
 		}
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_SUBSCRIPTION_MATCHING, mySubscriptionMatchingPost);
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_SUBSCRIPTION_ACTIVATED, mySubscriptionActivatedPost);
+		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);
+		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, mySubscriptionActivatedPost);
 	}
 
 	@After
