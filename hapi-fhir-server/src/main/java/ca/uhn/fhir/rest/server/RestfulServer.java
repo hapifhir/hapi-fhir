@@ -599,7 +599,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Sets the non-resource specific providers which implement method calls on this server.
 	 *
 	 * @see #setResourceProviders(Collection)
+	 * @deprecated This method causes inconsistent behaviour depending on the order it is called in. Use {@link #registerProviders(Object...)} instead.
 	 */
+	@Deprecated
 	public void setPlainProviders(Object... theProv) {
 		setPlainProviders(Arrays.asList(theProv));
 	}
@@ -608,7 +610,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Sets the non-resource specific providers which implement method calls on this server.
 	 *
 	 * @see #setResourceProviders(Collection)
+	 * @deprecated This method causes inconsistent behaviour depending on the order it is called in. Use {@link #registerProviders(Object...)} instead.
 	 */
+	@Deprecated
 	public void setPlainProviders(Collection<Object> theProviders) {
 		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
 
@@ -1357,6 +1361,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			providerList.add(provider);
 			registerProviders(providerList);
 		}
+	}
+
+	/**
+	 * Register a group of providers. These could be Resource Providers (classes implementing {@link IResourceProvider}) or "plain" providers, or a mixture of the two.
+	 *
+	 * @param theProviders a {@code Collection} of theProviders. The parameter could be null or an empty {@code Collection}
+	 */
+	public void registerProviders(Object... theProviders) {
+		Validate.noNullElements(theProviders);
+		registerProviders(Arrays.asList(theProviders));
 	}
 
 	/**

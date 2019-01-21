@@ -7,6 +7,7 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.MedicationRequestCategory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,6 +37,25 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		assertTrue(result.supported());
 		assertFalse(result.matched());
 	}
+
+	@Test
+	@Ignore
+	public void testResourceById() {
+
+		ProcedureRequest pr = new ProcedureRequest();
+		pr.setId("ProcedureRequest/123");
+		pr.setIntent(ProcedureRequest.ProcedureRequestIntent.ORIGINALORDER);
+
+		assertMatched(pr, "ProcedureRequest?_id=123");
+		assertMatched(pr, "ProcedureRequest?_id=Patient/123");
+		assertMatched(pr, "ProcedureRequest?_id=Patient/123,Patient/999");
+		assertMatched(pr, "ProcedureRequest?_id=Patient/123&_id=Patient/123");
+		assertNotMatched(pr, "ProcedureRequest?_id=Patient/888");
+		assertNotMatched(pr, "ProcedureRequest?_id=Patient/888,Patient/999");
+		assertNotMatched(pr, "ProcedureRequest?_id=Patient/123&_id=Patient/888");
+
+	}
+
 
 		/*
 	The following tests are copied from an e-mail from a site using HAPI FHIR
