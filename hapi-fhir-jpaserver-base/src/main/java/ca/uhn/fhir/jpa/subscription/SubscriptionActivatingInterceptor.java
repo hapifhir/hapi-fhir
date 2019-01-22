@@ -71,7 +71,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Lazy
-@Interceptor
+@Interceptor(manualRegistration = true)
 public class SubscriptionActivatingInterceptor {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
 

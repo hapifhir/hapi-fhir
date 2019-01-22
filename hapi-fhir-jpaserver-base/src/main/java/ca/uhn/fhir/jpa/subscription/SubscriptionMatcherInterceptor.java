@@ -43,7 +43,7 @@ import javax.annotation.PreDestroy;
 
 @Component
 @Lazy
-@Interceptor
+@Interceptor(manualRegistration = true)
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
