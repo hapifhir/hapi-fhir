@@ -49,6 +49,17 @@ public class CriteriaResourceMatcher {
 	ISearchParamRegistry mySearchParamRegistry;
 
 	public SubscriptionMatchResult match(String theCriteria, RuntimeResourceDefinition theResourceDefinition, ResourceIndexedSearchParams theSearchParams) {
+
+		// TODO: JA->KS this seems like a good sanity check - do you agree or is it redundant?
+		String criteriaResourceType = theCriteria;
+		int questionMarkIdx = theCriteria.indexOf('?');
+		if (questionMarkIdx != -1) {
+			criteriaResourceType = criteriaResourceType.substring(0, questionMarkIdx);
+		}
+		if (!criteriaResourceType.equals(theResourceDefinition.getName())) {
+			return new SubscriptionMatchResult(false, CRITERIA);
+		}
+
 		SearchParameterMap searchParameterMap;
 		try {
 			searchParameterMap = myMatchUrlService.translateMatchUrl(theCriteria, theResourceDefinition);
