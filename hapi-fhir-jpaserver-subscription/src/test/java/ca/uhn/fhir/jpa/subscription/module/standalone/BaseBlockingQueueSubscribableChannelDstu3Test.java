@@ -1,15 +1,14 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.interceptor.executor.InterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
-import ca.uhn.fhir.jpa.subscription.module.LatchedService;
+import ca.uhn.fhir.jpa.subscription.module.PointcutLatch;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -65,8 +64,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	private static SubscribableChannel ourSubscribableChannel;
 	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	private long idCounter = 0;
-	protected LatchedService mySubscriptionMatchingPost = new LatchedService(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
-	protected LatchedService mySubscriptionActivatedPost = new LatchedService(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
+	protected PointcutLatch mySubscriptionMatchingPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
+	protected PointcutLatch mySubscriptionActivatedPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 
 	@Before
 	public void beforeReset() {
@@ -165,7 +164,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 	public static class ObservationListener implements IResourceProvider {
 
-		private LatchedService updateLatch = new LatchedService("Observation Update");
+		private PointcutLatch updateLatch = new PointcutLatch("Observation Update");
 
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
@@ -184,17 +183,21 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			ourUpdatedObservations.add(theObservation);
-			updateLatch.countdown();
+			updateLatch.invoke(new HookParams().add(Observation.class, theObservation));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 
-		public void setExpectedCount(int count) {
+		public void setExpectedCount(int count) throws InterruptedException {
 			updateLatch.setExpectedCount(count);
 		}
 
-		public void awaitExpected() throws InterruptedException {
-			updateLatch.awaitExpected();
+		public void awaitExpected(boolean release) throws InterruptedException {
+			updateLatch.awaitExpected(release);
+		}
+
+		public void release() {
+			updateLatch.release();
 		}
 	}
 }

@@ -1443,7 +1443,10 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			id0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
+		TestUtil.sleepOneClick();
+
 		long start = System.currentTimeMillis();
+
 		TestUtil.sleepOneClick();
 
 		IIdType id1a;
@@ -1452,6 +1455,9 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			id1a = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+
+		TestUtil.sleepOneClick();
+
 		IIdType id1b;
 		{
 			Patient patient = new Patient();
@@ -1992,6 +1998,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			patient.addName().setFamily("Tester_testSearchStringParam").addGiven("Joe");
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+		TestUtil.sleepOneClick();
 		Date between = new Date();
 		TestUtil.sleepOneClick();
 		{

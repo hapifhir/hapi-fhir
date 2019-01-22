@@ -27,9 +27,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		ourObservationListener.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
-		ourObservationListener.awaitExpected();
+		ourObservationListener.awaitExpected(false);
 
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		ourObservationListener.release();
 	}
 
 	@Test
@@ -45,9 +46,10 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 		ourObservationListener.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
-		ourObservationListener.awaitExpected();
+		ourObservationListener.awaitExpected(false);
 
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
+		ourObservationListener.release();
 	}
 
 	@Test
@@ -65,6 +67,6 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionMatchingPost.setExpectedCount(1);
 		sendObservation(code, "SNOMED-CT");
 		mySubscriptionMatchingPost.awaitExpected();
-		ourObservationListener.awaitExpected();
+		ourObservationListener.awaitExpected(true);
 	}
 }

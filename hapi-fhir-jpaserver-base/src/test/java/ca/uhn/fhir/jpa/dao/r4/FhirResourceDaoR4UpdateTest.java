@@ -313,9 +313,9 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		assertEquals("1", outcome.getId().getVersionIdPart());
 
-		Date now = new Date();
-
 		TestUtil.sleepOneClick();
+
+		Date now = new Date();
 
 		Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
 		InstantType updated = TestUtil.getTimestamp(retrieved);

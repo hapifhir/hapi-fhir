@@ -159,14 +159,19 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		ourClient.create().resource(pt1).execute();
 
 		Date beforeFirst = new Date();
+
 		TestUtil.sleepOneClick();
 
 		Bundle results1 = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
+
+		TestUtil.sleepOneClick();
+
 		assertEquals(1, results1.getEntry().size());
 		assertEquals(1, mySearchEntityDao.count());
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
-		assertThat(TestUtil.getTimestamp(results1).getValue(), greaterThan(beforeFirst));
-		assertThat(TestUtil.getTimestamp(results1).getValue(), lessThan(new Date()));
+		Date results1Date = TestUtil.getTimestamp(results1).getValue();
+		assertThat(results1Date, greaterThan(beforeFirst));
+		assertThat(results1Date, lessThan(new Date()));
 		assertThat(results1.getId(), not(blankOrNullString()));
 
 		Patient pt2 = new Patient();

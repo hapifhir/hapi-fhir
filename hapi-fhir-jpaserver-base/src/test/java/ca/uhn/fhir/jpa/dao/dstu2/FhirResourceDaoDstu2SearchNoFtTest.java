@@ -374,6 +374,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+
+		TestUtil.sleepOneClick();
+
 		long betweenTime = System.currentTimeMillis();
 		IIdType id2;
 		{
@@ -820,8 +823,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchLastUpdatedParamWithComparator() throws InterruptedException {
-		String methodName = "testSearchLastUpdatedParamWithComparator";
-
 		IIdType id0;
 		{
 			Patient patient = new Patient();
@@ -829,18 +830,16 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			id0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		int sleep = 100;
-
 		long start = System.currentTimeMillis();
-		Thread.sleep(sleep);
+		TestUtil.sleepOneClick();
 
-		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
 		IIdType id1a;
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			id1a = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+		TestUtil.sleepOneClick();
 		IIdType id1b;
 		{
 			Patient patient = new Patient();
@@ -853,7 +852,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		InstantDt id1bpublished = ResourceMetadataKeyEnum.PUBLISHED.get(myPatientDao.read(id1b, mySrd));
 		ourLog.info("Res 3: {}", id1bpublished.getValueAsString());
 
-		Thread.sleep(sleep);
+		TestUtil.sleepOneClick();
 		long end = System.currentTimeMillis();
 
 		SearchParameterMap params;

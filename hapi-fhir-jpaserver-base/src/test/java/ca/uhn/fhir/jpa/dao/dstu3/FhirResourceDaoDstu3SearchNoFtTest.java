@@ -1023,7 +1023,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			patient.addName().setFamily("testSearchLanguageParam").addGiven("Joe");
 			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-
+		TestUtil.sleepOneClick();
 		Date betweenTime = new Date();
 
 		IIdType id2;
@@ -1199,10 +1199,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			id0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		int sleep = 100;
-
+		TestUtil.sleepOneClick();
 		long start = System.currentTimeMillis();
-		TestUtil.sleepAtLeast(sleep);
+		TestUtil.sleepOneClick();
 
 		IIdType id1a;
 		{
@@ -1221,7 +1220,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		ourLog.info("Res 2: {}", myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 		ourLog.info("Res 3: {}", myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 
-		TestUtil.sleepAtLeast(sleep);
+		TestUtil.sleepOneClick();
 		long end = System.currentTimeMillis();
 
 		SearchParameterMap map;
@@ -1856,15 +1855,15 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			patient.addName().setFamily("Tester_testSearchStringParam").addGiven("Joe");
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+		TestUtil.sleepOneClick();
 		Date between = new Date();
-		Thread.sleep(10);
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().setFamily("Tester_testSearchStringParam").addGiven("John");
 			pid2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		Thread.sleep(10);
+		TestUtil.sleepOneClick();
 		Date after = new Date();
 
 		SearchParameterMap params;
@@ -2874,6 +2873,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			tag1id = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 		}
 
+		TestUtil.sleepOneClick();
+
 		Date betweenDate = new Date();
 
 		IIdType tag2id;
@@ -3196,7 +3197,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		p01.addName().setFamily("B").addGiven("A");
 		String id1 = myPatientDao.create(p01).getId().toUnqualifiedVersionless().getValue();
 
-		Thread.sleep(10);
+		TestUtil.sleepOneClick();
 
 		// Numeric ID
 		Patient p02 = new Patient();
@@ -3206,7 +3207,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		p02.addName().setFamily("Z").addGiven("Z");
 		String id2 = myPatientDao.create(p02).getId().toUnqualifiedVersionless().getValue();
 
-		Thread.sleep(10);
+		TestUtil.sleepOneClick();
 
 		// Forced ID
 		Patient pAB = new Patient();
@@ -3216,7 +3217,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		pAB.addName().setFamily("A").addGiven("B");
 		myPatientDao.update(pAB);
 
-		Thread.sleep(10);
+		TestUtil.sleepOneClick();
 
 		// Forced ID
 		Patient pAA = new Patient();
