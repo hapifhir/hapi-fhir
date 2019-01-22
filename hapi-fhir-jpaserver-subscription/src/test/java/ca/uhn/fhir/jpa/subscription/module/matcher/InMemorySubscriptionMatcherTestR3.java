@@ -39,7 +39,6 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		assertFalse(result.matched());
 	}
 
-	// FIXME KHS
 	@Test
 	public void testResourceById() {
 

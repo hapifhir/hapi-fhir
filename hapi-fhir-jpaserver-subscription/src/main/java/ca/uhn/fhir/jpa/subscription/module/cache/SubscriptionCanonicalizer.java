@@ -64,7 +64,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		}
 	}
 
-	protected CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
 		ca.uhn.fhir.model.dstu2.resource.Subscription subscription = (ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -83,7 +83,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return retVal;
 	}
 
-	protected CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
 		org.hl7.fhir.dstu3.model.Subscription subscription = (org.hl7.fhir.dstu3.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -97,10 +97,10 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 
-				if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
+			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
 				String subjectTemplate;
-
+				String bodyTemplate;
 				try {
 					from = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
 					subjectTemplate = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
@@ -112,22 +112,16 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 			}
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
-
 				String stripVersionIds;
 				String deliverLatestVersion;
-				String maxRetries;
 				try {
 					stripVersionIds = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
 					deliverLatestVersion = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
-					maxRetries = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_MAX_RETRIES);
 				} catch (FHIRException theE) {
 					throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 				}
 				retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
 				retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
-				if (isNotBlank(maxRetries)) {
-					retVal.getRestHookDetails().setMaxRetries(Integer.parseInt(maxRetries));
-				}
 			}
 
 		} catch (FHIRException theE) {
@@ -217,7 +211,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return null;
 	}
 
-	protected CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
 		org.hl7.fhir.r4.model.Subscription subscription = (org.hl7.fhir.r4.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -246,20 +240,14 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
 			String stripVersionIds;
 			String deliverLatestVersion;
-			String maxRetries;
 			try {
 				stripVersionIds = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
 				deliverLatestVersion = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
-				maxRetries = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_MAX_RETRIES);
-
 			} catch (FHIRException theE) {
 				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 			}
 			retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
 			retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
-			if (isNotBlank(maxRetries)) {
-				retVal.getRestHookDetails().setMaxRetries(Integer.parseInt(maxRetries));
-			}
 		}
 
 		List<Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
