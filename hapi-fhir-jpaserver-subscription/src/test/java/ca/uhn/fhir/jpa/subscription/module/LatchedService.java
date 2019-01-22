@@ -17,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 
 public class LatchedService implements IAnonymousLambdaHook {
 	private static final Logger ourLog = LoggerFactory.getLogger(LatchedService.class);
+	private static final int DEFAULT_TIMEOUT_SECONDS = 20;
 	private final String name;
 
 	private CountDownLatch myCountdownLatch;
@@ -48,7 +49,7 @@ public class LatchedService implements IAnonymousLambdaHook {
 	}
 
 	public void awaitExpected() throws InterruptedException {
-		awaitExpectedWithTimeout(10);
+		awaitExpectedWithTimeout(DEFAULT_TIMEOUT_SECONDS);
 	}
 
 	public void awaitExpectedWithTimeout(int timeoutSecond) throws InterruptedException {

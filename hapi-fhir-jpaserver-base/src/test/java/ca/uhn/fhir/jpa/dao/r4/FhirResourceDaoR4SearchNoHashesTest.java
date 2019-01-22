@@ -1469,6 +1469,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 		SearchParameterMap map;
 		Date startDate = new Date(start);
+		TestUtil.sleepOneClick();
 		Date endDate = new Date(end);
 		DateTimeType startDateTime = new DateTimeType(startDate, TemporalPrecisionEnum.MILLI);
 		DateTimeType endDateTime = new DateTimeType(endDate, TemporalPrecisionEnum.MILLI);
