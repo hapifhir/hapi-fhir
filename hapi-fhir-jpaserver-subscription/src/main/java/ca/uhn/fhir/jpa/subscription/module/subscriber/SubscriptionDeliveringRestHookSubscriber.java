@@ -101,8 +101,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		try {
 			operation.execute();
 		} catch (ResourceNotFoundException e) {
-			ourLog.error("Cannot reach " + theMsg.getSubscription().getEndpointUrl());
-			e.printStackTrace();
+			ourLog.error("Cannot reach " + theMsg.getSubscription().getEndpointUrl(), e);
 			throw e;
 		}
 	}
