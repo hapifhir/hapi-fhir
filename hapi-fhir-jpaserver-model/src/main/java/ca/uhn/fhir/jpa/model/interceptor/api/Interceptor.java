@@ -31,4 +31,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Interceptor {
+
+	/**
+	 * @return Declares that an interceptor should be manually registered with the registry,
+	 * and should not auto-register using Spring autowiring.
+	 */
+	boolean manualRegistration() default false;
+
 }

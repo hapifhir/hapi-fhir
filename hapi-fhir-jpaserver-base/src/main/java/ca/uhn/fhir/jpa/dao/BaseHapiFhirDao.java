@@ -1475,11 +1475,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					((IServerOperationInterceptor) next).resourceUpdated(theRequest, theOldResource, theResource);
 				}
 			}
+			HookParams hookParams = new HookParams()
+				.add(IBaseResource.class, theOldResource)
+				.add(IBaseResource.class, theResource);
+			theInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, hookParams);
 		}
-		HookParams hookParams = new HookParams()
-			.add(IBaseResource.class, theOldResource)
-			.add(IBaseResource.class, theResource);
-		theInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, hookParams);
 
 		return savedEntity;
 	}

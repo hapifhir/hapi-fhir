@@ -429,9 +429,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getContext(), theResource);
 			notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
 		}
-		HookParams hookParams = new HookParams()
-			.add(IBaseResource.class, theResource);
-		theInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, hookParams);
 
 		// Notify JPA interceptors
 		if (theRequest != null) {
@@ -485,6 +482,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
+		HookParams hookParams = new HookParams()
+			.add(IBaseResource.class, theResource);
+		theInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, hookParams);
 
 		DaoMethodOutcome outcome = toMethodOutcome(entity, theResource).setCreated(true);
 		if (!thePerformIndexing) {
@@ -1272,7 +1272,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid);
 				resourceId = entity.getIdDt();
 			} else {
-				return create(theResource, null, thePerformIndexing, new Date(), theRequestDetails);
+				return create(theResource, null, thePerformIndexing, new Date(), theRequestDetails, theInterceptorRegistry);
 			}
 		} else {
 			/*

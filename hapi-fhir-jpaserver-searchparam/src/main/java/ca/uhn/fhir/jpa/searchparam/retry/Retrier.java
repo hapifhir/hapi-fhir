@@ -47,6 +47,7 @@ public class Retrier<T> {
 			try {
 				return mySupplier.get();
 			} catch(RuntimeException e) {
+				ourLog.trace("Failure during retry: {}", e.getMessage(), e); // with stacktrace if it's ever needed
 				ourLog.info("Failed to {}.  Attempt {} / {}: {}", myDescription, retryCount, myMaxRetries, e.getMessage());
 				lastException = e;
 				try {

@@ -38,6 +38,11 @@ public class DeferredInterceptorRegistry implements IInterceptorRegistry {
 	}
 
 	@Override
+	public void unregisterGlobalInterceptor(Object theInterceptor) {
+		myWrap.unregisterGlobalInterceptor(theInterceptor);
+	}
+
+	@Override
 	public boolean callHooks(Pointcut thePointcut, HookParams theParams) {
 		myDeferredInvocations.add(new Invocation(thePointcut, theParams));
 		return true;

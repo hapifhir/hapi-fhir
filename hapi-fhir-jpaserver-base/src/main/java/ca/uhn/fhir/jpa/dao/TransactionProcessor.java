@@ -91,6 +91,55 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, IInterceptorRegistry theInterceptorRegistry) {
+		DeferredInterceptorRegistry interceptorRegistry = new DeferredInterceptorRegistry(theInterceptorRegistry);
+
+		if (theRequestDetails != null) {
+			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
+			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
+		}
+
+		String actionName = "Transaction";
+		BUNDLE response = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName, interceptorRegistry);
+
+		interceptorRegistry.invokeDeferred();
+		return response;
+	}
+
+	public BUNDLE collection(final RequestDetails theRequestDetails, BUNDLE theRequest, IInterceptorRegistry theInterceptorRegistry) {
+		String transactionType = myVersionAdapter.getBundleType(theRequest);
+
+		if (!org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION.toCode().equals(transactionType)) {
+			throw new InvalidRequestException("Can not process collection Bundle of type: " + transactionType);
+		}
+
+		ourLog.info("Beginning storing collection with {} resources", myVersionAdapter.getEntries(theRequest).size());
+		long start = System.currentTimeMillis();
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		BUNDLE resp = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
+
+		List<IBaseResource> resources = new ArrayList<>();
+		for (final BUNDLEENTRY nextRequestEntry : myVersionAdapter.getEntries(theRequest)) {
+			IBaseResource resource = myVersionAdapter.getResource(nextRequestEntry);
+			resources.add(resource);
+		}
+
+		BUNDLE transactionBundle = myVersionAdapter.createBundle("transaction");
+		for (IBaseResource next : resources) {
+			BUNDLEENTRY entry = myVersionAdapter.addEntry(transactionBundle);
+			myVersionAdapter.setResource(entry, next);
+			myVersionAdapter.setRequestVerb(entry, "PUT");
+			myVersionAdapter.setRequestUrl(entry, next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+		transaction(theRequestDetails, transactionBundle, theInterceptorRegistry);
+
+		return resp;
+	}
+
 	private void populateEntryWithOperationOutcome(BaseServerResponseException caughtEx, BUNDLEENTRY nextEntry) {
 		myVersionAdapter.populateEntryWithOperationOutcome(caughtEx, nextEntry);
 	}
@@ -162,21 +211,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		myDao = theDao;
 	}
 
-	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, IInterceptorRegistry theInterceptorRegistry) {
-		DeferredInterceptorRegistry interceptorRegistry = new DeferredInterceptorRegistry(theInterceptorRegistry);
-
-		if (theRequestDetails != null) {
-			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
-			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
-		}
-
-		String actionName = "Transaction";
-		BUNDLE response = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName, interceptorRegistry);
-
-		interceptorRegistry.invokeDeferred();
-		return response;
-	}
-
 	private BUNDLE processTransactionAsSubRequest(ServletRequestDetails theRequestDetails, BUNDLE theRequest, String theActionName, IInterceptorRegistry theInterceptorRegistry) {
 		BaseHapiFhirDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
@@ -186,41 +220,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		}
 	}
 
-	public BUNDLE collection(final RequestDetails theRequestDetails, BUNDLE theRequest, IInterceptorRegistry theInterceptorRegistry) {
-		String transactionType = myVersionAdapter.getBundleType(theRequest);
-
-		if (!org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION.toCode().equals(transactionType)) {
-			throw new InvalidRequestException("Can not process collection Bundle of type: " + transactionType);
-		}
-
-		ourLog.info("Beginning storing collection with {} resources", myVersionAdapter.getEntries(theRequest).size());
-		long start = System.currentTimeMillis();
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-
-		BUNDLE resp = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
-
-		List<IBaseResource> resources = new ArrayList<>();
-		for (final BUNDLEENTRY nextRequestEntry : myVersionAdapter.getEntries(theRequest)) {
-			IBaseResource resource = myVersionAdapter.getResource(nextRequestEntry);
-			resources.add(resource);
-		}
-
-		BUNDLE transactionBundle = myVersionAdapter.createBundle("transaction");
-		for (IBaseResource next : resources) {
-			BUNDLEENTRY entry = myVersionAdapter.addEntry(transactionBundle);
-			myVersionAdapter.setResource(entry, next);
-			myVersionAdapter.setRequestVerb(entry, "PUT");
-			myVersionAdapter.setRequestUrl(entry, next.getIdElement().toUnqualifiedVersionless().getValue());
-		}
-
-		transaction(theRequestDetails, transactionBundle, theInterceptorRegistry);
-
-		return resp;
-	}
-
-	private BUNDLE batch(final RequestDetails theRequestDetails, BUNDLE theRequest) {
+	private BUNDLE batch(final RequestDetails theRequestDetails, BUNDLE theRequest, IInterceptorRegistry theInterceptorRegistry) {
 		ourLog.info("Beginning batch with {} resources", myVersionAdapter.getEntries(theRequest).size());
 		long start = System.currentTimeMillis();
 
@@ -241,7 +241,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				BUNDLE subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 				myVersionAdapter.addEntry(subRequestBundle, nextRequestEntry);
 
-				BUNDLE subResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request", interceptorRegistry);
+				BUNDLE subResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request", theInterceptorRegistry);
 				return subResponseBundle;
 			};
 
@@ -289,7 +289,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
 
 		if (org.hl7.fhir.r4.model.Bundle.BundleType.BATCH.toCode().equals(transactionType)) {
-			return batch(theRequestDetails, theRequest);
+			return batch(theRequestDetails, theRequest, theInterceptorRegistry);
 		}
 
 		if (transactionType == null) {
@@ -734,7 +734,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 
 				if (updatedEntities.contains(nextOutcome.getEntity())) {
-					myDao.updateInternal(theRequestDetails, nextResource, true, false, theRequestDetails, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
+					myDao.updateInternal(theRequestDetails, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theInterceptorRegistry);
 				} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
 					myDao.updateEntity(theRequestDetails, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
 				}

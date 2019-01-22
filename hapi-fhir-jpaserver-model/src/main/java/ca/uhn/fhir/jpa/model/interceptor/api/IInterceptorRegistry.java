@@ -26,22 +26,22 @@ public interface IInterceptorRegistry {
 
 	int DEFAULT_ORDER = 0;
 
-	@VisibleForTesting
-	void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook);
-
-	@VisibleForTesting
-	void registerAnonymousHookForUnitTest(Pointcut thePointcut, int theOrder, IAnonymousLambdaHook theHook);
-
-	@VisibleForTesting
-	void clearAnonymousHookForUnitTest();
-
 	/**
-	 * Register an interceptor
+	 * Register an interceptor. This method has no effect if the given interceptor is already registered.
 	 *
 	 * @param theInterceptor The interceptor to register
 	 * @return Returns <code>true</code> if at least one valid hook method was found on this interceptor
 	 */
+	// TODO JA: should this be called "gloabl"?
 	boolean registerGlobalInterceptor(Object theInterceptor);
+
+	/**
+	 * Unregister an interceptor. This method has no effect if the given interceptor is not already registered.
+	 *
+	 * @param theInterceptor The interceptor to unregister
+	 */
+	// TODO JA: should this be called "gloabl"?
+	void unregisterGlobalInterceptor(Object theInterceptor);
 
 	/**
 	 * Invoke the interceptor methods
@@ -53,4 +53,12 @@ public interface IInterceptorRegistry {
 	 */
 	boolean callHooks(Pointcut thePointcut, Object... theParams);
 
+	@VisibleForTesting
+	void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook);
+
+	@VisibleForTesting
+	void registerAnonymousHookForUnitTest(Pointcut thePointcut, int theOrder, IAnonymousLambdaHook theHook);
+
+	@VisibleForTesting
+	void clearAnonymousHookForUnitTest();
 }

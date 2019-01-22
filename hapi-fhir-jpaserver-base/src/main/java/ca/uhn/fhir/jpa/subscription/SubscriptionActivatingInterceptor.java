@@ -164,6 +164,7 @@ public class SubscriptionActivatingInterceptor {
 	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement());
+		subscription.setId(subscription.getIdElement().toVersionless());
 
 		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
 		try {
