@@ -1426,27 +1426,27 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return updateEntity(theRequest, theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);
 	}
 
-	public ResourceTable updateInternal(RequestDetails theRequest, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
+	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
 													ResourceTable theEntity, IIdType theResourceId, IBaseResource theOldResource, IInterceptorRegistry theInterceptorRegistry) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails;
-		if (theRequest != null) {
-			requestDetails = new ActionRequestDetails(theRequest, theResource, theResourceId.getResourceType(), theResourceId);
+		if (theRequestDetails != null) {
+			requestDetails = new ActionRequestDetails(theRequestDetails, theResource, theResourceId.getResourceType(), theResourceId);
 			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
 		}
 
 		// Notify IServerOperationInterceptors about pre-action call
-		if (theRequest != null) {
-			theRequest.getRequestOperationCallback().resourcePreUpdate(theOldResource, theResource);
+		if (theRequestDetails != null) {
+			theRequestDetails.getRequestOperationCallback().resourcePreUpdate(theOldResource, theResource);
 		}
 		for (IServerInterceptor next : getConfig().getInterceptors()) {
 			if (next instanceof IServerOperationInterceptor) {
-				((IServerOperationInterceptor) next).resourcePreUpdate(theRequest, theOldResource, theResource);
+				((IServerOperationInterceptor) next).resourcePreUpdate(theRequestDetails, theOldResource, theResource);
 			}
 		}
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theRequest, theResource, theEntity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
+		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, theEntity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
 
 		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
@@ -1465,14 +1465,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
-			if (theRequest != null) {
-				theRequest.getRequestOperationCallback().resourceUpdated(theResource);
-				theRequest.getRequestOperationCallback().resourceUpdated(theOldResource, theResource);
+			if (theRequestDetails != null) {
+				theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
+				theRequestDetails.getRequestOperationCallback().resourceUpdated(theOldResource, theResource);
 			}
 			for (IServerInterceptor next : getConfig().getInterceptors()) {
 				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(theRequest, theResource);
-					((IServerOperationInterceptor) next).resourceUpdated(theRequest, theOldResource, theResource);
+					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
+					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theOldResource, theResource);
 				}
 			}
 			HookParams hookParams = new HookParams()
