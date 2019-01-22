@@ -108,6 +108,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
 
+	DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequest, IInterceptorRegistry theInterceptorRegistry);
+
 	/**
 	 * This method throws an exception if there are delete conflicts
 	 */

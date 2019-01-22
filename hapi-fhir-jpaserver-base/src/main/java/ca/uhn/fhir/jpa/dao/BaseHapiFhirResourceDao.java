@@ -287,6 +287,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 */
 	@Override
 	public DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequest) {
+		return deleteByUrl(theUrl, deleteConflicts, theRequest, myInterceptorRegistry);
+	}
+
+	@Override
+	public DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequest, IInterceptorRegistry theInterceptorRegistry) {
 		StopWatch w = new StopWatch();
 
 		Set<Long> resource = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType);
@@ -337,6 +342,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					((IServerOperationInterceptor) next).resourceDeleted(theRequest, resourceToDelete);
 				}
 			}
+			HookParams hookParams = new HookParams()
+				.add(IBaseResource.class, resourceToDelete);
+			theInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_DELETED, hookParams);
 		}
 
 		IBaseOperationOutcome oo;
