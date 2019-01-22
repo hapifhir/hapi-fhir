@@ -118,7 +118,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			Integer totalNum = resultList.size();
 			start = offsetI;
 			if (totalNum != null) {
-				start = Math.min(start, totalNum - 1);
+				start = Math.min(start, totalNum);
 			}
 		}
 

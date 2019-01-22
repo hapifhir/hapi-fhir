@@ -187,8 +187,7 @@ public class HistoryR4Test {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setPlainProviders(plainProvider);
-		servlet.setResourceProviders(patientProvider);
+		servlet.registerProviders(plainProvider, patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
