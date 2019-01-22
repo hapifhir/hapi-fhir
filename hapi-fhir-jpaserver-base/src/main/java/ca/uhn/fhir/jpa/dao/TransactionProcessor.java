@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.executor.DeferredInterceptorRegistry;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
@@ -160,26 +162,31 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		myDao = theDao;
 	}
 
-	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
+	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, IInterceptorRegistry theInterceptorRegistry) {
+		DeferredInterceptorRegistry interceptorRegistry = new DeferredInterceptorRegistry(theInterceptorRegistry);
+
 		if (theRequestDetails != null) {
 			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
 			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 		}
 
 		String actionName = "Transaction";
-		return processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName);
+		BUNDLE response = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName, interceptorRegistry);
+
+		interceptorRegistry.invokeDeferred();
+		return response;
 	}
 
-	private BUNDLE processTransactionAsSubRequest(ServletRequestDetails theRequestDetails, BUNDLE theRequest, String theActionName) {
+	private BUNDLE processTransactionAsSubRequest(ServletRequestDetails theRequestDetails, BUNDLE theRequest, String theActionName, IInterceptorRegistry theInterceptorRegistry) {
 		BaseHapiFhirDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
-			return processTransaction(theRequestDetails, theRequest, theActionName);
+			return processTransaction(theRequestDetails, theRequest, theActionName, theInterceptorRegistry);
 		} finally {
 			BaseHapiFhirDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
 	}
 
-	public BUNDLE collection(final RequestDetails theRequestDetails, BUNDLE theRequest) {
+	public BUNDLE collection(final RequestDetails theRequestDetails, BUNDLE theRequest, IInterceptorRegistry theInterceptorRegistry) {
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
 
 		if (!org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION.toCode().equals(transactionType)) {
@@ -208,7 +215,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			myVersionAdapter.setRequestUrl(entry, next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		transaction(theRequestDetails, transactionBundle);
+		transaction(theRequestDetails, transactionBundle, theInterceptorRegistry);
 
 		return resp;
 	}
@@ -234,7 +241,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				BUNDLE subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 				myVersionAdapter.addEntry(subRequestBundle, nextRequestEntry);
 
-				BUNDLE subResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
+				BUNDLE subResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request", interceptorRegistry);
 				return subResponseBundle;
 			};
 
@@ -276,7 +283,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		return resp;
 	}
 
-	private BUNDLE processTransaction(final ServletRequestDetails theRequestDetails, final BUNDLE theRequest, final String theActionName) {
+	private BUNDLE processTransaction(final ServletRequestDetails theRequestDetails, final BUNDLE theRequest, final String theActionName, IInterceptorRegistry theInterceptorRegistry) {
 		validateDependencies();
 
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
@@ -360,7 +367,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		 */
 		TransactionTemplate txManager = new TransactionTemplate(myTxManager);
 		Map<BUNDLEENTRY, ResourceTable> entriesToProcess = txManager.execute(status -> {
-			Map<BUNDLEENTRY, ResourceTable> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, updateTime, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, entries, transactionStopWatch);
+			Map<BUNDLEENTRY, ResourceTable> retVal = doTransactionWriteOperations(theRequestDetails, theActionName, updateTime, allIds, idSubstitutions, idToPersistedOutcome, response, originalRequestOrder, entries, transactionStopWatch, theInterceptorRegistry);
 
 			transactionStopWatch.startTask("Commit writes to database");
 			return retVal;
@@ -489,7 +496,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 
 	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(final ServletRequestDetails theRequestDetails, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
-																								Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, BUNDLE theResponse, IdentityHashMap<BUNDLEENTRY, Integer> theOriginalRequestOrder, List<BUNDLEENTRY> theEntries, StopWatch theTransactionStopWatch) {
+																								Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, BUNDLE theResponse, IdentityHashMap<BUNDLEENTRY, Integer> theOriginalRequestOrder, List<BUNDLEENTRY> theEntries, StopWatch theTransactionStopWatch, IInterceptorRegistry theInterceptorRegistry) {
 
 		if (theRequestDetails != null) {
 			theRequestDetails.startDeferredOperationCallback();
@@ -567,7 +574,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						DaoMethodOutcome outcome;
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-						outcome = resourceDao.create(res, matchUrl, false, theUpdateTime, theRequestDetails);
+						outcome = resourceDao.create(res, matchUrl, false, theUpdateTime, theRequestDetails, theInterceptorRegistry);
 						if (nextResourceId != null) {
 							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
 						}
@@ -591,7 +598,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						if (parts.getResourceId() != null) {
 							IIdType deleteId = newIdType(parts.getResourceType(), parts.getResourceId());
 							if (!deletedResources.contains(deleteId.getValueAsString())) {
-								DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequestDetails);
+								DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequestDetails, theInterceptorRegistry);
 								if (outcome.getEntity() != null) {
 									deletedResources.add(deleteId.getValueAsString());
 									entriesToProcess.put(nextRespEntry, outcome.getEntity());
@@ -631,7 +638,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 								version = ParameterUtil.parseETagValue(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
 							}
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
-							outcome = resourceDao.update(res, null, false, theRequestDetails);
+							outcome = resourceDao.update(res, null, false, false, theRequestDetails, theInterceptorRegistry);
 						} else {
 							res.setId((String) null);
 							String matchUrl;
@@ -641,7 +648,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 								matchUrl = parts.getResourceType();
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							outcome = resourceDao.update(res, matchUrl, false, theRequestDetails);
+							outcome = resourceDao.update(res, matchUrl, false, false, theRequestDetails, theInterceptorRegistry);
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
 							}

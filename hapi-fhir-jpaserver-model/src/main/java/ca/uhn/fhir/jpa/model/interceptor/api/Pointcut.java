@@ -83,7 +83,50 @@ public enum Pointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
 	 * </ul>
 	 */
-	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED("CanonicalSubscription");
+	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED("CanonicalSubscription"),
+
+	/**
+	 * Invoked before a resource will be created
+	 * <p>
+	 *     Hooks will have access to the contents of the resource being
+	 *     created
+	 *     but should not make any changes as storage has already occurred
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource</li>
+	 * </ul>
+	 */
+	OP_PRECOMMIT_RESOURCE_CREATED("IBaseResource"),
+
+	/**
+	 * Invoked before a resource will be created
+	 * <p>
+	 *     Hooks will have access to the contents of the resource being
+	 *     deleted
+	 *     but should not make any changes as storage has already occurred
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource</li>
+	 * </ul>
+	 */
+	OP_PRECOMMIT_RESOURCE_DELETED("IBaseResource"),
+
+	/**
+	 * Invoked before a resource will be created
+	 * <p>
+	 *     Hooks will have access to the contents of the resource being
+	 *     updated (both the previous and new contents)
+	 *     but should not make any changes as storage has already occurred
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource (previous contents)</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource (new contents)</li>
+	 * </ul>
+	 */
+	OP_PRECOMMIT_RESOURCE_UPDATED("IBaseResource", "IBaseResource");
 
 	private final List<String> myParameterTypes;
 

@@ -7,6 +7,9 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -125,6 +128,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	protected IdHelperService myIdHelperService;
 	@Autowired
+	protected IInterceptorRegistry myInterceptorRegistry;
+	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	protected ISearchResultDao mySearchResultDao;
@@ -164,6 +169,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected IResourceSearchViewDao myResourceViewDao;
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+	@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 	@Autowired(required = true)
 	private DaoConfig myConfig;
 	private FhirContext myContext;
@@ -1420,23 +1426,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return updateEntity(theRequest, theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);
 	}
 
-	public ResourceTable updateInternal(RequestDetails theRequest, T theResource, boolean thePerformIndexing,
-													boolean theForceUpdateVersion, RequestDetails theRequestDetails, ResourceTable theEntity, IIdType
-														theResourceId, IBaseResource theOldResource) {
+	public ResourceTable updateInternal(RequestDetails theRequest, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
+													ResourceTable theEntity, IIdType theResourceId, IBaseResource theOldResource, IInterceptorRegistry theInterceptorRegistry) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails;
-		if (theRequestDetails != null) {
-			requestDetails = new ActionRequestDetails(theRequestDetails, theResource, theResourceId.getResourceType(), theResourceId);
+		if (theRequest != null) {
+			requestDetails = new ActionRequestDetails(theRequest, theResource, theResourceId.getResourceType(), theResourceId);
 			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
 		}
 
 		// Notify IServerOperationInterceptors about pre-action call
-		if (theRequestDetails != null) {
-			theRequestDetails.getRequestOperationCallback().resourcePreUpdate(theOldResource, theResource);
+		if (theRequest != null) {
+			theRequest.getRequestOperationCallback().resourcePreUpdate(theOldResource, theResource);
 		}
 		for (IServerInterceptor next : getConfig().getInterceptors()) {
 			if (next instanceof IServerOperationInterceptor) {
-				((IServerOperationInterceptor) next).resourcePreUpdate(theRequestDetails, theOldResource, theResource);
+				((IServerOperationInterceptor) next).resourcePreUpdate(theRequest, theOldResource, theResource);
 			}
 		}
 
@@ -1460,17 +1465,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
-			if (theRequestDetails != null) {
-				theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
-				theRequestDetails.getRequestOperationCallback().resourceUpdated(theOldResource, theResource);
+			if (theRequest != null) {
+				theRequest.getRequestOperationCallback().resourceUpdated(theResource);
+				theRequest.getRequestOperationCallback().resourceUpdated(theOldResource, theResource);
 			}
 			for (IServerInterceptor next : getConfig().getInterceptors()) {
 				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
-					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theOldResource, theResource);
+					((IServerOperationInterceptor) next).resourceUpdated(theRequest, theResource);
+					((IServerOperationInterceptor) next).resourceUpdated(theRequest, theOldResource, theResource);
 				}
 			}
 		}
+		HookParams hookParams = new HookParams()
+			.add(IBaseResource.class, theOldResource)
+			.add(IBaseResource.class, theResource);
+		theInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, hookParams);
+
 		return savedEntity;
 	}
 

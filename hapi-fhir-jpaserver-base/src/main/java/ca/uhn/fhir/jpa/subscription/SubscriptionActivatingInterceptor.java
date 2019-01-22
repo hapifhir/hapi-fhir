@@ -26,6 +26,9 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
+import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
@@ -68,7 +71,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Lazy
-public class SubscriptionActivatingInterceptor extends ServerOperationInterceptorAdapter {
+@Interceptor
+public class SubscriptionActivatingInterceptor {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
 
 	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
@@ -180,18 +184,18 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
-	@Override
-	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
+	public void resourceCreated(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 	}
 
-	@Override
-	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_DELETED)
+	public void resourceDeleted(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
 	}
 
-	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
+	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
