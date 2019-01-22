@@ -238,7 +238,7 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 	 * Only call this when assertions are enabled, it's expensive
 	 */
 	boolean haveAppropriateParams(Pointcut thePointcut, HookParams theParams) {
-		Validate.isTrue(theParams.getParamsForType().values().size() == thePointcut.getParameterTypes().size(), "Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), thePointcut.getParameterTypes(), theParams.getParamsForType().values().stream().map(t->t.getClass().getSimpleName()).collect(Collectors.toList()));
+		Validate.isTrue(theParams.getParamsForType().values().size() == thePointcut.getParameterTypes().size(), "Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t->t.getClass().getSimpleName()).sorted().collect(Collectors.toList()));
 
 		List<String> wantedTypes = new ArrayList<>(thePointcut.getParameterTypes());
 
@@ -247,11 +247,18 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 			String nextTypeName = nextTypeClass.getName();
 			for (Object nextParamValue : givenTypes.get(nextTypeClass)) {
 				Validate.isTrue(nextTypeClass.isAssignableFrom(nextParamValue.getClass()), "Invalid params for pointcut %s - %s is not of type %s", thePointcut.name(), nextParamValue.getClass(), nextTypeClass);
-				Validate.isTrue(wantedTypes.remove(nextTypeName), "Invalid params for pointcut %s - Wanted %s but missing %s", thePointcut.name(), thePointcut.getParameterTypes(), nextTypeName);
+				Validate.isTrue(wantedTypes.remove(nextTypeName), "Invalid params for pointcut %s - Wanted %s but missing %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), nextTypeName);
 			}
 		}
 
 		return true;
+	}
+
+	private static String toErrorString(List<String> theParameterTypes) {
+		return theParameterTypes
+			.stream()
+			.sorted()
+			.collect(Collectors.joining(","));
 	}
 
 	private abstract class BaseInvoker implements Comparable<BaseInvoker> {

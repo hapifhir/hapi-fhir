@@ -121,7 +121,7 @@ public class InterceptorRegistryTest {
 			myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Wrong number of params for pointcut OP_PRECOMMIT_RESOURCE_CREATED - Wanted [org.hl7.fhir.instance.model.api.IBaseResource] but found [Integer, CanonicalSubscription]", e.getMessage());
+			assertEquals("Wrong number of params for pointcut OP_PRECOMMIT_RESOURCE_CREATED - Wanted org.hl7.fhir.instance.model.api.IBaseResource but found [CanonicalSubscription, Integer]", e.getMessage());
 		}
 	}
 
@@ -142,7 +142,7 @@ public class InterceptorRegistryTest {
 			myInterceptorRegistry.haveAppropriateParams(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Wrong number of params for pointcut OP_PRECOMMIT_RESOURCE_UPDATED - Wanted [org.hl7.fhir.instance.model.api.IBaseResource, org.hl7.fhir.instance.model.api.IBaseResource] but found [Patient]", e.getMessage());
+			assertEquals("Wrong number of params for pointcut OP_PRECOMMIT_RESOURCE_UPDATED - Wanted org.hl7.fhir.instance.model.api.IBaseResource,org.hl7.fhir.instance.model.api.IBaseResource but found [Patient]", e.getMessage());
 		}
 	}
 
@@ -156,7 +156,7 @@ public class InterceptorRegistryTest {
 			myInterceptorRegistry.haveAppropriateParams(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("Wrong number of params for pointcut OP_PRECOMMIT_RESOURCE_UPDATED - Wanted [org.hl7.fhir.instance.model.api.IBaseResource, org.hl7.fhir.instance.model.api.IBaseResource] but found [Patient, Patient, Patient]", e.getMessage());
+			assertEquals("Wrong number of params for pointcut OP_PRECOMMIT_RESOURCE_UPDATED - Wanted org.hl7.fhir.instance.model.api.IBaseResource,org.hl7.fhir.instance.model.api.IBaseResource but found [Patient, Patient, Patient]", e.getMessage());
 		}
 	}
 
