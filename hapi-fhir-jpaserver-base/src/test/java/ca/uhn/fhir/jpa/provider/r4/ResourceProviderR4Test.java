@@ -123,6 +123,7 @@ import ca.uhn.fhir.util.UrlUtil;
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
+	public static final int LARGE_NUMBER = 77;
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 
@@ -1755,7 +1756,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setActive(true);
 		IIdType id = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		for (int i = 1; i < 77; i++) {
+		for (int i = 1; i < LARGE_NUMBER; i++) {
 			Observation obs = new Observation();
 			obs.setId("A" + StringUtils.leftPad(Integer.toString(i), 2, '0'));
 			obs.setSubject(new Reference(id));
@@ -1793,8 +1794,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		assertThat(ids, hasItem(id.getIdPart()));
-		assertEquals(77, ids.size());
-		for (int i = 1; i < 77; i++) {
+		assertEquals(LARGE_NUMBER, ids.size());
+		for (int i = 1; i < LARGE_NUMBER; i++) {
 			assertThat(ids.size() + " ids: " + ids, ids, hasItem("A" + StringUtils.leftPad(Integer.toString(i), 2, '0')));
 		}
 	}
