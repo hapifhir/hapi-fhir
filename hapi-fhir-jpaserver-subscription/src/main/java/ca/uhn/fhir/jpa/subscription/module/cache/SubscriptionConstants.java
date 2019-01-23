@@ -68,12 +68,6 @@ public class SubscriptionConstants {
 	public static final String EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-deliver-latest-version";
 
 	/**
-	 * This extension URL indicates the maximum number of delivery retries that will be attempted before the subscription delivery is considered to have failed.
-	 */
-
-	public static final String EXT_SUBSCRIPTION_MAX_RETRIES = "http://hapifhir.io/fhir/StructureDefinition/subscription-max-retries";
-
-	/**
 	 * The number of threads used in subscription channel processing
 	 */
 	public static final int EXECUTOR_THREAD_COUNT = 5;

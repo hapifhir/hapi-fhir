@@ -295,8 +295,6 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		private boolean myStripVersionId;
 		@JsonProperty("deliverLatestVersion")
 		private boolean myDeliverLatestVersion;
-		@JsonProperty("maxRetries")
-		private int myMaxRetries;
 
 		/**
 		 * Constructor
@@ -322,14 +320,6 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 			myStripVersionId = theStripVersionId;
 		}
 
-		public int getMaxRetries() {
-			return myMaxRetries;
-		}
-
-		public void setMaxRetries(int theMaxRetries) {
-			myMaxRetries = theMaxRetries;
-		}
-
 		@Override
 		public boolean equals(Object theO) {
 			if (this == theO) return true;
@@ -341,7 +331,6 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 			return new EqualsBuilder()
 				.append(myStripVersionId, that.myStripVersionId)
 				.append(myDeliverLatestVersion, that.myDeliverLatestVersion)
-				.append(myMaxRetries, that.myMaxRetries)
 				.isEquals();
 		}
 
@@ -350,7 +339,6 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 			return new HashCodeBuilder(17, 37)
 				.append(myStripVersionId)
 				.append(myDeliverLatestVersion)
-				.append(myMaxRetries)
 				.toHashCode();
 		}
 
