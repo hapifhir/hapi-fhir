@@ -212,7 +212,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		myObservationDao.update(obs, mySrd);
 
 		// Try to wait for the indexing to complete
-		waitToParamsToIndex(ptId);
+		waitForSize(2, ()-> fetchSuggestionCount(ptId));
 
 		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
 		try (CloseableHttpResponse http = ourHttpClient.execute(get)) {
@@ -230,16 +230,14 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		}
 	}
 
-	private void waitToParamsToIndex(IIdType thePtId) throws Exception {
-		waitForSize(2, ()->{
-			HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + thePtId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
-			try (CloseableHttpResponse http = ourHttpClient.execute(get)) {
-				assertEquals(200, http.getStatusLine().getStatusCode());
-				String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-				Parameters parameters = ourCtx.newXmlParser().parseResource(Parameters.class, output);
-				return parameters.getParameter().size();
-			}
-		});
+	private Number fetchSuggestionCount(IIdType thePtId) throws IOException {
+		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + thePtId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
+		try (CloseableHttpResponse http = ourHttpClient.execute(get)) {
+			assertEquals(200, http.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
+			Parameters parameters = ourCtx.newXmlParser().parseResource(Parameters.class, output);
+			return parameters.getParameter().size();
+		}
 	}
 
 	@Test
