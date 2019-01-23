@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.PointcutLatch;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends BaseSubscriptionDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
@@ -51,6 +53,9 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
 	InterceptorRegistry myInterceptorRegistry;
+	@Autowired
+	protected SubscriptionRegistry mySubscriptionRegistry;
+
 
 	protected String myCode = "1000000050";
 
@@ -63,7 +68,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	private static SubscribableChannel ourSubscribableChannel;
 	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-	private long idCounter = 0;
+	private static AtomicLong idCounter = new AtomicLong();
 	protected PointcutLatch mySubscriptionMatchingPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
 	protected PointcutLatch mySubscriptionActivatedPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 
@@ -72,6 +77,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
+		mySubscriptionRegistry.clearForUnitTests();
 		if (ourSubscribableChannel == null) {
 			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
@@ -85,10 +91,12 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		myInterceptorRegistry.clearAnonymousHookForUnitTest();
 	}
 
-	public <T extends IBaseResource> T sendResource(T theResource) {
+	public <T extends IBaseResource> T sendResource(T theResource) throws InterruptedException {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedJsonMessage message = new ResourceModifiedJsonMessage(msg);
+		mySubscriptionMatchingPost.setExpectedCount(1);
 		ourSubscribableChannel.send(message);
+		mySubscriptionMatchingPost.awaitExpected();
 		return theResource;
 	}
 
@@ -105,8 +113,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
 		subscription.setCriteria(theCriteria);
-		++idCounter;
-		IdType id = new IdType("Subscription", idCounter);
+		IdType id = new IdType("Subscription", idCounter.incrementAndGet());
 		subscription.setId(id);
 
 		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
@@ -117,10 +124,9 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		return subscription;
 	}
 
-	protected Observation sendObservation(String code, String system) {
+	protected Observation sendObservation(String code, String system) throws InterruptedException {
 		Observation observation = new Observation();
-		++idCounter;
-		IdType id = new IdType("Observation", idCounter);
+		IdType id = new IdType("Observation", idCounter.incrementAndGet());
 		observation.setId(id);
 
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -133,7 +139,6 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 		return sendResource(observation);
 	}
-
 
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
@@ -192,12 +197,12 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 			updateLatch.setExpectedCount(count);
 		}
 
-		public void awaitExpected(boolean release) throws InterruptedException {
-			updateLatch.awaitExpected(release);
+		public void awaitExpected() throws InterruptedException {
+			updateLatch.awaitExpected();
 		}
 
-		public void release() {
-			updateLatch.release();
+		public void expectNothing() {
+			updateLatch.expectNothing();
 		}
 	}
 }
