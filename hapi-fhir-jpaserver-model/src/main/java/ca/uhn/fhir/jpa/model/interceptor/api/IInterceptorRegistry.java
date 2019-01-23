@@ -41,6 +41,19 @@ public interface IInterceptorRegistry {
 	 */
 	void unregisterInterceptor(Object theInterceptor);
 
+	/**
+	 * @deprecated to be removed
+	 */
+	@Deprecated
+	boolean registerGlobalInterceptor(Object theInterceptor);
+
+	/**
+	 * @deprecated to be removed
+	 */
+	@Deprecated
+	void unregisterGlobalInterceptor(Object theInterceptor);
+
+
 	@VisibleForTesting
 	void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook);
 

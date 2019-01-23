@@ -162,6 +162,16 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 		}
 	}
 
+	@Override
+	public boolean registerGlobalInterceptor(Object theInterceptor) {
+		return registerInterceptor(theInterceptor);
+	}
+
+	@Override
+	public void unregisterGlobalInterceptor(Object theInterceptor) {
+		unregisterInterceptor(theInterceptor);
+	}
+
 	private void sortByOrderAnnotation(List<Object> theObjects) {
 		IdentityHashMap<Object, Integer> interceptorToOrder = new IdentityHashMap<>();
 		for (Object next : theObjects) {
