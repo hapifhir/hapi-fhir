@@ -784,7 +784,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	@SuppressWarnings("JpaQlInspection")
 	@Override
 	public <MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails) {
 		// Notify interceptors
@@ -975,7 +974,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (entity == null) {
 			if (theId.hasVersionIdPart()) {
-				@SuppressWarnings("JpaQlInspection")
 				TypedQuery<ResourceHistoryTable> q = myEntityManager.createQuery("SELECT t from ResourceHistoryTable t WHERE t.myResourceId = :RID AND t.myResourceType = :RTYP AND t.myResourceVersion = :RVER", ResourceHistoryTable.class);
 				q.setParameter("RID", pid);
 				q.setParameter("RTYP", myResourceName);
@@ -1396,7 +1394,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	protected void validateOkToDelete(List<DeleteConflict> theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
-		@SuppressWarnings("JpaQlInspection")
 		TypedQuery<ResourceLink> query = myEntityManager.createQuery("SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
 		query.setParameter("target_pid", theEntity.getId());
 		query.setMaxResults(1);
