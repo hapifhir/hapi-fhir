@@ -64,7 +64,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		}
 	}
 
-	protected CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
 		ca.uhn.fhir.model.dstu2.resource.Subscription subscription = (ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -83,7 +83,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return retVal;
 	}
 
-	protected CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
 		org.hl7.fhir.dstu3.model.Subscription subscription = (org.hl7.fhir.dstu3.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -217,7 +217,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return null;
 	}
 
-	protected CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
 		org.hl7.fhir.r4.model.Subscription subscription = (org.hl7.fhir.r4.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();

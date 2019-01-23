@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -39,7 +40,6 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 	}
 
 	@Test
-	@Ignore
 	public void testResourceById() {
 
 		ProcedureRequest pr = new ProcedureRequest();
@@ -47,12 +47,12 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		pr.setIntent(ProcedureRequest.ProcedureRequestIntent.ORIGINALORDER);
 
 		assertMatched(pr, "ProcedureRequest?_id=123");
-		assertMatched(pr, "ProcedureRequest?_id=Patient/123");
-		assertMatched(pr, "ProcedureRequest?_id=Patient/123,Patient/999");
-		assertMatched(pr, "ProcedureRequest?_id=Patient/123&_id=Patient/123");
-		assertNotMatched(pr, "ProcedureRequest?_id=Patient/888");
-		assertNotMatched(pr, "ProcedureRequest?_id=Patient/888,Patient/999");
-		assertNotMatched(pr, "ProcedureRequest?_id=Patient/123&_id=Patient/888");
+		assertMatched(pr, "ProcedureRequest?_id=ProcedureRequest/123");
+		assertMatched(pr, "ProcedureRequest?_id=ProcedureRequest/123,ProcedureRequest/999");
+		assertMatched(pr, "ProcedureRequest?_id=ProcedureRequest/123&_id=ProcedureRequest/123");
+		assertNotMatched(pr, "ProcedureRequest?_id=ProcedureRequest/888");
+		assertNotMatched(pr, "ProcedureRequest?_id=ProcedureRequest/888,ProcedureRequest/999");
+		assertNotMatched(pr, "ProcedureRequest?_id=ProcedureRequest/123&_id=ProcedureRequest/888");
 
 	}
 
@@ -301,7 +301,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
 		initSearchParamRegistry(bundle);
 
 		{
@@ -333,7 +333,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
 		initSearchParamRegistry(bundle);
 
 		{
@@ -425,7 +425,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
 		initSearchParamRegistry(bundle);
 
 		{

@@ -19,7 +19,7 @@
 					<ul>
 						<li>Spring (JPA): 5.0.8.RELEASE -&gt; 5.1.3.RELEASE</li>
 						<li>Spring-Data (JPA): 2.0.7.RELEASE -&gt; 2.1.3.RELEASE</li>
-						<li>Hibernate-Core (JPA): 5.3.6.FINAL -&gt; 5.4.0.FINAL</li>
+						<li>Hibernate-Core (JPA): 5.3.6.FINAL -&gt; 5.4.1.FINAL</li>
 						<li>Hibernate-Search (JPA): 5.10.3.FINAL -&gt; 5.11.0.FINAL</li>
 						<li>Thymeleaf (JPA): 3.0.9.RELEASE -&gt; 3.0.11.RELEASE</li>
 						<li>thymeleaf-spring4 (Testpage Overlay) has been replaced with thymeleaf-spring5</li>
@@ -319,6 +319,13 @@
 				requesting a page beginning at index 1000 when there are only 10 results would
 				result in the 10th result being returned). This will now result in an empty
 				response Bundle as would be expected.
+			</action>
+			<action type="add">
+				Added support for _id in in-memory matcher
+			</action>
+			<action type="fix">
+				The casing of the base64Binary datatype was incorrect in the DSTU3 and R4 model classes.
+				This has been corrected.
 			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
