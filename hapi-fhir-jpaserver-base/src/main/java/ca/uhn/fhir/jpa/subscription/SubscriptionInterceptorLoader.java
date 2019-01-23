@@ -57,12 +57,12 @@ public class SubscriptionInterceptorLoader {
 		if (!supportedSubscriptionTypes.isEmpty()) {
 			loadSubscriptions();
 			ourLog.info("Registering subscription activating interceptor");
-			myInterceptorRegistry.registerGlobalInterceptor(mySubscriptionActivatingInterceptor);
+			myInterceptorRegistry.registerInterceptor(mySubscriptionActivatingInterceptor);
 		}
 		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
 			mySubscriptionMatcherInterceptor.start();
 			ourLog.info("Registering subscription matcher interceptor");
-			myInterceptorRegistry.registerGlobalInterceptor(mySubscriptionMatcherInterceptor);
+			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class SubscriptionInterceptorLoader {
 
 	@VisibleForTesting
 	void unregisterInterceptorsForUnitTest() {
-		myInterceptorRegistry.unregisterGlobalInterceptor(mySubscriptionActivatingInterceptor);
-		myInterceptorRegistry.unregisterGlobalInterceptor(mySubscriptionMatcherInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(mySubscriptionActivatingInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(mySubscriptionMatcherInterceptor);
 	}
 }

@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
@@ -77,8 +76,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTimestamp, RequestDetails theRequestDetails);
 
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTimestamp, RequestDetails theRequestDetails, IInterceptorRegistry theInterceptorRegistry);
-
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
 	/**
@@ -95,8 +92,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	DaoMethodOutcome delete(IIdType theResource, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
 
-	DaoMethodOutcome delete(IIdType theId, List<DeleteConflict> theDeleteConflicts, RequestDetails theRequest, IInterceptorRegistry theInterceptorRegistry);
-
 	/**
 	 * This method throws an exception if there are delete conflicts
 	 */
@@ -107,8 +102,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * in the provided list
 	 */
 	DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
-
-	DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequest, IInterceptorRegistry theInterceptorRegistry);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
@@ -234,8 +227,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * therefore can not fire any interceptors. Use only for internal system calls
 	 */
 	DaoMethodOutcome update(T theResource, String theMatchUrl);
-
-	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails, IInterceptorRegistry theInterceptorRegistry);
 
 	/**
 	 * @param thePerformIndexing Use with caution! If you set this to false, you need to manually perform indexing or your resources

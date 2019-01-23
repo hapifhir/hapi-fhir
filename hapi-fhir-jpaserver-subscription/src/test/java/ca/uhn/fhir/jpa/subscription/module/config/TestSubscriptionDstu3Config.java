@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
-import ca.uhn.fhir.jpa.model.interceptor.executor.InterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionProvider;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +26,7 @@ public class TestSubscriptionDstu3Config extends SubscriptionDstu3Config {
 
 	@Bean
 	public IInterceptorRegistry interceptorRegistry() {
-		return new InterceptorRegistry();
+		return new InterceptorService();
 	}
 
 }

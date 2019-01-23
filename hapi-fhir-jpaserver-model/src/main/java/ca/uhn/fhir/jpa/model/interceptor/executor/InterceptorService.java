@@ -45,8 +45,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Component
-public class InterceptorRegistry implements IInterceptorRegistry, ApplicationContextAware {
-	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorRegistry.class);
+public class InterceptorService implements IInterceptorRegistry, IInterceptorBroadcaster, ApplicationContextAware {
+	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorService.class);
 	private final List<Object> myGlobalInterceptors = new ArrayList<>();
 	private final ListMultimap<Pointcut, BaseInvoker> myInvokers = ArrayListMultimap.create();
 	private final ListMultimap<Pointcut, BaseInvoker> myAnonymousInvokers = ArrayListMultimap.create();
@@ -56,12 +56,12 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 	/**
 	 * Constructor
 	 */
-	public InterceptorRegistry() {
+	public InterceptorService() {
 		super();
 	}
 
 	@VisibleForTesting
-	public List<Object> getGlobalInterceptorsForUnitTest() {
+	List<Object> getGlobalInterceptorsForUnitTest() {
 		return myGlobalInterceptors;
 	}
 
@@ -98,13 +98,13 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 				ourLog.debug("Not auto-registering interceptor: {}", nextName);
 				continue;
 			}
-			registerGlobalInterceptor(nextInterceptor);
+			registerInterceptor(nextInterceptor);
 		}
 
 	}
 
 	@Override
-	public boolean registerGlobalInterceptor(Object theInterceptor) {
+	public boolean registerInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
 			boolean retVal = false;
 
@@ -155,7 +155,7 @@ public class InterceptorRegistry implements IInterceptorRegistry, ApplicationCon
 	}
 
 	@Override
-	public void unregisterGlobalInterceptor(Object theInterceptor) {
+	public void unregisterInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
 			myGlobalInterceptors.removeIf(t -> t == theInterceptor);
 			myInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);

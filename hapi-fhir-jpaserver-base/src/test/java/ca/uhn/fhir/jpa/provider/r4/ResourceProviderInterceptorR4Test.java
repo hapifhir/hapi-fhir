@@ -366,6 +366,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	}
 
+
 	private void transaction(Bundle theBundle) throws IOException {
 		String resource = myFhirCtx.newXmlParser().encodeResourceToString(theBundle);
 		HttpPost post = new HttpPost(ourServerBase + "/");

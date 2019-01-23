@@ -24,8 +24,8 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {InterceptorRegistryTest.InterceptorRegistryTestCtxConfig.class})
-public class InterceptorRegistryTest {
+@ContextConfiguration(classes = {InterceptorServiceTest.InterceptorRegistryTestCtxConfig.class})
+public class InterceptorServiceTest {
 
 	private static boolean ourNext_beforeRestHookDelivery_Return1;
 	private static List<String> ourInvocations = new ArrayList<>();
@@ -34,7 +34,7 @@ public class InterceptorRegistryTest {
 	private static IBaseResource ourLastResourceTwoB;
 
 	@Autowired
-	private InterceptorRegistry myInterceptorRegistry;
+	private InterceptorService myInterceptorRegistry;
 
 	@Autowired
 	private MyTestInterceptorOne myInterceptorOne;
@@ -55,7 +55,7 @@ public class InterceptorRegistryTest {
 	public void testManuallyRegisterGlobalInterceptor() {
 
 		// Register the manual interceptor (has @Order right in the middle)
-		myInterceptorRegistry.registerGlobalInterceptor(myInterceptorManual);
+		myInterceptorRegistry.registerInterceptor(myInterceptorManual);
 		List<Object> globalInterceptors = myInterceptorRegistry.getGlobalInterceptorsForUnitTest();
 		assertEquals(3, globalInterceptors.size());
 		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
@@ -63,7 +63,7 @@ public class InterceptorRegistryTest {
 		assertTrue(globalInterceptors.get(2).getClass().toString(), globalInterceptors.get(2) instanceof MyTestInterceptorTwo);
 
 		// Try to register again (should have no effect
-		myInterceptorRegistry.registerGlobalInterceptor(myInterceptorManual);
+		myInterceptorRegistry.registerInterceptor(myInterceptorManual);
 		globalInterceptors = myInterceptorRegistry.getGlobalInterceptorsForUnitTest();
 		assertEquals(3, globalInterceptors.size());
 		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
@@ -77,7 +77,7 @@ public class InterceptorRegistryTest {
 		assertSame(myInterceptorTwo, invokers.get(2));
 
 		// Finally, unregister it
-		myInterceptorRegistry.unregisterGlobalInterceptor(myInterceptorManual);
+		myInterceptorRegistry.unregisterInterceptor(myInterceptorManual);
 		globalInterceptors = myInterceptorRegistry.getGlobalInterceptorsForUnitTest();
 		assertEquals(2, globalInterceptors.size());
 		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);

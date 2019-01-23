@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
@@ -58,7 +58,7 @@ public class SubscriptionRegistry {
 	@Autowired
 	ModelConfig myModelConfig;
 	@Autowired
-	private IInterceptorRegistry myInterceptorRegistry;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
@@ -100,7 +100,7 @@ public class SubscriptionRegistry {
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
-		myInterceptorRegistry.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, canonicalized);
+		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, canonicalized);
 
 		return canonicalized;
 	}
@@ -116,7 +116,7 @@ public class SubscriptionRegistry {
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 	}
 
-	public void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
+	void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
 		myActiveSubscriptionCache.unregisterAllSubscriptionsNotInCollection(theAllIds);
 	}
 
