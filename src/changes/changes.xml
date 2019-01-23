@@ -320,6 +320,9 @@
 				result in the 10th result being returned). This will now result in an empty
 				response Bundle as would be expected.
 			</action>
+			<action type="add">
+				Added support for _id in in-memory matcher
+			</action>
 			<action type="fix">
 				The casing of the base64Binary datatype was incorrect in the DSTU3 and R4 model classes.
 				This has been corrected.
