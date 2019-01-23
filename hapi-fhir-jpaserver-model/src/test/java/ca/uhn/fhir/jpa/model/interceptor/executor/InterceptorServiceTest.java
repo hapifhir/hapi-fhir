@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jpa.model.interceptor.executor;
 
-import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.interceptor.api.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -188,13 +185,18 @@ public class InterceptorServiceTest {
 	@ComponentScan(basePackages = "ca.uhn.fhir.jpa.model")
 	static class InterceptorRegistryTestCtxConfig {
 
+		@Autowired
+		private IInterceptorRegistry myInterceptorRegistry;
+
 		/**
 		 * Note: Orders are deliberately reversed to make sure we get the orders right
 		 * using the @Order annotation
 		 */
 		@Bean
 		public MyTestInterceptorTwo interceptor1() {
-			return new MyTestInterceptorTwo();
+			MyTestInterceptorTwo retVal = new MyTestInterceptorTwo();
+			myInterceptorRegistry.registerInterceptor(retVal);
+			return retVal;
 		}
 
 		/**
@@ -203,7 +205,9 @@ public class InterceptorServiceTest {
 		 */
 		@Bean
 		public MyTestInterceptorOne interceptor2() {
-			return new MyTestInterceptorOne();
+			MyTestInterceptorOne retVal = new MyTestInterceptorOne();
+			myInterceptorRegistry.registerInterceptor(retVal);
+			return retVal;
 		}
 
 		@Bean

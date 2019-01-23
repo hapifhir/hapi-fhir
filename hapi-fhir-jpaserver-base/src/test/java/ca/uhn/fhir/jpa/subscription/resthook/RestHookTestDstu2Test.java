@@ -113,10 +113,8 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		observation.setStatus(ObservationStatusEnum.FINAL);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
-
-		String observationId = methodOutcome.getId().getIdPart();
-		observation.setId(observationId);
+		IIdType id = myObservationDao.create(observation).getId();
+		observation.setId(id);
 
 		return observation;
 	}

@@ -1500,6 +1500,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			id = getContext().getVersion().newIdType().setValue(id.getValue());
 		}
 
+		if (id.hasResourceType() == false) {
+			id = id.withResourceType(theEntity.getResourceType());
+		}
+
 		theResource.setId(id);
 		if (theResource instanceof IResource) {
 			ResourceMetadataKeyEnum.VERSION.put((IResource) theResource, id.getVersionIdPart());

@@ -29,15 +29,11 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -45,13 +41,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Component
-public class InterceptorService implements IInterceptorRegistry, IInterceptorBroadcaster, ApplicationContextAware {
+public class InterceptorService implements IInterceptorRegistry, IInterceptorBroadcaster {
 	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorService.class);
 	private final List<Object> myGlobalInterceptors = new ArrayList<>();
 	private final ListMultimap<Pointcut, BaseInvoker> myInvokers = ArrayListMultimap.create();
 	private final ListMultimap<Pointcut, BaseInvoker> myAnonymousInvokers = ArrayListMultimap.create();
 	private final Object myRegistryMutex = new Object();
-	private ApplicationContext myAppCtx;
 
 	/**
 	 * Constructor
@@ -84,23 +79,6 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	@VisibleForTesting
 	public void clearAnonymousHookForUnitTest() {
 		myAnonymousInvokers.clear();
-	}
-
-	@PostConstruct
-	public void start() {
-
-		// Auto-register any discovered global interceptors
-		String[] globalInterceptorNames = myAppCtx.getBeanNamesForAnnotation(Interceptor.class);
-		for (String nextName : globalInterceptorNames) {
-			Object nextInterceptor = myAppCtx.getBean(nextName);
-			Interceptor nextInterceptorAnnotation = AnnotationUtils.findAnnotation(nextInterceptor.getClass(), Interceptor.class);
-			if (nextInterceptorAnnotation.manualRegistration()) {
-				ourLog.debug("Not auto-registering interceptor: {}", nextName);
-				continue;
-			}
-			registerInterceptor(nextInterceptor);
-		}
-
 	}
 
 	@Override
@@ -185,11 +163,6 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 			Integer orderB = interceptorToOrder.get(b);
 			return orderA - orderB;
 		});
-	}
-
-	@Override
-	public void setApplicationContext(@Nonnull ApplicationContext theApplicationContext) throws BeansException {
-		myAppCtx = theApplicationContext;
 	}
 
 	@Override
