@@ -320,6 +320,10 @@
 				result in the 10th result being returned). This will now result in an empty
 				response Bundle as would be expected.
 			</action>
+			<action type="fix">
+				The casing of the base64Binary datatype was incorrect in the DSTU3 and R4 model classes.
+				This has been corrected.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
