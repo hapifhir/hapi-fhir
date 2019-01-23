@@ -39,18 +39,6 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 	}
 
 
-
-	@Test
-	public void testMatchWithNoParams() {
-		ProcedureRequest pr = new ProcedureRequest();
-		pr.setId("ProcedureRequest/123");
-		pr.setIntent(ProcedureRequest.ProcedureRequestIntent.ORIGINALORDER);
-		assertMatched(pr, "ProcedureRequest?");
-
-		assertNotMatched(new Patient(), "ProcedureRequest?");
-	}
-
-
 	/**
 	 * Technically this is an invalid reference in most cases, but this shouldn't choke
 	 * the matcher in the case that it gets used.
