@@ -116,6 +116,13 @@ public class ResourceModifiedMessage implements IResourceMessage {
 	}
 
 	private void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
+		/*
+		 * References with placeholders would be invalid by the time we get here, and
+		 * would be caught before we even get here. This check is basically a last-ditch
+		 * effort to make sure nothing has broken in the various safeguards that
+		 * should prevent this from happening (hence it only being an assert as
+		 * opposed to something executed all the time).
+		 */
 		assert payloadContainsNoPlaceholderReferences(theCtx, theNewPayload);
 
 		/*

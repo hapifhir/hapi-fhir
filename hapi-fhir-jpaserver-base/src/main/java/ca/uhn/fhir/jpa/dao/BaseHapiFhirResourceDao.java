@@ -1351,13 +1351,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
-		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails);
+	public DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails) {
+		return update(theResource, theMatchUrl, true, theRequestDetails);
 	}
 
 	@Override
-	public DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails) {
-		return update(theResource, theMatchUrl, true, theRequestDetails);
+	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
+		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails);
 	}
 
 	/**

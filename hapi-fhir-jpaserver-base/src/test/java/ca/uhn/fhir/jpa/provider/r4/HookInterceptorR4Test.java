@@ -60,7 +60,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = ourClient.create().resource(p).execute().getId();
 
 		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRESTORAGE_RESOURCE_UPDATED, t->{
-			Patient contents = (Patient) t.get(IBaseResource.class, 0);
+			Patient contents = (Patient) t.get(IBaseResource.class, 1);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});
 
@@ -84,7 +84,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		IIdType id = ourClient.create().resource(p).execute().getId();
 
 		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, t->{
-			Patient contents = (Patient) t.get(IBaseResource.class, 0);
+			Patient contents = (Patient) t.get(IBaseResource.class, 1);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});
 
