@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @Component
 public class InterceptorService implements IInterceptorRegistry, IInterceptorBroadcaster {
 	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorService.class);
-	private final List<Object> myGlobalInterceptors = new ArrayList<>();
+	private final List<Object> myInterceptors = new ArrayList<>();
 	private final ListMultimap<Pointcut, BaseInvoker> myInvokers = ArrayListMultimap.create();
 	private final ListMultimap<Pointcut, BaseInvoker> myAnonymousInvokers = ArrayListMultimap.create();
 	private final Object myRegistryMutex = new Object();
@@ -57,7 +57,7 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 
 	@VisibleForTesting
 	List<Object> getGlobalInterceptorsForUnitTest() {
-		return myGlobalInterceptors;
+		return myInterceptors;
 	}
 
 
@@ -84,58 +84,78 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	@Override
 	public boolean registerInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
-			boolean retVal = false;
 
-			for (Object next : myGlobalInterceptors) {
-				if (next == theInterceptor) {
-					return false;
-				}
+			if (isInterceptorAlreadyRegistered(theInterceptor)) {
+				return false;
 			}
 
-			int typeOrder = DEFAULT_ORDER;
-			Order typeOrderAnnotation = AnnotationUtils.findAnnotation(theInterceptor.getClass(), Order.class);
-			if (typeOrderAnnotation != null) {
-				typeOrder = typeOrderAnnotation.value();
+			Class<?> interceptorClass = theInterceptor.getClass();
+			int typeOrder = determineOrder(interceptorClass);
+
+			if (!scanInterceptorForHookMethodsAndAddThem(theInterceptor, typeOrder)) {
+				return false;
 			}
 
-			for (Method nextMethod : theInterceptor.getClass().getDeclaredMethods()) {
-				Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
-
-				if (hook != null) {
-
-					int methodOrder = typeOrder;
-					Order methodOrderAnnotation = AnnotationUtils.findAnnotation(nextMethod, Order.class);
-					if (methodOrderAnnotation != null) {
-						methodOrder = methodOrderAnnotation.value();
-					}
-
-					HookInvoker invoker = new HookInvoker(hook, theInterceptor, nextMethod, methodOrder);
-					for (Pointcut nextPointcut : hook.value()) {
-						myInvokers.put(nextPointcut, invoker);
-					}
-
-					retVal = true;
-				}
-			}
-
-			myGlobalInterceptors.add(theInterceptor);
+			myInterceptors.add(theInterceptor);
 
 			// Make sure we're always sorted according to the order declared in
 			// @Order
-			sortByOrderAnnotation(myGlobalInterceptors);
+			sortByOrderAnnotation(myInterceptors);
 			for (Pointcut nextPointcut : myInvokers.keys()) {
 				List<BaseInvoker> nextInvokerList = myInvokers.get(nextPointcut);
 				nextInvokerList.sort(Comparator.naturalOrder());
 			}
 
-			return retVal;
+			return true;
 		}
+	}
+
+	private boolean scanInterceptorForHookMethodsAndAddThem(Object theInterceptor, int theTypeOrder) {
+		boolean retVal = false;
+		for (Method nextMethod : theInterceptor.getClass().getDeclaredMethods()) {
+			Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
+
+			if (hook != null) {
+
+				int methodOrder = theTypeOrder;
+				Order methodOrderAnnotation = AnnotationUtils.findAnnotation(nextMethod, Order.class);
+				if (methodOrderAnnotation != null) {
+					methodOrder = methodOrderAnnotation.value();
+				}
+
+				HookInvoker invoker = new HookInvoker(hook, theInterceptor, nextMethod, methodOrder);
+				for (Pointcut nextPointcut : hook.value()) {
+					myInvokers.put(nextPointcut, invoker);
+				}
+
+				retVal = true;
+			}
+		}
+		return retVal;
+	}
+
+	private int determineOrder(Class<?> theInterceptorClass) {
+		int typeOrder = DEFAULT_ORDER;
+		Order typeOrderAnnotation = AnnotationUtils.findAnnotation(theInterceptorClass, Order.class);
+		if (typeOrderAnnotation != null) {
+			typeOrder = typeOrderAnnotation.value();
+		}
+		return typeOrder;
+	}
+
+	private boolean isInterceptorAlreadyRegistered(Object theInterceptor) {
+		for (Object next : myInterceptors) {
+			if (next == theInterceptor) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public void unregisterInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
-			myGlobalInterceptors.removeIf(t -> t == theInterceptor);
+			myInterceptors.removeIf(t -> t == theInterceptor);
 			myInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
 		}
 	}
@@ -221,7 +241,7 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	 * Only call this when assertions are enabled, it's expensive
 	 */
 	boolean haveAppropriateParams(Pointcut thePointcut, HookParams theParams) {
-		Validate.isTrue(theParams.getParamsForType().values().size() == thePointcut.getParameterTypes().size(), "Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t->t.getClass().getSimpleName()).sorted().collect(Collectors.toList()));
+		Validate.isTrue(theParams.getParamsForType().values().size() == thePointcut.getParameterTypes().size(), "Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t -> t.getClass().getSimpleName()).sorted().collect(Collectors.toList()));
 
 		List<String> wantedTypes = new ArrayList<>(thePointcut.getParameterTypes());
 
@@ -235,13 +255,6 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 		}
 
 		return true;
-	}
-
-	private static String toErrorString(List<String> theParameterTypes) {
-		return theParameterTypes
-			.stream()
-			.sorted()
-			.collect(Collectors.joining(","));
 	}
 
 	private abstract class BaseInvoker implements Comparable<BaseInvoker> {
@@ -337,7 +350,7 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
 				if (targetException instanceof RuntimeException) {
-					throw ((RuntimeException)targetException);
+					throw ((RuntimeException) targetException);
 				} else {
 					throw new InternalErrorException(targetException);
 				}
@@ -347,6 +360,13 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 
 		}
 
+	}
+
+	private static String toErrorString(List<String> theParameterTypes) {
+		return theParameterTypes
+			.stream()
+			.sorted()
+			.collect(Collectors.joining(","));
 	}
 
 }
