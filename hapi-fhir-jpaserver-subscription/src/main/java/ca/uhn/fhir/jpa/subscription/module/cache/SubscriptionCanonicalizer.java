@@ -24,11 +24,13 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
@@ -258,5 +260,34 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		}
 
 		return retVal;
+	}
+
+	public String getCriteria(IBaseResource theSubscription) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case DSTU2:
+				return ((ca.uhn.fhir.model.dstu2.resource.Subscription)theSubscription).getCriteria();
+			case DSTU3:
+				return ((org.hl7.fhir.dstu3.model.Subscription)theSubscription).getCriteria();
+			case R4:
+				return ((org.hl7.fhir.r4.model.Subscription)theSubscription).getCriteria();
+			default:
+				throw new ConfigurationException("Subscription not supported for version: " + myFhirContext.getVersion().getVersion());
+		}
+	}
+
+
+	public void setMatchingStrategyTag(FhirContext theFhirContext, IBaseResource theSubscription, SubscriptionMatchingStrategy theStrategy) {
+		IBaseMetaType meta = theSubscription.getMeta();
+		String value = theStrategy.toString();
+		String display;
+
+		if (theStrategy == SubscriptionMatchingStrategy.DATABASE) {
+			display = "Database";
+		} else if (theStrategy == SubscriptionMatchingStrategy.IN_MEMORY) {
+			display = "In-memory";
+		} else {
+			throw new IllegalStateException("Unknown " + SubscriptionMatchingStrategy.class.getSimpleName() + ": "+theStrategy);
+		}
+		meta.addTag().setSystem(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY).setCode(value).setDisplay(display);
 	}
 }

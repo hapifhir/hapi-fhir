@@ -32,6 +32,8 @@ import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -92,6 +94,8 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
@@ -156,7 +160,6 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 		}
 	}
 
-
 	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement());
@@ -164,6 +167,8 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
 		try {
 			SubscriptionUtil.setStatus(myFhirContext, subscription, theActiveStatus);
+			SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(mySubscriptionCanonicalizer.getCriteria(theSubscription));
+			mySubscriptionCanonicalizer.setMatchingStrategyTag(myFhirContext, subscription, strategy);
 			subscription = subscriptionDao.update(subscription).getResource();
 			submitResourceModifiedForUpdate(subscription);
 			return true;

@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -352,7 +354,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
+		Assert.assertNotEquals(subscription1.getId(), subscription2.getId());
 		Assert.assertFalse(observation1.getId().isEmpty());
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
@@ -412,6 +414,41 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private void waitForQueueToDrain() throws InterruptedException {
 		mySubscriptionTestUtil.waitForQueueToDrain();
+	}
+
+	@Test
+	public void testSubscriptionActivatesInMemoryTag() throws Exception {
+		String payload = "application/fhir+xml";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		IdType subscriptionId = createSubscription(criteria1, payload, ourListenerServerBase).getIdElement();
+
+		Subscription subscription = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
+		List<Coding> tags = subscription.getMeta().getTag();
+		assertEquals(1, tags.size());
+		Coding tag = tags.get(0);
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
+		assertEquals("In-memory", tag.getDisplay());
+	}
+
+	@Test
+	public void testSubscriptionActivatesDatabaseTag() throws Exception {
+		String payload = "application/fhir+xml";
+
+		IdType subscriptionId = createSubscription("Observation?code=17861-6&context.type=IHD", payload, ourListenerServerBase).getIdElement();
+
+		Subscription subscription = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
+		List<Coding> tags = subscription.getMeta().getTag();
+		assertEquals(1, tags.size());
+		Coding tag = tags.get(0);
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
+		assertEquals("Database", tag.getDisplay());
 	}
 
 	@BeforeClass

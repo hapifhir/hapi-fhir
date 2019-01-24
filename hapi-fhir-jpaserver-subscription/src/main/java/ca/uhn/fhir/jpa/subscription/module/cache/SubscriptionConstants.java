@@ -68,6 +68,13 @@ public class SubscriptionConstants {
 	public static final String EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-deliver-latest-version";
 
 	/**
+	 * Indicate which strategy will be used to match this subscription
+	 */
+
+	public static final String EXT_SUBSCRIPTION_MATCHING_STRATEGY = "http://hapifhir.io/fhir/StructureDefinition/subscription-matching-strategy";
+
+
+	/**
 	 * The number of threads used in subscription channel processing
 	 */
 	public static final int EXECUTOR_THREAD_COUNT = 5;
@@ -79,12 +86,8 @@ public class SubscriptionConstants {
 	public static final int MAX_SUBSCRIPTION_RESULTS = 1000;
 
 	/**
-	 * The size of the queue used for sending resources to the subscription matching processor
+	 * The size of the queue used for sending resources to the subscription matching processor and by each subscription delivery queue
 	 */
-	public static final int PROCESSING_EXECUTOR_QUEUE_SIZE = 1000;
 
-	/**
-	 * The size of the queue used by each subscription delivery queue
-	 */
 	public static final int DELIVERY_EXECUTOR_QUEUE_SIZE = 1000;
 }
