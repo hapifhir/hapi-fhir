@@ -7,22 +7,22 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.codesystems.MedicationRequestCategory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test {
+	@Autowired
+	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Autowired
 	InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(myInMemorySubscriptionMatcher.match(criteria, resource).supported());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
 	private void assertMatched(IBaseResource resource, String criteria) {
@@ -30,13 +30,20 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 
 		assertTrue(result.supported());
 		assertTrue(result.matched());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
 	private void assertNotMatched(IBaseResource resource, String criteria) {
+		assertNotMatched(resource, criteria, SubscriptionMatchingStrategy.IN_MEMORY);
+	}
+
+	private void assertNotMatched(IBaseResource resource, String criteria, SubscriptionMatchingStrategy theSubscriptionMatchingStrategy) {
 		SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(criteria, resource);
 
 		assertTrue(result.supported());
 		assertFalse(result.matched());
+
+		assertEquals(theSubscriptionMatchingStrategy, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
 	@Test
@@ -125,7 +132,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("XXX");
-			assertNotMatched(obs, criteria);
+			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.DATABASE);
 		}
 		{
 			Observation obs = new Observation();
@@ -141,7 +148,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("XXX");
-			assertNotMatched(obs, criteria);
+			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.DATABASE);
 		}
 		{
 			Observation obs = new Observation();
@@ -239,7 +246,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("XXX");
-			assertNotMatched(obs, criteria);
+			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.DATABASE);
 		}
 	}
 

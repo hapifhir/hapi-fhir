@@ -36,28 +36,40 @@ public class InMemorySubscriptionMatcherTestR4 {
 	@Autowired
 	InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
 	@Autowired
+	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
+	@Autowired
 	FhirContext myContext;
 
-	private SubscriptionMatchResult match(IBaseResource resource, SearchParameterMap params) {
-		String criteria = params.toNormalizedQueryString(myContext);
+	private String getCriteria(Resource theResource, SearchParameterMap theParams) {
+		return theResource.getResourceType().name() + theParams.toNormalizedQueryString(myContext);
+	}
+
+	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {
+		assertFalse(match(resource, theParams).supported());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams)));
+	}
+
+	private SubscriptionMatchResult match(Resource theResource, SearchParameterMap theParams) {
+		return match(getCriteria(theResource, theParams), theResource);
+	}
+
+	private SubscriptionMatchResult match(String criteria, Resource theResource) {
 		ourLog.info("Criteria: <{}>", criteria);
-		return myInMemorySubscriptionMatcher.match(criteria, resource);
+		return myInMemorySubscriptionMatcher.match(criteria, theResource);
 	}
 
-	private void assertUnsupported(IBaseResource resource, SearchParameterMap params) {
-		assertFalse(match(resource, params).supported());
-	}
-
-	private void assertMatched(IBaseResource resource, SearchParameterMap params) {
+	private void assertMatched(Resource resource, SearchParameterMap params) {
 		SubscriptionMatchResult result = match(resource, params);
 		assertTrue(result.getUnsupportedReason(), result.supported());
 		assertTrue(result.matched());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
 	}
 
-	private void assertNotMatched(IBaseResource resource, SearchParameterMap params) {
+	private void assertNotMatched(Resource resource, SearchParameterMap params) {
 		SubscriptionMatchResult result = match(resource, params);
 		assertTrue(result.getUnsupportedReason(), result.supported());
 		assertFalse(result.matched());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
 	}
 
 	/*
@@ -93,7 +105,6 @@ public class InMemorySubscriptionMatcherTestR4 {
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
-		String criteria = params.toNormalizedQueryString(myContext);
 		assertUnsupported(patient, params);
 	}
 
@@ -130,7 +141,7 @@ public class InMemorySubscriptionMatcherTestR4 {
 
 		TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamN01");
 		StringParam v1 = new StringParam("testSearchCompositeParamS01");
-		CompositeParam<TokenParam, StringParam> val = new CompositeParam<TokenParam, StringParam>(v0, v1);
+		CompositeParam<TokenParam, StringParam> val = new CompositeParam<>(v0, v1);
 		SearchParameterMap params = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_CODE_VALUE_STRING, val);
 		assertUnsupported(o1, params);
 	}
@@ -170,11 +181,11 @@ public class InMemorySubscriptionMatcherTestR4 {
 	}
 
 	@Test
-	public void testIdNotSupported() {
+	public void testIdSupported() {
 		Observation o1 = new Observation();
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("_id", new StringParam("testSearchForUnknownAlphanumericId"));
-		assertUnsupported(o1, params);
+		assertNotMatched(o1, params);
 	}
 
 	@Test
@@ -190,7 +201,7 @@ public class InMemorySubscriptionMatcherTestR4 {
 	}
 
 	@Test
-	public void testSearchLastUpdatedParamUnsupported() throws InterruptedException {
+	public void testSearchLastUpdatedParamUnsupported() {
 		String methodName = "testSearchLastUpdatedParam";
 		DateTimeType today = new DateTimeType(new Date(), TemporalPrecisionEnum.DAY);
 		Patient patient = new Patient();
@@ -294,12 +305,12 @@ public class InMemorySubscriptionMatcherTestR4 {
 	@Test
 	public void testSearchQuantityWrongParam() {
 		Condition c1 = new Condition();
-		c1.setAbatement(new Range().setLow((SimpleQuantity) new SimpleQuantity().setValue(1L)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(1L)));
+		c1.setAbatement(new Range().setLow(new SimpleQuantity().setValue(1L)).setHigh(new SimpleQuantity().setValue(1L)));
 		SearchParameterMap params = new SearchParameterMap().setLoadSynchronous(true).add(Condition.SP_ABATEMENT_AGE, new QuantityParam("1"));
 		assertMatched(c1, params);
 
 		Condition c2 = new Condition();
-		c2.setOnset(new Range().setLow((SimpleQuantity) new SimpleQuantity().setValue(1L)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(1L)));
+		c2.setOnset(new Range().setLow(new SimpleQuantity().setValue(1L)).setHigh(new SimpleQuantity().setValue(1L)));
 
 		params = new SearchParameterMap().add(Condition.SP_ONSET_AGE, new QuantityParam("1"));
 		assertMatched(c2, params);
@@ -414,7 +425,7 @@ public class InMemorySubscriptionMatcherTestR4 {
 	}
 
 	@Test
-	public void testSearchStringParam() throws Exception {
+	public void testSearchStringParam() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().setFamily("Tester_testSearchStringParam").addGiven("Joe");
@@ -569,13 +580,11 @@ public class InMemorySubscriptionMatcherTestR4 {
 
 	@Test
 	public void testSearchTokenWithNotModifierUnsupported() {
-		String male, female;
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().setFamily("Tester").addGiven("Joe");
 		patient.setGender(Enumerations.AdministrativeGender.MALE);
 
-		List<String> patients;
 		SearchParameterMap params;
 
 		params = new SearchParameterMap();
@@ -640,7 +649,6 @@ public class InMemorySubscriptionMatcherTestR4 {
 		o2.setValue(q2);
 
 		SearchParameterMap map;
-		IBundleProvider found;
 		QuantityParam param;
 
 		map = new SearchParameterMap();
@@ -682,9 +690,7 @@ public class InMemorySubscriptionMatcherTestR4 {
 		Patient pt1 = new Patient();
 		pt1.addName().setFamily("ABCDEFGHIJK");
 
-		List<String> ids;
 		SearchParameterMap map;
-		IBundleProvider results;
 
 		// Contains = true
 		map = new SearchParameterMap();
@@ -875,7 +881,7 @@ public class InMemorySubscriptionMatcherTestR4 {
 		map.add(Observation.SP_DATE, new DateParam("2011-01-02"));
 
 		for (Observation obs : nlist) {
-//			assertNotMatched(obs, map);
+			assertNotMatched(obs, map);
 		}
 		for (Observation obs : ylist) {
 			ourLog.info("Obs {} has time {}", obs.getId(), obs.getEffectiveDateTimeType().getValue().toString());

@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.jpa.model.util.FHIRUrlParser;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
@@ -223,7 +223,7 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theResource);
 		String criteria = subscription.getCriteriaString();
 		try {
-			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myFhirContext, criteria);
+			RuntimeResourceDefinition resourceDef = FHIRUrlParser.parseUrlResourceType(myFhirContext, criteria);
 			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
 		} catch (InvalidRequestException e) {
 			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
