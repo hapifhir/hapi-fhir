@@ -153,9 +153,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
-
-		observation.setId(methodOutcome.getId());
+		IIdType id = myObservationDao.create(observation).getId();
+		observation.setId(id);
 
 		return observation;
 	}

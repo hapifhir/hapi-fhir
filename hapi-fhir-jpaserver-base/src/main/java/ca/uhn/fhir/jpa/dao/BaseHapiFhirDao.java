@@ -7,6 +7,9 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -69,6 +72,8 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.*;
@@ -115,7 +120,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	public static final String OO_SEVERITY_INFO = "information";
 	public static final String OO_SEVERITY_WARN = "warning";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirDao.class);
-	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<FhirVersionEnum, FhirContext>();
+	private static final Map<FhirVersionEnum, FhirContext> ourRetrievalContexts = new HashMap<>();
 	private static final String PROCESSING_SUB_REQUEST = "BaseHapiFhirDao.processingSubRequest";
 	private static boolean ourValidationDisabledForUnitTest;
 	private static boolean ourDisableIncrementOnUpdateForUnitTest = false;
@@ -124,6 +129,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected EntityManager myEntityManager;
 	@Autowired
 	protected IdHelperService myIdHelperService;
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -1420,9 +1427,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return updateEntity(theRequest, theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);
 	}
 
-	public ResourceTable updateInternal(RequestDetails theRequest, T theResource, boolean thePerformIndexing,
-													boolean theForceUpdateVersion, RequestDetails theRequestDetails, ResourceTable theEntity, IIdType
-														theResourceId, IBaseResource theOldResource) {
+	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
+													ResourceTable theEntity, IIdType theResourceId, IBaseResource theOldResource) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails;
 		if (theRequestDetails != null) {
@@ -1439,9 +1445,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				((IServerOperationInterceptor) next).resourcePreUpdate(theRequestDetails, theOldResource, theResource);
 			}
 		}
+		HookParams hookParams = new HookParams()
+			.add(IBaseResource.class, theOldResource)
+			.add(IBaseResource.class, theResource);
+		myInterceptorBroadcaster.callHooks(Pointcut.OP_PRESTORAGE_RESOURCE_UPDATED, hookParams);
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theRequest, theResource, theEntity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
+		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, theEntity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
 
 		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
@@ -1470,7 +1480,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theOldResource, theResource);
 				}
 			}
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public void beforeCommit(boolean readOnly) {
+					HookParams hookParams = new HookParams()
+						.add(IBaseResource.class, theOldResource)
+						.add(IBaseResource.class, theResource);
+					myInterceptorBroadcaster.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, hookParams);
+				}
+			});
 		}
+
 		return savedEntity;
 	}
 
@@ -1478,6 +1498,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		IIdType id = theEntity.getIdDt();
 		if (getContext().getVersion().getVersion().isRi()) {
 			id = getContext().getVersion().newIdType().setValue(id.getValue());
+		}
+
+		if (id.hasResourceType() == false) {
+			id = id.withResourceType(theEntity.getResourceType());
 		}
 
 		theResource.setId(id);

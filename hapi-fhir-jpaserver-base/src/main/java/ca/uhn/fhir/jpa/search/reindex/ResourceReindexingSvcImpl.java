@@ -391,7 +391,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		});
 	}
 
-	@SuppressWarnings("JpaQlInspection")
 	private void markResourceAsIndexingFailed(final long theId) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
