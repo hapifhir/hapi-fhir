@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -63,7 +64,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		}
 	}
 
-	protected CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
 		ca.uhn.fhir.model.dstu2.resource.Subscription subscription = (ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -82,7 +83,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return retVal;
 	}
 
-	protected CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
 		org.hl7.fhir.dstu3.model.Subscription subscription = (org.hl7.fhir.dstu3.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -96,10 +97,10 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 
-			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
+				if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
 				String subjectTemplate;
-				String bodyTemplate;
+
 				try {
 					from = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
 					subjectTemplate = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
@@ -111,6 +112,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 			}
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
+
 				String stripVersionIds;
 				String deliverLatestVersion;
 				try {
@@ -210,7 +212,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return null;
 	}
 
-	protected CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
 		org.hl7.fhir.r4.model.Subscription subscription = (org.hl7.fhir.r4.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();

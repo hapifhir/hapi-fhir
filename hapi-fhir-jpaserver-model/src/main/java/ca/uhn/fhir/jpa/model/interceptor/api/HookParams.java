@@ -24,6 +24,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class HookParams {
@@ -74,4 +76,7 @@ public class HookParams {
 		return Multimaps.unmodifiableListMultimap(myParams);
 	}
 
+	public Collection<Object> values() {
+		return Collections.unmodifiableCollection(myParams.values());
+	}
 }

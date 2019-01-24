@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
@@ -60,8 +59,7 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
 		mySearchParamExtractorService.extractFromResource(searchParams, entity, resource);
-		myResourceLinkExtractor.extractResourceLinks(searchParams, entity, resource, resource.getMeta().getLastUpdated(), myInlineResourceLinkResolver, false);
-		RuntimeResourceDefinition resourceDefinition = myContext.getResourceDefinition(resource);
-		return myCriteriaResourceMatcher.match(criteria, resourceDefinition, searchParams);
+		myResourceLinkExtractor.extractResourceLinks(searchParams, entity, resource, resource.getMeta().getLastUpdated(), myInlineResourceLinkResolver);
+		return myCriteriaResourceMatcher.match(criteria, resource, searchParams);
 	}
 }
