@@ -32,6 +32,8 @@ public class SubscriptionMatchResult {
 	private final String myUnsupportedParameter;
 	private final String myUnsupportedReason;
 
+	private boolean myInMemory = false;
+
 	private SubscriptionMatchResult(boolean theMatch) {
 		this.myMatch = theMatch;
 		this.mySupported = true;
@@ -75,5 +77,13 @@ public class SubscriptionMatchResult {
 			return "Parameter: <" + myUnsupportedParameter + "> Reason: " + myUnsupportedReason;
 		}
 		return myUnsupportedReason;
+	}
+
+	public boolean isInMemory() {
+		return myInMemory;
+	}
+
+	public void setInMemory(boolean theInMemory) {
+		myInMemory = theInMemory;
 	}
 }

@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
@@ -40,24 +39,6 @@ public class InMemorySubscriptionMatcherTestR4 {
 	@Autowired
 	FhirContext myContext;
 
-	private String getCriteria(Resource theResource, SearchParameterMap theParams) {
-		return theResource.getResourceType().name() + theParams.toNormalizedQueryString(myContext);
-	}
-
-	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {
-		assertFalse(match(resource, theParams).supported());
-		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams)));
-	}
-
-	private SubscriptionMatchResult match(Resource theResource, SearchParameterMap theParams) {
-		return match(getCriteria(theResource, theParams), theResource);
-	}
-
-	private SubscriptionMatchResult match(String criteria, Resource theResource) {
-		ourLog.info("Criteria: <{}>", criteria);
-		return myInMemorySubscriptionMatcher.match(criteria, theResource);
-	}
-
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		SubscriptionMatchResult result = match(resource, params);
 		assertTrue(result.getUnsupportedReason(), result.supported());
@@ -70,6 +51,25 @@ public class InMemorySubscriptionMatcherTestR4 {
 		assertTrue(result.getUnsupportedReason(), result.supported());
 		assertFalse(result.matched());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
+	}
+
+	private SubscriptionMatchResult match(Resource theResource, SearchParameterMap theParams) {
+		return match(getCriteria(theResource, theParams), theResource);
+	}
+
+	private String getCriteria(Resource theResource, SearchParameterMap theParams) {
+		return theResource.getResourceType().name() + theParams.toNormalizedQueryString(myContext);
+	}
+
+	private SubscriptionMatchResult match(String criteria, Resource theResource) {
+		ourLog.info("Criteria: <{}>", criteria);
+		return myInMemorySubscriptionMatcher.match(criteria, theResource);
+	}
+
+	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {
+		SubscriptionMatchResult result = match(resource, theParams);
+		assertFalse(result.supported());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams)));
 	}
 
 	/*

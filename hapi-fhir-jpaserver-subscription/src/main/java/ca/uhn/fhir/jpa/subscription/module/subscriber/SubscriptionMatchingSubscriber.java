@@ -117,8 +117,10 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			if (!matchResult.matched()) {
 				continue;
 			}
-// FIXME KHS log the matcher used
-			ourLog.info("Subscription {} was matched by resource {}", nextActiveSubscription.getSubscription().getIdElement(myFhirContext).getValue(), resourceId.toUnqualifiedVersionless().getValue());
+			ourLog.debug("Subscription {} was matched by resource {} {}",
+				nextActiveSubscription.getSubscription().getIdElement(myFhirContext).getValue(),
+				resourceId.toUnqualifiedVersionless().getValue(),
+				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
 
