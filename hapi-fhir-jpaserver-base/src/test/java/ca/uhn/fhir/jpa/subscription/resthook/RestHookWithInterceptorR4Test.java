@@ -136,9 +136,14 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	@Configuration
 	static class MyTestCtxConfig {
 
+		@Autowired
+		private IInterceptorRegistry myInterceptorRegistry;
+
 		@Bean
 		public MyTestInterceptor interceptor() {
-			return new MyTestInterceptor();
+			MyTestInterceptor retVal = new MyTestInterceptor();
+			myInterceptorRegistry.registerInterceptor(retVal);
+			return retVal;
 		}
 
 	}

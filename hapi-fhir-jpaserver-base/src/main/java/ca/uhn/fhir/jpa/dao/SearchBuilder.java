@@ -100,7 +100,6 @@ import static org.apache.commons.lang3.StringUtils.*;
  * The SearchBuilder is responsible for actually forming the SQL query that handles
  * searches for resources
  */
-@SuppressWarnings("JpaQlInspection")
 @Component
 @Scope("prototype")
 public class SearchBuilder implements ISearchBuilder {

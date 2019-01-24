@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -47,6 +48,8 @@ public class SubscriptionInterceptorLoader {
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private ApplicationContext myAppicationContext;
+	@Autowired
+	private IInterceptorRegistry myInterceptorRegistry;
 
 	public void registerInterceptors() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
@@ -54,12 +57,12 @@ public class SubscriptionInterceptorLoader {
 		if (!supportedSubscriptionTypes.isEmpty()) {
 			loadSubscriptions();
 			ourLog.info("Registering subscription activating interceptor");
-			myDaoConfig.registerInterceptor(mySubscriptionActivatingInterceptor);
+			myInterceptorRegistry.registerInterceptor(mySubscriptionActivatingInterceptor);
 		}
 		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
 			mySubscriptionMatcherInterceptor.start();
 			ourLog.info("Registering subscription matcher interceptor");
-			myDaoConfig.registerInterceptor(mySubscriptionMatcherInterceptor);
+			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
 		}
 	}
 
@@ -72,7 +75,7 @@ public class SubscriptionInterceptorLoader {
 
 	@VisibleForTesting
 	void unregisterInterceptorsForUnitTest() {
-		myDaoConfig.unregisterInterceptor(mySubscriptionActivatingInterceptor);
-		myDaoConfig.unregisterInterceptor(mySubscriptionMatcherInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(mySubscriptionActivatingInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(mySubscriptionMatcherInterceptor);
 	}
 }

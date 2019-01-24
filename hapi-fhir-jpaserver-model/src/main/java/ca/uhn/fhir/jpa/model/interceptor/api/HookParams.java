@@ -22,9 +22,11 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimaps;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class HookParams {
 
@@ -67,10 +69,14 @@ public class HookParams {
 	}
 
 	/**
-	 * Multivalued parameters will be returned twice in this list
+	 * Returns an unmodifiable multimap of the params, where the
+	 * key is the param type and the value is the actual instance
 	 */
-	public List<String> getTypesAsSimpleName() {
-		return myParams.values().stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList());
+	public ListMultimap<Class<?>, Object> getParamsForType() {
+		return Multimaps.unmodifiableListMultimap(myParams);
 	}
 
+	public Collection<Object> values() {
+		return Collections.unmodifiableCollection(myParams.values());
+	}
 }

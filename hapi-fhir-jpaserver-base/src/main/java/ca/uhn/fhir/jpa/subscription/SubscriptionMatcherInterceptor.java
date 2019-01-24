@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
+import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -42,7 +43,8 @@ import javax.annotation.PreDestroy;
 
 @Component
 @Lazy
-public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAdapter implements IResourceModifiedConsumer {
+@Interceptor(manualRegistration = true)
+public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
 	private static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
@@ -82,18 +84,18 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 		}
 	}
 
-	@Override
-	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
+	public void resourceCreated(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 	}
 
-	@Override
-	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_DELETED)
+	public void resourceDeleted(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
 	}
 
-	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
+	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
@@ -115,6 +117,7 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	/**
 	 * This is an internal API - Use with caution!
 	 */
+	@Override
 	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		sendToProcessingChannel(theMsg);
 	}

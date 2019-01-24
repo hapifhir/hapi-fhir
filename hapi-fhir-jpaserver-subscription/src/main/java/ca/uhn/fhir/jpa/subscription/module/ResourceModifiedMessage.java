@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.module;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.IResourceMessage;
+import ca.uhn.fhir.util.ResourceReferenceInfo;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,6 +30,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -113,6 +117,15 @@ public class ResourceModifiedMessage implements IResourceMessage {
 
 	private void setNewPayload(FhirContext theCtx, IBaseResource theNewPayload) {
 		/*
+		 * References with placeholders would be invalid by the time we get here, and
+		 * would be caught before we even get here. This check is basically a last-ditch
+		 * effort to make sure nothing has broken in the various safeguards that
+		 * should prevent this from happening (hence it only being an assert as
+		 * opposed to something executed all the time).
+		 */
+		assert payloadContainsNoPlaceholderReferences(theCtx, theNewPayload);
+
+		/*
 		 * Note: Don't set myPayloadDecoded in here- This is a false optimization since
 		 * it doesn't actually get used if anyone is doing subscriptions at any
 		 * scale using a queue engine, and not going through the serialize/deserialize
@@ -123,13 +136,31 @@ public class ResourceModifiedMessage implements IResourceMessage {
 		myPayloadId = theNewPayload.getIdElement().toUnqualified().getValue();
 	}
 
-
 	public enum OperationTypeEnum {
 		CREATE,
 		UPDATE,
 		DELETE,
 		MANUALLY_TRIGGERED
 
+	}
+
+	private static boolean payloadContainsNoPlaceholderReferences(FhirContext theCtx, IBaseResource theNewPayload) {
+		List<ResourceReferenceInfo> refs = theCtx.newTerser().getAllResourceReferences(theNewPayload);
+		for (ResourceReferenceInfo next : refs) {
+			String ref = next.getResourceReference().getReferenceElement().getValue();
+			if (isBlank(ref)) {
+				ref = next.getResourceReference().getResource().getIdElement().getValue();
+			}
+			if (isNotBlank(ref)) {
+				if (ref.startsWith("#")) {
+					continue;
+				}
+				if (ref.startsWith("urn:uuid:")) {
+					throw new AssertionError("Reference at " + next.getName() + " is invalid: " + next.getResourceReference());
+				}
+			}
+		}
+		return true;
 	}
 
 }

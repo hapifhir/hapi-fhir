@@ -20,22 +20,16 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-/**
- * This annotation declares a bean as a subscription interceptor
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Interceptor {
+public interface IInterceptorBroadcaster {
 
 	/**
-	 * @return Declares that an interceptor should be manually registered with the registry,
-	 * and should not auto-register using Spring autowiring.
+	 * Invoke the interceptor methods
 	 */
-	boolean manualRegistration() default false;
+	boolean callHooks(Pointcut thePointcut, HookParams theParams);
+
+	/**
+	 * Invoke the interceptor methods
+	 */
+	boolean callHooks(Pointcut thePointcut, Object... theParams);
 
 }

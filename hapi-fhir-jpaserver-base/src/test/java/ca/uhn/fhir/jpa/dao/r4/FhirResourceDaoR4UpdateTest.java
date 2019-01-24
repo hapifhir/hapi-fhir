@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -12,7 +13,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -313,12 +313,15 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		assertEquals("1", outcome.getId().getVersionIdPart());
 
+		TestUtil.sleepOneClick();
+
 		Date now = new Date();
+
 		Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
-		InstantType updated = retrieved.getMeta().getLastUpdatedElement().copy();
+		InstantType updated = TestUtil.getTimestamp(retrieved);
 		assertTrue(updated.before(now));
 
-		Thread.sleep(1000);
+		TestUtil.sleepOneClick();
 
 		reset(myInterceptor);
 		retrieved.getIdentifier().get(0).setValue("002");
@@ -335,17 +338,18 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertEquals("Patient", details.getResourceType());
 		assertEquals(Patient.class, details.getResource().getClass());
 
+		TestUtil.sleepOneClick();
 		Date now2 = new Date();
 
 		Patient retrieved2 = myPatientDao.read(outcome.getId().toVersionless(), mySrd);
 
 		assertEquals("2", retrieved2.getIdElement().getVersionIdPart());
 		assertEquals("002", retrieved2.getIdentifier().get(0).getValue());
-		InstantType updated2 = retrieved2.getMeta().getLastUpdatedElement();
+		InstantType updated2 = TestUtil.getTimestamp(retrieved2);
 		assertTrue(updated2.after(now));
 		assertTrue(updated2.before(now2));
 
-		Thread.sleep(2000);
+		TestUtil.sleepOneClick();
 
 		/*
 		 * Get history

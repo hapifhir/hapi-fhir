@@ -26,6 +26,34 @@ public interface IInterceptorRegistry {
 
 	int DEFAULT_ORDER = 0;
 
+	/**
+	 * Register an interceptor. This method has no effect if the given interceptor is already registered.
+	 *
+	 * @param theInterceptor The interceptor to register
+	 * @return Returns <code>true</code> if at least one valid hook method was found on this interceptor
+	 */
+	boolean registerInterceptor(Object theInterceptor);
+
+	/**
+	 * Unregister an interceptor. This method has no effect if the given interceptor is not already registered.
+	 *
+	 * @param theInterceptor The interceptor to unregister
+	 */
+	void unregisterInterceptor(Object theInterceptor);
+
+	/**
+	 * @deprecated to be removed
+	 */
+	@Deprecated
+	boolean registerGlobalInterceptor(Object theInterceptor);
+
+	/**
+	 * @deprecated to be removed
+	 */
+	@Deprecated
+	void unregisterGlobalInterceptor(Object theInterceptor);
+
+
 	@VisibleForTesting
 	void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook);
 
@@ -34,23 +62,4 @@ public interface IInterceptorRegistry {
 
 	@VisibleForTesting
 	void clearAnonymousHookForUnitTest();
-
-	/**
-	 * Register an interceptor
-	 *
-	 * @param theInterceptor The interceptor to register
-	 * @return Returns <code>true</code> if at least one valid hook method was found on this interceptor
-	 */
-	boolean registerGlobalInterceptor(Object theInterceptor);
-
-	/**
-	 * Invoke the interceptor methods
-	 */
-	boolean callHooks(Pointcut thePointcut, HookParams theParams);
-
-	/**
-	 * Invoke the interceptor methods
-	 */
-	boolean callHooks(Pointcut thePointcut, Object... theParams);
-
 }

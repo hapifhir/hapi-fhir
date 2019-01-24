@@ -99,7 +99,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		extractInlineReferences(theResource);
 
-		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDaoResourceLinkResolver);
+		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDaoResourceLinkResolver, true);
 
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them

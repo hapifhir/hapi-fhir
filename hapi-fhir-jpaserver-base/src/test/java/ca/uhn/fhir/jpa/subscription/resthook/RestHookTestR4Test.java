@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.*;
 
 /**
@@ -111,6 +112,39 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals("2", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
 	}
 
+
+	@Test
+	public void testPlaceholderReferencesInTransactionAreResolvedCorrectly() throws Exception {
+
+		String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria1 = "Observation?";
+		createSubscription(criteria1, payload);
+		waitForActivatedSubscriptionCount(1);
+
+		// Create a transaction that should match
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+		patient.getIdentifierFirstRep().setSystem("foo").setValue("AAA");
+		bundle.addEntry().setResource(patient).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Patient");
+
+		Observation observation = new Observation();
+		observation.getIdentifierFirstRep().setSystem("foo").setValue("1");
+		observation.getCode().addCoding().setCode(code).setSystem("SNOMED-CT");
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.getSubject().setReference(patient.getId());
+		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+
+		// Send the transaction
+		mySystemDao.transaction(null, bundle);
+
+		waitForSize(1, ourUpdatedObservations);
+
+		assertThat(ourUpdatedObservations.get(0).getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
+	}
 
 	@Test
 	public void testUpdatesHaveCorrectMetadataUsingTransactions() throws Exception {

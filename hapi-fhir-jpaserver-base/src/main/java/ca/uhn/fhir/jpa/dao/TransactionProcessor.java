@@ -89,6 +89,52 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
+	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
+		if (theRequestDetails != null) {
+			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
+			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
+		}
+
+		String actionName = "Transaction";
+		BUNDLE response = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName);
+
+		return response;
+	}
+
+	public BUNDLE collection(final RequestDetails theRequestDetails, BUNDLE theRequest) {
+		String transactionType = myVersionAdapter.getBundleType(theRequest);
+
+		if (!org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION.toCode().equals(transactionType)) {
+			throw new InvalidRequestException("Can not process collection Bundle of type: " + transactionType);
+		}
+
+		ourLog.info("Beginning storing collection with {} resources", myVersionAdapter.getEntries(theRequest).size());
+		long start = System.currentTimeMillis();
+
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+		BUNDLE resp = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
+
+		List<IBaseResource> resources = new ArrayList<>();
+		for (final BUNDLEENTRY nextRequestEntry : myVersionAdapter.getEntries(theRequest)) {
+			IBaseResource resource = myVersionAdapter.getResource(nextRequestEntry);
+			resources.add(resource);
+		}
+
+		BUNDLE transactionBundle = myVersionAdapter.createBundle("transaction");
+		for (IBaseResource next : resources) {
+			BUNDLEENTRY entry = myVersionAdapter.addEntry(transactionBundle);
+			myVersionAdapter.setResource(entry, next);
+			myVersionAdapter.setRequestVerb(entry, "PUT");
+			myVersionAdapter.setRequestUrl(entry, next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+		transaction(theRequestDetails, transactionBundle);
+
+		return resp;
+	}
+
 	private void populateEntryWithOperationOutcome(BaseServerResponseException caughtEx, BUNDLEENTRY nextEntry) {
 		myVersionAdapter.populateEntryWithOperationOutcome(caughtEx, nextEntry);
 	}
@@ -160,16 +206,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		myDao = theDao;
 	}
 
-	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
-		if (theRequestDetails != null) {
-			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
-			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
-		}
-
-		String actionName = "Transaction";
-		return processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName);
-	}
-
 	private BUNDLE processTransactionAsSubRequest(ServletRequestDetails theRequestDetails, BUNDLE theRequest, String theActionName) {
 		BaseHapiFhirDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
@@ -177,40 +213,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		} finally {
 			BaseHapiFhirDao.clearRequestAsProcessingSubRequest(theRequestDetails);
 		}
-	}
-
-	public BUNDLE collection(final RequestDetails theRequestDetails, BUNDLE theRequest) {
-		String transactionType = myVersionAdapter.getBundleType(theRequest);
-
-		if (!org.hl7.fhir.r4.model.Bundle.BundleType.COLLECTION.toCode().equals(transactionType)) {
-			throw new InvalidRequestException("Can not process collection Bundle of type: " + transactionType);
-		}
-
-		ourLog.info("Beginning storing collection with {} resources", myVersionAdapter.getEntries(theRequest).size());
-		long start = System.currentTimeMillis();
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-
-		BUNDLE resp = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.BATCHRESPONSE.toCode());
-
-		List<IBaseResource> resources = new ArrayList<>();
-		for (final BUNDLEENTRY nextRequestEntry : myVersionAdapter.getEntries(theRequest)) {
-			IBaseResource resource = myVersionAdapter.getResource(nextRequestEntry);
-			resources.add(resource);
-		}
-
-		BUNDLE transactionBundle = myVersionAdapter.createBundle("transaction");
-		for (IBaseResource next : resources) {
-			BUNDLEENTRY entry = myVersionAdapter.addEntry(transactionBundle);
-			myVersionAdapter.setResource(entry, next);
-			myVersionAdapter.setRequestVerb(entry, "PUT");
-			myVersionAdapter.setRequestUrl(entry, next.getIdElement().toUnqualifiedVersionless().getValue());
-		}
-
-		transaction(theRequestDetails, transactionBundle);
-
-		return resp;
 	}
 
 	private BUNDLE batch(final RequestDetails theRequestDetails, BUNDLE theRequest) {
@@ -234,8 +236,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				BUNDLE subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 				myVersionAdapter.addEntry(subRequestBundle, nextRequestEntry);
 
-				BUNDLE subResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
-				return subResponseBundle;
+				return processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
 			};
 
 			try {
@@ -472,10 +473,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		return p.parseResource(theResource.getClass(), p.encodeResourceToString(theResource));
 	}
 
-	public void setEntityManager(EntityManager theEntityManager) {
-		myEntityManager = theEntityManager;
-	}
-
 	private void validateDependencies() {
 		Validate.notNull(myEntityManager);
 		Validate.notNull(myContext);
@@ -526,7 +523,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						}
 					}
 
-					if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+\\:.*") && !isPlaceholder(nextResourceId)) {
+					if (nextResourceId.hasIdPart() && nextResourceId.getIdPart().matches("[a-zA-Z]+:.*") && !isPlaceholder(nextResourceId)) {
 						throw new InvalidRequestException("Invalid placeholder ID found: " + nextResourceId.getIdPart() + " - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
 					}
 
@@ -631,7 +628,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 								version = ParameterUtil.parseETagValue(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
 							}
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
-							outcome = resourceDao.update(res, null, false, theRequestDetails);
+							outcome = resourceDao.update(res, null, false, false, theRequestDetails);
 						} else {
 							res.setId((String) null);
 							String matchUrl;
@@ -641,7 +638,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 								matchUrl = parts.getResourceType();
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							outcome = resourceDao.update(res, matchUrl, false, theRequestDetails);
+							outcome = resourceDao.update(res, matchUrl, false, false, theRequestDetails);
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
 							}
@@ -727,7 +724,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 
 				if (updatedEntities.contains(nextOutcome.getEntity())) {
-					myDao.updateInternal(theRequestDetails, nextResource, true, false, theRequestDetails, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
+					myDao.updateInternal(theRequestDetails, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
 				} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
 					myDao.updateEntity(theRequestDetails, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
 				}
