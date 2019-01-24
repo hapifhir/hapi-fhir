@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,4 +75,7 @@ public class HookParams {
 		return myParams.values().stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList());
 	}
 
+	public Collection<Object> values() {
+		return Collections.unmodifiableCollection(myParams.values());
+	}
 }

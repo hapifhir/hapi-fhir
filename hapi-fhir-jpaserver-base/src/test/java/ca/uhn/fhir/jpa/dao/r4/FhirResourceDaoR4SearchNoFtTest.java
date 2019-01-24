@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -12,7 +13,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -151,16 +151,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> ids;
 
 		Date beforeAll = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
 		Organization org = new Organization();
 		org.setName("O1");
 		org.setId("O1");
 		myOrganizationDao.update(org);
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
 		Date beforePatient = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
 		Patient p = new Patient();
 		p.setId("P1");
@@ -168,7 +168,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.setManagingOrganization(new Reference("Organization/O1"));
 		myPatientDao.update(p);
 
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 		Date afterAll = new Date();
 
 		// Search with between date (should still return Organization even though
@@ -216,7 +216,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myOrganizationDao.update(org);
 
 		Date beforeAll = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
 		Patient p = new Patient();
 		p.setId("P1");
@@ -224,17 +224,17 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p.setManagingOrganization(new Reference("Organization/O1"));
 		myPatientDao.update(p);
 
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
 		Date beforeOrg = new Date();
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 
 		org = new Organization();
 		org.setActive(true);
 		org.setId("O1");
 		myOrganizationDao.update(org);
 
-		ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast(100);
+		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
 		Date afterAll = new Date();
 
 		// Everything should come back
@@ -889,7 +889,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+
+		TestUtil.sleepOneClick();
+
 		long betweenTime = System.currentTimeMillis();
+
 		IIdType id2;
 		{
 			Patient patient = new Patient();
@@ -1264,7 +1268,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
+		TestUtil.sleepOneClick();
+
 		Date betweenTime = new Date();
+
+		TestUtil.sleepOneClick();
 
 		IIdType id2;
 		{
@@ -1439,10 +1447,11 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			id0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		int sleep = 100;
+		TestUtil.sleepOneClick();
 
 		long start = System.currentTimeMillis();
-		Thread.sleep(sleep);
+
+		TestUtil.sleepOneClick();
 
 		IIdType id1a;
 		{
@@ -1450,6 +1459,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			id1a = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+
+		TestUtil.sleepOneClick();
+
 		IIdType id1b;
 		{
 			Patient patient = new Patient();
@@ -1461,7 +1473,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ourLog.info("Res 2: {}", myPatientDao.read(id1a, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 		ourLog.info("Res 3: {}", myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValueAsString());
 
-		Thread.sleep(sleep);
+		TestUtil.sleepOneClick();
+
 		long end = System.currentTimeMillis();
 
 		SearchParameterMap map;
@@ -1487,7 +1500,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		map = new SearchParameterMap();
 		map.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN, startDateTime.getValue()),
-			new DateParam(ParamPrefixEnum.LESSTHAN, myPatientDao.read(id1b, mySrd).getMeta().getLastUpdatedElement().getValue())));
+			new DateParam(ParamPrefixEnum.LESSTHAN, TestUtil.getTimestamp(myPatientDao.read(id1b, mySrd)))));
 		ourLog.info("Searching: {}", map.getLastUpdated());
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), containsInAnyOrder(id1a));
 	}
@@ -1857,15 +1870,15 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		obs01.setSubject(new Reference(patientId01));
 		IIdType obsId01 = myObservationDao.create(obs01, mySrd).getId().toUnqualifiedVersionless();
 
+		TestUtil.sleepOneClick();
 		Date between = new Date();
-		Thread.sleep(10);
 
 		Observation obs02 = new Observation();
 		obs02.setEffective(new DateTimeType(new Date()));
 		obs02.setSubject(new Reference(locId01));
 		IIdType obsId02 = myObservationDao.create(obs02, mySrd).getId().toUnqualifiedVersionless();
 
-		Thread.sleep(10);
+		TestUtil.sleepOneClick();
 		Date after = new Date();
 
 		ourLog.info("P1[{}] L1[{}] Obs1[{}] Obs2[{}]", patientId01, locId01, obsId01, obsId02);
@@ -1988,15 +2001,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			patient.addName().setFamily("Tester_testSearchStringParam").addGiven("Joe");
 			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+		TestUtil.sleepOneClick();
 		Date between = new Date();
-		Thread.sleep(10);
+
 		{
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("002");
 			patient.addName().setFamily("Tester_testSearchStringParam").addGiven("John");
 			pid2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		Thread.sleep(10);
+		TestUtil.sleepOneClick();
 		Date after = new Date();
 
 		SearchParameterMap params;
@@ -2965,6 +2979,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			org.getMeta().addTag("urn:taglist", methodName + "1b", null);
 			tag1id = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 		}
+
+		TestUtil.sleepOneClick();
 
 		Date betweenDate = new Date();
 

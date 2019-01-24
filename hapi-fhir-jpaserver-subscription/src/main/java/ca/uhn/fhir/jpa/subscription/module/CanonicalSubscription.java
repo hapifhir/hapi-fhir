@@ -311,6 +311,15 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 			myDeliverLatestVersion = theDeliverLatestVersion;
 		}
 
+
+		public boolean isStripVersionId() {
+			return myStripVersionId;
+		}
+
+		public void setStripVersionId(boolean theStripVersionId) {
+			myStripVersionId = theStripVersionId;
+		}
+
 		@Override
 		public boolean equals(Object theO) {
 			if (this == theO) return true;
@@ -331,14 +340,6 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 				.append(myStripVersionId)
 				.append(myDeliverLatestVersion)
 				.toHashCode();
-		}
-
-		public boolean isStripVersionId() {
-			return myStripVersionId;
-		}
-
-		public void setStripVersionId(boolean theStripVersionId) {
-			myStripVersionId = theStripVersionId;
 		}
 
 	}

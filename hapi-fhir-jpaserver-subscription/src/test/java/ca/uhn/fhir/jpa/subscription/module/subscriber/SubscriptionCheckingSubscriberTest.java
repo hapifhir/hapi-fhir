@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.Assert.assertEquals;
 
@@ -25,10 +27,13 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
-		sendObservation(code, "SNOMED-CT");
+		assertEquals(2, mySubscriptionRegistry.size());
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		ourObservationListener.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
+
+		assertEquals(1, ourContentTypes.size());
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -43,10 +48,13 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
-		sendObservation(code, "SNOMED-CT");
+		assertEquals(2, mySubscriptionRegistry.size());
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		ourObservationListener.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
+
+		assertEquals(1, ourContentTypes.size());
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -61,9 +69,12 @@ public class SubscriptionCheckingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
-		sendObservation(code, "SNOMED-CT");
+		assertEquals(2, mySubscriptionRegistry.size());
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		ourObservationListener.setExpectedCount(0);
+		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.expectNothing();
+
+		assertEquals(0, ourContentTypes.size());
 	}
 }
