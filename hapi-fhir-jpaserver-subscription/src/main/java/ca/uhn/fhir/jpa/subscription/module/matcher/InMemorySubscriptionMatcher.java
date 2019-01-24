@@ -59,7 +59,7 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
 		mySearchParamExtractorService.extractFromResource(searchParams, entity, resource);
-		myResourceLinkExtractor.extractResourceLinks(searchParams, entity, resource, resource.getMeta().getLastUpdated(), myInlineResourceLinkResolver);
+		myResourceLinkExtractor.extractResourceLinks(searchParams, entity, resource, resource.getMeta().getLastUpdated(), myInlineResourceLinkResolver, false);
 		return myCriteriaResourceMatcher.match(criteria, resource, searchParams);
 	}
 }
