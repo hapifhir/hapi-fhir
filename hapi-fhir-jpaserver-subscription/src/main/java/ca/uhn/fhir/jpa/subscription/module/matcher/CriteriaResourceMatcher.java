@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.util.FHIRUrlParser;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -34,6 +33,7 @@ import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -68,7 +68,7 @@ public class CriteriaResourceMatcher {
 	public SubscriptionMatchResult match(String theCriteria, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
 		RuntimeResourceDefinition resourceDefinition;
 		if (theResource == null) {
-			resourceDefinition = FHIRUrlParser.parseUrlResourceType(myFhirContext, theCriteria);
+			resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theCriteria);
 		} else {
 			resourceDefinition = myFhirContext.getResourceDefinition(theResource);
 		}

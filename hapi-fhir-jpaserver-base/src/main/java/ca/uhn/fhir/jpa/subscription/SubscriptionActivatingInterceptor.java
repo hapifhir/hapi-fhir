@@ -211,9 +211,6 @@ public class SubscriptionActivatingInterceptor {
 		}
 	}
 
-	private void addStrategyTags(IBaseResource theResource) {
-	}
-
 	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);

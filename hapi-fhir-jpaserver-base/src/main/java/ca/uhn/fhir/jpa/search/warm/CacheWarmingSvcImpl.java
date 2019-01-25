@@ -26,9 +26,9 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.util.FHIRUrlParser;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.util.UrlUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -77,7 +77,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	private void refreshNow(WarmCacheEntry theCacheEntry) {
 		String nextUrl = theCacheEntry.getUrl();
 
-		RuntimeResourceDefinition resourceDef = FHIRUrlParser.parseUrlResourceType(myCtx, nextUrl);
+		RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myCtx, nextUrl);
 		IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceDef.getName());
 		String queryPart = parseWarmUrlParamPart(nextUrl);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
@@ -106,7 +106,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 			// Validate
 			parseWarmUrlParamPart(next.getUrl());
-			FHIRUrlParser.parseUrlResourceType(myCtx, next.getUrl());
+			UrlUtil.parseUrlResourceType(myCtx, next.getUrl());
 
 			myCacheEntryToNextRefresh.put(next, 0L);
 		}
