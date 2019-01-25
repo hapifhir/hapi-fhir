@@ -65,6 +65,17 @@ public class VersionedApiConverterInterceptorR4Test {
 	}
 
 	@Test
+	public void testSearchConvertSpecimenToR2() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Specimen");
+		httpGet.addHeader("Accept", "application/fhir+json; fhirVersion=1.0.2");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertThat(responseContent, containsString("\"family\": ["));
+		}
+	}
+
+	@Test
 	public void testSearchConvertToR2ByFormatParam() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=" + UrlUtil.escapeUrlParam("application/fhir+json; fhirVersion=1.0"));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
