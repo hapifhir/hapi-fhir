@@ -36,6 +36,8 @@ import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
@@ -204,7 +206,7 @@ public class SubscriptionActivatingInterceptor {
 		try {
 			SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(criteria);
 			mySubscriptionCanonicalizer.setMatchingStrategyTag(myFhirContext, theResource, strategy);
-		} catch (InvalidRequestException e) {
+		} catch (InvalidRequestException | DataFormatException e) {
 			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
 		}
 	}
