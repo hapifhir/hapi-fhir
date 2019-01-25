@@ -327,6 +327,12 @@
 				The casing of the base64Binary datatype was incorrect in the DSTU3 and R4 model classes.
 				This has been corrected.
 			</action>
+			<action type="add">
+				Add a "subscription-matching-strategy" meta tag to incoming subscriptions with value of IN_MEMORY
+				or DATABASE indicating whether the subscription can be matched against new resources in-memory or
+				whether a call out to the database may be required.  I say "may" because subscription matches fail fast
+				so a negative match may be performed in-memory, but a positive match will require a database call.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
