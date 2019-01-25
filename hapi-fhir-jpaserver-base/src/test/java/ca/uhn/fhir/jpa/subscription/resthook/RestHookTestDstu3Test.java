@@ -108,12 +108,11 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		subscription.setChannel(channel);
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
-		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
 		waitForQueueToDrain();
 
-		return subscription;
+		return (Subscription)methodOutcome.getResource();
 	}
 
 	private Observation sendObservation(String code, String system) {
