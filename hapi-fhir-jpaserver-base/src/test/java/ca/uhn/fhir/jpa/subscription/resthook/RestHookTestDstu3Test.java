@@ -424,16 +424,21 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
 		Subscription subscriptionOrig = createSubscription(criteria1, payload, ourListenerServerBase);
+		IdType subscriptionId = subscriptionOrig.getIdElement();
+
 		assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscriptionOrig.getStatus());
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
-		assertEquals(0, tags.size());
-		IdType subscriptionId = subscriptionOrig.getIdElement();
+		assertEquals(1, tags.size());
+		Coding tag = tags.get(0);
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
+		assertEquals("In-memory", tag.getDisplay());
 
 		Subscription subscriptionActivated = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscriptionActivated.getStatus());
 	   tags = subscriptionActivated.getMeta().getTag();
 		assertEquals(1, tags.size());
-		Coding tag = tags.get(0);
+		tag = tags.get(0);
 		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
 		assertEquals("In-memory", tag.getDisplay());
@@ -443,13 +448,21 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSubscriptionActivatesDatabaseTag() throws Exception {
 		String payload = "application/fhir+xml";
 
-		IdType subscriptionId = createSubscription("Observation?code=17861-6&context.type=IHD", payload, ourListenerServerBase).getIdElement();
+		Subscription subscriptionOrig = createSubscription("Observation?code=17861-6&context.type=IHD", payload, ourListenerServerBase);
+		IdType subscriptionId = subscriptionOrig.getIdElement();
+
+		List<Coding> tags = subscriptionOrig.getMeta().getTag();
+		assertEquals(1, tags.size());
+		Coding tag = tags.get(0);
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
+		assertEquals("Database", tag.getDisplay());
 
 		Subscription subscription = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
-		List<Coding> tags = subscription.getMeta().getTag();
+		 tags = subscription.getMeta().getTag();
 		assertEquals(1, tags.size());
-		Coding tag = tags.get(0);
+		 tag = tags.get(0);
 		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
 		assertEquals("Database", tag.getDisplay());
