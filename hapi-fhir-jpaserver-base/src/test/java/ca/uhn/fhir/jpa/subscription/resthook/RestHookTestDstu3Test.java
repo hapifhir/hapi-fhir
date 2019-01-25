@@ -423,11 +423,15 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		IdType subscriptionId = createSubscription(criteria1, payload, ourListenerServerBase).getIdElement();
+		Subscription subscriptionOrig = createSubscription(criteria1, payload, ourListenerServerBase);
+		assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscriptionOrig.getStatus());
+		List<Coding> tags = subscriptionOrig.getMeta().getTag();
+		assertEquals(0, tags.size());
+		IdType subscriptionId = subscriptionOrig.getIdElement();
 
-		Subscription subscription = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
-		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
-		List<Coding> tags = subscription.getMeta().getTag();
+		Subscription subscriptionActivated = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscriptionActivated.getStatus());
+	   tags = subscriptionActivated.getMeta().getTag();
 		assertEquals(1, tags.size());
 		Coding tag = tags.get(0);
 		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
