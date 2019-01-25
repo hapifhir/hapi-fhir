@@ -117,8 +117,10 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			if (!matchResult.matched()) {
 				continue;
 			}
-
-			ourLog.info("Subscription {} was matched by resource {} using matcher {}", nextActiveSubscription.getSubscription().getIdElement(myFhirContext).getValue(), resourceId.toUnqualifiedVersionless().getValue(), matchResult.matcherShortName());
+			ourLog.debug("Subscription {} was matched by resource {} {}",
+				nextActiveSubscription.getSubscription().getIdElement(myFhirContext).getValue(),
+				resourceId.toUnqualifiedVersionless().getValue(),
+				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
 
@@ -161,7 +163,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			criteriaResource = criteriaResource.substring(0, criteriaResource.indexOf("?"));
 		}
 
-		if (resourceType != null && criteriaString != null && !criteriaResource.equals(resourceType)) {
+		if (resourceType != null && !criteriaResource.equals(resourceType)) {
 			ourLog.trace("Skipping subscription search for {} because it does not match the criteria {}", resourceType, criteriaString);
 			return false;
 		}

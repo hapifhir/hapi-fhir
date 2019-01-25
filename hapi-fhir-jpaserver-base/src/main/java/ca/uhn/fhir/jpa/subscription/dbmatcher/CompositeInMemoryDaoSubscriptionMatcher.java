@@ -24,8 +24,8 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,10 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 		SubscriptionMatchResult result;
 		if (myDaoConfig.isEnableInMemorySubscriptionMatching()) {
 			result = myInMemorySubscriptionMatcher.match(theSubscription, theMsg);
-			if (!result.supported()) {
+			if (result.supported()) {
+				// TODO KHS test
+				result.setInMemory(true);
+			} else {
 				ourLog.info("Criteria {} for Subscription {} not supported by InMemoryMatcher: {}.  Reverting to DatabaseMatcher", theSubscription.getCriteriaString(), theSubscription.getIdElementString(), result.getUnsupportedReason());
 				result = myDaoSubscriptionMatcher.match(theSubscription, theMsg);
 			}

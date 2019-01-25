@@ -86,7 +86,7 @@ public enum Pointcut {
 	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription"),
 
 	/**
-	 * Invoked before a resource will be updated, immediately before the resource
+	 * Invoked before a resource will be created, immediately before the resource
 	 * is persisted to the database.
 	 * <p>
 	 * Hooks will have access to the contents of the resource being created
