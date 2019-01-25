@@ -29,9 +29,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
 import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.model.util.FHIRUrlParser;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
@@ -170,8 +168,6 @@ public class SubscriptionActivatingInterceptor {
 		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
 		try {
 			SubscriptionUtil.setStatus(myFhirContext, subscription, theActiveStatus);
-			SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(mySubscriptionCanonicalizer.getCriteria(theSubscription));
-			mySubscriptionCanonicalizer.setMatchingStrategyTag(myFhirContext, subscription, strategy);
 			subscription = subscriptionDao.update(subscription).getResource();
 			submitResourceModifiedForUpdate(subscription);
 			return true;
@@ -188,6 +184,39 @@ public class SubscriptionActivatingInterceptor {
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
+	@Hook(Pointcut.OP_PRESTORAGE_RESOURCE_CREATED)
+	public void addStrategyTagCreated(IBaseResource theResource) {
+		if (isSubscription(theResource)) {
+			validateCriteriaAndAddStrategy(theResource);
+		}
+	}
+
+	@Hook(Pointcut.OP_PRESTORAGE_RESOURCE_UPDATED)
+	public void addStrategyTagUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
+		if (isSubscription(theNewResource)) {
+			validateCriteriaAndAddStrategy(theNewResource);
+		}
+	}
+
+	// TODO KHS add third type of strategy DISABLED if that subscription type is disabled on this server
+	public void validateCriteriaAndAddStrategy(final IBaseResource theResource) {
+		String criteria = mySubscriptionCanonicalizer.getCriteria(theResource);
+		try {
+			SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(criteria);
+			mySubscriptionCanonicalizer.setMatchingStrategyTag(myFhirContext, theResource, strategy);
+		} catch (InvalidRequestException e) {
+			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
+		}
+	}
+
+	private void addStrategyTags(IBaseResource theResource) {
+	}
+
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
+	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
+		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+	}
+
 	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
 	public void resourceCreated(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
@@ -198,43 +227,28 @@ public class SubscriptionActivatingInterceptor {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
-	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
-		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
+		if (isSubscription(theNewResource)) {
+			submitResourceModified(new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType));
+		}
 	}
 
-	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
-		submitResourceModified(new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType));
+	private boolean isSubscription(IBaseResource theNewResource) {
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theNewResource);
+		return ResourceTypeEnum.SUBSCRIPTION.getCode().equals(resourceDefinition.getName());
 	}
 
 	private void submitResourceModified(final ResourceModifiedMessage theMsg) {
-		IIdType id = theMsg.getId(myFhirContext);
-		if (!id.getResourceType().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
-			return;
-		}
 		switch (theMsg.getOperationType()) {
 			case DELETE:
-				mySubscriptionRegistry.unregisterSubscription(id);
+				mySubscriptionRegistry.unregisterSubscription(theMsg.getId(myFhirContext));
 				break;
 			case CREATE:
 			case UPDATE:
-				final IBaseResource subscription = theMsg.getNewPayload(myFhirContext);
-				validateCriteria(subscription);
-				activateAndRegisterSubscriptionIfRequiredInTransaction(subscription);
+				activateAndRegisterSubscriptionIfRequiredInTransaction(theMsg.getNewPayload(myFhirContext));
 				break;
 			default:
 				break;
-		}
-	}
-
-	public void validateCriteria(final IBaseResource theResource) {
-		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theResource);
-		String criteria = subscription.getCriteriaString();
-		try {
-			RuntimeResourceDefinition resourceDef = FHIRUrlParser.parseUrlResourceType(myFhirContext, criteria);
-			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
-		} catch (InvalidRequestException e) {
-			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
 		}
 	}
 
