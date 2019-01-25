@@ -156,7 +156,7 @@ public class ResourceModifiedMessage implements IResourceMessage {
 					continue;
 				}
 				if (ref.startsWith("urn:uuid:")) {
-					throw new AssertionError("Reference at " + next.getName() + " is invalid: " + next.getResourceReference());
+					throw new AssertionError("Reference at " + next.getName() + " is invalid: " + ref);
 				}
 			}
 		}

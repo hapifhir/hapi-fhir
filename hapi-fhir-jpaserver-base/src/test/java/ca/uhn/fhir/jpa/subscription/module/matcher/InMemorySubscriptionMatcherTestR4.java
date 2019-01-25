@@ -400,8 +400,8 @@ public class InMemorySubscriptionMatcherTestR4 {
 			msg.setId(new IdType("Patient/ABC"));
 			SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 			fail();
-		} catch (InternalErrorException e){
-			assertEquals("Failure processing resource ID[Patient/ABC] for subscription ID[Subscription/123]: Invalid resource reference found at path[Patient.managingOrganization] - Does not contain resource type - urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
+		} catch (AssertionError e){
+			assertEquals("Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
 		}
 	}
 
