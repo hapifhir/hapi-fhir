@@ -68,7 +68,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	private static SubscribableChannel ourSubscribableChannel;
 	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-	private static AtomicLong idCounter = new AtomicLong();
+	protected static AtomicLong idCounter = new AtomicLong();
 	protected PointcutLatch mySubscriptionMatchingPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
 	protected PointcutLatch mySubscriptionActivatedPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 
