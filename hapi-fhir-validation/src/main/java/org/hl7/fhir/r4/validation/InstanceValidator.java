@@ -5,6 +5,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.exceptions.*;
 import org.hl7.fhir.convertors.VersionConvertorConstants;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
