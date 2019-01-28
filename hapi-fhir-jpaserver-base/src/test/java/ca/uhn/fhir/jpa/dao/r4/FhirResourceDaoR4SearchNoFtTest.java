@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.config.CaptureQueriesListener;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -39,6 +41,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -2159,6 +2162,51 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 
 	}
+
+	@Test
+	public void testSearchLinkToken() {
+		// /fhirapi/MedicationRequest?category=community&identifier=urn:oid:2.16.840.1.113883.3.7418.12.3%7C&intent=order&medication.code:text=calcitriol,hectorol,Zemplar,rocaltrol,vectical,vitamin%20D,doxercalciferol,paricalcitol&status=active,completed
+
+		Medication m = new Medication();
+		m.getCode().setText("valueb");
+		myMedicationDao.create(m);
+
+		MedicationRequest mr = new MedicationRequest();
+		mr.addCategory().addCoding().setCode("community");
+		mr.addIdentifier().setSystem("urn:oid:2.16.840.1.113883.3.7418.12.3").setValue("1");
+		mr.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
+		mr.setMedication(new Reference(m.getId()));
+		myMedicationRequestDao.create(mr);
+
+		SearchParameterMap sp = new SearchParameterMap();
+		sp.setLoadSynchronous(true);
+		sp.add("category", new TokenParam("community"));
+		sp.add("identifier", new TokenParam("urn:oid:2.16.840.1.113883.3.7418.12.3", "1"));
+		sp.add("intent", new TokenParam("order"));
+		ReferenceParam param1 = new ReferenceParam("valuea").setChain("code:text");
+		ReferenceParam param2 = new ReferenceParam("valueb").setChain("code:text");
+		ReferenceParam param3 = new ReferenceParam("valuec").setChain("code:text");
+		sp.add("medication", new ReferenceOrListParam().addOr(param1).addOr(param2).addOr(param3));
+
+		IBundleProvider retrieved = myMedicationRequestDao.search(sp);
+		assertEquals(1, retrieved.size().intValue());
+
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.filter(t->t.getThreadName().equals("main"))
+			.filter(t -> t.getSql(false, false).toLowerCase().contains("select"))
+			.filter(t -> t.getSql(false, false).toLowerCase().contains("token"))
+			.map(t-> t.getSql(true, true))
+			.collect(Collectors.toList());
+
+		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
+
+		String searchQuery = queries.get(0);
+		assertEquals(searchQuery,3, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
+		assertEquals(searchQuery, 5, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
+	}
+
 
 	@Test
 	public void testSearchTokenParam() {

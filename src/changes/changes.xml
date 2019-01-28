@@ -333,6 +333,12 @@
 				whether a call out to the database may be required.  I say "may" because subscription matches fail fast
 				so a negative match may be performed in-memory, but a positive match will require a database call.
 			</action>
+			<action type="fix">
+				When performing a JPA search with a chained :text modifier
+				(e.g. MedicationStatement?medication.code:text=aspirin,tylenol) a series
+				of unneccesary joins were introduced to the generated SQL query, harming
+				performance. This has been fixed.
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
