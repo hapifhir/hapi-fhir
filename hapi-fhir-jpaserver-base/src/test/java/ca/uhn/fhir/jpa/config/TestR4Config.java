@@ -5,6 +5,7 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.hibernate.dialect.H2Dialect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -86,8 +88,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 			}
 
 		};
-		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-		retVal.setUrl("jdbc:derby:memory:myUnitTestDBR4;create=true");
+		retVal.setDriver(new org.h2.Driver());
+		retVal.setUrl("jdbc:h2:mem:testdb");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
@@ -127,7 +129,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.dialect", "ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect");
+		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 		extraProperties.put("hibernate.search.model_mapping", ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory.class.getName());
 		extraProperties.put("hibernate.search.default.directory_provider", "ram");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
