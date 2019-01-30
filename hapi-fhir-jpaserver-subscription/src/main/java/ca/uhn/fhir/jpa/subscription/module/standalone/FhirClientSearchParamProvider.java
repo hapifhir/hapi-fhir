@@ -62,7 +62,7 @@ public class FhirClientSearchParamProvider implements ISearchParamProvider {
 	}
 
 	@Override
-	public <SP extends IBaseResource> void refreshCache(BaseSearchParamRegistry<SP> theSearchParamRegistry, long theRefreshInterval) {
-		theSearchParamRegistry.doRefresh(theRefreshInterval);
+	public <SP extends IBaseResource> int refreshCache(BaseSearchParamRegistry<SP> theSearchParamRegistry, long theRefreshInterval) {
+		return theSearchParamRegistry.doRefresh(theRefreshInterval);
 	}
 }

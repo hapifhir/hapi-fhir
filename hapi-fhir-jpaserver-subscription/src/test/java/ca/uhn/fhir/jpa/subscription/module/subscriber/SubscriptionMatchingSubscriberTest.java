@@ -25,10 +25,13 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
-		sendObservation(code, "SNOMED-CT");
+		assertEquals(2, mySubscriptionRegistry.size());
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		ourObservationListener.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
+
+		assertEquals(1, ourContentTypes.size());
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
@@ -43,10 +46,13 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
-		sendObservation(code, "SNOMED-CT");
+		assertEquals(2, mySubscriptionRegistry.size());
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(1, ourUpdatedObservations);
+		ourObservationListener.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.awaitExpected();
+
+		assertEquals(1, ourContentTypes.size());
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
@@ -61,9 +67,12 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		sendSubscription(criteria1, payload, ourListenerServerBase);
 		sendSubscription(criteria2, payload, ourListenerServerBase);
 
-		sendObservation(code, "SNOMED-CT");
+		assertEquals(2, mySubscriptionRegistry.size());
 
-		waitForSize(0, ourCreatedObservations);
-		waitForSize(0, ourUpdatedObservations);
+		ourObservationListener.setExpectedCount(0);
+		sendObservation(code, "SNOMED-CT");
+		ourObservationListener.expectNothing();
+
+		assertEquals(0, ourContentTypes.size());
 	}
 }

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,11 +24,14 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
@@ -63,7 +66,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		}
 	}
 
-	protected CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu2(IBaseResource theSubscription) {
 		ca.uhn.fhir.model.dstu2.resource.Subscription subscription = (ca.uhn.fhir.model.dstu2.resource.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -82,7 +85,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return retVal;
 	}
 
-	protected CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
 		org.hl7.fhir.dstu3.model.Subscription subscription = (org.hl7.fhir.dstu3.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -96,10 +99,10 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 
-			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
+				if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
 				String subjectTemplate;
-				String bodyTemplate;
+
 				try {
 					from = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
 					subjectTemplate = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
@@ -111,6 +114,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 			}
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
+
 				String stripVersionIds;
 				String deliverLatestVersion;
 				try {
@@ -210,7 +214,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return null;
 	}
 
-	protected CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
+	private CanonicalSubscription canonicalizeR4(IBaseResource theSubscription) {
 		org.hl7.fhir.r4.model.Subscription subscription = (org.hl7.fhir.r4.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
@@ -258,5 +262,34 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		}
 
 		return retVal;
+	}
+
+	public String getCriteria(IBaseResource theSubscription) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case DSTU2:
+				return ((ca.uhn.fhir.model.dstu2.resource.Subscription)theSubscription).getCriteria();
+			case DSTU3:
+				return ((org.hl7.fhir.dstu3.model.Subscription)theSubscription).getCriteria();
+			case R4:
+				return ((org.hl7.fhir.r4.model.Subscription)theSubscription).getCriteria();
+			default:
+				throw new ConfigurationException("Subscription not supported for version: " + myFhirContext.getVersion().getVersion());
+		}
+	}
+
+
+	public void setMatchingStrategyTag(FhirContext theFhirContext, IBaseResource theSubscription, SubscriptionMatchingStrategy theStrategy) {
+		IBaseMetaType meta = theSubscription.getMeta();
+		String value = theStrategy.toString();
+		String display;
+
+		if (theStrategy == SubscriptionMatchingStrategy.DATABASE) {
+			display = "Database";
+		} else if (theStrategy == SubscriptionMatchingStrategy.IN_MEMORY) {
+			display = "In-memory";
+		} else {
+			throw new IllegalStateException("Unknown " + SubscriptionMatchingStrategy.class.getSimpleName() + ": "+theStrategy);
+		}
+		meta.addTag().setSystem(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY).setCode(value).setDisplay(display);
 	}
 }

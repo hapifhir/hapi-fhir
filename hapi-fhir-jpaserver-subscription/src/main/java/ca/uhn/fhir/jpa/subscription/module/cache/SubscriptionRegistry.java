@@ -20,7 +20,11 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -36,24 +40,26 @@ import java.util.Collections;
 import java.util.Optional;
 
 /**
- *
  * Cache of active subscriptions.  When a new subscription is added to the cache, a new Spring Channel is created
  * and a new MessageHandler for that subscription is subscribed to that channel.  These subscriptions, channels, and
  * handlers are all caches in this registry so they can be removed it the subscription is deleted.
  */
 
+// TODO KHS Does jpa need a subscription registry if matching is disabled?
 @Component
 public class SubscriptionRegistry {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
-
+	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
 	@Autowired
-	SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+	SubscriptionCanonicalizer<IBaseResource> mySubscriptionCanonicalizer;
 	@Autowired
 	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
-
-	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
+	@Autowired
+	ModelConfig myModelConfig;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
@@ -71,20 +77,31 @@ public class SubscriptionRegistry {
 	}
 
 	@SuppressWarnings("UnusedReturnValue")
-	public CanonicalSubscription registerSubscription(IIdType theId, IBaseResource theSubscription) {
+	private CanonicalSubscription registerSubscription(IIdType theId, IBaseResource theSubscription) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
 		Validate.notBlank(subscriptionId);
 		Validate.notNull(theSubscription);
 
 		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
-		SubscribableChannel deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(subscriptionId, canonicalized.getChannelType().toCode().toLowerCase());
-		Optional<MessageHandler> deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(canonicalized);
+		SubscribableChannel deliveryChannel;
+		Optional<MessageHandler> deliveryHandler;
+
+		if (myModelConfig.isSubscriptionMatchingEnabled()) {
+			deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(subscriptionId, canonicalized.getChannelType().toCode().toLowerCase());
+			deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(canonicalized);
+		} else {
+			deliveryChannel = null;
+			deliveryHandler = Optional.empty();
+		}
 
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, deliveryChannel);
+		deliveryHandler.ifPresent(activeSubscription::register);
+
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
-		deliveryHandler.ifPresent(handler -> activeSubscription.register(handler));
+		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
+		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, canonicalized);
 
 		return canonicalized;
 	}
@@ -100,7 +117,7 @@ public class SubscriptionRegistry {
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 	}
 
-	public void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
+	void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
 		myActiveSubscriptionCache.unregisterAllSubscriptionsNotInCollection(theAllIds);
 	}
 
@@ -138,5 +155,10 @@ public class SubscriptionRegistry {
 
 	public int size() {
 		return myActiveSubscriptionCache.size();
+	}
+
+	@VisibleForTesting
+	public void clearForUnitTests() {
+		myActiveSubscriptionCache.clearForUnitTests();
 	}
 }

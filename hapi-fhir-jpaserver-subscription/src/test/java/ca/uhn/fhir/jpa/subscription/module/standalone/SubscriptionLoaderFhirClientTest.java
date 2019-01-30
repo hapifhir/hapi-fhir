@@ -1,22 +1,27 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
-	private String myCode = "1000000050";
-
 	@Test
-	public void testSubscriptionLoaderFhirClient() throws Exception {
+	public void testSubscriptionLoaderFhirClient() throws InterruptedException {
+		CountDownLatch latch = new CountDownLatch(1);
+		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, t-> latch.countDown());
+
 		String payload = "application/fhir+json";
 
 		String criteria1 = "Observation?code=SNOMED-CT|" + myCode + "&_format=xml";
@@ -30,6 +35,7 @@ public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscriba
 		initSubscriptionLoader(bundle);
 
 		sendObservation(myCode, "SNOMED-CT");
+		latch.await(10, TimeUnit.SECONDS);
 
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
@@ -37,7 +43,10 @@ public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscriba
 	}
 
 	@Test
-	public void testSubscriptionLoaderFhirClientSubscriptionNotActive() throws Exception {
+	public void testSubscriptionLoaderFhirClientSubscriptionNotActive() throws InterruptedException {
+		CountDownLatch latch = new CountDownLatch(1);
+		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, t-> latch.countDown());
+
 		String payload = "application/fhir+json";
 
 		String criteria1 = "Observation?code=SNOMED-CT|" + myCode + "&_format=xml";
@@ -51,6 +60,7 @@ public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscriba
 		initSubscriptionLoader(bundle);
 
 		sendObservation(myCode, "SNOMED-CT");
+		latch.await(10, TimeUnit.SECONDS);
 
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(0, ourUpdatedObservations);

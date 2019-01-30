@@ -1,6 +1,9 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.escape.Escaper;
@@ -172,8 +175,13 @@ public class UrlUtil {
 		return true;
 	}
 
-	public static void main(String[] args) {
-		System.out.println(escapeUrlParam("http://snomed.info/sct?fhir_vs=isa/126851005"));
+	public static RuntimeResourceDefinition parseUrlResourceType(FhirContext theCtx, String theUrl) throws DataFormatException {
+		int paramIndex = theUrl.indexOf('?');
+		String resourceName = theUrl.substring(0, paramIndex);
+		if (resourceName.contains("/")) {
+			resourceName = resourceName.substring(resourceName.lastIndexOf('/') + 1);
+		}
+		return theCtx.getResourceDefinition(resourceName);
 	}
 
 	public static Map<String, String[]> parseQueryString(String theQueryString) {

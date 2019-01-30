@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.subscription.module.cache.ISubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.junit.After;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -15,25 +15,34 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public abstract class BaseSubscriptionTest {
 
 	@Autowired
-	ISearchParamProvider mySearchParamProvider;
+	MockFhirClientSubscriptionProvider myMockFhirClientSubscriptionProvider;
 
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
 
 	@Autowired
-	ISubscriptionProvider mySubscriptionProvider;
+	MockFhirClientSearchParamProvider myMockFhirClientSearchParamProvider;
 
 	@Autowired
 	SubscriptionLoader mySubscriptionLoader;
 
+	@Autowired
+	protected
+	IInterceptorRegistry myInterceptorRegistry;
+
+	@After
+	public void afterClearAnonymousLambdas() {
+		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+	}
+
 	public void initSearchParamRegistry(IBundleProvider theBundleProvider) {
-		((MockFhirClientSearchParamProvider)mySearchParamProvider).setBundleProvider(theBundleProvider);
+		myMockFhirClientSearchParamProvider.setBundleProvider(theBundleProvider);
 		mySearchParamRegistry.forceRefresh();
 	}
 
 	public void initSubscriptionLoader(IBundleProvider theBundleProvider) {
-		((MockFhirClientSubscriptionProvider)mySubscriptionProvider).setBundleProvider(theBundleProvider);
-		mySubscriptionLoader.doInitSubscriptionsForUnitTest();
+		myMockFhirClientSubscriptionProvider.setBundleProvider(theBundleProvider);
+		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 
 }

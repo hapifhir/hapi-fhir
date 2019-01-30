@@ -20,7 +20,10 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.*;
@@ -28,6 +31,7 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -38,24 +42,24 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
 public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDeliverySubscriber {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
-
 	@Autowired
 	IResourceRetriever myResourceRetriever;
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
 		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
-		if (payloadResource == null) return;
+		if (payloadResource == null) {
+			return;
+		}
 
 		doDelivery(theMsg, theSubscription, thePayloadType, theClient, payloadResource);
 	}
@@ -64,32 +68,16 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		IClientExecutable<?, ?> operation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
-				if (thePayloadResource == null || thePayloadResource.isEmpty()) {
-					if (thePayloadType != null ) {
-						operation = theClient.create().resource(thePayloadResource);
-					} else {
-						sendNotification(theMsg);
-						return;
-					}
-				} else {
-					if (thePayloadType != null ) {
-						operation = theClient.update().resource(thePayloadResource);
-					} else {
-						sendNotification(theMsg);
-						return;
-					}
-				}
-				break;
 			case UPDATE:
 				if (thePayloadResource == null || thePayloadResource.isEmpty()) {
-					if (thePayloadType != null ) {
+					if (thePayloadType != null) {
 						operation = theClient.create().resource(thePayloadResource);
 					} else {
 						sendNotification(theMsg);
 						return;
 					}
 				} else {
-					if (thePayloadType != null ) {
+					if (thePayloadType != null) {
 						operation = theClient.update().resource(thePayloadResource);
 					} else {
 						sendNotification(theMsg);
@@ -114,8 +102,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		try {
 			operation.execute();
 		} catch (ResourceNotFoundException e) {
-			ourLog.error("Cannot reach "+ theMsg.getSubscription().getEndpointUrl());
-			e.printStackTrace();
+			ourLog.error("Cannot reach {} ", theMsg.getSubscription().getEndpointUrl());
+			ourLog.error("Exception: ", e);
 			throw e;
 		}
 	}
@@ -143,54 +131,80 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 	@Override
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws MessagingException {
-			CanonicalSubscription subscription = theMessage.getSubscription();
+		CanonicalSubscription subscription = theMessage.getSubscription();
 
-			// Grab the endpoint from the subscription
-			String endpointUrl = subscription.getEndpointUrl();
+		// Interceptor call: SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, theMessage, subscription)) {
+			return;
+		}
 
-			// Grab the payload type (encoding mimetype) from the subscription
-			String payloadString = subscription.getPayloadString();
-			EncodingEnum payloadType = null;
-			if(payloadString != null) {
-				if (payloadString.contains(";")) {
-					payloadString = payloadString.substring(0, payloadString.indexOf(';'));
-				}
-				payloadString = payloadString.trim();
-				payloadType = EncodingEnum.forContentType(payloadString);
+		// Grab the endpoint from the subscription
+		String endpointUrl = subscription.getEndpointUrl();
+
+		// Grab the payload type (encoding mimetype) from the subscription
+		String payloadString = subscription.getPayloadString();
+		EncodingEnum payloadType = null;
+		if (payloadString != null) {
+			if (payloadString.contains(";")) {
+				payloadString = payloadString.substring(0, payloadString.indexOf(';'));
 			}
+			payloadString = payloadString.trim();
+			payloadType = EncodingEnum.forContentType(payloadString);
+		}
 
-			// Create the client request
-			myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-			IGenericClient client = null;
-			if (isNotBlank(endpointUrl)) {
-				client = myFhirContext.newRestfulGenericClient(endpointUrl);
+		// Create the client request
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+		IGenericClient client = null;
+		if (isNotBlank(endpointUrl)) {
+			client = myFhirContext.newRestfulGenericClient(endpointUrl);
 
-				// Additional headers specified in the subscription
-				List<String> headers = subscription.getHeaders();
-				for (String next : headers) {
-					if (isNotBlank(next)) {
-						client.registerInterceptor(new SimpleRequestHeaderInterceptor(next));
-					}
+			// Additional headers specified in the subscription
+			List<String> headers = subscription.getHeaders();
+			for (String next : headers) {
+				if (isNotBlank(next)) {
+					client.registerInterceptor(new SimpleRequestHeaderInterceptor(next));
 				}
 			}
+		}
 
-			deliverPayload(theMessage, subscription, payloadType, client);
+		deliverPayload(theMessage, subscription, payloadType, client);
+
+		// Interceptor call: SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, theMessage, subscription)) {
+			//noinspection UnnecessaryReturnStatement
+			return;
+		}
+
 	}
 
 	/**
 	 * Sends a POST notification without a payload
-	 * @param theMsg
 	 */
 	protected void sendNotification(ResourceDeliveryMessage theMsg) {
-		Map<String, List<String>> params = new HashMap();
+		Map<String, List<String>> params = new HashMap<>();
 		List<Header> headers = new ArrayList<>();
+		if (theMsg.getSubscription().getHeaders() != null) {
+			theMsg.getSubscription().getHeaders().stream().filter(Objects::nonNull).forEach(h -> {
+				final int sep = h.indexOf(':');
+				if (sep > 0) {
+					final String name = h.substring(0, sep);
+					final String value = h.substring(sep + 1);
+					if (StringUtils.isNotBlank(name)) {
+						headers.add(new Header(name.trim(), value.trim()));
+					}
+				}
+			});
+		}
+
 		StringBuilder url = new StringBuilder(theMsg.getSubscription().getEndpointUrl());
 		IHttpClient client = myFhirContext.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
 		IHttpRequest request = client.createParamRequest(myFhirContext, params, null);
 		try {
 			IHttpResponse response = request.execute();
+			// close connection in order to return a possible cached connection to the connection pool
+			response.close();
 		} catch (IOException e) {
-			ourLog.error("Error trying to reach "+ theMsg.getSubscription().getEndpointUrl());
+			ourLog.error("Error trying to reach " + theMsg.getSubscription().getEndpointUrl());
 			e.printStackTrace();
 			throw new ResourceNotFoundException(e.getMessage());
 		}

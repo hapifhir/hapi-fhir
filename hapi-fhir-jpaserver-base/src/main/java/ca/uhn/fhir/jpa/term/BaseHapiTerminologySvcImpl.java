@@ -25,9 +25,9 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.data.*;
-import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -137,6 +137,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
 	private ApplicationContext myApplicationContext;
 	private TransactionTemplate myTxTemplate;
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
 
 	/**
 	 * @param theAdd         If true, add the code. If false, remove the code.
@@ -368,9 +370,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
-	@Autowired
-	private PlatformTransactionManager myTransactionManager;
-
 	@Override
 	@Transactional
 	public void deleteConceptMapAndChildren(ResourceTable theResourceTable) {
@@ -391,7 +390,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-			txTemplate.execute(t->{
+			txTemplate.execute(t -> {
 				theDao.deleteInBatch(link);
 				return null;
 			});
@@ -1190,6 +1189,22 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		termConceptMap.setResource(theResourceTable);
 		termConceptMap.setUrl(theConceptMap.getUrl());
 
+		String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
+		String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
+
+		/*
+		 * If this is a mapping between "resources" instead of purely between
+		 * "concepts" (this is a weird concept that is technically possible, at least as of
+		 * FHIR R4), don't try to store the mappings.
+		 *
+		 * See here for a description of what that is:
+		 * http://hl7.org/fhir/conceptmap.html#bnr
+		 */
+		if ("StructureDefinition".equals(new IdType(source).getResourceType()) ||
+			"StructureDefinition".equals(new IdType(target).getResourceType())) {
+			return;
+		}
+
 		/*
 		 * For now we always delete old versions. At some point, it would be nice to allow configuration to keep old versions.
 		 */
@@ -1202,11 +1217,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
 		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
-				String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
 				if (isNotBlank(source)) {
 					termConceptMap.setSource(source);
 				}
-				String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
 				if (isNotBlank(target)) {
 					termConceptMap.setTarget(target);
 				}
@@ -1244,12 +1257,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 							if (element.hasTarget()) {
 								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
-								for (ConceptMap.TargetElementComponent target : element.getTarget()) {
+								for (ConceptMap.TargetElementComponent elementTarget : element.getTarget()) {
 									termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
 									termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
-									termConceptMapGroupElementTarget.setCode(target.getCode());
-									termConceptMapGroupElementTarget.setDisplay(target.getDisplay());
-									termConceptMapGroupElementTarget.setEquivalence(target.getEquivalence());
+									termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
+									termConceptMapGroupElementTarget.setDisplay(elementTarget.getDisplay());
+									termConceptMapGroupElementTarget.setEquivalence(elementTarget.getEquivalence());
 									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
 
 									if (codesSaved++ % 250 == 0) {

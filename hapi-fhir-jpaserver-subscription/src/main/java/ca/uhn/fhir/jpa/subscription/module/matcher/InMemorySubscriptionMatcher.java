@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,11 +45,11 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 	private InlineResourceLinkResolver myInlineResourceLinkResolver;
 
 	@Override
-	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {
+	public SubscriptionMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
 		try {
-			return match(criteria, msg.getNewPayload(myContext));
+			return match(theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext));
 		} catch (Exception e) {
-			throw new InternalErrorException("Failure processing resource ID[" + msg.getId(myContext) + "] for subscription ID[" + msg.getSubscriptionId() + "]: " + e.getMessage(), e);
+			throw new InternalErrorException("Failure processing resource ID[" + theMsg.getId(myContext) + "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(), e);
 		}
 	}
 
@@ -59,8 +59,7 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
 		mySearchParamExtractorService.extractFromResource(searchParams, entity, resource);
-		myResourceLinkExtractor.extractResourceLinks(searchParams, entity, resource, resource.getMeta().getLastUpdated(), myInlineResourceLinkResolver);
-		RuntimeResourceDefinition resourceDefinition = myContext.getResourceDefinition(resource);
-		return myCriteriaResourceMatcher.match(criteria, resourceDefinition, searchParams);
+		myResourceLinkExtractor.extractResourceLinks(searchParams, entity, resource, resource.getMeta().getLastUpdated(), myInlineResourceLinkResolver, false);
+		return myCriteriaResourceMatcher.match(criteria, resource, searchParams);
 	}
 }

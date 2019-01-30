@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
+import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +19,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /*-
@@ -42,9 +43,11 @@ import javax.annotation.PreDestroy;
 
 @Component
 @Lazy
-public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAdapter {
+@Interceptor(manualRegistration = true)
+public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
+	private static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 	static final String SUBSCRIPTION_STATUS = "Subscription.status";
 	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private SubscribableChannel myProcessingChannel;
@@ -63,32 +66,36 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 		super();
 	}
 
-	@PostConstruct
 	public void start() {
 		if (myProcessingChannel == null) {
-			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel("subscription-matching");
+			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 		}
 		myProcessingChannel.subscribe(mySubscriptionMatchingSubscriber);
+		ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myProcessingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+
 	}
 
 	@SuppressWarnings("unused")
 	@PreDestroy
 	public void preDestroy() {
-		myProcessingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
+
+		if (myProcessingChannel != null) {
+			myProcessingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
+		}
 	}
 
-	@Override
-	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
+	public void resourceCreated(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 	}
 
-	@Override
-	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_DELETED)
+	public void resourceDeleted(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
 	}
 
-	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
+	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
@@ -97,8 +104,9 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 		submitResourceModified(msg);
 	}
 
-	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
+	private void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");
+		Validate.notNull(myProcessingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		myProcessingChannel.send(new ResourceModifiedJsonMessage(theMessage));
 	}
 
@@ -109,12 +117,13 @@ public class SubscriptionMatcherInterceptor extends ServerOperationInterceptorAd
 	/**
 	 * This is an internal API - Use with caution!
 	 */
+	@Override
 	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		sendToProcessingChannel(theMsg);
 	}
 
 	@VisibleForTesting
-	public LinkedBlockingQueueSubscribableChannel getProcessingChannelForUnitTest() {
+	LinkedBlockingQueueSubscribableChannel getProcessingChannelForUnitTest() {
 		return (LinkedBlockingQueueSubscribableChannel) myProcessingChannel;
 	}
 }

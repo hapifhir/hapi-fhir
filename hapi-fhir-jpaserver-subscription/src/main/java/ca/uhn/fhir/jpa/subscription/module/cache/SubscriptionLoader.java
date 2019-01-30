@@ -21,10 +21,12 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
@@ -34,7 +36,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,46 +46,52 @@ import java.util.concurrent.Semaphore;
 @Lazy
 public class SubscriptionLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
+	@VisibleForTesting
+	public static final int INITIAL_SECONDS_BETWEEN_RETRIES = 5;
+	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 
 	@Autowired
 	private ISubscriptionProvider mySubscriptionProvidor;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 
-	private final Object myInitSubscriptionsLock = new Object();
-	private Semaphore myInitSubscriptionsSemaphore = new Semaphore(1);
+	private final Object mySyncSubscriptionsLock = new Object();
+	private Semaphore mySyncSubscriptionsSemaphore = new Semaphore(1);
 
-	@PostConstruct
-	public void start() {
-		initSubscriptions();
-	}
+	private volatile int mySecondsBetweenRetries = INITIAL_SECONDS_BETWEEN_RETRIES;
 
 	/**
 	 * Read the existing subscriptions from the database
 	 */
 	@SuppressWarnings("unused")
-	@Scheduled(fixedDelay = 60000)
-	public void initSubscriptions() {
-		if (!myInitSubscriptionsSemaphore.tryAcquire()) {
+	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
+	public void syncSubscriptions() {
+		if (!mySyncSubscriptionsSemaphore.tryAcquire()) {
 			return;
 		}
 		try {
-			doInitSubscriptions();
+			doSyncSubscriptionsWithRetry();
 		} finally {
-			myInitSubscriptionsSemaphore.release();
+			mySyncSubscriptionsSemaphore.release();
 		}
 	}
 
 	@VisibleForTesting
-	public int doInitSubscriptionsForUnitTest() {
-		return doInitSubscriptions();
+	public int doSyncSubscriptionsForUnitTest() {
+		return doSyncSubscriptionsWithRetry();
 	}
 
-	private int doInitSubscriptions() {
-		synchronized (myInitSubscriptionsLock) {
-			ourLog.debug("Starting init subscriptions");
+	synchronized int doSyncSubscriptionsWithRetry() {
+		Retrier<Integer> syncSubscriptionRetrier = new Retrier(() -> doSyncSubscriptions(), MAX_RETRIES, mySecondsBetweenRetries, "sync subscriptions");
+		return syncSubscriptionRetrier.runWithRetry();
+	}
+
+	private int doSyncSubscriptions() {
+		synchronized (mySyncSubscriptionsLock) {
+			ourLog.debug("Starting sync subscriptions");
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Subscription.SP_STATUS, new TokenOrListParam()
+				// TODO KHS perhaps we should only be requesting ACTIVE subscriptions here?...
 				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
 				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
@@ -109,7 +116,7 @@ public class SubscriptionLoader {
 			}
 
 			mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
-			ourLog.trace("Finished init subscriptions - found {}", resourceList.size());
+			ourLog.debug("Finished sync subscriptions - found {}", resourceList.size());
 
 			return changesCount;
 		}
@@ -118,6 +125,11 @@ public class SubscriptionLoader {
 	@VisibleForTesting
 	public void setSubscriptionProviderForUnitTest(ISubscriptionProvider theSubscriptionProvider) {
 		mySubscriptionProvidor = theSubscriptionProvider;
+	}
+
+	@VisibleForTesting
+	public void setSecondsBetweenRetriesForTesting(int theSecondsBetweenRetries) {
+		mySecondsBetweenRetries = theSecondsBetweenRetries;
 	}
 }
 

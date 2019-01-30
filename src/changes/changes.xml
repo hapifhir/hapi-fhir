@@ -19,7 +19,7 @@
 					<ul>
 						<li>Spring (JPA): 5.0.8.RELEASE -&gt; 5.1.3.RELEASE</li>
 						<li>Spring-Data (JPA): 2.0.7.RELEASE -&gt; 2.1.3.RELEASE</li>
-						<li>Hibernate-Core (JPA): 5.3.6.FINAL -&gt; 5.4.0.FINAL</li>
+						<li>Hibernate-Core (JPA): 5.3.6.FINAL -&gt; 5.4.1.FINAL</li>
 						<li>Hibernate-Search (JPA): 5.10.3.FINAL -&gt; 5.11.0.FINAL</li>
 						<li>Thymeleaf (JPA): 3.0.9.RELEASE -&gt; 3.0.11.RELEASE</li>
 						<li>thymeleaf-spring4 (Testpage Overlay) has been replaced with thymeleaf-spring5</li>
@@ -263,6 +263,86 @@
 			<action type="add" issue="1065">
 				OperationDefinitions are now created for named queries in server
 				module. Thanks to Stig Døssing for the pull request!
+			</action>
+			<action type="add">
+				A new server interceptor has been added called "SearchNarrowingInterceptor".
+				This interceptor can be used to automatically narrow the scope of searches
+				performed by the user to limit them to specific resources or compartments
+				that the user should have access to.
+			</action>
+			<action type="add">
+				In a DSTU2 server, if search parameters are expressed with chains directly in the
+				parameter name (e.g. 
+				<![CDATA[<code>@RequiredParam(name="subject.name.family")</code>]]>) the second
+				part of the chain was lost when the chain was described in the server
+				CapabilityStatement. This has been corrected.
+			</action>
+			<action type="fix">
+				In the JPA server, search/read operations being performed within a transaction bundle
+				did not pass the client request HTTP headers to the sub-request. This meant that
+				AuthorizationInterceptor could not authorize these requests if it was depending on
+				headers being present.
+			</action>
+			<action type="fix">
+				When using a client in DSTU3/R4 mode, if the client attempted to validate the server
+				CapabilityStatement but was not able to parse the response, the client would throw
+				an exception with a misleading error about the Conformance resource not existing. This
+				has been corrected. Thanks to Shayaan Munshi for reporting and providing a test case!
+			</action>
+			<action type="fix">
+				It is now possible to upload a ConceptMap to the JPA server containing mappings where the
+				source or target is a StructureDefinition canonical URI. This was previously blocked, as the
+				system could not apply these mappings. It is now permitted to be stored, although
+				the system will still not apply these mappings.
+			</action>
+			<action type="add">
+				A wrapper script for Maven has been added, enabling new users to use Maven without having
+				to install it beforehand. Thanks to Ari Ruotsalainen for the Pull Request!
+			</action>
+			<action type="add">
+				AuthorizationInterceptor can now allow a user to perform a search that is scoped to a particular
+				resource (e.g. Patient?_id=123) if the user has read access for that specific instance.
+			</action>
+			<action type="fix" issue="1084">
+				In JPA Server REST Hook Subscriptions, any Headers defined in the
+				Subscription resource are now applied to the outgoing HTTP
+				request.
+				Thanks to Volker Schmidt for the pull request!
+			</action>
+			<action type="add">
+				HAPI FHIR will now log the Git revision when it first starts up (on the ame line as the version number
+				that it already logs).
+			</action>
+			<action type="fix">
+				When fetching a page of search results, if a page offset beyond the total number
+				of available result was requested, a single result was still returned (e.g.
+				requesting a page beginning at index 1000 when there are only 10 results would
+				result in the 10th result being returned). This will now result in an empty
+				response Bundle as would be expected.
+			</action>
+			<action type="add">
+				Added support for _id in in-memory matcher
+			</action>
+			<action type="fix">
+				The casing of the base64Binary datatype was incorrect in the DSTU3 and R4 model classes.
+				This has been corrected.
+			</action>
+			<action type="add">
+				Add a "subscription-matching-strategy" meta tag to incoming subscriptions with value of IN_MEMORY
+				or DATABASE indicating whether the subscription can be matched against new resources in-memory or
+				whether a call out to the database may be required.  I say "may" because subscription matches fail fast
+				so a negative match may be performed in-memory, but a positive match will require a database call.
+			</action>
+			<action type="fix">
+				When performing a JPA search with a chained :text modifier
+				(e.g. MedicationStatement?medication.code:text=aspirin,tylenol) a series
+				of unneccesary joins were introduced to the generated SQL query, harming
+				performance. This has been fixed.
+			</action>
+			<action type="fix">
+				A serialization error when performing some searches in the JPA server
+				using data parameters has been fixed. Thanks to GitHub user
+				@PickOneFish for reporting!
 			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">

@@ -26,8 +26,10 @@ import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribable
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
+@EnableScheduling
 @ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam", "ca.uhn.fhir.jpa.subscription.module"})
 public abstract class BaseSubscriptionConfig {
 	public abstract FhirContext fhirContext();

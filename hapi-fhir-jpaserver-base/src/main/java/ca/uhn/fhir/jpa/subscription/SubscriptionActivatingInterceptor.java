@@ -26,17 +26,20 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
+import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.Subscription;
@@ -68,7 +71,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Lazy
-public class SubscriptionActivatingInterceptor extends ServerOperationInterceptorAdapter {
+@Interceptor(manualRegistration = true)
+public class SubscriptionActivatingInterceptor {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
 
 	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
@@ -92,6 +96,8 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
@@ -156,10 +162,10 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 		}
 	}
 
-
 	private boolean activateSubscription(String theActiveStatus, final IBaseResource theSubscription, String theRequestedStatus) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		IBaseResource subscription = subscriptionDao.read(theSubscription.getIdElement());
+		subscription.setId(subscription.getIdElement().toVersionless());
 
 		ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), theRequestedStatus, theActiveStatus);
 		try {
@@ -180,53 +186,68 @@ public class SubscriptionActivatingInterceptor extends ServerOperationIntercepto
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
-	@Override
-	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
-		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
+	@Hook(Pointcut.OP_PRESTORAGE_RESOURCE_CREATED)
+	public void addStrategyTagCreated(IBaseResource theResource) {
+		if (isSubscription(theResource)) {
+			validateCriteriaAndAddStrategy(theResource);
+		}
 	}
 
-	@Override
-	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
-		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
+	@Hook(Pointcut.OP_PRESTORAGE_RESOURCE_UPDATED)
+	public void addStrategyTagUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
+		if (isSubscription(theNewResource)) {
+			validateCriteriaAndAddStrategy(theNewResource);
+		}
 	}
 
-	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+	// TODO KHS add third type of strategy DISABLED if that subscription type is disabled on this server
+	public void validateCriteriaAndAddStrategy(final IBaseResource theResource) {
+		String criteria = mySubscriptionCanonicalizer.getCriteria(theResource);
+		try {
+			SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(criteria);
+			mySubscriptionCanonicalizer.setMatchingStrategyTag(myFhirContext, theResource, strategy);
+		} catch (InvalidRequestException | DataFormatException e) {
+			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
+		}
+	}
+
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
+	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}
 
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
+	public void resourceCreated(IBaseResource theResource) {
+		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
+	}
+
+	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_DELETED)
+	public void resourceDeleted(IBaseResource theResource) {
+		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
+	}
+
 	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
-		submitResourceModified(new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType));
+		if (isSubscription(theNewResource)) {
+			submitResourceModified(new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType));
+		}
+	}
+
+	private boolean isSubscription(IBaseResource theNewResource) {
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theNewResource);
+		return ResourceTypeEnum.SUBSCRIPTION.getCode().equals(resourceDefinition.getName());
 	}
 
 	private void submitResourceModified(final ResourceModifiedMessage theMsg) {
-		IIdType id = theMsg.getId(myFhirContext);
-		if (!id.getResourceType().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
-			return;
-		}
 		switch (theMsg.getOperationType()) {
 			case DELETE:
-				mySubscriptionRegistry.unregisterSubscription(id);
+				mySubscriptionRegistry.unregisterSubscription(theMsg.getId(myFhirContext));
 				break;
 			case CREATE:
 			case UPDATE:
-				final IBaseResource subscription = theMsg.getNewPayload(myFhirContext);
-				validateCriteria(subscription);
-				activateAndRegisterSubscriptionIfRequiredInTransaction(subscription);
+				activateAndRegisterSubscriptionIfRequiredInTransaction(theMsg.getNewPayload(myFhirContext));
 				break;
 			default:
 				break;
-		}
-	}
-
-	public void validateCriteria(final IBaseResource theResource) {
-		CanonicalSubscription subscription = mySubscriptionCanonicalizer.canonicalize(theResource);
-		String criteria = subscription.getCriteriaString();
-		try {
-			RuntimeResourceDefinition resourceDef = CacheWarmingSvcImpl.parseUrlResourceType(myFhirContext, criteria);
-			myMatchUrlService.translateMatchUrl(criteria, resourceDef);
-		} catch (InvalidRequestException e) {
-			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
 		}
 	}
 

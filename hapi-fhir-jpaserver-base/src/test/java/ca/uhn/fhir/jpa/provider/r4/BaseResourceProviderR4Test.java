@@ -59,14 +59,14 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static RestfulServer ourRestServer;
 	protected static String ourServerBase;
 	protected static SearchParamRegistryR4 ourSearchParamRegistry;
-	protected static DatabaseBackedPagingProvider ourPagingProvider;
+	private static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	protected static GenericWebApplicationContext ourWebApplicationContext;
-	protected static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
+	private static GenericWebApplicationContext ourWebApplicationContext;
+	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
 	private static Server ourServer;
 	protected IGenericClient ourClient;
-	protected ResourceCountCache ourResourceCountsCache;
+	ResourceCountCache ourResourceCountsCache;
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
@@ -162,6 +162,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
+			ourSubscriptionMatcherInterceptor.start();
 
 			myFhirCtx.getRestfulClientFactory().setSocketTimeout(5000000);
 
@@ -204,7 +205,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				fail("Failed to init subscriptions");
 			}
 			try {
-				mySubscriptionLoader.initSubscriptions();
+				mySubscriptionLoader.syncSubscriptions();
 				break;
 			} catch (ResourceVersionConflictException e) {
 				Thread.sleep(250);

@@ -24,14 +24,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -49,10 +48,11 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 	MatchUrlService myMatchUrlService;
 
 	@Override
-	public SubscriptionMatchResult match(String criteria, ResourceModifiedMessage msg) {
-		IIdType id = msg.getId(myCtx);
+	public SubscriptionMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
+		IIdType id = theMsg.getId(myCtx);
 		String resourceType = id.getResourceType();
 		String resourceId = id.getIdPart();
+		String criteria = theSubscription.getCriteriaString();
 
 		// run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
 		criteria += "&_id=" + resourceType + "/" + resourceId;
@@ -61,23 +61,20 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 
 		ourLog.debug("Subscription check found {} results for query: {}", results.size(), criteria);
 
-		return new SubscriptionMatchResult(results.size() > 0, "DATABASE");
+		return SubscriptionMatchResult.fromBoolean(results.size() > 0);
 	}
 	
 	/**
 	 * Search based on a query criteria
 	 */
-	protected IBundleProvider performSearch(String theCriteria) {
+	private IBundleProvider performSearch(String theCriteria) {
 		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		RuntimeResourceDefinition responseResourceDef = subscriptionDao.validateCriteriaAndReturnResourceDefinition(theCriteria);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
 
-		RequestDetails req = new ServletSubRequestDetails();
-		req.setSubRequest(true);
-
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		return responseDao.search(responseCriteriaUrl, req);
+		return responseDao.search(responseCriteriaUrl);
 	}
 }

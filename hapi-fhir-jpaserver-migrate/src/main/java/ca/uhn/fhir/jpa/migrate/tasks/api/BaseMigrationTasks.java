@@ -329,6 +329,10 @@ public class BaseMigrationTasks<T extends Enum> {
 				myTask.addSql(theDriverTypeEnum, theSql);
 				return this;
 			}
+
+			public void addSql(@Language("SQL") String theSql) {
+				myTask.addSql(theSql);
+			}
 		}
 
 		public class BuilderAddTableByColumns implements IAcceptsTasks {

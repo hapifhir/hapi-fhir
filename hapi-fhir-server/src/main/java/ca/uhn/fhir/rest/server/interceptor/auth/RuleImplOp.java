@@ -3,15 +3,18 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -20,10 +23,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -37,9 +37,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,6 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
+@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 	private AppliesTypeEnum myAppliesTo;
@@ -57,13 +58,22 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private ClassifierTypeEnum myClassifierType;
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
-	private List<IIdType> myAppliesToInstances;
+	private Collection<IIdType> myAppliesToInstances;
 
 	/**
 	 * Constructor
 	 */
 	public RuleImplOp(String theRuleName) {
 		super(theRuleName);
+	}
+
+	@VisibleForTesting
+	Collection<IIdType> getAppliesToInstances() {
+		return myAppliesToInstances;
+	}
+
+	public void setAppliesToInstances(Collection<IIdType> theAppliesToInstances) {
+		myAppliesToInstances = theAppliesToInstances;
 	}
 
 	@Override
@@ -77,7 +87,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
 		IBaseResource appliesToResource;
-		IIdType appliesToResourceId = null;
+		Collection<IIdType> appliesToResourceId = null;
 		String appliesToResourceType = null;
 		Map<String, String[]> appliesToSearchParams = null;
 		switch (myOp) {
@@ -90,7 +100,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					switch (theOperation) {
 						case READ:
 						case VREAD:
-							appliesToResourceId = theInputResourceId;
+							appliesToResourceId = Collections.singleton(theInputResourceId);
 							appliesToResourceType = theInputResourceId.getResourceType();
 							break;
 						case SEARCH_SYSTEM:
@@ -105,6 +115,33 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 							appliesToResourceType = theRequestDetails.getResourceName();
 							appliesToSearchParams = theRequestDetails.getParameters();
+
+							/*
+							 * If this is a search with an "_id" parameter, we can treat this
+							 * as a read for the given resource ID(s)
+							 */
+							if (theRequestDetails.getParameters().containsKey("_id")) {
+								String[] idValues = theRequestDetails.getParameters().get("_id");
+								appliesToResourceId = new ArrayList<>();
+
+								for (String nextIdValue : idValues) {
+									QualifiedParamList orParamList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextIdValue);
+									for (String next : orParamList) {
+										IIdType nextId = ctx.getVersion().newIdType().setValue(next);
+										if (nextId.hasIdPart()) {
+											if (!nextId.hasResourceType()) {
+												nextId = nextId.withResourceType(appliesToResourceType);
+											}
+											if (nextId.getResourceType().equals(appliesToResourceType)) {
+												appliesToResourceId.add(nextId);
+											}
+										}
+									}
+								}
+								if (appliesToResourceId.isEmpty()) {
+									appliesToResourceId = null;
+								}
+							}
 							break;
 						case HISTORY_TYPE:
 							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
@@ -116,7 +153,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 								return new Verdict(PolicyEnum.ALLOW, this);
 							}
-							appliesToResourceId = theInputResourceId;
+							appliesToResourceId = Collections.singleton(theInputResourceId);
 							break;
 						case GET_PAGE:
 							return new Verdict(PolicyEnum.ALLOW, this);
@@ -145,7 +182,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				}
 				appliesToResource = theOutputResource;
 				if (theOutputResource != null) {
-					appliesToResourceId = theOutputResource.getIdElement();
+					appliesToResourceId = Collections.singleton(theOutputResource.getIdElement());
 				}
 				break;
 			case WRITE:
@@ -160,7 +197,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					case META_ADD:
 					case META_DELETE:
 						appliesToResource = theInputResource;
-						appliesToResourceId = theInputResourceId;
+						if (theInputResourceId != null) {
+							appliesToResourceId = Collections.singletonList(theInputResourceId);
+						}
 						break;
 					default:
 						return null;
@@ -291,22 +330,33 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		switch (myAppliesTo) {
 			case INSTANCES:
-				if (appliesToResourceId != null) {
-					for (IIdType next : myAppliesToInstances) {
-						if (isNotBlank(next.getResourceType())) {
-							if (!next.getResourceType().equals(appliesToResourceId.getResourceType())) {
+				if (appliesToResourceId != null && appliesToResourceId.size() > 0) {
+					int haveMatches = 0;
+					for (IIdType requestAppliesToResource : appliesToResourceId) {
+
+						for (IIdType next : myAppliesToInstances) {
+							if (isNotBlank(next.getResourceType())) {
+								if (!next.getResourceType().equals(requestAppliesToResource.getResourceType())) {
+									continue;
+								}
+							}
+							if (!next.getIdPart().equals(requestAppliesToResource.getIdPart())) {
 								continue;
 							}
+							if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+								return null;
+							}
+							haveMatches++;
+							break;
 						}
-						if (!next.getIdPart().equals(appliesToResourceId.getIdPart())) {
-							continue;
-						}
-						if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
-							return null;
-						}
+
+					}
+
+					if (haveMatches == appliesToResourceId.size()) {
 						return newVerdict();
 					}
 				}
+
 				return null;
 			case ALL_RESOURCES:
 				if (appliesToResourceType != null) {
@@ -326,10 +376,14 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						}
 					}
 				}
-				if (appliesToResourceId != null && appliesToResourceId.hasResourceType()) {
-					Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceId.getResourceType()).getImplementingClass();
-					if (myAppliesToTypes.contains(type) == false) {
-						return null;
+				if (appliesToResourceId != null) {
+					for (IIdType nextRequestAppliesToResourceId : appliesToResourceId) {
+						if (nextRequestAppliesToResourceId.hasResourceType()) {
+							Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(nextRequestAppliesToResourceId.getResourceType()).getImplementingClass();
+							if (myAppliesToTypes.contains(type) == false) {
+								return null;
+							}
+						}
 					}
 				}
 				if (appliesToResourceType != null) {
@@ -356,15 +410,19 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case IN_COMPARTMENT:
 				FhirTerser t = ctx.newTerser();
 				boolean foundMatch = false;
+
+				if (appliesToResourceId != null && appliesToResourceId.size() > 0) {
+					boolean haveOwnersForAll = appliesToResourceId
+						.stream()
+						.allMatch(n -> myClassifierCompartmentOwners.contains(n.toUnqualifiedVersionless()));
+					if (haveOwnersForAll) {
+						foundMatch = true;
+					}
+				}
+
 				for (IIdType next : myClassifierCompartmentOwners) {
 					if (appliesToResource != null) {
 						if (t.isSourceInCompartmentForTarget(myClassifierCompartmentName, appliesToResource, next)) {
-							foundMatch = true;
-							break;
-						}
-					}
-					if (appliesToResourceId != null && appliesToResourceId.hasResourceType() && appliesToResourceId.hasIdPart()) {
-						if (appliesToResourceId.toUnqualifiedVersionless().getValue().equals(next.toUnqualifiedVersionless().getValue())) {
 							foundMatch = true;
 							break;
 						}
@@ -488,10 +546,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 	public void setAppliesTo(AppliesTypeEnum theAppliesTo) {
 		myAppliesTo = theAppliesTo;
-	}
-
-	public void setAppliesToInstances(List<IIdType> theAppliesToInstances) {
-		myAppliesToInstances = theAppliesToInstances;
 	}
 
 	public void setAppliesToTypes(Set<?> theAppliesToTypes) {

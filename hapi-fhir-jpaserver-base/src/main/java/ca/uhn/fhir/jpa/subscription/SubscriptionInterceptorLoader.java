@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -37,52 +38,44 @@ import java.util.Set;
 public class SubscriptionInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionInterceptorLoader.class);
 
+	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+	@Autowired
 	private SubscriptionActivatingInterceptor mySubscriptionActivatingInterceptor;
-
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
+	private SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
 	private ApplicationContext myAppicationContext;
 	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
+	private IInterceptorRegistry myInterceptorRegistry;
 
 	public void registerInterceptors() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
 
 		if (!supportedSubscriptionTypes.isEmpty()) {
 			loadSubscriptions();
-
 			ourLog.info("Registering subscription activating interceptor");
-			myDaoConfig.registerInterceptor(mySubscriptionActivatingInterceptor);
+			myInterceptorRegistry.registerInterceptor(mySubscriptionActivatingInterceptor);
 		}
 		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
+			mySubscriptionMatcherInterceptor.start();
 			ourLog.info("Registering subscription matcher interceptor");
-
-			if (mySubscriptionMatcherInterceptor == null) {
-				mySubscriptionMatcherInterceptor = myAppicationContext.getBean(SubscriptionMatcherInterceptor.class);
-			}
-
-			myDaoConfig.registerInterceptor(mySubscriptionMatcherInterceptor);
-
+			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
 		}
 	}
 
 	private void loadSubscriptions() {
 		ourLog.info("Loading subscriptions into the SubscriptionRegistry...");
-		// Load subscriptions into the SubscriptionRegistry
+		// Activate scheduled subscription loads into the SubscriptionRegistry
 		myAppicationContext.getBean(SubscriptionLoader.class);
 		ourLog.info("...{} subscriptions loaded", mySubscriptionRegistry.size());
-
-		// Once subscriptions have been loaded, now
-		if (mySubscriptionActivatingInterceptor == null) {
-			mySubscriptionActivatingInterceptor = myAppicationContext.getBean(SubscriptionActivatingInterceptor.class);
-		}
 	}
 
 	@VisibleForTesting
-	public void unregisterInterceptorsForUnitTest() {
-		myDaoConfig.unregisterInterceptor(mySubscriptionActivatingInterceptor);
-		myDaoConfig.unregisterInterceptor(mySubscriptionMatcherInterceptor);
+	void unregisterInterceptorsForUnitTest() {
+		myInterceptorRegistry.unregisterInterceptor(mySubscriptionActivatingInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(mySubscriptionMatcherInterceptor);
 	}
 }

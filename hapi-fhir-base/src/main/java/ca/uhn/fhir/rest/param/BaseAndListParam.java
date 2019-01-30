@@ -62,5 +62,10 @@ public abstract class BaseAndListParam<T extends IQueryParameterOr<?>> implement
 		return myValues.toString();
 	}
 
-
+	/**
+	 * Returns the number of AND parameters
+	 */
+	public int size() {
+		return myValues.size();
+	}
 }

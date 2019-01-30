@@ -10,17 +10,19 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
+import java.util.Collections;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test {
+	@Autowired
+	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Autowired
 	InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(myInMemorySubscriptionMatcher.match(criteria, resource).supported());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
 	private void assertMatched(IBaseResource resource, String criteria) {
@@ -28,14 +30,66 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 
 		assertTrue(result.supported());
 		assertTrue(result.matched());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
 	private void assertNotMatched(IBaseResource resource, String criteria) {
+		assertNotMatched(resource, criteria, SubscriptionMatchingStrategy.IN_MEMORY);
+	}
+
+	private void assertNotMatched(IBaseResource resource, String criteria, SubscriptionMatchingStrategy theSubscriptionMatchingStrategy) {
 		SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(criteria, resource);
 
 		assertTrue(result.supported());
 		assertFalse(result.matched());
+
+		assertEquals(theSubscriptionMatchingStrategy, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
+
+
+	/**
+	 * Technically this is an invalid reference in most cases, but this shouldn't choke
+	 * the matcher in the case that it gets used.
+	 */
+	@Test
+	public void testPlaceholderIdInReference() {
+
+		ProcedureRequest pr = new ProcedureRequest();
+		pr.setId("ProcedureRequest/123");
+		pr.setIntent(ProcedureRequest.ProcedureRequestIntent.ORIGINALORDER);
+
+		pr.setSubject(new Reference("urn:uuid:aaaaaaaaaa"));
+		assertMatched(pr, "ProcedureRequest?intent=original-order");
+		assertNotMatched(pr, "ProcedureRequest?subject=Patient/123");
+
+		pr.setSubject(new Reference("Foo/123"));
+		assertMatched(pr, "ProcedureRequest?intent=original-order");
+		assertNotMatched(pr, "ProcedureRequest?subject=Patient/123");
+
+		pr.setSubject(new Reference("Patient/"));
+		assertMatched(pr, "ProcedureRequest?intent=original-order");
+		assertNotMatched(pr, "ProcedureRequest?subject=Patient/123");
+
+	}
+
+
+	@Test
+	public void testResourceById() {
+
+		ProcedureRequest pr = new ProcedureRequest();
+		pr.setId("ProcedureRequest/123");
+		pr.setIntent(ProcedureRequest.ProcedureRequestIntent.ORIGINALORDER);
+
+		assertMatched(pr, "ProcedureRequest?_id=123");
+		assertMatched(pr, "ProcedureRequest?_id=ProcedureRequest/123");
+		assertMatched(pr, "ProcedureRequest?_id=ProcedureRequest/123,ProcedureRequest/999");
+		assertMatched(pr, "ProcedureRequest?_id=ProcedureRequest/123&_id=ProcedureRequest/123");
+		assertNotMatched(pr, "ProcedureRequest?_id=ProcedureRequest/888");
+		assertNotMatched(pr, "ProcedureRequest?_id=ProcedureRequest/888,ProcedureRequest/999");
+		assertNotMatched(pr, "ProcedureRequest?_id=ProcedureRequest/123&_id=ProcedureRequest/888");
+
+	}
+
 
 		/*
 	The following tests are copied from an e-mail from a site using HAPI FHIR
@@ -105,7 +159,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("XXX");
-			assertNotMatched(obs, criteria);
+			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.DATABASE);
 		}
 		{
 			Observation obs = new Observation();
@@ -121,7 +175,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("XXX");
-			assertNotMatched(obs, criteria);
+			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.DATABASE);
 		}
 		{
 			Observation obs = new Observation();
@@ -219,7 +273,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		{
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("XXX");
-			assertNotMatched(obs, criteria);
+			assertNotMatched(obs, criteria, SubscriptionMatchingStrategy.DATABASE);
 		}
 	}
 
@@ -281,7 +335,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
 		initSearchParamRegistry(bundle);
 
 		{
@@ -313,7 +367,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
 		initSearchParamRegistry(bundle);
 
 		{
@@ -405,7 +459,7 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
 		initSearchParamRegistry(bundle);
 
 		{

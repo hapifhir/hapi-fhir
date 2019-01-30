@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.module.standalone.FhirClientSearchParamProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.r4.model.Coding;
@@ -17,8 +16,6 @@ import static org.junit.Assert.assertEquals;
 
 
 public class FhirClientSearchParamProviderTest extends BaseSubscriptionsR4Test {
-	@Autowired
-	ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	ISearchParamProvider origSearchParamProvider;
 
@@ -44,7 +41,7 @@ public class FhirClientSearchParamProviderTest extends BaseSubscriptionsR4Test {
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(sp);
-		mySearchParamRegsitry.forceRefresh();
+		mySearchParamRegistry.forceRefresh();
 		createSubscription(criteria, "application/json");
 		waitForActivatedSubscriptionCount(1);
 

@@ -4,7 +4,10 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
+import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -49,6 +52,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
+	private static NotificationServlet ourNotificationServlet;
+	private static String ourNotificationListenerServer;
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -79,9 +84,15 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
+		ourNotificationServlet.reset();
 	}
 
-	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
+	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
+		return createSubscription(criteria, payload, endpoint, null);
+	}
+
+	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint,
+														 List<StringType> headers) throws InterruptedException {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -91,15 +102,17 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
 		channel.setPayload(thePayload);
 		channel.setEndpoint(theEndpoint);
+		if (headers != null) {
+			channel.setHeader(headers);
+		}
 		subscription.setChannel(channel);
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
-		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 
 		waitForQueueToDrain();
 
-		return subscription;
+		return (Subscription)methodOutcome.getResource();
 	}
 
 	private Observation sendObservation(String code, String system) {
@@ -118,6 +131,55 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		observation.setId(observationId);
 
 		return observation;
+	}
+
+	@Test
+	public void testRestHookSubscription() throws Exception {
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+
+		createSubscription(criteria1, null, ourNotificationListenerServer,
+			Collections.singletonList(new StringType("Authorization: abc-def")));
+		createSubscription(criteria2, null, ourNotificationListenerServer);
+
+		sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification with authorization header
+		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
+		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		Assert.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		ourNotificationServlet.reset();
+
+		sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification with authorization header
+		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
+		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		Assert.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		ourNotificationServlet.reset();
+
+		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
+
+		/// Should see 1 subscription notification with authorization header
+		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
+		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		Assert.assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		ourNotificationServlet.reset();
+
+		Observation observation3 = ourClient.read(Observation.class, observationTemp3.getId());
+		CodeableConcept codeableConcept = new CodeableConcept();
+		observation3.setCode(codeableConcept);
+		Coding coding = codeableConcept.addCoding();
+		coding.setCode(code + "111");
+		coding.setSystem("SNOMED-CT");
+		ourClient.update().resource(observation3).withId(observation3.getIdElement()).execute();
+
+		// Should see 2 subscription notifications with and without authorization header
+		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
+		Assert.assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		Assert.assertNull(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
+		ourNotificationServlet.reset();
 	}
 
 	@Test
@@ -291,7 +353,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		Assert.assertFalse(subscription1.getId().equals(subscription2.getId()));
+		Assert.assertNotEquals(subscription1.getId(), subscription2.getId());
 		Assert.assertFalse(observation1.getId().isEmpty());
 		Assert.assertFalse(observation2.getId().isEmpty());
 	}
@@ -353,16 +415,70 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 	}
 
+	@Test
+	public void testSubscriptionActivatesInMemoryTag() throws Exception {
+		String payload = "application/fhir+xml";
+
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		Subscription subscriptionOrig = createSubscription(criteria1, payload, ourListenerServerBase);
+		IdType subscriptionId = subscriptionOrig.getIdElement();
+
+		assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscriptionOrig.getStatus());
+		List<Coding> tags = subscriptionOrig.getMeta().getTag();
+		assertEquals(1, tags.size());
+		Coding tag = tags.get(0);
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
+		assertEquals("In-memory", tag.getDisplay());
+
+		Subscription subscriptionActivated = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscriptionActivated.getStatus());
+	   tags = subscriptionActivated.getMeta().getTag();
+		assertEquals(1, tags.size());
+		tag = tags.get(0);
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
+		assertEquals("In-memory", tag.getDisplay());
+	}
+
+	@Test
+	public void testSubscriptionActivatesDatabaseTag() throws Exception {
+		String payload = "application/fhir+xml";
+
+		Subscription subscriptionOrig = createSubscription("Observation?code=17861-6&context.type=IHD", payload, ourListenerServerBase);
+		IdType subscriptionId = subscriptionOrig.getIdElement();
+
+		List<Coding> tags = subscriptionOrig.getMeta().getTag();
+		assertEquals(1, tags.size());
+		Coding tag = tags.get(0);
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
+		assertEquals("Database", tag.getDisplay());
+
+		Subscription subscription = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
+		 tags = subscription.getMeta().getTag();
+		assertEquals(1, tags.size());
+		 tag = tags.get(0);
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
+		assertEquals("Database", tag.getDisplay());
+	}
+
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
 		ourListenerPort = PortUtil.findFreePort();
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
 		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
 
 		ourListenerServer = new Server(ourListenerPort);
+		ourNotificationServlet = new NotificationServlet();
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
@@ -370,6 +486,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ServletHolder servletHolder = new ServletHolder();
 		servletHolder.setServlet(ourListenerRestServer);
 		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+		servletHolder = new ServletHolder();
+		servletHolder.setServlet(ourNotificationServlet);
+		proxyHandler.addServlet(servletHolder, "/fhir/subscription");
 
 		ourListenerServer.setHandler(proxyHandler);
 		ourListenerServer.start();

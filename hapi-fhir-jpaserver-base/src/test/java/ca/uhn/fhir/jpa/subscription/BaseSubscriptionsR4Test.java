@@ -89,16 +89,22 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		ourHeaders.clear();
 
 		// Delete all Subscriptions
-		Bundle allSubscriptions = ourClient.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
-		for (IBaseResource next : BundleUtil.toListOfResources(myFhirCtx, allSubscriptions)) {
-			ourClient.delete().resource(next).execute();
+		if (ourClient != null) {
+			Bundle allSubscriptions = ourClient.search().forResource(Subscription.class).returnBundle(Bundle.class).execute();
+			for (IBaseResource next : BundleUtil.toListOfResources(myFhirCtx, allSubscriptions)) {
+				ourClient.delete().resource(next).execute();
+			}
+			waitForActivatedSubscriptionCount(0);
 		}
-		waitForActivatedSubscriptionCount(0);
 
 		LinkedBlockingQueueSubscribableChannel processingChannel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
-		processingChannel.clearInterceptorsForUnitTest();
+		if (processingChannel != null) {
+			processingChannel.clearInterceptorsForUnitTest();
+		}
 		myCountingInterceptor = new CountingInterceptor();
-		processingChannel.addInterceptorForUnitTest(myCountingInterceptor);
+		if (processingChannel != null) {
+			processingChannel.addInterceptorForUnitTest(myCountingInterceptor);
+		}
 	}
 
 
@@ -147,9 +153,8 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 		observation.setStatus(Observation.ObservationStatus.FINAL);
 
-		MethodOutcome methodOutcome = ourClient.create().resource(observation).execute();
-
-		observation.setId(methodOutcome.getId());
+		IIdType id = myObservationDao.create(observation).getId();
+		observation.setId(id);
 
 		return observation;
 	}
