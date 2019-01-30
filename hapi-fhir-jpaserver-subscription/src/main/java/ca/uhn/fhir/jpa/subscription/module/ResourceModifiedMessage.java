@@ -166,4 +166,13 @@ public class ResourceModifiedMessage implements IResourceMessage {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+			String resourceId = myPayloadId;
+			if (resourceId == null) {
+				resourceId = myId;
+			}
+			return "ResourceModified Message { " + myOperationType + ", " + resourceId + "}";
+	}
+
 }
