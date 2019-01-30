@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.config.CaptureQueriesListener;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -14,9 +14,9 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -56,6 +56,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
 
 	@Before
@@ -617,7 +618,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 				expect1.setResource(resource);
 				expect1.calculateHashes();
 
-				assertThat("Got: \"" + results.toString()+"\"", results, containsInAnyOrder(expect0, expect1));
+				assertThat("Got: \"" + results.toString() + "\"", results, containsInAnyOrder(expect0, expect1));
 			}
 		});
 	}
@@ -1063,7 +1064,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
 			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
 			IBundleProvider result = myObservationDao.search(map);
-			assertThat("Got: "+ toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
+			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
 		}
 	}
 
@@ -1095,7 +1096,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
 			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, val);
 			IBundleProvider result = myObservationDao.search(map);
-			assertThat("Got: "+ toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
+			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
 		}
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
@@ -1141,6 +1142,40 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, found.size().intValue());
 		}
 
+	}
+
+	/**
+	 * See #1174
+	 */
+	@Test
+	public void testSearchDateInSavedSearch() {
+		for (int i = 1; i <= 9; i++) {
+			Patient p1 = new Patient();
+			p1.getBirthDateElement().setValueAsString("1980-01-0" + i);
+			String id1 = myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+		}
+
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(3, 6, 10));
+
+		{
+			// Don't load synchronous
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLastUpdated(new DateRangeParam().setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, "2022-01-01")));
+			IBundleProvider found = myPatientDao.search(map);
+			Set<String> dates = new HashSet<>();
+			for (int i = 0; i < 9; i++) {
+				Patient nextResource = (Patient) found.getResources(i, i + 1).get(0);
+				dates.add(nextResource.getBirthDateElement().getValueAsString());
+			}
+
+			assertThat(dates, hasItems(
+				"1980-01-01",
+				"1980-01-09"
+			));
+
+			assertFalse(map.isLoadSynchronous());
+			assertNull(map.getLoadSynchronousUpTo());
+		}
 	}
 
 	/**
@@ -2194,16 +2229,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> queries = CaptureQueriesListener
 			.getLastNQueries()
 			.stream()
-			.filter(t->t.getThreadName().equals("main"))
+			.filter(t -> t.getThreadName().equals("main"))
 			.filter(t -> t.getSql(false, false).toLowerCase().contains("select"))
 			.filter(t -> t.getSql(false, false).toLowerCase().contains("token"))
-			.map(t-> t.getSql(true, true))
+			.map(t -> t.getSql(true, true))
 			.collect(Collectors.toList());
 
 		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
 
 		String searchQuery = queries.get(0);
-		assertEquals(searchQuery,3, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
+		assertEquals(searchQuery, 3, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
 		assertEquals(searchQuery, 5, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
 	}
 
@@ -3362,7 +3397,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			"Observation/YES21",
 			"Observation/YES22",
 			"Observation/YES23"
-			));
+		));
 	}
 
 	private void createObservationWithEffective(String theId, String theEffective) {

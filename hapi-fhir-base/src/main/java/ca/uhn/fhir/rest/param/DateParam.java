@@ -255,7 +255,15 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		return b.build();
 	}
 
-	public class DateParamDateTimeHolder extends BaseDateTimeDt {
+	public static class DateParamDateTimeHolder extends BaseDateTimeDt {
+
+		/**
+		 * Constructor
+		 */
+		public DateParamDateTimeHolder() {
+			super();
+		}
+
 		@Override
 		protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
 			return TemporalPrecisionEnum.SECOND;
