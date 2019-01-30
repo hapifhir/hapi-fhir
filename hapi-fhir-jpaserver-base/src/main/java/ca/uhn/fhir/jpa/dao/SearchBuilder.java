@@ -80,7 +80,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.util.ListUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -385,7 +384,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<Predicate> codePredicates = new ArrayList<>();
 
-		for (IQueryParameterType nextOr : theList) {
+		for (int orIdx = 0; orIdx < theList.size(); orIdx++) {
+			IQueryParameterType nextOr = theList.get(orIdx);
 
 			if (nextOr instanceof ReferenceParam) {
 				ReferenceParam ref = (ReferenceParam) nextOr;
@@ -496,15 +496,16 @@ public class SearchBuilder implements ISearchBuilder {
 
 					boolean foundChainMatch = false;
 
-					String chain = ref.getChain();
-					String remainingChain = null;
-					int chainDotIndex = chain.indexOf('.');
-					if (chainDotIndex != -1) {
-						remainingChain = chain.substring(chainDotIndex + 1);
-						chain = chain.substring(0, chainDotIndex);
-					}
-
 					for (Class<? extends IBaseResource> nextType : resourceTypes) {
+
+						String chain = ref.getChain();
+						String remainingChain = null;
+						int chainDotIndex = chain.indexOf('.');
+						if (chainDotIndex != -1) {
+							remainingChain = chain.substring(chainDotIndex + 1);
+							chain = chain.substring(0, chainDotIndex);
+						}
+
 						RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(nextType);
 						String subResourceName = typeDef.getName();
 
@@ -531,37 +532,29 @@ public class SearchBuilder implements ISearchBuilder {
 							}
 						}
 
-						IQueryParameterType chainValue;
-						if (remainingChain != null) {
-							if (param == null || param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
-								ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", nextType.getSimpleName(), chain, remainingChain);
+						ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
+
+						for (IQueryParameterType next : theList) {
+							String nextValue = next.getValueAsQueryToken(myContext);
+							IQueryParameterType chainValue = mapReferenceChainToRawParamType(remainingChain, param, theParamName, qualifier, nextType, chain, isMeta, nextValue);
+							if (chainValue == null) {
 								continue;
 							}
-
-							chainValue = new ReferenceParam();
-							chainValue.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
-							((ReferenceParam) chainValue).setChain(remainingChain);
-						} else if (isMeta) {
-							IQueryParameterType type = myMatchUrlService.newInstanceType(chain);
-							type.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
-							chainValue = type;
-						} else {
-							chainValue = toParameterType(param, qualifier, resourceId);
+							foundChainMatch = true;
+							orValues.add(chainValue);
 						}
-
-						foundChainMatch = true;
 
 						Subquery<Long> subQ = myResourceTableQuery.subquery(Long.class);
 						Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
 						subQ.select(subQfrom.get("myId").as(Long.class));
 
 						List<List<? extends IQueryParameterType>> andOrParams = new ArrayList<>();
-						andOrParams.add(Collections.singletonList(chainValue));
+						andOrParams.add(orValues);
 
 						/*
 						 * We're doing a chain call, so push the current query root
 						 * and predicate list down and put new ones at the top of the
-						 * stack and run a subuery
+						 * stack and run a subquery
 						 */
 						Root<ResourceTable> stackRoot = myResourceTableRoot;
 						ArrayList<Predicate> stackPredicates = myPredicates;
@@ -573,9 +566,11 @@ public class SearchBuilder implements ISearchBuilder {
 						// Create the subquery predicates
 						myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), subResourceName));
 						myPredicates.add(myBuilder.isNull(myResourceTableRoot.get("myDeleted")));
-						searchForIdsWithAndOr(subResourceName, chain, andOrParams);
 
-						subQ.where(toArray(myPredicates));
+						if (foundChainMatch) {
+							searchForIdsWithAndOr(subResourceName, chain, andOrParams);
+							subQ.where(toArray(myPredicates));
+						}
 
 						/*
 						 * Pop the old query root and predicate list back
@@ -593,6 +588,10 @@ public class SearchBuilder implements ISearchBuilder {
 					if (!foundChainMatch) {
 						throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + ref.getChain()));
 					}
+
+					myPredicates.add(myBuilder.or(toArray(codePredicates)));
+					return;
+
 				}
 
 			} else {
@@ -602,6 +601,28 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		myPredicates.add(myBuilder.or(toArray(codePredicates)));
+	}
+
+	private IQueryParameterType mapReferenceChainToRawParamType(String remainingChain, RuntimeSearchParam param, String theParamName, String qualifier, Class<? extends IBaseResource> nextType, String chain, boolean isMeta, String resourceId) {
+		IQueryParameterType chainValue;
+		if (remainingChain != null) {
+			if (param == null || param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+				ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", nextType.getSimpleName(), chain, remainingChain);
+				return null;
+			}
+
+			chainValue = new ReferenceParam();
+			chainValue.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
+			((ReferenceParam) chainValue).setChain(remainingChain);
+		} else if (isMeta) {
+			IQueryParameterType type = myMatchUrlService.newInstanceType(chain);
+			type.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
+			chainValue = type;
+		} else {
+			chainValue = toParameterType(param, qualifier, resourceId);
+		}
+
+		return chainValue;
 	}
 
 	private void addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues) {
@@ -794,24 +815,27 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamToken> join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
-
 		if (theList.get(0).getMissing() != null) {
+			Join<ResourceTable, ResourceIndexedSearchParamToken> join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
+		Join<ResourceTable, ResourceIndexedSearchParamToken> join = null;
 		for (IQueryParameterType nextOr : theList) {
 
 			if (nextOr instanceof TokenParam) {
 				TokenParam id = (TokenParam) nextOr;
 				if (id.isText()) {
 					addPredicateString(theResourceName, theParamName, theList);
-					continue;
+					break;
 				}
 			}
 
+			if (join == null) {
+				join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
+			}
 			Predicate singleCode = createPredicateToken(nextOr, theResourceName, theParamName, myBuilder, join);
 			codePredicates.add(singleCode);
 		}
@@ -972,38 +996,34 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@SuppressWarnings("unchecked")
 	private <T> Join<ResourceTable, T> createOrReuseJoin(JoinEnum theType, String theSearchParameterName) {
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
-
-		switch (theType) {
-			case DATE:
-				join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
-				break;
-			case NUMBER:
-				join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
-				break;
-			case QUANTITY:
-				join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
-				break;
-			case REFERENCE:
-				join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
-				break;
-			case STRING:
-				join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
-				break;
-			case URI:
-				join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
-				break;
-			case TOKEN:
-				join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
-				break;
-		}
-
 		JoinKey key = new JoinKey(theSearchParameterName, theType);
-		if (!myIndexJoins.containsKey(key)) {
-			myIndexJoins.put(key, join);
-		}
-
-		return (Join<ResourceTable, T>) join;
+		return (Join<ResourceTable, T>) myIndexJoins.computeIfAbsent(key, k -> {
+			Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
+			switch (theType) {
+				case DATE:
+					join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
+					break;
+				case NUMBER:
+					join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
+					break;
+				case QUANTITY:
+					join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
+					break;
+				case REFERENCE:
+					join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
+					break;
+				case STRING:
+					join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
+					break;
+				case URI:
+					join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
+					break;
+				case TOKEN:
+					join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
+					break;
+			}
+			return join;
+		});
 	}
 
 	private Predicate createPredicateDate(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamDate> theFrom) {

@@ -100,6 +100,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 //			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 //			.countQuery(new ThreadQueryCountHolder())
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
+			.afterQuery(new CaptureQueriesListener())
 			.countQuery(singleQueryCountHolder())
 			.build();
 
