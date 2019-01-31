@@ -87,8 +87,6 @@ public class SubscriptionLoader {
 			ourLog.debug("Starting sync subscriptions");
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Subscription.SP_STATUS, new TokenOrListParam()
-				// TODO KHS perhaps we should only be requesting ACTIVE subscriptions here?...
-				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
 				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 

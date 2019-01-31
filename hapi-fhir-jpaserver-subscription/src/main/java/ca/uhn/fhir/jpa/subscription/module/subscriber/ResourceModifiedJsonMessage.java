@@ -55,4 +55,8 @@ public class ResourceModifiedJsonMessage extends BaseJsonMessage<ResourceModifie
 		myPayload = thePayload;
 	}
 
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + " { " + getPayload() + " }";
+	}
 }

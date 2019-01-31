@@ -54,4 +54,8 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 		myPayload = thePayload;
 	}
 
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + " { " + getPayload().getPayloadId() + " }";
+	}
 }

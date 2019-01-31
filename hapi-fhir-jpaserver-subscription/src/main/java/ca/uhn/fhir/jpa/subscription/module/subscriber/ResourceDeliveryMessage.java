@@ -114,4 +114,10 @@ public class ResourceDeliveryMessage implements IResourceMessage {
 			myPayloadId = thePayloadId.getValue();
 		}
 	}
+
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + " { " + getPayloadId() + " }";
+	}
+
 }

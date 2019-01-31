@@ -174,5 +174,4 @@ public class ResourceModifiedMessage implements IResourceMessage {
 			}
 			return "ResourceModified Message { " + myOperationType + ", " + resourceId + "}";
 	}
-
 }
