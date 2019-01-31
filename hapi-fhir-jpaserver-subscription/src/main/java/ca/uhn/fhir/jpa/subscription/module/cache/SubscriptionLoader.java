@@ -46,8 +46,6 @@ import java.util.concurrent.Semaphore;
 @Lazy
 public class SubscriptionLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
-	@VisibleForTesting
-	public static final int INITIAL_SECONDS_BETWEEN_RETRIES = 5;
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 
 	@Autowired
@@ -57,8 +55,6 @@ public class SubscriptionLoader {
 
 	private final Object mySyncSubscriptionsLock = new Object();
 	private Semaphore mySyncSubscriptionsSemaphore = new Semaphore(1);
-
-	private volatile int mySecondsBetweenRetries = INITIAL_SECONDS_BETWEEN_RETRIES;
 
 	/**
 	 * Read the existing subscriptions from the database
@@ -82,7 +78,7 @@ public class SubscriptionLoader {
 	}
 
 	synchronized int doSyncSubscriptionsWithRetry() {
-		Retrier<Integer> syncSubscriptionRetrier = new Retrier(() -> doSyncSubscriptions(), MAX_RETRIES, mySecondsBetweenRetries, "sync subscriptions");
+		Retrier<Integer> syncSubscriptionRetrier = new Retrier<>(this::doSyncSubscriptions, MAX_RETRIES);
 		return syncSubscriptionRetrier.runWithRetry();
 	}
 
@@ -125,11 +121,6 @@ public class SubscriptionLoader {
 	@VisibleForTesting
 	public void setSubscriptionProviderForUnitTest(ISubscriptionProvider theSubscriptionProvider) {
 		mySubscriptionProvidor = theSubscriptionProvider;
-	}
-
-	@VisibleForTesting
-	public void setSecondsBetweenRetriesForTesting(int theSecondsBetweenRetries) {
-		mySecondsBetweenRetries = theSecondsBetweenRetries;
 	}
 }
 

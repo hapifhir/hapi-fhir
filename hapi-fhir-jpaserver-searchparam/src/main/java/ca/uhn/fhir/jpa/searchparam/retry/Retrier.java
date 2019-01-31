@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.retry;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,13 @@ package ca.uhn.fhir.jpa.searchparam.retry;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 import java.util.function.Supplier;
 
@@ -30,34 +34,27 @@ public class Retrier<T> {
 	private static final Logger ourLog = LoggerFactory.getLogger(Retrier.class);
 
 	private final Supplier<T> mySupplier;
-	private final int myMaxRetries;
-	private final int mySecondsBetweenRetries;
-	private final String myDescription;
 
-	public Retrier(Supplier<T> theSupplier, int theMaxRetries, int theSecondsBetweenRetries, String theDescription) {
+	private final RetryTemplate myRetryTemplate;
+
+	public Retrier(Supplier<T> theSupplier, int theMaxRetries) {
+		Validate.isTrue(theMaxRetries > 0, "maxRetries must be above zero.");
 		mySupplier = theSupplier;
-		myMaxRetries = theMaxRetries;
-		mySecondsBetweenRetries = theSecondsBetweenRetries;
-		myDescription = theDescription;
+
+		myRetryTemplate = new RetryTemplate();
+
+		ExponentialBackOffPolicy backOff = new ExponentialBackOffPolicy();
+		backOff.setInitialInterval(500);
+		backOff.setMaxInterval(DateUtils.MILLIS_PER_MINUTE);
+		backOff.setMultiplier(2);
+		myRetryTemplate.setBackOffPolicy(backOff);
+
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+		retryPolicy.setMaxAttempts(theMaxRetries);
+		myRetryTemplate.setRetryPolicy(retryPolicy);
 	}
 
 	public T runWithRetry() {
-		RuntimeException lastException = new IllegalStateException("maxRetries must be above zero.");
-		for (int retryCount = 1; retryCount <= myMaxRetries; ++retryCount) {
-			try {
-				return mySupplier.get();
-			} catch(RuntimeException e) {
-				ourLog.trace("Failure during retry: {}", e.getMessage(), e); // with stacktrace if it's ever needed
-				ourLog.info("Failed to {}.  Attempt {} / {}: {}", myDescription, retryCount, myMaxRetries, e.getMessage());
-				lastException = e;
-				try {
-					Thread.sleep(mySecondsBetweenRetries * DateUtils.MILLIS_PER_SECOND);
-				} catch (InterruptedException ie) {
-					Thread.currentThread().interrupt();
-					throw lastException;
-				}
-			}
-		}
-		throw lastException;
+		return myRetryTemplate.execute(retryContext -> mySupplier.get());
 	}
 }

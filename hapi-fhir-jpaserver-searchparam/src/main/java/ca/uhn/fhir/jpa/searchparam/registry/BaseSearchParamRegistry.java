@@ -48,8 +48,6 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
-	@VisibleForTesting
-	public static final int INITIAL_SECONDS_BETWEEN_RETRIES = 5;
 	private static long REFRESH_INTERVAL = 60 * DateUtils.MILLIS_PER_MINUTE;
 	private static final int MAX_RETRIES = 60; // 5 minutes
 
@@ -60,7 +58,6 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	@Autowired
 	private FhirContext myFhirContext;
 
-	private volatile int mySecondsBetweenRetries = INITIAL_SECONDS_BETWEEN_RETRIES;
 	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
 	private volatile Map<String, List<JpaRuntimeSearchParam>> myActiveUniqueSearchParams = Collections.emptyMap();
 	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
@@ -85,7 +82,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		return myActiveSearchParams.get(theResourceName);
 	}
 
-	void requiresActiveSearchParams() {
+	private void requiresActiveSearchParams() {
 		if (myActiveSearchParams == null) {
 			refreshCacheWithRetry();
 		}
@@ -120,11 +117,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	}
 
 	private Map<String, RuntimeSearchParam> getSearchParamMap(Map<String, Map<String, RuntimeSearchParam>> searchParams, String theResourceName) {
-		Map<String, RuntimeSearchParam> retVal = searchParams.get(theResourceName);
-		if (retVal == null) {
-			retVal = new HashMap<>();
-			searchParams.put(theResourceName, retVal);
-		}
+		Map<String, RuntimeSearchParam> retVal = searchParams.computeIfAbsent(theResourceName, k -> new HashMap<>());
 		return retVal;
 	}
 
@@ -139,11 +132,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		 * Loop through parameters and find JPA params
 		 */
 		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextResourceNameToEntries : theActiveSearchParams.entrySet()) {
-			List<JpaRuntimeSearchParam> uniqueSearchParams = activeUniqueSearchParams.get(nextResourceNameToEntries.getKey());
-			if (uniqueSearchParams == null) {
-				uniqueSearchParams = new ArrayList<>();
-				activeUniqueSearchParams.put(nextResourceNameToEntries.getKey(), uniqueSearchParams);
-			}
+			List<JpaRuntimeSearchParam> uniqueSearchParams = activeUniqueSearchParams.computeIfAbsent(nextResourceNameToEntries.getKey(), k -> new ArrayList<>());
 			Collection<RuntimeSearchParam> nextSearchParamsForResourceName = nextResourceNameToEntries.getValue().values();
 			for (RuntimeSearchParam nextCandidate : nextSearchParamsForResourceName) {
 
@@ -181,7 +170,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			}
 
 			if (next.getCompositeOf() != null) {
-				Collections.sort(next.getCompositeOf(), new Comparator<RuntimeSearchParam>() {
+				next.getCompositeOf().sort(new Comparator<RuntimeSearchParam>() {
 					@Override
 					public int compare(RuntimeSearchParam theO1, RuntimeSearchParam theO2) {
 						return StringUtils.compare(theO1.getName(), theO2.getName());
@@ -192,7 +181,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 						activeParamNamesToUniqueSearchParams.put(nextBase, new HashMap<>());
 					}
 					if (!activeParamNamesToUniqueSearchParams.get(nextBase).containsKey(paramNames)) {
-						activeParamNamesToUniqueSearchParams.get(nextBase).put(paramNames, new ArrayList<JpaRuntimeSearchParam>());
+						activeParamNamesToUniqueSearchParams.get(nextBase).put(paramNames, new ArrayList<>());
 					}
 					activeParamNamesToUniqueSearchParams.get(nextBase).get(paramNames).add(next);
 				}
@@ -339,7 +328,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	}
 
 	synchronized int refreshCacheWithRetry() {
-		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL), MAX_RETRIES, mySecondsBetweenRetries, "refresh search parameter registry");
+		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL), MAX_RETRIES);
 		return refreshCacheRetrier.runWithRetry();
 	}
 
@@ -353,11 +342,6 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			System.currentTimeMillis() - REFRESH_INTERVAL > myLastRefresh) {
 			refreshCacheWithRetry();
 		}
-	}
-
-	@VisibleForTesting
-	public void setSecondsBetweenRetriesForTesting(int theSecondsBetweenRetries) {
-		mySecondsBetweenRetries = theSecondsBetweenRetries;
 	}
 
 	@Override

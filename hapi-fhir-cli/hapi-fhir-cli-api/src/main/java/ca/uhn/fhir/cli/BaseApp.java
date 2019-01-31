@@ -42,9 +42,9 @@ import java.util.List;
 import static org.fusesource.jansi.Ansi.ansi;
 
 public abstract class BaseApp {
-	public static final String STACKFILTER_PATTERN = "%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
-	public static final String STACKFILTER_PATTERN_PROP = "log.stackfilter.pattern";
-	public static final String LINESEP = System.getProperty("line.separator");
+	private static final String STACKFILTER_PATTERN = "%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
+	private static final String STACKFILTER_PATTERN_PROP = "log.stackfilter.pattern";
+	static final String LINESEP = System.getProperty("line.separator");
 	protected static final org.slf4j.Logger ourLog;
 	private static List<BaseCommand> ourCommands;
 
@@ -145,7 +145,7 @@ public abstract class BaseApp {
 
 	protected abstract String provideCommandName();
 
-	public List<BaseCommand> provideCommands() {
+	List<BaseCommand> provideCommands() {
 		ArrayList<BaseCommand> commands = new ArrayList<>();
 		commands.add(new RunServerCommand());
 		commands.add(new ExampleDataUploader());
