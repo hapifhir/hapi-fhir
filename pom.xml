@@ -498,6 +498,11 @@
 			<name>Steve Lewis</name>
 			<organization>Cambia Health Solutions</organization>
 		</developer>
+		<developer>
+			<id>restevez-chs</id>
+			<name>Ricardo Estevez</name>
+			<organization>Cambia Health Solutions</organization>
+		</developer>
 	</developers>
 
 	<licenses>
