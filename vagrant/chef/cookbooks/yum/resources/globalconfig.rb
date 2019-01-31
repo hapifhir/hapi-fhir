@@ -73,7 +73,7 @@ attribute :multilib_policy, :kind_of => String, :equal_to => %w(all best), :defa
 attribute :obsoletes, :kind_of => [TrueClass, FalseClass], :default => nil
 attribute :overwrite_groups, :kind_of => [TrueClass, FalseClass], :default => nil
 attribute :password, :kind_of => String, :regex => /.*/, :default => nil
-attribute :path, :kind_of => String, :regex => /.*/, :default => nil, :name_attribute => true
+attribute :path, :kind_of => String, :regex => /.*/, :name_attribute => true
 attribute :persistdir, :kind_of => String, :regex => /.*/, :default => nil
 attribute :pluginconfpath, :kind_of => String, :regex => /.*/, :default => nil
 attribute :pluginpath, :kind_of => String, :regex => /.*/, :default => nil

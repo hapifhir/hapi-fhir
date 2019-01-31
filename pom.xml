@@ -493,6 +493,16 @@
 			<id>ruoat</id>
 			<name>Ari Ruotsalainen</name>
 		</developer>
+		<developer>
+			<id>stevelle</id>
+			<name>Steve Lewis</name>
+			<organization>Cambia Health Solutions</organization>
+		</developer>
+		<developer>
+			<id>restevez-chs</id>
+			<name>Ricardo Estevez</name>
+			<organization>Cambia Health Solutions</organization>
+		</developer>
 	</developers>
 
 	<licenses>

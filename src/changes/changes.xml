@@ -344,6 +344,14 @@
 				using data parameters has been fixed. Thanks to GitHub user
 				@PickOneFish for reporting!
 			</action>
+			<action type="fix" issue="1135">
+				An issue with outdated syntax in the Vagrant file that prevent it from being used
+				was corrected. Thanks to Steve Lewis for the pull requst!
+			</action>
+			<action type="fix" issue="1130">
+				The HAPI FHIR tutorial server project had outdated versions of HAPI FHIR
+				in its pom file. Thanks to Ricardo Estevez for the pull request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
