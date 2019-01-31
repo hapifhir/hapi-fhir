@@ -24,7 +24,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.util.*;
 
@@ -101,7 +100,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 	}
 
 	@Override
-	public void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws DataFormatException {
+	public void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws DataFormatException {
 		XMLStreamWriter eventWriter;
 		try {
 			eventWriter = createXmlWriter(theWriter);

@@ -102,10 +102,10 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 			// Only delete if we don't have results left in this search
 			if (resultPids.getNumberOfElements() < max) {
-				ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
+				ourLog.debug("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
 				mySearchDao.deleteByPid(searchToDelete.getId());
 			} else {
-				ourLog.info("Purged {} search results for deleted search {}/{}", resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
+				ourLog.debug("Purged {} search results for deleted search {}/{}", resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
 			}
 		});
 	}
@@ -149,7 +149,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		int count = toDelete.getContent().size();
 		if (count > 0) {
 			long total = tt.execute(t -> mySearchDao.count());
-			ourLog.info("Deleted {} searches, {} remaining", count, total);
+			ourLog.debug("Deleted {} searches, {} remaining", count, total);
 		}
 
 	}

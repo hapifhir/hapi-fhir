@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +56,24 @@ public class PortUtil {
 			server = new ServerSocket(0);
 			server.setReuseAddress(true);
 			int port = server.getLocalPort();
+
+			/*
+			 * Try to connect to the newly allocated port to make sure
+			 * it's free
+			 */
+			for (int i = 0; i < 10; i++) {
+				try {
+					Socket client = new Socket();
+					client.connect(new InetSocketAddress(port), 1000);
+					break;
+				} catch (Exception e) {
+					if (i == 9) {
+						throw new InternalErrorException("Can not connect to port: " + port);
+					}
+					Thread.sleep(250);
+				}
+			}
+
 			server.close();
 
 			/*

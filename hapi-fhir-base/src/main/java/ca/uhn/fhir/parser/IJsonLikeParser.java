@@ -39,7 +39,7 @@ import ca.uhn.fhir.parser.json.JsonLikeWriter;
  */
 public interface IJsonLikeParser extends IParser {
 
-	void encodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException;
+	void encodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theJsonLikeWriter, BaseParser.EncodeContext theEncodeContext) throws IOException, DataFormatException;
 
 	/**
 	 * Parses a resource from a JSON-like data structure

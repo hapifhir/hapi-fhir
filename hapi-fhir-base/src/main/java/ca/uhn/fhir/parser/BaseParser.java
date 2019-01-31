@@ -9,9 +9,9 @@ package ca.uhn.fhir.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -279,7 +279,7 @@ public abstract class BaseParser implements IParser {
 		return ref.getValue();
 	}
 
-	protected abstract void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;
+	protected abstract void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws IOException, DataFormatException;
 
 	protected abstract <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) throws DataFormatException;
 
@@ -296,15 +296,27 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public final void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException {
+		EncodeContext encodeContext = new EncodeContext();
+
+		encodeResourceToWriter(theResource, theWriter, encodeContext);
+	}
+
+	protected void encodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws IOException {
 		Validate.notNull(theResource, "theResource can not be null");
 		Validate.notNull(theWriter, "theWriter can not be null");
+		Validate.notNull(theEncodeContext, "theEncodeContext can not be null");
 
 		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
 			throw new IllegalArgumentException(
 				"This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
-		doEncodeResourceToWriter(theResource, theWriter);
+		String resourceName = myContext.getResourceDefinition(theResource).getName();
+		theEncodeContext.pushPath(resourceName);
+
+		doEncodeResourceToWriter(theResource, theWriter, theEncodeContext);
+
+		theEncodeContext.popPath();
 	}
 
 	private void filterCodingsWithNoCodeOrSystem(List<? extends IBaseCoding> tagList) {
@@ -468,6 +480,7 @@ public abstract class BaseParser implements IParser {
 
 	protected TagList getMetaTagsForEncoding(IResource theIResource) {
 		TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(theIResource);
+		String resourceType = myContext.getResourceDefinition(theIResource).getName();
 		if (shouldAddSubsettedTag()) {
 			tags = new TagList(tags);
 			tags.add(new Tag(getSubsettedCodeSystem(), Constants.TAG_SUBSETTED_CODE, subsetDescription()));
@@ -885,8 +898,18 @@ public abstract class BaseParser implements IParser {
 		return this;
 	}
 
-	protected boolean shouldAddSubsettedTag() {
-		return isSummaryMode() || isSuppressNarratives() || getEncodeElements() != null;
+	protected boolean shouldAddSubsettedTag(EncodeContext theEncodeContext) {
+		if (isSummaryMode()) {
+			return true;
+		}
+		if (isSuppressNarratives()) {
+			return true;
+		}
+		if (getEncodeElements() != null) {
+			if ()
+			return true;
+		}
+		return false;
 	}
 
 	protected boolean shouldEncodeResourceId(IBaseResource theResource, boolean theSubResource) {
@@ -1292,6 +1315,35 @@ public abstract class BaseParser implements IParser {
 			return res.hasModifierExtension();
 		}
 		return false;
+	}
+
+	/**
+	 * EncodeContext is a shared state object that is passed around the
+	 * encode process
+	 */
+	protected class EncodeContext {
+		private final ArrayList<String> myPath = new ArrayList<>(10);
+
+		protected List<String> getPath() {
+			return myPath;
+		}
+
+		/**
+		 * Add an element at the end of the path
+		 */
+		protected void pushPath(String thePathElement) {
+			assert isNotBlank(thePathElement);
+			assert !thePathElement.contains(".");
+
+			myPath.add(thePathElement);
+		}
+
+		/**
+		 * Remove the element at the end of the path
+		 */
+		public void popPath() {
+			myPath.remove(myPath.size() - 1);
+		}
 	}
 
 }
