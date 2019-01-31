@@ -29,11 +29,11 @@ import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -292,4 +292,10 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		}
 		meta.addTag().setSystem(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY).setCode(value).setDisplay(display);
 	}
+
+	public String getSubscriptionStatus(IBaseResource theSubscription) {
+		final IPrimitiveType<?> status = myFhirContext.newTerser().getSingleValueOrNull(theSubscription, SubscriptionConstants.SUBSCRIPTION_STATUS, IPrimitiveType.class);
+		return status.getValueAsString();
+	}
+
 }

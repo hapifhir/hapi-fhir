@@ -40,8 +40,8 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 		String criteria2 = "Observation?code=SNOMED-CT|" + myCode + "111&_format=xml";
 
 		List<Subscription> subs = new ArrayList<>();
-		subs.add(returnedActiveSubscription(criteria1, payload, ourListenerServerBase));
-		subs.add(returnedActiveSubscription(criteria2, payload, ourListenerServerBase));
+		subs.add(makeActiveSubscription(criteria1, payload, ourListenerServerBase));
+		subs.add(makeActiveSubscription(criteria2, payload, ourListenerServerBase));
 
 		IBundleProvider bundle = new SimpleBundleProvider(new ArrayList<>(subs), "uuid");
 		initSubscriptionLoader(bundle);
