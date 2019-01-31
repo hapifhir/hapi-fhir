@@ -2640,8 +2640,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     element.getNamedChildren("answer", answers);
     if (inProgress)
       warning(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), isAnswerRequirementFulfilled(qItem, answers), "No response answer found for required item "+qItem.getLinkId());
-    else
+    else if(myEnableWhenEvaluator.isQuestionEnabled(qItem, questionnaireResponseRoot))
       rule(errors, IssueType.REQUIRED, element.line(), element.col(), stack.getLiteralPath(), isAnswerRequirementFulfilled(qItem, answers), "No response answer found for required item "+qItem.getLinkId());
+    else if (!answers.isEmpty()) // items without answers should be allowed, but not items with answers to questions that are disabled
+      rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), !isAnswerRequirementFulfilled(qItem, answers), "Item has answer, even though it is not enabled "+qItem.getLinkId());
+
+    
     if (answers.size() > 1)
       rule(errors, IssueType.INVALID, answers.get(1).line(), answers.get(1).col(), stack.getLiteralPath(), qItem.getRepeats(), "Only one response answer item with this linkId allowed");
 
@@ -2785,8 +2789,8 @@ private boolean isAnswerRequirementFulfilled(QuestionnaireItemComponent qItem, L
     // ok, now we have a list of known items, grouped by linkId. We"ve made an error for anything out of order
     for (QuestionnaireItemComponent qItem : qItems) {
       List<Element> mapItem = map.get(qItem.getLinkId());
-      if (mapItem != null){
-    	  rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), myEnableWhenEvaluator.isQuestionEnabled(qItem, questionnaireResponseRoot), "Item has answer, even though it is not enabled "+qItem.getLinkId());
+      if (mapItem != null) {
+    	//rule(errors, IssueType.INVALID, element.line(), element.col(), stack.getLiteralPath(), myEnableWhenEvaluator.isQuestionEnabled(qItem, questionnaireResponseRoot), "Item has answer, even though it is not enabled "+qItem.getLinkId());
         validateQuestionannaireResponseItem(qsrc, qItem, errors, mapItem, stack, inProgress, questionnaireResponseRoot);
       } else { 
     	//item is missing, is the question enabled?
@@ -2796,6 +2800,7 @@ private boolean isAnswerRequirementFulfilled(QuestionnaireItemComponent qItem, L
       }
     }
   }
+  
 
 private String misplacedItemError(QuestionnaireItemComponent qItem) {
 	return qItem.hasLinkId() ? 

@@ -196,6 +196,7 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         }
         return true;
     }
+    
     private List<Element> findSubItems(Element item) {
         List<Element> results = item.getChildren(ITEM_ELEMENT)
                 .stream()
@@ -212,7 +213,5 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         }
         return false;
     }
-
-
    
 }
