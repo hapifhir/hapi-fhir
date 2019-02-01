@@ -72,9 +72,16 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
+
+		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED, theMsg)) {
+			return;
+		}
+
 		try {
 			doMatchActiveSubscriptionsAndDeliver(theMsg);
 		} finally {
+			// Interceptor call: SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, theMsg);
 		}
 	}
@@ -128,6 +135,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			deliveryMsg.setPayload(myFhirContext, payload);
 			deliveryMsg.setSubscription(nextActiveSubscription.getSubscription());
 			deliveryMsg.setOperationType(theMsg.getOperationType());
+			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
 			if (payload == null) {
 				deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
 			}
