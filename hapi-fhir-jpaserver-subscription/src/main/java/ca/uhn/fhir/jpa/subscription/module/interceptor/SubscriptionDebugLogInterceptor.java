@@ -70,16 +70,12 @@ public class SubscriptionDebugLogInterceptor {
 
 	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)
 	public void step05_afterDelivery(ResourceDeliveryMessage theMessage) {
-		Date precheckTime = theMessage
+		String processingTime = theMessage
 			.getAdditionalProperty(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
 			.map(Long::parseLong)
-			.map(t -> new Date(t))
-			.orElse(null);
-
-		String processingTime = "(unknown)";
-		if (precheckTime != null) {
-			processingTime = new StopWatch(precheckTime).toString();
-		}
+			.map(Date::new)
+			.map(t->new StopWatch(t).toString())
+			.orElse("(unknown)");
 
 		log("Finished delivery of resource {} for subscription {} to channel of type {} - Total processing time: {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType(), processingTime);
 	}
