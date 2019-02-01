@@ -15,10 +15,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Captor;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -46,10 +43,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@Autowired
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
-	@Captor
-	private ArgumentCaptor<String> myMessageCaptor;
-	@Captor
-	private ArgumentCaptor<Object[]> myArgsCaptor;
 
 	@After
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
