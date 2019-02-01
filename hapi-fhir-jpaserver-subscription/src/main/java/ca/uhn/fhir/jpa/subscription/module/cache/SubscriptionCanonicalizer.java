@@ -295,6 +295,9 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 
 	public String getSubscriptionStatus(IBaseResource theSubscription) {
 		final IPrimitiveType<?> status = myFhirContext.newTerser().getSingleValueOrNull(theSubscription, SubscriptionConstants.SUBSCRIPTION_STATUS, IPrimitiveType.class);
+		if (status == null) {
+			return null;
+		}
 		return status.getValueAsString();
 	}
 
