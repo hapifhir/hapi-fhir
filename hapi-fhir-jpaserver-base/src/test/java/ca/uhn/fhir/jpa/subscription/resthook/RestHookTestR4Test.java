@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -262,11 +264,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Logger loggerMock = mock(Logger.class);
 		doAnswer(t->{
 			Object msg = t.getArguments()[0];
-			Object[] args = (Object[]) t.getArguments()[1];
+			Object[] args = Arrays.copyOfRange(t.getArguments(), 1, t.getArguments().length);
 			String formattedMessage = MessageFormatter.arrayFormat((String) msg, args).getMessage();
 			messages.add(formattedMessage);
 			return null;
-		}).when(loggerMock).debug(any(), any(Object[].class));
+		}).when(loggerMock).debug(any(), ArgumentMatchers.<Object[]>any());
 
 		SubscriptionDebugLogInterceptor interceptor = new SubscriptionDebugLogInterceptor();
 		myInterceptorRegistry.registerInterceptor(interceptor);
@@ -310,6 +312,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 			ourLog.info("Messages:\n  " + messages.stream().collect(Collectors.joining("\n  ")));
 
+			assertThat(messages.get(messages.size()-1), matchesPattern("Finished delivery of resource Observation.*"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

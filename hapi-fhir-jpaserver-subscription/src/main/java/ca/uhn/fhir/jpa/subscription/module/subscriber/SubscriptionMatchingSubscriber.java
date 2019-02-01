@@ -140,6 +140,11 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
 			}
 
+			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
+			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, deliveryMsg, nextActiveSubscription.getSubscription(), matchResult)) {
+				return;
+			}
+
 			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
 			MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
 			if (deliveryChannel != null) {

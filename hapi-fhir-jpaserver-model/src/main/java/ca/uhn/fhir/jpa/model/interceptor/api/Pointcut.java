@@ -30,6 +30,48 @@ import java.util.List;
 public enum Pointcut {
 
 	/**
+	 * Invoked whenever a persisted resource has been modified and is being submitted to the
+	 * subscription processing pipeline. This method is called before the resource is placed
+	 * on any queues for processing and executes synchronously during the resource modification
+	 * operation itself, so it should return quickly.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - Hooks may modify this parameter. This will affect the checking process.</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks may return <code>null</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>null</code> or <code>true</code>, processing will continue normally. If the method
+	 * returns <code>false</code>, subscription processing will not proceed for the given resource;
+	 * </p>
+	 */
+	SUBSCRIPTION_RESOURCE_MODIFIED("ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+
+	/**
+	 * Inkoved any time that a resource is matched by an individual subscription, and
+	 * is about to be queued for delivery.
+	 * <p>
+	 * Hooks may make changes to the delivery payload, or make changes to the
+	 * canonical subscription such as adding headers, modifying the channel
+	 * endpoint, etc.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>null</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>null</code> or <code>true</code>, processing will continue normally. If the method
+	 * returns <code>false</code>, delivery will be aborted.
+	 * </p>
+	 */
+	SUBSCRIPTION_RESOURCE_MATCHED("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult"),
+
+
+	/**
 	 * Invoked immediately before the delivery of a subscription, and right before any channel-specific
 	 * hooks are invoked (e.g. {@link #SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY}.
 	 * <p>
@@ -249,7 +291,9 @@ public enum Pointcut {
 	 * Hooks should return <code>null</code>.
 	 * </p>
 	 */
-	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource");
+	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	;
 
 
 	private final List<String> myParameterTypes;
