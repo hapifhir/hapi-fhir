@@ -312,7 +312,7 @@ public abstract class BaseParser implements IParser {
 		}
 
 		String resourceName = myContext.getResourceDefinition(theResource).getName();
-		theEncodeContext.pushPath(resourceName);
+		theEncodeContext.pushPath(resourceName, true);
 
 		doEncodeResourceToWriter(theResource, theWriter, theEncodeContext);
 
@@ -478,10 +478,10 @@ public abstract class BaseParser implements IParser {
 		return url;
 	}
 
-	protected TagList getMetaTagsForEncoding(IResource theIResource) {
+	protected TagList getMetaTagsForEncoding(IResource theIResource, EncodeContext theEncodeContext) {
 		TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(theIResource);
 		String resourceType = myContext.getResourceDefinition(theIResource).getName();
-		if (shouldAddSubsettedTag()) {
+		if (shouldAddSubsettedTag(theEncodeContext)) {
 			tags = new TagList(tags);
 			tags.add(new Tag(getSubsettedCodeSystem(), Constants.TAG_SUBSETTED_CODE, subsetDescription()));
 		}
@@ -722,7 +722,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected List<? extends IBase> preProcessValues(BaseRuntimeChildDefinition theMetaChildUncast, IBaseResource theResource, List<? extends IBase> theValues,
-																	 CompositeChildElement theCompositeChildElement) {
+																	 CompositeChildElement theCompositeChildElement, EncodeContext theEncodeContext) {
 		if (myContext.getVersion().getVersion().isRi()) {
 
 			/*
@@ -767,7 +767,7 @@ public abstract class BaseParser implements IParser {
 					}
 				}
 
-				if (shouldAddSubsettedTag()) {
+				if (shouldAddSubsettedTag(theEncodeContext)) {
 					IBaseCoding coding = metaValue.addTag();
 					coding.setCode(Constants.TAG_SUBSETTED_CODE);
 					coding.setSystem(getSubsettedCodeSystem());
@@ -906,9 +906,14 @@ public abstract class BaseParser implements IParser {
 			return true;
 		}
 		if (getEncodeElements() != null) {
-			if ()
+			if (getEncodeElementsAppliesToResourceTypes() != null &&
+				!getEncodeElementsAppliesToResourceTypes().isEmpty() &&
+				!getEncodeElementsAppliesToResourceTypes().contains(theEncodeContext.getResourcePath().getLast().getName())) {
+				return false;
+			}
 			return true;
 		}
+
 		return false;
 	}
 
@@ -1168,6 +1173,68 @@ public abstract class BaseParser implements IParser {
 		}
 	}
 
+	/**
+	 * EncodeContext is a shared state object that is passed around the
+	 * encode process
+	 */
+	protected class EncodeContext {
+		private final ArrayDeque<EncodeContextPathElement> myPath = new ArrayDeque<>(10);
+		private final ArrayDeque<EncodeContextPathElement> myResourcePath = new ArrayDeque<>(10);
+
+		protected Deque<EncodeContextPathElement> getPath() {
+			return myPath;
+		}
+
+		protected Deque<EncodeContextPathElement> getResourcePath() {
+			return myResourcePath;
+		}
+
+		/**
+		 * Add an element at the end of the path
+		 */
+		protected void pushPath(String thePathElement, boolean theResource) {
+			assert isNotBlank(thePathElement);
+			assert !thePathElement.contains(".");
+			assert theResource ^ Character.isLowerCase(thePathElement.charAt(0));
+
+			EncodeContextPathElement element = new EncodeContextPathElement(thePathElement, theResource);
+			myPath.add(element);
+			if (theResource) {
+				myResourcePath.add(element);
+			}
+		}
+
+		/**
+		 * Remove the element at the end of the path
+		 */
+		public void popPath() {
+			EncodeContextPathElement removed = myPath.removeLast();
+			if (removed.isResource()) {
+				myResourcePath.removeLast();
+			}
+		}
+
+
+	}
+
+	protected class EncodeContextPathElement {
+		private final String myName;
+		private final boolean myResource;
+
+		public EncodeContextPathElement(String theName, boolean theResource) {
+			myName = theName;
+			myResource = theResource;
+		}
+
+		public String getName() {
+			return myName;
+		}
+
+		public boolean isResource() {
+			return myResource;
+		}
+	}
+
 	static class ContainedResources {
 		private long myNextContainedId = 1;
 
@@ -1315,35 +1382,6 @@ public abstract class BaseParser implements IParser {
 			return res.hasModifierExtension();
 		}
 		return false;
-	}
-
-	/**
-	 * EncodeContext is a shared state object that is passed around the
-	 * encode process
-	 */
-	protected class EncodeContext {
-		private final ArrayList<String> myPath = new ArrayList<>(10);
-
-		protected List<String> getPath() {
-			return myPath;
-		}
-
-		/**
-		 * Add an element at the end of the path
-		 */
-		protected void pushPath(String thePathElement) {
-			assert isNotBlank(thePathElement);
-			assert !thePathElement.contains(".");
-
-			myPath.add(thePathElement);
-		}
-
-		/**
-		 * Remove the element at the end of the path
-		 */
-		public void popPath() {
-			myPath.remove(myPath.size() - 1);
-		}
 	}
 
 }

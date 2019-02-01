@@ -312,7 +312,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				IBaseResource resource = (IBaseResource) theNextValue;
 				RuntimeResourceDefinition def = myContext.getResourceDefinition(resource);
 
-				theEncodeContext.pushPath(def.getName());
+				theEncodeContext.pushPath(def.getName(), true);
 				encodeResourceToJsonStreamWriter(def, resource, theEventWriter, theChildName, false, true, theEncodeContext);
 				theEncodeContext.popPath();
 
@@ -378,7 +378,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 
 			List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
-			values = super.preProcessValues(nextChild, theResource, values, nextChildElem);
+			values = super.preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
 
 			if (values == null || values.isEmpty()) {
 				continue;
@@ -553,7 +553,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	@Override
-	public void encodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theJsonLikeWriter, EncodeContext theEncodeContext) throws IOException, DataFormatException {
+	public void encodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException {
 		Validate.notNull(theResource, "theResource can not be null");
 		Validate.notNull(theJsonLikeWriter, "theJsonLikeWriter can not be null");
 
@@ -562,7 +562,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				"This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
-		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter, theEncodeContext);
+		EncodeContext encodeContext = new EncodeContext();
+		String resourceName = myContext.getResourceDefinition(theResource).getName();
+		encodeContext.pushPath(resourceName, true);
+		doEncodeResourceToJsonLikeWriter(theResource, theJsonLikeWriter, encodeContext);
 	}
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonLikeWriter theEventWriter, String theObjectNameOrNull,
@@ -648,7 +651,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			List<? extends IIdType> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
 			profiles = super.getProfileTagsForEncoding(resource, profiles);
 
-			TagList tags = getMetaTagsForEncoding(resource);
+			TagList tags = getMetaTagsForEncoding(resource, theEncodeContext);
 			InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
 			IdDt resourceId = resource.getId();
 			String versionIdPart = resourceId.getVersionIdPart();
@@ -676,7 +679,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					beginArray(theEventWriter, "security");
 					for (BaseCodingDt securityLabel : securityLabels) {
 						theEventWriter.beginObject();
-						theEncodeContext.pushPath("security");
+						theEncodeContext.pushPath("security", false);
 						encodeCompositeElementChildrenToStreamWriter(resDef, resource, securityLabel, theEventWriter, theContainedResource, theSubResource, null, theEncodeContext);
 						theEncodeContext.popPath();
 						theEventWriter.endObject();
@@ -1378,7 +1381,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				 *
 				 * See #327
 				 */
-				List<? extends IBase> preProcessedValue = preProcessValues(myDef, theResource, Collections.singletonList(myValue), myChildElem);
+				List<? extends IBase> preProcessedValue = preProcessValues(myDef, theResource, Collections.singletonList(myValue), myChildElem, theEncodeContext);
 
 				// // Check for undeclared extensions on the declared extension
 				// // (grrrrrr....)
@@ -1444,7 +1447,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				 * Pre-process value - This is called in case the value is a reference
 				 * since we might modify the text
 				 */
-				value = JsonParser.super.preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem).get(0);
+				value = JsonParser.super.preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem, theEncodeContext).get(0);
 
 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
 				String childName = extDef.getChildNameByDatatype(value.getClass());

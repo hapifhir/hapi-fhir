@@ -31,8 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class ElementsParamR4Test {
 
@@ -119,29 +118,15 @@ public class ElementsParamR4Test {
 		}
 	}
 
+	/**
+	 * By default the elements apply only to the focal resource in a search
+	 * and not any included resources
+	 */
 	@Test
-	public void testMultiResourceElementsFilter() throws IOException {
-		{
-			ourNextProcedure = new Procedure();
-			ourNextProcedure.setId("Procedure/PROC");
-			ourNextProcedure.addReasonCode().addCoding().setCode("REASON_CODE");
-			ourNextProcedure.addUsedCode().addCoding().setCode("USED_CODE");
-
-			DiagnosticReport dr = new DiagnosticReport();
-			dr.setId("DiagnosticReport/DRA");
-			ourNextProcedure.addReport().setResource(dr);
-
-			Observation obs = new Observation();
-			obs.setId("Observation/OBSA");
-			obs.setStatus(Observation.ObservationStatus.FINAL);
-			obs.setSubject(new Reference("Patient/123"));
-			obs.getCode().addCoding().setSystem("http://loinc.org").setCode("1234-5");
-			obs.setValue(new StringType("STRING VALUE"));
-			dr.addResult().setResource(obs);
-		}
-
+	public void testStandardElementsFilter() throws IOException {
+		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_include=*&_pretty=true&_elements=reasonCode,status",
+			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=reasonCode,status",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
@@ -156,20 +141,60 @@ public class ElementsParamR4Test {
 				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
 				assertEquals("1234-5", obs.getCode().getCoding().get(0).getCode());
 			});
+	}
 
+	@Test
+	public void testMultiResourceElementsFilter() throws IOException {
+		createProcedureWithLongChain();
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Procedure.reasonCode,Procedure.status,Observation.subject,Observation.valueString",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+				assertEquals(0, procedure.getUsedCode().size());
+
+				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
+				assertEquals(0, dr.getMeta().getTag().size());
+
+				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
+				assertEquals(0, obs.getMeta().getTag().size());
+				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+				assertNull(obs.getCode().getCoding().get(0).getCode());
+				assertEquals("AAA", obs.getValueStringType().getValue());
+			});
+	}
+
+	private void createProcedureWithLongChain() {
+		ourNextProcedure = new Procedure();
+		ourNextProcedure.setId("Procedure/PROC");
+		ourNextProcedure.addReasonCode().addCoding().setCode("REASON_CODE");
+		ourNextProcedure.addUsedCode().addCoding().setCode("USED_CODE");
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId("DiagnosticReport/DRA");
+		ourNextProcedure.addReport().setResource(dr);
+
+		Observation obs = new Observation();
+		obs.setId("Observation/OBSA");
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.setSubject(new Reference("Patient/123"));
+		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("1234-5");
+		obs.setValue(new StringType("STRING VALUE"));
+		dr.addResult().setResource(obs);
 	}
 
 	private void verifyXmlAndJson(String theUri, Consumer<Bundle> theVerifier) throws IOException {
-		EncodingEnum theEncoding = EncodingEnum.XML;
-		HttpGet httpGet = new HttpGet(theUri + "&_format=" + theEncoding.getFormatContentType());
+		EncodingEnum theEncoding = EncodingEnum.JSON;
+		HttpGet httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + theEncoding.getFormatContentType());
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 			Bundle response = theEncoding.newParser(ourCtx).parseResource(Bundle.class, responseContent);
 			theVerifier.accept(response);
 		}
-		theEncoding = EncodingEnum.JSON;
-		httpGet = new HttpGet(theUri + "&_format=" + theEncoding.getFormatContentType());
+		theEncoding = EncodingEnum.XML;
+		httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + theEncoding.getFormatContentType());
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
