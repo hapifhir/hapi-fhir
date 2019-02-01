@@ -1,10 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.IAnonymousLambdaHook;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,15 +11,15 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PointcutLatch implements IAnonymousLambdaHook {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatch.class);
 	private static final int DEFAULT_TIMEOUT_SECONDS = 10;
+	private static final FhirObjectPrinter ourFhirObjectToStringMapper = new FhirObjectPrinter();
+
 	private final String name;
 
 	private CountDownLatch myCountdownLatch;
@@ -36,11 +34,12 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 		this.name = theName;
 	}
 
-	public void setExpectedCount(int count) throws InterruptedException {
+	public void setExpectedCount(int count) {
 		if (myCountdownLatch != null) {
 			throw new PointcutLatchException("setExpectedCount() called before previous awaitExpected() completed.");
 		}
 		createLatch(count);
+		ourLog.info("Expecting {} calls to {} latch", count, name);
 	}
 
 	private void createLatch(int count) {
@@ -61,11 +60,12 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 		return name + " " + this.getClass().getSimpleName();
 	}
 
-	public void awaitExpected() throws InterruptedException {
-		awaitExpectedWithTimeout(DEFAULT_TIMEOUT_SECONDS);
+	public List<HookParams> awaitExpected() throws InterruptedException {
+		return awaitExpectedWithTimeout(DEFAULT_TIMEOUT_SECONDS);
 	}
 
-	public void awaitExpectedWithTimeout(int timeoutSecond) throws InterruptedException {
+	public List<HookParams> awaitExpectedWithTimeout(int timeoutSecond) throws InterruptedException {
+		List<HookParams> retval = myCalledWith.get();
 		try {
 			assertNotNull(getName() + " awaitExpected() called before setExpected() called.", myCountdownLatch);
 			assertTrue(getName() + " timed out waiting " + timeoutSecond + " seconds for latch to be triggered.", myCountdownLatch.await(timeoutSecond, TimeUnit.SECONDS));
@@ -76,15 +76,17 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 				throw new AssertionError(error);
 			}
 		} finally {
-			destroyLatch();
+			clear();
 		}
+		assertEquals("Concurrency error: Latch switched while waiting.", retval, myCalledWith.get());
+		return retval;
 	}
 
 	public void expectNothing() {
-		destroyLatch();
+		clear();
 	}
 
-	private void destroyLatch() {
+	public void clear() {
 		myCountdownLatch = null;
 	}
 
@@ -97,42 +99,29 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 			return "[]";
 		}
 		String retVal = "[ ";
-		retVal += calledWith.stream().flatMap(hookParams -> hookParams.values().stream()).map(itemToString()).collect(Collectors.joining(", "));
+		retVal += calledWith.stream().flatMap(hookParams -> hookParams.values().stream()).map(ourFhirObjectToStringMapper).collect(Collectors.joining(", "));
 		return retVal + " ]";
 	}
 
-	private static Function<Object, String> itemToString() {
-		return object -> {
-			if (object instanceof IBaseResource) {
-				IBaseResource resource = (IBaseResource) object;
-				return "Resource " + resource.getIdElement().getValue();
-			} else if (object instanceof ResourceModifiedMessage) {
-				ResourceModifiedMessage resourceModifiedMessage = (ResourceModifiedMessage)object;
-				// FIXME KHS can we get the context from the payload?
-				return "ResourceModified Message { " + resourceModifiedMessage.getOperationType() + ", " + resourceModifiedMessage.getNewPayload(FhirContext.forDstu3()).getIdElement().getValue() + "}";
-			} else {
-				return object.toString();
-			}
-		};
-	}
 
 	@Override
 	public void invoke(HookParams theArgs) {
 		if (myCountdownLatch == null) {
-			throw new PointcutLatchException("countdown() called before setExpectedCount() called.", theArgs);
+			throw new PointcutLatchException("invoke() called before setExpectedCount() called.", theArgs);
 		} else if (myCountdownLatch.getCount() <= 0) {
-			setFailure("countdown() called " + (1 - myCountdownLatch.getCount()) + " more times than expected.");
+			setFailure("invoke() called " + (1 - myCountdownLatch.getCount()) + " more times than expected.");
 		}
 
-		this.countdown();
 		if (myCalledWith.get() != null) {
 			myCalledWith.get().add(theArgs);
 		}
+		ourLog.info("Called {} {} with {}", name, myCountdownLatch, hookParamsToString(theArgs));
+
+		myCountdownLatch.countDown();
 	}
 
-	private void countdown() {
-		ourLog.info("{} counting down {}", name, myCountdownLatch);
-		myCountdownLatch.countDown();
+	public void call(Object arg) {
+		this.invoke(new HookParams(arg));
 	}
 
 	private class PointcutLatchException extends IllegalStateException {
@@ -146,6 +135,6 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 	}
 
 	private static String hookParamsToString(HookParams hookParams) {
-		return hookParams.values().stream().map(itemToString()).collect(Collectors.joining(", "));
+		return hookParams.values().stream().map(ourFhirObjectToStringMapper).collect(Collectors.joining(", "));
 	}
 }

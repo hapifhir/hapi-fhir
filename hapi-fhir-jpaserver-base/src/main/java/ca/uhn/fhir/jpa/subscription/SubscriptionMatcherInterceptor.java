@@ -48,8 +48,6 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
 	private static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
-	static final String SUBSCRIPTION_STATUS = "Subscription.status";
-	static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	private SubscribableChannel myProcessingChannel;
 
 	@Autowired

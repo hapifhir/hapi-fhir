@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -119,5 +120,17 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		if (thePayloadId != null) {
 			myPayloadId = thePayloadId.getValue();
 		}
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("mySubscription", mySubscription)
+//			.append("mySubscriptionString", mySubscriptionString)
+			.append("myPayloadString", myPayloadString)
+			.append("myPayload", myPayload)
+			.append("myPayloadId", myPayloadId)
+			.append("myOperationType", myOperationType)
+			.toString();
 	}
 }

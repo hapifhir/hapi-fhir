@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ActiveSubscriptionCache {
+class ActiveSubscriptionCache {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ActiveSubscriptionCache.class);
 
 	private final Map<String, ActiveSubscription> myCache = new ConcurrentHashMap<>();
@@ -72,7 +72,7 @@ public class ActiveSubscriptionCache {
 	}
 
 	@VisibleForTesting
-	public void clearForUnitTests() {
+	void clearForUnitTests() {
 		myCache.clear();
 	}
 }

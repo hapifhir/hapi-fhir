@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
@@ -32,18 +33,8 @@ public class SearchParamLoaderTest extends BaseBlockingQueueSubscribableChannelD
 		myMockFhirClientSearchParamProvider.setFailCount(0);
 	}
 
-	@Before
-	public void zeroRetryDelay() {
-		mySearchParamRegistry.setSecondsBetweenRetriesForTesting(0);
-	}
-
-	@After
-	public void restoreRetryDelay() {
-		mySearchParamRegistry.setSecondsBetweenRetriesForTesting(mySearchParamRegistry.INITIAL_SECONDS_BETWEEN_RETRIES);
-	}
-
 	@Test
-	public void testSubscriptionLoaderFhirClientDown() throws Exception {
+	public void testSubscriptionLoaderFhirClientDown() {
 		String criteria = "BodySite?accessType=Catheter,PD%20Catheter";
 
 		SearchParameter sp = new SearchParameter();
@@ -54,7 +45,7 @@ public class SearchParamLoaderTest extends BaseBlockingQueueSubscribableChannelD
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Arrays.asList(sp), "uuid");
+		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
 		initSearchParamRegistry(bundle);
 		assertEquals(0, myMockFhirClientSearchParamProvider.getFailCount());
 	}
