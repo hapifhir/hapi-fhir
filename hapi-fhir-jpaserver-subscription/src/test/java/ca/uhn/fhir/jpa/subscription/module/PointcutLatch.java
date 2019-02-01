@@ -39,10 +39,10 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 			throw new PointcutLatchException("setExpectedCount() called before previous awaitExpected() completed.");
 		}
 		createLatch(count);
+		ourLog.info("Expecting {} calls to {} latch", count, name);
 	}
 
 	private void createLatch(int count) {
-		ourLog.info("Creating new latch with count {}", count);
 		myFailure = new AtomicReference<>();
 		myCalledWith = new AtomicReference<>(new ArrayList<>());
 		myCountdownLatch = new CountDownLatch(count);
@@ -76,17 +76,17 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 				throw new AssertionError(error);
 			}
 		} finally {
-			destroyLatch();
+			clear();
 		}
 		assertEquals("Concurrency error: Latch switched while waiting.", retval, myCalledWith.get());
 		return retval;
 	}
 
 	public void expectNothing() {
-		destroyLatch();
+		clear();
 	}
 
-	private void destroyLatch() {
+	public void clear() {
 		myCountdownLatch = null;
 	}
 
@@ -115,11 +115,8 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 		if (myCalledWith.get() != null) {
 			myCalledWith.get().add(theArgs);
 		}
-		this.countdown();
-	}
+		ourLog.info("Called {} {} with {}", name, myCountdownLatch, hookParamsToString(theArgs));
 
-	private void countdown() {
-		ourLog.info("{} counting down {}", name, myCountdownLatch);
 		myCountdownLatch.countDown();
 	}
 

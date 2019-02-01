@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.subscription.module.standalone;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
@@ -46,6 +48,8 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 	SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -61,7 +65,10 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resource);
 
 		if (resourceDef.getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
-			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
+			String status = mySubscriptionCanonicalizer.getSubscriptionStatus(resource);
+			if (SubscriptionConstants.ACTIVE_STATUS.equals(status)) {
+				mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
+			}
 		}
 		mySubscriptionMatchingSubscriber.matchActiveSubscriptionsAndDeliver(theResourceModifiedMessage);
 	}

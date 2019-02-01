@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.Subscription;
+
 public class SubscriptionConstants {
 
 	/**
@@ -90,4 +92,8 @@ public class SubscriptionConstants {
 	 */
 
 	public static final int DELIVERY_EXECUTOR_QUEUE_SIZE = 1000;
+	public static final String SUBSCRIPTION_STATUS = "Subscription.status";
+	public static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
+	public static final String REQUESTED_STATUS = Subscription.SubscriptionStatus.REQUESTED.toCode();
+	public static final String ACTIVE_STATUS = Subscription.SubscriptionStatus.ACTIVE.toCode();
 }
