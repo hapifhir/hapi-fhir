@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
@@ -54,4 +55,10 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 		myPayload = thePayload;
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myPayload", myPayload)
+			.toString();
+	}
 }
