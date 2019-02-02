@@ -495,7 +495,7 @@ public class Element extends Base {
 	    setUserData("fhir.decorations", decorations);
 	  }
 	  decorations.add(new ElementDecoration(DecorationType.TYPE, profile.getUserString("path"), definition.getPath()));
-	  if (tail(definition.getId()).contains(":")) {
+	  if (definition.getId() != null && tail(definition.getId()).contains(":")) {
 	    String[] details = tail(definition.getId()).split("\\:");
 	    decorations.add(new ElementDecoration(DecorationType.SLICE, null, details[1]));
 	  }
