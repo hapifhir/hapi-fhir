@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -166,4 +167,15 @@ public class ResourceModifiedMessage implements IResourceMessage {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myId", myId)
+			.append("myOperationType", myOperationType)
+			.append("mySubscriptionId", mySubscriptionId)
+//			.append("myPayload", myPayload)
+			.append("myPayloadId", myPayloadId)
+//			.append("myPayloadDecoded", myPayloadDecoded)
+			.toString();
+	}
 }
