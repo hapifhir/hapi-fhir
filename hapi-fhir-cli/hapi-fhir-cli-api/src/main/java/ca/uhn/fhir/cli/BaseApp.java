@@ -145,7 +145,7 @@ public abstract class BaseApp {
 
 	protected abstract String provideCommandName();
 
-	List<BaseCommand> provideCommands() {
+	public List<BaseCommand> provideCommands() {
 		ArrayList<BaseCommand> commands = new ArrayList<>();
 		commands.add(new RunServerCommand());
 		commands.add(new ExampleDataUploader());
