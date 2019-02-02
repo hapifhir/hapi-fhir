@@ -352,6 +352,10 @@
 				The HAPI FHIR tutorial server project had outdated versions of HAPI FHIR
 				in its pom file. Thanks to Ricardo Estevez for the pull request!
 			</action>
+			<action type="fix" issue="1114">
+				A NullPointerException during validation was fixed. Thanks to GitHub
+				user zilin375 for the pull request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">

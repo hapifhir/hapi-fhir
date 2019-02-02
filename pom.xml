@@ -503,6 +503,9 @@
 			<name>Ricardo Estevez</name>
 			<organization>Cambia Health Solutions</organization>
 		</developer>
+		<developer>
+			<id>zilin375</id>
+		</developer>
 	</developers>
 
 	<licenses>
