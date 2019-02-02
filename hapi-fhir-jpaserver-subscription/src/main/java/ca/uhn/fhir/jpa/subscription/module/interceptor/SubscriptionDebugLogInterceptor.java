@@ -12,11 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
 import java.util.Date;
-import java.util.regex.MatchResult;
 
 /**
  * This interceptor can be used for troubleshooting subscription processing. It provides very
  * detailed logging about the subscription processing pipeline.
+ *
+ * @since 3.7.0
  */
 @Interceptor
 public class SubscriptionDebugLogInterceptor {
@@ -43,59 +44,70 @@ public class SubscriptionDebugLogInterceptor {
 
 	/*
 	 * These methods are numbered in the order that an individual
-	 * resource would go through them, just for ease of modification
+	 * resource would go through them, for clarity and ease of
+	 * tracing when debugging and poring over logs.
+	 *
+	 * I don't know if this numbering scheme makes sense.. I'm incrementing
+	 * by 10 for each step in the normal delivery pipeline, leaving lots of
+	 * gaps to add things if we ever need them.
 	 */
 
 	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED)
-	public void step01_resourceModified(ResourceModifiedMessage theMessage) {
+	public void step10_resourceModified(ResourceModifiedMessage theMessage) {
 		String value = Long.toString(System.currentTimeMillis());
 		theMessage.setAdditionalProperty(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK, value);
-		log("Resource {} was submitted to the processing pipeline", theMessage.getPayloadId(), theMessage.getOperationType());
+		log("SUBS10","Resource {} was submitted to the processing pipeline", theMessage.getPayloadId(), theMessage.getOperationType());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED)
-	public void step02_beforeChecked(ResourceModifiedMessage theMessage) {
-		log("Checking resource {} (op={}) for matching subscriptions", theMessage.getPayloadId(), theMessage.getOperationType());
+	public void step20_beforeChecked(ResourceModifiedMessage theMessage) {
+		log("SUBS20","Checking resource {} (op={}) for matching subscriptions", theMessage.getPayloadId(), theMessage.getOperationType());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED)
-	public void step03_subscriptionMatched(ResourceDeliveryMessage theMessage, SubscriptionMatchResult theResult) {
-		log("Resource {} matched by subscription {} (memory match={})", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theResult.isInMemory());
+	public void step30_subscriptionMatched(ResourceDeliveryMessage theMessage, SubscriptionMatchResult theResult) {
+		log("SUBS30","Resource {} matched by subscription {} (memory match={})", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theResult.isInMemory());
+	}
+
+	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS)
+	public void step35_subscriptionMatched(ResourceModifiedMessage theMessage) {
+		log("SUBS35","Resource {} did not match any subscriptions", theMessage.getPayloadId());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY)
-	public void step04_beforeDelivery(ResourceDeliveryMessage theMessage) {
-		log("Delivering resource {} for subscription {} to channel of type {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType());
+	public void step40_beforeDelivery(ResourceDeliveryMessage theMessage) {
+		log("SUBS40","Delivering resource {} for subscription {} to channel of type {} to endpoint {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType(), theMessage.getSubscription().getEndpointUrl());
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)
-	public void step05_afterDelivery(ResourceDeliveryMessage theMessage) {
+	public void step50_afterDelivery(ResourceDeliveryMessage theMessage) {
 		String processingTime = theMessage
 			.getAdditionalProperty(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
 			.map(Long::parseLong)
 			.map(Date::new)
-			.map(t->new StopWatch(t).toString())
+			.map(start -> new StopWatch(start).toString())
 			.orElse("(unknown)");
 
-		log("Finished delivery of resource {} for subscription {} to channel of type {} - Total processing time: {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType(), processingTime);
+		log("SUBS50","Finished delivery of resource {} for subscription {} to channel of type {} - Total processing time: {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType(), processingTime);
 	}
 
-	private void log(String theMessage, Object... theArguments) {
+	private void log(String theCode, String theMessage, Object... theArguments) {
+		String msg = "[" + theCode + "] " + theMessage;
 		switch (myLevel) {
 			case ERROR:
-				myLogger.error(theMessage, theArguments);
+				myLogger.error(msg, theArguments);
 				break;
 			case WARN:
-				myLogger.warn(theMessage, theArguments);
+				myLogger.warn(msg, theArguments);
 				break;
 			case INFO:
-				myLogger.info(theMessage, theArguments);
+				myLogger.info(msg, theArguments);
 				break;
 			case DEBUG:
-				myLogger.debug(theMessage, theArguments);
+				myLogger.debug(msg, theArguments);
 				break;
 			case TRACE:
-				myLogger.trace(theMessage, theArguments);
+				myLogger.trace(msg, theArguments);
 				break;
 		}
 	}

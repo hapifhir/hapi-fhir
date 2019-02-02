@@ -8,26 +8,41 @@ import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.module.interceptor.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Subscription;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test the rest-hook subscriptions
@@ -132,6 +147,69 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		observation.setId(methodOutcome.getId());
 		return observation;
 	}
+
+	@Test
+	public void testDebugLoggingInterceptor() throws Exception {
+		List<String> messages = new ArrayList<>();
+		Logger loggerMock = mock(Logger.class);
+		doAnswer(t->{
+			Object msg = t.getArguments()[0];
+			Object[] args = Arrays.copyOfRange(t.getArguments(), 1, t.getArguments().length);
+			String formattedMessage = MessageFormatter.arrayFormat((String) msg, args).getMessage();
+			messages.add(formattedMessage);
+			return null;
+		}).when(loggerMock).debug(any(), ArgumentMatchers.<Object[]>any());
+
+		SubscriptionDebugLogInterceptor interceptor = new SubscriptionDebugLogInterceptor();
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		SubscriptionDebugLogInterceptor interceptor2 = new SubscriptionDebugLogInterceptor(loggerMock, Level.DEBUG);
+		myInterceptorRegistry.registerInterceptor(interceptor2);
+		try {
+
+			String payload = "application/json";
+
+			String code = "1000000050";
+			String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+			String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+
+			Subscription subscription1 = createSubscription(criteria1, payload);
+			Subscription subscription2 = createSubscription(criteria2, payload);
+			waitForActivatedSubscriptionCount(2);
+
+			Observation observation1 = sendObservation(code, "SNOMED-CT");
+
+			// Should see 1 subscription notification
+			waitForQueueToDrain();
+			waitForSize(0, ourCreatedObservations);
+			waitForSize(1, ourUpdatedObservations);
+			assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+
+			assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
+
+			Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
+			Assert.assertNotNull(subscriptionTemp);
+
+			subscriptionTemp.setCriteria(criteria1);
+			ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
+			waitForQueueToDrain();
+
+			sendObservation(code, "SNOMED-CT");
+			waitForQueueToDrain();
+
+			// Should see two subscription notifications
+			waitForSize(0, ourCreatedObservations);
+			waitForSize(3, ourUpdatedObservations);
+
+			ourLog.info("Messages:\n  " + messages.stream().collect(Collectors.joining("\n  ")));
+
+			assertThat(messages.get(messages.size()-1), matchesPattern("\\[SUBS50\\] Finished delivery of resource Observation.*"));
+
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+			myInterceptorRegistry.unregisterInterceptor(interceptor2);
+		}
+	}
+
 
 	@Configuration
 	static class MyTestCtxConfig {

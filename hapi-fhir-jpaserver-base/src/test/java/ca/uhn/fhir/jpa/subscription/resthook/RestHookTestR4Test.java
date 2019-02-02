@@ -252,68 +252,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	@Test
-	public void testDebugLoggingInterceptor() throws Exception {
-		List<String> messages = new ArrayList<>();
-		Logger loggerMock = mock(Logger.class);
-		doAnswer(t->{
-			Object msg = t.getArguments()[0];
-			Object[] args = Arrays.copyOfRange(t.getArguments(), 1, t.getArguments().length);
-			String formattedMessage = MessageFormatter.arrayFormat((String) msg, args).getMessage();
-			messages.add(formattedMessage);
-			return null;
-		}).when(loggerMock).debug(any(), ArgumentMatchers.<Object[]>any());
-
-		SubscriptionDebugLogInterceptor interceptor = new SubscriptionDebugLogInterceptor();
-		myInterceptorRegistry.registerInterceptor(interceptor);
-		SubscriptionDebugLogInterceptor interceptor2 = new SubscriptionDebugLogInterceptor(loggerMock, Level.DEBUG);
-		myInterceptorRegistry.registerInterceptor(interceptor2);
-		try {
-
-			String payload = "application/json";
-
-			String code = "1000000050";
-			String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-			String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
-
-			Subscription subscription1 = createSubscription(criteria1, payload);
-			Subscription subscription2 = createSubscription(criteria2, payload);
-			waitForActivatedSubscriptionCount(2);
-
-			Observation observation1 = sendObservation(code, "SNOMED-CT");
-
-			// Should see 1 subscription notification
-			waitForQueueToDrain();
-			waitForSize(0, ourCreatedObservations);
-			waitForSize(1, ourUpdatedObservations);
-			assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
-
-			assertEquals("1", ourUpdatedObservations.get(0).getIdElement().getVersionIdPart());
-
-			Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
-			Assert.assertNotNull(subscriptionTemp);
-
-			subscriptionTemp.setCriteria(criteria1);
-			ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
-			waitForQueueToDrain();
-
-			sendObservation(code, "SNOMED-CT");
-			waitForQueueToDrain();
-
-			// Should see two subscription notifications
-			waitForSize(0, ourCreatedObservations);
-			waitForSize(3, ourUpdatedObservations);
-
-			ourLog.info("Messages:\n  " + messages.stream().collect(Collectors.joining("\n  ")));
-
-			assertThat(messages.get(messages.size()-1), matchesPattern("Finished delivery of resource Observation.*"));
-
-		} finally {
-			myInterceptorRegistry.unregisterInterceptor(interceptor);
-			myInterceptorRegistry.unregisterInterceptor(interceptor2);
-		}
-	}
-
-	@Test
 	public void testRestHookSubscriptionNoopUpdateDoesntTriggerNewDelivery() throws Exception {
 		String payload = "application/fhir+json";
 

@@ -72,6 +72,22 @@ public enum Pointcut {
 
 
 	/**
+	 * Invoked whenever a persisted resource was checked against all active subscriptions, and did not
+	 * match any.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage - Hooks should not modify this parameter as changes will not have any effect.</li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks should return <code>null</code>.
+	 * </p>
+	 */
+	SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS("ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+
+
+	/**
 	 * Invoked immediately before the delivery of a subscription, and right before any channel-specific
 	 * hooks are invoked (e.g. {@link #SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY}.
 	 * <p>
@@ -294,7 +310,6 @@ public enum Pointcut {
 	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),
 
 	;
-
 
 	private final List<String> myParameterTypes;
 

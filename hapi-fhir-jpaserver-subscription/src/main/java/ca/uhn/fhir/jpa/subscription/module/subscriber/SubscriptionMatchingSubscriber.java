@@ -104,6 +104,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
 		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
+		boolean resourceMatched = false;
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 
@@ -148,10 +149,16 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
 			MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
 			if (deliveryChannel != null) {
+				resourceMatched = true;
 				deliveryChannel.send(wrappedMsg);
 			} else {
 				ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
 			}
+		}
+
+		if (!resourceMatched) {
+			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, theMsg);
 		}
 	}
 
