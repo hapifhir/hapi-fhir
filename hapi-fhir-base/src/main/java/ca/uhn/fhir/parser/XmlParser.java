@@ -126,7 +126,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 		ourLog.trace("Entering XML parsing loop with state: {}", parserState);
 
 		try {
-			List<String> heldComments = new ArrayList<String>(1);
+			List<String> heldComments = new ArrayList<>(1);
 
 			while (streamReader.hasNext()) {
 				XMLEvent nextEvent = streamReader.nextEvent();
@@ -170,10 +170,8 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 								heldComments.clear();
 							}
 
-							@SuppressWarnings("unchecked")
-							Iterator<Attribute> attributes = elem.getAttributes();
-							for (Iterator<Attribute> iter = attributes; iter.hasNext(); ) {
-								Attribute next = iter.next();
+							for (Iterator<Attribute> attributes = elem.getAttributes(); attributes.hasNext(); ) {
+								Attribute next = attributes.next();
 								parserState.attributeValue(next.getName().getLocalPart(), next.getValue());
 							}
 

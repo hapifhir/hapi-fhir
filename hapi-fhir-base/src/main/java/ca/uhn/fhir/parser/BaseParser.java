@@ -77,6 +77,7 @@ public abstract class BaseParser implements IParser {
 		final List<BaseRuntimeChildDefinition> children = elementDef.getChildrenAndExtension();
 
 		return new Iterable<BaseParser.CompositeChildElement>() {
+
 			@Override
 			public Iterator<CompositeChildElement> iterator() {
 
