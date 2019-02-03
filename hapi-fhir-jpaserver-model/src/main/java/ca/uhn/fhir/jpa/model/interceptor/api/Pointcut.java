@@ -41,15 +41,15 @@ public enum Pointcut {
 	 * </ul>
 	 * </p>
 	 * <p>
-	 * Hooks may return <code>null</code> or may return a <code>boolean</code>. If the method returns
-	 * <code>null</code> or <code>true</code>, processing will continue normally. If the method
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
 	 * returns <code>false</code>, subscription processing will not proceed for the given resource;
 	 * </p>
 	 */
 	SUBSCRIPTION_RESOURCE_MODIFIED("ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
 
 	/**
-	 * Inkoved any time that a resource is matched by an individual subscription, and
+	 * Invoked any time that a resource is matched by an individual subscription, and
 	 * is about to be queued for delivery.
 	 * <p>
 	 * Hooks may make changes to the delivery payload, or make changes to the
@@ -63,8 +63,8 @@ public enum Pointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult</li>
 	 * </ul>
 	 * <p>
-	 * Hooks may return <code>null</code> or may return a <code>boolean</code>. If the method returns
-	 * <code>null</code> or <code>true</code>, processing will continue normally. If the method
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
 	 * returns <code>false</code>, delivery will be aborted.
 	 * </p>
 	 */
@@ -81,7 +81,7 @@ public enum Pointcut {
 	 * </ul>
 	 * </p>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS("ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
@@ -101,8 +101,8 @@ public enum Pointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
 	 * </ul>
 	 * <p>
-	 * Hooks may return <code>null</code> or may return a <code>boolean</code>. If the method returns
-	 * <code>null</code> or <code>true</code>, processing will continue normally. If the method
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
@@ -119,7 +119,7 @@ public enum Pointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	SUBSCRIPTION_AFTER_DELIVERY("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
@@ -136,7 +136,7 @@ public enum Pointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
@@ -154,8 +154,8 @@ public enum Pointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
 	 * </ul>
 	 * <p>
-	 * Hooks may return <code>null</code> or may return a <code>boolean</code>. If the method returns
-	 * <code>null</code> or <code>true</code>, processing will continue normally. If the method
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
@@ -172,8 +172,8 @@ public enum Pointcut {
 	 * </ul>
 	 * </p>
 	 * <p>
-	 * Hooks may return <code>null</code> or may return a <code>boolean</code>. If the method returns
-	 * <code>null</code> or <code>true</code>, processing will continue normally. If the method
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally. If the method
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
@@ -190,7 +190,7 @@ public enum Pointcut {
 	 * </ul>
 	 * </p>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED("ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
@@ -209,7 +209,7 @@ public enum Pointcut {
 	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription"),
@@ -227,7 +227,7 @@ public enum Pointcut {
 	 * <li>org.hl7.fhir.instance.model.api.IBaseResource</li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	OP_PRESTORAGE_RESOURCE_CREATED("org.hl7.fhir.instance.model.api.IBaseResource"),
@@ -247,7 +247,7 @@ public enum Pointcut {
 	 * <li>org.hl7.fhir.instance.model.api.IBaseResource</li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	OP_PRECOMMIT_RESOURCE_CREATED("org.hl7.fhir.instance.model.api.IBaseResource"),
@@ -263,7 +263,7 @@ public enum Pointcut {
 	 * <li>org.hl7.fhir.instance.model.api.IBaseResource</li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	OP_PRECOMMIT_RESOURCE_DELETED("org.hl7.fhir.instance.model.api.IBaseResource"),
@@ -284,7 +284,7 @@ public enum Pointcut {
 	 * <li>org.hl7.fhir.instance.model.api.IBaseResource (new contents)</li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	OP_PRECOMMIT_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),
@@ -304,7 +304,7 @@ public enum Pointcut {
 	 * <li>org.hl7.fhir.instance.model.api.IBaseResource (new contents)</li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>null</code>.
+	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
 	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),

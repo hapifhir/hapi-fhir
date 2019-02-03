@@ -55,7 +55,7 @@ public class SubscriptionDebugLogInterceptor {
 	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED)
 	public void step10_resourceModified(ResourceModifiedMessage theMessage) {
 		String value = Long.toString(System.currentTimeMillis());
-		theMessage.setAdditionalProperty(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK, value);
+		theMessage.setAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK, value);
 		log("SUBS10","Resource {} was submitted to the processing pipeline", theMessage.getPayloadId(), theMessage.getOperationType());
 	}
 
@@ -82,7 +82,7 @@ public class SubscriptionDebugLogInterceptor {
 	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)
 	public void step50_afterDelivery(ResourceDeliveryMessage theMessage) {
 		String processingTime = theMessage
-			.getAdditionalProperty(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
+			.getAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK)
 			.map(Long::parseLong)
 			.map(Date::new)
 			.map(start -> new StopWatch(start).toString())

@@ -8,10 +8,12 @@ import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.interceptor.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Subscription;
@@ -39,7 +41,8 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -126,6 +129,33 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 
 	@Test
+	public void testAttributesAreCopiedAlongPipeline() throws Exception {
+		AttributeCarryingInterceptor interceptor = new AttributeCarryingInterceptor();
+		myInterceptorRegistry.registerInterceptor(interceptor);
+		try {
+
+			// Create a subscription
+			CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
+			createSubscription("Observation?status=final", "application/fhir+json");
+			registerLatch.await(10, TimeUnit.SECONDS);
+
+			// Creating a matching resource
+			sendObservation();
+
+			interceptor.getFinishedLatch().await(10, TimeUnit.SECONDS);
+			ResourceDeliveryMessage lastDelivery = interceptor.getLastDelivery();
+			assertEquals("Some value 1", lastDelivery.getAttribute("ATTR1").get());
+			assertEquals("Some value 2", lastDelivery.getAttribute("ATTR2").get());
+			assertEquals("", lastDelivery.getAttribute("ATTRBLANK").get());
+			assertEquals(false, lastDelivery.getAttribute("ATTRNONEXISTENT").isPresent());
+
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+
+	@Test
 	public void testBeforeRestHookDelivery_AbortDelivery() throws Exception {
 		ourNextBeforeRestHookDeliveryReturn = false;
 
@@ -152,7 +182,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	public void testDebugLoggingInterceptor() throws Exception {
 		List<String> messages = new ArrayList<>();
 		Logger loggerMock = mock(Logger.class);
-		doAnswer(t->{
+		doAnswer(t -> {
 			Object msg = t.getArguments()[0];
 			Object[] args = Arrays.copyOfRange(t.getArguments(), 1, t.getArguments().length);
 			String formattedMessage = MessageFormatter.arrayFormat((String) msg, args).getMessage();
@@ -202,12 +232,43 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			ourLog.info("Messages:\n  " + messages.stream().collect(Collectors.joining("\n  ")));
 
-			assertThat(messages.get(messages.size()-1), matchesPattern("\\[SUBS50\\] Finished delivery of resource Observation.*"));
+			assertThat(messages.get(messages.size() - 1), matchesPattern("\\[SUBS50\\] Finished delivery of resource Observation.*"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 			myInterceptorRegistry.unregisterInterceptor(interceptor2);
 		}
+	}
+
+	@Interceptor
+	public static class AttributeCarryingInterceptor {
+
+		private ResourceDeliveryMessage myLastDelivery;
+		private CountDownLatch myFinishedLatch = new CountDownLatch(1);
+
+		public CountDownLatch getFinishedLatch() {
+			return myFinishedLatch;
+		}
+
+		public ResourceDeliveryMessage getLastDelivery() {
+			return myLastDelivery;
+		}
+
+		@Hook(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED)
+		public void onSubmit(ResourceModifiedMessage theMessage) {
+			theMessage.setAttribute("ATTR1", "Some value 1");
+			theMessage.setAttribute("ATTR2", "Some value 2");
+			theMessage.setAttribute("ATTRBLANK", "");
+		}
+
+		@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)
+		public void afterDelivery(ResourceDeliveryMessage theMessage) {
+			myFinishedLatch.countDown();
+			;
+			Validate.isTrue(myLastDelivery == null);
+			myLastDelivery = theMessage;
+		}
+
 	}
 
 

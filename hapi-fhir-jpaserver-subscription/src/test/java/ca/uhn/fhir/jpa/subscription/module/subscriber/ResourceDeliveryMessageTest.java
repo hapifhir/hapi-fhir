@@ -12,14 +12,14 @@ public class ResourceDeliveryMessageTest {
 	@Test
 	public void testAdditionalProperties() throws IOException {
 		ResourceDeliveryMessage msg = new ResourceDeliveryMessage();
-		msg.setAdditionalProperty("foo1", "bar");
-		msg.setAdditionalProperty("foo2", "baz");
+		msg.setAttribute("foo1", "bar");
+		msg.setAttribute("foo2", "baz");
 		String encoded = new ObjectMapper().writeValueAsString(msg);
 
 		msg = new ObjectMapper().readValue(encoded, ResourceDeliveryMessage.class);
-		assertEquals("bar", msg.getAdditionalProperty("foo1").get());
-		assertEquals("baz", msg.getAdditionalProperty("foo2").get());
-		assertEquals(false, msg.getAdditionalProperty("foo3").isPresent());
+		assertEquals("bar", msg.getAttribute("foo1").get());
+		assertEquals("baz", msg.getAttribute("foo2").get());
+		assertEquals(false, msg.getAttribute("foo3").isPresent());
 	}
 
 }
