@@ -47,7 +47,6 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	@SuppressWarnings("deprecation")
 	@After
 	public void after() {
-		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myDaoConfig.setMaximumSearchResultCountInTransaction(new DaoConfig().getMaximumSearchResultCountInTransaction());
 	}
