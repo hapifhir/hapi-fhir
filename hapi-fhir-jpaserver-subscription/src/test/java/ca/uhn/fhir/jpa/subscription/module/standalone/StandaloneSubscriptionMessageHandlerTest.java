@@ -32,6 +32,7 @@ public class StandaloneSubscriptionMessageHandlerTest extends BaseSubscriptionDs
 		ResourceModifiedMessage message = new ResourceModifiedMessage(myFhirContext, subscription, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedJsonMessage jsonMessage = new ResourceModifiedJsonMessage(message);
 		myStandaloneSubscriptionMessageHandler.handleMessage(jsonMessage);
+		Mockito.verify(mySubscriptionRegistry, never()).unregisterSubscription(any());
 		Mockito.verify(mySubscriptionRegistry).registerSubscriptionUnlessAlreadyRegistered(any());
 		Mockito.verify(mySubscriptionMatchingSubscriber).matchActiveSubscriptionsAndDeliver(any());
 	}
@@ -42,7 +43,19 @@ public class StandaloneSubscriptionMessageHandlerTest extends BaseSubscriptionDs
 		ResourceModifiedMessage message = new ResourceModifiedMessage(myFhirContext, subscription, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 		ResourceModifiedJsonMessage jsonMessage = new ResourceModifiedJsonMessage(message);
 		myStandaloneSubscriptionMessageHandler.handleMessage(jsonMessage);
+		Mockito.verify(mySubscriptionRegistry, never()).unregisterSubscription(any());
 		Mockito.verify(mySubscriptionRegistry, never()).registerSubscriptionUnlessAlreadyRegistered(any());
 		Mockito.verify(mySubscriptionMatchingSubscriber).matchActiveSubscriptionsAndDeliver(any());
+	}
+
+	@Test
+	public void deleteSubscription() {
+		Subscription subscription = makeSubscriptionWithStatus("testCriteria", "testPayload", "testEndpoint", Subscription.SubscriptionStatus.REQUESTED);
+		ResourceModifiedMessage message = new ResourceModifiedMessage(myFhirContext, subscription, ResourceModifiedMessage.OperationTypeEnum.DELETE);
+		ResourceModifiedJsonMessage jsonMessage = new ResourceModifiedJsonMessage(message);
+		myStandaloneSubscriptionMessageHandler.handleMessage(jsonMessage);
+		Mockito.verify(mySubscriptionRegistry).unregisterSubscription(any());
+		Mockito.verify(mySubscriptionRegistry, never()).registerSubscriptionUnlessAlreadyRegistered(any());
+		Mockito.verify(mySubscriptionMatchingSubscriber, never()).matchActiveSubscriptionsAndDeliver(any());
 	}
 }

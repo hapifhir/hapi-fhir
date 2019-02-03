@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.standalone;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessag
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,15 +62,35 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 	}
 
 	public void updateSubscriptionRegistryAndPerformMatching(ResourceModifiedMessage theResourceModifiedMessage) {
-		IBaseResource resource = theResourceModifiedMessage.getNewPayload(myFhirContext);
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resource);
-
-		if (resourceDef.getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode())) {
-			String status = mySubscriptionCanonicalizer.getSubscriptionStatus(resource);
-			if (SubscriptionConstants.ACTIVE_STATUS.equals(status)) {
-				mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
-			}
+		switch (theResourceModifiedMessage.getOperationType()) {
+			case DELETE:
+				if (isSubscription(theResourceModifiedMessage)) {
+					mySubscriptionRegistry.unregisterSubscription(theResourceModifiedMessage.getId(myFhirContext));
+				}
+				return;
+			case CREATE:
+			case UPDATE:
+				if (isSubscription(theResourceModifiedMessage)) {
+					registerActiveSubscription(theResourceModifiedMessage.getNewPayload(myFhirContext));
+				}
+				break;
+			default:
+				break;
 		}
+
 		mySubscriptionMatchingSubscriber.matchActiveSubscriptionsAndDeliver(theResourceModifiedMessage);
+	}
+
+	private boolean isSubscription(ResourceModifiedMessage theResourceModifiedMessage) {
+		IIdType id = theResourceModifiedMessage.getId(myFhirContext);
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(id.getResourceType());
+		return resourceDef.getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode());
+	}
+
+	private void registerActiveSubscription(IBaseResource theSubscription) {
+		String status = mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription);
+		if (SubscriptionConstants.ACTIVE_STATUS.equals(status)) {
+			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(theSubscription);
+		}
 	}
 }

@@ -73,7 +73,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
-		mySubscriptionRegistry.clearForUnitTests();
+		mySubscriptionRegistry.unregisterAllSubscriptions();
 		if (ourSubscribableChannel == null) {
 			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
@@ -85,6 +85,9 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	@After
 	public void cleanup() {
 		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+		mySubscriptionMatchingPost.clear();
+		mySubscriptionActivatedPost.clear();
+		ourObservationListener.clear();
 	}
 
 	public <T extends IBaseResource> T sendResource(T theResource) throws InterruptedException {
@@ -184,5 +187,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		public void expectNothing() {
 			updateLatch.expectNothing();
 		}
+
+		public void clear() { updateLatch.clear();}
 	}
 }

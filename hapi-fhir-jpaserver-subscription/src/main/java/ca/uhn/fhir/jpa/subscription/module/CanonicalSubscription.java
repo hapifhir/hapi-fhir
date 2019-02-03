@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -357,4 +358,20 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myIdElement", myIdElement)
+			.append("myStatus", myStatus)
+			.append("myCriteriaString", myCriteriaString)
+			.append("myEndpointUrl", myEndpointUrl)
+			.append("myPayloadString", myPayloadString)
+//			.append("myHeaders", myHeaders)
+			.append("myChannelType", myChannelType)
+//			.append("myTrigger", myTrigger)
+//			.append("myEmailDetails", myEmailDetails)
+//			.append("myRestHookDetails", myRestHookDetails)
+//			.append("myChannelExtensions", myChannelExtensions)
+			.toString();
+	}
 }
