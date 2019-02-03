@@ -30,11 +30,13 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.*;
 
 import java.io.*;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -47,11 +49,9 @@ public abstract class BaseParser implements IParser {
 	private ContainedResources myContainedResources;
 	private boolean myEncodeElementsAppliesToChildResourcesOnly;
 	private FhirContext myContext;
-	private Set<String> myDontEncodeElements;
-	private boolean myDontEncodeElementsIncludesStars;
-	private Set<String> myEncodeElements;
+	private List<ElementsPath> myDontEncodeElements;
+	private List<ElementsPath> myEncodeElements;
 	private Set<String> myEncodeElementsAppliesToResourceTypes;
-	private boolean myEncodeElementsIncludesStars;
 	private IIdType myEncodeForceResourceId;
 	private IParserErrorHandler myErrorHandler;
 	private boolean myOmitResourceId;
@@ -65,15 +65,13 @@ public abstract class BaseParser implements IParser {
 
 	/**
 	 * Constructor
-	 *
-	 * @param theParserErrorHandler
 	 */
 	public BaseParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		myContext = theContext;
 		myErrorHandler = theParserErrorHandler;
 	}
 
-	protected Iterable<CompositeChildElement> compositeChildIterator(IBase theCompositeElement, final boolean theContainedResource, final boolean theSubResource, final CompositeChildElement theParent) {
+	protected Iterable<CompositeChildElement> compositeChildIterator(IBase theCompositeElement, final boolean theContainedResource, final CompositeChildElement theParent, EncodeContext theEncodeContext) {
 
 		BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theCompositeElement.getClass());
 		final List<BaseRuntimeChildDefinition> children = elementDef.getChildrenAndExtension();
@@ -106,7 +104,7 @@ public abstract class BaseParser implements IParser {
 								return false;
 							}
 
-							myNext = new CompositeChildElement(theParent, myChildrenIter.next(), theSubResource);
+							myNext = new CompositeChildElement(theParent, myChildrenIter.next(), theEncodeContext);
 
 							/*
 							 * There are lots of reasons we might skip encoding a particular child
@@ -181,8 +179,6 @@ public abstract class BaseParser implements IParser {
 					theContained.getExistingIdToContainedResource().put(nextId, next);
 				}
 			}
-		} else {
-			// no resources to contain
 		}
 
 		List<IBaseReference> allReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
@@ -404,43 +400,32 @@ public abstract class BaseParser implements IParser {
 		return myDontStripVersionsFromReferencesAtPaths;
 	}
 
-	/**
-	 * See {@link #setEncodeElements(Set)}
-	 */
-	@Override
-	public Set<String> getEncodeElements() {
-		return myEncodeElements;
-	}
-
 	@Override
 	public void setEncodeElements(Set<String> theEncodeElements) {
-		myEncodeElementsIncludesStars = false;
+
 		if (theEncodeElements == null || theEncodeElements.isEmpty()) {
 			myEncodeElements = null;
-		} else {
-			myEncodeElements = theEncodeElements;
-			for (String next : theEncodeElements) {
-				if (next.startsWith("*.")) {
-					myEncodeElementsIncludesStars = true;
-				}
-			}
-		}
-	}
-
-	/**
-	 * See {@link #setEncodeElementsAppliesToResourceTypes(Set)}
-	 */
-	@Override
-	public Set<String> getEncodeElementsAppliesToResourceTypes() {
-		return myEncodeElementsAppliesToResourceTypes;
-	}
-
-	@Override
-	public void setEncodeElementsAppliesToResourceTypes(Set<String> theEncodeElementsAppliesToResourceTypes) {
-		if (theEncodeElementsAppliesToResourceTypes == null || theEncodeElementsAppliesToResourceTypes.isEmpty()) {
 			myEncodeElementsAppliesToResourceTypes = null;
 		} else {
-			myEncodeElementsAppliesToResourceTypes = theEncodeElementsAppliesToResourceTypes;
+			myEncodeElements = theEncodeElements
+				.stream()
+				.map(ElementsPath::new)
+				.collect(Collectors.toList());
+
+			myEncodeElementsAppliesToResourceTypes = new HashSet<>();
+			for (String next : myEncodeElements.stream().map(t -> t.getPath().get(0).getName()).collect(Collectors.toList())) {
+				if (next.startsWith("*")) {
+					myEncodeElementsAppliesToResourceTypes = null;
+					break;
+				}
+				int dotIdx = next.indexOf('.');
+				if (dotIdx == -1) {
+					myEncodeElementsAppliesToResourceTypes.add(next);
+				} else {
+					myEncodeElementsAppliesToResourceTypes.add(next.substring(0, dotIdx));
+				}
+			}
+
 		}
 	}
 
@@ -460,7 +445,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> getExtensionMetadataKeys(IResource resource) {
-		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys = new ArrayList<Map.Entry<ResourceMetadataKeyEnum<?>, Object>>();
+		List<Map.Entry<ResourceMetadataKeyEnum<?>, Object>> extensionMetadataKeys = new ArrayList<>();
 		for (Map.Entry<ResourceMetadataKeyEnum<?>, Object> entry : resource.getResourceMetadata().entrySet()) {
 			if (entry.getKey() instanceof ResourceMetadataKeyEnum.ExtensionResourceMetadataKey) {
 				extensionMetadataKeys.add(entry);
@@ -480,7 +465,6 @@ public abstract class BaseParser implements IParser {
 
 	protected TagList getMetaTagsForEncoding(IResource theIResource, EncodeContext theEncodeContext) {
 		TagList tags = ResourceMetadataKeyEnum.TAG_LIST.get(theIResource);
-		String resourceType = myContext.getResourceDefinition(theIResource).getName();
 		if (shouldAddSubsettedTag(theEncodeContext)) {
 			tags = new TagList(tags);
 			tags.add(new Tag(getSubsettedCodeSystem(), Constants.TAG_SUBSETTED_CODE, subsetDescription()));
@@ -819,16 +803,13 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public void setDontEncodeElements(Set<String> theDontEncodeElements) {
-		myDontEncodeElementsIncludesStars = false;
 		if (theDontEncodeElements == null || theDontEncodeElements.isEmpty()) {
 			myDontEncodeElements = null;
 		} else {
-			myDontEncodeElements = theDontEncodeElements;
-			for (String next : theDontEncodeElements) {
-				if (next.startsWith("*.")) {
-					myDontEncodeElementsIncludesStars = true;
-				}
-			}
+			myDontEncodeElements = theDontEncodeElements
+				.stream()
+				.map(ElementsPath::new)
+				.collect(Collectors.toList());
 		}
 	}
 
@@ -905,30 +886,32 @@ public abstract class BaseParser implements IParser {
 		if (isSuppressNarratives()) {
 			return true;
 		}
-		if (getEncodeElements() != null) {
-			if (getEncodeElementsAppliesToResourceTypes() != null &&
-				!getEncodeElementsAppliesToResourceTypes().isEmpty() &&
-				!getEncodeElementsAppliesToResourceTypes().contains(theEncodeContext.getResourcePath().getLast().getName())) {
+		if (myEncodeElements != null) {
+			if (isEncodeElementsAppliesToChildResourcesOnly() && theEncodeContext.getResourcePath().size() < 2) {
 				return false;
 			}
-			return true;
+
+			String currentResourceName = theEncodeContext.getResourcePath().get(theEncodeContext.getResourcePath().size() - 1).getName();
+			if (myEncodeElementsAppliesToResourceTypes == null || myEncodeElementsAppliesToResourceTypes.contains(currentResourceName)) {
+				return true;
+			}
 		}
 
 		return false;
 	}
 
-	protected boolean shouldEncodeResourceId(IBaseResource theResource, boolean theSubResource) {
+	protected boolean shouldEncodeResourceId(IBaseResource theResource, EncodeContext theEncodeContext) {
 		boolean retVal = true;
 		if (isOmitResourceId()) {
 			retVal = false;
 		} else {
 			if (myDontEncodeElements != null) {
 				String resourceName = myContext.getResourceDefinition(theResource).getName();
-				if (myDontEncodeElements.contains(resourceName + ".id")) {
+				if (myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath(resourceName + ".id"))) {
 					retVal = false;
-				} else if (myDontEncodeElements.contains("*.id")) {
+				} else if (myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath("*.id"))) {
 					retVal = false;
-				} else if (theSubResource == false && myDontEncodeElements.contains("id")) {
+				} else if (theEncodeContext.getResourcePath().size() == 1 && myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath("id"))) {
 					retVal = false;
 				}
 			}
@@ -942,9 +925,11 @@ public abstract class BaseParser implements IParser {
 	protected boolean shouldEncodeResourceMeta(IResource theResource) {
 		if (myDontEncodeElements != null) {
 			String resourceName = myContext.getResourceDefinition(theResource).getName();
-			if (myDontEncodeElements.contains(resourceName + ".meta")) {
+			if (myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath(resourceName + ".meta"))) {
 				return false;
-			} else return !myDontEncodeElements.contains("*.meta");
+			} else {
+				return myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath("*.meta"));
+			}
 		}
 		return true;
 	}
@@ -993,13 +978,13 @@ public abstract class BaseParser implements IParser {
 		private final BaseRuntimeChildDefinition myDef;
 		private final CompositeChildElement myParent;
 		private final RuntimeResourceDefinition myResDef;
-		private final boolean mySubResource;
+		private final EncodeContext myEncodeContext;
 
-		public CompositeChildElement(CompositeChildElement theParent, BaseRuntimeChildDefinition theDef, boolean theSubResource) {
+		public CompositeChildElement(CompositeChildElement theParent, BaseRuntimeChildDefinition theDef, EncodeContext theEncodeContext) {
 			myDef = theDef;
 			myParent = theParent;
 			myResDef = null;
-			mySubResource = theSubResource;
+			myEncodeContext = theEncodeContext;
 
 			if (ourLog.isTraceEnabled()) {
 				if (theParent != null) {
@@ -1014,11 +999,11 @@ public abstract class BaseParser implements IParser {
 
 		}
 
-		public CompositeChildElement(RuntimeResourceDefinition theResDef, boolean theSubResource) {
+		public CompositeChildElement(RuntimeResourceDefinition theResDef, EncodeContext theEncodeContext) {
 			myResDef = theResDef;
 			myDef = null;
 			myParent = null;
-			mySubResource = theSubResource;
+			myEncodeContext = theEncodeContext;
 		}
 
 		private void addParent(CompositeChildElement theParent, StringBuilder theB) {
@@ -1066,71 +1051,75 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		private boolean checkIfParentShouldBeEncodedAndBuildPath(StringBuilder thePathBuilder, boolean theStarPass) {
-			Set<String> encodeElements = myEncodeElements;
-			if (encodeElements != null && encodeElements.isEmpty() == false) {
-				if (isEncodeElementsAppliesToChildResourcesOnly() && !mySubResource) {
-					encodeElements = null;
-				}
+		private boolean checkIfParentShouldBeEncodedAndBuildPath() {
+			List<ElementsPath> encodeElements = myEncodeElements;
+
+			String currentResourceName = myEncodeContext.getResourcePath().get(myEncodeContext.getResourcePath().size() - 1).getName();
+			if (myEncodeElementsAppliesToResourceTypes != null && !myEncodeElementsAppliesToResourceTypes.contains(currentResourceName)) {
+				encodeElements = null;
 			}
-			return checkIfPathMatchesForEncoding(thePathBuilder, theStarPass, myEncodeElementsAppliesToResourceTypes, encodeElements, true);
-		}
 
-		private boolean checkIfParentShouldNotBeEncodedAndBuildPath(StringBuilder thePathBuilder, boolean theStarPass) {
-			return checkIfPathMatchesForEncoding(thePathBuilder, theStarPass, null, myDontEncodeElements, false);
-		}
+			boolean retVal = checkIfPathMatchesForEncoding(encodeElements, true);
 
-		private boolean checkIfPathMatchesForEncoding(StringBuilder thePathBuilder, boolean theStarPass, Set<String> theResourceTypes, Set<String> theElements, boolean theCheckingForWhitelist) {
-			if (myResDef != null) {
-				if (theResourceTypes != null) {
-					if (!theResourceTypes.contains(myResDef.getName())) {
-						return true;
-					}
-				}
-				if (theStarPass) {
-					thePathBuilder.append('*');
-				} else {
-					thePathBuilder.append(myResDef.getName());
-				}
-				if (theElements == null) {
-					return true;
-				}
-				return theElements.contains(thePathBuilder.toString());
-			} else if (myParent != null) {
-				boolean parentCheck;
-				if (theCheckingForWhitelist) {
-					parentCheck = myParent.checkIfParentShouldBeEncodedAndBuildPath(thePathBuilder, theStarPass);
-				} else {
-					parentCheck = myParent.checkIfParentShouldNotBeEncodedAndBuildPath(thePathBuilder, theStarPass);
-				}
-				if (parentCheck) {
-					return true;
-				}
-
-				if (myDef != null) {
-					if (myDef.getMin() > 0) {
-						if (theElements.contains("*.(mandatory)")) {
-							return true;
-						}
-					}
-
-					thePathBuilder.append('.');
-					thePathBuilder.append(myDef.getElementName());
-					String currentPath = thePathBuilder.toString();
-					boolean retVal = theElements.contains(currentPath);
-					int dotIdx = currentPath.indexOf('.');
-					if (!retVal) {
-						if (dotIdx != -1 && theElements.contains(currentPath.substring(dotIdx + 1))) {
-							if (!myParent.isSubResource()) {
-								return true;
-							}
-						}
-					}
-					return retVal;
+			/*
+			 * We force the meta tag to be encoded even if it's not specified as an element in the
+			 * elements filter, specifically because we'll need it in order to automatically add
+			 * the SUBSETTED tag
+			 */
+			if (!retVal) {
+				if ("meta".equals(myEncodeContext.getLeafResourcePathFirstField()) && shouldAddSubsettedTag(myEncodeContext)) {
+					// The next element is a child of the <meta> element
+					retVal = true;
+				} else if ("meta".equals(myDef.getElementName()) && shouldAddSubsettedTag(myEncodeContext)) {
+					// The next element is the <meta> element
+					retVal = true;
 				}
 			}
 
-			return false;
+			return retVal;
+		}
+
+		private boolean checkIfParentShouldNotBeEncodedAndBuildPath() {
+			return checkIfPathMatchesForEncoding(myDontEncodeElements, false);
+		}
+
+		private boolean checkIfPathMatchesForEncoding(List<ElementsPath> theElements, boolean theCheckingForWhitelist) {
+
+			boolean retVal = false;
+			myEncodeContext.pushPath(myDef.getElementName(), false);
+
+			if (isEncodeElementsAppliesToChildResourcesOnly() && myEncodeContext.getResourcePath().size() < 2) {
+				retVal = true;
+			} else if (theElements == null) {
+				retVal = true;
+			} else {
+				EncodeContextPath currentResourcePath = myEncodeContext.getCurrentResourcePath();
+				ourLog.trace("Current resource path: {}", currentResourcePath);
+				for (ElementsPath next : theElements) {
+
+					if (next.startsWith(currentResourcePath)) {
+						if (theCheckingForWhitelist || next.getPath().size() == currentResourcePath.getPath().size()) {
+							retVal = true;
+							break;
+						}
+					}
+
+					if (next.getPath().get(next.getPath().size() - 1).getName().equals("(mandatory)")) {
+						if (myDef.getMin() > 0) {
+							retVal = true;
+							break;
+						}
+						if (currentResourcePath.getPath().size() > next.getPath().size()) {
+							retVal = true;
+							break;
+						}
+					}
+
+				}
+			}
+
+			myEncodeContext.popPath();
+			return retVal;
 		}
 
 		public BaseRuntimeChildDefinition getDef() {
@@ -1141,53 +1130,111 @@ public abstract class BaseParser implements IParser {
 			return myParent;
 		}
 
-		public RuntimeResourceDefinition getResDef() {
-			return myResDef;
-		}
-
-		private boolean isSubResource() {
-			return mySubResource;
-		}
-
 		public boolean shouldBeEncoded() {
 			boolean retVal = true;
 			if (myEncodeElements != null) {
-				retVal = checkIfParentShouldBeEncodedAndBuildPath(new StringBuilder(), false);
-				if (retVal == false && myEncodeElementsIncludesStars) {
-					retVal = checkIfParentShouldBeEncodedAndBuildPath(new StringBuilder(), true);
-				}
+				retVal = checkIfParentShouldBeEncodedAndBuildPath();
 			}
 			if (retVal && myDontEncodeElements != null) {
-				retVal = !checkIfParentShouldNotBeEncodedAndBuildPath(new StringBuilder(), false);
-				if (retVal && myDontEncodeElementsIncludesStars) {
-					retVal = !checkIfParentShouldNotBeEncodedAndBuildPath(new StringBuilder(), true);
-				}
+				retVal = !checkIfParentShouldNotBeEncodedAndBuildPath();
 			}
-			// if (retVal == false && myEncodeElements.contains("*.(mandatory)")) {
-			// if (myDef.getMin() > 0) {
-			// retVal = true;
-			// }
-			// }
 
 			return retVal;
 		}
 	}
 
+	protected class EncodeContextPath {
+		private final List<EncodeContextPathElement> myPath;
+
+		public EncodeContextPath() {
+			myPath = new ArrayList<>(10);
+		}
+
+		public EncodeContextPath(List<EncodeContextPathElement> thePath) {
+			myPath = thePath;
+		}
+
+		@Override
+		public String toString() {
+			return myPath.toString();
+		}
+
+		protected List<EncodeContextPathElement> getPath() {
+			return myPath;
+		}
+
+		public EncodeContextPath getCurrentResourcePath() {
+			EncodeContextPath retVal = null;
+			for (int i = myPath.size() - 1; i >= 0; i--) {
+				if (myPath.get(i).isResource()) {
+					retVal = new EncodeContextPath(myPath.subList(i, myPath.size()));
+					break;
+				}
+			}
+			Validate.isTrue(retVal != null);
+			return retVal;
+		}
+	}
+
+	protected class ElementsPath extends EncodeContextPath {
+
+		protected ElementsPath(String thePath) {
+			StringTokenizer tok = new StringTokenizer(thePath, ".");
+			boolean first = true;
+			while (tok.hasMoreTokens()) {
+				String next = tok.nextToken();
+				if (first && next.equals("*")) {
+					getPath().add(new EncodeContextPathElement("*", true));
+				} else if (isNotBlank(next)) {
+					getPath().add(new EncodeContextPathElement(next, Character.isUpperCase(next.charAt(0))));
+				}
+				first = false;
+			}
+		}
+
+		public boolean startsWith(EncodeContextPath theCurrentResourcePath) {
+			for (int i = 0; i < getPath().size(); i++) {
+				if (theCurrentResourcePath.getPath().size() == i) {
+					return true;
+				}
+				EncodeContextPathElement expected = getPath().get(i);
+				EncodeContextPathElement actual = theCurrentResourcePath.getPath().get(i);
+				if (!expected.matches(actual)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public boolean startsWithPath(String thePath) {
+			return startsWith(new ElementsPath(thePath));
+		}
+	}
+
+
 	/**
 	 * EncodeContext is a shared state object that is passed around the
 	 * encode process
 	 */
-	protected class EncodeContext {
-		private final ArrayDeque<EncodeContextPathElement> myPath = new ArrayDeque<>(10);
-		private final ArrayDeque<EncodeContextPathElement> myResourcePath = new ArrayDeque<>(10);
+	protected class EncodeContext extends EncodeContextPath {
+		private final ArrayList<EncodeContextPathElement> myResourcePath = new ArrayList<>(10);
 
-		protected Deque<EncodeContextPathElement> getPath() {
-			return myPath;
-		}
-
-		protected Deque<EncodeContextPathElement> getResourcePath() {
+		protected ArrayList<EncodeContextPathElement> getResourcePath() {
 			return myResourcePath;
 		}
+
+		public String getLeafResourcePathFirstField() {
+			String retVal = null;
+			for (int i = getPath().size() - 1; i >= 0; i--) {
+				if (getPath().get(i).isResource()) {
+					break;
+				} else {
+					retVal = getPath().get(i).getName();
+				}
+			}
+			return retVal;
+		}
+
 
 		/**
 		 * Add an element at the end of the path
@@ -1198,7 +1245,7 @@ public abstract class BaseParser implements IParser {
 			assert theResource ^ Character.isLowerCase(thePathElement.charAt(0));
 
 			EncodeContextPathElement element = new EncodeContextPathElement(thePathElement, theResource);
-			myPath.add(element);
+			getPath().add(element);
 			if (theResource) {
 				myResourcePath.add(element);
 			}
@@ -1208,9 +1255,9 @@ public abstract class BaseParser implements IParser {
 		 * Remove the element at the end of the path
 		 */
 		public void popPath() {
-			EncodeContextPathElement removed = myPath.removeLast();
+			EncodeContextPathElement removed = getPath().remove(getPath().size() - 1);
 			if (removed.isResource()) {
-				myResourcePath.removeLast();
+				myResourcePath.remove(myResourcePath.size() - 1);
 			}
 		}
 
@@ -1222,8 +1269,39 @@ public abstract class BaseParser implements IParser {
 		private final boolean myResource;
 
 		public EncodeContextPathElement(String theName, boolean theResource) {
+			Validate.notBlank(theName);
 			myName = theName;
 			myResource = theResource;
+		}
+
+
+		public boolean matches(EncodeContextPathElement theOther) {
+			if (myResource != theOther.isResource()) {
+				return false;
+			}
+			if (myName.equals(theOther.getName())) {
+				return true;
+			}
+			if (myName.equals("*")) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(myName)
+				.append(myResource)
+				.toHashCode();
+		}
+
+		@Override
+		public String toString() {
+			if (myResource) {
+				return myName + "(res)";
+			}
+			return myName;
 		}
 
 		public String getName() {
@@ -1332,7 +1410,6 @@ public abstract class BaseParser implements IParser {
 				for (IBaseResource nextResource : getResourceList()) {
 					if (getResourceToIdMap().get(nextResource) != null) {
 						ids.add(getResourceToIdMap().get(nextResource).getValue());
-						continue;
 					}
 				}
 
@@ -1364,24 +1441,24 @@ public abstract class BaseParser implements IParser {
 		return new ArrayList<>(securityLabels);
 	}
 
-	static boolean hasExtensions(IBase theElement) {
+	static boolean hasNoExtensions(IBase theElement) {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
 			ISupportsUndeclaredExtensions res = (ISupportsUndeclaredExtensions) theElement;
 			if (res.getUndeclaredExtensions().size() > 0 || res.getUndeclaredModifierExtensions().size() > 0) {
-				return true;
+				return false;
 			}
 		}
 		if (theElement instanceof IBaseHasExtensions) {
 			IBaseHasExtensions res = (IBaseHasExtensions) theElement;
 			if (res.hasExtension()) {
-				return true;
+				return false;
 			}
 		}
 		if (theElement instanceof IBaseHasModifierExtensions) {
 			IBaseHasModifierExtensions res = (IBaseHasModifierExtensions) theElement;
-			return res.hasModifierExtension();
+			return !res.hasModifierExtension();
 		}
-		return false;
+		return true;
 	}
 
 }

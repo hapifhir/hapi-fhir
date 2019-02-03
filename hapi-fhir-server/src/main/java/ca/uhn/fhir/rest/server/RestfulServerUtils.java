@@ -54,7 +54,7 @@ public class RestfulServerUtils {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
-	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<String>(Arrays.asList("Bundle", "*.text", "*.(mandatory)"));
+	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)"));
 	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<FhirVersionEnum, FhirContext>());
 
 	private enum NarrativeModeEnum {
@@ -129,25 +129,33 @@ public class RestfulServerUtils {
 		if (elements != null && summaryMode != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
 			throw new InvalidRequestException("Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
 		}
-		Set<String> elementsAppliesTo = null;
-		if (elements != null && isNotBlank(theRequestDetails.getResourceName())) {
-			elementsAppliesTo = Collections.singleton(theRequestDetails.getResourceName());
-		}
 
 		if (summaryMode != null) {
 			if (summaryMode.contains(SummaryEnum.COUNT) && summaryMode.size() == 1) {
 				parser.setEncodeElements(Collections.singleton("Bundle.total"));
 			} else if (summaryMode.contains(SummaryEnum.TEXT) && summaryMode.size() == 1) {
 				parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
+				parser.setEncodeElementsAppliesToChildResourcesOnly(true);
 			} else {
 				parser.setSuppressNarratives(summaryMode.contains(SummaryEnum.DATA));
 				parser.setSummaryMode(summaryMode.contains(SummaryEnum.TRUE));
 			}
 		}
 		if (elements != null && elements.size() > 0) {
+			String elementsAppliesTo = "*";
+			if (isNotBlank(theRequestDetails.getResourceName())) {
+				elementsAppliesTo = theRequestDetails.getResourceName();
+			}
+
 			Set<String> newElements = new HashSet<>();
 			for (String next : elements) {
-				newElements.add("*." + next);
+				if (isNotBlank(next)) {
+					if (Character.isUpperCase(next.charAt(0))) {
+						newElements.add(next);
+					} else {
+						newElements.add(elementsAppliesTo + "." + next);
+					}
+				}
 			}
 
 			/*
@@ -158,6 +166,13 @@ public class RestfulServerUtils {
 			 * the client has explicitly scoped the Bundle
 			 * (i.e. with Bundle.total or something like that)
 			 */
+			boolean haveExplicitBundleElement = false;
+			for (String next : newElements) {
+				if (next.startsWith("Bundle.")) {
+					haveExplicitBundleElement = true;
+					break;
+				}
+			}
 			switch (theRequestDetails.getRestOperationType()) {
 				case SEARCH_SYSTEM:
 				case SEARCH_TYPE:
@@ -165,13 +180,6 @@ public class RestfulServerUtils {
 				case HISTORY_TYPE:
 				case HISTORY_INSTANCE:
 				case GET_PAGE:
-					boolean haveExplicitBundleElement = false;
-					for (String next : newElements) {
-						if (next.startsWith("Bundle.")) {
-							haveExplicitBundleElement = true;
-							break;
-						}
-					}
 					if (!haveExplicitBundleElement) {
 						parser.setEncodeElementsAppliesToChildResourcesOnly(true);
 					}
@@ -181,7 +189,6 @@ public class RestfulServerUtils {
 			}
 
 			parser.setEncodeElements(newElements);
-			parser.setEncodeElementsAppliesToResourceTypes(elementsAppliesTo);
 		}
 	}
 

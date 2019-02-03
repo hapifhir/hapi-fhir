@@ -51,71 +51,65 @@ public class ElementsParamR4Test {
 
 	@Test
 	public void testReadSummaryData() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_elements=name,maritalStatus");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(Constants.CT_FHIR_XML_NEW + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
-			assertThat(responseContent, not(containsString("<Bundle")));
-			assertThat(responseContent, (containsString("<Patient")));
-			assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
-			assertThat(responseContent, (containsString("family")));
-			assertThat(responseContent, (containsString("maritalStatus")));
-			assertThat(ourLastElements, containsInAnyOrder("meta", "name", "maritalStatus"));
-		}
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Patient/1?_elements=name,maritalStatus",
+			Patient.class,
+			patient -> {
+				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
+				assertThat(responseContent, not(containsString("<Bundle")));
+				assertThat(responseContent, (containsString("<Patient")));
+				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
+				assertThat(responseContent, (containsString("family")));
+				assertThat(responseContent, (containsString("maritalStatus")));
+				assertThat(ourLastElements, containsInAnyOrder("meta", "name", "maritalStatus"));
+			}
+		);
 	}
 
 	@Test
 	public void testReadSummaryTrue() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_elements=name");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
-			ourLog.info(responseContent);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(Constants.CT_FHIR_XML_NEW + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
-			assertThat(responseContent, not(containsString("<Bundle")));
-			assertThat(responseContent, (containsString("<Patient")));
-			assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
-			assertThat(responseContent, (containsString("family")));
-			assertThat(responseContent, not(containsString("maritalStatus")));
-			assertThat(ourLastElements, containsInAnyOrder("meta", "name"));
-		}
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Patient/1?_elements=name",
+			Patient.class,
+			patient -> {
+				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
+				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
+				assertThat(responseContent, (containsString("family")));
+				assertThat(responseContent, not(containsString("maritalStatus")));
+				assertThat(ourLastElements, containsInAnyOrder("meta", "name"));
+			}
+		);
 	}
 
 	@Test
 	public void testSearchSummaryData() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_elements=name,maritalStatus");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("<Patient"));
-			assertThat(responseContent, not(containsString("THE DIV")));
-			assertThat(responseContent, containsString("family"));
-			assertThat(responseContent, containsString("maritalStatus"));
-			assertThat(ourLastElements, containsInAnyOrder("meta", "name", "maritalStatus"));
-		}
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Patient?_elements=name,maritalStatus",
+			bundle -> {
+				assertEquals("1", bundle.getTotalElement().getValueAsString());
+				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
+				assertThat(responseContent, containsString("<Patient"));
+				assertThat(responseContent, not(containsString("THE DIV")));
+				assertThat(responseContent, containsString("family"));
+				assertThat(responseContent, containsString("maritalStatus"));
+				assertThat(ourLastElements, containsInAnyOrder("meta", "name", "maritalStatus"));
+			}
+		);
 	}
 
 	@Test
 	public void testSearchSummaryText() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_elements=text");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info(responseContent);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, (containsString("<total value=\"1\"/>")));
-			assertThat(responseContent, (containsString("entry")));
-			assertThat(responseContent, (containsString("THE DIV")));
-			assertThat(responseContent, not(containsString("family")));
-			assertThat(responseContent, not(containsString("maritalStatus")));
-			assertThat(ourLastElements, containsInAnyOrder("meta", "text"));
-		}
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Patient?_elements=text&_pretty=true",
+			bundle -> {
+				assertEquals("1", bundle.getTotalElement().getValueAsString());
+				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle.getEntry().get(0).getResource());
+				assertThat(responseContent, containsString("THE DIV"));
+				assertThat(responseContent, not(containsString("family")));
+				assertThat(responseContent, not(containsString("maritalStatus")));
+				assertThat(ourLastElements, containsInAnyOrder("meta", "text"));
+			}
+		);
 	}
 
 	/**
@@ -135,6 +129,7 @@ public class ElementsParamR4Test {
 
 				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
 				assertEquals(0, dr.getMeta().getTag().size());
+				assertEquals("Observation/OBSA", dr.getResult().get(0).getReference());
 
 				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
 				assertEquals(0, obs.getMeta().getTag().size());
@@ -147,7 +142,7 @@ public class ElementsParamR4Test {
 	public void testMultiResourceElementsFilter() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
-			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Procedure.reasonCode,Procedure.status,Observation.subject,Observation.valueString",
+			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
 				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
@@ -158,10 +153,10 @@ public class ElementsParamR4Test {
 				assertEquals(0, dr.getMeta().getTag().size());
 
 				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
-				assertEquals(0, obs.getMeta().getTag().size());
+				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
 				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
-				assertNull(obs.getCode().getCoding().get(0).getCode());
-				assertEquals("AAA", obs.getValueStringType().getValue());
+				assertEquals(0, obs.getCode().getCoding().size());
+				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
 			});
 	}
 
@@ -185,20 +180,28 @@ public class ElementsParamR4Test {
 	}
 
 	private void verifyXmlAndJson(String theUri, Consumer<Bundle> theVerifier) throws IOException {
-		EncodingEnum theEncoding = EncodingEnum.JSON;
-		HttpGet httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + theEncoding.getFormatContentType());
+		verifyXmlAndJson(theUri, Bundle.class, theVerifier);
+	}
+
+	private <T extends IBaseResource> void verifyXmlAndJson(String theUri, Class<T> theType, Consumer<T> theVerifier) throws IOException {
+		EncodingEnum encodingEnum;
+		HttpGet httpGet;
+
+		encodingEnum = EncodingEnum.JSON;
+		httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
-			Bundle response = theEncoding.newParser(ourCtx).parseResource(Bundle.class, responseContent);
+			T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 			theVerifier.accept(response);
 		}
-		theEncoding = EncodingEnum.XML;
-		httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + theEncoding.getFormatContentType());
+
+		encodingEnum = EncodingEnum.XML;
+		httpGet = new HttpGet(theUri + "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
-			Bundle response = theEncoding.newParser(ourCtx).parseResource(Bundle.class, responseContent);
+			T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
 			theVerifier.accept(response);
 		}
 	}

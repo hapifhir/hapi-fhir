@@ -1010,7 +1010,8 @@ public class JsonParserDstu2_1Test {
 			assertThat(out, containsString("name"));
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
-			assertThat(out, not(containsString("meta")));
+			assertThat(out, containsString("meta"));
+			assertThat(out, containsString("SUBSETTED"));
 		}
 	}
 
