@@ -62,25 +62,23 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 	}
 
 	public void updateSubscriptionRegistryAndPerformMatching(ResourceModifiedMessage theResourceModifiedMessage) {
-		if (isSubscription(theResourceModifiedMessage)) {
-			handleSubscriptionActivation(theResourceModifiedMessage);
-		}
-
-		mySubscriptionMatchingSubscriber.matchActiveSubscriptionsAndDeliver(theResourceModifiedMessage);
-	}
-
-	private void handleSubscriptionActivation(ResourceModifiedMessage theResourceModifiedMessage) {
 		switch (theResourceModifiedMessage.getOperationType()) {
 			case DELETE:
-				mySubscriptionRegistry.unregisterSubscription(theResourceModifiedMessage.getId(myFhirContext));
-				break;
+				if (isSubscription(theResourceModifiedMessage)) {
+					mySubscriptionRegistry.unregisterSubscription(theResourceModifiedMessage.getId(myFhirContext));
+				}
+				return;
 			case CREATE:
 			case UPDATE:
-				registerActiveSubscription(theResourceModifiedMessage.getNewPayload(myFhirContext));
+				if (isSubscription(theResourceModifiedMessage)) {
+					registerActiveSubscription(theResourceModifiedMessage.getNewPayload(myFhirContext));
+				}
 				break;
 			default:
 				break;
 		}
+
+		mySubscriptionMatchingSubscriber.matchActiveSubscriptionsAndDeliver(theResourceModifiedMessage);
 	}
 
 	private boolean isSubscription(ResourceModifiedMessage theResourceModifiedMessage) {
