@@ -56,6 +56,6 @@ public class StandaloneSubscriptionMessageHandlerTest extends BaseSubscriptionDs
 		myStandaloneSubscriptionMessageHandler.handleMessage(jsonMessage);
 		Mockito.verify(mySubscriptionRegistry).unregisterSubscription(any());
 		Mockito.verify(mySubscriptionRegistry, never()).registerSubscriptionUnlessAlreadyRegistered(any());
-		Mockito.verify(mySubscriptionMatchingSubscriber).matchActiveSubscriptionsAndDeliver(any());
+		Mockito.verify(mySubscriptionMatchingSubscriber, never()).matchActiveSubscriptionsAndDeliver(any());
 	}
 }
