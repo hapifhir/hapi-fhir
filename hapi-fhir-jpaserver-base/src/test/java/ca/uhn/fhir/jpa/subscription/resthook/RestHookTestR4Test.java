@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.module.interceptor.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -14,17 +15,25 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+import org.slf4j.helpers.MessageFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -112,7 +121,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals("2", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
 	}
 
-
 	@Test
 	public void testPlaceholderReferencesInTransactionAreResolvedCorrectly() throws Exception {
 
@@ -194,7 +202,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(obs.getIdElement().toUnqualifiedVersionless().getValue());
-		mySystemDao.transaction(null,bundle);
+		mySystemDao.transaction(null, bundle);
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 
 		// Should see 1 subscription notification
@@ -208,7 +216,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals("2", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
 	}
-
 
 	@Test
 	public void testRepeatedDeliveries() throws Exception {
@@ -230,7 +237,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForSize(100, ourUpdatedObservations);
 	}
-
 
 	@Test
 	public void testActiveSubscriptionShouldntReActivate() throws Exception {
@@ -869,22 +875,22 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@Test
 	public void testGoodSubscriptionPersists() {
-		assertEquals(0, subsciptionCount());
+		assertEquals(0, subscriptionCount());
 		String payload = "application/fhir+json";
 		String criteriaGood = "Patient?gender=male";
 		Subscription subscription = newSubscription(criteriaGood, payload);
 		ourClient.create().resource(subscription).execute();
-		assertEquals(1, subsciptionCount());
+		assertEquals(1, subscriptionCount());
 	}
 
-	private int subsciptionCount() {
+	private int subscriptionCount() {
 		IBaseBundle found = ourClient.search().forResource(Subscription.class).cacheControl(new CacheControlDirective().setNoCache(true)).execute();
 		return toUnqualifiedVersionlessIdValues(found).size();
 	}
 
 	@Test
 	public void testBadSubscriptionDoesntPersist() {
-		assertEquals(0, subsciptionCount());
+		assertEquals(0, subscriptionCount());
 		String payload = "application/fhir+json";
 		String criteriaBad = "BodySite?accessType=Catheter";
 		Subscription subscription = newSubscription(criteriaBad, payload);
@@ -893,7 +899,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		} catch (UnprocessableEntityException e) {
 			ourLog.info("Expected exception", e);
 		}
-		assertEquals(0, subsciptionCount());
+		assertEquals(0, subscriptionCount());
 	}
 
 	@Test
@@ -945,7 +951,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		}
 
 	}
-
 
 
 }
