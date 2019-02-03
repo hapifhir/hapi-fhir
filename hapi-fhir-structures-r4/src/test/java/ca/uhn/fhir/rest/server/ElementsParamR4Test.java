@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -42,11 +41,13 @@ public class ElementsParamR4Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static Procedure ourNextProcedure;
+	private static RestfulServer ourServlet;
 
 	@Before
 	public void before() {
 		ourLastElements = null;
 		ourNextProcedure = null;
+		ourServlet.setElementsSupport(new RestfulServer().getElementsSupport());
 	}
 
 	@Test
@@ -160,10 +161,47 @@ public class ElementsParamR4Test {
 			});
 	}
 
+	@Test
+	public void testMultiResourceElementsFilterWithMetadataExcluded() throws IOException {
+		createProcedureWithLongChain();
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals(true, procedure.getMeta().isEmpty());
+				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+				assertEquals(0, procedure.getUsedCode().size());
+
+				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
+				assertEquals(true, dr.getMeta().isEmpty());
+
+				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
+				assertEquals(true, obs.getMeta().isEmpty());
+				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+				assertEquals(0, obs.getCode().getCoding().size());
+				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
+			});
+	}
+
+	@Test
+	public void testElementsFilterWithComplexPath() throws IOException {
+		createProcedureWithLongChain();
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.reasonCode.coding.code",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+				assertEquals(null, procedure.getReasonCode().get(0).getCoding().get(0).getSystem());
+				assertEquals(null, procedure.getReasonCode().get(0).getCoding().get(0).getDisplay());
+				assertEquals(0, procedure.getUsedCode().size());
+			});
+	}
+
 	private void createProcedureWithLongChain() {
 		ourNextProcedure = new Procedure();
 		ourNextProcedure.setId("Procedure/PROC");
-		ourNextProcedure.addReasonCode().addCoding().setCode("REASON_CODE");
+		ourNextProcedure.addReasonCode().addCoding().setCode("REASON_CODE").setSystem("REASON_SYSTEM").setDisplay("REASON_DISPLAY");
 		ourNextProcedure.addUsedCode().addCoding().setCode("USED_CODE");
 
 		DiagnosticReport dr = new DiagnosticReport();
@@ -263,11 +301,11 @@ public class ElementsParamR4Test {
 		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
+		ourServlet = new RestfulServer(ourCtx);
 
-		servlet.registerProvider(new DummyPatientResourceProvider());
-		servlet.registerProvider(new DummyProcedureResourceProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
+		ourServlet.registerProvider(new DummyPatientResourceProvider());
+		ourServlet.registerProvider(new DummyProcedureResourceProvider());
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();

@@ -1630,7 +1630,7 @@ public class XmlParserDstu2_1Test {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setDontEncodeElements(Sets.newHashSet("Patient.meta"));
-			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
+			p.setEncodeElements(new HashSet<>(Arrays.asList("Patient.name")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(patient);
 			ourLog.info(out);
@@ -1638,8 +1638,8 @@ public class XmlParserDstu2_1Test {
 			assertThat(out, containsString("name"));
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
-			assertThat(out, containsString("meta"));
-			assertThat(out, containsString("SUBSETTED"));
+			assertThat(out, not(containsString("meta")));
+			assertThat(out, not(containsString("SUBSETTED")));
 		}
 	}
 
@@ -2698,12 +2698,6 @@ public class XmlParserDstu2_1Test {
 				.build();
 
 		assertTrue(d.toString(), !d.hasDifferences());
-	}
-
-	public static void main(String[] args) {
-		IGenericClient c = ourCtx.newRestfulGenericClient("http://fhir-dev.healthintersections.com.au/open");
-		// c.registerInterceptor(new LoggingInterceptor(true));
-		c.read().resource("Patient").withId("324").execute();
 	}
 
 	@ResourceDef(name = "Patient")

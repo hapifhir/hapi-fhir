@@ -1083,12 +1083,12 @@ public abstract class BaseParser implements IParser {
 			return checkIfPathMatchesForEncoding(myDontEncodeElements, false);
 		}
 
-		private boolean checkIfPathMatchesForEncoding(List<ElementsPath> theElements, boolean theCheckingForWhitelist) {
+		private boolean checkIfPathMatchesForEncoding(List<ElementsPath> theElements, boolean theCheckingForEncodeElements) {
 
 			boolean retVal = false;
 			myEncodeContext.pushPath(myDef.getElementName(), false);
 
-			if (isEncodeElementsAppliesToChildResourcesOnly() && myEncodeContext.getResourcePath().size() < 2) {
+			if (theCheckingForEncodeElements && isEncodeElementsAppliesToChildResourcesOnly() && myEncodeContext.getResourcePath().size() < 2) {
 				retVal = true;
 			} else if (theElements == null) {
 				retVal = true;
@@ -1098,7 +1098,7 @@ public abstract class BaseParser implements IParser {
 				for (ElementsPath next : theElements) {
 
 					if (next.startsWith(currentResourcePath)) {
-						if (theCheckingForWhitelist || next.getPath().size() == currentResourcePath.getPath().size()) {
+						if (theCheckingForEncodeElements || next.getPath().size() == currentResourcePath.getPath().size()) {
 							retVal = true;
 							break;
 						}

@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,6 +46,7 @@ import java.io.Writer;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -125,9 +126,15 @@ public class RestfulServerUtils {
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequestDetails);
 
 		// _elements
-		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails);
+		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
 		if (elements != null && summaryMode != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
 			throw new InvalidRequestException("Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
+		}
+
+		// _elements:exclude
+		Set<String> elementsExclude = ElementsParameter.getElementsValueOrNull(theRequestDetails, true);
+		if (elementsExclude != null) {
+			parser.setDontEncodeElements(elementsExclude);
 		}
 
 		if (summaryMode != null) {
@@ -192,22 +199,25 @@ public class RestfulServerUtils {
 		}
 	}
 
-	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
+	public static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
 													  BundleTypeEnum theBundleType) {
-		return createPagingLink(theIncludes, theServerBase, theSearchId, theOffset, theCount, theRequestParameters, thePrettyPrint,
+		return createPagingLink(theIncludes, theRequestDetails, theSearchId, theOffset, theCount, theRequestParameters, thePrettyPrint,
 			theBundleType, null);
 	}
 
-	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, String thePageId, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
+	public static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, String thePageId, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
 													  BundleTypeEnum theBundleType) {
-		return createPagingLink(theIncludes, theServerBase, theSearchId, null, null, theRequestParameters, thePrettyPrint,
+		return createPagingLink(theIncludes, theRequestDetails, theSearchId, null, null, theRequestParameters, thePrettyPrint,
 			theBundleType, thePageId);
 	}
 
-	private static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
+	private static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
 														BundleTypeEnum theBundleType, String thePageId) {
+
+		String serverBase = theRequestDetails.getFhirServerBase();
+
 		StringBuilder b = new StringBuilder();
-		b.append(theServerBase);
+		b.append(serverBase);
 		b.append('?');
 		b.append(Constants.PARAM_PAGINGACTION);
 		b.append('=');
@@ -265,16 +275,33 @@ public class RestfulServerUtils {
 			b.append(theBundleType.getCode());
 		}
 
-		String paramName = Constants.PARAM_ELEMENTS;
-		String[] params = theRequestParameters.get(paramName);
-		if (params != null) {
-			for (String nextValue : params) {
-				if (isNotBlank(nextValue)) {
-					b.append('&');
-					b.append(paramName);
-					b.append('=');
-					b.append(UrlUtil.escapeUrlParam(nextValue));
-				}
+		// _elements
+		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
+		if (elements != null) {
+			b.append('&');
+			b.append(Constants.PARAM_ELEMENTS);
+			b.append('=');
+			String nextValue = elements
+				.stream()
+				.sorted()
+				.map(UrlUtil::escapeUrlParam)
+				.collect(Collectors.joining(","));
+			b.append(nextValue);
+		}
+
+		// _elements:exclude
+		if (theRequestDetails.getServer().getElementsSupport() == ElementsSupportEnum.EXTENDED) {
+			Set<String> elementsExclude = ElementsParameter.getElementsValueOrNull(theRequestDetails, true);
+			if (elementsExclude != null) {
+				b.append('&');
+				b.append(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
+				b.append('=');
+				String nextValue = elementsExclude
+					.stream()
+					.sorted()
+					.map(UrlUtil::escapeUrlParam)
+					.collect(Collectors.joining(","));
+				b.append(nextValue);
 			}
 		}
 

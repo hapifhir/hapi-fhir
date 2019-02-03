@@ -119,6 +119,14 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 		return ETagSupportEnum.DISABLED;
 	}
 
+	/**
+	 * DEFAULT = {@link ElementsSupportEnum#STANDARD}
+	 */
+	@Override
+	public ElementsSupportEnum getElementsSupport() {
+		return ElementsSupportEnum.STANDARD;
+	}
+
 	@Override
 	public FhirContext getFhirContext() {
 		return CTX;

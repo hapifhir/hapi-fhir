@@ -40,7 +40,6 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -126,10 +125,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private String myServerVersion = createPoweredByHeaderProductVersion();
 	private boolean myStarted;
 	private boolean myUncompressIncomingContents = true;
-	private boolean myUseBrowserFriendlyContentTypes;
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
 	private Date myConformanceDate;
 	private PreferReturnEnum myDefaultPreferReturn = DEFAULT_PREFER_RETURN;
+	private ElementsSupportEnum myElementsSupport = ElementsSupportEnum.EXTENDED;
 
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
@@ -498,6 +497,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	@Override
 	public ETagSupportEnum getETagSupport() {
 		return myETagSupport;
+	}
+
+	@Override
+	public ElementsSupportEnum getElementsSupport() {
+		return myElementsSupport;
+	}
+
+	/**
+	 * Sets the elements support mode.
+	 *
+	 * @see <a href="http://hapifhir.io/doc_rest_server.html#extended_elements_support">Extended Elements Support</a>
+	 */
+	public void setElementsSupport(ElementsSupportEnum theElementsSupport) {
+		Validate.notNull(theElementsSupport, "theElementsSupport must not be null");
+		myElementsSupport = theElementsSupport;
 	}
 
 	/**
@@ -1025,6 +1039,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 */
 			requestDetails.removeParameter(Constants.PARAM_SUMMARY);
 			requestDetails.removeParameter(Constants.PARAM_ELEMENTS);
+			requestDetails.removeParameter(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
 
 			/*
 			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
@@ -1251,26 +1266,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myUncompressIncomingContents = theUncompressIncomingContents;
 	}
 
-	/**
-	 * @deprecated This feature did not work well, and will be removed. Use {@link ResponseHighlighterInterceptor}
-	 * instead as an interceptor on your server and it will provide more useful syntax
-	 * highlighting. Deprocated in 1.4
-	 */
-	@Deprecated
-	@Override
-	public boolean isUseBrowserFriendlyContentTypes() {
-		return myUseBrowserFriendlyContentTypes;
-	}
-
-	/**
-	 * @deprecated This feature did not work well, and will be removed. Use {@link ResponseHighlighterInterceptor}
-	 * instead as an interceptor on your server and it will provide more useful syntax
-	 * highlighting. Deprocated in 1.4
-	 */
-	@Deprecated
-	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
-		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
-	}
 
 	public void populateRequestDetailsFromRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
 		UrlPathTokenizer tok = new UrlPathTokenizer(theRequestPath);

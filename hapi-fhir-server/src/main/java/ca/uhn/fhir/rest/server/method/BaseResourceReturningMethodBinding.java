@@ -192,19 +192,19 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			// We're doing named pages
 			searchId = theResult.getUuid();
 			if (isNotBlank(theResult.getNextPageId())) {
-				linkNext = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getNextPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				linkNext = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getNextPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 			if (isNotBlank(theResult.getPreviousPageId())) {
-				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 		} else if (searchId != null) {
 			// We're doing offset pages
 			if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
-				linkNext = (RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
+				linkNext = (RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
 			}
 			if (theOffset > 0) {
 				int start = Math.max(0, theOffset - theLimit);
-				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, start, theLimit, theRequest.getParameters(), prettyPrint, theBundleType);
+				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, start, theLimit, theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 		}
 

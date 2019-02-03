@@ -1231,8 +1231,8 @@ public class JsonParserDstu3Test {
 			assertThat(out, containsString("name"));
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
-			assertThat(out, containsString("meta"));
-			assertThat(out, containsString("SUBSETTED"));
+			assertThat(out, not(containsString("meta")));
+			assertThat(out, not(containsString("SUBSETTED")));
 		}
 	}
 

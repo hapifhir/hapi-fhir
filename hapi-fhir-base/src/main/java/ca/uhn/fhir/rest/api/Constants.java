@@ -137,6 +137,7 @@ public class Constants {
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
 	public static final String PARAM_ELEMENTS = "_elements";
+	public static final String PARAM_ELEMENTS_EXCLUDE_MODIFIER = ":exclude";
 	public static final String PARAM_FORMAT = "_format";
 	public static final String PARAM_HAS = "_has";
 	public static final String PARAM_HISTORY = "_history";
