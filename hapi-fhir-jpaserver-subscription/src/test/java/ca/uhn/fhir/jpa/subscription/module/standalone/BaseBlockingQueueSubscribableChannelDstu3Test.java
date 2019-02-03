@@ -73,7 +73,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
-		mySubscriptionRegistry.clearForUnitTests();
+		mySubscriptionRegistry.unregisterAllSubscriptions();
 		if (ourSubscribableChannel == null) {
 			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
