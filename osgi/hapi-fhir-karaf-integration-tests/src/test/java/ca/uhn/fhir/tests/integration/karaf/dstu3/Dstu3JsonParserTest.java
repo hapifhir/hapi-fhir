@@ -1143,7 +1143,6 @@ public class Dstu3JsonParserTest {
 			assertThat(out, containsString("name"));
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
-			assertThat(out, not(containsString("meta")));
 		}
 	}
 

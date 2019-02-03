@@ -52,16 +52,6 @@ public interface IParser {
 	void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;
 
 	/**
-	 * See {@link #setEncodeElements(Set)}
-	 */
-	Set<String> getEncodeElements();
-
-	/**
-	 * See {@link #setEncodeElementsAppliesToResourceTypes(Set)}
-	 */
-	Set<String> getEncodeElementsAppliesToResourceTypes();
-
-	/**
 	 * If not set to null (as is the default) this ID will be used as the ID in any
 	 * resources encoded by this parser
 	 */
@@ -257,14 +247,6 @@ public interface IParser {
 	 * contained within it (i.e. search result resources in that bundle)
 	 */
 	boolean isEncodeElementsAppliesToChildResourcesOnly();
-
-	/**
-	 * If provided, tells the parse which resource types to apply {@link #setEncodeElements(Set) encode elements} to. Any
-	 * resource types not specified here will be encoded completely, with no elements excluded.
-	 * 
-	 * @param theEncodeElementsAppliesToResourceTypes
-	 */
-	void setEncodeElementsAppliesToResourceTypes(Set<String> theEncodeElementsAppliesToResourceTypes);
 
 	/**
 	 * When encoding, force this resource ID to be encoded as the resource ID

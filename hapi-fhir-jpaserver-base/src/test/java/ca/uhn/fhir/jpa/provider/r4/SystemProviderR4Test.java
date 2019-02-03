@@ -67,7 +67,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@SuppressWarnings("deprecation")
 	@After
 	public void after() {
-		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 	}
 
@@ -250,7 +249,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testResponseUsesCorrectContentType() throws Exception {
-		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		HttpGet get = new HttpGet(ourServerBase);
