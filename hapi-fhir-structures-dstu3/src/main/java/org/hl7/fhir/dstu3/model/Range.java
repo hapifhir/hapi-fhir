@@ -211,12 +211,16 @@ public class Range extends Type implements ICompositeType {
       public Range copy() {
         Range dst = new Range();
         copyValues(dst);
-        dst.low = low == null ? null : low.copy();
-        dst.high = high == null ? null : high.copy();
         return dst;
       }
 
-      protected Range typedCopy() {
+      public void copyValues(Range dst) {
+        super.copyValues(dst);
+        dst.low = low == null ? null : low.copy();
+        dst.high = high == null ? null : high.copy();
+      }
+
+  protected Range typedCopy() {
         return copy();
       }
 

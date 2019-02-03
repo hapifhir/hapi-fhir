@@ -1674,21 +1674,25 @@ public class ImmunizationRecommendation extends DomainResource {
       public ImmunizationRecommendation copy() {
         ImmunizationRecommendation dst = new ImmunizationRecommendation();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ImmunizationRecommendation dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.patient = patient == null ? null : patient.copy();
         if (recommendation != null) {
           dst.recommendation = new ArrayList<ImmunizationRecommendationRecommendationComponent>();
           for (ImmunizationRecommendationRecommendationComponent i : recommendation)
             dst.recommendation.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ImmunizationRecommendation typedCopy() {
+  protected ImmunizationRecommendation typedCopy() {
         return copy();
       }
 

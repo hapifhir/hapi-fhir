@@ -672,6 +672,11 @@ public class Attachment extends Type implements ICompositeType {
       public Attachment copy() {
         Attachment dst = new Attachment();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Attachment dst) {
+        super.copyValues(dst);
         dst.contentType = contentType == null ? null : contentType.copy();
         dst.language = language == null ? null : language.copy();
         dst.data = data == null ? null : data.copy();
@@ -680,10 +685,9 @@ public class Attachment extends Type implements ICompositeType {
         dst.hash = hash == null ? null : hash.copy();
         dst.title = title == null ? null : title.copy();
         dst.creation = creation == null ? null : creation.copy();
-        return dst;
       }
 
-      protected Attachment typedCopy() {
+  protected Attachment typedCopy() {
         return copy();
       }
 

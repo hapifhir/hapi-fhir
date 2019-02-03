@@ -2403,6 +2403,11 @@ public class MessageDefinition extends MetadataResource {
       public MessageDefinition copy() {
         MessageDefinition dst = new MessageDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(MessageDefinition dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.version = version == null ? null : version.copy();
@@ -2416,18 +2421,18 @@ public class MessageDefinition extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
         dst.base = base == null ? null : base.copy();
@@ -2435,29 +2440,28 @@ public class MessageDefinition extends MetadataResource {
           dst.parent = new ArrayList<Reference>();
           for (Reference i : parent)
             dst.parent.add(i.copy());
-        };
+        }
         if (replaces != null) {
           dst.replaces = new ArrayList<Reference>();
           for (Reference i : replaces)
             dst.replaces.add(i.copy());
-        };
+        }
         dst.event = event == null ? null : event.copy();
         dst.category = category == null ? null : category.copy();
         if (focus != null) {
           dst.focus = new ArrayList<MessageDefinitionFocusComponent>();
           for (MessageDefinitionFocusComponent i : focus)
             dst.focus.add(i.copy());
-        };
+        }
         dst.responseRequired = responseRequired == null ? null : responseRequired.copy();
         if (allowedResponse != null) {
           dst.allowedResponse = new ArrayList<MessageDefinitionAllowedResponseComponent>();
           for (MessageDefinitionAllowedResponseComponent i : allowedResponse)
             dst.allowedResponse.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected MessageDefinition typedCopy() {
+  protected MessageDefinition typedCopy() {
         return copy();
       }
 

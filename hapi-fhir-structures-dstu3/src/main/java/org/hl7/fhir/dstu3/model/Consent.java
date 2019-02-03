@@ -3818,13 +3818,18 @@ public class Consent extends DomainResource {
       public Consent copy() {
         Consent dst = new Consent();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Consent dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.status = status == null ? null : status.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.patient = patient == null ? null : patient.copy();
         dst.period = period == null ? null : period.copy();
         dst.dateTime = dateTime == null ? null : dateTime.copy();
@@ -3832,54 +3837,53 @@ public class Consent extends DomainResource {
           dst.consentingParty = new ArrayList<Reference>();
           for (Reference i : consentingParty)
             dst.consentingParty.add(i.copy());
-        };
+        }
         if (actor != null) {
           dst.actor = new ArrayList<ConsentActorComponent>();
           for (ConsentActorComponent i : actor)
             dst.actor.add(i.copy());
-        };
+        }
         if (action != null) {
           dst.action = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : action)
             dst.action.add(i.copy());
-        };
+        }
         if (organization != null) {
           dst.organization = new ArrayList<Reference>();
           for (Reference i : organization)
             dst.organization.add(i.copy());
-        };
+        }
         dst.source = source == null ? null : source.copy();
         if (policy != null) {
           dst.policy = new ArrayList<ConsentPolicyComponent>();
           for (ConsentPolicyComponent i : policy)
             dst.policy.add(i.copy());
-        };
+        }
         dst.policyRule = policyRule == null ? null : policyRule.copy();
         if (securityLabel != null) {
           dst.securityLabel = new ArrayList<Coding>();
           for (Coding i : securityLabel)
             dst.securityLabel.add(i.copy());
-        };
+        }
         if (purpose != null) {
           dst.purpose = new ArrayList<Coding>();
           for (Coding i : purpose)
             dst.purpose.add(i.copy());
-        };
+        }
         dst.dataPeriod = dataPeriod == null ? null : dataPeriod.copy();
         if (data != null) {
           dst.data = new ArrayList<ConsentDataComponent>();
           for (ConsentDataComponent i : data)
             dst.data.add(i.copy());
-        };
+        }
         if (except != null) {
           dst.except = new ArrayList<ExceptComponent>();
           for (ExceptComponent i : except)
             dst.except.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Consent typedCopy() {
+  protected Consent typedCopy() {
         return copy();
       }
 

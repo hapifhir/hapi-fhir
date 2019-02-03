@@ -3576,6 +3576,11 @@ public class ConceptMap extends MetadataResource {
       public ConceptMap copy() {
         ConceptMap dst = new ConceptMap();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ConceptMap dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.version = version == null ? null : version.copy();
@@ -3589,18 +3594,18 @@ public class ConceptMap extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
         dst.source = source == null ? null : source.copy();
@@ -3609,11 +3614,10 @@ public class ConceptMap extends MetadataResource {
           dst.group = new ArrayList<ConceptMapGroupComponent>();
           for (ConceptMapGroupComponent i : group)
             dst.group.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ConceptMap typedCopy() {
+  protected ConceptMap typedCopy() {
         return copy();
       }
 

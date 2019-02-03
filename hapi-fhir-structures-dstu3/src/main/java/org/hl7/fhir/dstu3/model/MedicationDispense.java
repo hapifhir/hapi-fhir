@@ -2680,16 +2680,21 @@ public class MedicationDispense extends DomainResource {
       public MedicationDispense copy() {
         MedicationDispense dst = new MedicationDispense();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(MedicationDispense dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (partOf != null) {
           dst.partOf = new ArrayList<Reference>();
           for (Reference i : partOf)
             dst.partOf.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.category = category == null ? null : category.copy();
         dst.medication = medication == null ? null : medication.copy();
@@ -2699,17 +2704,17 @@ public class MedicationDispense extends DomainResource {
           dst.supportingInformation = new ArrayList<Reference>();
           for (Reference i : supportingInformation)
             dst.supportingInformation.add(i.copy());
-        };
+        }
         if (performer != null) {
           dst.performer = new ArrayList<MedicationDispensePerformerComponent>();
           for (MedicationDispensePerformerComponent i : performer)
             dst.performer.add(i.copy());
-        };
+        }
         if (authorizingPrescription != null) {
           dst.authorizingPrescription = new ArrayList<Reference>();
           for (Reference i : authorizingPrescription)
             dst.authorizingPrescription.add(i.copy());
-        };
+        }
         dst.type = type == null ? null : type.copy();
         dst.quantity = quantity == null ? null : quantity.copy();
         dst.daysSupply = daysSupply == null ? null : daysSupply.copy();
@@ -2720,34 +2725,33 @@ public class MedicationDispense extends DomainResource {
           dst.receiver = new ArrayList<Reference>();
           for (Reference i : receiver)
             dst.receiver.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (dosageInstruction != null) {
           dst.dosageInstruction = new ArrayList<Dosage>();
           for (Dosage i : dosageInstruction)
             dst.dosageInstruction.add(i.copy());
-        };
+        }
         dst.substitution = substitution == null ? null : substitution.copy();
         if (detectedIssue != null) {
           dst.detectedIssue = new ArrayList<Reference>();
           for (Reference i : detectedIssue)
             dst.detectedIssue.add(i.copy());
-        };
+        }
         dst.notDone = notDone == null ? null : notDone.copy();
         dst.notDoneReason = notDoneReason == null ? null : notDoneReason.copy();
         if (eventHistory != null) {
           dst.eventHistory = new ArrayList<Reference>();
           for (Reference i : eventHistory)
             dst.eventHistory.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected MedicationDispense typedCopy() {
+  protected MedicationDispense typedCopy() {
         return copy();
       }
 

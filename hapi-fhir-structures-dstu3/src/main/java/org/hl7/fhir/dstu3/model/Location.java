@@ -1674,11 +1674,16 @@ public class Location extends DomainResource {
       public Location copy() {
         Location dst = new Location();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Location dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.operationalStatus = operationalStatus == null ? null : operationalStatus.copy();
         dst.name = name == null ? null : name.copy();
@@ -1686,7 +1691,7 @@ public class Location extends DomainResource {
           dst.alias = new ArrayList<StringType>();
           for (StringType i : alias)
             dst.alias.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         dst.mode = mode == null ? null : mode.copy();
         dst.type = type == null ? null : type.copy();
@@ -1694,7 +1699,7 @@ public class Location extends DomainResource {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
-        };
+        }
         dst.address = address == null ? null : address.copy();
         dst.physicalType = physicalType == null ? null : physicalType.copy();
         dst.position = position == null ? null : position.copy();
@@ -1704,11 +1709,10 @@ public class Location extends DomainResource {
           dst.endpoint = new ArrayList<Reference>();
           for (Reference i : endpoint)
             dst.endpoint.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Location typedCopy() {
+  protected Location typedCopy() {
         return copy();
       }
 

@@ -989,22 +989,27 @@ public class Slot extends DomainResource {
       public Slot copy() {
         Slot dst = new Slot();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Slot dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.serviceCategory = serviceCategory == null ? null : serviceCategory.copy();
         if (serviceType != null) {
           dst.serviceType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : serviceType)
             dst.serviceType.add(i.copy());
-        };
+        }
         if (specialty != null) {
           dst.specialty = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : specialty)
             dst.specialty.add(i.copy());
-        };
+        }
         dst.appointmentType = appointmentType == null ? null : appointmentType.copy();
         dst.schedule = schedule == null ? null : schedule.copy();
         dst.status = status == null ? null : status.copy();
@@ -1012,10 +1017,9 @@ public class Slot extends DomainResource {
         dst.end = end == null ? null : end.copy();
         dst.overbooked = overbooked == null ? null : overbooked.copy();
         dst.comment = comment == null ? null : comment.copy();
-        return dst;
       }
 
-      protected Slot typedCopy() {
+  protected Slot typedCopy() {
         return copy();
       }
 

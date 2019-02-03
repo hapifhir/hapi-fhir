@@ -1186,28 +1186,33 @@ public class Person extends DomainResource {
       public Person copy() {
         Person dst = new Person();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Person dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (name != null) {
           dst.name = new ArrayList<HumanName>();
           for (HumanName i : name)
             dst.name.add(i.copy());
-        };
+        }
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
-        };
+        }
         dst.gender = gender == null ? null : gender.copy();
         dst.birthDate = birthDate == null ? null : birthDate.copy();
         if (address != null) {
           dst.address = new ArrayList<Address>();
           for (Address i : address)
             dst.address.add(i.copy());
-        };
+        }
         dst.photo = photo == null ? null : photo.copy();
         dst.managingOrganization = managingOrganization == null ? null : managingOrganization.copy();
         dst.active = active == null ? null : active.copy();
@@ -1215,11 +1220,10 @@ public class Person extends DomainResource {
           dst.link = new ArrayList<PersonLinkComponent>();
           for (PersonLinkComponent i : link)
             dst.link.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Person typedCopy() {
+  protected Person typedCopy() {
         return copy();
       }
 

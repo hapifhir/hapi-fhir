@@ -121,7 +121,11 @@ public class Money extends Quantity implements ICompositeType {
         return dst;
       }
 
-      protected Money typedCopy() {
+      public void copyValues(Money dst) {
+        super.copyValues(dst);
+      }
+
+  protected Money typedCopy() {
         return copy();
       }
 

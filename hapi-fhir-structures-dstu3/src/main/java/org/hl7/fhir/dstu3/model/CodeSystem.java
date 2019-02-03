@@ -4359,6 +4359,11 @@ public class CodeSystem extends MetadataResource {
       public CodeSystem copy() {
         CodeSystem dst = new CodeSystem();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(CodeSystem dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.version = version == null ? null : version.copy();
@@ -4372,18 +4377,18 @@ public class CodeSystem extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
         dst.caseSensitive = caseSensitive == null ? null : caseSensitive.copy();
@@ -4397,21 +4402,20 @@ public class CodeSystem extends MetadataResource {
           dst.filter = new ArrayList<CodeSystemFilterComponent>();
           for (CodeSystemFilterComponent i : filter)
             dst.filter.add(i.copy());
-        };
+        }
         if (property != null) {
           dst.property = new ArrayList<PropertyComponent>();
           for (PropertyComponent i : property)
             dst.property.add(i.copy());
-        };
+        }
         if (concept != null) {
           dst.concept = new ArrayList<ConceptDefinitionComponent>();
           for (ConceptDefinitionComponent i : concept)
             dst.concept.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected CodeSystem typedCopy() {
+  protected CodeSystem typedCopy() {
         return copy();
       }
 

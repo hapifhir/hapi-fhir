@@ -1463,6 +1463,11 @@ public class DetectedIssue extends DomainResource {
       public DetectedIssue copy() {
         DetectedIssue dst = new DetectedIssue();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(DetectedIssue dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.category = category == null ? null : category.copy();
@@ -1474,18 +1479,17 @@ public class DetectedIssue extends DomainResource {
           dst.implicated = new ArrayList<Reference>();
           for (Reference i : implicated)
             dst.implicated.add(i.copy());
-        };
+        }
         dst.detail = detail == null ? null : detail.copy();
         dst.reference = reference == null ? null : reference.copy();
         if (mitigation != null) {
           dst.mitigation = new ArrayList<DetectedIssueMitigationComponent>();
           for (DetectedIssueMitigationComponent i : mitigation)
             dst.mitigation.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected DetectedIssue typedCopy() {
+  protected DetectedIssue typedCopy() {
         return copy();
       }
 

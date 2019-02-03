@@ -2358,51 +2358,56 @@ public class CommunicationRequest extends DomainResource {
       public CommunicationRequest copy() {
         CommunicationRequest dst = new CommunicationRequest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(CommunicationRequest dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         if (replaces != null) {
           dst.replaces = new ArrayList<Reference>();
           for (Reference i : replaces)
             dst.replaces.add(i.copy());
-        };
+        }
         dst.groupIdentifier = groupIdentifier == null ? null : groupIdentifier.copy();
         dst.status = status == null ? null : status.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.priority = priority == null ? null : priority.copy();
         if (medium != null) {
           dst.medium = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : medium)
             dst.medium.add(i.copy());
-        };
+        }
         dst.subject = subject == null ? null : subject.copy();
         if (recipient != null) {
           dst.recipient = new ArrayList<Reference>();
           for (Reference i : recipient)
             dst.recipient.add(i.copy());
-        };
+        }
         if (topic != null) {
           dst.topic = new ArrayList<Reference>();
           for (Reference i : topic)
             dst.topic.add(i.copy());
-        };
+        }
         dst.context = context == null ? null : context.copy();
         if (payload != null) {
           dst.payload = new ArrayList<CommunicationRequestPayloadComponent>();
           for (CommunicationRequestPayloadComponent i : payload)
             dst.payload.add(i.copy());
-        };
+        }
         dst.occurrence = occurrence == null ? null : occurrence.copy();
         dst.authoredOn = authoredOn == null ? null : authoredOn.copy();
         dst.sender = sender == null ? null : sender.copy();
@@ -2411,21 +2416,20 @@ public class CommunicationRequest extends DomainResource {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
           for (Reference i : reasonReference)
             dst.reasonReference.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected CommunicationRequest typedCopy() {
+  protected CommunicationRequest typedCopy() {
         return copy();
       }
 

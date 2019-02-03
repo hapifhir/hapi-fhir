@@ -2646,11 +2646,16 @@ public class HealthcareService extends DomainResource {
       public HealthcareService copy() {
         HealthcareService dst = new HealthcareService();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(HealthcareService dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.active = active == null ? null : active.copy();
         dst.providedBy = providedBy == null ? null : providedBy.copy();
         dst.category = category == null ? null : category.copy();
@@ -2658,17 +2663,17 @@ public class HealthcareService extends DomainResource {
           dst.type = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : type)
             dst.type.add(i.copy());
-        };
+        }
         if (specialty != null) {
           dst.specialty = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : specialty)
             dst.specialty.add(i.copy());
-        };
+        }
         if (location != null) {
           dst.location = new ArrayList<Reference>();
           for (Reference i : location)
             dst.location.add(i.copy());
-        };
+        }
         dst.name = name == null ? null : name.copy();
         dst.comment = comment == null ? null : comment.copy();
         dst.extraDetails = extraDetails == null ? null : extraDetails.copy();
@@ -2677,55 +2682,54 @@ public class HealthcareService extends DomainResource {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
-        };
+        }
         if (coverageArea != null) {
           dst.coverageArea = new ArrayList<Reference>();
           for (Reference i : coverageArea)
             dst.coverageArea.add(i.copy());
-        };
+        }
         if (serviceProvisionCode != null) {
           dst.serviceProvisionCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : serviceProvisionCode)
             dst.serviceProvisionCode.add(i.copy());
-        };
+        }
         dst.eligibility = eligibility == null ? null : eligibility.copy();
         dst.eligibilityNote = eligibilityNote == null ? null : eligibilityNote.copy();
         if (programName != null) {
           dst.programName = new ArrayList<StringType>();
           for (StringType i : programName)
             dst.programName.add(i.copy());
-        };
+        }
         if (characteristic != null) {
           dst.characteristic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : characteristic)
             dst.characteristic.add(i.copy());
-        };
+        }
         if (referralMethod != null) {
           dst.referralMethod = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : referralMethod)
             dst.referralMethod.add(i.copy());
-        };
+        }
         dst.appointmentRequired = appointmentRequired == null ? null : appointmentRequired.copy();
         if (availableTime != null) {
           dst.availableTime = new ArrayList<HealthcareServiceAvailableTimeComponent>();
           for (HealthcareServiceAvailableTimeComponent i : availableTime)
             dst.availableTime.add(i.copy());
-        };
+        }
         if (notAvailable != null) {
           dst.notAvailable = new ArrayList<HealthcareServiceNotAvailableComponent>();
           for (HealthcareServiceNotAvailableComponent i : notAvailable)
             dst.notAvailable.add(i.copy());
-        };
+        }
         dst.availabilityExceptions = availabilityExceptions == null ? null : availabilityExceptions.copy();
         if (endpoint != null) {
           dst.endpoint = new ArrayList<Reference>();
           for (Reference i : endpoint)
             dst.endpoint.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected HealthcareService typedCopy() {
+  protected HealthcareService typedCopy() {
         return copy();
       }
 

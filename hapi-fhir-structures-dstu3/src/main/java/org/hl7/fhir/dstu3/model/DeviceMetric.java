@@ -1747,6 +1747,11 @@ public class DeviceMetric extends DomainResource {
       public DeviceMetric copy() {
         DeviceMetric dst = new DeviceMetric();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(DeviceMetric dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.type = type == null ? null : type.copy();
         dst.unit = unit == null ? null : unit.copy();
@@ -1760,11 +1765,10 @@ public class DeviceMetric extends DomainResource {
           dst.calibration = new ArrayList<DeviceMetricCalibrationComponent>();
           for (DeviceMetricCalibrationComponent i : calibration)
             dst.calibration.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected DeviceMetric typedCopy() {
+  protected DeviceMetric typedCopy() {
         return copy();
       }
 

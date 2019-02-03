@@ -264,16 +264,20 @@ public class CodeableConcept extends Type implements ICompositeType {
       public CodeableConcept copy() {
         CodeableConcept dst = new CodeableConcept();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(CodeableConcept dst) {
+        super.copyValues(dst);
         if (coding != null) {
           dst.coding = new ArrayList<Coding>();
           for (Coding i : coding)
             dst.coding.add(i.copy());
-        };
+        }
         dst.text = text == null ? null : text.copy();
-        return dst;
       }
 
-      protected CodeableConcept typedCopy() {
+  protected CodeableConcept typedCopy() {
         return copy();
       }
 

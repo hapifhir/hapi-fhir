@@ -458,7 +458,9 @@ public class MedicationAdministration extends DomainResource {
     @Block()
     public static class MedicationAdministrationDosageComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.The dosage instructions should reflect the dosage of the medication that was administered.
+         * Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.
+
+The dosage instructions should reflect the dosage of the medication that was administered.
          */
         @Child(name = "text", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Free text dosage instructions e.g. SIG", formalDefinition="Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.\r\rThe dosage instructions should reflect the dosage of the medication that was administered." )
@@ -512,7 +514,9 @@ public class MedicationAdministration extends DomainResource {
       }
 
         /**
-         * @return {@link #text} (Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.The dosage instructions should reflect the dosage of the medication that was administered.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+         * @return {@link #text} (Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.
+
+The dosage instructions should reflect the dosage of the medication that was administered.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
          */
         public StringType getTextElement() { 
           if (this.text == null)
@@ -532,7 +536,9 @@ public class MedicationAdministration extends DomainResource {
         }
 
         /**
-         * @param value {@link #text} (Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.The dosage instructions should reflect the dosage of the medication that was administered.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+         * @param value {@link #text} (Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.
+
+The dosage instructions should reflect the dosage of the medication that was administered.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
          */
         public MedicationAdministrationDosageComponent setTextElement(StringType value) { 
           this.text = value;
@@ -540,14 +546,18 @@ public class MedicationAdministration extends DomainResource {
         }
 
         /**
-         * @return Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.The dosage instructions should reflect the dosage of the medication that was administered.
+         * @return Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.
+
+The dosage instructions should reflect the dosage of the medication that was administered.
          */
         public String getText() { 
           return this.text == null ? null : this.text.getValue();
         }
 
         /**
-         * @param value Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.The dosage instructions should reflect the dosage of the medication that was administered.
+         * @param value Free text dosage can be used for cases where the dosage administered is too complex to code. When coded dosage is present, the free text dosage may still be present for display to humans.
+
+The dosage instructions should reflect the dosage of the medication that was administered.
          */
         public MedicationAdministrationDosageComponent setText(String value) { 
           if (Utilities.noString(value))
@@ -2490,21 +2500,26 @@ public class MedicationAdministration extends DomainResource {
       public MedicationAdministration copy() {
         MedicationAdministration dst = new MedicationAdministration();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(MedicationAdministration dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (definition != null) {
           dst.definition = new ArrayList<Reference>();
           for (Reference i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         if (partOf != null) {
           dst.partOf = new ArrayList<Reference>();
           for (Reference i : partOf)
             dst.partOf.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.category = category == null ? null : category.copy();
         dst.medication = medication == null ? null : medication.copy();
@@ -2514,50 +2529,49 @@ public class MedicationAdministration extends DomainResource {
           dst.supportingInformation = new ArrayList<Reference>();
           for (Reference i : supportingInformation)
             dst.supportingInformation.add(i.copy());
-        };
+        }
         dst.effective = effective == null ? null : effective.copy();
         if (performer != null) {
           dst.performer = new ArrayList<MedicationAdministrationPerformerComponent>();
           for (MedicationAdministrationPerformerComponent i : performer)
             dst.performer.add(i.copy());
-        };
+        }
         dst.notGiven = notGiven == null ? null : notGiven.copy();
         if (reasonNotGiven != null) {
           dst.reasonNotGiven = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonNotGiven)
             dst.reasonNotGiven.add(i.copy());
-        };
+        }
         if (reasonCode != null) {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
           for (Reference i : reasonReference)
             dst.reasonReference.add(i.copy());
-        };
+        }
         dst.prescription = prescription == null ? null : prescription.copy();
         if (device != null) {
           dst.device = new ArrayList<Reference>();
           for (Reference i : device)
             dst.device.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         dst.dosage = dosage == null ? null : dosage.copy();
         if (eventHistory != null) {
           dst.eventHistory = new ArrayList<Reference>();
           for (Reference i : eventHistory)
             dst.eventHistory.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected MedicationAdministration typedCopy() {
+  protected MedicationAdministration typedCopy() {
         return copy();
       }
 

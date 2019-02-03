@@ -569,20 +569,25 @@ public class Signature extends Type implements ICompositeType {
       public Signature copy() {
         Signature dst = new Signature();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Signature dst) {
+        super.copyValues(dst);
         if (type != null) {
           dst.type = new ArrayList<Coding>();
           for (Coding i : type)
             dst.type.add(i.copy());
-        };
+        }
+        ;
         dst.when = when == null ? null : when.copy();
         dst.who = who == null ? null : who.copy();
         dst.onBehalfOf = onBehalfOf == null ? null : onBehalfOf.copy();
         dst.contentType = contentType == null ? null : contentType.copy();
         dst.blob = blob == null ? null : blob.copy();
-        return dst;
       }
 
-      protected Signature typedCopy() {
+  protected Signature typedCopy() {
         return copy();
       }
 

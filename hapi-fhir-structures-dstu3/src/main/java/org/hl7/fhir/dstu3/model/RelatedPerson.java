@@ -864,11 +864,16 @@ public class RelatedPerson extends DomainResource {
       public RelatedPerson copy() {
         RelatedPerson dst = new RelatedPerson();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(RelatedPerson dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.active = active == null ? null : active.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.relationship = relationship == null ? null : relationship.copy();
@@ -876,29 +881,28 @@ public class RelatedPerson extends DomainResource {
           dst.name = new ArrayList<HumanName>();
           for (HumanName i : name)
             dst.name.add(i.copy());
-        };
+        }
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
-        };
+        }
         dst.gender = gender == null ? null : gender.copy();
         dst.birthDate = birthDate == null ? null : birthDate.copy();
         if (address != null) {
           dst.address = new ArrayList<Address>();
           for (Address i : address)
             dst.address.add(i.copy());
-        };
+        }
         if (photo != null) {
           dst.photo = new ArrayList<Attachment>();
           for (Attachment i : photo)
             dst.photo.add(i.copy());
-        };
+        }
         dst.period = period == null ? null : period.copy();
-        return dst;
       }
 
-      protected RelatedPerson typedCopy() {
+  protected RelatedPerson typedCopy() {
         return copy();
       }
 

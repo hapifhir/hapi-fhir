@@ -344,13 +344,17 @@ public class Annotation extends Type implements ICompositeType {
       public Annotation copy() {
         Annotation dst = new Annotation();
         copyValues(dst);
-        dst.author = author == null ? null : author.copy();
-        dst.time = time == null ? null : time.copy();
-        dst.text = text == null ? null : text.copy();
         return dst;
       }
 
-      protected Annotation typedCopy() {
+      public void copyValues(Annotation dst) {
+        super.copyValues(dst);
+        dst.author = author == null ? null : author.copy();
+        dst.time = time == null ? null : time.copy();
+        dst.text = text == null ? null : text.copy();
+      }
+
+  protected Annotation typedCopy() {
         return copy();
       }
 

@@ -44,7 +44,9 @@ import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
- * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
+ * A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now, or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient's memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains 
+
+The primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient's memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.
  */
 @ResourceDef(name="MedicationStatement", profile="http://hl7.org/fhir/StructureDefinition/MedicationStatement")
 public class MedicationStatement extends DomainResource {
@@ -1740,21 +1742,26 @@ public class MedicationStatement extends DomainResource {
       public MedicationStatement copy() {
         MedicationStatement dst = new MedicationStatement();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(MedicationStatement dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         if (partOf != null) {
           dst.partOf = new ArrayList<Reference>();
           for (Reference i : partOf)
             dst.partOf.add(i.copy());
-        };
+        }
         dst.context = context == null ? null : context.copy();
         dst.status = status == null ? null : status.copy();
         dst.category = category == null ? null : category.copy();
@@ -1767,37 +1774,36 @@ public class MedicationStatement extends DomainResource {
           dst.derivedFrom = new ArrayList<Reference>();
           for (Reference i : derivedFrom)
             dst.derivedFrom.add(i.copy());
-        };
+        }
         dst.taken = taken == null ? null : taken.copy();
         if (reasonNotTaken != null) {
           dst.reasonNotTaken = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonNotTaken)
             dst.reasonNotTaken.add(i.copy());
-        };
+        }
         if (reasonCode != null) {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
           for (Reference i : reasonReference)
             dst.reasonReference.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (dosage != null) {
           dst.dosage = new ArrayList<Dosage>();
           for (Dosage i : dosage)
             dst.dosage.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected MedicationStatement typedCopy() {
+  protected MedicationStatement typedCopy() {
         return copy();
       }
 

@@ -1533,11 +1533,17 @@ This period may be different to the coveragePeriod which is the duration of time
       public Account copy() {
         Account dst = new Account();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Account dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
+        ;
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
         dst.name = name == null ? null : name.copy();
@@ -1549,18 +1555,18 @@ This period may be different to the coveragePeriod which is the duration of time
           dst.coverage = new ArrayList<CoverageComponent>();
           for (CoverageComponent i : coverage)
             dst.coverage.add(i.copy());
-        };
+        }
+        ;
         dst.owner = owner == null ? null : owner.copy();
         dst.description = description == null ? null : description.copy();
         if (guarantor != null) {
           dst.guarantor = new ArrayList<GuarantorComponent>();
           for (GuarantorComponent i : guarantor)
             dst.guarantor.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Account typedCopy() {
+  protected Account typedCopy() {
         return copy();
       }
 

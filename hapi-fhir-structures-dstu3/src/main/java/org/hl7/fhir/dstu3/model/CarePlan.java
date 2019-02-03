@@ -3963,38 +3963,43 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public CarePlan copy() {
         CarePlan dst = new CarePlan();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(CarePlan dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (definition != null) {
           dst.definition = new ArrayList<Reference>();
           for (Reference i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         if (replaces != null) {
           dst.replaces = new ArrayList<Reference>();
           for (Reference i : replaces)
             dst.replaces.add(i.copy());
-        };
+        }
         if (partOf != null) {
           dst.partOf = new ArrayList<Reference>();
           for (Reference i : partOf)
             dst.partOf.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.intent = intent == null ? null : intent.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.title = title == null ? null : title.copy();
         dst.description = description == null ? null : description.copy();
         dst.subject = subject == null ? null : subject.copy();
@@ -4004,41 +4009,40 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           dst.author = new ArrayList<Reference>();
           for (Reference i : author)
             dst.author.add(i.copy());
-        };
+        }
         if (careTeam != null) {
           dst.careTeam = new ArrayList<Reference>();
           for (Reference i : careTeam)
             dst.careTeam.add(i.copy());
-        };
+        }
         if (addresses != null) {
           dst.addresses = new ArrayList<Reference>();
           for (Reference i : addresses)
             dst.addresses.add(i.copy());
-        };
+        }
         if (supportingInfo != null) {
           dst.supportingInfo = new ArrayList<Reference>();
           for (Reference i : supportingInfo)
             dst.supportingInfo.add(i.copy());
-        };
+        }
         if (goal != null) {
           dst.goal = new ArrayList<Reference>();
           for (Reference i : goal)
             dst.goal.add(i.copy());
-        };
+        }
         if (activity != null) {
           dst.activity = new ArrayList<CarePlanActivityComponent>();
           for (CarePlanActivityComponent i : activity)
             dst.activity.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected CarePlan typedCopy() {
+  protected CarePlan typedCopy() {
         return copy();
       }
 

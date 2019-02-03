@@ -2151,11 +2151,16 @@ public class ClinicalImpression extends DomainResource {
       public ClinicalImpression copy() {
         ClinicalImpression dst = new ClinicalImpression();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ClinicalImpression dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.code = code == null ? null : code.copy();
         dst.description = description == null ? null : description.copy();
@@ -2169,47 +2174,46 @@ public class ClinicalImpression extends DomainResource {
           dst.problem = new ArrayList<Reference>();
           for (Reference i : problem)
             dst.problem.add(i.copy());
-        };
+        }
         if (investigation != null) {
           dst.investigation = new ArrayList<ClinicalImpressionInvestigationComponent>();
           for (ClinicalImpressionInvestigationComponent i : investigation)
             dst.investigation.add(i.copy());
-        };
+        }
         if (protocol != null) {
           dst.protocol = new ArrayList<UriType>();
           for (UriType i : protocol)
             dst.protocol.add(i.copy());
-        };
+        }
         dst.summary = summary == null ? null : summary.copy();
         if (finding != null) {
           dst.finding = new ArrayList<ClinicalImpressionFindingComponent>();
           for (ClinicalImpressionFindingComponent i : finding)
             dst.finding.add(i.copy());
-        };
+        }
         if (prognosisCodeableConcept != null) {
           dst.prognosisCodeableConcept = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : prognosisCodeableConcept)
             dst.prognosisCodeableConcept.add(i.copy());
-        };
+        }
         if (prognosisReference != null) {
           dst.prognosisReference = new ArrayList<Reference>();
           for (Reference i : prognosisReference)
             dst.prognosisReference.add(i.copy());
-        };
+        }
         if (action != null) {
           dst.action = new ArrayList<Reference>();
           for (Reference i : action)
             dst.action.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ClinicalImpression typedCopy() {
+  protected ClinicalImpression typedCopy() {
         return copy();
       }
 

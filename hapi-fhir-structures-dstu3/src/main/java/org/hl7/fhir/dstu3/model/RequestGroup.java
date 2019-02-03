@@ -4795,26 +4795,31 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public RequestGroup copy() {
         RequestGroup dst = new RequestGroup();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(RequestGroup dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (definition != null) {
           dst.definition = new ArrayList<Reference>();
           for (Reference i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         if (replaces != null) {
           dst.replaces = new ArrayList<Reference>();
           for (Reference i : replaces)
             dst.replaces.add(i.copy());
-        };
+        }
         dst.groupIdentifier = groupIdentifier == null ? null : groupIdentifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.intent = intent == null ? null : intent.copy();
@@ -4828,16 +4833,15 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (action != null) {
           dst.action = new ArrayList<RequestGroupActionComponent>();
           for (RequestGroupActionComponent i : action)
             dst.action.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected RequestGroup typedCopy() {
+  protected RequestGroup typedCopy() {
         return copy();
       }
 

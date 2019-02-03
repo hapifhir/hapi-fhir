@@ -2725,22 +2725,27 @@ public class Patient extends DomainResource {
       public Patient copy() {
         Patient dst = new Patient();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Patient dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.active = active == null ? null : active.copy();
         if (name != null) {
           dst.name = new ArrayList<HumanName>();
           for (HumanName i : name)
             dst.name.add(i.copy());
-        };
+        }
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
-        };
+        }
         dst.gender = gender == null ? null : gender.copy();
         dst.birthDate = birthDate == null ? null : birthDate.copy();
         dst.deceased = deceased == null ? null : deceased.copy();
@@ -2748,40 +2753,39 @@ public class Patient extends DomainResource {
           dst.address = new ArrayList<Address>();
           for (Address i : address)
             dst.address.add(i.copy());
-        };
+        }
         dst.maritalStatus = maritalStatus == null ? null : maritalStatus.copy();
         dst.multipleBirth = multipleBirth == null ? null : multipleBirth.copy();
         if (photo != null) {
           dst.photo = new ArrayList<Attachment>();
           for (Attachment i : photo)
             dst.photo.add(i.copy());
-        };
+        }
         if (contact != null) {
           dst.contact = new ArrayList<ContactComponent>();
           for (ContactComponent i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.animal = animal == null ? null : animal.copy();
         if (communication != null) {
           dst.communication = new ArrayList<PatientCommunicationComponent>();
           for (PatientCommunicationComponent i : communication)
             dst.communication.add(i.copy());
-        };
+        }
         if (generalPractitioner != null) {
           dst.generalPractitioner = new ArrayList<Reference>();
           for (Reference i : generalPractitioner)
             dst.generalPractitioner.add(i.copy());
-        };
+        }
         dst.managingOrganization = managingOrganization == null ? null : managingOrganization.copy();
         if (link != null) {
           dst.link = new ArrayList<PatientLinkComponent>();
           for (PatientLinkComponent i : link)
             dst.link.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Patient typedCopy() {
+  protected Patient typedCopy() {
         return copy();
       }
 

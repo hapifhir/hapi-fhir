@@ -2597,6 +2597,11 @@ public class SearchParameter extends MetadataResource {
       public SearchParameter copy() {
         SearchParameter dst = new SearchParameter();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(SearchParameter dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
@@ -2608,24 +2613,24 @@ public class SearchParameter extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.code = code == null ? null : code.copy();
         if (base != null) {
           dst.base = new ArrayList<CodeType>();
           for (CodeType i : base)
             dst.base.add(i.copy());
-        };
+        }
         dst.type = type == null ? null : type.copy();
         dst.derivedFrom = derivedFrom == null ? null : derivedFrom.copy();
         dst.description = description == null ? null : description.copy();
@@ -2636,31 +2641,30 @@ public class SearchParameter extends MetadataResource {
           dst.target = new ArrayList<CodeType>();
           for (CodeType i : target)
             dst.target.add(i.copy());
-        };
+        }
         if (comparator != null) {
           dst.comparator = new ArrayList<Enumeration<SearchComparator>>();
           for (Enumeration<SearchComparator> i : comparator)
             dst.comparator.add(i.copy());
-        };
+        }
         if (modifier != null) {
           dst.modifier = new ArrayList<Enumeration<SearchModifierCode>>();
           for (Enumeration<SearchModifierCode> i : modifier)
             dst.modifier.add(i.copy());
-        };
+        }
         if (chain != null) {
           dst.chain = new ArrayList<StringType>();
           for (StringType i : chain)
             dst.chain.add(i.copy());
-        };
+        }
         if (component != null) {
           dst.component = new ArrayList<SearchParameterComponentComponent>();
           for (SearchParameterComponentComponent i : component)
             dst.component.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected SearchParameter typedCopy() {
+  protected SearchParameter typedCopy() {
         return copy();
       }
 

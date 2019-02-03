@@ -813,11 +813,16 @@ public class AppointmentResponse extends DomainResource {
       public AppointmentResponse copy() {
         AppointmentResponse dst = new AppointmentResponse();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(AppointmentResponse dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.appointment = appointment == null ? null : appointment.copy();
         dst.start = start == null ? null : start.copy();
         dst.end = end == null ? null : end.copy();
@@ -825,14 +830,13 @@ public class AppointmentResponse extends DomainResource {
           dst.participantType = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : participantType)
             dst.participantType.add(i.copy());
-        };
+        }
         dst.actor = actor == null ? null : actor.copy();
         dst.participantStatus = participantStatus == null ? null : participantStatus.copy();
         dst.comment = comment == null ? null : comment.copy();
-        return dst;
       }
 
-      protected AppointmentResponse typedCopy() {
+  protected AppointmentResponse typedCopy() {
         return copy();
       }
 

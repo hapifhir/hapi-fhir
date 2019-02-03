@@ -1367,11 +1367,16 @@ public class ProcessResponse extends DomainResource {
       public ProcessResponse copy() {
         ProcessResponse dst = new ProcessResponse();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ProcessResponse dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.created = created == null ? null : created.copy();
         dst.organization = organization == null ? null : organization.copy();
@@ -1385,21 +1390,21 @@ public class ProcessResponse extends DomainResource {
           dst.processNote = new ArrayList<ProcessResponseProcessNoteComponent>();
           for (ProcessResponseProcessNoteComponent i : processNote)
             dst.processNote.add(i.copy());
-        };
+        }
         if (error != null) {
           dst.error = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : error)
             dst.error.add(i.copy());
-        };
+        }
         if (communicationRequest != null) {
           dst.communicationRequest = new ArrayList<Reference>();
           for (Reference i : communicationRequest)
             dst.communicationRequest.add(i.copy());
-        };
-        return dst;
+        }
+        ;
       }
 
-      protected ProcessResponse typedCopy() {
+  protected ProcessResponse typedCopy() {
         return copy();
       }
 

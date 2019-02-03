@@ -2733,26 +2733,31 @@ public class Procedure extends DomainResource {
       public Procedure copy() {
         Procedure dst = new Procedure();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Procedure dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (definition != null) {
           dst.definition = new ArrayList<Reference>();
           for (Reference i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         if (partOf != null) {
           dst.partOf = new ArrayList<Reference>();
           for (Reference i : partOf)
             dst.partOf.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.notDone = notDone == null ? null : notDone.copy();
         dst.notDoneReason = notDoneReason == null ? null : notDoneReason.copy();
@@ -2765,68 +2770,67 @@ public class Procedure extends DomainResource {
           dst.performer = new ArrayList<ProcedurePerformerComponent>();
           for (ProcedurePerformerComponent i : performer)
             dst.performer.add(i.copy());
-        };
+        }
         dst.location = location == null ? null : location.copy();
         if (reasonCode != null) {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
           for (Reference i : reasonReference)
             dst.reasonReference.add(i.copy());
-        };
+        }
         if (bodySite != null) {
           dst.bodySite = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : bodySite)
             dst.bodySite.add(i.copy());
-        };
+        }
         dst.outcome = outcome == null ? null : outcome.copy();
         if (report != null) {
           dst.report = new ArrayList<Reference>();
           for (Reference i : report)
             dst.report.add(i.copy());
-        };
+        }
         if (complication != null) {
           dst.complication = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : complication)
             dst.complication.add(i.copy());
-        };
+        }
         if (complicationDetail != null) {
           dst.complicationDetail = new ArrayList<Reference>();
           for (Reference i : complicationDetail)
             dst.complicationDetail.add(i.copy());
-        };
+        }
         if (followUp != null) {
           dst.followUp = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : followUp)
             dst.followUp.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (focalDevice != null) {
           dst.focalDevice = new ArrayList<ProcedureFocalDeviceComponent>();
           for (ProcedureFocalDeviceComponent i : focalDevice)
             dst.focalDevice.add(i.copy());
-        };
+        }
         if (usedReference != null) {
           dst.usedReference = new ArrayList<Reference>();
           for (Reference i : usedReference)
             dst.usedReference.add(i.copy());
-        };
+        }
         if (usedCode != null) {
           dst.usedCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : usedCode)
             dst.usedCode.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Procedure typedCopy() {
+  protected Procedure typedCopy() {
         return copy();
       }
 

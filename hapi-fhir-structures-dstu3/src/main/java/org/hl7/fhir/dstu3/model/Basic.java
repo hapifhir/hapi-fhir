@@ -448,19 +448,23 @@ public class Basic extends DomainResource {
       public Basic copy() {
         Basic dst = new Basic();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Basic dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.created = created == null ? null : created.copy();
         dst.author = author == null ? null : author.copy();
-        return dst;
       }
 
-      protected Basic typedCopy() {
+  protected Basic typedCopy() {
         return copy();
       }
 

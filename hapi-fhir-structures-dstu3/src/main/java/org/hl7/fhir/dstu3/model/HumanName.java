@@ -858,6 +858,11 @@ public class HumanName extends Type implements ICompositeType {
       public HumanName copy() {
         HumanName dst = new HumanName();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(HumanName dst) {
+        super.copyValues(dst);
         dst.use = use == null ? null : use.copy();
         dst.text = text == null ? null : text.copy();
         dst.family = family == null ? null : family.copy();
@@ -865,22 +870,21 @@ public class HumanName extends Type implements ICompositeType {
           dst.given = new ArrayList<StringType>();
           for (StringType i : given)
             dst.given.add(i.copy());
-        };
+        }
         if (prefix != null) {
           dst.prefix = new ArrayList<StringType>();
           for (StringType i : prefix)
             dst.prefix.add(i.copy());
-        };
+        }
         if (suffix != null) {
           dst.suffix = new ArrayList<StringType>();
           for (StringType i : suffix)
             dst.suffix.add(i.copy());
-        };
+        }
         dst.period = period == null ? null : period.copy();
-        return dst;
       }
 
-      protected HumanName typedCopy() {
+  protected HumanName typedCopy() {
         return copy();
       }
 

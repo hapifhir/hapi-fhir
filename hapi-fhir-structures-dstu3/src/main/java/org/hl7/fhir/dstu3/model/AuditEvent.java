@@ -3578,12 +3578,17 @@ public class AuditEvent extends DomainResource {
       public AuditEvent copy() {
         AuditEvent dst = new AuditEvent();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(AuditEvent dst) {
+        super.copyValues(dst);
         dst.type = type == null ? null : type.copy();
         if (subtype != null) {
           dst.subtype = new ArrayList<Coding>();
           for (Coding i : subtype)
             dst.subtype.add(i.copy());
-        };
+        }
         dst.action = action == null ? null : action.copy();
         dst.recorded = recorded == null ? null : recorded.copy();
         dst.outcome = outcome == null ? null : outcome.copy();
@@ -3592,22 +3597,21 @@ public class AuditEvent extends DomainResource {
           dst.purposeOfEvent = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : purposeOfEvent)
             dst.purposeOfEvent.add(i.copy());
-        };
+        }
         if (agent != null) {
           dst.agent = new ArrayList<AuditEventAgentComponent>();
           for (AuditEventAgentComponent i : agent)
             dst.agent.add(i.copy());
-        };
+        }
         dst.source = source == null ? null : source.copy();
         if (entity != null) {
           dst.entity = new ArrayList<AuditEventEntityComponent>();
           for (AuditEventEntityComponent i : entity)
             dst.entity.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected AuditEvent typedCopy() {
+  protected AuditEvent typedCopy() {
         return copy();
       }
 

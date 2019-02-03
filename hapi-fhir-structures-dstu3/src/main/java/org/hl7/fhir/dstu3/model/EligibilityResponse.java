@@ -2581,11 +2581,16 @@ public class EligibilityResponse extends DomainResource {
       public EligibilityResponse copy() {
         EligibilityResponse dst = new EligibilityResponse();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(EligibilityResponse dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.created = created == null ? null : created.copy();
         dst.requestProvider = requestProvider == null ? null : requestProvider.copy();
@@ -2599,17 +2604,16 @@ public class EligibilityResponse extends DomainResource {
           dst.insurance = new ArrayList<InsuranceComponent>();
           for (InsuranceComponent i : insurance)
             dst.insurance.add(i.copy());
-        };
+        }
         dst.form = form == null ? null : form.copy();
         if (error != null) {
           dst.error = new ArrayList<ErrorsComponent>();
           for (ErrorsComponent i : error)
             dst.error.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected EligibilityResponse typedCopy() {
+  protected EligibilityResponse typedCopy() {
         return copy();
       }
 

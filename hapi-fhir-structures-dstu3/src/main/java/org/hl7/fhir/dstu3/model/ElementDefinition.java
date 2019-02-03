@@ -6878,19 +6878,24 @@ public class ElementDefinition extends Type implements ICompositeType {
       public ElementDefinition copy() {
         ElementDefinition dst = new ElementDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ElementDefinition dst) {
+        super.copyValues(dst);
         dst.path = path == null ? null : path.copy();
         if (representation != null) {
           dst.representation = new ArrayList<Enumeration<PropertyRepresentation>>();
           for (Enumeration<PropertyRepresentation> i : representation)
             dst.representation.add(i.copy());
-        };
+        }
         dst.sliceName = sliceName == null ? null : sliceName.copy();
         dst.label = label == null ? null : label.copy();
         if (code != null) {
           dst.code = new ArrayList<Coding>();
           for (Coding i : code)
             dst.code.add(i.copy());
-        };
+        }
         dst.slicing = slicing == null ? null : slicing.copy();
         dst.short_ = short_ == null ? null : short_.copy();
         dst.definition = definition == null ? null : definition.copy();
@@ -6900,7 +6905,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           dst.alias = new ArrayList<StringType>();
           for (StringType i : alias)
             dst.alias.add(i.copy());
-        };
+        }
         dst.min = min == null ? null : min.copy();
         dst.max = max == null ? null : max.copy();
         dst.base = base == null ? null : base.copy();
@@ -6909,7 +6914,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           dst.type = new ArrayList<TypeRefComponent>();
           for (TypeRefComponent i : type)
             dst.type.add(i.copy());
-        };
+        }
         dst.defaultValue = defaultValue == null ? null : defaultValue.copy();
         dst.meaningWhenMissing = meaningWhenMissing == null ? null : meaningWhenMissing.copy();
         dst.orderMeaning = orderMeaning == null ? null : orderMeaning.copy();
@@ -6919,7 +6924,7 @@ public class ElementDefinition extends Type implements ICompositeType {
           dst.example = new ArrayList<ElementDefinitionExampleComponent>();
           for (ElementDefinitionExampleComponent i : example)
             dst.example.add(i.copy());
-        };
+        }
         dst.minValue = minValue == null ? null : minValue.copy();
         dst.maxValue = maxValue == null ? null : maxValue.copy();
         dst.maxLength = maxLength == null ? null : maxLength.copy();
@@ -6927,12 +6932,12 @@ public class ElementDefinition extends Type implements ICompositeType {
           dst.condition = new ArrayList<IdType>();
           for (IdType i : condition)
             dst.condition.add(i.copy());
-        };
+        }
         if (constraint != null) {
           dst.constraint = new ArrayList<ElementDefinitionConstraintComponent>();
           for (ElementDefinitionConstraintComponent i : constraint)
             dst.constraint.add(i.copy());
-        };
+        }
         dst.mustSupport = mustSupport == null ? null : mustSupport.copy();
         dst.isModifier = isModifier == null ? null : isModifier.copy();
         dst.isSummary = isSummary == null ? null : isSummary.copy();
@@ -6941,11 +6946,10 @@ public class ElementDefinition extends Type implements ICompositeType {
           dst.mapping = new ArrayList<ElementDefinitionMappingComponent>();
           for (ElementDefinitionMappingComponent i : mapping)
             dst.mapping.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ElementDefinition typedCopy() {
+  protected ElementDefinition typedCopy() {
         return copy();
       }
 

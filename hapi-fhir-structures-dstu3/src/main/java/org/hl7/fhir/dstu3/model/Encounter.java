@@ -260,7 +260,9 @@ public class Encounter extends DomainResource {
          */
         PLANNED, 
         /**
-         * The patient is currently at this location, or was between the period specified.A system may update these records when the patient leaves the location to either reserved, or completed
+         * The patient is currently at this location, or was between the period specified.
+
+A system may update these records when the patient leaves the location to either reserved, or completed
          */
         ACTIVE, 
         /**
@@ -268,7 +270,9 @@ public class Encounter extends DomainResource {
          */
         RESERVED, 
         /**
-         * The patient was at this location during the period specified.Not to be used when the patient is currently at the location
+         * The patient was at this location during the period specified.
+
+Not to be used when the patient is currently at the location
          */
         COMPLETED, 
         /**
@@ -3929,45 +3933,50 @@ This would be used for a case where an admission starts of as an emergency encou
       public Encounter copy() {
         Encounter dst = new Encounter();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Encounter dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         if (statusHistory != null) {
           dst.statusHistory = new ArrayList<StatusHistoryComponent>();
           for (StatusHistoryComponent i : statusHistory)
             dst.statusHistory.add(i.copy());
-        };
+        }
         dst.class_ = class_ == null ? null : class_.copy();
         if (classHistory != null) {
           dst.classHistory = new ArrayList<ClassHistoryComponent>();
           for (ClassHistoryComponent i : classHistory)
             dst.classHistory.add(i.copy());
-        };
+        }
         if (type != null) {
           dst.type = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : type)
             dst.type.add(i.copy());
-        };
+        }
         dst.priority = priority == null ? null : priority.copy();
         dst.subject = subject == null ? null : subject.copy();
         if (episodeOfCare != null) {
           dst.episodeOfCare = new ArrayList<Reference>();
           for (Reference i : episodeOfCare)
             dst.episodeOfCare.add(i.copy());
-        };
+        }
         if (incomingReferral != null) {
           dst.incomingReferral = new ArrayList<Reference>();
           for (Reference i : incomingReferral)
             dst.incomingReferral.add(i.copy());
-        };
+        }
         if (participant != null) {
           dst.participant = new ArrayList<EncounterParticipantComponent>();
           for (EncounterParticipantComponent i : participant)
             dst.participant.add(i.copy());
-        };
+        }
         dst.appointment = appointment == null ? null : appointment.copy();
         dst.period = period == null ? null : period.copy();
         dst.length = length == null ? null : length.copy();
@@ -3975,29 +3984,28 @@ This would be used for a case where an admission starts of as an emergency encou
           dst.reason = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reason)
             dst.reason.add(i.copy());
-        };
+        }
         if (diagnosis != null) {
           dst.diagnosis = new ArrayList<DiagnosisComponent>();
           for (DiagnosisComponent i : diagnosis)
             dst.diagnosis.add(i.copy());
-        };
+        }
         if (account != null) {
           dst.account = new ArrayList<Reference>();
           for (Reference i : account)
             dst.account.add(i.copy());
-        };
+        }
         dst.hospitalization = hospitalization == null ? null : hospitalization.copy();
         if (location != null) {
           dst.location = new ArrayList<EncounterLocationComponent>();
           for (EncounterLocationComponent i : location)
             dst.location.add(i.copy());
-        };
+        }
         dst.serviceProvider = serviceProvider == null ? null : serviceProvider.copy();
         dst.partOf = partOf == null ? null : partOf.copy();
-        return dst;
       }
 
-      protected Encounter typedCopy() {
+  protected Encounter typedCopy() {
         return copy();
       }
 

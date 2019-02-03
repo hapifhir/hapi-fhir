@@ -795,6 +795,11 @@ public class ResearchSubject extends DomainResource {
       public ResearchSubject copy() {
         ResearchSubject dst = new ResearchSubject();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ResearchSubject dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.period = period == null ? null : period.copy();
@@ -803,10 +808,9 @@ public class ResearchSubject extends DomainResource {
         dst.assignedArm = assignedArm == null ? null : assignedArm.copy();
         dst.actualArm = actualArm == null ? null : actualArm.copy();
         dst.consent = consent == null ? null : consent.copy();
-        return dst;
       }
 
-      protected ResearchSubject typedCopy() {
+  protected ResearchSubject typedCopy() {
         return copy();
       }
 

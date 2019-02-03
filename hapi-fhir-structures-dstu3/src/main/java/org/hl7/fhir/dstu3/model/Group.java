@@ -1573,11 +1573,16 @@ public class Group extends DomainResource {
       public Group copy() {
         Group dst = new Group();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Group dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.active = active == null ? null : active.copy();
         dst.type = type == null ? null : type.copy();
         dst.actual = actual == null ? null : actual.copy();
@@ -1588,16 +1593,15 @@ public class Group extends DomainResource {
           dst.characteristic = new ArrayList<GroupCharacteristicComponent>();
           for (GroupCharacteristicComponent i : characteristic)
             dst.characteristic.add(i.copy());
-        };
+        }
         if (member != null) {
           dst.member = new ArrayList<GroupMemberComponent>();
           for (GroupMemberComponent i : member)
             dst.member.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Group typedCopy() {
+  protected Group typedCopy() {
         return copy();
       }
 

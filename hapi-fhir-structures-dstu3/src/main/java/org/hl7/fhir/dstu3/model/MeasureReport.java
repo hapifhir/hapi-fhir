@@ -2655,6 +2655,11 @@ public class MeasureReport extends DomainResource {
       public MeasureReport copy() {
         MeasureReport dst = new MeasureReport();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(MeasureReport dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
@@ -2667,12 +2672,11 @@ public class MeasureReport extends DomainResource {
           dst.group = new ArrayList<MeasureReportGroupComponent>();
           for (MeasureReportGroupComponent i : group)
             dst.group.add(i.copy());
-        };
+        }
         dst.evaluatedResources = evaluatedResources == null ? null : evaluatedResources.copy();
-        return dst;
       }
 
-      protected MeasureReport typedCopy() {
+  protected MeasureReport typedCopy() {
         return copy();
       }
 

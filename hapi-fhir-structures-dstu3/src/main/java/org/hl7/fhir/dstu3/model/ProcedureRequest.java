@@ -2778,26 +2778,31 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public ProcedureRequest copy() {
         ProcedureRequest dst = new ProcedureRequest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ProcedureRequest dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (definition != null) {
           dst.definition = new ArrayList<Reference>();
           for (Reference i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         if (replaces != null) {
           dst.replaces = new ArrayList<Reference>();
           for (Reference i : replaces)
             dst.replaces.add(i.copy());
-        };
+        }
         dst.requisition = requisition == null ? null : requisition.copy();
         dst.status = status == null ? null : status.copy();
         dst.intent = intent == null ? null : intent.copy();
@@ -2807,7 +2812,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
@@ -2821,41 +2826,40 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
           for (Reference i : reasonReference)
             dst.reasonReference.add(i.copy());
-        };
+        }
         if (supportingInfo != null) {
           dst.supportingInfo = new ArrayList<Reference>();
           for (Reference i : supportingInfo)
             dst.supportingInfo.add(i.copy());
-        };
+        }
         if (specimen != null) {
           dst.specimen = new ArrayList<Reference>();
           for (Reference i : specimen)
             dst.specimen.add(i.copy());
-        };
+        }
         if (bodySite != null) {
           dst.bodySite = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : bodySite)
             dst.bodySite.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (relevantHistory != null) {
           dst.relevantHistory = new ArrayList<Reference>();
           for (Reference i : relevantHistory)
             dst.relevantHistory.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ProcedureRequest typedCopy() {
+  protected ProcedureRequest typedCopy() {
         return copy();
       }
 

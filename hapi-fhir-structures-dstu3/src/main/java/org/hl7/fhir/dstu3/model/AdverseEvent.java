@@ -1960,6 +1960,11 @@ public class AdverseEvent extends DomainResource {
       public AdverseEvent copy() {
         AdverseEvent dst = new AdverseEvent();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(AdverseEvent dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.category = category == null ? null : category.copy();
         dst.type = type == null ? null : type.copy();
@@ -1969,7 +1974,7 @@ public class AdverseEvent extends DomainResource {
           dst.reaction = new ArrayList<Reference>();
           for (Reference i : reaction)
             dst.reaction.add(i.copy());
-        };
+        }
         dst.location = location == null ? null : location.copy();
         dst.seriousness = seriousness == null ? null : seriousness.copy();
         dst.outcome = outcome == null ? null : outcome.copy();
@@ -1980,26 +1985,25 @@ public class AdverseEvent extends DomainResource {
           dst.suspectEntity = new ArrayList<AdverseEventSuspectEntityComponent>();
           for (AdverseEventSuspectEntityComponent i : suspectEntity)
             dst.suspectEntity.add(i.copy());
-        };
+        }
         if (subjectMedicalHistory != null) {
           dst.subjectMedicalHistory = new ArrayList<Reference>();
           for (Reference i : subjectMedicalHistory)
             dst.subjectMedicalHistory.add(i.copy());
-        };
+        }
         if (referenceDocument != null) {
           dst.referenceDocument = new ArrayList<Reference>();
           for (Reference i : referenceDocument)
             dst.referenceDocument.add(i.copy());
-        };
+        }
         if (study != null) {
           dst.study = new ArrayList<Reference>();
           for (Reference i : study)
             dst.study.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected AdverseEvent typedCopy() {
+  protected AdverseEvent typedCopy() {
         return copy();
       }
 
@@ -2240,7 +2244,8 @@ public class AdverseEvent extends DomainResource {
  /**
    * Search parameter: <b>category</b>
    * <p>
-   * Description: <b>AE | PAE An adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not</b><br>
+   * Description: <b>AE | PAE 
+An adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not</b><br>
    * Type: <b>token</b><br>
    * Path: <b>AdverseEvent.category</b><br>
    * </p>
@@ -2250,7 +2255,8 @@ public class AdverseEvent extends DomainResource {
  /**
    * <b>Fluent Client</b> search parameter constant for <b>category</b>
    * <p>
-   * Description: <b>AE | PAE An adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not</b><br>
+   * Description: <b>AE | PAE 
+An adverse event is an event that caused harm to a patient,  an adverse reaction is a something that is a subject-specific event that is a result of an exposure to a medication, food, device or environmental substance, a potential adverse event is something that occurred and that could have caused harm to a patient but did not</b><br>
    * Type: <b>token</b><br>
    * Path: <b>AdverseEvent.category</b><br>
    * </p>

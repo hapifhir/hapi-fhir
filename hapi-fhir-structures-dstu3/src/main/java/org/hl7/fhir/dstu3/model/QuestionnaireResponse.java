@@ -2042,17 +2042,22 @@ public class QuestionnaireResponse extends DomainResource {
       public QuestionnaireResponse copy() {
         QuestionnaireResponse dst = new QuestionnaireResponse();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(QuestionnaireResponse dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         if (parent != null) {
           dst.parent = new ArrayList<Reference>();
           for (Reference i : parent)
             dst.parent.add(i.copy());
-        };
+        }
         dst.questionnaire = questionnaire == null ? null : questionnaire.copy();
         dst.status = status == null ? null : status.copy();
         dst.subject = subject == null ? null : subject.copy();
@@ -2064,11 +2069,10 @@ public class QuestionnaireResponse extends DomainResource {
           dst.item = new ArrayList<QuestionnaireResponseItemComponent>();
           for (QuestionnaireResponseItemComponent i : item)
             dst.item.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected QuestionnaireResponse typedCopy() {
+  protected QuestionnaireResponse typedCopy() {
         return copy();
       }
 

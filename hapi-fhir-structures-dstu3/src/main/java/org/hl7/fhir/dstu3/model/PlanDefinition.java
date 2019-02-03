@@ -7054,12 +7054,17 @@ public class PlanDefinition extends MetadataResource {
       public PlanDefinition copy() {
         PlanDefinition dst = new PlanDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(PlanDefinition dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
@@ -7078,52 +7083,51 @@ public class PlanDefinition extends MetadataResource {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : topic)
             dst.topic.add(i.copy());
-        };
+        }
         if (contributor != null) {
           dst.contributor = new ArrayList<Contributor>();
           for (Contributor i : contributor)
             dst.contributor.add(i.copy());
-        };
+        }
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.copyright = copyright == null ? null : copyright.copy();
         if (relatedArtifact != null) {
           dst.relatedArtifact = new ArrayList<RelatedArtifact>();
           for (RelatedArtifact i : relatedArtifact)
             dst.relatedArtifact.add(i.copy());
-        };
+        }
         if (library != null) {
           dst.library = new ArrayList<Reference>();
           for (Reference i : library)
             dst.library.add(i.copy());
-        };
+        }
         if (goal != null) {
           dst.goal = new ArrayList<PlanDefinitionGoalComponent>();
           for (PlanDefinitionGoalComponent i : goal)
             dst.goal.add(i.copy());
-        };
+        }
         if (action != null) {
           dst.action = new ArrayList<PlanDefinitionActionComponent>();
           for (PlanDefinitionActionComponent i : action)
             dst.action.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected PlanDefinition typedCopy() {
+  protected PlanDefinition typedCopy() {
         return copy();
       }
 

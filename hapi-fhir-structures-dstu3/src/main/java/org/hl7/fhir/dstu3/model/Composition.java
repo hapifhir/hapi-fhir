@@ -3291,6 +3291,11 @@ public class Composition extends DomainResource {
       public Composition copy() {
         Composition dst = new Composition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Composition dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.type = type == null ? null : type.copy();
@@ -3302,34 +3307,33 @@ public class Composition extends DomainResource {
           dst.author = new ArrayList<Reference>();
           for (Reference i : author)
             dst.author.add(i.copy());
-        };
+        }
         dst.title = title == null ? null : title.copy();
         dst.confidentiality = confidentiality == null ? null : confidentiality.copy();
         if (attester != null) {
           dst.attester = new ArrayList<CompositionAttesterComponent>();
           for (CompositionAttesterComponent i : attester)
             dst.attester.add(i.copy());
-        };
+        }
         dst.custodian = custodian == null ? null : custodian.copy();
         if (relatesTo != null) {
           dst.relatesTo = new ArrayList<CompositionRelatesToComponent>();
           for (CompositionRelatesToComponent i : relatesTo)
             dst.relatesTo.add(i.copy());
-        };
+        }
         if (event != null) {
           dst.event = new ArrayList<CompositionEventComponent>();
           for (CompositionEventComponent i : event)
             dst.event.add(i.copy());
-        };
+        }
         if (section != null) {
           dst.section = new ArrayList<SectionComponent>();
           for (SectionComponent i : section)
             dst.section.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Composition typedCopy() {
+  protected Composition typedCopy() {
         return copy();
       }
 

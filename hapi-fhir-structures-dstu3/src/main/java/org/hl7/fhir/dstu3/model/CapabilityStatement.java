@@ -9553,6 +9553,11 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
       public CapabilityStatement copy() {
         CapabilityStatement dst = new CapabilityStatement();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(CapabilityStatement dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
@@ -9565,18 +9570,18 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.copyright = copyright == null ? null : copyright.copy();
         dst.kind = kind == null ? null : kind.copy();
@@ -9584,7 +9589,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           dst.instantiates = new ArrayList<UriType>();
           for (UriType i : instantiates)
             dst.instantiates.add(i.copy());
-        };
+        }
         dst.software = software == null ? null : software.copy();
         dst.implementation = implementation == null ? null : implementation.copy();
         dst.fhirVersion = fhirVersion == null ? null : fhirVersion.copy();
@@ -9593,41 +9598,40 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           dst.format = new ArrayList<CodeType>();
           for (CodeType i : format)
             dst.format.add(i.copy());
-        };
+        }
         if (patchFormat != null) {
           dst.patchFormat = new ArrayList<CodeType>();
           for (CodeType i : patchFormat)
             dst.patchFormat.add(i.copy());
-        };
+        }
         if (implementationGuide != null) {
           dst.implementationGuide = new ArrayList<UriType>();
           for (UriType i : implementationGuide)
             dst.implementationGuide.add(i.copy());
-        };
+        }
         if (profile != null) {
           dst.profile = new ArrayList<Reference>();
           for (Reference i : profile)
             dst.profile.add(i.copy());
-        };
+        }
         if (rest != null) {
           dst.rest = new ArrayList<CapabilityStatementRestComponent>();
           for (CapabilityStatementRestComponent i : rest)
             dst.rest.add(i.copy());
-        };
+        }
         if (messaging != null) {
           dst.messaging = new ArrayList<CapabilityStatementMessagingComponent>();
           for (CapabilityStatementMessagingComponent i : messaging)
             dst.messaging.add(i.copy());
-        };
+        }
         if (document != null) {
           dst.document = new ArrayList<CapabilityStatementDocumentComponent>();
           for (CapabilityStatementDocumentComponent i : document)
             dst.document.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected CapabilityStatement typedCopy() {
+  protected CapabilityStatement typedCopy() {
         return copy();
       }
 

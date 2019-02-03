@@ -1715,6 +1715,11 @@ public class SupplyRequest extends DomainResource {
       public SupplyRequest copy() {
         SupplyRequest dst = new SupplyRequest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(SupplyRequest dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.category = category == null ? null : category.copy();
@@ -1727,14 +1732,13 @@ public class SupplyRequest extends DomainResource {
           dst.supplier = new ArrayList<Reference>();
           for (Reference i : supplier)
             dst.supplier.add(i.copy());
-        };
+        }
         dst.reason = reason == null ? null : reason.copy();
         dst.deliverFrom = deliverFrom == null ? null : deliverFrom.copy();
         dst.deliverTo = deliverTo == null ? null : deliverTo.copy();
-        return dst;
       }
 
-      protected SupplyRequest typedCopy() {
+  protected SupplyRequest typedCopy() {
         return copy();
       }
 

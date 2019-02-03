@@ -1543,11 +1543,16 @@ public class ListResource extends DomainResource {
       public ListResource copy() {
         ListResource dst = new ListResource();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ListResource dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.mode = mode == null ? null : mode.copy();
         dst.title = title == null ? null : title.copy();
@@ -1561,17 +1566,16 @@ public class ListResource extends DomainResource {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (entry != null) {
           dst.entry = new ArrayList<ListEntryComponent>();
           for (ListEntryComponent i : entry)
             dst.entry.add(i.copy());
-        };
+        }
         dst.emptyReason = emptyReason == null ? null : emptyReason.copy();
-        return dst;
       }
 
-      protected ListResource typedCopy() {
+  protected ListResource typedCopy() {
         return copy();
       }
 

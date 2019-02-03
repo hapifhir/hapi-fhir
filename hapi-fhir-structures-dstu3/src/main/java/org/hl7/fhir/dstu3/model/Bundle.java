@@ -2953,6 +2953,11 @@ public class Bundle extends Resource implements IBaseBundle {
       public Bundle copy() {
         Bundle dst = new Bundle();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Bundle dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.type = type == null ? null : type.copy();
         dst.total = total == null ? null : total.copy();
@@ -2960,17 +2965,16 @@ public class Bundle extends Resource implements IBaseBundle {
           dst.link = new ArrayList<BundleLinkComponent>();
           for (BundleLinkComponent i : link)
             dst.link.add(i.copy());
-        };
+        }
         if (entry != null) {
           dst.entry = new ArrayList<BundleEntryComponent>();
           for (BundleEntryComponent i : entry)
             dst.entry.add(i.copy());
-        };
+        }
         dst.signature = signature == null ? null : signature.copy();
-        return dst;
       }
 
-      protected Bundle typedCopy() {
+  protected Bundle typedCopy() {
         return copy();
       }
 

@@ -2700,6 +2700,11 @@ public class GraphDefinition extends MetadataResource {
       public GraphDefinition copy() {
         GraphDefinition dst = new GraphDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(GraphDefinition dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
@@ -2711,18 +2716,18 @@ public class GraphDefinition extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.purpose = purpose == null ? null : purpose.copy();
         dst.start = start == null ? null : start.copy();
         dst.profile = profile == null ? null : profile.copy();
@@ -2730,11 +2735,10 @@ public class GraphDefinition extends MetadataResource {
           dst.link = new ArrayList<GraphDefinitionLinkComponent>();
           for (GraphDefinitionLinkComponent i : link)
             dst.link.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected GraphDefinition typedCopy() {
+  protected GraphDefinition typedCopy() {
         return copy();
       }
 

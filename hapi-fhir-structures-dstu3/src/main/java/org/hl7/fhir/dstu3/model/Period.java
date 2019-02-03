@@ -284,12 +284,16 @@ public class Period extends Type implements ICompositeType {
       public Period copy() {
         Period dst = new Period();
         copyValues(dst);
-        dst.start = start == null ? null : start.copy();
-        dst.end = end == null ? null : end.copy();
         return dst;
       }
 
-      protected Period typedCopy() {
+      public void copyValues(Period dst) {
+        super.copyValues(dst);
+        dst.start = start == null ? null : start.copy();
+        dst.end = end == null ? null : end.copy();
+      }
+
+  protected Period typedCopy() {
         return copy();
       }
 

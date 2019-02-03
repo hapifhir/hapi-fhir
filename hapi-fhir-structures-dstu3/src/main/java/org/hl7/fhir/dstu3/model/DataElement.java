@@ -1729,12 +1729,17 @@ public class DataElement extends MetadataResource {
       public DataElement copy() {
         DataElement dst = new DataElement();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(DataElement dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.version = version == null ? null : version.copy();
         dst.status = status == null ? null : status.copy();
         dst.experimental = experimental == null ? null : experimental.copy();
@@ -1746,33 +1751,32 @@ public class DataElement extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.copyright = copyright == null ? null : copyright.copy();
         dst.stringency = stringency == null ? null : stringency.copy();
         if (mapping != null) {
           dst.mapping = new ArrayList<DataElementMappingComponent>();
           for (DataElementMappingComponent i : mapping)
             dst.mapping.add(i.copy());
-        };
+        }
         if (element != null) {
           dst.element = new ArrayList<ElementDefinition>();
           for (ElementDefinition i : element)
             dst.element.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected DataElement typedCopy() {
+  protected DataElement typedCopy() {
         return copy();
       }
 

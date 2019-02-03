@@ -264,16 +264,20 @@ public class ContactDetail extends Type implements ICompositeType {
       public ContactDetail copy() {
         ContactDetail dst = new ContactDetail();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ContactDetail dst) {
+        super.copyValues(dst);
         dst.name = name == null ? null : name.copy();
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ContactDetail typedCopy() {
+  protected ContactDetail typedCopy() {
         return copy();
       }
 

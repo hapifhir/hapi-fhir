@@ -1483,17 +1483,22 @@ public class CareTeam extends DomainResource {
       public CareTeam copy() {
         CareTeam dst = new CareTeam();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(CareTeam dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.name = name == null ? null : name.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
@@ -1502,31 +1507,30 @@ public class CareTeam extends DomainResource {
           dst.participant = new ArrayList<CareTeamParticipantComponent>();
           for (CareTeamParticipantComponent i : participant)
             dst.participant.add(i.copy());
-        };
+        }
         if (reasonCode != null) {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
           for (Reference i : reasonReference)
             dst.reasonReference.add(i.copy());
-        };
+        }
         if (managingOrganization != null) {
           dst.managingOrganization = new ArrayList<Reference>();
           for (Reference i : managingOrganization)
             dst.managingOrganization.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected CareTeam typedCopy() {
+  protected CareTeam typedCopy() {
         return copy();
       }
 

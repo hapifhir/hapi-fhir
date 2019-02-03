@@ -3596,6 +3596,11 @@ public class ImplementationGuide extends MetadataResource {
       public ImplementationGuide copy() {
         ImplementationGuide dst = new ImplementationGuide();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ImplementationGuide dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
@@ -3607,45 +3612,44 @@ public class ImplementationGuide extends MetadataResource {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (useContext != null) {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.copyright = copyright == null ? null : copyright.copy();
         dst.fhirVersion = fhirVersion == null ? null : fhirVersion.copy();
         if (dependency != null) {
           dst.dependency = new ArrayList<ImplementationGuideDependencyComponent>();
           for (ImplementationGuideDependencyComponent i : dependency)
             dst.dependency.add(i.copy());
-        };
+        }
         if (package_ != null) {
           dst.package_ = new ArrayList<ImplementationGuidePackageComponent>();
           for (ImplementationGuidePackageComponent i : package_)
             dst.package_.add(i.copy());
-        };
+        }
         if (global != null) {
           dst.global = new ArrayList<ImplementationGuideGlobalComponent>();
           for (ImplementationGuideGlobalComponent i : global)
             dst.global.add(i.copy());
-        };
+        }
         if (binary != null) {
           dst.binary = new ArrayList<UriType>();
           for (UriType i : binary)
             dst.binary.add(i.copy());
-        };
+        }
         dst.page = page == null ? null : page.copy();
-        return dst;
       }
 
-      protected ImplementationGuide typedCopy() {
+  protected ImplementationGuide typedCopy() {
         return copy();
       }
 

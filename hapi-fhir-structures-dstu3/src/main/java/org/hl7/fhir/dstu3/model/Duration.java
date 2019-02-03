@@ -121,7 +121,11 @@ public class Duration extends Quantity implements ICompositeType {
         return dst;
       }
 
-      protected Duration typedCopy() {
+      public void copyValues(Duration dst) {
+        super.copyValues(dst);
+      }
+
+  protected Duration typedCopy() {
         return copy();
       }
 

@@ -539,27 +539,31 @@ public class Meta extends Type implements IBaseMetaType {
       public Meta copy() {
         Meta dst = new Meta();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Meta dst) {
+        super.copyValues(dst);
         dst.versionId = versionId == null ? null : versionId.copy();
         dst.lastUpdated = lastUpdated == null ? null : lastUpdated.copy();
         if (profile != null) {
           dst.profile = new ArrayList<UriType>();
           for (UriType i : profile)
             dst.profile.add(i.copy());
-        };
+        }
         if (security != null) {
           dst.security = new ArrayList<Coding>();
           for (Coding i : security)
             dst.security.add(i.copy());
-        };
+        }
         if (tag != null) {
           dst.tag = new ArrayList<Coding>();
           for (Coding i : tag)
             dst.tag.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Meta typedCopy() {
+  protected Meta typedCopy() {
         return copy();
       }
 

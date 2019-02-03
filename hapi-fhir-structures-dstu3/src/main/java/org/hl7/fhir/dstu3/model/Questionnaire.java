@@ -4068,12 +4068,17 @@ Any information provided in these elements on a Questionnaire Item overrides the
       public Questionnaire copy() {
         Questionnaire dst = new Questionnaire();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Questionnaire dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
@@ -4090,37 +4095,36 @@ Any information provided in these elements on a Questionnaire Item overrides the
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.copyright = copyright == null ? null : copyright.copy();
         if (code != null) {
           dst.code = new ArrayList<Coding>();
           for (Coding i : code)
             dst.code.add(i.copy());
-        };
+        }
         if (subjectType != null) {
           dst.subjectType = new ArrayList<CodeType>();
           for (CodeType i : subjectType)
             dst.subjectType.add(i.copy());
-        };
+        }
         if (item != null) {
           dst.item = new ArrayList<QuestionnaireItemComponent>();
           for (QuestionnaireItemComponent i : item)
             dst.item.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Questionnaire typedCopy() {
+  protected Questionnaire typedCopy() {
         return copy();
       }
 

@@ -1337,12 +1337,17 @@ public class Subscription extends DomainResource {
       public Subscription copy() {
         Subscription dst = new Subscription();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Subscription dst) {
+        super.copyValues(dst);
         dst.status = status == null ? null : status.copy();
         if (contact != null) {
           dst.contact = new ArrayList<ContactPoint>();
           for (ContactPoint i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.end = end == null ? null : end.copy();
         dst.reason = reason == null ? null : reason.copy();
         dst.criteria = criteria == null ? null : criteria.copy();
@@ -1352,11 +1357,10 @@ public class Subscription extends DomainResource {
           dst.tag = new ArrayList<Coding>();
           for (Coding i : tag)
             dst.tag.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Subscription typedCopy() {
+  protected Subscription typedCopy() {
         return copy();
       }
 

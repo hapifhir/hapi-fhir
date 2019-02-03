@@ -2541,26 +2541,31 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
       public ReferralRequest copy() {
         ReferralRequest dst = new ReferralRequest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ReferralRequest dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (definition != null) {
           dst.definition = new ArrayList<Reference>();
           for (Reference i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         if (replaces != null) {
           dst.replaces = new ArrayList<Reference>();
           for (Reference i : replaces)
             dst.replaces.add(i.copy());
-        };
+        }
         dst.groupIdentifier = groupIdentifier == null ? null : groupIdentifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.intent = intent == null ? null : intent.copy();
@@ -2570,7 +2575,7 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           dst.serviceRequested = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : serviceRequested)
             dst.serviceRequested.add(i.copy());
-        };
+        }
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
         dst.occurrence = occurrence == null ? null : occurrence.copy();
@@ -2581,37 +2586,36 @@ Refer to [[[RequestGroup]]] for additional information on how this status is use
           dst.recipient = new ArrayList<Reference>();
           for (Reference i : recipient)
             dst.recipient.add(i.copy());
-        };
+        }
         if (reasonCode != null) {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
           for (Reference i : reasonReference)
             dst.reasonReference.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (supportingInfo != null) {
           dst.supportingInfo = new ArrayList<Reference>();
           for (Reference i : supportingInfo)
             dst.supportingInfo.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (relevantHistory != null) {
           dst.relevantHistory = new ArrayList<Reference>();
           for (Reference i : relevantHistory)
             dst.relevantHistory.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ReferralRequest typedCopy() {
+  protected ReferralRequest typedCopy() {
         return copy();
       }
 

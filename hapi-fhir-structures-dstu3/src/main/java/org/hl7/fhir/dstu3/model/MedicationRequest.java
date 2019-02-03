@@ -3131,21 +3131,26 @@ public class MedicationRequest extends DomainResource {
       public MedicationRequest copy() {
         MedicationRequest dst = new MedicationRequest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(MedicationRequest dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (definition != null) {
           dst.definition = new ArrayList<Reference>();
           for (Reference i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         dst.groupIdentifier = groupIdentifier == null ? null : groupIdentifier.copy();
         dst.status = status == null ? null : status.copy();
         dst.intent = intent == null ? null : intent.copy();
@@ -3158,7 +3163,7 @@ public class MedicationRequest extends DomainResource {
           dst.supportingInformation = new ArrayList<Reference>();
           for (Reference i : supportingInformation)
             dst.supportingInformation.add(i.copy());
-        };
+        }
         dst.authoredOn = authoredOn == null ? null : authoredOn.copy();
         dst.requester = requester == null ? null : requester.copy();
         dst.recorder = recorder == null ? null : recorder.copy();
@@ -3166,22 +3171,22 @@ public class MedicationRequest extends DomainResource {
           dst.reasonCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : reasonCode)
             dst.reasonCode.add(i.copy());
-        };
+        }
         if (reasonReference != null) {
           dst.reasonReference = new ArrayList<Reference>();
           for (Reference i : reasonReference)
             dst.reasonReference.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (dosageInstruction != null) {
           dst.dosageInstruction = new ArrayList<Dosage>();
           for (Dosage i : dosageInstruction)
             dst.dosageInstruction.add(i.copy());
-        };
+        }
         dst.dispenseRequest = dispenseRequest == null ? null : dispenseRequest.copy();
         dst.substitution = substitution == null ? null : substitution.copy();
         dst.priorPrescription = priorPrescription == null ? null : priorPrescription.copy();
@@ -3189,16 +3194,15 @@ public class MedicationRequest extends DomainResource {
           dst.detectedIssue = new ArrayList<Reference>();
           for (Reference i : detectedIssue)
             dst.detectedIssue.add(i.copy());
-        };
+        }
         if (eventHistory != null) {
           dst.eventHistory = new ArrayList<Reference>();
           for (Reference i : eventHistory)
             dst.eventHistory.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected MedicationRequest typedCopy() {
+  protected MedicationRequest typedCopy() {
         return copy();
       }
 

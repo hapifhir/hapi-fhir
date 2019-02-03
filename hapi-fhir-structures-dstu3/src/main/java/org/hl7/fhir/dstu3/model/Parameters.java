@@ -702,15 +702,19 @@ public class Parameters extends Resource implements IBaseParameters {
       public Parameters copy() {
         Parameters dst = new Parameters();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Parameters dst) {
+        super.copyValues(dst);
         if (parameter != null) {
           dst.parameter = new ArrayList<ParametersParameterComponent>();
           for (ParametersParameterComponent i : parameter)
             dst.parameter.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Parameters typedCopy() {
+  protected Parameters typedCopy() {
         return copy();
       }
 

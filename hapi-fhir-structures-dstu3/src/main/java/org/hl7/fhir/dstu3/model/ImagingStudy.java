@@ -2986,19 +2986,24 @@ public class ImagingStudy extends DomainResource {
       public ImagingStudy copy() {
         ImagingStudy dst = new ImagingStudy();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ImagingStudy dst) {
+        super.copyValues(dst);
         dst.uid = uid == null ? null : uid.copy();
         dst.accession = accession == null ? null : accession.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.availability = availability == null ? null : availability.copy();
         if (modalityList != null) {
           dst.modalityList = new ArrayList<Coding>();
           for (Coding i : modalityList)
             dst.modalityList.add(i.copy());
-        };
+        }
         dst.patient = patient == null ? null : patient.copy();
         dst.context = context == null ? null : context.copy();
         dst.started = started == null ? null : started.copy();
@@ -3006,41 +3011,40 @@ public class ImagingStudy extends DomainResource {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         dst.referrer = referrer == null ? null : referrer.copy();
         if (interpreter != null) {
           dst.interpreter = new ArrayList<Reference>();
           for (Reference i : interpreter)
             dst.interpreter.add(i.copy());
-        };
+        }
         if (endpoint != null) {
           dst.endpoint = new ArrayList<Reference>();
           for (Reference i : endpoint)
             dst.endpoint.add(i.copy());
-        };
+        }
         dst.numberOfSeries = numberOfSeries == null ? null : numberOfSeries.copy();
         dst.numberOfInstances = numberOfInstances == null ? null : numberOfInstances.copy();
         if (procedureReference != null) {
           dst.procedureReference = new ArrayList<Reference>();
           for (Reference i : procedureReference)
             dst.procedureReference.add(i.copy());
-        };
+        }
         if (procedureCode != null) {
           dst.procedureCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : procedureCode)
             dst.procedureCode.add(i.copy());
-        };
+        }
         dst.reason = reason == null ? null : reason.copy();
         dst.description = description == null ? null : description.copy();
         if (series != null) {
           dst.series = new ArrayList<ImagingStudySeriesComponent>();
           for (ImagingStudySeriesComponent i : series)
             dst.series.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ImagingStudy typedCopy() {
+  protected ImagingStudy typedCopy() {
         return copy();
       }
 

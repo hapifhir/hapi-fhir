@@ -1771,17 +1771,22 @@ public class Goal extends DomainResource {
       public Goal copy() {
         Goal dst = new Goal();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Goal dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.priority = priority == null ? null : priority.copy();
         dst.description = description == null ? null : description.copy();
         dst.subject = subject == null ? null : subject.copy();
@@ -1794,26 +1799,25 @@ public class Goal extends DomainResource {
           dst.addresses = new ArrayList<Reference>();
           for (Reference i : addresses)
             dst.addresses.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (outcomeCode != null) {
           dst.outcomeCode = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : outcomeCode)
             dst.outcomeCode.add(i.copy());
-        };
+        }
         if (outcomeReference != null) {
           dst.outcomeReference = new ArrayList<Reference>();
           for (Reference i : outcomeReference)
             dst.outcomeReference.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Goal typedCopy() {
+  protected Goal typedCopy() {
         return copy();
       }
 

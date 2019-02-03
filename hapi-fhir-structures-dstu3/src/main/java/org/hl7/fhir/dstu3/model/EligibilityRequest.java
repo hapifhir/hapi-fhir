@@ -1238,11 +1238,16 @@ public class EligibilityRequest extends DomainResource {
       public EligibilityRequest copy() {
         EligibilityRequest dst = new EligibilityRequest();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(EligibilityRequest dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.priority = priority == null ? null : priority.copy();
         dst.patient = patient == null ? null : patient.copy();
@@ -1257,10 +1262,9 @@ public class EligibilityRequest extends DomainResource {
         dst.businessArrangement = businessArrangement == null ? null : businessArrangement.copy();
         dst.benefitCategory = benefitCategory == null ? null : benefitCategory.copy();
         dst.benefitSubCategory = benefitSubCategory == null ? null : benefitSubCategory.copy();
-        return dst;
       }
 
-      protected EligibilityRequest typedCopy() {
+  protected EligibilityRequest typedCopy() {
         return copy();
       }
 

@@ -3329,22 +3329,27 @@ public class Observation extends DomainResource {
       public Observation copy() {
         Observation dst = new Observation();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Observation dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.code = code == null ? null : code.copy();
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
@@ -3354,7 +3359,7 @@ public class Observation extends DomainResource {
           dst.performer = new ArrayList<Reference>();
           for (Reference i : performer)
             dst.performer.add(i.copy());
-        };
+        }
         dst.value = value == null ? null : value.copy();
         dst.dataAbsentReason = dataAbsentReason == null ? null : dataAbsentReason.copy();
         dst.interpretation = interpretation == null ? null : interpretation.copy();
@@ -3367,21 +3372,20 @@ public class Observation extends DomainResource {
           dst.referenceRange = new ArrayList<ObservationReferenceRangeComponent>();
           for (ObservationReferenceRangeComponent i : referenceRange)
             dst.referenceRange.add(i.copy());
-        };
+        }
         if (related != null) {
           dst.related = new ArrayList<ObservationRelatedComponent>();
           for (ObservationRelatedComponent i : related)
             dst.related.add(i.copy());
-        };
+        }
         if (component != null) {
           dst.component = new ArrayList<ObservationComponentComponent>();
           for (ObservationComponentComponent i : component)
             dst.component.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Observation typedCopy() {
+  protected Observation typedCopy() {
         return copy();
       }
 

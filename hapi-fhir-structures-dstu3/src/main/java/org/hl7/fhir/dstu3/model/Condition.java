@@ -2161,25 +2161,30 @@ public class Condition extends DomainResource {
       public Condition copy() {
         Condition dst = new Condition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Condition dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.clinicalStatus = clinicalStatus == null ? null : clinicalStatus.copy();
         dst.verificationStatus = verificationStatus == null ? null : verificationStatus.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         dst.severity = severity == null ? null : severity.copy();
         dst.code = code == null ? null : code.copy();
         if (bodySite != null) {
           dst.bodySite = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : bodySite)
             dst.bodySite.add(i.copy());
-        };
+        }
         dst.subject = subject == null ? null : subject.copy();
         dst.context = context == null ? null : context.copy();
         dst.onset = onset == null ? null : onset.copy();
@@ -2191,16 +2196,15 @@ public class Condition extends DomainResource {
           dst.evidence = new ArrayList<ConditionEvidenceComponent>();
           for (ConditionEvidenceComponent i : evidence)
             dst.evidence.add(i.copy());
-        };
+        }
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Condition typedCopy() {
+  protected Condition typedCopy() {
         return copy();
       }
 

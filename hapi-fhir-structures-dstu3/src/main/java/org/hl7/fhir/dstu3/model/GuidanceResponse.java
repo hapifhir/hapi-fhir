@@ -1270,6 +1270,11 @@ public class GuidanceResponse extends DomainResource {
       public GuidanceResponse copy() {
         GuidanceResponse dst = new GuidanceResponse();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(GuidanceResponse dst) {
+        super.copyValues(dst);
         dst.requestId = requestId == null ? null : requestId.copy();
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.module = module == null ? null : module.copy();
@@ -1283,23 +1288,22 @@ public class GuidanceResponse extends DomainResource {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (evaluationMessage != null) {
           dst.evaluationMessage = new ArrayList<Reference>();
           for (Reference i : evaluationMessage)
             dst.evaluationMessage.add(i.copy());
-        };
+        }
         dst.outputParameters = outputParameters == null ? null : outputParameters.copy();
         dst.result = result == null ? null : result.copy();
         if (dataRequirement != null) {
           dst.dataRequirement = new ArrayList<DataRequirement>();
           for (DataRequirement i : dataRequirement)
             dst.dataRequirement.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected GuidanceResponse typedCopy() {
+  protected GuidanceResponse typedCopy() {
         return copy();
       }
 

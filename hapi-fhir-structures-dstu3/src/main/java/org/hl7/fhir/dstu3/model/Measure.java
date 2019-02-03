@@ -4148,12 +4148,17 @@ public class Measure extends MetadataResource {
       public Measure copy() {
         Measure dst = new Measure();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Measure dst) {
+        super.copyValues(dst);
         dst.url = url == null ? null : url.copy();
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.version = version == null ? null : version.copy();
         dst.name = name == null ? null : name.copy();
         dst.title = title == null ? null : title.copy();
@@ -4171,38 +4176,38 @@ public class Measure extends MetadataResource {
           dst.useContext = new ArrayList<UsageContext>();
           for (UsageContext i : useContext)
             dst.useContext.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         if (topic != null) {
           dst.topic = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : topic)
             dst.topic.add(i.copy());
-        };
+        }
         if (contributor != null) {
           dst.contributor = new ArrayList<Contributor>();
           for (Contributor i : contributor)
             dst.contributor.add(i.copy());
-        };
+        }
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         dst.copyright = copyright == null ? null : copyright.copy();
         if (relatedArtifact != null) {
           dst.relatedArtifact = new ArrayList<RelatedArtifact>();
           for (RelatedArtifact i : relatedArtifact)
             dst.relatedArtifact.add(i.copy());
-        };
+        }
         if (library != null) {
           dst.library = new ArrayList<Reference>();
           for (Reference i : library)
             dst.library.add(i.copy());
-        };
+        }
         dst.disclaimer = disclaimer == null ? null : disclaimer.copy();
         dst.scoring = scoring == null ? null : scoring.copy();
         dst.compositeScoring = compositeScoring == null ? null : compositeScoring.copy();
@@ -4210,7 +4215,7 @@ public class Measure extends MetadataResource {
           dst.type = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : type)
             dst.type.add(i.copy());
-        };
+        }
         dst.riskAdjustment = riskAdjustment == null ? null : riskAdjustment.copy();
         dst.rateAggregation = rateAggregation == null ? null : rateAggregation.copy();
         dst.rationale = rationale == null ? null : rationale.copy();
@@ -4220,23 +4225,22 @@ public class Measure extends MetadataResource {
           dst.definition = new ArrayList<MarkdownType>();
           for (MarkdownType i : definition)
             dst.definition.add(i.copy());
-        };
+        }
         dst.guidance = guidance == null ? null : guidance.copy();
         dst.set = set == null ? null : set.copy();
         if (group != null) {
           dst.group = new ArrayList<MeasureGroupComponent>();
           for (MeasureGroupComponent i : group)
             dst.group.add(i.copy());
-        };
+        }
         if (supplementalData != null) {
           dst.supplementalData = new ArrayList<MeasureSupplementalDataComponent>();
           for (MeasureSupplementalDataComponent i : supplementalData)
             dst.supplementalData.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Measure typedCopy() {
+  protected Measure typedCopy() {
         return copy();
       }
 

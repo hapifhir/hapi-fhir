@@ -700,6 +700,11 @@ public class ParameterDefinition extends Type implements ICompositeType {
       public ParameterDefinition copy() {
         ParameterDefinition dst = new ParameterDefinition();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ParameterDefinition dst) {
+        super.copyValues(dst);
         dst.name = name == null ? null : name.copy();
         dst.use = use == null ? null : use.copy();
         dst.min = min == null ? null : min.copy();
@@ -707,10 +712,9 @@ public class ParameterDefinition extends Type implements ICompositeType {
         dst.documentation = documentation == null ? null : documentation.copy();
         dst.type = type == null ? null : type.copy();
         dst.profile = profile == null ? null : profile.copy();
-        return dst;
       }
 
-      protected ParameterDefinition typedCopy() {
+  protected ParameterDefinition typedCopy() {
         return copy();
       }
 

@@ -436,7 +436,8 @@ public class Practitioner extends DomainResource {
     protected List<ContactPoint> telecom;
 
     /**
-     * Address(es) of the practitioner that are not role specific (typically home address). Work addresses are not typically entered in this property as they are usually role dependent.
+     * Address(es) of the practitioner that are not role specific (typically home address). 
+Work addresses are not typically entered in this property as they are usually role dependent.
      */
     @Child(name = "address", type = {Address.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Address(es) of the practitioner that are not role specific (typically home address)", formalDefinition="Address(es) of the practitioner that are not role specific (typically home address). \rWork addresses are not typically entered in this property as they are usually role dependent." )
@@ -693,7 +694,8 @@ public class Practitioner extends DomainResource {
     }
 
     /**
-     * @return {@link #address} (Address(es) of the practitioner that are not role specific (typically home address). Work addresses are not typically entered in this property as they are usually role dependent.)
+     * @return {@link #address} (Address(es) of the practitioner that are not role specific (typically home address). 
+Work addresses are not typically entered in this property as they are usually role dependent.)
      */
     public List<Address> getAddress() { 
       if (this.address == null)
@@ -1199,48 +1201,52 @@ public class Practitioner extends DomainResource {
       public Practitioner copy() {
         Practitioner dst = new Practitioner();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Practitioner dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.active = active == null ? null : active.copy();
         if (name != null) {
           dst.name = new ArrayList<HumanName>();
           for (HumanName i : name)
             dst.name.add(i.copy());
-        };
+        }
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
-        };
+        }
         if (address != null) {
           dst.address = new ArrayList<Address>();
           for (Address i : address)
             dst.address.add(i.copy());
-        };
+        }
         dst.gender = gender == null ? null : gender.copy();
         dst.birthDate = birthDate == null ? null : birthDate.copy();
         if (photo != null) {
           dst.photo = new ArrayList<Attachment>();
           for (Attachment i : photo)
             dst.photo.add(i.copy());
-        };
+        }
         if (qualification != null) {
           dst.qualification = new ArrayList<PractitionerQualificationComponent>();
           for (PractitionerQualificationComponent i : qualification)
             dst.qualification.add(i.copy());
-        };
+        }
         if (communication != null) {
           dst.communication = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : communication)
             dst.communication.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected Practitioner typedCopy() {
+  protected Practitioner typedCopy() {
         return copy();
       }
 

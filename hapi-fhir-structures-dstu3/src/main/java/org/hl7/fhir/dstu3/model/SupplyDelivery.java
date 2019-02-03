@@ -1281,17 +1281,22 @@ public class SupplyDelivery extends DomainResource {
       public SupplyDelivery copy() {
         SupplyDelivery dst = new SupplyDelivery();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(SupplyDelivery dst) {
+        super.copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         if (partOf != null) {
           dst.partOf = new ArrayList<Reference>();
           for (Reference i : partOf)
             dst.partOf.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.patient = patient == null ? null : patient.copy();
         dst.type = type == null ? null : type.copy();
@@ -1303,11 +1308,10 @@ public class SupplyDelivery extends DomainResource {
           dst.receiver = new ArrayList<Reference>();
           for (Reference i : receiver)
             dst.receiver.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected SupplyDelivery typedCopy() {
+  protected SupplyDelivery typedCopy() {
         return copy();
       }
 

@@ -277,12 +277,16 @@ public class UsageContext extends Type implements ICompositeType {
       public UsageContext copy() {
         UsageContext dst = new UsageContext();
         copyValues(dst);
-        dst.code = code == null ? null : code.copy();
-        dst.value = value == null ? null : value.copy();
         return dst;
       }
 
-      protected UsageContext typedCopy() {
+      public void copyValues(UsageContext dst) {
+        super.copyValues(dst);
+        dst.code = code == null ? null : code.copy();
+        dst.value = value == null ? null : value.copy();
+      }
+
+  protected UsageContext typedCopy() {
         return copy();
       }
 

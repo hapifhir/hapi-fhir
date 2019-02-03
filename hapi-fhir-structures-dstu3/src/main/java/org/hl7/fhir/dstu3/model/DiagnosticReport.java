@@ -2082,16 +2082,21 @@ public class DiagnosticReport extends DomainResource {
       public DiagnosticReport copy() {
         DiagnosticReport dst = new DiagnosticReport();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(DiagnosticReport dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         if (basedOn != null) {
           dst.basedOn = new ArrayList<Reference>();
           for (Reference i : basedOn)
             dst.basedOn.add(i.copy());
-        };
+        }
         dst.status = status == null ? null : status.copy();
         dst.category = category == null ? null : category.copy();
         dst.code = code == null ? null : code.copy();
@@ -2103,42 +2108,41 @@ public class DiagnosticReport extends DomainResource {
           dst.performer = new ArrayList<DiagnosticReportPerformerComponent>();
           for (DiagnosticReportPerformerComponent i : performer)
             dst.performer.add(i.copy());
-        };
+        }
         if (specimen != null) {
           dst.specimen = new ArrayList<Reference>();
           for (Reference i : specimen)
             dst.specimen.add(i.copy());
-        };
+        }
         if (result != null) {
           dst.result = new ArrayList<Reference>();
           for (Reference i : result)
             dst.result.add(i.copy());
-        };
+        }
         if (imagingStudy != null) {
           dst.imagingStudy = new ArrayList<Reference>();
           for (Reference i : imagingStudy)
             dst.imagingStudy.add(i.copy());
-        };
+        }
         if (image != null) {
           dst.image = new ArrayList<DiagnosticReportImageComponent>();
           for (DiagnosticReportImageComponent i : image)
             dst.image.add(i.copy());
-        };
+        }
         dst.conclusion = conclusion == null ? null : conclusion.copy();
         if (codedDiagnosis != null) {
           dst.codedDiagnosis = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : codedDiagnosis)
             dst.codedDiagnosis.add(i.copy());
-        };
+        }
         if (presentedForm != null) {
           dst.presentedForm = new ArrayList<Attachment>();
           for (Attachment i : presentedForm)
             dst.presentedForm.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected DiagnosticReport typedCopy() {
+  protected DiagnosticReport typedCopy() {
         return copy();
       }
 

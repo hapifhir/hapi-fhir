@@ -211,12 +211,16 @@ public class Ratio extends Type implements ICompositeType {
       public Ratio copy() {
         Ratio dst = new Ratio();
         copyValues(dst);
-        dst.numerator = numerator == null ? null : numerator.copy();
-        dst.denominator = denominator == null ? null : denominator.copy();
         return dst;
       }
 
-      protected Ratio typedCopy() {
+      public void copyValues(Ratio dst) {
+        super.copyValues(dst);
+        dst.numerator = numerator == null ? null : numerator.copy();
+        dst.denominator = denominator == null ? null : denominator.copy();
+      }
+
+  protected Ratio typedCopy() {
         return copy();
       }
 

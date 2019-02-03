@@ -475,15 +475,19 @@ public class Coding extends Type implements IBaseCoding, ICompositeType {
       public Coding copy() {
         Coding dst = new Coding();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Coding dst) {
+        super.copyValues(dst);
         dst.system = system == null ? null : system.copy();
         dst.version = version == null ? null : version.copy();
         dst.code = code == null ? null : code.copy();
         dst.display = display == null ? null : display.copy();
         dst.userSelected = userSelected == null ? null : userSelected.copy();
-        return dst;
       }
 
-      protected Coding typedCopy() {
+  protected Coding typedCopy() {
         return copy();
       }
 

@@ -2313,17 +2313,22 @@ public class Timing extends Type implements ICompositeType {
       public Timing copy() {
         Timing dst = new Timing();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(Timing dst) {
+        super.copyValues(dst);
         if (event != null) {
           dst.event = new ArrayList<DateTimeType>();
           for (DateTimeType i : event)
             dst.event.add(i.copy());
-        };
+        }
+        ;
         dst.repeat = repeat == null ? null : repeat.copy();
         dst.code = code == null ? null : code.copy();
-        return dst;
       }
 
-      protected Timing typedCopy() {
+  protected Timing typedCopy() {
         return copy();
       }
 

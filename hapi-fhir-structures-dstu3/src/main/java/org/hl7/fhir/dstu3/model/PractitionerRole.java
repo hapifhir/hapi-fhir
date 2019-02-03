@@ -1982,11 +1982,16 @@ public class PractitionerRole extends DomainResource {
       public PractitionerRole copy() {
         PractitionerRole dst = new PractitionerRole();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(PractitionerRole dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.active = active == null ? null : active.copy();
         dst.period = period == null ? null : period.copy();
         dst.practitioner = practitioner == null ? null : practitioner.copy();
@@ -1995,47 +2000,46 @@ public class PractitionerRole extends DomainResource {
           dst.code = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : code)
             dst.code.add(i.copy());
-        };
+        }
         if (specialty != null) {
           dst.specialty = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : specialty)
             dst.specialty.add(i.copy());
-        };
+        }
         if (location != null) {
           dst.location = new ArrayList<Reference>();
           for (Reference i : location)
             dst.location.add(i.copy());
-        };
+        }
         if (healthcareService != null) {
           dst.healthcareService = new ArrayList<Reference>();
           for (Reference i : healthcareService)
             dst.healthcareService.add(i.copy());
-        };
+        }
         if (telecom != null) {
           dst.telecom = new ArrayList<ContactPoint>();
           for (ContactPoint i : telecom)
             dst.telecom.add(i.copy());
-        };
+        }
         if (availableTime != null) {
           dst.availableTime = new ArrayList<PractitionerRoleAvailableTimeComponent>();
           for (PractitionerRoleAvailableTimeComponent i : availableTime)
             dst.availableTime.add(i.copy());
-        };
+        }
         if (notAvailable != null) {
           dst.notAvailable = new ArrayList<PractitionerRoleNotAvailableComponent>();
           for (PractitionerRoleNotAvailableComponent i : notAvailable)
             dst.notAvailable.add(i.copy());
-        };
+        }
         dst.availabilityExceptions = availabilityExceptions == null ? null : availabilityExceptions.copy();
         if (endpoint != null) {
           dst.endpoint = new ArrayList<Reference>();
           for (Reference i : endpoint)
             dst.endpoint.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected PractitionerRole typedCopy() {
+  protected PractitionerRole typedCopy() {
         return copy();
       }
 

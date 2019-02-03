@@ -416,12 +416,16 @@ public class Extension extends BaseExtension implements IBaseExtension<Extension
       public Extension copy() {
         Extension dst = new Extension();
         copyValues(dst);
-        dst.url = url == null ? null : url.copy();
-        dst.value = value == null ? null : value.copy();
         return dst;
       }
 
-      protected Extension typedCopy() {
+      public void copyValues(Extension dst) {
+        super.copyValues(dst);
+        dst.url = url == null ? null : url.copy();
+        dst.value = value == null ? null : value.copy();
+      }
+
+  protected Extension typedCopy() {
         return copy();
       }
 

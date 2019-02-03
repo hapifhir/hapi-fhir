@@ -348,13 +348,17 @@ public class Reference extends BaseReference implements IBaseReference, IComposi
       public Reference copy() {
         Reference dst = new Reference();
         copyValues(dst);
-        dst.reference = reference == null ? null : reference.copy();
-        dst.identifier = identifier == null ? null : identifier.copy();
-        dst.display = display == null ? null : display.copy();
         return dst;
       }
 
-      protected Reference typedCopy() {
+      public void copyValues(Reference dst) {
+        super.copyValues(dst);
+        dst.reference = reference == null ? null : reference.copy();
+        dst.identifier = identifier == null ? null : identifier.copy();
+        dst.display = display == null ? null : display.copy();
+      }
+
+  protected Reference typedCopy() {
         return copy();
       }
 

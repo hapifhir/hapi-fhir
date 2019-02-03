@@ -757,15 +757,19 @@ public class ContactPoint extends Type implements ICompositeType {
       public ContactPoint copy() {
         ContactPoint dst = new ContactPoint();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ContactPoint dst) {
+        super.copyValues(dst);
         dst.system = system == null ? null : system.copy();
         dst.value = value == null ? null : value.copy();
         dst.use = use == null ? null : use.copy();
         dst.rank = rank == null ? null : rank.copy();
         dst.period = period == null ? null : period.copy();
-        return dst;
       }
 
-      protected ContactPoint typedCopy() {
+  protected ContactPoint typedCopy() {
         return copy();
       }
 

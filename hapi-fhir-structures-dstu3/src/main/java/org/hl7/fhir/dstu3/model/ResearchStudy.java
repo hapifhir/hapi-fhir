@@ -2079,59 +2079,65 @@ public class ResearchStudy extends DomainResource {
       public ResearchStudy copy() {
         ResearchStudy dst = new ResearchStudy();
         copyValues(dst);
+        return dst;
+      }
+
+      public void copyValues(ResearchStudy dst) {
+        super.copyValues(dst);
         if (identifier != null) {
           dst.identifier = new ArrayList<Identifier>();
           for (Identifier i : identifier)
             dst.identifier.add(i.copy());
-        };
+        }
         dst.title = title == null ? null : title.copy();
         if (protocol != null) {
           dst.protocol = new ArrayList<Reference>();
           for (Reference i : protocol)
             dst.protocol.add(i.copy());
-        };
+        }
         if (partOf != null) {
           dst.partOf = new ArrayList<Reference>();
           for (Reference i : partOf)
             dst.partOf.add(i.copy());
-        };
+        }
+        ;
         dst.status = status == null ? null : status.copy();
         if (category != null) {
           dst.category = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : category)
             dst.category.add(i.copy());
-        };
+        }
         if (focus != null) {
           dst.focus = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : focus)
             dst.focus.add(i.copy());
-        };
+        }
         if (contact != null) {
           dst.contact = new ArrayList<ContactDetail>();
           for (ContactDetail i : contact)
             dst.contact.add(i.copy());
-        };
+        }
         if (relatedArtifact != null) {
           dst.relatedArtifact = new ArrayList<RelatedArtifact>();
           for (RelatedArtifact i : relatedArtifact)
             dst.relatedArtifact.add(i.copy());
-        };
+        }
         if (keyword != null) {
           dst.keyword = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : keyword)
             dst.keyword.add(i.copy());
-        };
+        }
         if (jurisdiction != null) {
           dst.jurisdiction = new ArrayList<CodeableConcept>();
           for (CodeableConcept i : jurisdiction)
             dst.jurisdiction.add(i.copy());
-        };
+        }
         dst.description = description == null ? null : description.copy();
         if (enrollment != null) {
           dst.enrollment = new ArrayList<Reference>();
           for (Reference i : enrollment)
             dst.enrollment.add(i.copy());
-        };
+        }
         dst.period = period == null ? null : period.copy();
         dst.sponsor = sponsor == null ? null : sponsor.copy();
         dst.principalInvestigator = principalInvestigator == null ? null : principalInvestigator.copy();
@@ -2139,22 +2145,21 @@ public class ResearchStudy extends DomainResource {
           dst.site = new ArrayList<Reference>();
           for (Reference i : site)
             dst.site.add(i.copy());
-        };
+        }
         dst.reasonStopped = reasonStopped == null ? null : reasonStopped.copy();
         if (note != null) {
           dst.note = new ArrayList<Annotation>();
           for (Annotation i : note)
             dst.note.add(i.copy());
-        };
+        }
         if (arm != null) {
           dst.arm = new ArrayList<ResearchStudyArmComponent>();
           for (ResearchStudyArmComponent i : arm)
             dst.arm.add(i.copy());
-        };
-        return dst;
+        }
       }
 
-      protected ResearchStudy typedCopy() {
+  protected ResearchStudy typedCopy() {
         return copy();
       }
 
