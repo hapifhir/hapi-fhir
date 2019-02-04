@@ -31,8 +31,8 @@ import java.util.function.Function;
  * creation may use another strategy.
  * </p>
  *
- * @since 3.7.0
  * @see EventCodeEnum
+ * @since 3.7.0
  */
 @Interceptor
 public class SubscriptionDebugLogInterceptor {

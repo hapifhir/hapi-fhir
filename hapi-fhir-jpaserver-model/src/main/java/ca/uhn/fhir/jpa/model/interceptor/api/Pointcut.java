@@ -161,7 +161,7 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription","ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
+	SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
 
 	/**
 	 * Invoked immediately before the delivery of a REST HOOK subscription.
@@ -181,7 +181,7 @@ public enum Pointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription","ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
+	SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
 
 	/**
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
@@ -309,7 +309,7 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	OP_PRECOMMIT_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource","org.hl7.fhir.instance.model.api.IBaseResource"),
+	OP_PRECOMMIT_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),
 
 
 	/**
@@ -330,7 +330,7 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource","org.hl7.fhir.instance.model.api.IBaseResource");
+	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource");
 
 	private final List<String> myParameterTypes;
 
