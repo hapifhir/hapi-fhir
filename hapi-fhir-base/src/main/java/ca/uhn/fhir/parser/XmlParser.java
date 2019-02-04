@@ -526,9 +526,13 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 
 			if (super.shouldEncodeResourceMeta(resource) && ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
 				theEventWriter.writeStartElement("meta");
-				writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
+				if (shouldEncodePath(resource, "meta.versionId")) {
+					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
+				}
 				if (updated != null) {
-					writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
+					if (shouldEncodePath(resource, "meta.lastUpdated")) {
+						writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
+					}
 				}
 
 				for (IIdType profile : profiles) {

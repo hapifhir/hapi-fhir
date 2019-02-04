@@ -649,8 +649,13 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 			if (super.shouldEncodeResourceMeta(resource) && (ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) || !extensionMetadataKeys.isEmpty()) {
 				beginObject(theEventWriter, "meta");
-				writeOptionalTagWithTextNode(theEventWriter, "versionId", versionIdPart);
-				writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", updated);
+
+				if (shouldEncodePath(resource, "meta.versionId")) {
+					writeOptionalTagWithTextNode(theEventWriter, "versionId", versionIdPart);
+				}
+				if (shouldEncodePath(resource, "meta.lastUpdated")) {
+					writeOptionalTagWithTextNode(theEventWriter, "lastUpdated", updated);
+				}
 
 				if (profiles != null && profiles.isEmpty() == false) {
 					beginArray(theEventWriter, "profile");
