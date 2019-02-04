@@ -139,6 +139,7 @@ public class ElementsParamR4Test {
 			});
 	}
 
+
 	@Test
 	public void testMultiResourceElementsFilter() throws IOException {
 		createProcedureWithLongChain();
@@ -179,6 +180,30 @@ public class ElementsParamR4Test {
 				assertEquals(true, obs.getMeta().isEmpty());
 				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
 				assertEquals(0, obs.getCode().getCoding().size());
+				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
+			});
+	}
+
+	@Test
+	public void testMultiResourceElementsFilterWithMetadataExcludedStandardMode() throws IOException {
+		ourServlet.setElementsSupport(ElementsSupportEnum.STANDARD);
+		createProcedureWithLongChain();
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals(true, procedure.getMeta().isEmpty());
+				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+				assertEquals(1, procedure.getUsedCode().size());
+
+				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
+				assertEquals(true, dr.getMeta().isEmpty());
+				assertEquals(1, dr.getResult().size());
+
+				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
+				assertEquals(true, obs.getMeta().isEmpty());
+				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+				assertEquals(1, obs.getCode().getCoding().size());
 				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
 			});
 	}
