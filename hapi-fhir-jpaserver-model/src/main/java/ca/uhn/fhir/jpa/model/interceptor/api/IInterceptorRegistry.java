@@ -53,7 +53,6 @@ public interface IInterceptorRegistry {
 	@Deprecated
 	void unregisterGlobalInterceptor(Object theInterceptor);
 
-
 	@VisibleForTesting
 	void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook);
 
