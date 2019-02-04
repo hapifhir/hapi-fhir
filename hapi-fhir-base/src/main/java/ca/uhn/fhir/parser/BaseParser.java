@@ -30,6 +30,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.*;
 
@@ -908,11 +909,11 @@ public abstract class BaseParser implements IParser {
 		} else {
 			if (myDontEncodeElements != null) {
 				String resourceName = myContext.getResourceDefinition(theResource).getName();
-				if (myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath(resourceName + ".id"))) {
+				if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath(resourceName + ".id"))) {
 					retVal = false;
-				} else if (myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath("*.id"))) {
+				} else if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath("*.id"))) {
 					retVal = false;
-				} else if (theEncodeContext.getResourcePath().size() == 1 && myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath("id"))) {
+				} else if (theEncodeContext.getResourcePath().size() == 1 && myDontEncodeElements.stream().anyMatch(t -> t.equalsPath("id"))) {
 					retVal = false;
 				}
 			}
@@ -924,12 +925,19 @@ public abstract class BaseParser implements IParser {
 	 * Used for DSTU2 only
 	 */
 	protected boolean shouldEncodeResourceMeta(IResource theResource) {
+		return shouldEncodePath(theResource, "meta");
+	}
+
+	/**
+	 * Used for DSTU2 only
+	 */
+	protected boolean shouldEncodePath(IResource theResource, String thePath) {
 		if (myDontEncodeElements != null) {
 			String resourceName = myContext.getResourceDefinition(theResource).getName();
-			if (myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath(resourceName + ".meta"))) {
+			if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath(resourceName + "." + thePath))) {
 				return false;
-			} else {
-				return myDontEncodeElements.stream().anyMatch(t -> t.startsWithPath("*.meta"));
+			} else if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath("*."+ thePath))) {
+				return false;
 			}
 		}
 		return true;
@@ -1207,8 +1215,9 @@ public abstract class BaseParser implements IParser {
 			return true;
 		}
 
-		public boolean startsWithPath(String thePath) {
-			return startsWith(new ElementsPath(thePath));
+		public boolean equalsPath(String thePath) {
+			ElementsPath parsedPath = new ElementsPath(thePath);
+			return getPath().equals(parsedPath.getPath());
 		}
 	}
 
@@ -1287,6 +1296,24 @@ public abstract class BaseParser implements IParser {
 				return true;
 			}
 			return false;
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) {
+				return true;
+			}
+
+			if (theO == null || getClass() != theO.getClass()) {
+				return false;
+			}
+
+			EncodeContextPathElement that = (EncodeContextPathElement) theO;
+
+			return new EqualsBuilder()
+				.append(myResource, that.myResource)
+				.append(myName, that.myName)
+				.isEquals();
 		}
 
 		@Override
