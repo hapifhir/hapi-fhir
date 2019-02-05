@@ -144,6 +144,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			interceptor.getFinishedLatch().await(10, TimeUnit.SECONDS);
 			ResourceDeliveryMessage lastDelivery = interceptor.getLastDelivery();
+			assertTrue(lastDelivery.getAttribute("ATTR1").isPresent());
+			assertTrue(lastDelivery.getAttribute("ATTR2").isPresent());
+			assertTrue(lastDelivery.getAttribute("ATTRBLANK").isPresent());
 			assertEquals("Some value 1", lastDelivery.getAttribute("ATTR1").get());
 			assertEquals("Some value 2", lastDelivery.getAttribute("ATTR2").get());
 			assertEquals("", lastDelivery.getAttribute("ATTRBLANK").get());
