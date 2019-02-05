@@ -31,6 +31,8 @@ import org.hl7.fhir.r4.utils.INarrativeGenerator;
 import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.r4.utils.IResourceValidator.IdStatus;
+import org.hl7.fhir.r4.validation.DefaultEnableWhenEvaluator;
+import org.hl7.fhir.r4.validation.IEnableWhenEvaluator;
 import org.hl7.fhir.r4.validation.InstanceValidator;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -47,6 +49,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @SuppressWarnings({"PackageAccessibility", "Duplicates"})
 public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
@@ -60,6 +63,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
+	private Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier;
+
+	private boolean errorForUnknownProfiles;
 	private List<String> extensionDomains = Collections.emptyList();
 
 	/**
@@ -80,6 +86,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		myDocBuilderFactory = DocumentBuilderFactory.newInstance();
 		myDocBuilderFactory.setNamespaceAware(true);
 		myValidationSupport = theValidationSupport;
+		setEnableWhenEvaluatorSupplier(ctx -> new DefaultEnableWhenEvaluator());
 	}
 
 	/**
@@ -221,6 +228,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	public boolean isAnyExtensionsAllowed() {
 		return myAnyExtensionsAllowed;
 	}
+	
+	public boolean isErrorForUnknownProfiles() {
+		return errorForUnknownProfiles;
+	}
+	
+	public void setErrorForUnknownProfiles(boolean errorForUnknownProfiles) {
+		this.errorForUnknownProfiles = errorForUnknownProfiles;
+	}
 
 	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the
@@ -236,6 +251,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 */
 	public boolean isNoTerminologyChecks() {
 		return noTerminologyChecks;
+	}
+	
+	/**
+	 * Sets a customized {@link IEnableWhenEvaluator} which is injected to created InstanceValidators 
+	 */
+	public void setEnableWhenEvaluatorSupplier(
+			Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier) {
+		this.enableWhenEvaluatorSupplier = enableWhenEvaluatorSupplier;
 	}
 
 	/**
@@ -270,6 +293,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
+		v.setEnableWhenEvaluator(enableWhenEvaluatorSupplier.apply(wrappedWorkerContext));
+		v.setErrorForUnknownProfiles(isErrorForUnknownProfiles());
 		v.getExtensionDomains().addAll(extensionDomains);
 
 		List<ValidationMessage> messages = new ArrayList<>();
