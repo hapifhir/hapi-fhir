@@ -32,16 +32,9 @@ import org.hl7.fhir.dstu3.model.ExpansionProfile.SystemVersionProcessingMode;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Enumeration;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Expression.ExpressionLanguage;
 import org.hl7.fhir.r4.model.HealthcareService.HealthcareServiceEligibilityComponent;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.TerminologyCapabilities;
-import org.hl7.fhir.r4.model.Type;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.utilities.Utilities;
 
 
@@ -76,7 +69,7 @@ import org.hl7.fhir.utilities.Utilities;
 
 
 public class VersionConvertor_30_40 {
-  private static List<String> CANONICAL_URLS = new ArrayList<String>();
+  private static List<String> CANONICAL_URLS = new ArrayList<>();
   static {
     CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap");
     CANONICAL_URLS.add("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset");
@@ -16013,7 +16006,7 @@ public class VersionConvertor_30_40 {
       tgt.setType(convertQuestionnaireItemType(src.getType()));
     for (org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemEnableWhenComponent t : src.getEnableWhen())
       tgt.addEnableWhen(convertQuestionnaireItemEnableWhenComponent(t));
-    tgt.setEnableBehavior(EnableWhenBehavior.ANY);
+    tgt.setEnableBehavior(Questionnaire.EnableWhenBehavior.ANY);
     if (src.hasRequired())
       tgt.setRequired(src.getRequired());
     if (src.hasRepeats())

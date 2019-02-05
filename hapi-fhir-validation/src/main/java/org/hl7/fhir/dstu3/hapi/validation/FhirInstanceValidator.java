@@ -63,7 +63,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
-	private Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier = ctx -> new DefaultEnableWhenEvaluator();
+	private Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier;
 
 	private boolean errorForUnknownProfiles;
 	private List<String> extensionDomains = Collections.emptyList();
@@ -86,6 +86,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		myDocBuilderFactory = DocumentBuilderFactory.newInstance();
 		myDocBuilderFactory.setNamespaceAware(true);
 		myValidationSupport = theValidationSupport;
+		setEnableWhenEvaluatorSupplier(ctx -> new DefaultEnableWhenEvaluator());
 	}
 
 	/**
@@ -254,7 +255,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	
 	/**
 	 * Sets a customized {@link IEnableWhenEvaluator} which is injected to created InstanceValidators 
-	 * @param myEnableWhenEvaluator
 	 */
 	public void setEnableWhenEvaluatorSupplier(
 			Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier) {
@@ -293,9 +293,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
 		v.setResourceIdRule(IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(isNoTerminologyChecks());
-		v.setMyEnableWhenEvaluator(enableWhenEvaluatorSupplier.apply(wrappedWorkerContext));
+		v.setEnableWhenEvaluator(enableWhenEvaluatorSupplier.apply(wrappedWorkerContext));
 		v.setErrorForUnknownProfiles(isErrorForUnknownProfiles());
-		v.addExtensionDomains(extensionDomains);
+		v.getExtensionDomains().addAll(extensionDomains);
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
