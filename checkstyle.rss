@@ -23,11 +23,11 @@ under the License.
     <link>http://jamesagnew.github.io/hapi-fhir/</link>
     <description>HAPI FHIR - Core Library - Checkstyle report</description>
     <language>en-us</language>
-    <copyright>&#169;2014 - 2018 University Health Network</copyright>
+    <copyright>&#169;2014 - 2019 University Health Network</copyright>
     <item>
-      <title>File: 228,
+      <title>File: 230,
              Errors: 0,
-             Warnings: 1639,
+             Warnings: 1839,
              Infos: 0
       </title>
             <link>http://jamesagnew.github.io/hapi-fhir//checkstyle.html</link>
@@ -808,7 +808,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  13
+                  12
                 </td>
                 <td>
                   0
@@ -850,7 +850,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  32
+                  231
                 </td>
                 <td>
                   0
@@ -998,13 +998,27 @@ under the License.
               </tr>
                           <tr>
                 <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.rest.param.BaseAndListParam.java">ca/uhn/fhir/rest/param/BaseAndListParam.java</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  1
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
                   <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.parser.JsonParser.java">ca/uhn/fhir/parser/JsonParser.java</a>
                 </td>
                 <td>
                   0
                 </td>
                 <td>
-                  107
+                  110
                 </td>
                 <td>
                   0
@@ -1396,7 +1410,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  2
+                  1
                 </td>
                 <td>
                   0
@@ -1915,6 +1929,20 @@ under the License.
                 </td>
                 <td>
                   2
+                </td>
+                <td>
+                  0
+                </td>
+              </tr>
+                          <tr>
+                <td>
+                  <a href="http://jamesagnew.github.io/hapi-fhir//checkstyle.html#ca.uhn.fhir.hapi-fhir-base-build.properties">ca/uhn/fhir/hapi-fhir-base-build.properties</a>
+                </td>
+                <td>
+                  0
+                </td>
+                <td>
+                  0
                 </td>
                 <td>
                   0
@@ -2460,7 +2488,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  16
+                  13
                 </td>
                 <td>
                   0
@@ -2866,7 +2894,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  7
+                  8
                 </td>
                 <td>
                   0
@@ -3160,7 +3188,7 @@ under the License.
                   0
                 </td>
                 <td>
-                  11
+                  12
                 </td>
                 <td>
                   0

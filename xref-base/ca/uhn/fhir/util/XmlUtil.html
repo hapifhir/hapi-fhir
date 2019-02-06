@@ -12,7 +12,7 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2018 University Health Network</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2019 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -1695,151 +1695,154 @@
 <a class="jxr_linenumber" name="L1687" href="#L1687">1687</a> 		XMLInputFactory inputFactory;
 <a class="jxr_linenumber" name="L1688" href="#L1688">1688</a> 		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L1689" href="#L1689">1689</a> 			inputFactory = XMLInputFactory.newInstance();
-<a class="jxr_linenumber" name="L1690" href="#L1690">1690</a> 			throwUnitTestExceptionIfConfiguredToDoSo();
-<a class="jxr_linenumber" name="L1691" href="#L1691">1691</a> 		} <strong class="jxr_keyword">catch</strong> (Throwable e) {
-<a class="jxr_linenumber" name="L1692" href="#L1692">1692</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Unable to initialize StAX - XML processing is disabled"</span>, e);
-<a class="jxr_linenumber" name="L1693" href="#L1693">1693</a> 		}
-<a class="jxr_linenumber" name="L1694" href="#L1694">1694</a> 		<strong class="jxr_keyword">return</strong> inputFactory;
-<a class="jxr_linenumber" name="L1695" href="#L1695">1695</a> 	}
-<a class="jxr_linenumber" name="L1696" href="#L1696">1696</a> 
-<a class="jxr_linenumber" name="L1697" href="#L1697">1697</a> 	<strong class="jxr_keyword">static</strong> XMLOutputFactory newOutputFactory() <strong class="jxr_keyword">throws</strong> FactoryConfigurationError {
-<a class="jxr_linenumber" name="L1698" href="#L1698">1698</a> 		XMLOutputFactory outputFactory;
-<a class="jxr_linenumber" name="L1699" href="#L1699">1699</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L1700" href="#L1700">1700</a> 			outputFactory = XMLOutputFactory.newInstance();
-<a class="jxr_linenumber" name="L1701" href="#L1701">1701</a> 			throwUnitTestExceptionIfConfiguredToDoSo();
-<a class="jxr_linenumber" name="L1702" href="#L1702">1702</a> 		} <strong class="jxr_keyword">catch</strong> (Throwable e) {
-<a class="jxr_linenumber" name="L1703" href="#L1703">1703</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Unable to initialize StAX - XML processing is disabled"</span>, e);
-<a class="jxr_linenumber" name="L1704" href="#L1704">1704</a> 		}
-<a class="jxr_linenumber" name="L1705" href="#L1705">1705</a> 		<strong class="jxr_keyword">return</strong> outputFactory;
-<a class="jxr_linenumber" name="L1706" href="#L1706">1706</a> 	}
-<a class="jxr_linenumber" name="L1707" href="#L1707">1707</a> 
-<a class="jxr_linenumber" name="L1708" href="#L1708">1708</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1709" href="#L1709">1709</a> <em class="jxr_javadoccomment">	 * Parses an XML string into a set of StAX events</em>
-<a class="jxr_linenumber" name="L1710" href="#L1710">1710</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1711" href="#L1711">1711</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> List&lt;XMLEvent&gt; parse(String theValue) {
-<a class="jxr_linenumber" name="L1712" href="#L1712">1712</a> 		<strong class="jxr_keyword">if</strong> (isBlank(theValue)) {
-<a class="jxr_linenumber" name="L1713" href="#L1713">1713</a> 			<strong class="jxr_keyword">return</strong> Collections.emptyList();
-<a class="jxr_linenumber" name="L1714" href="#L1714">1714</a> 		}
-<a class="jxr_linenumber" name="L1715" href="#L1715">1715</a> 
-<a class="jxr_linenumber" name="L1716" href="#L1716">1716</a> 		String val = theValue.trim();
-<a class="jxr_linenumber" name="L1717" href="#L1717">1717</a> 		<strong class="jxr_keyword">if</strong> (!val.startsWith(<span class="jxr_string">"&lt;"</span>)) {
-<a class="jxr_linenumber" name="L1718" href="#L1718">1718</a> 			val = XhtmlDt.DIV_OPEN_FIRST + val + <span class="jxr_string">"&lt;/div&gt;"</span>;
-<a class="jxr_linenumber" name="L1719" href="#L1719">1719</a> 		}
-<a class="jxr_linenumber" name="L1720" href="#L1720">1720</a> 		<strong class="jxr_keyword">boolean</strong> hasProcessingInstruction = val.startsWith(<span class="jxr_string">"&lt;?"</span>);
-<a class="jxr_linenumber" name="L1721" href="#L1721">1721</a> 		<strong class="jxr_keyword">if</strong> (hasProcessingInstruction &amp;&amp; val.endsWith(<span class="jxr_string">"?&gt;"</span>)) {
-<a class="jxr_linenumber" name="L1722" href="#L1722">1722</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L1723" href="#L1723">1723</a> 		}
-<a class="jxr_linenumber" name="L1724" href="#L1724">1724</a> 
-<a class="jxr_linenumber" name="L1725" href="#L1725">1725</a> 
-<a class="jxr_linenumber" name="L1726" href="#L1726">1726</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L1727" href="#L1727">1727</a> 			ArrayList&lt;XMLEvent&gt; value = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L1728" href="#L1728">1728</a> 			StringReader reader = <strong class="jxr_keyword">new</strong> StringReader(val);
-<a class="jxr_linenumber" name="L1729" href="#L1729">1729</a> 			XMLEventReader er = XmlUtil.createXmlReader(reader);
-<a class="jxr_linenumber" name="L1730" href="#L1730">1730</a> 			<strong class="jxr_keyword">boolean</strong> first = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L1731" href="#L1731">1731</a> 			<strong class="jxr_keyword">while</strong> (er.hasNext()) {
-<a class="jxr_linenumber" name="L1732" href="#L1732">1732</a> 				XMLEvent next = er.nextEvent();
-<a class="jxr_linenumber" name="L1733" href="#L1733">1733</a> 				<strong class="jxr_keyword">if</strong> (first) {
-<a class="jxr_linenumber" name="L1734" href="#L1734">1734</a> 					first = false;
-<a class="jxr_linenumber" name="L1735" href="#L1735">1735</a> 					<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L1736" href="#L1736">1736</a> 				}
-<a class="jxr_linenumber" name="L1737" href="#L1737">1737</a> 				<strong class="jxr_keyword">if</strong> (er.hasNext()) {
-<a class="jxr_linenumber" name="L1738" href="#L1738">1738</a> 					<em class="jxr_comment">// don't add the last event</em>
-<a class="jxr_linenumber" name="L1739" href="#L1739">1739</a> 					value.add(next);
-<a class="jxr_linenumber" name="L1740" href="#L1740">1740</a> 				}
-<a class="jxr_linenumber" name="L1741" href="#L1741">1741</a> 			}
-<a class="jxr_linenumber" name="L1742" href="#L1742">1742</a> 			<strong class="jxr_keyword">return</strong> value;
-<a class="jxr_linenumber" name="L1743" href="#L1743">1743</a> 
-<a class="jxr_linenumber" name="L1744" href="#L1744">1744</a> 		} <strong class="jxr_keyword">catch</strong> (XMLStreamException e) {
-<a class="jxr_linenumber" name="L1745" href="#L1745">1745</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="DataFormatException" href="../../../../ca/uhn/fhir/parser/DataFormatException.html#DataFormatException">DataFormatException</a>(<span class="jxr_string">"String does not appear to be valid XML/XHTML (error is \&quot;"</span> + e.getMessage() + <span class="jxr_string">"\&quot;): "</span> + theValue, e);
-<a class="jxr_linenumber" name="L1746" href="#L1746">1746</a> 		} <strong class="jxr_keyword">catch</strong> (FactoryConfigurationError e) {
-<a class="jxr_linenumber" name="L1747" href="#L1747">1747</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(e);
-<a class="jxr_linenumber" name="L1748" href="#L1748">1748</a> 		}
-<a class="jxr_linenumber" name="L1749" href="#L1749">1749</a> 	}
-<a class="jxr_linenumber" name="L1750" href="#L1750">1750</a> 
-<a class="jxr_linenumber" name="L1751" href="#L1751">1751</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1752" href="#L1752">1752</a> <em class="jxr_javadoccomment">	 * FOR UNIT TESTS ONLY - Throw this exception for the next operation</em>
-<a class="jxr_linenumber" name="L1753" href="#L1753">1753</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1754" href="#L1754">1754</a> 	<strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> setThrowExceptionForUnitTest(Throwable theException) {
-<a class="jxr_linenumber" name="L1755" href="#L1755">1755</a> 		ourNextException = theException;
-<a class="jxr_linenumber" name="L1756" href="#L1756">1756</a> 	}
-<a class="jxr_linenumber" name="L1757" href="#L1757">1757</a> 
-<a class="jxr_linenumber" name="L1758" href="#L1758">1758</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> throwUnitTestExceptionIfConfiguredToDoSo() <strong class="jxr_keyword">throws</strong> FactoryConfigurationError, XMLStreamException {
-<a class="jxr_linenumber" name="L1759" href="#L1759">1759</a> 		<strong class="jxr_keyword">if</strong> (ourNextException != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1760" href="#L1760">1760</a> 			<strong class="jxr_keyword">if</strong> (ourNextException instanceof javax.xml.stream.FactoryConfigurationError) {
-<a class="jxr_linenumber" name="L1761" href="#L1761">1761</a> 				<strong class="jxr_keyword">throw</strong> ((javax.xml.stream.FactoryConfigurationError)ourNextException);
-<a class="jxr_linenumber" name="L1762" href="#L1762">1762</a> 			}
-<a class="jxr_linenumber" name="L1763" href="#L1763">1763</a> 			<strong class="jxr_keyword">throw</strong> (XMLStreamException)ourNextException;
-<a class="jxr_linenumber" name="L1764" href="#L1764">1764</a> 		}
-<a class="jxr_linenumber" name="L1765" href="#L1765">1765</a> 	}
-<a class="jxr_linenumber" name="L1766" href="#L1766">1766</a> 
-<a class="jxr_linenumber" name="L1767" href="#L1767">1767</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> ExtendedEntityReplacingXmlResolver <strong class="jxr_keyword">implements</strong> XMLResolver {
-<a class="jxr_linenumber" name="L1768" href="#L1768">1768</a> 		@Override
-<a class="jxr_linenumber" name="L1769" href="#L1769">1769</a> 		<strong class="jxr_keyword">public</strong> Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) {
-<a class="jxr_linenumber" name="L1770" href="#L1770">1770</a> 			<strong class="jxr_keyword">if</strong> (thePublicID == <strong class="jxr_keyword">null</strong> &amp;&amp; theSystemID == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1771" href="#L1771">1771</a> 				<strong class="jxr_keyword">if</strong> (theNamespace != <strong class="jxr_keyword">null</strong> &amp;&amp; VALID_ENTITY_NAMES.containsKey(theNamespace)) {
-<a class="jxr_linenumber" name="L1772" href="#L1772">1772</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
-<a class="jxr_linenumber" name="L1773" href="#L1773">1773</a> 				}
-<a class="jxr_linenumber" name="L1774" href="#L1774">1774</a> 			}
-<a class="jxr_linenumber" name="L1775" href="#L1775">1775</a> 
-<a class="jxr_linenumber" name="L1776" href="#L1776">1776</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L1777" href="#L1777">1777</a> 		}
-<a class="jxr_linenumber" name="L1778" href="#L1778">1778</a> 	}
-<a class="jxr_linenumber" name="L1779" href="#L1779">1779</a> 	
-<a class="jxr_linenumber" name="L1780" href="#L1780">1780</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> MyEscaper <strong class="jxr_keyword">implements</strong> EscapingWriterFactory {
-<a class="jxr_linenumber" name="L1781" href="#L1781">1781</a> 
-<a class="jxr_linenumber" name="L1782" href="#L1782">1782</a> 		@Override
-<a class="jxr_linenumber" name="L1783" href="#L1783">1783</a> 		<strong class="jxr_keyword">public</strong> Writer createEscapingWriterFor(OutputStream theOut, String theEnc) <strong class="jxr_keyword">throws</strong> UnsupportedEncodingException {
-<a class="jxr_linenumber" name="L1784" href="#L1784">1784</a> 			<strong class="jxr_keyword">return</strong> createEscapingWriterFor(<strong class="jxr_keyword">new</strong> OutputStreamWriter(theOut, theEnc), theEnc);
-<a class="jxr_linenumber" name="L1785" href="#L1785">1785</a> 		}
-<a class="jxr_linenumber" name="L1786" href="#L1786">1786</a> 
-<a class="jxr_linenumber" name="L1787" href="#L1787">1787</a> 		@Override
-<a class="jxr_linenumber" name="L1788" href="#L1788">1788</a> 		<strong class="jxr_keyword">public</strong> Writer createEscapingWriterFor(<strong class="jxr_keyword">final</strong> Writer theW, String theEnc) {
-<a class="jxr_linenumber" name="L1789" href="#L1789">1789</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Writer() {
-<a class="jxr_linenumber" name="L1790" href="#L1790">1790</a> 
-<a class="jxr_linenumber" name="L1791" href="#L1791">1791</a> 				@Override
-<a class="jxr_linenumber" name="L1792" href="#L1792">1792</a> 				<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> close() <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L1793" href="#L1793">1793</a> 					theW.close();
-<a class="jxr_linenumber" name="L1794" href="#L1794">1794</a> 				}
-<a class="jxr_linenumber" name="L1795" href="#L1795">1795</a> 
-<a class="jxr_linenumber" name="L1796" href="#L1796">1796</a> 				@Override
-<a class="jxr_linenumber" name="L1797" href="#L1797">1797</a> 				<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> flush() <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L1798" href="#L1798">1798</a> 					theW.flush();
-<a class="jxr_linenumber" name="L1799" href="#L1799">1799</a> 				}
-<a class="jxr_linenumber" name="L1800" href="#L1800">1800</a> 
-<a class="jxr_linenumber" name="L1801" href="#L1801">1801</a> 				@Override
-<a class="jxr_linenumber" name="L1802" href="#L1802">1802</a> 				<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> write(<strong class="jxr_keyword">char</strong>[] theCbuf, <strong class="jxr_keyword">int</strong> theOff, <strong class="jxr_keyword">int</strong> theLen) <strong class="jxr_keyword">throws</strong> IOException {
-<a class="jxr_linenumber" name="L1803" href="#L1803">1803</a> 					<strong class="jxr_keyword">boolean</strong> hasEscapable = false;
-<a class="jxr_linenumber" name="L1804" href="#L1804">1804</a> 					<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; theLen &amp;&amp; !hasEscapable; i++) {
-<a class="jxr_linenumber" name="L1805" href="#L1805">1805</a> 						<strong class="jxr_keyword">char</strong> nextChar = theCbuf[i + theOff];
-<a class="jxr_linenumber" name="L1806" href="#L1806">1806</a> 						<strong class="jxr_keyword">switch</strong> (nextChar) {
-<a class="jxr_linenumber" name="L1807" href="#L1807">1807</a> 						<strong class="jxr_keyword">case</strong> '&lt;':
-<a class="jxr_linenumber" name="L1808" href="#L1808">1808</a> 						<strong class="jxr_keyword">case</strong> '&gt;':
-<a class="jxr_linenumber" name="L1809" href="#L1809">1809</a> 						<strong class="jxr_keyword">case</strong> '&quot;':
-<a class="jxr_linenumber" name="L1810" href="#L1810">1810</a> 						<strong class="jxr_keyword">case</strong> '&amp;':
-<a class="jxr_linenumber" name="L1811" href="#L1811">1811</a> 							hasEscapable = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L1812" href="#L1812">1812</a> 							<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L1813" href="#L1813">1813</a> 						<strong class="jxr_keyword">default</strong>:
-<a class="jxr_linenumber" name="L1814" href="#L1814">1814</a> 							<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L1815" href="#L1815">1815</a> 						}
-<a class="jxr_linenumber" name="L1816" href="#L1816">1816</a> 					}
-<a class="jxr_linenumber" name="L1817" href="#L1817">1817</a> 
-<a class="jxr_linenumber" name="L1818" href="#L1818">1818</a> 					<strong class="jxr_keyword">if</strong> (!hasEscapable) {
-<a class="jxr_linenumber" name="L1819" href="#L1819">1819</a> 						theW.write(theCbuf, theOff, theLen);
-<a class="jxr_linenumber" name="L1820" href="#L1820">1820</a> 						<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L1821" href="#L1821">1821</a> 					}
-<a class="jxr_linenumber" name="L1822" href="#L1822">1822</a> 
-<a class="jxr_linenumber" name="L1823" href="#L1823">1823</a> 					String escaped = StringEscapeUtils.escapeXml10(<strong class="jxr_keyword">new</strong> String(theCbuf, theOff, theLen));
-<a class="jxr_linenumber" name="L1824" href="#L1824">1824</a> 					theW.write(escaped.toCharArray());
-<a class="jxr_linenumber" name="L1825" href="#L1825">1825</a> 				}
-<a class="jxr_linenumber" name="L1826" href="#L1826">1826</a> 			};
-<a class="jxr_linenumber" name="L1827" href="#L1827">1827</a> 		}
-<a class="jxr_linenumber" name="L1828" href="#L1828">1828</a> 
-<a class="jxr_linenumber" name="L1829" href="#L1829">1829</a> 	}
-<a class="jxr_linenumber" name="L1830" href="#L1830">1830</a> 
-<a class="jxr_linenumber" name="L1831" href="#L1831">1831</a> }
+<a class="jxr_linenumber" name="L1690" href="#L1690">1690</a> 			<strong class="jxr_keyword">if</strong> (inputFactory.isPropertySupported(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)) {
+<a class="jxr_linenumber" name="L1691" href="#L1691">1691</a> 				inputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L1692" href="#L1692">1692</a> 			}
+<a class="jxr_linenumber" name="L1693" href="#L1693">1693</a> 			throwUnitTestExceptionIfConfiguredToDoSo();
+<a class="jxr_linenumber" name="L1694" href="#L1694">1694</a> 		} <strong class="jxr_keyword">catch</strong> (Throwable e) {
+<a class="jxr_linenumber" name="L1695" href="#L1695">1695</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Unable to initialize StAX - XML processing is disabled"</span>, e);
+<a class="jxr_linenumber" name="L1696" href="#L1696">1696</a> 		}
+<a class="jxr_linenumber" name="L1697" href="#L1697">1697</a> 		<strong class="jxr_keyword">return</strong> inputFactory;
+<a class="jxr_linenumber" name="L1698" href="#L1698">1698</a> 	}
+<a class="jxr_linenumber" name="L1699" href="#L1699">1699</a> 
+<a class="jxr_linenumber" name="L1700" href="#L1700">1700</a> 	<strong class="jxr_keyword">static</strong> XMLOutputFactory newOutputFactory() <strong class="jxr_keyword">throws</strong> FactoryConfigurationError {
+<a class="jxr_linenumber" name="L1701" href="#L1701">1701</a> 		XMLOutputFactory outputFactory;
+<a class="jxr_linenumber" name="L1702" href="#L1702">1702</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1703" href="#L1703">1703</a> 			outputFactory = XMLOutputFactory.newInstance();
+<a class="jxr_linenumber" name="L1704" href="#L1704">1704</a> 			throwUnitTestExceptionIfConfiguredToDoSo();
+<a class="jxr_linenumber" name="L1705" href="#L1705">1705</a> 		} <strong class="jxr_keyword">catch</strong> (Throwable e) {
+<a class="jxr_linenumber" name="L1706" href="#L1706">1706</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Unable to initialize StAX - XML processing is disabled"</span>, e);
+<a class="jxr_linenumber" name="L1707" href="#L1707">1707</a> 		}
+<a class="jxr_linenumber" name="L1708" href="#L1708">1708</a> 		<strong class="jxr_keyword">return</strong> outputFactory;
+<a class="jxr_linenumber" name="L1709" href="#L1709">1709</a> 	}
+<a class="jxr_linenumber" name="L1710" href="#L1710">1710</a> 
+<a class="jxr_linenumber" name="L1711" href="#L1711">1711</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1712" href="#L1712">1712</a> <em class="jxr_javadoccomment">	 * Parses an XML string into a set of StAX events</em>
+<a class="jxr_linenumber" name="L1713" href="#L1713">1713</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1714" href="#L1714">1714</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> List&lt;XMLEvent&gt; parse(String theValue) {
+<a class="jxr_linenumber" name="L1715" href="#L1715">1715</a> 		<strong class="jxr_keyword">if</strong> (isBlank(theValue)) {
+<a class="jxr_linenumber" name="L1716" href="#L1716">1716</a> 			<strong class="jxr_keyword">return</strong> Collections.emptyList();
+<a class="jxr_linenumber" name="L1717" href="#L1717">1717</a> 		}
+<a class="jxr_linenumber" name="L1718" href="#L1718">1718</a> 
+<a class="jxr_linenumber" name="L1719" href="#L1719">1719</a> 		String val = theValue.trim();
+<a class="jxr_linenumber" name="L1720" href="#L1720">1720</a> 		<strong class="jxr_keyword">if</strong> (!val.startsWith(<span class="jxr_string">"&lt;"</span>)) {
+<a class="jxr_linenumber" name="L1721" href="#L1721">1721</a> 			val = XhtmlDt.DIV_OPEN_FIRST + val + <span class="jxr_string">"&lt;/div&gt;"</span>;
+<a class="jxr_linenumber" name="L1722" href="#L1722">1722</a> 		}
+<a class="jxr_linenumber" name="L1723" href="#L1723">1723</a> 		<strong class="jxr_keyword">boolean</strong> hasProcessingInstruction = val.startsWith(<span class="jxr_string">"&lt;?"</span>);
+<a class="jxr_linenumber" name="L1724" href="#L1724">1724</a> 		<strong class="jxr_keyword">if</strong> (hasProcessingInstruction &amp;&amp; val.endsWith(<span class="jxr_string">"?&gt;"</span>)) {
+<a class="jxr_linenumber" name="L1725" href="#L1725">1725</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1726" href="#L1726">1726</a> 		}
+<a class="jxr_linenumber" name="L1727" href="#L1727">1727</a> 
+<a class="jxr_linenumber" name="L1728" href="#L1728">1728</a> 
+<a class="jxr_linenumber" name="L1729" href="#L1729">1729</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L1730" href="#L1730">1730</a> 			ArrayList&lt;XMLEvent&gt; value = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L1731" href="#L1731">1731</a> 			StringReader reader = <strong class="jxr_keyword">new</strong> StringReader(val);
+<a class="jxr_linenumber" name="L1732" href="#L1732">1732</a> 			XMLEventReader er = XmlUtil.createXmlReader(reader);
+<a class="jxr_linenumber" name="L1733" href="#L1733">1733</a> 			<strong class="jxr_keyword">boolean</strong> first = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1734" href="#L1734">1734</a> 			<strong class="jxr_keyword">while</strong> (er.hasNext()) {
+<a class="jxr_linenumber" name="L1735" href="#L1735">1735</a> 				XMLEvent next = er.nextEvent();
+<a class="jxr_linenumber" name="L1736" href="#L1736">1736</a> 				<strong class="jxr_keyword">if</strong> (first) {
+<a class="jxr_linenumber" name="L1737" href="#L1737">1737</a> 					first = false;
+<a class="jxr_linenumber" name="L1738" href="#L1738">1738</a> 					<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L1739" href="#L1739">1739</a> 				}
+<a class="jxr_linenumber" name="L1740" href="#L1740">1740</a> 				<strong class="jxr_keyword">if</strong> (er.hasNext()) {
+<a class="jxr_linenumber" name="L1741" href="#L1741">1741</a> 					<em class="jxr_comment">// don't add the last event</em>
+<a class="jxr_linenumber" name="L1742" href="#L1742">1742</a> 					value.add(next);
+<a class="jxr_linenumber" name="L1743" href="#L1743">1743</a> 				}
+<a class="jxr_linenumber" name="L1744" href="#L1744">1744</a> 			}
+<a class="jxr_linenumber" name="L1745" href="#L1745">1745</a> 			<strong class="jxr_keyword">return</strong> value;
+<a class="jxr_linenumber" name="L1746" href="#L1746">1746</a> 
+<a class="jxr_linenumber" name="L1747" href="#L1747">1747</a> 		} <strong class="jxr_keyword">catch</strong> (XMLStreamException e) {
+<a class="jxr_linenumber" name="L1748" href="#L1748">1748</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="DataFormatException" href="../../../../ca/uhn/fhir/parser/DataFormatException.html#DataFormatException">DataFormatException</a>(<span class="jxr_string">"String does not appear to be valid XML/XHTML (error is \&quot;"</span> + e.getMessage() + <span class="jxr_string">"\&quot;): "</span> + theValue, e);
+<a class="jxr_linenumber" name="L1749" href="#L1749">1749</a> 		} <strong class="jxr_keyword">catch</strong> (FactoryConfigurationError e) {
+<a class="jxr_linenumber" name="L1750" href="#L1750">1750</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(e);
+<a class="jxr_linenumber" name="L1751" href="#L1751">1751</a> 		}
+<a class="jxr_linenumber" name="L1752" href="#L1752">1752</a> 	}
+<a class="jxr_linenumber" name="L1753" href="#L1753">1753</a> 
+<a class="jxr_linenumber" name="L1754" href="#L1754">1754</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1755" href="#L1755">1755</a> <em class="jxr_javadoccomment">	 * FOR UNIT TESTS ONLY - Throw this exception for the next operation</em>
+<a class="jxr_linenumber" name="L1756" href="#L1756">1756</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1757" href="#L1757">1757</a> 	<strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> setThrowExceptionForUnitTest(Throwable theException) {
+<a class="jxr_linenumber" name="L1758" href="#L1758">1758</a> 		ourNextException = theException;
+<a class="jxr_linenumber" name="L1759" href="#L1759">1759</a> 	}
+<a class="jxr_linenumber" name="L1760" href="#L1760">1760</a> 
+<a class="jxr_linenumber" name="L1761" href="#L1761">1761</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> throwUnitTestExceptionIfConfiguredToDoSo() <strong class="jxr_keyword">throws</strong> FactoryConfigurationError, XMLStreamException {
+<a class="jxr_linenumber" name="L1762" href="#L1762">1762</a> 		<strong class="jxr_keyword">if</strong> (ourNextException != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1763" href="#L1763">1763</a> 			<strong class="jxr_keyword">if</strong> (ourNextException instanceof javax.xml.stream.FactoryConfigurationError) {
+<a class="jxr_linenumber" name="L1764" href="#L1764">1764</a> 				<strong class="jxr_keyword">throw</strong> ((javax.xml.stream.FactoryConfigurationError)ourNextException);
+<a class="jxr_linenumber" name="L1765" href="#L1765">1765</a> 			}
+<a class="jxr_linenumber" name="L1766" href="#L1766">1766</a> 			<strong class="jxr_keyword">throw</strong> (XMLStreamException)ourNextException;
+<a class="jxr_linenumber" name="L1767" href="#L1767">1767</a> 		}
+<a class="jxr_linenumber" name="L1768" href="#L1768">1768</a> 	}
+<a class="jxr_linenumber" name="L1769" href="#L1769">1769</a> 
+<a class="jxr_linenumber" name="L1770" href="#L1770">1770</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">class</strong> ExtendedEntityReplacingXmlResolver <strong class="jxr_keyword">implements</strong> XMLResolver {
+<a class="jxr_linenumber" name="L1771" href="#L1771">1771</a> 		@Override
+<a class="jxr_linenumber" name="L1772" href="#L1772">1772</a> 		<strong class="jxr_keyword">public</strong> Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) {
+<a class="jxr_linenumber" name="L1773" href="#L1773">1773</a> 			<strong class="jxr_keyword">if</strong> (thePublicID == <strong class="jxr_keyword">null</strong> &amp;&amp; theSystemID == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1774" href="#L1774">1774</a> 				<strong class="jxr_keyword">if</strong> (theNamespace != <strong class="jxr_keyword">null</strong> &amp;&amp; VALID_ENTITY_NAMES.containsKey(theNamespace)) {
+<a class="jxr_linenumber" name="L1775" href="#L1775">1775</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> String(Character.toChars(VALID_ENTITY_NAMES.get(theNamespace)));
+<a class="jxr_linenumber" name="L1776" href="#L1776">1776</a> 				}
+<a class="jxr_linenumber" name="L1777" href="#L1777">1777</a> 			}
+<a class="jxr_linenumber" name="L1778" href="#L1778">1778</a> 
+<a class="jxr_linenumber" name="L1779" href="#L1779">1779</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1780" href="#L1780">1780</a> 		}
+<a class="jxr_linenumber" name="L1781" href="#L1781">1781</a> 	}
+<a class="jxr_linenumber" name="L1782" href="#L1782">1782</a> 	
+<a class="jxr_linenumber" name="L1783" href="#L1783">1783</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> MyEscaper <strong class="jxr_keyword">implements</strong> EscapingWriterFactory {
+<a class="jxr_linenumber" name="L1784" href="#L1784">1784</a> 
+<a class="jxr_linenumber" name="L1785" href="#L1785">1785</a> 		@Override
+<a class="jxr_linenumber" name="L1786" href="#L1786">1786</a> 		<strong class="jxr_keyword">public</strong> Writer createEscapingWriterFor(OutputStream theOut, String theEnc) <strong class="jxr_keyword">throws</strong> UnsupportedEncodingException {
+<a class="jxr_linenumber" name="L1787" href="#L1787">1787</a> 			<strong class="jxr_keyword">return</strong> createEscapingWriterFor(<strong class="jxr_keyword">new</strong> OutputStreamWriter(theOut, theEnc), theEnc);
+<a class="jxr_linenumber" name="L1788" href="#L1788">1788</a> 		}
+<a class="jxr_linenumber" name="L1789" href="#L1789">1789</a> 
+<a class="jxr_linenumber" name="L1790" href="#L1790">1790</a> 		@Override
+<a class="jxr_linenumber" name="L1791" href="#L1791">1791</a> 		<strong class="jxr_keyword">public</strong> Writer createEscapingWriterFor(<strong class="jxr_keyword">final</strong> Writer theW, String theEnc) {
+<a class="jxr_linenumber" name="L1792" href="#L1792">1792</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> Writer() {
+<a class="jxr_linenumber" name="L1793" href="#L1793">1793</a> 
+<a class="jxr_linenumber" name="L1794" href="#L1794">1794</a> 				@Override
+<a class="jxr_linenumber" name="L1795" href="#L1795">1795</a> 				<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> close() <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L1796" href="#L1796">1796</a> 					theW.close();
+<a class="jxr_linenumber" name="L1797" href="#L1797">1797</a> 				}
+<a class="jxr_linenumber" name="L1798" href="#L1798">1798</a> 
+<a class="jxr_linenumber" name="L1799" href="#L1799">1799</a> 				@Override
+<a class="jxr_linenumber" name="L1800" href="#L1800">1800</a> 				<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> flush() <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L1801" href="#L1801">1801</a> 					theW.flush();
+<a class="jxr_linenumber" name="L1802" href="#L1802">1802</a> 				}
+<a class="jxr_linenumber" name="L1803" href="#L1803">1803</a> 
+<a class="jxr_linenumber" name="L1804" href="#L1804">1804</a> 				@Override
+<a class="jxr_linenumber" name="L1805" href="#L1805">1805</a> 				<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> write(<strong class="jxr_keyword">char</strong>[] theCbuf, <strong class="jxr_keyword">int</strong> theOff, <strong class="jxr_keyword">int</strong> theLen) <strong class="jxr_keyword">throws</strong> IOException {
+<a class="jxr_linenumber" name="L1806" href="#L1806">1806</a> 					<strong class="jxr_keyword">boolean</strong> hasEscapable = false;
+<a class="jxr_linenumber" name="L1807" href="#L1807">1807</a> 					<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; theLen &amp;&amp; !hasEscapable; i++) {
+<a class="jxr_linenumber" name="L1808" href="#L1808">1808</a> 						<strong class="jxr_keyword">char</strong> nextChar = theCbuf[i + theOff];
+<a class="jxr_linenumber" name="L1809" href="#L1809">1809</a> 						<strong class="jxr_keyword">switch</strong> (nextChar) {
+<a class="jxr_linenumber" name="L1810" href="#L1810">1810</a> 						<strong class="jxr_keyword">case</strong> '&lt;':
+<a class="jxr_linenumber" name="L1811" href="#L1811">1811</a> 						<strong class="jxr_keyword">case</strong> '&gt;':
+<a class="jxr_linenumber" name="L1812" href="#L1812">1812</a> 						<strong class="jxr_keyword">case</strong> '&quot;':
+<a class="jxr_linenumber" name="L1813" href="#L1813">1813</a> 						<strong class="jxr_keyword">case</strong> '&amp;':
+<a class="jxr_linenumber" name="L1814" href="#L1814">1814</a> 							hasEscapable = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L1815" href="#L1815">1815</a> 							<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1816" href="#L1816">1816</a> 						<strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L1817" href="#L1817">1817</a> 							<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L1818" href="#L1818">1818</a> 						}
+<a class="jxr_linenumber" name="L1819" href="#L1819">1819</a> 					}
+<a class="jxr_linenumber" name="L1820" href="#L1820">1820</a> 
+<a class="jxr_linenumber" name="L1821" href="#L1821">1821</a> 					<strong class="jxr_keyword">if</strong> (!hasEscapable) {
+<a class="jxr_linenumber" name="L1822" href="#L1822">1822</a> 						theW.write(theCbuf, theOff, theLen);
+<a class="jxr_linenumber" name="L1823" href="#L1823">1823</a> 						<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L1824" href="#L1824">1824</a> 					}
+<a class="jxr_linenumber" name="L1825" href="#L1825">1825</a> 
+<a class="jxr_linenumber" name="L1826" href="#L1826">1826</a> 					String escaped = StringEscapeUtils.escapeXml10(<strong class="jxr_keyword">new</strong> String(theCbuf, theOff, theLen));
+<a class="jxr_linenumber" name="L1827" href="#L1827">1827</a> 					theW.write(escaped.toCharArray());
+<a class="jxr_linenumber" name="L1828" href="#L1828">1828</a> 				}
+<a class="jxr_linenumber" name="L1829" href="#L1829">1829</a> 			};
+<a class="jxr_linenumber" name="L1830" href="#L1830">1830</a> 		}
+<a class="jxr_linenumber" name="L1831" href="#L1831">1831</a> 
+<a class="jxr_linenumber" name="L1832" href="#L1832">1832</a> 	}
+<a class="jxr_linenumber" name="L1833" href="#L1833">1833</a> 
+<a class="jxr_linenumber" name="L1834" href="#L1834">1834</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

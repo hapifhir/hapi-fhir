@@ -12,7 +12,7 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR JPA Server</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2018 University Health Network</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2019 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -110,10 +110,10 @@
 <a class="jxr_linenumber" name="L102" href="#L102">102</a> 
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 			<em class="jxr_comment">// Only delete if we don't have results left in this search</em>
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 			<strong class="jxr_keyword">if</strong> (resultPids.getNumberOfElements() &lt; max) {
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 				ourLog.info(<span class="jxr_string">"Deleting search {}/{} - Created[{}] -- Last returned[{}]"</span>, searchToDelete.getId(), searchToDelete.getUuid(), <strong class="jxr_keyword">new</strong> InstantType(searchToDelete.getCreated()), <strong class="jxr_keyword">new</strong> InstantType(searchToDelete.getSearchLastReturned()));
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 				ourLog.debug(<span class="jxr_string">"Deleting search {}/{} - Created[{}] -- Last returned[{}]"</span>, searchToDelete.getId(), searchToDelete.getUuid(), <strong class="jxr_keyword">new</strong> InstantType(searchToDelete.getCreated()), <strong class="jxr_keyword">new</strong> InstantType(searchToDelete.getSearchLastReturned()));
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 				mySearchDao.deleteByPid(searchToDelete.getId());
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 				ourLog.info(<span class="jxr_string">"Purged {} search results for deleted search {}/{}"</span>, resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 				ourLog.debug(<span class="jxr_string">"Purged {} search results for deleted search {}/{}"</span>, resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
 <a class="jxr_linenumber" name="L109" href="#L109">109</a> 			}
 <a class="jxr_linenumber" name="L110" href="#L110">110</a> 		});
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 	}
@@ -157,7 +157,7 @@
 <a class="jxr_linenumber" name="L149" href="#L149">149</a> 		<strong class="jxr_keyword">int</strong> count = toDelete.getContent().size();
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 		<strong class="jxr_keyword">if</strong> (count &gt; 0) {
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 			<strong class="jxr_keyword">long</strong> total = tt.execute(t -&gt; mySearchDao.count());
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			ourLog.info(<span class="jxr_string">"Deleted {} searches, {} remaining"</span>, count, total);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			ourLog.debug(<span class="jxr_string">"Deleted {} searches, {} remaining"</span>, count, total);
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 		}
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 
 <a class="jxr_linenumber" name="L155" href="#L155">155</a> 	}
@@ -204,7 +204,7 @@
 <a class="jxr_linenumber" name="L196" href="#L196">196</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

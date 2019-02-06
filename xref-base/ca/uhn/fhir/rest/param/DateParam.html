@@ -12,7 +12,7 @@
 <a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * #%L</em>
 <a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * HAPI FHIR - Core Library</em>
 <a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * %%</em>
-<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2018 University Health Network</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> * Copyright (C) 2014 - 2019 University Health Network</em>
 <a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> * %%</em>
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
@@ -263,21 +263,29 @@
 <a class="jxr_linenumber" name="L255" href="#L255">255</a> 		<strong class="jxr_keyword">return</strong> b.build();
 <a class="jxr_linenumber" name="L256" href="#L256">256</a> 	}
 <a class="jxr_linenumber" name="L257" href="#L257">257</a> 
-<a class="jxr_linenumber" name="L258" href="#L258">258</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> DateParamDateTimeHolder <strong class="jxr_keyword">extends</strong> <a name="BaseDateTimeDt" href="../../../../../ca/uhn/fhir/model/primitive/BaseDateTimeDt.html#BaseDateTimeDt">BaseDateTimeDt</a> {
-<a class="jxr_linenumber" name="L259" href="#L259">259</a> 		@Override
-<a class="jxr_linenumber" name="L260" href="#L260">260</a> 		<strong class="jxr_keyword">protected</strong> <a name="TemporalPrecisionEnum" href="../../../../../ca/uhn/fhir/model/api/TemporalPrecisionEnum.html#TemporalPrecisionEnum">TemporalPrecisionEnum</a> getDefaultPrecisionForDatatype() {
-<a class="jxr_linenumber" name="L261" href="#L261">261</a> 			<strong class="jxr_keyword">return</strong> TemporalPrecisionEnum.SECOND;
-<a class="jxr_linenumber" name="L262" href="#L262">262</a> 		}
-<a class="jxr_linenumber" name="L263" href="#L263">263</a> 
-<a class="jxr_linenumber" name="L264" href="#L264">264</a> 		@Override
-<a class="jxr_linenumber" name="L265" href="#L265">265</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> isPrecisionAllowed(<a name="TemporalPrecisionEnum" href="../../../../../ca/uhn/fhir/model/api/TemporalPrecisionEnum.html#TemporalPrecisionEnum">TemporalPrecisionEnum</a> thePrecision) {
-<a class="jxr_linenumber" name="L266" href="#L266">266</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L267" href="#L267">267</a> 		}
-<a class="jxr_linenumber" name="L268" href="#L268">268</a> 	}
-<a class="jxr_linenumber" name="L269" href="#L269">269</a> }
+<a class="jxr_linenumber" name="L258" href="#L258">258</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">class</strong> DateParamDateTimeHolder <strong class="jxr_keyword">extends</strong> <a name="BaseDateTimeDt" href="../../../../../ca/uhn/fhir/model/primitive/BaseDateTimeDt.html#BaseDateTimeDt">BaseDateTimeDt</a> {
+<a class="jxr_linenumber" name="L259" href="#L259">259</a> 
+<a class="jxr_linenumber" name="L260" href="#L260">260</a> 		<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L261" href="#L261">261</a> <em class="jxr_javadoccomment">		 * Constructor</em>
+<a class="jxr_linenumber" name="L262" href="#L262">262</a> <em class="jxr_javadoccomment">		 */</em>
+<a class="jxr_linenumber" name="L263" href="#L263">263</a> 		<strong class="jxr_keyword">public</strong> DateParamDateTimeHolder() {
+<a class="jxr_linenumber" name="L264" href="#L264">264</a> 			<strong class="jxr_keyword">super</strong>();
+<a class="jxr_linenumber" name="L265" href="#L265">265</a> 		}
+<a class="jxr_linenumber" name="L266" href="#L266">266</a> 
+<a class="jxr_linenumber" name="L267" href="#L267">267</a> 		@Override
+<a class="jxr_linenumber" name="L268" href="#L268">268</a> 		<strong class="jxr_keyword">protected</strong> <a name="TemporalPrecisionEnum" href="../../../../../ca/uhn/fhir/model/api/TemporalPrecisionEnum.html#TemporalPrecisionEnum">TemporalPrecisionEnum</a> getDefaultPrecisionForDatatype() {
+<a class="jxr_linenumber" name="L269" href="#L269">269</a> 			<strong class="jxr_keyword">return</strong> TemporalPrecisionEnum.SECOND;
+<a class="jxr_linenumber" name="L270" href="#L270">270</a> 		}
+<a class="jxr_linenumber" name="L271" href="#L271">271</a> 
+<a class="jxr_linenumber" name="L272" href="#L272">272</a> 		@Override
+<a class="jxr_linenumber" name="L273" href="#L273">273</a> 		<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> isPrecisionAllowed(<a name="TemporalPrecisionEnum" href="../../../../../ca/uhn/fhir/model/api/TemporalPrecisionEnum.html#TemporalPrecisionEnum">TemporalPrecisionEnum</a> thePrecision) {
+<a class="jxr_linenumber" name="L274" href="#L274">274</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L275" href="#L275">275</a> 		}
+<a class="jxr_linenumber" name="L276" href="#L276">276</a> 	}
+<a class="jxr_linenumber" name="L277" href="#L277">277</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2014&#x2013;2018 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
