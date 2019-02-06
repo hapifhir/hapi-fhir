@@ -356,6 +356,10 @@
 				A NullPointerException during validation was fixed. Thanks to GitHub
 				user zilin375 for the pull request!
 			</action>
+			<action type="add" issue="1148">
+				Support for validating enableWhen in Questionnaires has been added to the Validator. Thanks
+				to Eeva Turkka and Matti Uutsitalo for the pull request!
+			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
 			<action type="add">
