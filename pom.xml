@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>3.7.0</version>
+	<version>3.8.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -1567,8 +1567,6 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<!-- Be careful upgrading the version of this plugin- 3.5 breaks the relow-maven-skin that we use currently. Also once we move to 3.5 the site.xml <head> tag needs to have its contents put in a CDATA 
-						block. What an unpleasant misadventure to figure that all out...... -->
 					<version>3.7.1</version>
 					<configuration>
 						<skip>false</skip>
