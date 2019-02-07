@@ -62,7 +62,7 @@ public class ElementsParamR4Test {
 				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
 				assertThat(responseContent, (containsString("family")));
 				assertThat(responseContent, (containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("meta", "name", "maritalStatus"));
+				assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
 			}
 		);
 	}
@@ -77,7 +77,7 @@ public class ElementsParamR4Test {
 				assertThat(responseContent, not(containsString("<div>THE DIV</div>")));
 				assertThat(responseContent, (containsString("family")));
 				assertThat(responseContent, not(containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("meta", "name"));
+				assertThat(ourLastElements, containsInAnyOrder("name"));
 			}
 		);
 	}
@@ -93,7 +93,7 @@ public class ElementsParamR4Test {
 				assertThat(responseContent, not(containsString("THE DIV")));
 				assertThat(responseContent, containsString("family"));
 				assertThat(responseContent, containsString("maritalStatus"));
-				assertThat(ourLastElements, containsInAnyOrder("meta", "name", "maritalStatus"));
+				assertThat(ourLastElements, containsInAnyOrder("name", "maritalStatus"));
 			}
 		);
 	}
@@ -108,7 +108,7 @@ public class ElementsParamR4Test {
 				assertThat(responseContent, containsString("THE DIV"));
 				assertThat(responseContent, not(containsString("family")));
 				assertThat(responseContent, not(containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder("meta", "text"));
+				assertThat(ourLastElements, containsInAnyOrder( "text"));
 			}
 		);
 	}
@@ -181,6 +181,34 @@ public class ElementsParamR4Test {
 				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
 				assertEquals(0, obs.getCode().getCoding().size());
 				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
+			});
+	}
+
+	/**
+	 * A search on procedure, with only resource specific elements filters that are specifically
+	 * on other resources but Procedure, should not affect the output of the procedure resource.
+	 */
+	@Test
+	public void testMultiResourceElementsFilterDoesntAffectFocalResource() throws IOException {
+		createProcedureWithLongChain();
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements=Observation.subject",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals(true, procedure.getMeta().isEmpty());
+				assertEquals("REASON_CODE", procedure.getReasonCode().get(0).getCoding().get(0).getCode());
+				assertEquals("USED_CODE", procedure.getUsedCode().get(0).getCoding().get(0).getCode());
+
+				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
+				assertEquals(true, dr.getMeta().isEmpty());
+				assertEquals(1, dr.getResult().size());
+
+				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
+				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
+				assertEquals(null, obs.getStatus());
+				assertEquals(0, obs.getCode().getCoding().size());
+				assertEquals(false, obs.hasValue());
+				assertEquals("Patient/123", obs.getSubject().getReference());
 			});
 	}
 

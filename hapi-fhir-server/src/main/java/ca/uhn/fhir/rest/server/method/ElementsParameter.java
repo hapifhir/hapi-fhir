@@ -87,29 +87,25 @@ public class ElementsParameter implements IParameter {
 		if (theExclude) {
 			paramName = Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER;
 		}
-		String[] summary = theRequest.getParameters().get(paramName);
+		String[] elementsValues = theRequest.getParameters().get(paramName);
 
-		if (summary != null && summary.length > 0) {
-			Set<String> retVal = new HashSet<String>();
-			for (String next : summary) {
+		if (elementsValues != null && elementsValues.length > 0) {
+			Set<String> retVal = new HashSet<>();
+			for (String next : elementsValues) {
 				StringTokenizer tok = new StringTokenizer(next, ",");
 				while (tok.hasMoreTokens()) {
 					String token = tok.nextToken();
 					if (isNotBlank(token)) {
-						if (token.contains(".") && standardMode) {
-							continue;
-						}
+						if (token.contains("."))
+							if (standardMode) {
+								continue;
+							}
 						retVal.add(token);
 					}
 				}
 			}
 			if (retVal.isEmpty()) {
 				return null;
-			}
-
-			// Always include the meta element even for subsetted values
-			if (!theExclude) {
-				retVal.add("meta");
 			}
 
 			return retVal;

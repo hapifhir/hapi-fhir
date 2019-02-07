@@ -6,7 +6,7 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.7.0" date="TBD" description="Gale">
+		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
 				HAPI FHIR is now built using OpenJDK 11. Users are recommended to upgrade to this version
 				of Java if this is feasible. We are not yet dropping support for Java 8 (aka 1.8), but
@@ -355,6 +355,10 @@
 			<action type="fix" issue="1114">
 				A NullPointerException during validation was fixed. Thanks to GitHub
 				user zilin375 for the pull request!
+			</action>
+			<action type="add" issue="1148">
+				Support for validating enableWhen in Questionnaires has been added to the Validator. Thanks
+				to Eeva Turkka and Matti Uutsitalo for the pull request!
 			</action>
 		</release>
 		<release version="3.6.0" date="2018-11-12" description="Food">
