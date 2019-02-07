@@ -1172,7 +1172,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		dr.getCode().setText("CODE TEXT");
 		ourClient.create().resource(dr).execute();
 
-		HttpGet get = new HttpGet(ourServerBase + "/DiagnosticReport?_include=DiagnosticReport:result&_elements:exclude=DiagnosticReport&_elements=DiagnosticReport:status,Observation:value,Observation:code,Observation:subject&_pretty=true");
+		HttpGet get = new HttpGet(ourServerBase + "/DiagnosticReport?_include=DiagnosticReport:result&_elements:exclude=DiagnosticReport&_elements=DiagnosticReport.status,Observation.value,Observation.code,Observation.subject&_pretty=true");
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
