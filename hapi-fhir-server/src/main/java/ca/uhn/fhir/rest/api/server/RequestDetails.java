@@ -166,6 +166,20 @@ public abstract class RequestDetails {
 	}
 
 	/**
+	 * Returns the attribute map for this request. Attributes are a place for user-supplied
+	 * objects of any type to be attached to an individual request. They can be used to pass information
+	 * between interceptor methods.
+	 */
+	public abstract Object getAttribute(String theAttributeName);
+
+	/**
+	 * Returns the attribute map for this request. Attributes are a place for user-supplied
+	 * objects of any type to be attached to an individual request. They can be used to pass information
+	 * between interceptor methods.
+	 */
+	public abstract void setAttribute(String theAttributeName, Object theAttributeValue);
+
+	/**
 	 * Retrieves the body of the request as binary data. Either this method or {@link #getReader} may be called to read
 	 * the body, not both.
 	 *
