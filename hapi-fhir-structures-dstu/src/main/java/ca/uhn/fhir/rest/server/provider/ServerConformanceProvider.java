@@ -54,7 +54,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private boolean myCache = true;
 	private volatile Conformance myConformance;
 	private String myPublisher = "Not provided";
-	private RestulfulServerConfiguration myServerConfiguration;
+	private RestfulServerConfiguration myServerConfiguration;
 
 	/*
 	 * Add a no-arg constructor and seetter so that the

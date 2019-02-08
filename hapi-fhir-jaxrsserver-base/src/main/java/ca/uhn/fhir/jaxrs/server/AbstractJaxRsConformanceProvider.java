@@ -61,7 +61,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	/** the resource bindings */
 	private ConcurrentHashMap<String, ResourceBinding> myResourceNameToBinding = new ConcurrentHashMap<String, ResourceBinding>();
 	/** the server configuration */
-	private RestulfulServerConfiguration serverConfiguration = new RestulfulServerConfiguration();
+	private RestfulServerConfiguration serverConfiguration = new RestfulServerConfiguration();
 
 	/** the conformance. It is created once during startup */
 	private org.hl7.fhir.r4.model.CapabilityStatement myR4CapabilityStatement;

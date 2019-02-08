@@ -183,8 +183,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	}
 
-	public RestulfulServerConfiguration createConfiguration() {
-		RestulfulServerConfiguration result = new RestulfulServerConfiguration();
+	public RestfulServerConfiguration createConfiguration() {
+		RestfulServerConfiguration result = new RestfulServerConfiguration();
 		result.setResourceBindings(getResourceBindings());
 		result.setServerBindings(getServerBindings());
 		result.setImplementationDescription(getImplementationDescription());

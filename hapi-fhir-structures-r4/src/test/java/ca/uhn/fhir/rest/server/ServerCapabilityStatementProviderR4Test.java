@@ -537,8 +537,8 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		RestfulServer rsNoType = new RestfulServer(ourCtx){
 			@Override
-			public RestulfulServerConfiguration createConfiguration() {
-				RestulfulServerConfiguration retVal = super.createConfiguration();
+			public RestfulServerConfiguration createConfiguration() {
+				RestfulServerConfiguration retVal = super.createConfiguration();
 				retVal.setConformanceDate(new InstantDt("2011-02-22T11:22:33Z"));
 				return retVal;
 			}
@@ -554,8 +554,8 @@ public class ServerCapabilityStatementProviderR4Test {
 
 		RestfulServer rsWithType = new RestfulServer(ourCtx){
 			@Override
-			public RestulfulServerConfiguration createConfiguration() {
-				RestulfulServerConfiguration retVal = super.createConfiguration();
+			public RestfulServerConfiguration createConfiguration() {
+				RestfulServerConfiguration retVal = super.createConfiguration();
 				retVal.setConformanceDate(new InstantDt("2011-02-22T11:22:33Z"));
 				return retVal;
 			}

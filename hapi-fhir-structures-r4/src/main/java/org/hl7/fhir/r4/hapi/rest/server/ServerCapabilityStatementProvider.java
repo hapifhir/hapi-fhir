@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IServerConformanceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.method.*;
@@ -77,7 +77,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
   private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
   private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
   private String myPublisher = "Not provided";
-  private Callable<RestulfulServerConfiguration> myServerConfiguration;
+  private Callable<RestfulServerConfiguration> myServerConfiguration;
 
   /**
    * No-arg constructor and setter so that the ServerConformanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
@@ -96,7 +96,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
   /**
    * Constructor
    */
-  public ServerCapabilityStatementProvider(RestulfulServerConfiguration theServerConfiguration) {
+  public ServerCapabilityStatementProvider(RestfulServerConfiguration theServerConfiguration) {
     this.myServerConfiguration = () -> theServerConfiguration;
   }
 
@@ -202,7 +202,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
     myPublisher = thePublisher;
   }
 
-  RestulfulServerConfiguration getServerConfiguration() {
+  RestfulServerConfiguration getServerConfiguration() {
     try {
       return myServerConfiguration.call();
     } catch (Exception e) {

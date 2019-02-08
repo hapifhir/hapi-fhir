@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.ResourceBinding;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
@@ -583,8 +583,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		RestfulServer rsNoType = new RestfulServer(ourCtx) {
 			@Override
-			public RestulfulServerConfiguration createConfiguration() {
-				RestulfulServerConfiguration retVal = super.createConfiguration();
+			public RestfulServerConfiguration createConfiguration() {
+				RestfulServerConfiguration retVal = super.createConfiguration();
 				retVal.setConformanceDate(new InstantDt("2011-02-22T11:22:33Z"));
 				return retVal;
 			}
@@ -600,8 +600,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		RestfulServer rsWithType = new RestfulServer(ourCtx) {
 			@Override
-			public RestulfulServerConfiguration createConfiguration() {
-				RestulfulServerConfiguration retVal = super.createConfiguration();
+			public RestfulServerConfiguration createConfiguration() {
+				RestfulServerConfiguration retVal = super.createConfiguration();
 				retVal.setConformanceDate(new InstantDt("2011-02-22T11:22:33Z"));
 				return retVal;
 			}

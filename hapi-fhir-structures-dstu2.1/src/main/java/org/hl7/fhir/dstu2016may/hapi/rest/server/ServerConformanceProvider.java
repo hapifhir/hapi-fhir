@@ -67,7 +67,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
 	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
-	private Callable<RestulfulServerConfiguration> myServerConfiguration;
+	private Callable<RestfulServerConfiguration> myServerConfiguration;
 
 	/**
 	 * No-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
@@ -86,7 +86,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 	/**
 	 * Constructor
 	 */
-	public ServerConformanceProvider(RestulfulServerConfiguration theServerConfiguration) {
+	public ServerConformanceProvider(RestfulServerConfiguration theServerConfiguration) {
 		this.myServerConfiguration = () -> theServerConfiguration;
 	}
 
@@ -560,7 +560,7 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 		myServerConfiguration = theRestfulServer::createConfiguration;
 	}
 
-	RestulfulServerConfiguration getServerConfiguration() {
+	RestfulServerConfiguration getServerConfiguration() {
 		try {
 			return myServerConfiguration.call();
 		} catch (Exception e) {
