@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -93,13 +93,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * context, in order to avoid a dependency on Servlet-API 3.0+
 	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE = "ca.uhn.fhir.rest.server.RestfulServer.servlet_context";
-	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
-	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
-	private static final long serialVersionUID = 1L;
 	/**
 	 * Default value for {@link #setDefaultPreferReturn(PreferReturnEnum)}
 	 */
 	public static final PreferReturnEnum DEFAULT_PREFER_RETURN = PreferReturnEnum.REPRESENTATION;
+	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
+	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
+	private static final long serialVersionUID = 1L;
 	private final List<IServerInterceptor> myInterceptors = new ArrayList<>();
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
@@ -499,6 +499,19 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		return myETagSupport;
 	}
 
+	/**
+	 * Sets (enables/disables) the server support for ETags. Must not be <code>null</code>. Default is
+	 * {@link #DEFAULT_ETAG_SUPPORT}
+	 *
+	 * @param theETagSupport The ETag support mode
+	 */
+	public void setETagSupport(ETagSupportEnum theETagSupport) {
+		if (theETagSupport == null) {
+			throw new NullPointerException("theETagSupport can not be null");
+		}
+		myETagSupport = theETagSupport;
+	}
+
 	@Override
 	public ElementsSupportEnum getElementsSupport() {
 		return myElementsSupport;
@@ -512,19 +525,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	public void setElementsSupport(ElementsSupportEnum theElementsSupport) {
 		Validate.notNull(theElementsSupport, "theElementsSupport must not be null");
 		myElementsSupport = theElementsSupport;
-	}
-
-	/**
-	 * Sets (enables/disables) the server support for ETags. Must not be <code>null</code>. Default is
-	 * {@link #DEFAULT_ETAG_SUPPORT}
-	 *
-	 * @param theETagSupport The ETag support mode
-	 */
-	public void setETagSupport(ETagSupportEnum theETagSupport) {
-		if (theETagSupport == null) {
-			throw new NullPointerException("theETagSupport can not be null");
-		}
-		myETagSupport = theETagSupport;
 	}
 
 	/**
@@ -933,21 +933,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);
 
-			// String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
-			// if (getPagingProvider() != null && isNotBlank(pagingAction)) {
-			// requestDetails.setRestOperationType(RestOperationTypeEnum.GET_PAGE);
-			// if (theRequestType != RequestTypeEnum.GET) {
-			// /*
-			// * We reconstruct the link-self URL using the request parameters, and this would break if the parameters came
-			// in using a POST. We could probably work around that but why bother unless
-			// * someone comes up with a reason for needing it.
-			// */
-			// throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(RestfulServer.class,
-			// "getPagesNonHttpGet"));
-			// }
-			// handlePagingRequest(requestDetails, theResponse, pagingAction);
-			// return;
-			// }
+			validateRequest(requestDetails);
 
 			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
 
@@ -1046,6 +1032,26 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 */
 			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
 
+		}
+	}
+
+	protected void validateRequest(ServletRequestDetails theRequestDetails) {
+		String[] elements = theRequestDetails.getParameters().get(Constants.PARAM_ELEMENTS);
+		if (elements != null) {
+			for (String next : elements) {
+				if (next.indexOf(':') != -1) {
+					throw new InvalidRequestException("Invalid _elements value: \"" + next + "\"");
+				}
+			}
+		}
+
+		elements = theRequestDetails.getParameters().get(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
+		if (elements != null) {
+			for (String next : elements) {
+				if (next.indexOf(':') != -1) {
+					throw new InvalidRequestException("Invalid _elements value: \"" + next + "\"");
+				}
+			}
 		}
 	}
 

@@ -272,7 +272,7 @@
 				This could be used, for example, to allow the user to perform a search for<br/>
 				<code>http://baseurl/Observation?category=laboratory</code><br/>
 				and then receive results as though they had requested<br/>
-				<code>http://baseurl/Observation?subject=Patient/123&category=laboratory</code>.
+				<code>http://baseurl/Observation?subject=Patient/123&amp;category=laboratory</code>.
 			</p>
 			<p>
 				An example of this interceptor follows:
