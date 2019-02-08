@@ -42,7 +42,7 @@ public class FhirTesterConfig {
 			.addServer()
 				.withId("home")
 				.withFhirVersion(FhirVersionEnum.DSTU3)
-				.withBaseUrl("${serverBase}/baseDstu3")
+				.withBaseUrl("${serverBase}/R4")
 				.withName("Local Tester")
 			.addServer()
 				.withId("hapi")

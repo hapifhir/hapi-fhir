@@ -10,6 +10,8 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
+import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
+import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -37,45 +39,60 @@ public class JpaServerDemo extends RestfulServer {
 	protected void initialize() throws ServletException {
 		super.initialize();
 
-		/* 
-		 * We want to support FHIR DSTU2 format. This means that the server
-		 * will use the DSTU2 bundle format and other DSTU2 encoding changes.
+		/*
+		 * We want to support FHIR R4 format. This means that the server
+		 * will use the R4 bundle format and other R4 encoding changes.
 		 *
-		 * If you want to use DSTU1 instead, change the following line, and change the 2 occurrences of dstu2 in web.xml to dstu1
+		 * If you want to use another FHIR version instead, change the following line, and change the 2 occurrences of R4
+		 * in web.xml to the desired FHIR version and let extend ca.uhn.fhir.jpa.demo.FhirServerConfig from the corresponding
+		 * FHIR version parent.
 		 */
-		FhirVersionEnum fhirVersion = FhirVersionEnum.DSTU3;
+		FhirVersionEnum fhirVersion = FhirVersionEnum.R4;
 		setFhirContext(new FhirContext(fhirVersion));
 
 		// Get the spring context from the web container (it's declared in web.xml)
 		myAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 
-		/* 
+		/*
 		 * The BaseJavaConfigDstu2.java class is a spring configuration
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
 		 * contains bean definitions for a resource provider for each resource type
 		 */
 		String resourceProviderBeanName;
-		if (fhirVersion == FhirVersionEnum.DSTU2) {
-			resourceProviderBeanName = "myResourceProvidersDstu2";
-		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
-			resourceProviderBeanName = "myResourceProvidersDstu3";
-		} else {
-			throw new IllegalStateException();
+		switch (fhirVersion) {
+			case DSTU2:
+				resourceProviderBeanName = "myResourceProvidersDstu2";
+				break;
+			case DSTU3:
+				resourceProviderBeanName = "myResourceProvidersDstu3";
+				break;
+			case R4:
+				resourceProviderBeanName = "myResourceProvidersR4";
+				break;
+			default:
+				throw new IllegalStateException();
 		}
+
 		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
 		setResourceProviders(beans);
-		
-		/* 
+
+		/*
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
 		Object systemProvider;
-		if (fhirVersion == FhirVersionEnum.DSTU2) {
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
-		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
-			systemProvider = myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class);
-		} else {
-			throw new IllegalStateException();
+		switch (fhirVersion) {
+			case DSTU2:
+				systemProvider = myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
+				break;
+			case DSTU3:
+				systemProvider = myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class);
+				break;
+			case R4:
+				systemProvider = myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class);
+				break;
+			default:
+				throw new IllegalStateException();
 		}
 		setPlainProviders(systemProvider);
 
@@ -84,20 +101,30 @@ public class JpaServerDemo extends RestfulServer {
 		 * this server. The JPA version adds resource counts to the exported statement, so it
 		 * is a nice addition.
 		 */
-		if (fhirVersion == FhirVersionEnum.DSTU2) {
-			IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle, MetaDt> systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
-			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao,
+		switch (fhirVersion) {
+			case DSTU2:
+				IFhirSystemDao<ca.uhn.fhir.model.dstu2.resource.Bundle, MetaDt> systemDaoDstu2 = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
+				JpaConformanceProviderDstu2 confProviderDstu2 = new JpaConformanceProviderDstu2(this, systemDaoDstu2,
 					myAppCtx.getBean(DaoConfig.class));
-			confProvider.setImplementationDescription("Example Server");
-			setServerConformanceProvider(confProvider);
-		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
-			IFhirSystemDao<Bundle, Meta> systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
-			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao,
-			myAppCtx.getBean(DaoConfig.class));
-			confProvider.setImplementationDescription("Example Server");
-			setServerConformanceProvider(confProvider);
-		} else {
-			throw new IllegalStateException();
+				confProviderDstu2.setImplementationDescription("Example Server");
+				setServerConformanceProvider(confProviderDstu2);
+				break;
+			case DSTU3:
+				IFhirSystemDao<Bundle, Meta> systemDaoDstu3 = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
+				JpaConformanceProviderDstu3 conformanceProviderDstu3 = new JpaConformanceProviderDstu3(this, systemDaoDstu3,
+					myAppCtx.getBean(DaoConfig.class));
+				conformanceProviderDstu3.setImplementationDescription("Example Server");
+				setServerConformanceProvider(conformanceProviderDstu3);
+				break;
+			case R4:
+				IFhirSystemDao<org.hl7.fhir.r4.model.Bundle, org.hl7.fhir.r4.model.Meta> systemDaoR4 = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
+				JpaConformanceProviderR4 conformanceProviderR4 = new JpaConformanceProviderR4(this, systemDaoR4,
+					myAppCtx.getBean(DaoConfig.class));
+				conformanceProviderR4.setImplementationDescription("Example Server");
+				setServerConformanceProvider(conformanceProviderR4);
+				break;
+			default:
+				throw new IllegalStateException();
 		}
 
 		/*
@@ -133,22 +160,22 @@ public class JpaServerDemo extends RestfulServer {
 		subscriptionInterceptorLoader.registerInterceptors();
 
 		/*
-		 * If you are hosting this server at a specific DNS name, the server will try to 
+		 * If you are hosting this server at a specific DNS name, the server will try to
 		 * figure out the FHIR base URL based on what the web container tells it, but
 		 * this doesn't always work. If you are setting links in your search bundles that
 		 * just refer to "localhost", you might want to use a server address strategy:
 		 */
 		//setServerAddressStrategy(new HardcodedServerAddressStrategy("http://mydomain.com/fhir/baseDstu2"));
-		
+
 		/*
-		 * If you are using DSTU3+, you may want to add a terminology uploader, which allows 
+		 * If you are using DSTU3+, you may want to add a terminology uploader, which allows
 		 * uploading of external terminologies such as Snomed CT. Note that this uploader
 		 * does not have any security attached (any anonymous user may use it by default)
 		 * so it is a potential security vulnerability. Consider using an AuthorizationInterceptor
 		 * with this feature.
 		 */
 		if (fhirVersion == FhirVersionEnum.DSTU3) {
-			 registerProvider(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
+			registerProvider(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
 		}
 	}
 
