@@ -50,7 +50,7 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 		}
 
 		ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-		String subscriptionId = msg.getSubscription().getIdElement(myFhirContext).getValue();
+		String subscriptionId = msg.getSubscriptionId(myFhirContext);
 
 		ActiveSubscription updatedSubscription = mySubscriptionRegistry.get(msg.getSubscription().getIdElement(myFhirContext).getIdPart());
 		if (updatedSubscription != null) {
@@ -71,13 +71,14 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 		} catch (Exception e) {
 
+			String errorMsg = "Failure handling subscription payload for subscription: " + subscriptionId;
+			ourLog.error(errorMsg, e);
+
 			// Interceptor call: SUBSCRIPTION_AFTER_DELIVERY
 			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, msg, msg.getSubscription(), e)) {
 				return;
 			}
 
-			String errorMsg = "Failure handling subscription payload for subscription: " + subscriptionId;
-			ourLog.error(errorMsg, e);
 			throw new MessagingException(theMessage, errorMsg, e);
 		}
 	}
