@@ -274,7 +274,7 @@ public final class ResourceIndexedSearchParams {
 		ResourceTable target = theResourceLink.getTargetResource();
 		IdDt idDt = target.getIdDt();
 		if (idDt.isIdPartValidLong()) {
-			return theReference.getIdPartAsLong() == idDt.getIdPartAsLong();
+			return theReference.getIdPartAsLong().equals(idDt.getIdPartAsLong());
 		} else {
 			ForcedId forcedId = target.getForcedId();
 			if (forcedId != null) {
