@@ -57,6 +57,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private static NotificationServlet ourNotificationServlet;
 	private static String ourNotificationListenerServer;
 	private static CountDownLatch communicationRequestListenerLatch;
+	private static SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -75,14 +76,13 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
-		SubscriptionDebugLogInterceptor interceptor = new SubscriptionDebugLogInterceptor();
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
 	@Before
