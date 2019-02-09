@@ -57,7 +57,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private static NotificationServlet ourNotificationServlet;
 	private static String ourNotificationListenerServer;
 	private static CountDownLatch communicationRequestListenerLatch;
-//	private static SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
+	private static SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -76,14 +76,13 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-//		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
-		// TODO KHS This is somehow causing a java.lang.NullPointerException at ca.uhn.fhir.jpa.subscription.resthook.RestHookWithInterceptorR4Test.testAttributesAreCopiedAlongPipeline(RestHookWithInterceptorR4Test.java:147)
-		//	myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
+		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
 	@Before
