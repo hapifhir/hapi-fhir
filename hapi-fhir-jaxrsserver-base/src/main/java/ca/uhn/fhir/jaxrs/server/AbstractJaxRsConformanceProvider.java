@@ -67,7 +67,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	private org.hl7.fhir.r4.model.CapabilityStatement myR4CapabilityStatement;
 	private org.hl7.fhir.dstu3.model.CapabilityStatement myDstu3CapabilityStatement;
 	private org.hl7.fhir.dstu2016may.model.Conformance myDstu2_1Conformance;
-	private org.hl7.fhir.instance.model.Conformance myDstu2Hl7OrgConformance;
+	private org.hl7.fhir.dstu2.model.Conformance myDstu2Hl7OrgConformance;
 	private ca.uhn.fhir.model.dstu2.resource.Conformance myDstu2Conformance;
 	private boolean myInitialized;
 
@@ -148,7 +148,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 				myDstu2_1Conformance = dstu2_1ServerConformanceProvider.getServerConformance(null);
 				break;
 			case DSTU2_HL7ORG:
-				org.hl7.fhir.instance.conf.ServerConformanceProvider dstu2Hl7OrgServerConformanceProvider = new org.hl7.fhir.instance.conf.ServerConformanceProvider(serverConfiguration);
+				org.hl7.fhir.dstu2.conf.ServerConformanceProvider dstu2Hl7OrgServerConformanceProvider = new org.hl7.fhir.dstu2.conf.ServerConformanceProvider(serverConfiguration);
 				dstu2Hl7OrgServerConformanceProvider.initializeOperations();
 				myDstu2Hl7OrgConformance = dstu2Hl7OrgServerConformanceProvider.getServerConformance(null);
 				break;
@@ -310,7 +310,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 			case DSTU2_1:
 				return Class.class.cast(org.hl7.fhir.dstu2016may.model.Conformance.class);
 			case DSTU2_HL7ORG:
-				return Class.class.cast(org.hl7.fhir.instance.model.Conformance.class);
+				return Class.class.cast(org.hl7.fhir.dstu2.model.Conformance.class);
 			case DSTU2:
 				return Class.class.cast(ca.uhn.fhir.model.dstu2.resource.Conformance.class);
 			default:
