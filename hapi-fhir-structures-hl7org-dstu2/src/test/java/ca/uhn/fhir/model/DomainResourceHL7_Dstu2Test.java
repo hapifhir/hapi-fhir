@@ -3,9 +3,9 @@ package ca.uhn.fhir.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.hl7.fhir.instance.model.DomainResource;
-import org.hl7.fhir.instance.model.Narrative;
-import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.dstu2.model.DomainResource;
+import org.hl7.fhir.dstu2.model.Narrative;
+import org.hl7.fhir.dstu2.model.Patient;
 import org.junit.Test;
 
 public class DomainResourceHL7_Dstu2Test {

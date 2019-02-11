@@ -15,8 +15,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.Bundle.BundleType;
-import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.dstu2.model.Bundle.BundleType;
+import org.hl7.fhir.dstu2.model.Patient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,7 +44,7 @@ public class BundleTypeInResponseHl7OrgTest {
 		
 		ourLog.info(responseContent);
 		
-		org.hl7.fhir.instance.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Bundle.class, responseContent);
+		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
 		assertEquals(1, bundle.getEntry().size());
 		assertEquals(BundleType.SEARCHSET, bundle.getType());
 	}

@@ -1717,7 +1717,7 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.dstu3.model.Type convertType(org.hl7.fhir.instance.model.Type src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Type convertType(org.hl7.fhir.dstu2.model.Type src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     if (src instanceof org.hl7.fhir.instance.model.Base64BinaryType)
@@ -1809,7 +1809,7 @@ public class VersionConvertor_10_30 {
     throw new Error("Unknown type "+src.fhirType());
   }
 
-  public org.hl7.fhir.instance.model.Type convertType(org.hl7.fhir.dstu3.model.Type src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Type convertType(org.hl7.fhir.dstu3.model.Type src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     if (src instanceof org.hl7.fhir.dstu3.model.Base64BinaryType)
@@ -2633,7 +2633,7 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.dstu3.model.Bundle convertBundle(org.hl7.fhir.instance.model.Bundle src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Bundle convertBundle(org.hl7.fhir.dstu2.model.Bundle src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu3.model.Bundle tgt = new org.hl7.fhir.dstu3.model.Bundle();
@@ -2641,18 +2641,18 @@ public class VersionConvertor_10_30 {
     tgt.setType(convertBundleType(src.getType()));
     if (src.hasTotal())
       tgt.setTotal(src.getTotal());
-    for (org.hl7.fhir.instance.model.Bundle.BundleLinkComponent t : src.getLink())
+    for (org.hl7.fhir.dstu2.model.Bundle.BundleLinkComponent t : src.getLink())
       tgt.addLink(convertBundleLinkComponent(t));
-    for (org.hl7.fhir.instance.model.Bundle.BundleEntryComponent t : src.getEntry())
+    for (org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent t : src.getEntry())
       tgt.addEntry(convertBundleEntryComponent(t));
     tgt.setSignature(convertSignature(src.getSignature()));
     return tgt;
   }
 
-  public org.hl7.fhir.instance.model.Bundle convertBundle(org.hl7.fhir.dstu3.model.Bundle src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Bundle convertBundle(org.hl7.fhir.dstu3.model.Bundle src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
-    org.hl7.fhir.instance.model.Bundle tgt = new org.hl7.fhir.instance.model.Bundle();
+    org.hl7.fhir.dstu2.model.Bundle tgt = new org.hl7.fhir.dstu2.model.Bundle();
     copyResource(src, tgt);
     tgt.setType(convertBundleType(src.getType()));
     if (src.hasTotal())
@@ -2666,7 +2666,7 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.dstu3.model.Bundle.BundleType convertBundleType(org.hl7.fhir.instance.model.Bundle.BundleType src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Bundle.BundleType convertBundleType(org.hl7.fhir.dstu2.model.Bundle.BundleType src) throws FHIRException {
     if (src == null)
       return null;
     switch (src) {
@@ -2683,24 +2683,24 @@ public class VersionConvertor_10_30 {
     }
   }
 
-  public org.hl7.fhir.instance.model.Bundle.BundleType convertBundleType(org.hl7.fhir.dstu3.model.Bundle.BundleType src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Bundle.BundleType convertBundleType(org.hl7.fhir.dstu3.model.Bundle.BundleType src) throws FHIRException {
     if (src == null)
       return null;
     switch (src) {
-    case DOCUMENT: return org.hl7.fhir.instance.model.Bundle.BundleType.DOCUMENT;
-    case MESSAGE: return org.hl7.fhir.instance.model.Bundle.BundleType.MESSAGE;
-    case TRANSACTION: return org.hl7.fhir.instance.model.Bundle.BundleType.TRANSACTION;
-    case TRANSACTIONRESPONSE: return org.hl7.fhir.instance.model.Bundle.BundleType.TRANSACTIONRESPONSE;
-    case BATCH: return org.hl7.fhir.instance.model.Bundle.BundleType.BATCH;
-    case BATCHRESPONSE: return org.hl7.fhir.instance.model.Bundle.BundleType.BATCHRESPONSE;
-    case HISTORY: return org.hl7.fhir.instance.model.Bundle.BundleType.HISTORY;
-    case SEARCHSET: return org.hl7.fhir.instance.model.Bundle.BundleType.SEARCHSET;
-    case COLLECTION: return org.hl7.fhir.instance.model.Bundle.BundleType.COLLECTION;
-    default: return org.hl7.fhir.instance.model.Bundle.BundleType.NULL;
+    case DOCUMENT: return org.hl7.fhir.dstu2.model.Bundle.BundleType.DOCUMENT;
+    case MESSAGE: return org.hl7.fhir.dstu2.model.Bundle.BundleType.MESSAGE;
+    case TRANSACTION: return org.hl7.fhir.dstu2.model.Bundle.BundleType.TRANSACTION;
+    case TRANSACTIONRESPONSE: return org.hl7.fhir.dstu2.model.Bundle.BundleType.TRANSACTIONRESPONSE;
+    case BATCH: return org.hl7.fhir.dstu2.model.Bundle.BundleType.BATCH;
+    case BATCHRESPONSE: return org.hl7.fhir.dstu2.model.Bundle.BundleType.BATCHRESPONSE;
+    case HISTORY: return org.hl7.fhir.dstu2.model.Bundle.BundleType.HISTORY;
+    case SEARCHSET: return org.hl7.fhir.dstu2.model.Bundle.BundleType.SEARCHSET;
+    case COLLECTION: return org.hl7.fhir.dstu2.model.Bundle.BundleType.COLLECTION;
+    default: return org.hl7.fhir.dstu2.model.Bundle.BundleType.NULL;
     }
   }
 
-  public org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent convertBundleLinkComponent(org.hl7.fhir.instance.model.Bundle.BundleLinkComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent convertBundleLinkComponent(org.hl7.fhir.dstu2.model.Bundle.BundleLinkComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent tgt = new org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent();
@@ -2710,22 +2710,22 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.instance.model.Bundle.BundleLinkComponent convertBundleLinkComponent(org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Bundle.BundleLinkComponent convertBundleLinkComponent(org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
-    org.hl7.fhir.instance.model.Bundle.BundleLinkComponent tgt = new org.hl7.fhir.instance.model.Bundle.BundleLinkComponent();
+    org.hl7.fhir.dstu2.model.Bundle.BundleLinkComponent tgt = new org.hl7.fhir.dstu2.model.Bundle.BundleLinkComponent();
     copyElement(src, tgt);
     tgt.setRelation(src.getRelation());
     tgt.setUrl(src.getUrl());
     return tgt;
   }
 
-  public org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent convertBundleEntryComponent(org.hl7.fhir.instance.model.Bundle.BundleEntryComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent convertBundleEntryComponent(org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent tgt = new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent();
     copyElement(src, tgt);
-    for (org.hl7.fhir.instance.model.Bundle.BundleLinkComponent t : src.getLink())
+    for (org.hl7.fhir.dstu2.model.Bundle.BundleLinkComponent t : src.getLink())
       tgt.addLink(convertBundleLinkComponent(t));
     tgt.setFullUrl(src.getFullUrl());
     tgt.setResource(convertResource(src.getResource()));
@@ -2735,13 +2735,13 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.instance.model.Bundle.BundleEntryComponent convertBundleEntryComponent(org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent convertBundleEntryComponent(org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     if (advisor.ignoreEntry(src))
       return null;
 
-    org.hl7.fhir.instance.model.Bundle.BundleEntryComponent tgt = new org.hl7.fhir.instance.model.Bundle.BundleEntryComponent();
+    org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent tgt = new org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent();
     copyElement(src, tgt);
     for (org.hl7.fhir.dstu3.model.Bundle.BundleLinkComponent t : src.getLink())
       tgt.addLink(convertBundleLinkComponent(t));
@@ -2759,7 +2759,7 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.dstu3.model.Bundle.BundleEntrySearchComponent convertBundleEntrySearchComponent(org.hl7.fhir.instance.model.Bundle.BundleEntrySearchComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Bundle.BundleEntrySearchComponent convertBundleEntrySearchComponent(org.hl7.fhir.dstu2.model.Bundle.BundleEntrySearchComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu3.model.Bundle.BundleEntrySearchComponent tgt = new org.hl7.fhir.dstu3.model.Bundle.BundleEntrySearchComponent();
@@ -2769,17 +2769,17 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.instance.model.Bundle.BundleEntrySearchComponent convertBundleEntrySearchComponent(org.hl7.fhir.dstu3.model.Bundle.BundleEntrySearchComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Bundle.BundleEntrySearchComponent convertBundleEntrySearchComponent(org.hl7.fhir.dstu3.model.Bundle.BundleEntrySearchComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
-    org.hl7.fhir.instance.model.Bundle.BundleEntrySearchComponent tgt = new org.hl7.fhir.instance.model.Bundle.BundleEntrySearchComponent();
+    org.hl7.fhir.dstu2.model.Bundle.BundleEntrySearchComponent tgt = new org.hl7.fhir.dstu2.model.Bundle.BundleEntrySearchComponent();
     copyElement(src, tgt);
     tgt.setMode(convertSearchEntryMode(src.getMode()));
     tgt.setScore(src.getScore());
     return tgt;
   }
 
-  public org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode convertSearchEntryMode(org.hl7.fhir.instance.model.Bundle.SearchEntryMode src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode convertSearchEntryMode(org.hl7.fhir.dstu2.model.Bundle.SearchEntryMode src) throws FHIRException {
     if (src == null)
       return null;
     switch (src) {
@@ -2790,18 +2790,18 @@ public class VersionConvertor_10_30 {
     }
   }
 
-  public org.hl7.fhir.instance.model.Bundle.SearchEntryMode convertSearchEntryMode(org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Bundle.SearchEntryMode convertSearchEntryMode(org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode src) throws FHIRException {
     if (src == null)
       return null;
     switch (src) {
-    case MATCH: return org.hl7.fhir.instance.model.Bundle.SearchEntryMode.MATCH;
-    case INCLUDE: return org.hl7.fhir.instance.model.Bundle.SearchEntryMode.INCLUDE;
-    case OUTCOME: return org.hl7.fhir.instance.model.Bundle.SearchEntryMode.OUTCOME;
-    default: return org.hl7.fhir.instance.model.Bundle.SearchEntryMode.NULL;
+    case MATCH: return org.hl7.fhir.dstu2.model.Bundle.SearchEntryMode.MATCH;
+    case INCLUDE: return org.hl7.fhir.dstu2.model.Bundle.SearchEntryMode.INCLUDE;
+    case OUTCOME: return org.hl7.fhir.dstu2.model.Bundle.SearchEntryMode.OUTCOME;
+    default: return org.hl7.fhir.dstu2.model.Bundle.SearchEntryMode.NULL;
     }
   }
 
-  public org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent convertBundleEntryRequestComponent(org.hl7.fhir.instance.model.Bundle.BundleEntryRequestComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent convertBundleEntryRequestComponent(org.hl7.fhir.dstu2.model.Bundle.BundleEntryRequestComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent tgt = new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent();
@@ -2815,10 +2815,10 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.instance.model.Bundle.BundleEntryRequestComponent convertBundleEntryRequestComponent(org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Bundle.BundleEntryRequestComponent convertBundleEntryRequestComponent(org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
-    org.hl7.fhir.instance.model.Bundle.BundleEntryRequestComponent tgt = new org.hl7.fhir.instance.model.Bundle.BundleEntryRequestComponent();
+    org.hl7.fhir.dstu2.model.Bundle.BundleEntryRequestComponent tgt = new org.hl7.fhir.dstu2.model.Bundle.BundleEntryRequestComponent();
     copyElement(src, tgt);
     tgt.setMethod(convertHTTPVerb(src.getMethod()));
     tgt.setUrl(src.getUrl());
@@ -2829,7 +2829,7 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.dstu3.model.Bundle.HTTPVerb convertHTTPVerb(org.hl7.fhir.instance.model.Bundle.HTTPVerb src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Bundle.HTTPVerb convertHTTPVerb(org.hl7.fhir.dstu2.model.Bundle.HTTPVerb src) throws FHIRException {
     if (src == null)
       return null;
     switch (src) {
@@ -2841,19 +2841,19 @@ public class VersionConvertor_10_30 {
     }
   }
 
-  public org.hl7.fhir.instance.model.Bundle.HTTPVerb convertHTTPVerb(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Bundle.HTTPVerb convertHTTPVerb(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb src) throws FHIRException {
     if (src == null)
       return null;
     switch (src) {
-    case GET: return org.hl7.fhir.instance.model.Bundle.HTTPVerb.GET;
-    case POST: return org.hl7.fhir.instance.model.Bundle.HTTPVerb.POST;
-    case PUT: return org.hl7.fhir.instance.model.Bundle.HTTPVerb.PUT;
-    case DELETE: return org.hl7.fhir.instance.model.Bundle.HTTPVerb.DELETE;
-    default: return org.hl7.fhir.instance.model.Bundle.HTTPVerb.NULL;
+    case GET: return org.hl7.fhir.dstu2.model.Bundle.HTTPVerb.GET;
+    case POST: return org.hl7.fhir.dstu2.model.Bundle.HTTPVerb.POST;
+    case PUT: return org.hl7.fhir.dstu2.model.Bundle.HTTPVerb.PUT;
+    case DELETE: return org.hl7.fhir.dstu2.model.Bundle.HTTPVerb.DELETE;
+    default: return org.hl7.fhir.dstu2.model.Bundle.HTTPVerb.NULL;
     }
   }
 
-  public org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent convertBundleEntryResponseComponent(org.hl7.fhir.instance.model.Bundle.BundleEntryResponseComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent convertBundleEntryResponseComponent(org.hl7.fhir.dstu2.model.Bundle.BundleEntryResponseComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
     org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent tgt = new org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent();
@@ -2865,10 +2865,10 @@ public class VersionConvertor_10_30 {
     return tgt;
   }
 
-  public org.hl7.fhir.instance.model.Bundle.BundleEntryResponseComponent convertBundleEntryResponseComponent(org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent src) throws FHIRException {
+  public org.hl7.fhir.dstu2.model.Bundle.BundleEntryResponseComponent convertBundleEntryResponseComponent(org.hl7.fhir.dstu3.model.Bundle.BundleEntryResponseComponent src) throws FHIRException {
     if (src == null || src.isEmpty())
       return null;
-    org.hl7.fhir.instance.model.Bundle.BundleEntryResponseComponent tgt = new org.hl7.fhir.instance.model.Bundle.BundleEntryResponseComponent();
+    org.hl7.fhir.dstu2.model.Bundle.BundleEntryResponseComponent tgt = new org.hl7.fhir.dstu2.model.Bundle.BundleEntryResponseComponent();
     copyElement(src, tgt);
     tgt.setStatus(src.getStatus());
     tgt.setLocation(src.getLocation());
@@ -12838,8 +12838,8 @@ public org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionDesignationComponen
       return convertBasic((org.hl7.fhir.instance.model.Basic) src);
     if (src instanceof org.hl7.fhir.instance.model.Binary)
       return convertBinary((org.hl7.fhir.instance.model.Binary) src);
-    if (src instanceof org.hl7.fhir.instance.model.Bundle)
-      return convertBundle((org.hl7.fhir.instance.model.Bundle) src);
+    if (src instanceof org.hl7.fhir.dstu2.model.Bundle)
+      return convertBundle((org.hl7.fhir.dstu2.model.Bundle) src);
     if (src instanceof org.hl7.fhir.instance.model.CarePlan)
       return convertCarePlan((org.hl7.fhir.instance.model.CarePlan) src);
     if (src instanceof org.hl7.fhir.instance.model.ClinicalImpression)

@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.Address;
 import org.hl7.fhir.instance.model.CodeableConcept;
 import org.hl7.fhir.instance.model.Composition;
 import org.hl7.fhir.instance.model.DiagnosticReport;
-import org.hl7.fhir.instance.model.EnumFactory;
+import org.hl7.fhir.dstu2.model.EnumFactory;
 import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.Narrative;
@@ -100,7 +100,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testOverrideResourceIdWithBundleEntryFullUrlEnabled() {
 		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
-		org.hl7.fhir.instance.model.Bundle bundle = (org.hl7.fhir.instance.model.Bundle) ourCtx.newXmlParser().parseResource(tmp);
+		org.hl7.fhir.dstu2.model.Bundle bundle = (org.hl7.fhir.dstu2.model.Bundle) ourCtx.newXmlParser().parseResource(tmp);
 		assertEquals(1, bundle.getEntry().size());
 		{
 			org.hl7.fhir.instance.model.Patient o1 = (org.hl7.fhir.instance.model.Patient) bundle.getEntry().get(0).getResource();
@@ -116,7 +116,7 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnFhirContext() {
 		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
 		ourCtx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
-		org.hl7.fhir.instance.model.Bundle bundle = (org.hl7.fhir.instance.model.Bundle) ourCtx.newXmlParser().parseResource(tmp);
+		org.hl7.fhir.dstu2.model.Bundle bundle = (org.hl7.fhir.dstu2.model.Bundle) ourCtx.newXmlParser().parseResource(tmp);
 		assertEquals(1, bundle.getEntry().size());
 		{
 			org.hl7.fhir.instance.model.Patient o1 = (org.hl7.fhir.instance.model.Patient) bundle.getEntry().get(0).getResource();
@@ -131,7 +131,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnParser() {
 		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
-		org.hl7.fhir.instance.model.Bundle bundle = (org.hl7.fhir.instance.model.Bundle) ourCtx.newXmlParser().setOverrideResourceIdWithBundleEntryFullUrl(false).parseResource(tmp);
+		org.hl7.fhir.dstu2.model.Bundle bundle = (org.hl7.fhir.dstu2.model.Bundle) ourCtx.newXmlParser().setOverrideResourceIdWithBundleEntryFullUrl(false).parseResource(tmp);
 		assertEquals(1, bundle.getEntry().size());
 		{
 			org.hl7.fhir.instance.model.Patient o1 = (org.hl7.fhir.instance.model.Patient) bundle.getEntry().get(0).getResource();
@@ -223,7 +223,7 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
 
 		// Create a bundle with just the patient resource
-		org.hl7.fhir.instance.model.Bundle b = new org.hl7.fhir.instance.model.Bundle();
+		org.hl7.fhir.dstu2.model.Bundle b = new org.hl7.fhir.dstu2.model.Bundle();
 		b.addEntry().setResource(patient);
 
 		// Encode the bundle
@@ -405,7 +405,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testEncodeBundle() throws InterruptedException {
-		org.hl7.fhir.instance.model.Bundle b = new org.hl7.fhir.instance.model.Bundle();
+		org.hl7.fhir.dstu2.model.Bundle b = new org.hl7.fhir.dstu2.model.Bundle();
 		b.getMeta().addTag().setSystem("http://hl7.org/fhir/tag").setCode("http://hl7.org/fhir/tag/message")
 			.setDisplay("Message");
 
@@ -414,7 +414,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		org.hl7.fhir.instance.model.Patient p1 = new org.hl7.fhir.instance.model.Patient();
 		p1.addName().addFamily("Family1");
-		org.hl7.fhir.instance.model.Bundle.BundleEntryComponent entry = b.addEntry();
+		org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent entry = b.addEntry();
 		p1.getIdElement().setValue("1");
 		entry.setResource(p1);
 
@@ -439,8 +439,8 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testEncodeBundleCategory() {
 
-		org.hl7.fhir.instance.model.Bundle b = new org.hl7.fhir.instance.model.Bundle();
-		org.hl7.fhir.instance.model.Bundle.BundleEntryComponent e = b.addEntry();
+		org.hl7.fhir.dstu2.model.Bundle b = new org.hl7.fhir.dstu2.model.Bundle();
+		org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent e = b.addEntry();
 		e.setResource(new org.hl7.fhir.instance.model.Patient());
 		e.getResource().getMeta().addTag().setSystem("scheme").setCode("term").setDisplay("label");
 
@@ -452,7 +452,7 @@ public class XmlParserHl7OrgDstu2Test {
 			"<display value=\"label\"/>", "</tag>"));
 		// @formatter:on
 
-		b = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Bundle.class, val);
+		b = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, val);
 		assertEquals(1, b.getEntry().size());
 		assertEquals(1, b.getEntry().get(0).getResource().getMeta().getTag().size());
 		assertEquals("scheme", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getSystem());
@@ -803,7 +803,7 @@ public class XmlParserHl7OrgDstu2Test {
 		resources.add(patient);
 
 		// Create a bundle with both
-		org.hl7.fhir.instance.model.Bundle b = new org.hl7.fhir.instance.model.Bundle();
+		org.hl7.fhir.dstu2.model.Bundle b = new org.hl7.fhir.dstu2.model.Bundle();
 		b.addEntry().setResource(org);
 		b.addEntry().setResource(patient);
 
