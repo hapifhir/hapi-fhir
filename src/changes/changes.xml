@@ -26,6 +26,10 @@
 				enabled after the refactoring of how Subscriptions are enabled that
 				occurred in HAPI FHIR 3.7.0. Thanks to Volker Schmidt for the pull request!
 			</action>
+			<action type="add" issue="1179">
+				The DSTU2/3 version converter now converts Specimen resources. Thanks to Gary
+				Graham for the pull request!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
