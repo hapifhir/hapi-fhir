@@ -7,13 +7,12 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.validation.IResourceLoader;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
-import org.hl7.fhir.instance.model.Questionnaire;
-import org.hl7.fhir.instance.model.QuestionnaireResponse;
-import org.hl7.fhir.instance.model.ValueSet;
+import org.hl7.fhir.dstu2.model.Questionnaire;
+import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.utils.IWorkerContext;
-import org.hl7.fhir.instance.utils.WorkerContext;
+import org.hl7.fhir.dstu2.utils.IWorkerContext;
 import org.hl7.fhir.instance.validation.QuestionnaireResponseValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -48,7 +47,7 @@ public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge impl
 		return retVal;
 	}
 
-	private boolean loadReferences(IBaseResource theResource, WorkerContext theWorkerCtx, IValidationContext<?> theValCtx,
+	private boolean loadReferences(IBaseResource theResource, IWorkerContext theWorkerCtx, IValidationContext<?> theValCtx,
 											 ArrayList<ValidationMessage> theMessages) {
 		List<ResourceReferenceInfo> refs = theValCtx.getFhirContext().newTerser().getAllResourceReferences(theResource);
 
