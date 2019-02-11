@@ -121,11 +121,11 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 		return true;
 	}
 
-	private org.hl7.fhir.instance.model.Resource toDstu2(IBaseResource theResponseResource) {
+	private org.hl7.fhir.dstu2.model.Resource toDstu2(IBaseResource theResponseResource) {
 		if (theResponseResource instanceof IResource) {
-			return (org.hl7.fhir.instance.model.Resource) myCtxDstu2Hl7Org.newJsonParser().parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
+			return (org.hl7.fhir.dstu2.model.Resource) myCtxDstu2Hl7Org.newJsonParser().parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
 		}
-		return (org.hl7.fhir.instance.model.Resource) theResponseResource;
+		return (org.hl7.fhir.dstu2.model.Resource) theResponseResource;
 	}
 
 	private Resource toDstu3(IBaseResource theResponseResource) {

@@ -35,7 +35,7 @@ public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge impl
 	private List<ValidationMessage> doValidate(IValidationContext<?> theValCtx, QuestionnaireResponse theResource) {
 
 		WorkerContext workerCtx = new WorkerContext();
-		ArrayList<ValidationMessage> retVal = new ArrayList<ValidationMessage>();
+		ArrayList<ValidationMessage> retVal = new ArrayList<>();
 
 		if (!loadReferences(theResource, workerCtx, theValCtx, retVal)) {
 			return retVal;
@@ -47,11 +47,11 @@ public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge impl
 		return retVal;
 	}
 
-	private boolean loadReferences(IBaseResource theResource, IWorkerContext theWorkerCtx, IValidationContext<?> theValCtx,
+	private boolean loadReferences(IBaseResource theResource, WorkerContext theWorkerCtx, IValidationContext<?> theValCtx,
 											 ArrayList<ValidationMessage> theMessages) {
 		List<ResourceReferenceInfo> refs = theValCtx.getFhirContext().newTerser().getAllResourceReferences(theResource);
 
-		List<IBaseResource> newResources = new ArrayList<IBaseResource>();
+		List<IBaseResource> newResources = new ArrayList<>();
 
 		for (ResourceReferenceInfo nextRefInfo : refs) {
 			IIdType nextRef = nextRefInfo.getResourceReference().getReferenceElement();

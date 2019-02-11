@@ -26,7 +26,7 @@ public interface VersionConvertorAdvisor40 {
   boolean ignoreEntry(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent src);
 
   // called ?
-  org.hl7.fhir.instance.model.Resource convertR2(org.hl7.fhir.r4.model.Resource resource) throws FHIRException;
+  org.hl7.fhir.dstu2.model.Resource convertR2(org.hl7.fhir.r4.model.Resource resource) throws FHIRException;
   org.hl7.fhir.dstu3.model.Resource convertR3(org.hl7.fhir.r4.model.Resource resource) throws FHIRException;
 
   // called when an r2 value set has a codeSystem in it

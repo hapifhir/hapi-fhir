@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.Subscription;
+import org.hl7.fhir.dstu2.model.Subscription;
 
 public class SubscriptionConstants {
 

@@ -1,15 +1,14 @@
 package ca.uhn.fhir.tests.integration.karaf.dstu2hl7org;
 
-import java.io.IOException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hl7.fhir.dstu2.model.DateType;
+import org.hl7.fhir.dstu2.model.Observation;
+import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.Observation;
-import org.hl7.fhir.instance.model.QuestionnaireResponse;
-import org.hl7.fhir.instance.model.StringType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -18,16 +17,14 @@ import org.ops4j.pax.exam.junit.PaxExam;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.HAPI_FHIR_VALIDATION_HL7ORG_DSTU2;
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.KARAF;
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.WRAP;
+import java.io.IOException;
+
+import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
 
 /**
@@ -94,11 +91,11 @@ public class FhirInstanceValidatorTest {
 
 	@Test
 	public void testParametersWithTwoParameters() {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
-		org.hl7.fhir.instance.model.Parameters input = new org.hl7.fhir.instance.model.Parameters();
+		org.hl7.fhir.dstu2.model.Parameters input = new org.hl7.fhir.dstu2.model.Parameters();
 		input.addParameter().setName("mode").setValue(new StringType("create"));
 		input.addParameter().setName("resource").setResource(patient);
 
@@ -117,11 +114,11 @@ public class FhirInstanceValidatorTest {
 
 	@Test
 	public void testParametersHl7OrgDstu2() {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
-		org.hl7.fhir.instance.model.Parameters input = new org.hl7.fhir.instance.model.Parameters();
+		org.hl7.fhir.dstu2.model.Parameters input = new org.hl7.fhir.dstu2.model.Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
 		FhirValidator val = ourCtxHl7OrgDstu2.newValidator();

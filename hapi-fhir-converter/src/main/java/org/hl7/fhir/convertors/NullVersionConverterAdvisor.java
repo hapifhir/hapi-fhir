@@ -20,11 +20,11 @@ package org.hl7.fhir.convertors;
  * #L%
  */
 
+import org.hl7.fhir.dstu2.model.Resource;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.Resource;
 
 public class NullVersionConverterAdvisor implements VersionConvertorAdvisor {
 

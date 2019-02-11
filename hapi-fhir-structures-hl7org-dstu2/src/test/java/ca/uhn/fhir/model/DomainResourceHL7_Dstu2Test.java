@@ -10,7 +10,7 @@ import org.junit.Test;
 
 public class DomainResourceHL7_Dstu2Test {
     /**
-     * Ensuring that fields defined in {@link org.hl7.fhir.instance.model.DomainResource} and {@link org.hl7.fhir.instance.model.Resource}
+     * Ensuring that fields defined in {@link org.hl7.fhir.instance.model.DomainResource} and {@link org.hl7.fhir.dstu2.model.Resource}
      * the {@link org.hl7.fhir.instance.model.DomainResource#copy()} method is called
      */
     @Test
