@@ -125,6 +125,28 @@ public enum Pointcut {
 	SUBSCRIPTION_AFTER_DELIVERY("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
 
 	/**
+	 * Invoked immediately after the attempted delivery of a subscription, if the delivery
+	 * failed.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>java.lang.Exception - The exception that caused the failure</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally, meaning that
+	 * an exception will be thrown by the delivery mechanism. This typically means that the
+	 * message will be returned to the processing queue. If the method
+	 * returns <code>false</code>, processing will be aborted and no further action will be
+	 * taken for the delivery.
+	 * </p>
+	 */
+	SUBSCRIPTION_AFTER_DELIVERY_FAILED("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
+
+	/**
 	 * Invoked immediately after the delivery of a REST HOOK subscription.
 	 * <p>
 	 * When this hook is called, all processing is complete so this hook should not
@@ -179,6 +201,7 @@ public enum Pointcut {
 	 */
 	SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED("ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
 
+
 	/**
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) has been checked for whether any subscriptions
@@ -194,7 +217,6 @@ public enum Pointcut {
 	 * </p>
 	 */
 	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED("ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
-
 
 	/**
 	 * Invoked immediately after an active subscription is "registered". In HAPI FHIR, when
@@ -289,6 +311,7 @@ public enum Pointcut {
 	 */
 	OP_PRECOMMIT_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),
 
+
 	/**
 	 * Invoked before a resource will be updated, immediately before the resource
 	 * is persisted to the database.
@@ -307,9 +330,7 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),
-
-	;
+	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource");
 
 	private final List<String> myParameterTypes;
 

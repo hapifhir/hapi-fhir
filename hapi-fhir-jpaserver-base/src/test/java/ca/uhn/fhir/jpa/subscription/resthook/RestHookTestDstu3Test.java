@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.module.interceptor.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -31,9 +32,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -54,12 +56,14 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 	private static NotificationServlet ourNotificationServlet;
 	private static String ourNotificationListenerServer;
+	private static CountDownLatch communicationRequestListenerLatch;
+	private static SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
 
 	@After
 	public void afterUnregisterRestHookListener() {
 		ourLog.info("**** Starting @After *****");
 
-		for (IIdType next : mySubscriptionIds){
+		for (IIdType next : mySubscriptionIds) {
 			ourClient.delete().resourceById(next).execute();
 		}
 		mySubscriptionIds.clear();
@@ -72,11 +76,13 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		myInterceptorRegistry.unregisterInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
 	@Before
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
+		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
 	@Before
@@ -112,7 +118,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		waitForQueueToDrain();
 
-		return (Subscription)methodOutcome.getResource();
+		return (Subscription) methodOutcome.getResource();
 	}
 
 	private Observation sendObservation(String code, String system) {
@@ -201,7 +207,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(1, ourUpdatedObservations);
 		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
-	
+
 	@Test
 	public void testRestHookSubscriptionApplicationJson() throws Exception {
 		String payload = "application/json";
@@ -435,7 +441,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Subscription subscriptionActivated = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscriptionActivated.getStatus());
-	   tags = subscriptionActivated.getMeta().getTag();
+		tags = subscriptionActivated.getMeta().getTag();
 		assertEquals(1, tags.size());
 		tag = tags.get(0);
 		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
@@ -459,12 +465,30 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Subscription subscription = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
-		 tags = subscription.getMeta().getTag();
+		tags = subscription.getMeta().getTag();
 		assertEquals(1, tags.size());
-		 tag = tags.get(0);
+		tag = tags.get(0);
 		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
 		assertEquals("Database", tag.getDisplay());
+	}
+
+	@Test
+	public void testCommunicationRequestWithRef() throws InterruptedException {
+		Organization org = new Organization();
+		MethodOutcome methodOutcome = ourClient.create().resource(org).execute();
+		String orgId = methodOutcome.getId().getIdPart();
+
+		String criteria = "CommunicationRequest?requester=1276," + orgId + "&occurrence=ge2019-02-08T00:00:00-05:00&occurrence=le2019-02-09T00:00:00-05:00";
+		String payload = "application/fhir+xml";
+		createSubscription(criteria, payload, ourListenerServerBase);
+
+		CommunicationRequest cr = new CommunicationRequest();
+		cr.getRequester().getAgent().setReference("Organization/" + orgId);
+		cr.setOccurrence(new DateTimeType("2019-02-08T00:01:00-05:00"));
+		communicationRequestListenerLatch = new CountDownLatch(1);
+		ourClient.create().resource(cr).execute();
+		assertTrue("Timed out waiting for subscription to match", communicationRequestListenerLatch.await(10, TimeUnit.SECONDS));
 	}
 
 	@BeforeClass
@@ -475,7 +499,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
 
 		ObservationListener obsListener = new ObservationListener();
-		ourListenerRestServer.setResourceProviders(obsListener);
+		CommunicationRequestListener crListener = new CommunicationRequestListener();
+		ourListenerRestServer.setResourceProviders(obsListener, crListener);
 
 		ourListenerServer = new Server(ourListenerPort);
 		ourNotificationServlet = new NotificationServlet();
@@ -505,7 +530,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourLog.info("Received Listener Create");
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
-			ourCreatedObservations.add(theObservation);
+			ourCreatedObservations.add((Observation) theObservation);
 			return new MethodOutcome(new IdType("Observation/1"), true);
 		}
 
@@ -521,7 +546,27 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
-
 	}
 
+	public static class CommunicationRequestListener implements IResourceProvider {
+
+		@Create
+		public MethodOutcome create(@ResourceParam CommunicationRequest theResource, HttpServletRequest theRequest) {
+			ourLog.info("Received CommunicationRequestListener Create");
+			communicationRequestListenerLatch.countDown();
+			return new MethodOutcome(new IdType("CommunicationRequest/1"), true);
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return CommunicationRequest.class;
+		}
+
+		@Update
+		public MethodOutcome update(@ResourceParam CommunicationRequest theResource, HttpServletRequest theRequest) {
+			ourLog.info("Received CommunicationRequestListener Update");
+			communicationRequestListenerLatch.countDown();
+			return new MethodOutcome(new IdType("CommunicationRequest/1"), false);
+		}
+	}
 }

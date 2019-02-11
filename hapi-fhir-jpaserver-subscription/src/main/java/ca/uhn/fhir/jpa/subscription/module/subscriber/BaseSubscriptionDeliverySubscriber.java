@@ -49,16 +49,15 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 			return;
 		}
 
-		String subscriptionId = "(unknown?)";
+		ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
+		String subscriptionId = msg.getSubscriptionId(myFhirContext);
+
+		ActiveSubscription updatedSubscription = mySubscriptionRegistry.get(msg.getSubscription().getIdElement(myFhirContext).getIdPart());
+		if (updatedSubscription != null) {
+			msg.setSubscription(updatedSubscription.getSubscription());
+		}
 
 		try {
-			ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
-			subscriptionId = msg.getSubscription().getIdElement(myFhirContext).getValue();
-
-			ActiveSubscription updatedSubscription = mySubscriptionRegistry.get(msg.getSubscription().getIdElement(myFhirContext).getIdPart());
-			if (updatedSubscription != null) {
-				msg.setSubscription(updatedSubscription.getSubscription());
-			}
 
 			// Interceptor call: SUBSCRIPTION_BEFORE_DELIVERY
 			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY, msg, msg.getSubscription())) {
@@ -71,9 +70,16 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_DELIVERY, msg, msg.getSubscription());
 
 		} catch (Exception e) {
-			String msg = "Failure handling subscription payload for subscription: " + subscriptionId;
-			ourLog.error(msg, e);
-			throw new MessagingException(theMessage, msg, e);
+
+			String errorMsg = "Failure handling subscription payload for subscription: " + subscriptionId;
+			ourLog.error(errorMsg, e);
+
+			// Interceptor call: SUBSCRIPTION_AFTER_DELIVERY
+			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, msg, msg.getSubscription(), e)) {
+				return;
+			}
+
+			throw new MessagingException(theMessage, errorMsg, e);
 		}
 	}
 
