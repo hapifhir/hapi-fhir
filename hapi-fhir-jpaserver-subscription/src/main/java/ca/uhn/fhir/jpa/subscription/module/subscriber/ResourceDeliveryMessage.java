@@ -28,15 +28,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.Gson;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -132,5 +126,12 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 			.append("myPayloadId", myPayloadId)
 			.append("myOperationType", myOperationType)
 			.toString();
+	}
+
+	/**
+	 * Helper method to fetch the subscription ID
+	 */
+	public String getSubscriptionId(FhirContext theFhirContext) {
+		return getSubscription().getIdElement(theFhirContext).getValue();
 	}
 }

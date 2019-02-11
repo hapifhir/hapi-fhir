@@ -218,12 +218,12 @@ public final class ResourceIndexedSearchParams {
 		return populatedResourceLinkParameters;
 	}
 
-	public boolean matchParam(String theResourceName, String theParamName, RuntimeSearchParam paramDef, IQueryParameterType theParam) {
-		if (paramDef == null) {
+	public boolean matchParam(String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+		if (theParamDef == null) {
 			return false;
 		}
 		Collection<? extends BaseResourceIndexedSearchParam> resourceParams;
-		switch (paramDef.getParamType()) {
+		switch (theParamDef.getParamType()) {
 			case TOKEN:
 				resourceParams = tokenParams;
 				break;
@@ -243,7 +243,7 @@ public final class ResourceIndexedSearchParams {
 				resourceParams = dateParams;
 				break;
 			case REFERENCE:
-				return matchResourceLinks(theResourceName, theParamName, theParam);
+				return matchResourceLinks(theResourceName, theParamName, theParam, theParamDef.getPath());
 			case COMPOSITE:
 			case HAS:
 			case SPECIAL:
@@ -260,11 +260,11 @@ public final class ResourceIndexedSearchParams {
 		return resourceParams.stream().anyMatch(namedParamPredicate);
 	}
 
-	private boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam) {
+	private boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
 		ReferenceParam reference = (ReferenceParam)theParam;
 
 		Predicate<ResourceLink> namedParamPredicate = resourceLink ->
-			resourceLinkMatches(theResourceName, resourceLink, theParamName)
+			resourceLinkMatches(theResourceName, resourceLink, theParamName, theParamPath)
 			 && resourceIdMatches(resourceLink, reference);
 
 		return links.stream().anyMatch(namedParamPredicate);
@@ -274,7 +274,7 @@ public final class ResourceIndexedSearchParams {
 		ResourceTable target = theResourceLink.getTargetResource();
 		IdDt idDt = target.getIdDt();
 		if (idDt.isIdPartValidLong()) {
-			return theReference.getIdPartAsLong() == idDt.getIdPartAsLong();
+			return theReference.getIdPartAsLong().equals(idDt.getIdPartAsLong());
 		} else {
 			ForcedId forcedId = target.getForcedId();
 			if (forcedId != null) {
@@ -285,9 +285,9 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
-	private boolean resourceLinkMatches(String theResourceName, ResourceLink theResourceLink, String theParamName) {
+	private boolean resourceLinkMatches(String theResourceName, ResourceLink theResourceLink, String theParamName, String theParamPath) {
 		return theResourceLink.getTargetResource().getResourceType().equalsIgnoreCase(theParamName) ||
-			theResourceLink.getSourcePath().equalsIgnoreCase(theResourceName+"."+theParamName);
+			theResourceLink.getSourcePath().equalsIgnoreCase(theParamPath);
 	}
 
 	@Override

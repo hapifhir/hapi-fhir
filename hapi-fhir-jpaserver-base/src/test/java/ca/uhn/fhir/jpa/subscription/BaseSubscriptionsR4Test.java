@@ -54,7 +54,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static String ourListenerServerBase;
 
-	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
+	protected List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 
 
 	@After

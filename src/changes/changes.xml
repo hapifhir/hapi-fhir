@@ -21,6 +21,11 @@
 				file for configuration, making it much easier to get started with this 
 				project. Thanks to Sean McIlvenna for the pull request!
 			</action>
+			<action type="fix">
+				The hapi-fhir-jpaserver-example did not have Subscription capabilities
+				enabled after the refactoring of how Subscriptions are enabled that
+				occurred in HAPI FHIR 3.7.0. Thanks to Volker Schmidt for the pull request!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
