@@ -186,25 +186,44 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
-	private void addPredicateDate(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+	private Predicate addPredicateDate(String theResourceName,
+												  String theParamName,
+												  List<? extends IQueryParameterType> theList) {
+
+		return addPredicateDate(theResourceName,
+			theParamName,
+			theList,
+			null);
+	}
+
+	private Predicate addPredicateDate(String theResourceName,
+											  String theParamName,
+											  List<? extends IQueryParameterType> theList,
+											  SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamDate> join = createOrReuseJoin(JoinEnum.DATE, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
 			addPredicateParamMissing(theResourceName, theParamName, missing, join);
-			return;
+			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
-			Predicate p = createPredicateDate(nextOr, theResourceName, theParamName, myBuilder, join);
+			IQueryParameterType params = nextOr;
+			Predicate p = createPredicateDate(params,
+				theResourceName,
+				theParamName,
+				myBuilder,
+				join,
+				operation);
 			codePredicates.add(p);
 		}
 
 		Predicate orPredicates = myBuilder.or(toArray(codePredicates));
 		myPredicates.add(orPredicates);
-
+		return orPredicates;
 	}
 
 	private void addPredicateHas(List<List<? extends IQueryParameterType>> theHasParameters) {
@@ -264,7 +283,13 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void addPredicateLanguage(List<List<? extends IQueryParameterType>> theList) {
+	private Predicate addPredicateLanguage(List<List<? extends IQueryParameterType>> theList) {
+		return addPredicateLanguage(theList,
+			null);
+	}
+
+	private Predicate addPredicateLanguage(List<List<? extends IQueryParameterType>> theList,
+														SearchFilterParser.CompareOperation operation) {
 		for (List<? extends IQueryParameterType> nextList : theList) {
 
 			Set<String> values = new HashSet<>();
@@ -284,22 +309,48 @@ public class SearchBuilder implements ISearchBuilder {
 				continue;
 			}
 
-			Predicate predicate = myResourceTableRoot.get("myLanguage").as(String.class).in(values);
+			Predicate predicate = null;
+			if ((operation == null) ||
+				(operation == SearchFilterParser.CompareOperation.eq)) {
+				predicate = myResourceTableRoot.get("myLanguage").as(String.class).in(values);
+			}
+			else if (operation == SearchFilterParser.CompareOperation.ne) {
+				predicate = myResourceTableRoot.get("myLanguage").as(String.class).in(values).not();
+			}
+			else {
+				throw new InvalidRequestException("Unsupported operator specified in language query, only \"eq\" and \"ne\" are supported");
+			}
 			myPredicates.add(predicate);
+			if (operation != null) {
+				return predicate;
+			}
 		}
 
+		return null;
 	}
 
-	private void addPredicateNumber(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+	private Predicate addPredicateNumber(String theResourceName,
+													 String theParamName,
+													 List<? extends IQueryParameterType> theList) {
+		return addPredicateNumber(theResourceName,
+			theParamName,
+			theList,
+			null);
+	}
+
+	private Predicate addPredicateNumber(String theResourceName,
+													 String theParamName,
+													 List<? extends IQueryParameterType> theList,
+													 SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = createOrReuseJoin(JoinEnum.NUMBER, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
-			return;
+			return null;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<>();
+		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
 
 			if (nextOr instanceof NumberParam) {
@@ -312,6 +363,29 @@ public class SearchBuilder implements ISearchBuilder {
 
 				final Expression<BigDecimal> fromObj = join.get("myValue");
 				ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
+				if (operation == SearchFilterParser.CompareOperation.ne) {
+					prefix = ParamPrefixEnum.NOT_EQUAL;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.lt) {
+					prefix = ParamPrefixEnum.LESSTHAN;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.le) {
+					prefix = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.gt) {
+					prefix = ParamPrefixEnum.GREATERTHAN;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.ge) {
+					prefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+				}
+				else if (operation == SearchFilterParser.CompareOperation.eq) {
+					prefix = ParamPrefixEnum.EQUAL;
+				}
+				else if (operation != null) {
+					throw new IllegalArgumentException("Invalid operator specified for number type");
+				}
+
+
 				String invalidMessageName = "invalidNumberPrefix";
 
 				Predicate predicateNumeric = createPredicateNumeric(theResourceName, theParamName, join, myBuilder, nextOr, prefix, value, fromObj, invalidMessageName);
@@ -351,33 +425,70 @@ public class SearchBuilder implements ISearchBuilder {
 		myPredicates.add(myBuilder.equal(theJoin.get("myMissing"), theMissing));
 	}
 
-	private void addPredicateQuantity(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+	private Predicate addPredicateQuantity(String theResourceName,
+														String theParamName,
+														List<? extends IQueryParameterType> theList) {
+		return addPredicateQuantity(theResourceName,
+			theParamName,
+			theList,
+			null);
+	}
+
+	private Predicate addPredicateQuantity(String theResourceName,
+														String theParamName,
+														List<? extends IQueryParameterType> theList,
+														SearchFilterParser.CompareOperation operation) {
 		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createOrReuseJoin(JoinEnum.QUANTITY, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
-			return;
+			return null;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<>();
+		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
 
-			Predicate singleCode = createPredicateQuantity(nextOr, theResourceName, theParamName, myBuilder, join);
+			Predicate singleCode = createPredicateQuantity(nextOr,
+				theResourceName,
+				theParamName,
+				myBuilder,
+				join,
+				operation);
 			codePredicates.add(singleCode);
 		}
 
-		myPredicates.add(myBuilder.or(toArray(codePredicates)));
+		Predicate retVal = myBuilder.or(toArray(codePredicates));
+		myPredicates.add(retVal);
+		return retVal;
+	}
+
+	private Predicate addPredicateReference(String theResourceName,
+														 String theParamName,
+														 List<? extends IQueryParameterType> theList) {
+		return addPredicateReference(theResourceName,
+			theParamName,
+			theList,
+			null);
 	}
 
 	/**
-	 * Add reference predicate to the current search
-	 */
-	private void addPredicateReference(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+	* Add reference predicate to the current search
+	*/
+	private Predicate addPredicateReference(String theResourceName,
+														 String theParamName,
+														 List<? extends IQueryParameterType> theList,
+														 SearchFilterParser.CompareOperation operation) {
 		assert theParamName.contains(".") == false;
+
+		if ((operation != null) &&
+			(operation != SearchFilterParser.CompareOperation.eq) &&
+			(operation != SearchFilterParser.CompareOperation.ne)) {
+			throw new InvalidRequestException("Invalid operator specified for reference predicate.  Supported operators for reference predicate are \"eq\" and \"ne\".");
+		}
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing());
-			return;
+			return null;
 		}
 
 		Join<ResourceTable, ResourceLink> join = createOrReuseJoin(JoinEnum.REFERENCE, theParamName);
@@ -397,8 +508,11 @@ public class SearchBuilder implements ISearchBuilder {
 						if (myDaoConfig.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
 							dt = dt.toUnqualified();
 						} else {
-							ourLog.debug("Searching for resource link with target URL: {}", dt.getValue());
-							Predicate eq = myBuilder.equal(join.get("myTargetResourceUrl"), dt.getValue());
+							ourLog.debug(((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? "Searching for resource link with target URL: {}"
+								: "Searching for resource link(s) that don't match target URL: {}",
+								dt.getValue());
+							Predicate eq = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? myBuilder.equal(join.get("myTargetResourceUrl"), dt.getValue())
+								: myBuilder.notEqual(join.get("myTargetResourceUrl"), dt.getValue());
 							codePredicates.add(eq);
 							continue;
 						}
@@ -412,10 +526,12 @@ public class SearchBuilder implements ISearchBuilder {
 						targetPid = Collections.singletonList(-1L);
 					}
 					for (Long next : targetPid) {
-						ourLog.debug("Searching for resource link with target PID: {}", next);
-
+						ourLog.debug(((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? "Searching for resource link with target PID: {}"
+							: "Searching for resource link(s) that don't match target PID: {}",
+							next);
 						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
-						Predicate pidPredicate = myBuilder.equal(join.get("myTargetResourcePid"), next);
+						Predicate pidPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? myBuilder.equal(join.get("myTargetResourcePid"), next)
+							: myBuilder.notEqual(join.get("myTargetResourcePid"), next);
 						codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 					}
 
@@ -580,7 +696,8 @@ public class SearchBuilder implements ISearchBuilder {
 						myIndexJoins = stackIndexJoins;
 
 						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
-						Predicate pidPredicate = join.get("myTargetResourcePid").in(subQ);
+						Predicate pidPredicate = ((operation == null) || (operation == SearchFilterParser.CompareOperation.eq)) ? join.get("myTargetResourcePid").in(subQ)
+							: join.get("myTargetResourcePid").in(subQ).not();
 						codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 
 					}
@@ -625,7 +742,13 @@ public class SearchBuilder implements ISearchBuilder {
 		return chainValue;
 	}
 
-	private void addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues) {
+    private Predicate addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues) {
+        return addPredicateResourceId(theValues,
+                                      null);
+    }
+    
+    private Predicate addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues,
+                                             SearchFilterParser.CompareOperation operation) {
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
 			Set<Long> orPids = new HashSet<>();
 			for (IQueryParameterType next : nextValue) {
@@ -654,35 +777,68 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 			}
 
+			Predicate nextPredicate = null;
 			if (orPids.size() > 0) {
-				Predicate nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids);
+				if ((operation == null) ||
+					(operation == SearchFilterParser.CompareOperation.eq)) {
+					nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids);
+				}
+				else if (operation == SearchFilterParser.CompareOperation.ne) {
+					nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids).not();
+				}
+				else {
+					throw new InvalidRequestException("Unsupported operator specified in resource ID query, only \"eq\" and \"ne\" are supported");
+				}
 				myPredicates.add(nextPredicate);
 			} else {
 				// This will never match
-				Predicate nextPredicate = myBuilder.equal(myResourceTableRoot.get("myId").as(Long.class), -1);
+				nextPredicate = myBuilder.equal(myResourceTableRoot.get("myId").as(Long.class), -1);
 				myPredicates.add(nextPredicate);
 			}
 
+			if (operation != null) {
+				return nextPredicate;
+			}
 		}
+		return null;
 	}
 
-	private void addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+	private Predicate addPredicateString(String theResourceName,
+													 String theParamName,
+													 List<? extends IQueryParameterType> theList) {
+		return addPredicateString(theResourceName,
+			theParamName,
+			theList,
+			SearchFilterParser.CompareOperation.eq);
+	}
+
+	private Predicate addPredicateString(String theResourceName,
+													 String theParamName,
+													 List<? extends IQueryParameterType> theList,
+													 SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamString> join = createOrReuseJoin(JoinEnum.STRING, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
-			return;
+			return null;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<>();
+		List<Predicate> codePredicates = new ArrayList<Predicate>();
 		for (IQueryParameterType nextOr : theList) {
-			Predicate singleCode = createPredicateString(nextOr, theResourceName, theParamName, myBuilder, join);
+			IQueryParameterType theParameter = nextOr;
+			Predicate singleCode = createPredicateString(theParameter,
+				theResourceName,
+				theParamName,
+				myBuilder,
+				join,
+				operation);
 			codePredicates.add(singleCode);
 		}
 
-		myPredicates.add(myBuilder.or(toArray(codePredicates)));
-
+		Predicate retVal = myBuilder.or(toArray(codePredicates));
+		myPredicates.add(retVal);
+		return retVal;
 	}
 
 	private void addPredicateTag(List<List<? extends IQueryParameterType>> theList, String theParamName) {
@@ -813,12 +969,24 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
-	private void addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+	private Predicate addPredicateToken(String theResourceName,
+											 String theParamName,
+											 List<? extends IQueryParameterType> theList) {
+		return addPredicateToken(theResourceName,
+			theParamName,
+			theList,
+			null);
+	}
+
+	private Predicate addPredicateToken(String theResourceName,
+													String theParamName,
+													List<? extends IQueryParameterType> theList,
+													SearchFilterParser.CompareOperation operation) {
 
 		if (theList.get(0).getMissing() != null) {
 			Join<ResourceTable, ResourceIndexedSearchParamToken> join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
-			return;
+			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
@@ -836,25 +1004,38 @@ public class SearchBuilder implements ISearchBuilder {
 			if (join == null) {
 				join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
 			}
-			Predicate singleCode = createPredicateToken(nextOr, theResourceName, theParamName, myBuilder, join);
+			Predicate singleCode = createPredicateToken(nextOr, theResourceName, theParamName, myBuilder, join, operation);
 			codePredicates.add(singleCode);
 		}
 
 		if (codePredicates.isEmpty()) {
-			return;
+			return null;
 		}
 
 		Predicate spPredicate = myBuilder.or(toArray(codePredicates));
 		myPredicates.add(spPredicate);
+		return spPredicate;
 	}
 
-	private void addPredicateUri(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+	private Predicate addPredicateUri(String theResourceName,
+												 String theParamName,
+												 List<? extends IQueryParameterType> theList) {
+		return addPredicateUri(theResourceName,
+			theParamName,
+			theList,
+			SearchFilterParser.CompareOperation.eq);
+	}
+
+	private Predicate addPredicateUri(String theResourceName,
+												 String theParamName,
+												 List<? extends IQueryParameterType> theList,
+												 SearchFilterParser.CompareOperation operation) {
 
 		Join<ResourceTable, ResourceIndexedSearchParamUri> join = createOrReuseJoin(JoinEnum.URI, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
-			return;
+			return null;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
@@ -907,19 +1088,43 @@ public class SearchBuilder implements ISearchBuilder {
 					codePredicates.add(hashAndUriPredicate);
 
 				} else {
-
-					if (myDontUseHashesForSearch) {
-
-						Predicate predicate = myBuilder.equal(join.get("myUri").as(String.class), value);
-						codePredicates.add(predicate);
-
-					} else {
-
-						long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(theResourceName, theParamName, value);
-						Predicate hashPredicate = myBuilder.equal(join.get("myHashUri"), hashUri);
-						codePredicates.add(hashPredicate);
-
+                    if (myDontUseHashesForSearch) {
+                        Predicate predicate = myBuilder.equal(join.get("myUri").as(String.class), value);
+                        codePredicates.add(predicate);
+                    } else {
+					if (operation == SearchFilterParser.CompareOperation.eq) {
+						predicate = myBuilder.equal(join.get("myUri").as(String.class), value);
 					}
+					else if (operation == SearchFilterParser.CompareOperation.ne) {
+						predicate = myBuilder.notEqual(join.get("myUri").as(String.class), value);
+					}
+					else if (operation == SearchFilterParser.CompareOperation.co) {
+						predicate = myBuilder.like(join.get("myUri").as(String.class), createLeftAndRightMatchLikeExpression(value));
+					}
+					else if (operation == SearchFilterParser.CompareOperation.gt) {
+						predicate = myBuilder.greaterThan(join.get("myUri").as(String.class), value);
+					}
+					else if (operation == SearchFilterParser.CompareOperation.lt) {
+						predicate = myBuilder.lessThan(join.get("myUri").as(String.class), value);
+					}
+					else if (operation == SearchFilterParser.CompareOperation.ge) {
+						predicate = myBuilder.greaterThanOrEqualTo(join.get("myUri").as(String.class), value);
+					}
+					else if (operation == SearchFilterParser.CompareOperation.le) {
+						predicate = myBuilder.lessThanOrEqualTo(join.get("myUri").as(String.class), value);
+					}
+					else if (operation == SearchFilterParser.CompareOperation.sw) {
+						predicate = myBuilder.like(join.get("myUri").as(String.class), createLeftMatchLikeExpression(value));
+					}
+					else if (operation == SearchFilterParser.CompareOperation.ew) {
+						predicate = myBuilder.like(join.get("myUri").as(String.class), createRightMatchLikeExpression(value));
+					}
+					else {
+						throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
+							operation.toString()));
+					}
+                        codePredicates.add(predicate);
+                    }
 				}
 
 			} else {
@@ -935,11 +1140,17 @@ public class SearchBuilder implements ISearchBuilder {
 		if (codePredicates.isEmpty()) {
 			Predicate predicate = myBuilder.isNull(join.get("myMissing").as(String.class));
 			myPredicates.add(predicate);
-			return;
+			return null;
 		}
 
 		Predicate orPredicate = myBuilder.or(toArray(codePredicates));
-		myPredicates.add(orPredicate);
+
+		Predicate outerPredicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName,
+			theParamName,
+			join,
+			orPredicate);
+		myPredicates.add(outerPredicate);
+		return outerPredicate;
 	}
 
 	private Predicate combineParamIndexPredicateWithParamNamePredicate(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, Predicate thePredicate) {
@@ -1026,20 +1237,45 @@ public class SearchBuilder implements ISearchBuilder {
 		});
 	}
 
-	private Predicate createPredicateDate(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamDate> theFrom) {
+	private Predicate createPredicateDate(IQueryParameterType theParam,
+													  String theResourceName,
+													  String theParamName,
+													  CriteriaBuilder theBuilder,
+													  From<?, ResourceIndexedSearchParamDate> theFrom) {
+		return createPredicateDate(theParam,
+			theResourceName,
+			theParamName,
+			theBuilder,
+			theFrom,
+			null);
+	}
+
+	private Predicate createPredicateDate(IQueryParameterType theParam,
+												  String theResourceName,
+												  String theParamName,
+												  CriteriaBuilder theBuilder,
+												  From<?, ResourceIndexedSearchParamDate> theFrom,
+												  SearchFilterParser.CompareOperation operation) {
+
 		Predicate p;
 		if (theParam instanceof DateParam) {
 			DateParam date = (DateParam) theParam;
 			if (!date.isEmpty()) {
 				DateRangeParam range = new DateRangeParam(date);
-				p = createPredicateDateFromRange(theBuilder, theFrom, range);
+				p = createPredicateDateFromRange(theBuilder,
+					theFrom,
+					range,
+					operation);
 			} else {
 				// TODO: handle missing date param?
 				p = null;
 			}
 		} else if (theParam instanceof DateRangeParam) {
 			DateRangeParam range = (DateRangeParam) theParam;
-			p = createPredicateDateFromRange(theBuilder, theFrom, range);
+			p = createPredicateDateFromRange(theBuilder,
+				theFrom,
+				range,
+				operation);
 		} else {
 			throw new IllegalArgumentException("Invalid token type: " + theParam.getClass());
 		}
@@ -1047,30 +1283,80 @@ public class SearchBuilder implements ISearchBuilder {
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, p);
 	}
 
-	private Predicate createPredicateDateFromRange(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamDate> theFrom, DateRangeParam theRange) {
+	private Predicate createPredicateDateFromRange(CriteriaBuilder theBuilder,
+																  From<?, ResourceIndexedSearchParamDate> theFrom,
+																  DateRangeParam theRange,
+																  SearchFilterParser.CompareOperation operation) {
 		Date lowerBound = theRange.getLowerBoundAsInstant();
 		Date upperBound = theRange.getUpperBoundAsInstant();
-
+		Predicate lt = null;
+		Predicate gt = null;
 		Predicate lb = null;
-		if (lowerBound != null) {
-			Predicate gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBound);
-			Predicate lt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), lowerBound);
-			if (theRange.getLowerBound().getPrefix() == ParamPrefixEnum.STARTS_AFTER || theRange.getLowerBound().getPrefix() == ParamPrefixEnum.EQUAL) {
-				lb = gt;
-			} else {
-				lb = theBuilder.or(gt, lt);
+		Predicate ub = null;
+
+		if (operation == SearchFilterParser.CompareOperation.lt) {
+			if (lowerBound == null) {
+				throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
+			}
+			lb = theBuilder.lessThan(theFrom.get("myValueLow"), lowerBound);
+		}
+		else if (operation == SearchFilterParser.CompareOperation.le) {
+			if (upperBound == null) {
+				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
+			}
+			lb = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBound);
+		}
+		else if (operation == SearchFilterParser.CompareOperation.gt) {
+			if (upperBound == null) {
+				throw new InvalidRequestException("upperBound value not correctly specified for compare operation");
+			}
+			lb = theBuilder.greaterThan(theFrom.get("myValueHigh"), upperBound);
+		}
+		else if (operation == SearchFilterParser.CompareOperation.ge) {
+			if (lowerBound == null) {
+				throw new InvalidRequestException("lowerBound value not correctly specified for compare operation");
+			}
+			lb = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBound);
+		}
+		else if (operation == SearchFilterParser.CompareOperation.ne) {
+			if ((lowerBound == null) ||
+				(upperBound == null)) {
+				throw new InvalidRequestException("lowerBound and/or upperBound value not correctly specified for compare operation");
+			}
+			/*Predicate*/ lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), lowerBound);
+			/*Predicate*/ gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), upperBound);
+			lb = theBuilder.or(lt,
+				gt);
+		}
+		else if ((operation == SearchFilterParser.CompareOperation.eq) ||
+			(operation == null)) {
+			if (lowerBound != null) {
+				/*Predicate*/
+				gt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueLow"), lowerBound);
+				/*Predicate*/
+				lt = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueHigh"), lowerBound);
+				if (theRange.getLowerBound().getPrefix() == ParamPrefixEnum.STARTS_AFTER || theRange.getLowerBound().getPrefix() == ParamPrefixEnum.EQUAL) {
+					lb = gt;
+				} else {
+					lb = theBuilder.or(gt, lt);
+				}
+			}
+
+			if (upperBound != null) {
+				/*Predicate*/
+				gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), upperBound);
+				/*Predicate*/
+				lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBound);
+				if (theRange.getUpperBound().getPrefix() == ParamPrefixEnum.ENDS_BEFORE || theRange.getUpperBound().getPrefix() == ParamPrefixEnum.EQUAL) {
+					ub = lt;
+				} else {
+					ub = theBuilder.or(gt, lt);
+				}
 			}
 		}
-
-		Predicate ub = null;
-		if (upperBound != null) {
-			Predicate gt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueLow"), upperBound);
-			Predicate lt = theBuilder.lessThanOrEqualTo(theFrom.get("myValueHigh"), upperBound);
-			if (theRange.getUpperBound().getPrefix() == ParamPrefixEnum.ENDS_BEFORE || theRange.getUpperBound().getPrefix() == ParamPrefixEnum.EQUAL) {
-				ub = lt;
-			} else {
-				ub = theBuilder.or(gt, lt);
-			}
+		else {
+			throw new InvalidRequestException(String.format("Unsupported operator specified, operator=%s",
+				operation.name()));
 		}
 
 		ourLog.trace("Date range is {} - {}", lowerBound, upperBound);
@@ -1084,9 +1370,37 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private Predicate createPredicateNumeric(String theResourceName, String theParamName, From<?, ? extends BaseResourceIndexedSearchParam> theFrom, CriteriaBuilder builder,
-														  IQueryParameterType theParam, ParamPrefixEnum thePrefix, BigDecimal theValue, final Expression<BigDecimal> thePath,
+	private Predicate createPredicateNumeric(String theResourceName,
+														  String theParamName,
+														  From<?, ? extends BaseResourceIndexedSearchParam> theFrom,
+														  CriteriaBuilder builder,
+														  IQueryParameterType theParam,
+														  ParamPrefixEnum thePrefix,
+														  BigDecimal theValue,
+														  final Expression<BigDecimal> thePath,
 														  String invalidMessageName) {
+		return createPredicateNumeric(theResourceName,
+			theParamName,
+			theFrom,
+			builder,
+			theParam,
+			thePrefix,
+			theValue,
+			thePath,
+			invalidMessageName,
+			null);
+	}
+
+	private Predicate createPredicateNumeric(String theResourceName,
+														  String theParamName,
+														  From<?, ? extends BaseResourceIndexedSearchParam> theFrom,
+														  CriteriaBuilder builder,
+														  IQueryParameterType theParam,
+														  ParamPrefixEnum thePrefix,
+														  BigDecimal theValue,
+														  final Expression<BigDecimal> thePath,
+														  String invalidMessageName,
+														  SearchFilterParser.CompareOperation operation) {
 		Predicate num;
 		switch (thePrefix) {
 			case GREATERTHAN:
@@ -1131,27 +1445,70 @@ public class SearchBuilder implements ISearchBuilder {
 		if (theParamName == null) {
 			return num;
 		}
-		return num;
+		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, num);
 	}
 
-	private Predicate createPredicateQuantity(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
+	private Predicate createPredicateQuantity(IQueryParameterType theParam,
+															String theResourceName,
+															String theParamName,
+															CriteriaBuilder theBuilder,
 															From<?, ResourceIndexedSearchParamQuantity> theFrom) {
+		return createPredicateQuantity(theParam,
+			theResourceName,
+			theParamName,
+			theBuilder,
+			theFrom,
+			null);
+	}
+
+	private Predicate createPredicateQuantity(IQueryParameterType theParam,
+															String theResourceName,
+															String theParamName,
+															CriteriaBuilder theBuilder,
+															From<?, ResourceIndexedSearchParamQuantity> theFrom,
+															SearchFilterParser.CompareOperation operation) {
 		String systemValue;
 		String unitsValue;
-		ParamPrefixEnum cmpValue;
+		ParamPrefixEnum cmpValue = null;
 		BigDecimal valueValue;
+
+		if (operation == SearchFilterParser.CompareOperation.ne) {
+			cmpValue = ParamPrefixEnum.NOT_EQUAL;
+		}
+		else if (operation == SearchFilterParser.CompareOperation.lt) {
+			cmpValue = ParamPrefixEnum.LESSTHAN;
+		}
+		else if (operation == SearchFilterParser.CompareOperation.le) {
+			cmpValue = ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+		}
+		else if (operation == SearchFilterParser.CompareOperation.gt) {
+			cmpValue = ParamPrefixEnum.GREATERTHAN;
+		}
+		else if (operation == SearchFilterParser.CompareOperation.ge) {
+			cmpValue = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+		}
+		else if (operation == SearchFilterParser.CompareOperation.eq) {
+			cmpValue = ParamPrefixEnum.EQUAL;
+		}
+		else if (operation != null) {
+			throw new IllegalArgumentException("Invalid operator specified for quantity type");
+		}
 
 		if (theParam instanceof BaseQuantityDt) {
 			BaseQuantityDt param = (BaseQuantityDt) theParam;
 			systemValue = param.getSystemElement().getValueAsString();
 			unitsValue = param.getUnitsElement().getValueAsString();
-			cmpValue = ParamPrefixEnum.forValue(param.getComparatorElement().getValueAsString());
+			if (operation == null) {
+				cmpValue = ParamPrefixEnum.forValue(param.getComparatorElement().getValueAsString());
+			}
 			valueValue = param.getValueElement().getValue();
 		} else if (theParam instanceof QuantityParam) {
 			QuantityParam param = (QuantityParam) theParam;
 			systemValue = param.getSystem();
 			unitsValue = param.getUnits();
-			cmpValue = param.getPrefix();
+			if (operation == null) {
+				cmpValue = param.getPrefix();
+			}
 			valueValue = param.getValue();
 		} else {
 			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
@@ -1209,8 +1566,25 @@ public class SearchBuilder implements ISearchBuilder {
 		return theBuilder.and(hashPredicate, numericPredicate);
 	}
 
-	private Predicate createPredicateString(IQueryParameterType theParameter, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
+	private Predicate createPredicateString(IQueryParameterType theParameter,
+														 String theResourceName,
+														 String theParamName,
+														 CriteriaBuilder theBuilder,
 														 From<?, ResourceIndexedSearchParamString> theFrom) {
+		return createPredicateString(theParameter,
+			theResourceName,
+			theParamName,
+			theBuilder,
+			theFrom,
+			null);
+	}
+
+	private Predicate createPredicateString(IQueryParameterType theParameter,
+														 String theResourceName,
+														 String theParamName,
+														 CriteriaBuilder theBuilder,
+														 From<?, ResourceIndexedSearchParamString> theFrom,
+														 SearchFilterParser.CompareOperation operation) {
 		String rawSearchTerm;
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
@@ -1290,6 +1664,41 @@ public class SearchBuilder implements ISearchBuilder {
 			Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 			return theBuilder.and(hashCode, singleCode);
 
+            // Inciorporate
+            Predicate singleCode = null;
+            if ((operation == null) ||
+                (operation == SearchFilterParser.CompareOperation.eq) ||
+                (operation == SearchFilterParser.CompareOperation.co) ||
+                (operation == SearchFilterParser.CompareOperation.sw) ||
+                (operation == SearchFilterParser.CompareOperation.ew)) {
+                singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+            }
+            else if (operation == SearchFilterParser.CompareOperation.ne) {
+                singleCode = theBuilder.notEqual(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+            }
+            else if (operation == SearchFilterParser.CompareOperation.gt) {
+                singleCode = theBuilder.greaterThan(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+            }
+            else if (operation == SearchFilterParser.CompareOperation.lt) {
+                singleCode = theBuilder.lessThan(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+            }
+            else if (operation == SearchFilterParser.CompareOperation.ge) {
+                singleCode = theBuilder.greaterThanOrEqualTo(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+            }
+            else if (operation == SearchFilterParser.CompareOperation.le) {
+                singleCode = theBuilder.lessThanOrEqualTo(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+            }
+            
+            if (theParameter instanceof StringParam && ((StringParam) theParameter).isExact()) {
+                Predicate exactCode = theBuilder.equal(theFrom.get("myValueExact"), rawSearchTerm);
+                singleCode = theBuilder.and(singleCode, exactCode);
+            }
+            
+            return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
+
+            
+            
+            
 		}
 	}
 
@@ -1309,8 +1718,25 @@ public class SearchBuilder implements ISearchBuilder {
 		return orPredicates;
 	}
 
-	private Predicate createPredicateToken(IQueryParameterType theParameter, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
+	private Predicate createPredicateToken(IQueryParameterType theParameter,
+														String theResourceName,
+														String theParamName,
+														CriteriaBuilder theBuilder,
 														From<?, ResourceIndexedSearchParamToken> theFrom) {
+		return createPredicateToken(theParameter,
+			theResourceName,
+			theParamName,
+			theBuilder,
+			theFrom,
+			null);
+	}
+
+	private Predicate createPredicateToken(IQueryParameterType theParameter,
+														String theResourceName,
+														String theParamName,
+														CriteriaBuilder theBuilder,
+														From<?, ResourceIndexedSearchParamToken> theFrom,
+														SearchFilterParser.CompareOperation operation) {
 		String code;
 		String system;
 		TokenParamModifier modifier = null;
@@ -1491,6 +1917,9 @@ public class SearchBuilder implements ISearchBuilder {
 			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
 		}
 		return predicate;
+        
+        // Incorporate
+        
 	}
 
 	@Override
@@ -2180,6 +2609,135 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
+	private Predicate processFilterParameter(SearchFilterParser.FilterParameter filter,
+													String theResourceName) {
+
+		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName,
+			((SearchFilterParser.FilterParameter) filter).getParamPath().getName());
+
+		if (searchParam.getName().equals(BaseResource.SP_RES_ID)) {
+			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
+				TokenParam param = new TokenParam();
+				param.setValueAsQueryToken(null,
+					null,
+					null,
+					((SearchFilterParser.FilterParameter) filter).getValue());
+				return addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)),
+					filter.getOperation());
+			}
+			else {
+				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
+			}
+		} else if (searchParam.getName().equals(BaseResource.SP_RES_LANGUAGE)) {
+			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
+				return addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(((SearchFilterParser.FilterParameter) filter).getValue()))),
+					filter.getOperation());
+			}
+			else {
+				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
+			}
+		}
+//		else if ((searchParam.getName().equals(Constants.PARAM_TAG)) ||
+//			(searchParam.equals(Constants.PARAM_SECURITY))) {
+//			TokenParam param = new TokenParam();
+//			param.setValueAsQueryToken(null,
+//				null,
+//				null,
+//				((SearchFilterParser.FilterParameter) filter).getValue());
+//			return addPredicateTag(Collections.singletonList(Collections.singletonList(param)),
+//				searchParam.getName());
+//		}
+//		else if (searchParam.equals(Constants.PARAM_PROFILE)) {
+//			addPredicateTag(Collections.singletonList(Collections.singletonList(new UriParam(((SearchFilterParser.FilterParameter) filter).getValue()))),
+//				searchParam.getName());
+//		}
+		else if (searchParam != null) {
+			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
+			if (typeEnum == RestSearchParameterTypeEnum.URI) {
+				return addPredicateUri(theResourceName,
+					((SearchFilterParser.FilterParameter) filter).getParamPath().getName(),
+					Collections.singletonList(new UriParam(((SearchFilterParser.FilterParameter) filter).getValue())),
+					filter.getOperation());
+			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
+				return addPredicateString(theResourceName,
+					((SearchFilterParser.FilterParameter) filter).getParamPath().getName(),
+					Collections.singletonList(new StringParam(((SearchFilterParser.FilterParameter) filter).getValue())),
+					filter.getOperation());
+			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
+				return addPredicateDate(theResourceName,
+					((SearchFilterParser.FilterParameter) filter).getParamPath().getName(),
+					Collections.singletonList(new DateParam(((SearchFilterParser.FilterParameter) filter).getValue())),
+					filter.getOperation());
+			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
+				return addPredicateNumber(theResourceName,
+					((SearchFilterParser.FilterParameter) filter).getParamPath().getName(),
+					Collections.singletonList(new NumberParam(((SearchFilterParser.FilterParameter) filter).getValue())),
+					filter.getOperation());
+			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
+				return addPredicateReference(theResourceName,
+					((SearchFilterParser.FilterParameter) filter).getParamPath().getName(),
+					Collections.singletonList(new ReferenceParam(((SearchFilterParser.FilterParameter) filter).getParamPath().getName(),
+						(((SearchFilterParser.FilterParameter) filter).getParamPath().getNext() != null) ? ((SearchFilterParser.FilterParameter) filter).getParamPath().getNext().toString()
+						: null,
+						((SearchFilterParser.FilterParameter) filter).getValue())),
+					filter.getOperation());
+			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
+				return addPredicateQuantity(theResourceName,
+					((SearchFilterParser.FilterParameter) filter).getParamPath().getName(),
+					Collections.singletonList(new QuantityParam(((SearchFilterParser.FilterParameter) filter).getValue())),
+					filter.getOperation());
+			} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
+				throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
+			} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
+				TokenParam param = new TokenParam();
+				param.setValueAsQueryToken(null,
+					null,
+					null,
+					((SearchFilterParser.FilterParameter) filter).getValue());
+				return addPredicateToken(theResourceName,
+					((SearchFilterParser.FilterParameter) filter).getParamPath().getName(),
+					Collections.singletonList(param),
+					filter.getOperation());
+			}
+		}
+		else {
+			throw new InvalidRequestException("Invalid search parameter specified, " + ((SearchFilterParser.FilterParameter) filter).getParamPath().getName() + ", for resource type " + theResourceName);
+		}
+		return null;
+	}
+
+	private Predicate processFilter(SearchFilterParser.Filter filter,
+										String theResourceName) {
+
+		if (filter instanceof SearchFilterParser.FilterParameter) {
+			return processFilterParameter((SearchFilterParser.FilterParameter) filter,
+				theResourceName);
+		}
+		else if (filter instanceof SearchFilterParser.FilterLogical) {
+			// Left side
+			Predicate leftPredicate = processFilter(((SearchFilterParser.FilterLogical) filter).getFilter1(),
+				theResourceName);
+
+			// Right side
+			Predicate rightPredicate = processFilter(((SearchFilterParser.FilterLogical) filter).getFilter2(),
+				theResourceName);
+
+			if (((SearchFilterParser.FilterLogical) filter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
+				return myBuilder.and(leftPredicate,
+					rightPredicate);
+			}
+			else if (((SearchFilterParser.FilterLogical) filter).getOperation() == SearchFilterParser.FilterLogicalOperation.or) {
+				return myBuilder.or(leftPredicate,
+					rightPredicate);
+			}
+		}
+		else if (filter instanceof SearchFilterParser.FilterParameterGroup) {
+			return processFilter(((SearchFilterParser.FilterParameterGroup) filter).getContained(),
+				theResourceName);
+		}
+		return null;
+	}
+
 	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
 
 		if (theAndOrParams.isEmpty()) {
@@ -2255,6 +2813,21 @@ public class SearchBuilder implements ISearchBuilder {
 			} else {
 				if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
 					// These are handled later
+				} else if (Constants.PARAM_FILTER.equals(theParamName))
+				{
+					// Parse the predicates enumerated in the _filter separated by AND or OR...
+					if (theAndOrParams.get(0).get(0) instanceof StringParam) {
+						String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
+						SearchFilterParser.Filter filter = SearchFilterParser.parse(filterString);
+						if (filter != null) {
+							Predicate filterPredicate = processFilter(filter,
+								theResourceName);
+							myPredicates.clear();
+							myPredicates.add(filterPredicate);
+						}
+					}
+
+
 				} else {
 					throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
 				}
@@ -2317,6 +2890,113 @@ public class SearchBuilder implements ISearchBuilder {
 
 		qp.setValueAsQueryToken(myContext, theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
+	}
+
+	/**
+	 * Figures out the tolerance for a search. For example, if the user is searching for <code>4.00</code>, this method
+	 * returns <code>0.005</code> because we shold actually match values which are
+	 * <code>4 (+/-) 0.005</code> according to the FHIR specs.
+	 */
+	static BigDecimal calculateFuzzAmount(ParamPrefixEnum cmpValue, BigDecimal theValue) {
+		if (cmpValue == ParamPrefixEnum.APPROXIMATE) {
+			return theValue.multiply(new BigDecimal(0.1));
+		} else {
+			String plainString = theValue.toPlainString();
+			int dotIdx = plainString.indexOf('.');
+			if (dotIdx == -1) {
+				return new BigDecimal(0.5);
+			}
+
+			int precision = plainString.length() - (dotIdx);
+			double mul = Math.pow(10, -precision);
+			double val = mul * 5.0d;
+			return new BigDecimal(val);
+		}
+	}
+
+	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
+		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
+		if (theLastUpdated != null) {
+			if (theLastUpdated.getLowerBoundAsInstant() != null) {
+				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
+				Predicate predicateLower = builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
+				lastUpdatedPredicates.add(predicateLower);
+			}
+			if (theLastUpdated.getUpperBoundAsInstant() != null) {
+				Predicate predicateUpper = builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
+				lastUpdatedPredicates.add(predicateUpper);
+			}
+		}
+		return lastUpdatedPredicates;
+	}
+
+	private static String createLeftAndRightMatchLikeExpression(String likeExpression) {
+		return "%" + likeExpression.replace("%", "[%]") + "%";
+	}
+
+	private static String createLeftMatchLikeExpression(String likeExpression) {
+		return likeExpression.replace("%", "[%]") + "%";
+	}
+
+	private static String createRightMatchLikeExpression(String likeExpression) {
+		return "%" + likeExpression.replace("%", "[%]");
+	}
+
+	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
+																				String theResourceType) {
+		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
+		RuntimeSearchParam param = theCallingDao.getSearchParamByName(resourceDef, theParamName);
+		List<String> path = param.getPathsSplit();
+
+		/*
+		 * SearchParameters can declare paths on multiple resources
+		 * types. Here we only want the ones that actually apply.
+		 */
+		for (Iterator<String> iter = path.iterator(); iter.hasNext(); ) {
+			if (!iter.next().startsWith(theResourceType + ".")) {
+				iter.remove();
+			}
+		}
+		return theFrom.get("mySourcePath").in(path);
+	}
+
+	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {
+		if (thePids.isEmpty()) {
+			return Collections.emptyList();
+		}
+		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+
+		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
+		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(thePids));
+
+		cq.where(SearchBuilder.toArray(lastUpdatedPredicates));
+		TypedQuery<Long> query = theEntityManager.createQuery(cq);
+
+		List<Long> resultList = query.getResultList();
+		return resultList;
+	}
+
+	@VisibleForTesting
+	public static HandlerTypeEnum getLastHandlerMechanismForUnitTest() {
+		return ourLastHandlerMechanismForUnitTest;
+	}
+
+	@VisibleForTesting
+	public static SearchParameterMap getLastHandlerParamsForUnitTest() {
+		return ourLastHandlerParamsForUnitTest;
+	}
+
+	@VisibleForTesting
+	public static void resetLastHandlerMechanismForUnitTest() {
+		ourLastHandlerMechanismForUnitTest = null;
+		ourLastHandlerParamsForUnitTest = null;
+	}
+
+	static Predicate[] toArray(List<Predicate> thePredicates) {
+		return thePredicates.toArray(new Predicate[thePredicates.size()]);
 	}
 
 	public enum HandlerTypeEnum {
