@@ -72,6 +72,17 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
+		switch (theMsg.getOperationType()) {
+			case CREATE:
+			case UPDATE:
+			case MANUALLY_TRIGGERED:
+				break;
+			case DELETE:
+			default:
+				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
+				// ignore anything else
+				return;
+		}
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED
 		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED, theMsg)) {
@@ -87,18 +98,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
-		switch (theMsg.getOperationType()) {
-			case CREATE:
-			case UPDATE:
-			case MANUALLY_TRIGGERED:
-				break;
-			case DELETE:
-			default:
-				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
-				// ignore anything else
-				return;
-		}
-
 		IIdType resourceId = theMsg.getId(myFhirContext);
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
