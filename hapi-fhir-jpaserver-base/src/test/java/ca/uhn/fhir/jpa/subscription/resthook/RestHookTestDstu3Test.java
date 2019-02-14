@@ -140,6 +140,24 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
+	public void testDatabaseStrategyMeta() throws InterruptedException {
+		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
+		Subscription subscription = createSubscription(databaseCriteria, null, ourNotificationListenerServer);
+		List<Coding> tag = subscription.getMeta().getTag();
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.get(0).getCode());
+	}
+
+	@Test
+	public void testMemorytrategyMeta() throws InterruptedException {
+		String inMemoryCriteria = "Observation?code=17861-6";
+		Subscription subscription = createSubscription(inMemoryCriteria, null, ourNotificationListenerServer);
+		List<Coding> tag = subscription.getMeta().getTag();
+		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
+	}
+
+	@Test
 	public void testRestHookSubscription() throws Exception {
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
