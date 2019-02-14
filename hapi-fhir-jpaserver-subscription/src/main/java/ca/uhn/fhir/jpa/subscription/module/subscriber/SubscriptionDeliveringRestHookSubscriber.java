@@ -97,7 +97,11 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			operation.encoded(thePayloadType);
 		}
 
-		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), thePayloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+		String payloadId = null;
+		if (thePayloadResource != null) {
+			payloadId = thePayloadResource.getIdElement().toUnqualified().getValue();
+		}
+		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 
 		try {
 			operation.execute();
