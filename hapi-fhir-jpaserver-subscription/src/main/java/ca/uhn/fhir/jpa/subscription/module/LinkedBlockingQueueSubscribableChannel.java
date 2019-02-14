@@ -53,9 +53,10 @@ public class LinkedBlockingQueueSubscribableChannel implements SubscribableChann
 			StopWatch sw = new StopWatch();
 			try {
 				theQueue.put(theRunnable);
-			} catch (InterruptedException theE) {
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				throw new RejectedExecutionException("Task " + theRunnable.toString() +
-					" rejected from " + theE.toString());
+					" rejected from " + e.toString());
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());
 		};

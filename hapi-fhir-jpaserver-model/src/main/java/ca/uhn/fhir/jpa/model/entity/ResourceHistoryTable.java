@@ -82,7 +82,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void addTag(ResourceHistoryTag theTag) {
 		for (ResourceHistoryTag next : getTags()) {
-			if (next.getTag().equals(theTag)) {
+			if (next.equals(theTag)) {
 				return;
 			}
 		}
