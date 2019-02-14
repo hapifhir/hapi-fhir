@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -290,11 +290,11 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, mySrd);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
 
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, mySrd);
+		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 	}
 
@@ -322,9 +322,9 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setEverythingMode(EverythingModeEnum.PATIENT_INSTANCE);
 		IPrimitiveType<Integer> count = new IntegerType(1000);
-		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), new IdType("Patient/A161443"), count, null, null, null, null, mySrd);
+		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), new IdType("Patient/A161443"), count, null, null, null, null, null, mySrd);
 
-		TreeSet<String> ids = new TreeSet<String>(toUnqualifiedVersionlessIdValues(everything));
+		TreeSet<String> ids = new TreeSet<>(toUnqualifiedVersionlessIdValues(everything));
 		assertThat(ids, hasItem("List/A161444"));
 		assertThat(ids, hasItem("List/A161468"));
 		assertThat(ids, hasItem("List/A161500"));
@@ -333,7 +333,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		ourLog.info("Actual   {} - {}", ids.size(), ids);
 		assertEquals(allIds, ids);
 
-		ids = new TreeSet<String>();
+		ids = new TreeSet<>();
 		for (int i = 0; i < everything.size(); i++) {
 			for (IBaseResource next : everything.getResources(i, i + 1)) {
 				ids.add(next.getIdElement().toUnqualifiedVersionless().getValue());
@@ -616,7 +616,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 				expect1.setResource(resource);
 				expect1.calculateHashes();
 
-				assertThat("Got: \"" + results.toString()+"\"", results, containsInAnyOrder(expect0, expect1));
+				assertThat("Got: \"" + results.toString() + "\"", results, containsInAnyOrder(expect0, expect1));
 			}
 		});
 	}
@@ -1059,7 +1059,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
 			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
 			IBundleProvider result = myObservationDao.search(map);
-			assertThat("Got: "+ toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
+			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
 		}
 	}
 
@@ -1091,7 +1091,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
 			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, val);
 			IBundleProvider result = myObservationDao.search(map);
-			assertThat("Got: "+ toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
+			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
 		}
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
@@ -3288,7 +3288,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			"Observation/YES21",
 			"Observation/YES22",
 			"Observation/YES23"
-			));
+		));
 	}
 
 	private void createObservationWithEffective(String theId, String theEffective) {
