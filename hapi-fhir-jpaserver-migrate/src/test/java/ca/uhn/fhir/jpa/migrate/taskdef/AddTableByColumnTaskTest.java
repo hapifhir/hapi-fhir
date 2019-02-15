@@ -24,7 +24,6 @@ public class AddTableByColumnTaskTest extends BaseTest {
 
 
 	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {
-		BaseSearchParamRegistry
 		public MyMigrationTasks() {
 			Builder v = forVersion(VersionEnum.V3_5_0);
 
