@@ -353,7 +353,11 @@ public class BaseMigrationTasks<T extends Enum> {
 
 			@Override
 			public void addTask(BaseTask<?> theTask) {
-				myTask.addAddColumnTask((AddColumnTask) theTask);
+				if (theTask instanceof AddColumnTask) {
+					myTask.addAddColumnTask((AddColumnTask) theTask);
+				} else {
+					super.addTask(theTask);
+				}
 			}
 		}
 
