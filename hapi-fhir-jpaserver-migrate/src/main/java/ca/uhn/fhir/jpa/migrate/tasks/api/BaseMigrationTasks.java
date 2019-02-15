@@ -335,16 +335,18 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 		}
 
-		public class BuilderAddTableByColumns implements IAcceptsTasks {
+		public class BuilderAddTableByColumns extends BuilderWithTableName implements IAcceptsTasks {
 			private final AddTableByColumnTask myTask;
 
 			public BuilderAddTableByColumns(IAcceptsTasks theSink, String theTableName, String thePkColumnName) {
+				super(theSink, theTableName);
 				myTask = new AddTableByColumnTask();
 				myTask.setTableName(theTableName);
 				myTask.setPkColumn(thePkColumnName);
 				theSink.addTask(myTask);
 			}
 
+			@Override
 			public BuilderWithTableName.BuilderAddColumnWithName addColumn(String theColumnName) {
 				return new BuilderWithTableName.BuilderAddColumnWithName(theColumnName, this);
 			}
