@@ -2030,6 +2030,24 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchStringParamWithLike() throws Exception {
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_FAMILY, new StringOrListParam().addOr(new StringParam("AAA")).addOr(new StringParam("BBB")));
+		map.setLoadSynchronous(true);
+		myPatientDao.search(map);
+
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, true))
+			.filter(t -> t.contains("select"))
+			.collect(Collectors.toList());
+
+		ourLog.info("Queries:\n  " + queries.stream().collect(Collectors.joining("\n  ")));
+	}
+
+
+	@Test
 	public void testSearchStringParam() throws Exception {
 		IIdType pid1;
 		IIdType pid2;
