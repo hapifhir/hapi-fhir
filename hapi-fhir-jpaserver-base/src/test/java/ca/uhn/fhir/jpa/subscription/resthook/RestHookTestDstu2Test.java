@@ -129,7 +129,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 			createSubscription(criteria1, payload, ourListenerServerBase);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("TTP 422 Unprocessable Entity: Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 
