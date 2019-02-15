@@ -36,7 +36,7 @@ import java.util.HashSet;
 public class ActiveSubscription {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
-	private final CanonicalSubscription mySubscription;
+	private CanonicalSubscription mySubscription;
 	private final SubscribableChannel mySubscribableChannel;
 	private final Collection<MessageHandler> myDeliveryHandlerSet = new HashSet<>();
 
@@ -89,5 +89,9 @@ public class ActiveSubscription {
 	@VisibleForTesting
 	public MessageHandler getDeliveryHandlerForUnitTest() {
 		return myDeliveryHandlerSet.iterator().next();
+	}
+
+	public void setSubscription(CanonicalSubscription theCanonicalizedSubscription) {
+		mySubscription = theCanonicalizedSubscription;
 	}
 }
