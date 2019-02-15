@@ -247,6 +247,42 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
+	public void testMultiResourceElementsOnExtension() throws IOException {
+		ourNextProcedure = new Procedure();
+		ourNextProcedure.setId("Procedure/PROC");
+		ourNextProcedure.addExtension()
+			.setUrl("http://quantity")
+			.setValue(Quantity.fromUcum("1.1", "mg"));
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals(0, procedure.getReasonCode().size());
+				assertEquals("http://quantity", procedure.getExtension().get(0).getUrl());
+				assertEquals("mg", ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
+			});
+
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value.value",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals(0, procedure.getReasonCode().size());
+				assertEquals("1.1", ((Quantity) procedure.getExtension().get(0).getValue()).getValueElement().getValueAsString());
+				assertEquals(null, ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
+			});
+
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.reason",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals(0, procedure.getExtension().size());
+			});
+	}
+
+	@Test
 	public void testMultiResourceElementsFilterWithMetadataExcluded() throws IOException {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(

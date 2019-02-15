@@ -1277,18 +1277,22 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	private void writeExtensionsAsDirectChild(IBaseResource theResource, JsonLikeWriter theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions,
 															List<HeldExtension> modifierExtensions, EncodeContext theEncodeContext) throws IOException {
 		if (extensions.isEmpty() == false) {
+			theEncodeContext.pushPath("extension", false);
 			beginArray(theEventWriter, "extension");
 			for (HeldExtension next : extensions) {
 				next.write(resDef, theResource, theEventWriter, theEncodeContext);
 			}
 			theEventWriter.endArray();
+			theEncodeContext.popPath();
 		}
 		if (modifierExtensions.isEmpty() == false) {
+			theEncodeContext.pushPath("modifierExtension", false);
 			beginArray(theEventWriter, "modifierExtension");
 			for (HeldExtension next : modifierExtensions) {
 				next.write(resDef, theResource, theEventWriter, theEncodeContext);
 			}
 			theEventWriter.endArray();
+			theEncodeContext.popPath();
 		}
 	}
 
