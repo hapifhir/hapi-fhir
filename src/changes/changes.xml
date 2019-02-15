@@ -43,6 +43,11 @@
 				A Google Analytics script fragment was leftover in the hapi-fhir-jpaserver
 				example and starter projects. Thanks to Patrick Werner for removing these!
 			</action>
+			<action type="add">
+				ParametersUtil now has a utility method that can be used to add parameter values
+				using the string name of the datatype (e.g. "dateTime") in order to help
+				building Parameters resources in a version-independent way.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

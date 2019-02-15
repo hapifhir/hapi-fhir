@@ -20,10 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -105,6 +102,25 @@ public class ParametersUtil {
 		BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
 
 		addClientParameter(theContext, theValue, theParameters, paramChild, paramChildElem, theName);
+	}
+
+	/**
+	 * Add a paratemer value to a Parameters resource
+	 *
+	 * @param theContext    The FhirContext
+	 * @param theParameters The Parameters resource
+	 * @param theName       The parameter name
+	 * @param thePrimitiveDatatype The datatype, e.g. "string", or "uri"
+	 * @param theValue The value
+	 */
+	public static void addParameterToParameters(FhirContext theContext, IBaseParameters theParameters, String theName, String thePrimitiveDatatype, String theValue) {
+		Validate.notBlank(thePrimitiveDatatype, "thePrimitiveDatatype must not be null or empty");
+
+		BaseRuntimeElementDefinition<?> datatypeDef = theContext.getElementDefinition(thePrimitiveDatatype);
+		IPrimitiveType<?> value = (IPrimitiveType<?>) datatypeDef.newInstance();
+		value.setValueAsString(theValue);
+
+		addParameterToParameters(theContext, theParameters, theName, value);
 	}
 
 	private static IBase createParameterRepetition(FhirContext theContext, IBaseResource theTargetResource, BaseRuntimeChildDefinition paramChild, BaseRuntimeElementCompositeDefinition<?> paramChildElem, String theName) {
