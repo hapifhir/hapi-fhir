@@ -26,9 +26,12 @@
 				enabled after the refactoring of how Subscriptions are enabled that
 				occurred in HAPI FHIR 3.7.0. Thanks to Volker Schmidt for the pull request!
 			</action>
+			<action type="change">
+				Re-use subscription channel and handlers when a subscription is updated (unless the channel type changed).
+			</action>
 			<action type="fix">
 				When using the <![CDATA[<code>_elements</code>]]> parameter on searches and reads,
-				requesting extensions to be included caused the extensions to be included but 
+				requesting extensions to be included caused the extensions to be included but
 				not any values contained within. This has been corrected.
 			</action>
 			<action type="add">
