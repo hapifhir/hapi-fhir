@@ -31,6 +31,11 @@
 				requesting extensions to be included caused the extensions to be included but 
 				not any values contained within. This has been corrected.
 			</action>
+			<action type="add">
+				The JPA terminology service can now detect when Hibvernate Search (Lucene)
+				is not enabled, and will perform simple ValueSet expansions without relying
+				on Hibenrate Search in such cases.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
