@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,9 +48,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
-	private static long REFRESH_INTERVAL = 60 * DateUtils.MILLIS_PER_MINUTE;
 	private static final int MAX_RETRIES = 60; // 5 minutes
-
+	private static long REFRESH_INTERVAL = 60 * DateUtils.MILLIS_PER_MINUTE;
 	@Autowired
 	private ModelConfig myModelConfig;
 	@Autowired
@@ -327,8 +326,12 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		mySearchParamProvider = theSearchParamProvider;
 	}
 
-	synchronized int refreshCacheWithRetry() {
-		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL), MAX_RETRIES);
+	int refreshCacheWithRetry() {
+		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> {
+			synchronized(BaseSearchParamRegistry.this) {
+				return mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL);
+			}
+		}, MAX_RETRIES);
 		return refreshCacheRetrier.runWithRetry();
 	}
 
