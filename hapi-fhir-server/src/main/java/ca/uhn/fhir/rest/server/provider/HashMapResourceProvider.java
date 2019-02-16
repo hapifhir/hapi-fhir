@@ -186,7 +186,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Override
-	public Class<? extends IBaseResource> getResourceType() {
+	public Class<T> getResourceType() {
 		return myResourceType;
 	}
 
@@ -211,7 +211,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Read(version = true)
-	public IBaseResource read(@IdParam IIdType theId) {
+	public T read(@IdParam IIdType theId) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
 			throw new ResourceNotFoundException(theId);
@@ -240,8 +240,8 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Search
-	public List<IBaseResource> searchAll() {
-		List<IBaseResource> retVal = new ArrayList<>();
+	public List<T> searchAll() {
+		List<T> retVal = new ArrayList<>();
 
 		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
 			if (next.isEmpty() == false) {
@@ -255,10 +255,10 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Search
-	public List<IBaseResource> searchById(
+	public List<T> searchById(
 		@RequiredParam(name = "_id") TokenAndListParam theIds) {
 
-		List<IBaseResource> retVal = new ArrayList<>();
+		List<T> retVal = new ArrayList<>();
 
 		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
 			if (next.isEmpty() == false) {

@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Subscription;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
@@ -64,7 +65,7 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 	@JsonProperty("restHookDetails")
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
-	private Map<String, String> myChannelExtensions;
+	private Map<String, List<String>> myChannelExtensions;
 
 	/**
 	 * Constructor
@@ -134,15 +135,32 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		}
 	}
 
-	public String getChannelExtension(String url) {
-		return myChannelExtensions.get(url);
+	public String getChannelExtension(String theUrl) {
+		String retVal = null;
+		List<String> strings = myChannelExtensions.get(theUrl);
+		if (strings != null && strings.isEmpty()==false) {
+			retVal = strings.get(0);
+		}
+		return retVal;
 	}
 
-	public void setChannelExtensions(Map<String, String> theChannelExtensions) {
+	@Nonnull
+	public List<String> getChannelExtensions(String theUrl) {
+		List<String> retVal = myChannelExtensions.get(theUrl);
+		if (retVal == null) {
+			retVal = Collections.emptyList();
+		} else {
+			retVal = Collections.unmodifiableList(retVal);
+		}
+		return retVal;
+	}
+
+	public void setChannelExtensions(Map<String, List<String>> theChannelExtensions) {
 		myChannelExtensions = new HashMap<>();
 		for (String url : theChannelExtensions.keySet()) {
-			if (isNotBlank(url) && isNotBlank(theChannelExtensions.get(url))) {
-				myChannelExtensions.put(url, theChannelExtensions.get(url));
+			List<String> values = theChannelExtensions.get(url);
+			if (isNotBlank(url) && values != null) {
+				myChannelExtensions.put(url, values);
 			}
 		}
 	}
