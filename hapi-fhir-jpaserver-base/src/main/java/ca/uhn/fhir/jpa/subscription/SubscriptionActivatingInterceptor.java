@@ -198,7 +198,7 @@ public class SubscriptionActivatingInterceptor {
 		String criteria = mySubscriptionCanonicalizer.getCriteria(theResource);
 		try {
 			SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(criteria);
-			mySubscriptionCanonicalizer.setMatchingStrategyTag(myFhirContext, theResource, strategy);
+			mySubscriptionCanonicalizer.setMatchingStrategyTag(theResource, strategy);
 		} catch (InvalidRequestException | DataFormatException e) {
 			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
 		}

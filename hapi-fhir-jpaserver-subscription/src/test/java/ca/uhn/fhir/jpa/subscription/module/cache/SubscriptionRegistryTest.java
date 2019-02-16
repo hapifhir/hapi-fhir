@@ -4,6 +4,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,8 +17,13 @@ public class SubscriptionRegistryTest extends BaseSubscriptionDstu3Test {
 	@Autowired
 	SubscriptionRegistry mySubscriptionRegistry;
 
+	@Before
+	public void clearRegistryBefore() {
+		mySubscriptionRegistry.unregisterAllSubscriptions();
+	}
+
 	@After
-	public void clearRegistry() {
+	public void clearRegistryAfter() {
 		mySubscriptionRegistry.unregisterAllSubscriptions();
 	}
 
