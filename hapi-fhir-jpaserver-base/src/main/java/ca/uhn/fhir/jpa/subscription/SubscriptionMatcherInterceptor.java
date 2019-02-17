@@ -48,7 +48,7 @@ import javax.annotation.PreDestroy;
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
-	private static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
+	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 	private SubscribableChannel myProcessingChannel;
 
 	@Autowired
