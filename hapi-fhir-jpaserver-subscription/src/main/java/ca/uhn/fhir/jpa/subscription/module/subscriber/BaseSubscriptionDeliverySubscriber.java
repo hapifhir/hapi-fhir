@@ -51,6 +51,10 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 		ResourceDeliveryMessage msg = (ResourceDeliveryMessage) theMessage.getPayload();
 		String subscriptionId = msg.getSubscriptionId(myFhirContext);
+		if (subscriptionId == null) {
+			ourLog.warn("Subscription has no ID, ignoring");
+			return;
+		}
 
 		ActiveSubscription updatedSubscription = mySubscriptionRegistry.get(msg.getSubscription().getIdElement(myFhirContext).getIdPart());
 		if (updatedSubscription != null) {
