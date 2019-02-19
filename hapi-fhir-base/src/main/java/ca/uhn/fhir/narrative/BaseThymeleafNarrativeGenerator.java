@@ -19,14 +19,17 @@ package ca.uhn.fhir.narrative;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import java.io.*;
-import java.util.*;
-
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.thymeleaf.IEngineConfiguration;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.cache.AlwaysValidCacheEntryValidity;
@@ -40,17 +43,21 @@ import org.thymeleaf.processor.IProcessor;
 import org.thymeleaf.processor.element.AbstractAttributeTagProcessor;
 import org.thymeleaf.processor.element.IElementTagStructureHandler;
 import org.thymeleaf.standard.StandardDialect;
-import org.thymeleaf.standard.expression.*;
+import org.thymeleaf.standard.expression.IStandardExpression;
+import org.thymeleaf.standard.expression.IStandardExpressionParser;
+import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.DefaultTemplateResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IDatatype;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
 
@@ -151,7 +158,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				loadProperties(next);
 			}
 		} catch (IOException e) {
-			ourLog.info("Failed to load property file " + propFileName, e);
+			ourLog.info("Failed to load property file {}: {}", propFileName, e.getMessage());
 			throw new ConfigurationException("Can not load property file " + propFileName, e);
 		}
 
@@ -349,10 +356,6 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 				lastNonWhitespaceCharWasTagEnd = true;
 				continue;
 			} else if (nextChar == '\n' || nextChar == '\r') {
-				// if (inWhitespace) {
-				// b.append(' ');
-				// inWhitespace = false;
-				// }
 				continue;
 			}
 
@@ -464,118 +467,6 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 		}
 
 	}
-
-	// public class NarrativeAttributeProcessor extends AbstractAttributeTagProcessor {
-	//
-	// private FhirContext myContext;
-	//
-	// protected NarrativeAttributeProcessor(FhirContext theContext) {
-	// super()
-	// myContext = theContext;
-	// }
-	//
-	// @Override
-	// public int getPrecedence() {
-	// return 0;
-	// }
-	//
-	// @SuppressWarnings("unchecked")
-	// @Override
-	// protected ProcessorResult processAttribute(Arguments theArguments, Element theElement, String theAttributeName) {
-	// final String attributeValue = theElement.getAttributeValue(theAttributeName);
-	//
-	// final Configuration configuration = theArguments.getConfiguration();
-	// final IStandardExpressionParser expressionParser = StandardExpressions.getExpressionParser(configuration);
-	//
-	// final IStandardExpression expression = expressionParser.parseExpression(configuration, theArguments, attributeValue);
-	// final Object value = expression.execute(configuration, theArguments);
-	//
-	// theElement.removeAttribute(theAttributeName);
-	// theElement.clearChildren();
-	//
-	// if (value == null) {
-	// return ProcessorResult.ok();
-	// }
-	//
-	// Context context = new Context();
-	// context.setVariable("fhirVersion", myContext.getVersion().getVersion().name());
-	// context.setVariable("resource", value);
-	//
-	// String name = null;
-	// if (value != null) {
-	// Class<? extends Object> nextClass = value.getClass();
-	// do {
-	// name = myClassToName.get(nextClass);
-	// nextClass = nextClass.getSuperclass();
-	// } while (name == null && nextClass.equals(Object.class) == false);
-	//
-	// if (name == null) {
-	// if (value instanceof IBaseResource) {
-	// name = myContext.getResourceDefinition((Class<? extends IBaseResource>) value).getName();
-	// } else if (value instanceof IDatatype) {
-	// name = value.getClass().getSimpleName();
-	// name = name.substring(0, name.length() - 2);
-	// } else if (value instanceof IBaseDatatype) {
-	// name = value.getClass().getSimpleName();
-	// if (name.endsWith("Type")) {
-	// name = name.substring(0, name.length() - 4);
-	// }
-	// } else {
-	// throw new DataFormatException("Don't know how to determine name for type: " + value.getClass());
-	// }
-	// name = name.toLowerCase();
-	// if (!myNameToNarrativeTemplate.containsKey(name)) {
-	// name = null;
-	// }
-	// }
-	// }
-	//
-	// if (name == null) {
-	// if (myIgnoreMissingTemplates) {
-	// ourLog.debug("No narrative template available for type: {}", value.getClass());
-	// return ProcessorResult.ok();
-	// } else {
-	// throw new DataFormatException("No narrative template for class " + value.getClass());
-	// }
-	// }
-	//
-	// String result = myProfileTemplateEngine.process(name, context);
-	// String trim = result.trim();
-	// if (!isBlank(trim + "AAA")) {
-	// Document dom = getXhtmlDOMFor(new StringReader(trim));
-	//
-	// Element firstChild = (Element) dom.getFirstChild();
-	// for (int i = 0; i < firstChild.getChildren().size(); i++) {
-	// Node next = firstChild.getChildren().get(i);
-	// if (i == 0 && firstChild.getChildren().size() == 1) {
-	// if (next instanceof org.thymeleaf.dom.Text) {
-	// org.thymeleaf.dom.Text nextText = (org.thymeleaf.dom.Text) next;
-	// nextText.setContent(nextText.getContent().trim());
-	// }
-	// }
-	// theElement.addChild(next);
-	// }
-	//
-	// }
-	//
-	//
-	// return ProcessorResult.ok();
-	// }
-	//
-	// }
-
-	// public String generateString(Patient theValue) {
-	//
-	// Context context = new Context();
-	// context.setVariable("resource", theValue);
-	// String result =
-	// myProfileTemplateEngine.process("ca/uhn/fhir/narrative/Patient.html",
-	// context);
-	//
-	// ourLog.info("Result: {}", result);
-	//
-	// return result;
-	// }
 
 	private final class ProfileResourceResolver extends DefaultTemplateResolver {
 

@@ -11,7 +11,7 @@
 		<!--/*
 		Show the DiagnosticReport's name.text value, or if that isn't populated, show the
 		display value on the first coding, and if that's missing too show a default "Untitled"
-		value 
+		value
 		*/-->
 		<th:block th:switch="${fhirVersion}">
 			<th:block th:case="'DSTU1'">
@@ -27,7 +27,7 @@
 		</th:block>
 		<!--/*--> Complete Blood Count <!--*/-->
 	</div>
-	
+
 	<table class="hapiPropertyTable">
 		<tbody>
 			<tr th:if="${not resource.statusElement.empty}">
@@ -44,7 +44,7 @@
 			</tr>
 		</tbody>
 	</table>
-	
+
 	<table class="hapiTableOfValues" th:if="${not #lists.isEmpty(resource.result)} and ${resource.result[0].resource != null}">
 		<thead>
 			<tr>
@@ -75,8 +75,15 @@
 					</td>
 					<td th:narrative="${result.resource.value}">2.2 g/L</td>
 					<td>
-						<th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
-						<th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                  <th:block th:switch="${fhirVersion}">
+                     <th:block th:case="'R4'">
+                        <!-- FIXME KHS -->
+                     </th:block>
+                     <th:block th:case="*">
+                        <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+		      				<th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                     </th:block>
+                  </th:block>
 						<!--/*--> N <!--*/-->
 					</td>
 					<td>
@@ -95,22 +102,25 @@
 							<td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
 						</tr>
 					</th:block>
+               <th:block th:case="'R4'">
+                  <!-- FIXME KHS -->
+               </th:block>
 					<th:block th:case="*">
 						<tr th:if="${not result.resource.commentsElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 							<td th:text="${result.resource.commentsElement.value}" colspan="5">This is a comment</td>
 						</tr>
 					</th:block>
 				</th:block>
-				
+
 				<!--/* The following are just examples that don't appear in the generated narrative -->
 				<tr class="hapiTableOfValuesRowEven"><td>Lkc</td><td>198 g/L</td><td>H</td><td>78 g/L - 99 g/L</td><td>final</td></tr>
 				<tr class="hapiTableOfValuesRowEven"><td colspan="5">Yet another comment</td></tr>
 				<!--*/-->
-				
+
 			</th:block>
 		</tbody>
 	</table>
-		
+
 </div>
 
 
