@@ -2314,7 +2314,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", ""));
 			IBundleProvider retrieved = myPatientDao.search(map);
-			assertEquals(1, retrieved.size().intValue());
+			assertEquals(2, retrieved.size().intValue());
 		}
 	}
 
