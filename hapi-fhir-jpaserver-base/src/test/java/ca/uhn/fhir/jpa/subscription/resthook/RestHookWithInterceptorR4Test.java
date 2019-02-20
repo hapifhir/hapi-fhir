@@ -294,12 +294,10 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 		@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)
 		public void afterDelivery(ResourceDeliveryMessage theMessage) {
-			myFinishedLatch.countDown();
-			;
 			Validate.isTrue(myLastDelivery == null);
 			myLastDelivery = theMessage;
+			myFinishedLatch.countDown();
 		}
-
 	}
 
 
