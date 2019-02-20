@@ -1,11 +1,10 @@
 package ca.uhn.fhir.narrative;
 
-import static org.junit.Assert.assertEquals;
-
+import ca.uhn.fhir.util.TestUtil;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.util.TestUtil;
+import static org.junit.Assert.assertEquals;
 
 public class BaseThymeleafNarrativeGeneratorDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseThymeleafNarrativeGeneratorDstu2Test.class);
@@ -59,7 +58,7 @@ public class BaseThymeleafNarrativeGeneratorDstu2Test {
 				"</div>";
 		//@formatter:on
 
-		String actual = BaseThymeleafNarrativeGenerator.cleanWhitespace(input);
+		String actual = BaseNarrativeGenerator.cleanWhitespace(input);
 		String expected = "<div><div class=\"hapiHeaderText\"> joe john <b>BLOW </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>123456</td></tr><tr><td>Address</td><td><span>123 Fake Street</span><br /><span>Unit 1</span><br /><span>Toronto</span><span>ON</span><span>Canada</span></td></tr><tr><td>Date of birth</td><td><span>31 March 2014</span></td></tr></tbody></table></div>";
 		
 		ourLog.info(actual);
