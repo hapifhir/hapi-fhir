@@ -1407,12 +1407,6 @@ public class SearchBuilder implements ISearchBuilder {
 		return retVal;
 	}
 
-	private enum TokenModeEnum {
-		SYSTEM_ONLY,
-		VALUE_ONLY,
-		SYSTEM_AND_VALUE
-	}
-
 	private Predicate addPredicateToken(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, TokenModeEnum theTokenMode) {
 		if (myDontUseHashesForSearch) {
 			final Path<String> systemExpression = theFrom.get("mySystem");
@@ -1434,8 +1428,8 @@ public class SearchBuilder implements ISearchBuilder {
 				case SYSTEM_AND_VALUE:
 					for (VersionIndependentConcept next : theTokens) {
 						orPredicates.add(theBuilder.and(
-							theBuilder.equal(systemExpression, next.getSystem()),
-							theBuilder.equal(valueExpression, next.getCode())
+							toEqualOrIsNullPredicate(systemExpression, next.getSystem()),
+							toEqualOrIsNullPredicate(valueExpression, next.getCode())
 						));
 					}
 					break;
@@ -1461,14 +1455,14 @@ public class SearchBuilder implements ISearchBuilder {
 				hashField = theFrom.get("myHashSystem").as(Long.class);
 				values = theTokens
 					.stream()
-					.map(t->ResourceIndexedSearchParamToken.calculateHashSystem(theResourceName, theParamName, t.getSystem()))
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystem(theResourceName, theParamName, t.getSystem()))
 					.collect(Collectors.toList());
 				break;
 			case VALUE_ONLY:
 				hashField = theFrom.get("myHashValue").as(Long.class);
 				values = theTokens
 					.stream()
-					.map(t->ResourceIndexedSearchParamToken.calculateHashValue(theResourceName, theParamName, t.getCode()))
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashValue(theResourceName, theParamName, t.getCode()))
 					.collect(Collectors.toList());
 				break;
 			case SYSTEM_AND_VALUE:
@@ -1476,7 +1470,7 @@ public class SearchBuilder implements ISearchBuilder {
 				hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
 				values = theTokens
 					.stream()
-					.map(t->ResourceIndexedSearchParamToken.calculateHashSystemAndValue(theResourceName, theParamName, t.getSystem(), t.getCode()))
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(theResourceName, theParamName, t.getSystem(), t.getCode()))
 					.collect(Collectors.toList());
 				break;
 		}
@@ -1488,6 +1482,13 @@ public class SearchBuilder implements ISearchBuilder {
 			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
 		}
 		return predicate;
+	}
+
+	private <T> Expression<Boolean> toEqualOrIsNullPredicate(Path<T> theExpression, T theCode) {
+		if (theCode == null) {
+			return myBuilder.isNull(theExpression);
+		}
+		return myBuilder.equal(theExpression, theCode);
 	}
 
 	@Override
@@ -2335,6 +2336,12 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		return theFrom.get("mySourcePath").in(path);
+	}
+
+	private enum TokenModeEnum {
+		SYSTEM_ONLY,
+		VALUE_ONLY,
+		SYSTEM_AND_VALUE
 	}
 
 	public enum HandlerTypeEnum {

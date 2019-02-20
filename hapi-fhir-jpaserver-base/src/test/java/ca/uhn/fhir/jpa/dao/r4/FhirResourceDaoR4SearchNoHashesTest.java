@@ -2293,21 +2293,28 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		myPatientDao.create(patient, mySrd);
 
 		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue(null);
+		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
+		myPatientDao.create(patient, mySrd);
+
+		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
 		myPatientDao.create(patient, mySrd);
 
 		{
+			// Match system="urn:system" and value = *
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", null));
 			IBundleProvider retrieved = myPatientDao.search(map);
 			assertEquals(2, retrieved.size().intValue());
 		}
 		{
+			// Match system="urn:system" and value = ""
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", ""));
 			IBundleProvider retrieved = myPatientDao.search(map);
-			assertEquals(2, retrieved.size().intValue());
+			assertEquals(1, retrieved.size().intValue());
 		}
 	}
 
