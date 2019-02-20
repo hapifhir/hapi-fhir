@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -64,7 +64,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -92,6 +91,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -105,6 +105,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static final List<Long> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
+	private static final int maxLoad = 800;
 	private static Long NO_MORE = -1L;
 	private static HandlerTypeEnum ourLastHandlerMechanismForUnitTest;
 	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
@@ -112,15 +113,14 @@ public class SearchBuilder implements ISearchBuilder {
 	private static boolean ourTrackHandlersForUnitTest;
 	private final boolean myDontUseHashesForSearch;
 	private final DaoConfig myDaoConfig;
-
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
 	@Autowired
 	private IResourceSearchViewDao myResourceSearchViewDao;
 	@Autowired
 	private FhirContext myContext;
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
 	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired(required = false)
@@ -137,7 +137,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
@@ -823,6 +822,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<Predicate> codePredicates = new ArrayList<>();
 		Join<ResourceTable, ResourceIndexedSearchParamToken> join = null;
+		List<IQueryParameterType> tokens = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
 			if (nextOr instanceof TokenParam) {
@@ -836,13 +836,16 @@ public class SearchBuilder implements ISearchBuilder {
 			if (join == null) {
 				join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
 			}
-			Predicate singleCode = createPredicateToken(nextOr, theResourceName, theParamName, myBuilder, join);
-			codePredicates.add(singleCode);
+
+			tokens.add(nextOr);
 		}
 
-		if (codePredicates.isEmpty()) {
+		if (tokens.isEmpty()) {
 			return;
 		}
+
+		List<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myBuilder, join);
+		codePredicates.addAll(singleCode);
 
 		Predicate spPredicate = myBuilder.or(toArray(codePredicates));
 		myPredicates.add(spPredicate);
@@ -965,7 +968,9 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 			case TOKEN: {
 				From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = theRoot.join("myParamsToken", JoinType.INNER);
-				retVal = createPredicateToken(leftValue, theResourceName, theParam.getName(), myBuilder, tokenJoin);
+				List<IQueryParameterType> tokens = Collections.singletonList(leftValue);
+				List<Predicate> tokenPredicates = createPredicateToken(tokens, theResourceName, theParam.getName(), myBuilder, tokenJoin);
+				retVal = myBuilder.and(tokenPredicates.toArray(new Predicate[0]));
 				break;
 			}
 			case DATE: {
@@ -1309,183 +1314,175 @@ public class SearchBuilder implements ISearchBuilder {
 		return orPredicates;
 	}
 
-	private Predicate createPredicateToken(IQueryParameterType theParameter, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
-														From<?, ResourceIndexedSearchParamToken> theFrom) {
-		String code;
-		String system;
+	private List<Predicate> createPredicateToken(Collection<IQueryParameterType> theParameters, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
+																From<?, ResourceIndexedSearchParamToken> theFrom) {
+		final List<VersionIndependentConcept> codes = new ArrayList<>();
+
 		TokenParamModifier modifier = null;
-		if (theParameter instanceof TokenParam) {
-			TokenParam id = (TokenParam) theParameter;
-			system = id.getSystem();
-			code = (id.getValue());
-			modifier = id.getModifier();
-		} else if (theParameter instanceof BaseIdentifierDt) {
-			BaseIdentifierDt id = (BaseIdentifierDt) theParameter;
-			system = id.getSystemElement().getValueAsString();
-			code = (id.getValueElement().getValue());
-		} else if (theParameter instanceof BaseCodingDt) {
-			BaseCodingDt id = (BaseCodingDt) theParameter;
-			system = id.getSystemElement().getValueAsString();
-			code = (id.getCodeElement().getValue());
-		} else if (theParameter instanceof NumberParam) {
-			NumberParam number = (NumberParam) theParameter;
-			system = null;
-			code = number.getValueAsQueryToken(myContext);
-		} else {
-			throw new IllegalArgumentException("Invalid token type: " + theParameter.getClass());
+		for (IQueryParameterType nextParameter : theParameters) {
+
+			String code;
+			String system;
+			if (nextParameter instanceof TokenParam) {
+				TokenParam id = (TokenParam) nextParameter;
+				system = id.getSystem();
+				code = (id.getValue());
+				modifier = id.getModifier();
+			} else if (nextParameter instanceof BaseIdentifierDt) {
+				BaseIdentifierDt id = (BaseIdentifierDt) nextParameter;
+				system = id.getSystemElement().getValueAsString();
+				code = (id.getValueElement().getValue());
+			} else if (nextParameter instanceof BaseCodingDt) {
+				BaseCodingDt id = (BaseCodingDt) nextParameter;
+				system = id.getSystemElement().getValueAsString();
+				code = (id.getCodeElement().getValue());
+			} else if (nextParameter instanceof NumberParam) {
+				NumberParam number = (NumberParam) nextParameter;
+				system = null;
+				code = number.getValueAsQueryToken(myContext);
+			} else {
+				throw new IllegalArgumentException("Invalid token type: " + nextParameter.getClass());
+			}
+
+			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
+				throw new InvalidRequestException(
+					"Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+			}
+
+			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
+				throw new InvalidRequestException(
+					"Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+			}
+
+			/*
+			 * Process token modifiers (:in, :below, :above)
+			 */
+
+			if (modifier == TokenParamModifier.IN) {
+				codes.addAll(myTerminologySvc.expandValueSet(code));
+			} else if (modifier == TokenParamModifier.ABOVE) {
+				system = determineSystemIfMissing(theParamName, code, system);
+				codes.addAll(myTerminologySvc.findCodesAbove(system, code));
+			} else if (modifier == TokenParamModifier.BELOW) {
+				system = determineSystemIfMissing(theParamName, code, system);
+				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
+			} else {
+				codes.add(new VersionIndependentConcept(system, code));
+			}
+
 		}
 
-		if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException(
-				"Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
-		}
-
-		if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException(
-				"Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
-		}
-
-		/*
-		 * Process token modifiers (:in, :below, :above)
-		 */
-
-		List<VersionIndependentConcept> codes;
-		if (modifier == TokenParamModifier.IN) {
-			codes = myTerminologySvc.expandValueSet(code);
-		} else if (modifier == TokenParamModifier.ABOVE) {
-			system = determineSystemIfMissing(theParamName, code, system);
-			codes = myTerminologySvc.findCodesAbove(system, code);
-		} else if (modifier == TokenParamModifier.BELOW) {
-			system = determineSystemIfMissing(theParamName, code, system);
-			codes = myTerminologySvc.findCodesBelow(system, code);
-		} else {
-			codes = Collections.singletonList(new VersionIndependentConcept(system, code));
-		}
+		List<VersionIndependentConcept> sortedCodesList = codes
+			.stream()
+			.filter(t -> t.getCode() != null || t.getSystem() != null)
+			.sorted()
+			.distinct()
+			.collect(Collectors.toList());
 
 		if (codes.isEmpty()) {
 			// This will never match anything
-			return new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, false);
+			return Collections.singletonList(new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, false));
 		}
 
+		List<Predicate> retVal = new ArrayList<>();
+
+		// System only
+		List<VersionIndependentConcept> systemOnlyCodes = sortedCodesList.stream().filter(t -> t.getCode() == null).collect(Collectors.toList());
+		if (!systemOnlyCodes.isEmpty()) {
+			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, systemOnlyCodes, modifier, TokenModeEnum.SYSTEM_ONLY));
+		}
+
+		// Code only
+		List<VersionIndependentConcept> codeOnlyCodes = sortedCodesList.stream().filter(t -> t.getSystem() == null).collect(Collectors.toList());
+		if (!codeOnlyCodes.isEmpty()) {
+			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, codeOnlyCodes, modifier, TokenModeEnum.VALUE_ONLY));
+		}
+
+		// System and code
+		List<VersionIndependentConcept> systemAndCodeCodes = sortedCodesList.stream().filter(t -> t.getCode() == null).collect(Collectors.toList());
+		if (!systemAndCodeCodes.isEmpty()) {
+			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, systemAndCodeCodes, modifier, TokenModeEnum.SYSTEM_AND_VALUE));
+		}
+
+		return retVal;
+	}
+
+	private enum TokenModeEnum {
+		SYSTEM_ONLY,
+		VALUE_ONLY,
+		SYSTEM_AND_VALUE
+	}
+
+	private Predicate addPredicateToken(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, TokenModeEnum theTokenMode) {
 		if (myDontUseHashesForSearch) {
-			ArrayList<Predicate> singleCodePredicates = new ArrayList<Predicate>();
-			if (codes != null) {
+			final Path<String> systemExpression = theFrom.get("mySystem");
+			final Path<String> valueExpression = theFrom.get("myValue");
 
-				List<Predicate> orPredicates = new ArrayList<Predicate>();
-				Map<String, List<VersionIndependentConcept>> map = new HashMap<String, List<VersionIndependentConcept>>();
-				for (VersionIndependentConcept nextCode : codes) {
-					List<VersionIndependentConcept> systemCodes = map.get(nextCode.getSystem());
-					if (null == systemCodes) {
-						systemCodes = new ArrayList<>();
-						map.put(nextCode.getSystem(), systemCodes);
-					}
-					systemCodes.add(nextCode);
+			List<Predicate> orPredicates = new ArrayList<>();
+			switch (theTokenMode) {
+				case SYSTEM_ONLY: {
+					List<String> systems = theTokens.stream().map(t -> t.getSystem()).collect(Collectors.toList());
+					Predicate orPredicate = systemExpression.in(systems);
+					orPredicates.add(orPredicate);
+					break;
 				}
-				// Use "in" in case of large numbers of codes due to param modifiers
-				final Path<String> systemExpression = theFrom.get("mySystem");
-				final Path<String> valueExpression = theFrom.get("myValue");
-				for (Map.Entry<String, List<VersionIndependentConcept>> entry : map.entrySet()) {
-					CriteriaBuilder.In<String> codePredicate = theBuilder.in(valueExpression);
-					boolean haveAtLeastOneCode = false;
-					for (VersionIndependentConcept nextCode : entry.getValue()) {
-						if (isNotBlank(nextCode.getCode())) {
-							codePredicate.value(nextCode.getCode());
-							haveAtLeastOneCode = true;
-						}
+				case VALUE_ONLY:
+					List<String> codes = theTokens.stream().map(t -> t.getCode()).collect(Collectors.toList());
+					Predicate orPredicate = valueExpression.in(codes);
+					orPredicates.add(orPredicate);
+					break;
+				case SYSTEM_AND_VALUE:
+					for (VersionIndependentConcept next : theTokens) {
+						orPredicates.add(theBuilder.and(
+							theBuilder.equal(systemExpression, next.getSystem()),
+							theBuilder.equal(valueExpression, next.getCode())
+						));
 					}
-
-					if (entry.getKey() != null) {
-						Predicate systemPredicate = theBuilder.equal(systemExpression, entry.getKey());
-						if (haveAtLeastOneCode) {
-							orPredicates.add(theBuilder.and(systemPredicate, codePredicate));
-						} else {
-							orPredicates.add(systemPredicate);
-						}
-					} else {
-						orPredicates.add(codePredicate);
-					}
-				}
-
-				Predicate or = theBuilder.or(orPredicates.toArray(new Predicate[0]));
-				if (modifier == TokenParamModifier.NOT) {
-					or = theBuilder.not(or);
-				}
-				singleCodePredicates.add(or);
-
-			} else {
-
-				/*
-				 * Ok, this is a normal query
-				 */
-
-				if (StringUtils.isNotBlank(system)) {
-					if (modifier != null && modifier == TokenParamModifier.NOT) {
-						singleCodePredicates.add(theBuilder.notEqual(theFrom.get("mySystem"), system));
-					} else {
-						singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
-					}
-				} else if (system == null) {
-					// don't check the system
-				} else {
-					// If the system is "", we only match on null systems
-					singleCodePredicates.add(theBuilder.isNull(theFrom.get("mySystem")));
-				}
-
-				if (StringUtils.isNotBlank(code)) {
-					if (modifier != null && modifier == TokenParamModifier.NOT) {
-						singleCodePredicates.add(theBuilder.notEqual(theFrom.get("myValue"), code));
-					} else {
-						singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
-					}
-				} else {
-					/*
-					 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to
-					 * match all tokens with the given value.
-					 *
-					 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was the result :)
-					 */
-					// singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
-				}
+					break;
 			}
 
-			Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
-			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
-		}
+			Predicate or = theBuilder.or(orPredicates.toArray(new Predicate[0]));
+			if (theModifier == TokenParamModifier.NOT) {
+				or = theBuilder.not(or);
+			}
 
+			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, or);
+		}
 
 		/*
 		 * Note: A null system value means "match any system", but
 		 * an empty-string system value means "match values that
 		 * explicitly have no system".
 		 */
-		boolean haveSystem = codes.get(0).getSystem() != null;
-		boolean haveCode = isNotBlank(codes.get(0).getCode());
 		Expression<Long> hashField;
-		if (!haveSystem && !haveCode) {
-			// If we have neither, this isn't actually an expression so
-			// just return 1=1
-			return new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, true);
-		} else if (haveSystem && haveCode) {
-			hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
-		} else if (haveSystem) {
-			hashField = theFrom.get("myHashSystem").as(Long.class);
-		} else {
-			hashField = theFrom.get("myHashValue").as(Long.class);
-		}
-
-		List<Long> values = new ArrayList<>(codes.size());
-		for (VersionIndependentConcept next : codes) {
-			if (haveSystem && haveCode) {
-				values.add(ResourceIndexedSearchParamToken.calculateHashSystemAndValue(theResourceName, theParamName, next.getSystem(), next.getCode()));
-			} else if (haveSystem) {
-				values.add(ResourceIndexedSearchParamToken.calculateHashSystem(theResourceName, theParamName, next.getSystem()));
-			} else {
-				values.add(ResourceIndexedSearchParamToken.calculateHashValue(theResourceName, theParamName, next.getCode()));
-			}
+		List<Long> values;
+		switch (theTokenMode) {
+			case SYSTEM_ONLY:
+				hashField = theFrom.get("myHashSystem").as(Long.class);
+				values = theTokens
+					.stream()
+					.map(t->ResourceIndexedSearchParamToken.calculateHashSystem(theResourceName, theParamName, t.getSystem()))
+					.collect(Collectors.toList());
+				break;
+			case VALUE_ONLY:
+				hashField = theFrom.get("myHashValue").as(Long.class);
+				values = theTokens
+					.stream()
+					.map(t->ResourceIndexedSearchParamToken.calculateHashValue(theResourceName, theParamName, t.getCode()))
+					.collect(Collectors.toList());
+				break;
+			case SYSTEM_AND_VALUE:
+			default:
+				hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
+				values = theTokens
+					.stream()
+					.map(t->ResourceIndexedSearchParamToken.calculateHashSystemAndValue(theResourceName, theParamName, t.getSystem(), t.getCode()))
+					.collect(Collectors.toList());
+				break;
 		}
 
 		Predicate predicate = hashField.in(values);
-		if (modifier == TokenParamModifier.NOT) {
+		if (theModifier == TokenParamModifier.NOT) {
 			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName));
 			Predicate disjunctionPredicate = theBuilder.not(predicate);
 			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
@@ -1966,8 +1963,6 @@ public class SearchBuilder implements ISearchBuilder {
 		return tagMap;
 	}
 
-	private static final int maxLoad = 800;
-
 	@Override
 	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theIncludedPids, boolean theForHistoryOperation,
 											 EntityManager entityManager, FhirContext context, IDao theDao) {
@@ -2317,6 +2312,29 @@ public class SearchBuilder implements ISearchBuilder {
 
 		qp.setValueAsQueryToken(myContext, theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
+	}
+
+	private Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
+																	  String theResourceType) {
+		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
+		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+		List<String> path = param.getPathsSplit();
+
+		/*
+		 * SearchParameters can declare paths on multiple resources
+		 * types. Here we only want the ones that actually apply.
+		 */
+		path = new ArrayList<>(path);
+
+		for (int i = 0; i < path.size(); i++) {
+			String nextPath = trim(path.get(i));
+			if (!nextPath.contains(theResourceType + ".")) {
+				path.remove(i);
+				i--;
+			}
+		}
+
+		return theFrom.get("mySourcePath").in(path);
 	}
 
 	public enum HandlerTypeEnum {
@@ -2671,29 +2689,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static String createLeftMatchLikeExpression(String likeExpression) {
 		return likeExpression.replace("%", "[%]") + "%";
-	}
-
-	private Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
-																				String theResourceType) {
-		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
-		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
-		List<String> path = param.getPathsSplit();
-
-		/*
-		 * SearchParameters can declare paths on multiple resources
-		 * types. Here we only want the ones that actually apply.
-		 */
-		path = new ArrayList<>(path);
-
-		for (int i = 0; i < path.size(); i++) {
-			String nextPath = trim(path.get(i));
-			if (!nextPath.contains(theResourceType + ".")) {
-				path.remove(i);
-				i--;
-			}
-		}
-
-		return theFrom.get("mySourcePath").in(path);
 	}
 
 	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {

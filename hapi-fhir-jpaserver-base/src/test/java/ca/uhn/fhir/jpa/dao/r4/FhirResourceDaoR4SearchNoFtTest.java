@@ -2030,7 +2030,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchStringParamWithLike() throws Exception {
+	public void testSearchStringParamWithLike() {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_FAMILY, new StringOrListParam().addOr(new StringParam("AAA")).addOr(new StringParam("BBB")));
 		map.setLoadSynchronous(true);
@@ -2044,6 +2044,51 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 
 		ourLog.info("Queries:\n  " + queries.stream().collect(Collectors.joining("\n  ")));
+	}
+
+
+	@Test
+	public void testSearchTokenListLike() {
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("FOO");
+		myPatientDao.create(p);
+		p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("BAR");
+		myPatientDao.create(p);
+		p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("BAZ");
+		myPatientDao.create(p);
+		CaptureQueriesListener.clear();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_IDENTIFIER, new TokenOrListParam().addOr(new TokenParam("FOO")).addOr(new TokenParam("BAR")));
+		map.setLoadSynchronous(true);
+		IBundleProvider search = myPatientDao.search(map);
+
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, true))
+			.filter(t -> t.contains("select"))
+			.collect(Collectors.toList());
+		String resultingQueryFormatted = queries.get(queries.size() - 1);
+		ourLog.info("Resulting query formatted:\n{}", resultingQueryFormatted);
+
+		queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.filter(t -> t.contains("select"))
+			.collect(Collectors.toList());
+		String resultingQueryNotFormatted = queries.get(queries.size() - 1);
+
+		assertEquals(resultingQueryFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"));
+		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE in ('3140583648400062149' , '4929264259256651518')"));
+
+		// Ensure that the search actually worked
+		assertEquals(2, search.size().intValue());
+
 	}
 
 
