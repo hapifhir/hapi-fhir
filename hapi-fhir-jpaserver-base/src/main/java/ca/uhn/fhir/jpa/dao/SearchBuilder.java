@@ -1387,7 +1387,7 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> retVal = new ArrayList<>();
 
 		// System only
-		List<VersionIndependentConcept> systemOnlyCodes = sortedCodesList.stream().filter(t -> t.getCode() == null).collect(Collectors.toList());
+		List<VersionIndependentConcept> systemOnlyCodes = sortedCodesList.stream().filter(t -> isBlank(t.getCode())).collect(Collectors.toList());
 		if (!systemOnlyCodes.isEmpty()) {
 			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, systemOnlyCodes, modifier, TokenModeEnum.SYSTEM_ONLY));
 		}
@@ -1399,7 +1399,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// System and code
-		List<VersionIndependentConcept> systemAndCodeCodes = sortedCodesList.stream().filter(t -> t.getCode() != null && t.getSystem() != null).collect(Collectors.toList());
+		List<VersionIndependentConcept> systemAndCodeCodes = sortedCodesList.stream().filter(t -> isNotBlank(t.getCode()) && t.getSystem() != null).collect(Collectors.toList());
 		if (!systemAndCodeCodes.isEmpty()) {
 			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, systemAndCodeCodes, modifier, TokenModeEnum.SYSTEM_AND_VALUE));
 		}
