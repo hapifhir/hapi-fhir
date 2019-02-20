@@ -25,7 +25,6 @@ import ca.uhn.fhir.model.api.IDatatype;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.INarrative;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.IEngineConfiguration;
@@ -52,8 +51,6 @@ import org.thymeleaf.templateresource.StringTemplateResource;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseThymeleafNarrativeGenerator.class);
 
@@ -61,51 +58,13 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 
 	private IMessageResolver resolver;
 
-	/**
-	 * Constructor
-	 */
-	public BaseThymeleafNarrativeGenerator() {
-		super();
-	}
-
 	@Override
-	public void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative) {
-		String name = getName(theContext, theResource);
-		if (name == null) return;
+	protected String processTemplate(FhirContext theContext, String theName, IBaseResource theResource) {
+		Context context = new Context();
+		context.setVariable("resource", theResource);
+		context.setVariable("fhirVersion", theContext.getVersion().getVersion().name());
 
-		try {
-			Context context = new Context();
-			context.setVariable("resource", theResource);
-			context.setVariable("fhirVersion", theContext.getVersion().getVersion().name());
-
-			String result = myProfileTemplateEngine.process(name, context);
-
-			if (isCleanWhitespace()) {
-				ourLog.trace("Pre-whitespace cleaning: ", result);
-				result = cleanWhitespace(result);
-				ourLog.trace("Post-whitespace cleaning: ", result);
-			}
-
-			if (isBlank(result)) {
-				return;
-			}
-
-			theNarrative.setDivAsString(result);
-			theNarrative.setStatusAsString("generated");
-			return;
-		} catch (Exception e) {
-			if (isIgnoreFailures()) {
-				ourLog.error("Failed to generate narrative", e);
-				try {
-					theNarrative.setDivAsString("<div>No narrative available - Error: " + e.getMessage() + "</div>");
-				} catch (Exception e1) {
-					// last resort..
-				}
-				theNarrative.setStatusAsString("empty");
-				return;
-			}
-			throw new DataFormatException(e);
-		}
+		return myProfileTemplateEngine.process(theName, context);
 	}
 
 	@Override

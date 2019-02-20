@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.INarrative;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,43 @@ abstract public class BaseNarrativeGenerator implements INarrativeGenerator {
 	private volatile boolean myInitialized;
 	protected HashMap<String, String> myNameToNarrativeTemplate;
 
+	@Override
+	public void generateNarrative(FhirContext theFhirContext, IBaseResource theResource, INarrative theNarrative) {
+		String name = getName(theFhirContext, theResource);
+		if (name == null) return;
+
+		try {
+			String result = processTemplate(theFhirContext, name, theResource);
+
+			if (isCleanWhitespace()) {
+				ourLog.trace("Pre-whitespace cleaning: ", result);
+				result = cleanWhitespace(result);
+				ourLog.trace("Post-whitespace cleaning: ", result);
+			}
+
+			if (isBlank(result)) {
+				return;
+			}
+
+			theNarrative.setDivAsString(result);
+			theNarrative.setStatusAsString("generated");
+			return;
+		} catch (Exception e) {
+			if (isIgnoreFailures()) {
+				ourLog.error("Failed to generate narrative", e);
+				try {
+					theNarrative.setDivAsString("<div>No narrative available - Error: " + e.getMessage() + "</div>");
+				} catch (Exception e1) {
+					// last resort..
+				}
+				theNarrative.setStatusAsString("empty");
+				return;
+			}
+			throw new DataFormatException(e);
+		}
+	}
+
+	protected abstract String processTemplate(FhirContext theFhirContext, String theName, IBaseResource theResource) throws Exception;
 
 	protected String getName(FhirContext theContext, IBaseResource theResource) {
 		if (!myInitialized) {
@@ -85,6 +123,10 @@ abstract public class BaseNarrativeGenerator implements INarrativeGenerator {
 	}
 
 	protected abstract void initializeNarrativeEngine(FhirContext theFhirContext);
+
+	protected String getNarrativeTemplate(String name) {
+		return myNameToNarrativeTemplate.get(name);
+	}
 
 	private void loadProperties(String propFileName) throws IOException {
 		ourLog.debug("Loading narrative properties file: {}", propFileName);
@@ -155,7 +197,7 @@ abstract public class BaseNarrativeGenerator implements INarrativeGenerator {
 		}
 	}
 
-	static String cleanWhitespace(String theResult) {
+	protected static String cleanWhitespace(String theResult) {
 		StringBuilder b = new StringBuilder();
 		boolean inWhitespace = false;
 		boolean betweenTags = false;
@@ -244,9 +286,9 @@ abstract public class BaseNarrativeGenerator implements INarrativeGenerator {
 	protected InputStream loadResource(String name) throws IOException {
 		if (name.startsWith("classpath:")) {
 			String cpName = name.substring("classpath:".length());
-			InputStream resource = DefaultThymeleafNarrativeGenerator.class.getResourceAsStream(cpName);
+			InputStream resource = BaseNarrativeGenerator.class.getResourceAsStream(cpName);
 			if (resource == null) {
-				resource = DefaultThymeleafNarrativeGenerator.class.getResourceAsStream("/" + cpName);
+				resource = BaseNarrativeGenerator.class.getResourceAsStream("/" + cpName);
 				if (resource == null) {
 					throw new IOException("Can not find '" + cpName + "' on classpath");
 				}
