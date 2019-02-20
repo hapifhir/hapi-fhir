@@ -49,7 +49,7 @@ public class SingleItemLoadingCache<T> {
 	}
 
 	public synchronized void clear() {
-		ourLog.info("Clearning cache");
+		ourLog.info("Clearing cache");
 		myCapabilityStatement.set(null);
 		myLastFetched = 0;
 	}
