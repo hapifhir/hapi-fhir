@@ -26,6 +26,11 @@ public class DefaultLiquidNarrativeGenerator extends BaseNarrativeGenerator {
 
 	@Override
 	protected void initializeNarrativeEngine(FhirContext theFhirContext) {
+// FIXME KHS
+//		MapEvaluationContext myHostServices = null;
+//		MapEvaluationContext myHostServices = new MapEvaluationContext();
+//		myHostServices.put("FHIR_VERSION", theFhirContext.getVersion().getVersion().name());
+//		myLiquidEngine = new LiquidEngine(new HapiWorkerContext(theFhirContext, new DefaultProfileValidationSupport()), myHostServices);
 		myLiquidEngine = new LiquidEngine(new HapiWorkerContext(theFhirContext, new DefaultProfileValidationSupport()), null);
 	}
 
