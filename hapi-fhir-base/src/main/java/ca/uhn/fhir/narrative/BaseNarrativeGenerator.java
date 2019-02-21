@@ -38,7 +38,7 @@ abstract public class BaseNarrativeGenerator implements INarrativeGenerator {
 		if (name == null) return;
 
 		try {
-			String result = processTemplate(theFhirContext, name, theResource);
+			String result = processNamedTemplate(theFhirContext, name, theResource);
 
 			if (isCleanWhitespace()) {
 				ourLog.trace("Pre-whitespace cleaning: ", result);
@@ -68,7 +68,7 @@ abstract public class BaseNarrativeGenerator implements INarrativeGenerator {
 		}
 	}
 
-	protected abstract String processTemplate(FhirContext theFhirContext, String theName, IBaseResource theResource) throws Exception;
+	protected abstract String processNamedTemplate(FhirContext theFhirContext, String theName, IBaseResource theResource) throws Exception;
 
 	protected String getName(FhirContext theContext, IBaseResource theResource) {
 		if (!myInitialized) {

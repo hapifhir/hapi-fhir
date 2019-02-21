@@ -27,14 +27,14 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class DefaultLiquidNarrativeGeneratorR4Test {
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourFhirContext = FhirContext.forR4();
 	private static final Logger ourLog = LoggerFactory.getLogger(DefaultLiquidNarrativeGeneratorR4Test.class);
 	private DefaultLiquidNarrativeGenerator myNarrativeGenerator;
 
 	@Before
 	public void before() {
 		myNarrativeGenerator = new DefaultLiquidNarrativeGenerator();
-		ourCtx.setNarrativeGenerator(myNarrativeGenerator);
+		ourFhirContext.setNarrativeGenerator(myNarrativeGenerator);
 	}
 
 
@@ -60,7 +60,7 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 		value.setBirthDate(new Date());
 
 		Narrative narrative = new Narrative();
-		myNarrativeGenerator.generateNarrative(ourCtx, value, narrative);
+		myNarrativeGenerator.generateNarrative(ourFhirContext, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
@@ -126,7 +126,7 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 		value.addResult().setReference("Observation/3");
 
 		Narrative narrative = new Narrative();
-		myNarrativeGenerator.generateNarrative(ourCtx, value, narrative);
+		myNarrativeGenerator.generateNarrative(ourFhirContext, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -149,10 +149,10 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 				"</OperationOutcome>";
 		//@formatter:on
 
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
+		OperationOutcome oo = ourFhirContext.newXmlParser().parseResource(OperationOutcome.class, parse);
 
 		Narrative narrative = new Narrative();
-		myNarrativeGenerator.generateNarrative(ourCtx, oo, narrative);
+		myNarrativeGenerator.generateNarrative(ourFhirContext, oo, narrative);
 		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -192,7 +192,7 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 		}
 
 		Narrative narrative = new Narrative();
-		myNarrativeGenerator.generateNarrative(ourCtx, value, narrative);
+		myNarrativeGenerator.generateNarrative(ourFhirContext, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -213,7 +213,7 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 		mp.setAuthoredOnElement(new DateTimeType("2014-09-01"));
 
 		Narrative narrative = new Narrative();
-		myNarrativeGenerator.generateNarrative(ourCtx, mp, narrative);
+		myNarrativeGenerator.generateNarrative(ourFhirContext, mp, narrative);
 
 		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin") > -1);
 		assertTrue("Expected string status of ACTIVE within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ACTIVE") > -1);
@@ -226,11 +226,9 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 		med.getCode().setText("ciproflaxin");
 
 		Narrative narrative = new Narrative();
-		myNarrativeGenerator.generateNarrative(ourCtx, med, narrative);
+		myNarrativeGenerator.generateNarrative(ourFhirContext, med, narrative);
 
 		String string = narrative.getDiv().getValueAsString();
 		assertThat(string, containsString("ciproflaxin"));
-
 	}
-
 }

@@ -1,1 +1,5 @@
+{% if  %"FHIR_VERSION" = 'DSTU1' %}
+<div class="hapiHeaderText">{{ Medication.name.text }}</div>
+{% else %}
 <div class="hapiHeaderText">{{ Medication.code.text }}</div>
+{% endif %}

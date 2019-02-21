@@ -19,6 +19,7 @@ public class DefaultLiquidNarrativeGenerator extends BaseNarrativeGenerator {
 
 	public static final String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/liquid/narratives.properties";
 	static final String HAPISERVER_NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/liquid/narratives-hapiserver.properties";
+	private HapiWorkerContext myWorkerContext;
 
 	private boolean myUseHapiServerConformanceNarrative;
 
@@ -26,20 +27,21 @@ public class DefaultLiquidNarrativeGenerator extends BaseNarrativeGenerator {
 
 	@Override
 	protected void initializeNarrativeEngine(FhirContext theFhirContext) {
-// FIXME KHS
-//		MapEvaluationContext myHostServices = null;
-//		MapEvaluationContext myHostServices = new MapEvaluationContext();
-//		myHostServices.put("FHIR_VERSION", theFhirContext.getVersion().getVersion().name());
-//		myLiquidEngine = new LiquidEngine(new HapiWorkerContext(theFhirContext, new DefaultProfileValidationSupport()), myHostServices);
-		myLiquidEngine = new LiquidEngine(new HapiWorkerContext(theFhirContext, new DefaultProfileValidationSupport()), null);
+		LiquidEnvironmentVariables liquidEnvironmentVariables = new LiquidEnvironmentVariables();
+		liquidEnvironmentVariables.put("FHIR_VERSION", theFhirContext.getVersion().getVersion().name());
+		myWorkerContext = new HapiWorkerContext(theFhirContext, new DefaultProfileValidationSupport());
+		myLiquidEngine = new LiquidEngine(myWorkerContext, liquidEnvironmentVariables);
 	}
 
 	@Override
-	protected String processTemplate(FhirContext theFhirContext, String theName, IBaseResource theResource) throws Exception {
+	protected String processNamedTemplate(FhirContext theFhirContext, String theName, IBaseResource theResource) throws Exception {
 		String template = getNarrativeTemplate(theName);
-		// TODO How to make FhirContext available to namespace?
-		LiquidEngine.LiquidDocument doc = myLiquidEngine.parse(template, theName);
-		return myLiquidEngine.evaluate(doc, (Resource) theResource, null);
+		return processTemplate(theFhirContext, theName, (Resource) theResource, template);
+	}
+
+	private String processTemplate(FhirContext theFhirContext, String theName, Resource theResource, String theTemplate) throws Exception {
+		LiquidEngine.LiquidDocument doc = myLiquidEngine.parse(theTemplate, theName);
+		return myLiquidEngine.evaluate(doc, theResource, null);
 	}
 
 	@Override

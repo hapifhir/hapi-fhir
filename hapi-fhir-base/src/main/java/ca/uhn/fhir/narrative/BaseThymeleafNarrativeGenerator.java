@@ -59,7 +59,7 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 	private IMessageResolver resolver;
 
 	@Override
-	protected String processTemplate(FhirContext theContext, String theName, IBaseResource theResource) {
+	protected String processNamedTemplate(FhirContext theContext, String theName, IBaseResource theResource) {
 		Context context = new Context();
 		context.setVariable("resource", theResource);
 		context.setVariable("fhirVersion", theContext.getVersion().getVersion().name());
