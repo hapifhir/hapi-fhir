@@ -468,9 +468,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
 		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent nextContains : expandedR4.getContains()) {
 			retVal.add(
-				new VersionIndependentConcept()
-					.setSystem(nextContains.getSystem())
-					.setCode(nextContains.getCode()));
+				new VersionIndependentConcept(nextContains.getSystem(), nextContains.getCode()));
 		}
 		return retVal;
 	}
@@ -933,7 +931,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		tt.execute(new TransactionCallbackWithoutResult() {
+			tt.execute(new TransactionCallbackWithoutResult() {
 			private void createParentsString(StringBuilder theParentsBuilder, Long theConceptPid) {
 				Validate.notNull(theConceptPid, "theConceptPid must not be null");
 				List<Long> parents = myChildToParentPidCache.get(theConceptPid);

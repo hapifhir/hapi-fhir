@@ -106,7 +106,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu3().getResourceCounts());
-		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
+		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
 		return retVal;
 	}
 

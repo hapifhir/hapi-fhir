@@ -48,6 +48,10 @@
 				using the string name of the datatype (e.g. "dateTime") in order to help
 				building Parameters resources in a version-independent way.
 			</action>
+			<action type="add">
+				The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions
+				when performing token searches with multiple OR values.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
