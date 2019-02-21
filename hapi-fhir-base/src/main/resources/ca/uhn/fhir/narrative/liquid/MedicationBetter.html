@@ -1,6 +1,5 @@
-{% case Context.fhirVersion %}
-   {% when 'DSTU1' %}
+{% if context.fhirVersion == 'DSTU1' %}
       <div class="hapiHeaderText">{{ Medication.name.text }}</div>
-   {% else %}
+{% else %}
       <div class="hapiHeaderText">{{ Medication.code.text }}</div>
-{% endcase %}
+{% endif %}
