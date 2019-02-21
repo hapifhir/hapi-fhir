@@ -150,10 +150,6 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
 
-		// String output = gen.generateTitle(oo);
-		// ourLog.info(output);
-		// assertEquals("Operation Outcome (2 issues)", output);
-
 		Narrative narrative = new Narrative();
 		myGen.generateNarrative(ourCtx, oo, narrative);
 		String output = narrative.getDiv().getValueAsString();

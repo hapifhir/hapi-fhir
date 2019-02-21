@@ -77,7 +77,7 @@
 					<td>
                   <th:block th:switch="${fhirVersion}">
                      <th:block th:case="'R4'">
-                        <!-- FIXME KHS -->
+                        <!-- TODO KHS -->
                      </th:block>
                      <th:block th:case="*">
                         <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
@@ -103,7 +103,7 @@
 						</tr>
 					</th:block>
                <th:block th:case="'R4'">
-                  <!-- FIXME KHS -->
+                  <!-- TODO KHS -->
                </th:block>
 					<th:block th:case="*">
 						<tr th:if="${not result.resource.commentsElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
