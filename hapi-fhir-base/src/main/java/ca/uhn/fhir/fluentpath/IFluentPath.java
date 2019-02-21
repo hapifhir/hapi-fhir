@@ -20,10 +20,11 @@ package ca.uhn.fhir.fluentpath;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import java.util.List;
 import java.util.Optional;
-
-import org.hl7.fhir.instance.model.api.IBase;
 
 public interface IFluentPath {
 
@@ -47,5 +48,13 @@ public interface IFluentPath {
 	 */
 	<T extends IBase> Optional<T> evaluateFirst(IBase theInput, String thePath, Class<T> theReturnType);
 
-	
+
+	IExpressionNode parse(String path);
+	IExpressionNodeWithOffset parsePartial(String path, int offset);
+
+	String evaluateToString(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
+	boolean evaluateToBoolean(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
+	List<IBase> evaluate(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
+
+	void setHostServices(Object theHostServices);
 }

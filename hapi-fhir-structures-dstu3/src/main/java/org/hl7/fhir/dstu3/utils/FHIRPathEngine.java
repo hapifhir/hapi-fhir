@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.utils;
 
+import ca.uhn.fhir.fluentpath.IExpressionNodeWithOffset;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ElementUtil;
@@ -2444,6 +2445,40 @@ public class FHIRPathEngine {
     node = gatherPrecedence(lexer, node, EnumSet.of(Operation.Xor, Operation.Or));
     // last: implies
     return node;
+  }
+
+  /**
+   * Parse a path for later use using execute
+   *
+   * @param path
+   * @return
+   * @throws PathEngineException
+   * @throws Exception
+   */
+  public ExpressionNodeWithOffset parsePartial(String path, int i) throws FHIRLexerException {
+    FHIRLexer lexer = new FHIRLexer(path, i);
+    if (lexer.done())
+      throw lexer.error("Path cannot be empty");
+    ExpressionNode result = parseExpression(lexer, true);
+    result.check();
+    return new ExpressionNodeWithOffset(lexer.getCurrentStart(), result);
+  }
+
+  public static class ExpressionNodeWithOffset implements IExpressionNodeWithOffset {
+    private int offset;
+    private ExpressionNode node;
+    public ExpressionNodeWithOffset(int offset, ExpressionNode node) {
+      super();
+      this.offset = offset;
+      this.node = node;
+    }
+    public int getOffset() {
+      return offset;
+    }
+    public ExpressionNode getNode() {
+      return node;
+    }
+
   }
 
   /**

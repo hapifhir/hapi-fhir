@@ -1,12 +1,8 @@
-package ca.uhn.fhir.r4.narrative;
+package org.hl7.fhir.utilities.liquid;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.BaseNarrativeGenerator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.utils.LiquidEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,27 +15,25 @@ public class DefaultLiquidNarrativeGenerator extends BaseNarrativeGenerator {
 
 	public static final String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/liquid/narratives.properties";
 	static final String HAPISERVER_NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/liquid/narratives-hapiserver.properties";
-	private HapiWorkerContext myWorkerContext;
 
 	private boolean myUseHapiServerConformanceNarrative;
 
 	private LiquidEngine myLiquidEngine;
+	private Object myHostServices;
 
 	@Override
 	protected void initializeNarrativeEngine(FhirContext theFhirContext) {
-		LiquidEnvironmentVariables liquidEnvironmentVariables = new LiquidEnvironmentVariables();
-		liquidEnvironmentVariables.put("FHIR_VERSION", theFhirContext.getVersion().getVersion().name());
-		myWorkerContext = new HapiWorkerContext(theFhirContext, new DefaultProfileValidationSupport());
-		myLiquidEngine = new LiquidEngine(myWorkerContext, liquidEnvironmentVariables);
+		myLiquidEngine = new LiquidEngine(theFhirContext);
+		myLiquidEngine.setHostServices(myHostServices);
 	}
 
 	@Override
 	protected String processNamedTemplate(FhirContext theFhirContext, String theName, IBaseResource theResource) throws Exception {
 		String template = getNarrativeTemplate(theName);
-		return processTemplate(theFhirContext, theName, (Resource) theResource, template);
+		return processTemplate(theFhirContext, theName, theResource, template);
 	}
 
-	private String processTemplate(FhirContext theFhirContext, String theName, Resource theResource, String theTemplate) throws Exception {
+	private String processTemplate(FhirContext theFhirContext, String theName, IBaseResource theResource, String theTemplate) throws Exception {
 		LiquidEngine.LiquidDocument doc = myLiquidEngine.parse(theTemplate, theName);
 		return myLiquidEngine.evaluate(doc, theResource, null);
 	}
@@ -52,6 +46,11 @@ public class DefaultLiquidNarrativeGenerator extends BaseNarrativeGenerator {
 			retVal.add(HAPISERVER_NARRATIVES_PROPERTIES);
 		}
 		return retVal;
+	}
+
+	@Override
+	public void setHostServices(Object theHostServices) {
+		myHostServices = theHostServices;
 	}
 
 	/**

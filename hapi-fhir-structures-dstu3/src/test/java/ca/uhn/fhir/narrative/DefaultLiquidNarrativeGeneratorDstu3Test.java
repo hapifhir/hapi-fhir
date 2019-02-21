@@ -1,13 +1,13 @@
 package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.dstu3.narrative.LiquidEnvironmentVariables;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.r4.narrative.LiquidEnvironmentVariables;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.map.LazyMap;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.utilities.liquid.DefaultLiquidNarrativeGenerator;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -27,9 +27,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class DefaultLiquidNarrativeGeneratorR4Test {
-	private static FhirContext ourFhirContext = FhirContext.forR4();
-	private static final Logger ourLog = LoggerFactory.getLogger(DefaultLiquidNarrativeGeneratorR4Test.class);
+public class DefaultLiquidNarrativeGeneratorDstu3Test {
+	private static FhirContext ourFhirContext = FhirContext.forDstu3();
+	private static final Logger ourLog = LoggerFactory.getLogger(DefaultLiquidNarrativeGeneratorDstu3Test.class);
 	private DefaultLiquidNarrativeGenerator myNarrativeGenerator;
 
 	@Before
@@ -78,7 +78,7 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 		customGen.setIgnoreFailures(false);
 		customGen.setIgnoreMissingTemplates(false);
 
-		FhirContext ctx = FhirContext.forR4();
+		FhirContext ctx = FhirContext.forDstu3();
 		ctx.setNarrativeGenerator(customGen);
 
 		Patient value = new Patient();
@@ -180,7 +180,7 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 			obs.setValue(new Quantity(null, 2.223, null, null, "mg/L"));
 			obs.addReferenceRange().setLow((SimpleQuantity) new SimpleQuantity().setValue(2.20)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(2.99));
 			obs.setStatus(Observation.ObservationStatus.FINAL);
-			obs.addNote().setText("This is a result comment");
+			obs.setComment("This is a result comment");
 			Reference result = value.addResult();
 			result.setResource(obs);
 		}

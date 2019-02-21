@@ -1,11 +1,11 @@
-package ca.uhn.fhir.r4.narrative;
+package ca.uhn.fhir.dstu3.narrative;
 
+import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.TypeDetails;
+import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.TypeDetails;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,15 +23,6 @@ public class LiquidEnvironmentVariables implements FHIRPathEngine.IEvaluationCon
   }
 
   @Override
-  public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
-    String value = constantMap.get(name);
-    if (value == null) {
-      return null;
-    }
-    return new StringType(constantMap.get(name));
-  }
-
-  @Override
   public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
     return null;
   }
@@ -39,6 +30,15 @@ public class LiquidEnvironmentVariables implements FHIRPathEngine.IEvaluationCon
   @Override
   public boolean log(String argument, List<Base> focus) {
     return false;
+  }
+
+  @Override
+  public Base resolveConstant(Object appContext, String name) throws PathEngineException {
+    String value = constantMap.get(name);
+    if (value == null) {
+      return null;
+    }
+    return new StringType(constantMap.get(name));
   }
 
   @Override
@@ -59,10 +59,5 @@ public class LiquidEnvironmentVariables implements FHIRPathEngine.IEvaluationCon
   @Override
   public Base resolveReference(Object appContext, String url) throws FHIRException {
     return null;
-  }
-
-  @Override
-  public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
-    return false;
   }
 }

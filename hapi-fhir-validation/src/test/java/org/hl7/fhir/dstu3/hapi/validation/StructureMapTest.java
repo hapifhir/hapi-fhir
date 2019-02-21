@@ -1,19 +1,18 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.*;
-
-import javax.annotation.Nullable;
-
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
+import javax.annotation.Nullable;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
 
 public class StructureMapTest {
 

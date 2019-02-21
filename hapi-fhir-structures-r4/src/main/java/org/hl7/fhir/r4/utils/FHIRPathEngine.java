@@ -2,6 +2,7 @@ package org.hl7.fhir.r4.utils;
 
 //import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 
+import ca.uhn.fhir.fluentpath.IExpressionNodeWithOffset;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.util.ElementUtil;
 import org.apache.commons.lang3.NotImplementedException;
@@ -284,7 +285,7 @@ public class FHIRPathEngine {
     return result;    
   }
 
-  public static class ExpressionNodeWithOffset {
+  public static class ExpressionNodeWithOffset implements IExpressionNodeWithOffset {
     private int offset;
     private ExpressionNode node;
     public ExpressionNodeWithOffset(int offset, ExpressionNode node) {

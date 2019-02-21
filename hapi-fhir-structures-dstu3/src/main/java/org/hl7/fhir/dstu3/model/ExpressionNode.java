@@ -1,11 +1,12 @@
 package org.hl7.fhir.dstu3.model;
 
+import ca.uhn.fhir.fluentpath.IExpressionNode;
+import org.hl7.fhir.utilities.Utilities;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.utilities.Utilities;
-
-public class ExpressionNode {
+public class ExpressionNode implements IExpressionNode {
 
 	public enum Kind {
 		Name, Function, Constant, Group

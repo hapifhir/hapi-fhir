@@ -20,15 +20,14 @@ package ca.uhn.fhir.jpa.validation;
  * #L%
  */
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 

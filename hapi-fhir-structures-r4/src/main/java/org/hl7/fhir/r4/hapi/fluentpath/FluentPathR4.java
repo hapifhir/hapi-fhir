@@ -2,12 +2,17 @@ package org.hl7.fhir.r4.hapi.fluentpath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fluentpath.FluentPathExecutionException;
+import ca.uhn.fhir.fluentpath.IExpressionNode;
+import ca.uhn.fhir.fluentpath.IExpressionNodeWithOffset;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.ExpressionNode;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import java.util.List;
@@ -49,5 +54,33 @@ public class FluentPathR4 implements IFluentPath {
     return evaluate(theInput, thePath, theReturnType).stream().findFirst();
   }
 
+  @Override
+  public IExpressionNode parse(String path) {
+    return myEngine.parse(path);
+  }
 
+  @Override
+  public IExpressionNodeWithOffset parsePartial(String path, int offset) {
+    return myEngine.parsePartial(path, offset);
+  }
+
+  @Override
+  public String evaluateToString(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
+    return myEngine.evaluateToString(theAppInfo, (Resource)theResource, (Base)theBase, (ExpressionNode) theCompiled);
+  }
+
+  @Override
+  public boolean evaluateToBoolean(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
+    return myEngine.evaluateToBoolean(theAppInfo, (Resource)theResource, (Base)theBase, (ExpressionNode) theCompiled);
+  }
+
+  @Override
+  public List<IBase> evaluate(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
+    return (List<IBase>)(List<?>)myEngine.evaluate(theAppInfo, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
+  }
+
+  @Override
+  public void setHostServices(Object theHostServices) {
+    myEngine.setHostServices((FHIRPathEngine.IEvaluationContext) theHostServices);
+  }
 }
