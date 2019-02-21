@@ -138,7 +138,7 @@ public abstract class BaseThymeleafNarrativeGenerator implements INarrativeGener
 
 		ourLog.info("Initializing narrative generator");
 
-		myClassToName = new HashMap<Class<?>, String>();
+		myClassToName = new HashMap<>();
 		myNameToNarrativeTemplate = new HashMap<String, String>();
 
 		List<String> propFileName = getPropertyFile();
