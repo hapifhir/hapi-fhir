@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.model.interceptor.executor;
 
 import ca.uhn.fhir.jpa.model.interceptor.api.*;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.Before;
@@ -39,6 +40,21 @@ public class InterceptorServiceTest {
 	private MyTestInterceptorTwo myInterceptorTwo;
 	@Autowired
 	private MyTestInterceptorManual myInterceptorManual;
+
+	@Test
+	public void testRegisterHookFails() {
+		int initialSize = myInterceptorRegistry.getGlobalInterceptorsForUnitTest().size();
+
+		try {
+			myInterceptorRegistry.registerInterceptor(new InterceptorThatFailsOnRegister());
+			fail();
+		} catch (InternalErrorException e) {
+			// good
+		}
+
+		assertEquals(initialSize, myInterceptorRegistry.getGlobalInterceptorsForUnitTest().size());
+
+	}
 
 	@Test
 	public void testGlobalInterceptorsAreFound() {
@@ -265,4 +281,15 @@ public class InterceptorServiceTest {
 	 */
 	private static class ResourceDeliveryMessage {
 	}
+
+	@Interceptor(manualRegistration = true)
+	public static class InterceptorThatFailsOnRegister {
+
+		@Hook(Pointcut.REGISTERED)
+		public void start() throws Exception {
+			throw new Exception("InterceptorThatFailsOnRegister FAILED!");
+		}
+
+	}
+
 }

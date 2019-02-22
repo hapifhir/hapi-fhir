@@ -1,4 +1,4 @@
-package org.hl7.fhir.instance.model.api;
+package ca.uhn.fhir.narrative2;
 
 /*
  * #%L
@@ -20,18 +20,10 @@ package org.hl7.fhir.instance.model.api;
  * #L%
  */
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface IBaseReference extends ICompositeType {
+public interface INarrativeGenerator {
 
-	IBaseResource getResource();
+	void generateNarrative(IBaseResource theResource);
 
-	IBaseReference setResource(IBaseResource theResource);
-
-	IIdType getReferenceElement();
-
-	IBaseReference setReference(String theReference);
-
-	IBase setDisplay(String theValue);
-
-	IPrimitiveType<String> getDisplayElement();
 }
