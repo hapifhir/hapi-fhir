@@ -57,4 +57,5 @@ public interface IFluentPath {
 	List<IBase> evaluate(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
 
 	void setHostServices(Object theHostServices);
+	INarrativeConstantMap createLiquidIncludeMap();
 }

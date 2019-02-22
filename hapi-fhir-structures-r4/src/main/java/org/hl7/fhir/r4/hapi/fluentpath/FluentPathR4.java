@@ -1,10 +1,7 @@
 package org.hl7.fhir.r4.hapi.fluentpath;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fluentpath.FluentPathExecutionException;
-import ca.uhn.fhir.fluentpath.IExpressionNode;
-import ca.uhn.fhir.fluentpath.IExpressionNodeWithOffset;
-import ca.uhn.fhir.fluentpath.IFluentPath;
+import ca.uhn.fhir.fluentpath.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -13,6 +10,7 @@ import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.ExpressionNode;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Tuple;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import java.util.List;
@@ -82,5 +80,10 @@ public class FluentPathR4 implements IFluentPath {
   @Override
   public void setHostServices(Object theHostServices) {
     myEngine.setHostServices((FHIRPathEngine.IEvaluationContext) theHostServices);
+  }
+
+  @Override
+  public INarrativeConstantMap createLiquidIncludeMap() {
+    return new Tuple();
   }
 }

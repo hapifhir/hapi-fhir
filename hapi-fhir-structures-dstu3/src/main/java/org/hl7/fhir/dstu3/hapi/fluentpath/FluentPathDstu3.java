@@ -1,10 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.fluentpath;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fluentpath.FluentPathExecutionException;
-import ca.uhn.fhir.fluentpath.IExpressionNode;
-import ca.uhn.fhir.fluentpath.IExpressionNodeWithOffset;
-import ca.uhn.fhir.fluentpath.IFluentPath;
+import ca.uhn.fhir.fluentpath.*;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Base;
@@ -82,5 +79,10 @@ public class FluentPathDstu3 implements IFluentPath {
   @Override
   public void setHostServices(Object theHostServices) {
     myEngine.setHostServices((FHIRPathEngine.IEvaluationContext) theHostServices);
+  }
+
+  @Override
+  public INarrativeConstantMap createLiquidIncludeMap() {
+    return new NarrativeConstantMapDstu3();
   }
 }

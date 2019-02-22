@@ -5,6 +5,7 @@ import ca.uhn.fhir.fluentpath.IExpressionNode;
 import ca.uhn.fhir.fluentpath.IExpressionNodeWithOffset;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.Utilities;
@@ -16,7 +17,7 @@ public class LiquidEngine {
   private final FhirContext fhirContext;
 
   public interface ILiquidEngineIcludeResolver {
-    public String fetchInclude(LiquidEngine engine, String name);
+    public String fetchInclude(String name);
   }
 
   private IFluentPath engine;
@@ -149,21 +150,18 @@ public class LiquidEngine {
 
     @Override
     public void evaluate(StringBuilder b, IBaseResource resource, LiquidEngineContext ctxt) throws FHIRException {
-      throw new UnsupportedOperationException();
-      /** FIXME KHS
-       String src = includeResolver.fetchInclude(LiquidEngine.this, page);
-       LiquidParser parser = new LiquidParser(src);
-       LiquidDocument doc = parser.parse(page);
-       LiquidEngineContext nctxt =  new LiquidEngineContext(ctxt.externalContext);
-       Tuple incl = new Tuple();
-       nctxt.vars.put("include", incl);
-       for (String s : params.keySet()) {
-       incl.addProperty(s, engine.evaluate(ctxt, resource, resource, params.get(s)));
-       }
-       for (LiquidNode n : doc.body) {
-       n.evaluate(b, resource, nctxt);
-       }
-       */
+      String src = includeResolver.fetchInclude(page);
+      LiquidParser parser = new LiquidParser(src);
+      LiquidDocument doc = parser.parse(page);
+      LiquidEngineContext nctxt = new LiquidEngineContext(ctxt.externalContext);
+      LiquidIncludeMap incl = new LiquidIncludeMap();
+      nctxt.vars.put("include", incl);
+      for (String s : params.keySet()) {
+        incl.addProperty(s, engine.evaluate(ctxt, resource, resource, params.get(s)));
+      }
+      for (LiquidNode n : doc.body) {
+        n.evaluate(b, resource, nctxt);
+      }
     }
   }
 
@@ -336,61 +334,10 @@ public class LiquidEngine {
     engine.setHostServices(theHostServices);
   }
 
-/** FIXME KHS
- @Override public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
- LiquidEngineContext ctxt = (LiquidEngineContext) appContext;
- if (ctxt.vars.containsKey(name))
- return ctxt.vars.get(name);
- if (externalHostServices == null)
- return null;
- return externalHostServices.resolveConstant(ctxt.externalContext, name, beforeContext);
- }
-
- @Override public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
- if (externalHostServices == null)
- return null;
- LiquidEngineContext ctxt = (LiquidEngineContext) appContext;
- return externalHostServices.resolveConstantType(ctxt.externalContext, name);
- }
-
- @Override public boolean log(String argument, List<Base> focus) {
- if (externalHostServices == null)
- return false;
- return externalHostServices.log(argument, focus);
- }
-
- @Override public FunctionDetails resolveFunction(String functionName) {
- if (externalHostServices == null)
- return null;
- return externalHostServices.resolveFunction(functionName);
- }
-
- @Override public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
- if (externalHostServices == null)
- return null;
- LiquidEngineContext ctxt = (LiquidEngineContext) appContext;
- return externalHostServices.checkFunction(ctxt.externalContext, functionName, parameters);
- }
-
- @Override public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters) {
- if (externalHostServices == null)
- return null;
- LiquidEngineContext ctxt = (LiquidEngineContext) appContext;
- return externalHostServices.executeFunction(ctxt.externalContext, functionName, parameters);
- }
-
- @Override public Base resolveReference(Object appContext, String url) throws FHIRException {
- if (externalHostServices == null)
- return null;
- LiquidEngineContext ctxt = (LiquidEngineContext) appContext;
- return resolveReference(ctxt.externalContext, url);
- }
-
- @Override public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
- if (externalHostServices == null)
- return false;
- LiquidEngineContext ctxt = (LiquidEngineContext) appContext;
- return conformsToProfile(ctxt.externalContext, item, url);
- }
- */
+  public IBase resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
+    LiquidEngineContext ctxt = (LiquidEngineContext) appContext;
+    if (ctxt.vars.containsKey(name))
+      return ctxt.vars.get(name);
+    return null;
+  }
 }

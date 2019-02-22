@@ -68,4 +68,8 @@ public class DefaultLiquidNarrativeGenerator extends BaseNarrativeGenerator {
 	public boolean isUseHapiServerConformanceNarrative() {
 		return myUseHapiServerConformanceNarrative;
 	}
+
+	public LiquidEngine getLiquidEngine() {
+		return myLiquidEngine;
+	}
 }

@@ -1,15 +1,18 @@
-package org.hl7.fhir.r4.model;
+package org.hl7.fhir.dstu3.hapi.fluentpath;
+
+
+import ca.uhn.fhir.fluentpath.INarrativeConstantMap;
+import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.Property;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.fluentpath.INarrativeConstantMap;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
-
-public class Tuple extends Base implements INarrativeConstantMap {
+public class NarrativeConstantMapDstu3 extends Base implements INarrativeConstantMap {
   private Map<String, List<Base>> properties = new HashMap<>();
 
   @Override
@@ -21,7 +24,7 @@ public class Tuple extends Base implements INarrativeConstantMap {
   protected void listChildren(List<Property> result) {
     for (String s : properties.keySet()) {
       result.add(new Property(s, "Base", null, 0, 1, properties.get(s)));
-    }    
+    }
   }
 
   @Override
@@ -34,9 +37,9 @@ public class Tuple extends Base implements INarrativeConstantMap {
   }
 
   public void addProperty(String s, List<Base> list) {
-    properties.put(s, list); 
+    properties.put(s, list);
   }
-  
+
   public Base[] listChildrenByName(String name, boolean checkValid) throws FHIRException {
     if (name.equals("*")) {
       List<Property> children = new ArrayList<Property>();
@@ -48,7 +51,7 @@ public class Tuple extends Base implements INarrativeConstantMap {
     } else if (properties.containsKey(name)) {
       return properties.get(name).toArray(new Base[0]);
     }
-      return getProperty(name.hashCode(), name, checkValid);
+    return getProperty(name.hashCode(), name, checkValid);
   }
 
   @Override
@@ -56,3 +59,4 @@ public class Tuple extends Base implements INarrativeConstantMap {
     this.addProperty(name, (List<Base>)(List<?>)values);
   }
 }
+

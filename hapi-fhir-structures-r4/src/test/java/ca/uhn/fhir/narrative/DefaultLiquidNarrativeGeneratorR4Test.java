@@ -2,7 +2,7 @@ package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.r4.narrative.LiquidEnvironmentVariables;
+import ca.uhn.fhir.r4.narrative.LiquidHostServices;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.map.LazyMap;
@@ -35,10 +35,10 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 	@Before
 	public void before() {
 		myNarrativeGenerator = new DefaultLiquidNarrativeGenerator();
-		LiquidEnvironmentVariables liquidEnvironmentVariables = new LiquidEnvironmentVariables();
-		liquidEnvironmentVariables.put("FHIR_VERSION", ourFhirContext.getVersion().getVersion().name());
+		LiquidHostServices liquidHostServices = new LiquidHostServices(myNarrativeGenerator.getLiquidEngine());
+		liquidHostServices.setEnvironmentVariable("FHIR_VERSION", ourFhirContext.getVersion().getVersion().name());
 
-		myNarrativeGenerator.setHostServices(liquidEnvironmentVariables);
+		myNarrativeGenerator.setHostServices(liquidHostServices);
 		ourFhirContext.setNarrativeGenerator(myNarrativeGenerator);
 	}
 
