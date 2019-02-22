@@ -52,6 +52,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		set.add(Constants.PARAM_SORT_ASC);
 		set.add(Constants.PARAM_SORT_DESC);
 		set.add(Constants.PARAM_COUNT);
+		set.add(Constants.PARAM_OFFSET);
 		set.add(Constants.PARAM_SUMMARY);
 		set.add(Constants.PARAM_ELEMENTS);
 		ALLOWED_PARAMS = Collections.unmodifiableSet(set);

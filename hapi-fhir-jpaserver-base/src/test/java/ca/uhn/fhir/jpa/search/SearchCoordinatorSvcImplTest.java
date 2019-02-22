@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -365,6 +366,31 @@ public class SearchCoordinatorSvcImplTest {
 
 		completionLatch.await(10, TimeUnit.SECONDS);
 	}
+	
+	@Test
+	public void testAsyncSearchLargeResultSetSameCoordinatorWithOffset() {
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("name", new StringParam("ANAME"));
+		params.setOffset(10);
+		params.setCount(10);
+
+		SlowIterator iter = new SlowIterator(createPidSequence(10).iterator(), 2);
+		when(mySearchBuilder.createCountQuery(same(params), any(String.class), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(Lists.newArrayList(Long.valueOf(10L)).iterator());
+		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(iter);
+
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
+
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		assertNotNull(result.getUuid());
+		assertEquals(10, result.size().intValue());
+
+		List<IBaseResource> resources;
+
+		resources = result.getResources(0, 10);
+		assertEquals(10, resources.size());
+		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
+		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
+	}
 
 	/**
 	 * Subsequent requests for the same search (i.e. a request for the next
@@ -549,6 +575,29 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals(790, resources.size());
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
+	}
+
+	@Test
+	public void testSynchronousSearchWithOffset() {
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add("name", new StringParam("ANAME"));
+		params.setCount(10);
+		params.setOffset(10);
+
+		List<ResourcePersistentId> pids = createPidSequence(10);
+		when(mySearchBuilder.createCountQuery(same(params), any(String.class), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(Lists.newArrayList(Long.valueOf(10L)).iterator());
+		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new ResultIterator(pids.iterator()));
+
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
+
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		assertNull(result.getUuid());
+		assertEquals(10, result.size().intValue());
+
+		List<IBaseResource> resources = result.getResources(0, 10);
+		assertEquals(10, resources.size());
+		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 	}
 
 	@Test

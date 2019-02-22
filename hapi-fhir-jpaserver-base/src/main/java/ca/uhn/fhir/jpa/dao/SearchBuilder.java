@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -250,7 +251,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
-		List<TypedQuery<Long>> queries = createQuery(null, null, true, theRequest, null);
+		List<TypedQuery<Long>> queries = createQuery(null, null, null, true, theRequest, null);
 		return new CountQueryIterator(queries.get(0));
 	}
 
@@ -285,7 +286,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	private List<TypedQuery<Long>> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+	private List<TypedQuery<Long>> createQuery(SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
 															 SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		List<ResourcePersistentId> pids = new ArrayList<>();
@@ -341,22 +342,22 @@ public class SearchBuilder implements ISearchBuilder {
 			if (theMaximumResults != null && pids.size() > theMaximumResults) {
 				pids.subList(0,theMaximumResults-1);
 			}
-			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t-> doCreateChunkedQueries(t, sort, theCount, theRequest, myQueries));
+			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t-> doCreateChunkedQueries(t, sort, theOffset, theCount, theRequest, myQueries));
 		} else {
-			myQueries.add(createChunkedQuery(sort,theMaximumResults, theCount, theRequest, null));
+			myQueries.add(createChunkedQuery(sort, theOffset, theMaximumResults, theCount, theRequest, null));
 		}
 
 		return myQueries;
 	}
 
-	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {
+	private void doCreateChunkedQueries(List<Long> thePids, SortSpec sort, Integer theOffset, boolean theCount, RequestDetails theRequest, ArrayList<TypedQuery<Long>> theQueries) {
 		if(thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
 		}
-		theQueries.add(createChunkedQuery(sort, thePids.size(), theCount, theRequest, thePids));
+		theQueries.add(createChunkedQuery(sort, theOffset, thePids.size(), theCount, theRequest, thePids));
 	}
 
-	private TypedQuery<Long> createChunkedQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
+	private TypedQuery<Long> createChunkedQuery(SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
 		/*
 		 * Sort
 		 *
@@ -420,7 +421,9 @@ public class SearchBuilder implements ISearchBuilder {
 		CriteriaQuery<Long> outerQuery = (CriteriaQuery<Long>) myQueryStack.pop();
 		final TypedQuery<Long> query = myEntityManager.createQuery(outerQuery);
 		assert myQueryStack.isEmpty();
-
+		if (!theCount && theOffset != null) {
+			query.setFirstResult(theOffset);
+		}
 		if (theMaximumResults != null) {
 			query.setMaxResults(theMaximumResults);
 		}
@@ -1094,6 +1097,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private ResourcePersistentId myNext;
 		private Iterator<ResourcePersistentId> myPreResultsIterator;
 		private ScrollableResultsIterator<Long> myResultsIterator;
+		private Integer myOffset;
 		private final SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
@@ -1104,6 +1108,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
 			mySort = myParams.getSort();
+			myOffset = myParams.getOffset();
 			myRequest = theRequest;
 
 			// Includes are processed inline for $everything query
@@ -1116,6 +1121,13 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
+		private boolean isPagingProviderDatabaseBacked() {
+			if (myRequest == null || myRequest.getServer() == null) {
+				return false;
+			}
+			return myRequest.getServer().getPagingProvider() instanceof DatabaseBackedPagingProvider;
+		}
+
 		private void fetchNext() {
 
 			try {
@@ -1126,10 +1138,14 @@ public class SearchBuilder implements ISearchBuilder {
 				// If we don't have a query yet, create one
 				if (myResultsIterator == null) {
 					if (myMaxResultsToFetch == null) {
-						myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
+						if (!isPagingProviderDatabaseBacked() || myOffset != null) {
+							myMaxResultsToFetch = myParams.getCount();
+						} else {
+							myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
+						}
 					}
 
-					initializeIteratorQuery(myMaxResultsToFetch);
+					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
 					// If the query resulted in extra results being requested
 					if (myAlsoIncludePids != null) {
@@ -1191,7 +1207,7 @@ public class SearchBuilder implements ISearchBuilder {
 											.add(StorageProcessingMessage.class, message);
 										JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
-										initializeIteratorQuery(myMaxResultsToFetch);
+										initializeIteratorQuery(null, myMaxResultsToFetch);
 									}
 								}
 							}
@@ -1254,11 +1270,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
-		private void initializeIteratorQuery(Integer theMaxResultsToFetch) {
+		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
 			if (myQueryList.isEmpty()) {
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
-				myQueryList = createQuery(mySort, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
+				myQueryList = createQuery(mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
 			}
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());

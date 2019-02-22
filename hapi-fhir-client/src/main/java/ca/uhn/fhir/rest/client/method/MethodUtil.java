@@ -340,6 +340,8 @@ public class MethodUtil {
 								outerCollectionType);
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
+					} else if (nextAnnotation instanceof Offset) {
+						param = new OffsetParameter();
 					} else if (nextAnnotation instanceof Sort) {
 						param = new SortParameter(theContext);
 					} else if (nextAnnotation instanceof TransactionParam) {

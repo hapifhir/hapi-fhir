@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -267,6 +268,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry {
 
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
+			params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
 			IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
 			int size = allSearchParamsBp.size();

@@ -459,15 +459,33 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
 
+		boolean wantOnlyCount = isWantOnlyCount(theParams);
+		boolean wantCount = isWantCount(theParams, wantOnlyCount);
+
 		// Execute the query and make sure we return distinct results
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		return txTemplate.execute(t -> {
-
+				
 			// Load the results synchronously
 			final List<ResourcePersistentId> pids = new ArrayList<>();
 
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theResourceType);
+
+			Long count = 0L;
+			if (wantCount) {
+				ourLog.trace("Performing count");
+				Iterator<Long> countIterator = theSb.createCountQuery(theParams, theSearchUuid, theRequestDetails, requestPartitionId);
+				count = countIterator.next();
+				ourLog.trace("Got count {}", count);
+			}
+
+			if (wantOnlyCount) {
+				SimpleBundleProvider bundleProvider = new SimpleBundleProvider();
+				bundleProvider.setSize(count.intValue());
+				return bundleProvider;
+			}
+
 			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, requestPartitionId)) {
 				while (resultIter.hasNext()) {
 					pids.add(resultIter.next());
@@ -516,7 +534,28 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// Hook: STORAGE_PRESHOW_RESOURCES
 			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 
-			return new SimpleBundleProvider(resources);
+			SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
+
+			if (wantCount) {
+				bundleProvider.setSize(count.intValue());
+			} else {
+				if (theLoadSynchronousUpTo != null) {
+					if (theParams.getOffset() != null && theLoadSynchronousUpTo > pids.size()) {
+						bundleProvider.setSize(theParams.getOffset() + pids.size());
+					} else {
+						bundleProvider.setSize(null);
+					}
+				} else if (theParams.getOffset() != null && 
+					theParams.getCount() != null && theParams.getCount() > pids.size()) {
+					bundleProvider.setSize(theParams.getOffset() + pids.size());
+				} else if (theParams.getCount() != null && theParams.getCount() > pids.size()) {
+					bundleProvider.setSize(pids.size());
+				} else {
+					bundleProvider.setSize(null);
+				}
+			}
+
+			return bundleProvider;
 		});
 	}
 
@@ -991,13 +1030,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 *
 			 * before doing anything else.
 			 */
-			boolean wantOnlyCount =
-				SummaryEnum.COUNT.equals(myParams.getSummaryMode())
-					| INTEGER_0.equals(myParams.getCount());
-			boolean wantCount =
-				wantOnlyCount ||
-					SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
-					(myParams.getSearchTotalMode() == null && SearchTotalModeEnum.ACCURATE.equals(myDaoConfig.getDefaultTotalMode()));
+			boolean wantOnlyCount = isWantOnlyCount(myParams);
+			boolean wantCount = isWantCount(myParams, wantOnlyCount);
 			if (wantCount) {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
@@ -1126,6 +1160,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 	}
 
+	private boolean isWantCount(SearchParameterMap myParams, boolean wantOnlyCount) {
+		return wantOnlyCount ||
+			SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
+			(myParams.getSearchTotalMode() == null && SearchTotalModeEnum.ACCURATE.equals(myDaoConfig.getDefaultTotalMode()));
+	}
+
+	private static boolean isWantOnlyCount(SearchParameterMap myParams) {
+		return SummaryEnum.COUNT.equals(myParams.getSummaryMode())
+			| INTEGER_0.equals(myParams.getCount());
+	}
 
 	public class SearchContinuationTask extends SearchTask {
 

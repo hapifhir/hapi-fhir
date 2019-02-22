@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -130,6 +131,7 @@ public class SubscriptionLoader {
 					.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 			}
 			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
+			map.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
 			IBundleProvider subscriptionBundleList =  myDaoRegistry.getSubscriptionDao().search(map);
 
