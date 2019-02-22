@@ -44,10 +44,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.*;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -97,6 +94,14 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 		String actionName = "Transaction";
 		BUNDLE response = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName);
+
+		List<BUNDLEENTRY> entries = myVersionAdapter.getEntries(response);
+		for (int i = 0; i < entries.size(); i++) {
+			if (ElementUtil.isEmpty(entries.get(i))) {
+				entries.remove(i);
+				i--;
+			}
+		}
 
 		return response;
 	}
@@ -499,6 +504,42 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
 			Set<ResourceTable> updatedEntities = new HashSet<>();
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
+
+			/*
+			 * Look for duplicate conditional creates and consolidate them
+			 */
+			Map<String, String> ifNoneExistToUuid = new HashMap<>();
+			for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
+				BUNDLEENTRY nextReqEntry = theEntries.get(index);
+				String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
+				String entryUrl = myVersionAdapter.getFullUrl(nextReqEntry);
+				String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
+				String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
+				if ("POST".equals(verb)) {
+					if (isNotBlank(entryUrl) && isNotBlank(requestUrl) && isNotBlank(ifNoneExist)) {
+						if (!entryUrl.equals(requestUrl)) {
+							String key = requestUrl + "|" + ifNoneExist; // just in case the ifNoneExist doesn't include the resource type
+							if (!ifNoneExistToUuid.containsKey(key)) {
+								ifNoneExistToUuid.put(key, entryUrl);
+							} else {
+								ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional create: {}", originalIndex, ifNoneExist);
+								theEntries.remove(index);
+								index--;
+								String existingUuid = ifNoneExistToUuid.get(key);
+								for (BUNDLEENTRY nextEntry : theEntries) {
+									IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
+									for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
+										if (entryUrl.equals(nextReference.getResourceReference().getReferenceElement().getValue())) {
+											nextReference.getResourceReference().setReference(existingUuid);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
 
 			/*
 			 * Loop through the request and process any entries of type
