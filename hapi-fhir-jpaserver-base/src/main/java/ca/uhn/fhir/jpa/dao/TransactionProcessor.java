@@ -508,36 +508,60 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			/*
 			 * Look for duplicate conditional creates and consolidate them
 			 */
-			Map<String, String> ifNoneExistToUuid = new HashMap<>();
+			Map<String, String> keyToUuid = new HashMap<>();
 			for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
 				BUNDLEENTRY nextReqEntry = theEntries.get(index);
+
+//				String encoded = myContext.newJsonParser().encodeResourceToString(myVersionAdapter.getResource(nextReqEntry));
+//				if (encoded.contains("00000011111")) {
+//					ourLog.info("Resource contains 00000011111");
+//				}
+
 				String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
 				String entryUrl = myVersionAdapter.getFullUrl(nextReqEntry);
 				String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
 				String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
+				String key = verb + "|"+ requestUrl + "|" + ifNoneExist;
+
+				// Conditional UPDATE
+				boolean consolidateEntry = false;
+				if ("PUT".equals(verb)) {
+					if (isNotBlank(entryUrl) && isNotBlank(requestUrl)) {
+						int questionMarkIndex = requestUrl.indexOf('?');
+						if (questionMarkIndex >= 0 && requestUrl.length() > (questionMarkIndex+1)) {
+							consolidateEntry = true;
+						}
+					}
+				}
+
+				// Conditional CREATE
 				if ("POST".equals(verb)) {
 					if (isNotBlank(entryUrl) && isNotBlank(requestUrl) && isNotBlank(ifNoneExist)) {
 						if (!entryUrl.equals(requestUrl)) {
-							String key = requestUrl + "|" + ifNoneExist; // just in case the ifNoneExist doesn't include the resource type
-							if (!ifNoneExistToUuid.containsKey(key)) {
-								ifNoneExistToUuid.put(key, entryUrl);
-							} else {
-								ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional create: {}", originalIndex, ifNoneExist);
-								theEntries.remove(index);
-								index--;
-								String existingUuid = ifNoneExistToUuid.get(key);
-								for (BUNDLEENTRY nextEntry : theEntries) {
-									IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
-									for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
-										if (entryUrl.equals(nextReference.getResourceReference().getReferenceElement().getValue())) {
-											nextReference.getResourceReference().setReference(existingUuid);
-										}
-									}
+							consolidateEntry = true;
+						}
+					}
+				}
+
+				if (consolidateEntry) {
+					if (!keyToUuid.containsKey(key)) {
+						keyToUuid.put(key, entryUrl);
+					} else {
+						ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
+						theEntries.remove(index);
+						index--;
+						String existingUuid = keyToUuid.get(key);
+						for (BUNDLEENTRY nextEntry : theEntries) {
+							IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
+							for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
+								if (entryUrl.equals(nextReference.getResourceReference().getReferenceElement().getValue())) {
+									nextReference.getResourceReference().setReference(existingUuid);
 								}
 							}
 						}
 					}
 				}
+
 			}
 
 
