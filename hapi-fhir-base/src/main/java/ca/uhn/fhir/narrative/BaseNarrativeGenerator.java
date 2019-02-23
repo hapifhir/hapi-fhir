@@ -333,6 +333,4 @@ abstract public class BaseNarrativeGenerator implements INarrativeGenerator {
 	public void setIgnoreMissingTemplates(boolean theIgnoreMissingTemplates) {
 		myIgnoreMissingTemplates = theIgnoreMissingTemplates;
 	}
-
-	public abstract void setHostServices(Object theLiquidEnvironmentVariables);
 }

@@ -330,10 +330,6 @@ public class LiquidEngine {
 
   }
 
-  public void setHostServices(Object theHostServices) {
-    engine.setHostServices(theHostServices);
-  }
-
   public IBase resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
     LiquidEngineContext ctxt = (LiquidEngineContext) appContext;
     if (ctxt.vars.containsKey(name))

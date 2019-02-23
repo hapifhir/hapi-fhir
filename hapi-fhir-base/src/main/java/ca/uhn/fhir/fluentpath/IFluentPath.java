@@ -56,6 +56,7 @@ public interface IFluentPath {
 	boolean evaluateToBoolean(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
 	List<IBase> evaluate(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
 
-	void setHostServices(Object theHostServices);
+	void setHostServices(INarrativeConstantResolver theNarrativeConstantEvaluator);
 	INarrativeConstantMap createLiquidIncludeMap();
+	void setEnvironmentVariable(String key, String value);
 }

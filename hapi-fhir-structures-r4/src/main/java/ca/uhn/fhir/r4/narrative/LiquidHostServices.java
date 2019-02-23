@@ -1,5 +1,6 @@
 package ca.uhn.fhir.r4.narrative;
 
+import ca.uhn.fhir.fluentpath.INarrativeConstantResolver;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -7,7 +8,6 @@ import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TypeDetails;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
-import org.hl7.fhir.utilities.liquid.LiquidEngine;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,10 +15,10 @@ import java.util.Map;
 
 public class LiquidHostServices implements FHIRPathEngine.IEvaluationContext {
   private Map<String, String> environmentVariables = new HashMap<>();
-  private final LiquidEngine myLiquidEngine;
+  private final INarrativeConstantResolver myNarrativeConstantEvaluator;
 
-  public LiquidHostServices(LiquidEngine theLiquidEngine) {
-    myLiquidEngine = theLiquidEngine;
+  public LiquidHostServices(INarrativeConstantResolver theNarrativeConstantEvaluator) {
+    myNarrativeConstantEvaluator = theNarrativeConstantEvaluator;
   }
 
   public void setEnvironmentVariable(String key, String value) {
@@ -31,7 +31,7 @@ public class LiquidHostServices implements FHIRPathEngine.IEvaluationContext {
 
   @Override
   public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
-    IBase retval = myLiquidEngine.resolveConstant(appContext, name, beforeContext);
+    IBase retval = myNarrativeConstantEvaluator.resolveConstant(appContext, name, beforeContext);
     if (retval != null) {
       return (Base)retval;
     }

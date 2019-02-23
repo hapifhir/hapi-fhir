@@ -190,9 +190,4 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 		}
 
 	}
-
-	@Override
-	public void setHostServices(Object theLiquidEnvironmentVariables) {
-		throw new UnsupportedOperationException();
-	}
 }

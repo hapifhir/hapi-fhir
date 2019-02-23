@@ -1,7 +1,6 @@
 package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.dstu3.narrative.LiquidEnvironmentVariables;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.collections.Transformer;
@@ -35,10 +34,6 @@ public class DefaultLiquidNarrativeGeneratorDstu3Test {
 	@Before
 	public void before() {
 		myNarrativeGenerator = new DefaultLiquidNarrativeGenerator();
-		LiquidEnvironmentVariables liquidEnvironmentVariables = new LiquidEnvironmentVariables();
-		liquidEnvironmentVariables.put("FHIR_VERSION", ourFhirContext.getVersion().getVersion().name());
-
-		myNarrativeGenerator.setHostServices(liquidEnvironmentVariables);
 		ourFhirContext.setNarrativeGenerator(myNarrativeGenerator);
 	}
 

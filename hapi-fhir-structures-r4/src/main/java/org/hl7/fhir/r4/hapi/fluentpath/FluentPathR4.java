@@ -2,6 +2,7 @@ package org.hl7.fhir.r4.hapi.fluentpath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fluentpath.*;
+import ca.uhn.fhir.r4.narrative.LiquidHostServices;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -18,14 +19,17 @@ import java.util.Optional;
 
 public class FluentPathR4 implements IFluentPath {
 
+  private final FhirContext myFhirContext;
   private FHIRPathEngine myEngine;
+  private LiquidHostServices myLiquidHostServices;
 
-  public FluentPathR4(FhirContext theCtx) {
-    if (!(theCtx.getValidationSupport() instanceof IValidationSupport)) {
+  public FluentPathR4(FhirContext theFhirContext) {
+    myFhirContext = theFhirContext;
+    if (!(theFhirContext.getValidationSupport() instanceof IValidationSupport)) {
       throw new IllegalStateException("Validation support module configured on context appears to be for the wrong FHIR version- Does not extend " + IValidationSupport.class.getName());
     }
-    IValidationSupport validationSupport = (IValidationSupport) theCtx.getValidationSupport();
-    myEngine = new FHIRPathEngine(new HapiWorkerContext(theCtx, validationSupport));
+    IValidationSupport validationSupport = (IValidationSupport) theFhirContext.getValidationSupport();
+    myEngine = new FHIRPathEngine(new HapiWorkerContext(theFhirContext, validationSupport));
   }
 
   @SuppressWarnings("unchecked")
@@ -78,12 +82,19 @@ public class FluentPathR4 implements IFluentPath {
   }
 
   @Override
-  public void setHostServices(Object theHostServices) {
-    myEngine.setHostServices((FHIRPathEngine.IEvaluationContext) theHostServices);
+  public void setHostServices(INarrativeConstantResolver theNarrativeConstantResolver) {
+    myLiquidHostServices = new LiquidHostServices(theNarrativeConstantResolver);
+    myLiquidHostServices.setEnvironmentVariable("FHIR_VERSION", myFhirContext.getVersion().getVersion().name());
+    myEngine.setHostServices(myLiquidHostServices);
   }
 
   @Override
   public INarrativeConstantMap createLiquidIncludeMap() {
     return new Tuple();
+  }
+
+  @Override
+  public void setEnvironmentVariable(String key, String value) {
+    myLiquidHostServices.setEnvironmentVariable(key, value);
   }
 }

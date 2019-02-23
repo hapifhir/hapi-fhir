@@ -19,12 +19,10 @@ public class DefaultLiquidNarrativeGenerator extends BaseNarrativeGenerator {
 	private boolean myUseHapiServerConformanceNarrative;
 
 	private LiquidEngine myLiquidEngine;
-	private Object myHostServices;
 
 	@Override
 	protected void initializeNarrativeEngine(FhirContext theFhirContext) {
 		myLiquidEngine = new LiquidEngine(theFhirContext);
-		myLiquidEngine.setHostServices(myHostServices);
 	}
 
 	@Override
@@ -46,11 +44,6 @@ public class DefaultLiquidNarrativeGenerator extends BaseNarrativeGenerator {
 			retVal.add(HAPISERVER_NARRATIVES_PROPERTIES);
 		}
 		return retVal;
-	}
-
-	@Override
-	public void setHostServices(Object theHostServices) {
-		myHostServices = theHostServices;
 	}
 
 	/**
