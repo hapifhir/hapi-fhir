@@ -23,6 +23,7 @@ package ca.uhn.fhir.narrative2;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -31,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -89,8 +91,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
 		String contextPath = defaultIfEmpty(theTemplate.getContextPath(), resourceName);
 
-		IFluentPath fhirPath = myFhirContext.newFluentPath();
-		List<IBase> targets = fhirPath.evaluate(theResource, contextPath, IBase.class);
+		List<IBase> targets = findTargets(theResource, contextPath);
 		for (IBase nextTargetContext : targets) {
 
 			BaseRuntimeElementCompositeDefinition<?> targetElementDef = (BaseRuntimeElementCompositeDefinition<?>) getFhirContext().getElementDefinition(nextTargetContext.getClass());
@@ -119,6 +120,14 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 
 		}
 		return retVal;
+	}
+
+	private List<IBase> findTargets(IBaseResource theResource, String theContextPath) {
+		if (myFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+			return Collections.singletonList(theResource);
+		}
+		IFluentPath fhirPath = myFhirContext.newFluentPath();
+		return fhirPath.evaluate(theResource, theContextPath, IBase.class);
 	}
 
 	protected abstract String applyTemplate(INarrativeTemplate theTemplate, IBase theTargetContext);
