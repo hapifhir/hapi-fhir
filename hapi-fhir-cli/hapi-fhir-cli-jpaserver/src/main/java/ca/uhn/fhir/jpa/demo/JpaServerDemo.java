@@ -125,7 +125,7 @@ public class JpaServerDemo extends RestfulServer {
 		 * This server tries to dynamically generate narratives
 		 */
 		FhirContext ctx = getFhirContext();
-		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(getFhirContext()));
 
 		/*
 		 * Default to XML and pretty printing

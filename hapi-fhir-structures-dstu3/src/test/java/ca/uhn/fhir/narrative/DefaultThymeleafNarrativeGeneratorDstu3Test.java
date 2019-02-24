@@ -47,7 +47,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 
 	@Before
 	public void before() {
-		myGen = new DefaultThymeleafNarrativeGenerator();
+		myGen = new DefaultThymeleafNarrativeGenerator(ourCtx);
 		myGen.setUseHapiServerConformanceNarrative(true);
 		myGen.setFhirContext(ourCtx);
 

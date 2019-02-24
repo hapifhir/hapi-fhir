@@ -159,7 +159,7 @@ public class TestRestfulServer extends RestfulServer {
 		 * This server tries to dynamically generate narratives
 		 */
 		FhirContext ctx = getFhirContext();
-		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(getFhirContext()));
 
 		/*
 		 * The resource and system providers (which actually implement the various FHIR

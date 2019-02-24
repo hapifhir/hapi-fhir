@@ -44,6 +44,10 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 	private INarrativeTemplateManifest myManifest;
 	private FhirContext myFhirContext;
 
+	public BaseNarrativeGenerator() {
+		super();
+	}
+
 	public INarrativeTemplateManifest getManifest() {
 		return myManifest;
 	}
@@ -63,20 +67,25 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 	}
 
 	@Override
-	public void generateNarrative(IBaseResource theResource) {
+	public boolean generateNarrative(IBaseResource theResource) {
 		Optional<INarrativeTemplate> templateOpt = getTemplateForElement(theResource);
-		templateOpt.ifPresent(t -> applyTemplate(t, theResource));
+		if (templateOpt.isPresent()) {
+			return applyTemplate(templateOpt.get(), theResource);
+		} else {
+			return false;
+		}
 	}
 
 	private Optional<INarrativeTemplate> getTemplateForElement(IBase theElement) {
 		return myManifest.getTemplateByElement(getStyle(), theElement);
 	}
 
-	private void applyTemplate(INarrativeTemplate theTemplate, IBaseResource theResource) {
+	private boolean applyTemplate(INarrativeTemplate theTemplate, IBaseResource theResource) {
 		if (templateDoesntApplyToResourceProfiles(theTemplate, theResource)) {
-			return;
+			return false;
 		}
 
+		boolean retVal = false;
 		String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
 		String contextPath = defaultIfEmpty(theTemplate.getContextPath(), resourceName);
 
@@ -102,12 +111,14 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 				try {
 					nextTargetNarrative.setDivAsString(narrative);
 					nextTargetNarrative.setStatusAsString("generated");
+					retVal = true;
 				} catch (Exception e) {
 					throw new InternalErrorException(e);
 				}
 			}
 
 		}
+		return retVal;
 	}
 
 	protected abstract String applyTemplate(INarrativeTemplate theTemplate, IBase theTargetContext);
@@ -134,7 +145,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 
 	protected abstract TemplateTypeEnum getStyle();
 
-	static String cleanWhitespace(String theResult) {
+	public static String cleanWhitespace(String theResult) {
 		StringBuilder b = new StringBuilder();
 		boolean inWhitespace = false;
 		boolean betweenTags = false;

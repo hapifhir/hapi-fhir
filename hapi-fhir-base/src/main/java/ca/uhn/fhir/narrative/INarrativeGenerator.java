@@ -24,6 +24,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface INarrativeGenerator {
 
-	void generateNarrative(IBaseResource theResource);
+	/**
+	 * Generate any narratives for the given resource that have applicable
+	 * templates, and populates the appropriate field(s). This almost always means
+	 * the <code>Resource.text.narrative</code> field, but for some resource types
+	 * it can mean other fields (e.g. <code>Composition.</code>
+	 *
+	 * @return Returns <code>true</code> if a narrative was actually generated
+	 */
+	boolean generateNarrative(IBaseResource theResource);
 
 }

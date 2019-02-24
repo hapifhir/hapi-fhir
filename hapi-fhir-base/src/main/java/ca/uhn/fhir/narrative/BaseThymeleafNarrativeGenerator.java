@@ -39,11 +39,12 @@ public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrative
 	}
 
 	@Override
-	public void generateNarrative(IBaseResource theResource) {
+	public boolean generateNarrative(IBaseResource theResource) {
 		if (!myInitialized) {
 			initialize();
 		}
 		super.generateNarrative(theResource);
+		return false;
 	}
 
 	protected abstract List<String> getPropertyFile();
