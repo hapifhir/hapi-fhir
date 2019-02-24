@@ -1,6 +1,6 @@
 package ca.uhn.fhir.narrative2;
 
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -20,10 +20,12 @@ package ca.uhn.fhir.narrative2;
  * #L%
  */
 
+import ca.uhn.fhir.narrative.INarrativeGenerator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-public interface INarrativeGenerator {
-
-	void generateNarrative(IBaseResource theResource);
-
+public class NullNarrativeGenerator implements INarrativeGenerator {
+	@Override
+	public void generateNarrative(IBaseResource theResource) {
+		// NOP
+	}
 }

@@ -1,12 +1,34 @@
 package ca.uhn.fhir.narrative2;
 
+/*-
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2019 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,34 +41,95 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	private static final Logger ourLog = LoggerFactory.getLogger(NarrativeTemplateManifest.class);
 
 	private final Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> myStyleToResourceTypeToTemplate;
+	private final Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> myStyleToDatatypeToTemplate;
 	private final Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> myStyleToNameToTemplate;
+	private final FhirContext myCtx;
+	private final int myTemplateCount;
 
-	public NarrativeTemplateManifest(String thePropertyFilePath) throws IOException {
-		Collection<NarrativeTemplate> templates = loadProperties(thePropertyFilePath);
+	private NarrativeTemplateManifest(FhirContext theFhirContext, Collection<NarrativeTemplate> theTemplates) {
+		myCtx = theFhirContext;
 		Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> styleToResourceTypeToTemplate = new HashMap<>();
+		Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> styleToDatatypeToTemplate = new HashMap<>();
 		Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> styleToNameToTemplate = new HashMap<>();
 
-		for (NarrativeTemplate nextTemplate : templates) {
+		for (NarrativeTemplate nextTemplate : theTemplates) {
 			Map<String, NarrativeTemplate> resourceTypeToTemplate = styleToResourceTypeToTemplate.computeIfAbsent(nextTemplate.getTemplateType(), t -> new HashMap<>());
+			Map<String, NarrativeTemplate> datatypeToTemplate = styleToDatatypeToTemplate.computeIfAbsent(nextTemplate.getTemplateType(), t -> new HashMap<>());
 			Map<String, NarrativeTemplate> nameToTemplate = styleToNameToTemplate.computeIfAbsent(nextTemplate.getTemplateType(), t -> new HashMap<>());
 			nameToTemplate.put(nextTemplate.getTemplateName(), nextTemplate);
 			for (String nextResourceType : nextTemplate.getAppliesToResourceTypes()) {
-				resourceTypeToTemplate.put(nextResourceType, nextTemplate);
+				resourceTypeToTemplate.put(nextResourceType.toUpperCase(), nextTemplate);
+			}
+			for (String nextDataType : nextTemplate.getAppliesToDataTypes()) {
+				datatypeToTemplate.put(nextDataType.toUpperCase(), nextTemplate);
 			}
 		}
 
+		myTemplateCount = theTemplates.size();
 		myStyleToNameToTemplate = makeImmutable(styleToNameToTemplate);
 		myStyleToResourceTypeToTemplate = makeImmutable(styleToResourceTypeToTemplate);
+		myStyleToDatatypeToTemplate = makeImmutable(styleToDatatypeToTemplate);
 	}
 
-	private Collection<NarrativeTemplate> loadProperties(String propFileName) throws IOException {
-		ourLog.debug("Loading narrative properties file: {}", propFileName);
+	public int getNamedTemplateCount() {
+		return myTemplateCount;
+	}
+
+	@Override
+	public Optional<INarrativeTemplate> getTemplateByResourceName(TemplateTypeEnum theStyle, String theResourceName) {
+		return getFromMap(theStyle, theResourceName.toUpperCase(), myStyleToResourceTypeToTemplate);
+	}
+
+	@Override
+	public Optional<INarrativeTemplate> getTemplateByName(TemplateTypeEnum theStyle, String theName) {
+		return getFromMap(theStyle, theName, myStyleToNameToTemplate);
+	}
+
+	@Override
+	public Optional<INarrativeTemplate> getTemplateByElement(TemplateTypeEnum theStyle, IBase theElement) {
+		if (theElement instanceof IBaseResource) {
+			String resourceName = myCtx.getResourceDefinition((IBaseResource) theElement).getName();
+			return getTemplateByResourceName(theStyle, resourceName);
+		} else {
+			String datatypeName = myCtx.getElementDefinition(theElement.getClass()).getName();
+			return getFromMap(theStyle, datatypeName.toUpperCase(), myStyleToDatatypeToTemplate);
+		}
+	}
+
+	public static NarrativeTemplateManifest forManifestFileLocation(FhirContext theFhirContext, String... thePropertyFilePaths) throws IOException {
+		return forManifestFileLocation(theFhirContext, Arrays.asList(thePropertyFilePaths));
+	}
+
+	public static NarrativeTemplateManifest forManifestFileLocation(FhirContext theFhirContext, Collection<String> thePropertyFilePaths) throws IOException {
+		ourLog.debug("Loading narrative properties file(s): {}", thePropertyFilePaths);
+
+		List<String> manifestFileContents = new ArrayList<>(thePropertyFilePaths.size());
+		for (String next : thePropertyFilePaths) {
+			String resource = loadResource(next);
+			manifestFileContents.add(resource);
+		}
+
+		return forManifestFileContents(theFhirContext, manifestFileContents);
+	}
+
+	public static NarrativeTemplateManifest forManifestFileContents(FhirContext theFhirContext, String... theResources) throws IOException {
+		return forManifestFileContents(theFhirContext, Arrays.asList(theResources));
+	}
+
+	public static NarrativeTemplateManifest forManifestFileContents(FhirContext theFhirContext, Collection<String> theResources) throws IOException {
+		List<NarrativeTemplate> templates = new ArrayList<>();
+		for (String next : theResources) {
+			templates.addAll(loadProperties(next));
+		}
+		return new NarrativeTemplateManifest(theFhirContext, templates);
+	}
+
+	private static Collection<NarrativeTemplate> loadProperties(String theManifestText) throws IOException {
 		Map<String, NarrativeTemplate> nameToTemplate = new HashMap<>();
 
 		Properties file = new Properties();
 
-		String resource = loadResource(propFileName);
-		file.load(new StringReader(resource));
+		file.load(new StringReader(theManifestText));
 		for (Object nextKeyObj : file.keySet()) {
 			String nextKey = (String) nextKeyObj;
 			Validate.isTrue(StringUtils.countMatches(nextKey, ".") == 1, "Invalid narrative property file key: %s", nextKey);
@@ -55,6 +138,8 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 
 			NarrativeTemplate nextTemplate = nameToTemplate.computeIfAbsent(name, t -> new NarrativeTemplate().setTemplateName(name));
 
+			Validate.isTrue(!nextKey.endsWith(".class"), "Narrative manifest does not support specifying templates by class name - Use \"[name].resourceType=[resourceType]\" instead");
+
 			if (nextKey.endsWith(".profile")) {
 				String profile = file.getProperty(nextKey);
 				if (isNotBlank(profile)) {
@@ -62,16 +147,25 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 				}
 			} else if (nextKey.endsWith(".resourceType")) {
 				String resourceType = file.getProperty(nextKey);
-				if (isNotBlank(resourceType)) {
-					nextTemplate.addAppliesToResourceType(resourceType);
-				}
+				Arrays
+					.stream(resourceType.split(","))
+					.map(t -> t.trim())
+					.filter(t -> isNotBlank(t))
+					.forEach(t -> nextTemplate.addAppliesToResourceType(t));
+			} else if (nextKey.endsWith(".dataType")) {
+				String dataType = file.getProperty(nextKey);
+				Arrays
+					.stream(dataType.split(","))
+					.map(t -> t.trim())
+					.filter(t -> isNotBlank(t))
+					.forEach(t -> nextTemplate.addAppliesToDatatype(t));
 			} else if (nextKey.endsWith(".class")) {
 				String className = file.getProperty(nextKey);
 				Class<? extends IBase> clazz;
 				try {
 					clazz = (Class<? extends IBase>) Class.forName(className);
 				} catch (ClassNotFoundException e) {
-					ourLog.debug("Unknown datatype class '{}' identified in narrative file {}", name, propFileName);
+					ourLog.debug("Unknown datatype class '{}' identified in manifest", name);
 					clazz = null;
 				}
 				if (clazz != null) {
@@ -99,16 +193,6 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		}
 
 		return nameToTemplate.values();
-	}
-
-	@Override
-	public Optional<INarrativeTemplate> getTemplateByResourceName(TemplateTypeEnum theStyle, String theResourceName) {
-		return getFromMap(theStyle, theResourceName, myStyleToResourceTypeToTemplate);
-	}
-
-	@Override
-	public Optional<INarrativeTemplate> getTemplateByName(TemplateTypeEnum theStyle, String theName) {
-		return getFromMap(theStyle, theName, myStyleToNameToTemplate);
 	}
 
 	static String loadResource(String name) throws IOException {

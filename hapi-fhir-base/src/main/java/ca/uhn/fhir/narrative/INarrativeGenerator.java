@@ -21,12 +21,9 @@ package ca.uhn.fhir.narrative;
  */
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.INarrative;
-
-import ca.uhn.fhir.context.FhirContext;
 
 public interface INarrativeGenerator {
 
-	void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative);
+	void generateNarrative(IBaseResource theResource);
 
 }

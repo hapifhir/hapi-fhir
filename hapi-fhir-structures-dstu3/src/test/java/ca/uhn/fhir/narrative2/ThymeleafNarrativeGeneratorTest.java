@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class ThymeleafNarrativeGeneratorTest {
@@ -19,6 +20,8 @@ public class ThymeleafNarrativeGeneratorTest {
 	@Test
 	public void testGenerateCompositionWithContextPath() throws IOException {
 		DiagnosticReport dr1 = new DiagnosticReport();
+		dr1.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+		dr1.setIssuedElement(new InstantType("2019-01-01T12:12:12-05:00"));
 		dr1.getCode().getCodingFirstRep().setDisplay("Complete Blood Count");
 
 		Observation obs1 = new Observation();
@@ -54,7 +57,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ref.setReference("DiagnosticReport/1").setResource(dr1);
 		sect.getEntry().add(ref);
 
-		NarrativeTemplateManifest manifest = new NarrativeTemplateManifest("classpath:narrative2/narratives.properties");
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(myCtx, "classpath:narrative2/narratives.properties");
 		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
 		gen.setManifest(manifest);
 		gen.setFhirContext(myCtx);
@@ -69,4 +72,11 @@ public class ThymeleafNarrativeGeneratorTest {
 		narrative = composition.getSection().get(1).getText().getDiv().getValueAsString();
 		ourLog.info("Narrative:\n{}", narrative);
 	}
+
+	@Test
+	public void testTemplateCount() throws IOException {
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(myCtx, "classpath:narrative2/narratives.properties");
+		assertEquals(4, manifest.getNamedTemplateCount());
+	}
+
 }
