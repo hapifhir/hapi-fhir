@@ -2351,6 +2351,31 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 
 	@Test
+	public void testSearchWithDateRange() {
+		// https://fhir-nshx.fmcna.com/STU3/fhirapi/ProcedureRequest?category=EVAL&_include=*&_lastUpdated=ge2019-02-22T13:50:00&_lastUpdated=le2019-02-22T17:50:00
+
+		SearchParameterMap sp = new SearchParameterMap();
+		sp.setLoadSynchronous(true);
+		sp.setLastUpdated(new DateRangeParam()
+			.setUpperBound(new DateParam("le2019-02-22T17:50:00"))
+			.setLowerBound(new DateParam("ge2019-02-22T13:50:00")));
+		IBundleProvider retrieved = myMedicationRequestDao.search(sp);
+
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, true))
+			.collect(Collectors.toList());
+
+		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
+
+		String searchQuery = queries.get(0);
+		assertEquals(searchQuery, 3, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
+		assertEquals(searchQuery, 5, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
+	}
+
+
+	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");
