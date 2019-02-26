@@ -912,7 +912,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.afterPropertiesSet();
 				txTemplate.execute(t -> {
-					List<Long> previouslyAddedResourcePids = mySearchResultDao.findWithSearchUuid(getSearch());
+					List<Long> previouslyAddedResourcePids = mySearchResultDao.findWithSearchUuidOrderIndependent(getSearch());
 					ourLog.debug("Have {} previously added IDs in search: {}", previouslyAddedResourcePids.size(), getSearch().getUuid());
 					setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
 					return null;

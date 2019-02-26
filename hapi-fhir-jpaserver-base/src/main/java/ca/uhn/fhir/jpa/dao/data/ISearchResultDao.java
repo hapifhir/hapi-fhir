@@ -39,8 +39,8 @@ public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
 	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
 	Page<Long> findWithSearchUuid(@Param("search") Search theSearch, Pageable thePage);
 
-	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
-	List<Long> findWithSearchUuid(@Param("search") Search theSearch);
+	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search")
+	List<Long> findWithSearchUuidOrderIndependent(@Param("search") Search theSearch);
 
 	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
 	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
