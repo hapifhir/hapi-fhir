@@ -601,7 +601,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 					synchronized (mySyncedPids) {
 						int numSyncedThisPass = myUnsyncedPids.size();
-						ourLog.info("Syncing {} search results", numSyncedThisPass);
+						ourLog.info("Syncing {} search results - Have more: {}", numSyncedThisPass, theResultIter.hasNext());
 						mySyncedPids.addAll(myUnsyncedPids);
 						myUnsyncedPids.clear();
 
@@ -610,7 +610,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							int loadedCountThisPass = myCountSaved - theResultIter.getSkippedCount();
 
 							ourLog.info("MaxToFetch[{}], LoadedThisPass[{} = {}-{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, loadedCountThisPass,myCountSaved,theResultIter.getSkippedCount(), myAdditionalPrefetchThresholdsRemaining);
-							if (myMaxResultsToFetch != null && myCountSaved < myMaxResultsToFetch) {
+							if (myMaxResultsToFetch != null && myCountSaved < myMaxResultsToFetch && theResultIter.getSkippedCount() == 0) {
 								ourLog.info("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSaved);

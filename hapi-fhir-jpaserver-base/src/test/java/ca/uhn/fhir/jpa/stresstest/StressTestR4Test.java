@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.jpa.config.UnregisterScheduledProcessor;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
@@ -31,8 +33,15 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.contains;
+import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -45,6 +54,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
 	private RequestValidatingInterceptor myRequestValidatingInterceptor;
+	@Autowired
+	private IPagingProvider myPagingProvider;
 
 	@Override
 	@After
@@ -52,6 +63,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		super.after();
 
 		ourRestServer.unregisterInterceptor(myRequestValidatingInterceptor);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
 	}
 
 	@Override
@@ -65,18 +78,19 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myRequestValidatingInterceptor.addValidatorModule(module);
 	}
 
-
 	@Test
 	public void testPageThroughLotsOfPages() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
 		Bundle bundle = new Bundle();
 
 		DiagnosticReport dr = new DiagnosticReport();
 		dr.setId(IdType.newRandomUuid());
 		bundle.addEntry().setFullUrl(dr.getId()).setResource(dr).getRequest().setMethod(HTTPVerb.POST).setUrl("DiagnosticReport");
-		int count = 2400;
+		int count = 5000;
 		for (int i = 0; i < count; i++) {
 			Observation o = new Observation();
-			o.setId("A" + i);
+			o.setId("A" + leftPad(Integer.toString(i), 4, '0'));
 			o.setStatus(Observation.ObservationStatus.FINAL);
 			bundle.addEntry().setFullUrl(o.getId()).setResource(o).getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/A" + i);
 		}
@@ -124,26 +138,9 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			results = myPagingProvider.retrieveResultList(results.getUuid());
 		}
 		assertEquals(count - 1000, ids.size());
-		assertEquals(count- 1000, Sets.newHashSet(ids).size());
-
-		// Load from DAOs starting near the end
-//		ids = new ArrayList<>();
-//		map = new SearchParameterMap();
-//		map.add("status", new TokenOrListParam().add("final").add("bbb")); // add some noise to guarantee we don't reuse a previous query
-//		results = myObservationDao.search(map);
-//		for (int i = 2100; i <= count; i += 100) {
-//			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
-//			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
-//			results = myPagingProvider.retrieveResultList(results.getUuid());
-//		}
-//		assertEquals(count - 2100, ids.size());
-//		assertEquals(count- 2100, Sets.newHashSet(ids).size());
+		assertEquals(count - 1000, Sets.newHashSet(ids).size());
 
 	}
-
-
-	@Autowired
-	private IPagingProvider myPagingProvider;
 
 	@Test
 	public void testSearchWithLargeNumberOfIncludes() {
@@ -221,6 +218,42 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		validateNoErrors(tasks);
 
+	}
+
+	@Test
+	public void testMultithreadedCreateWithDuplicateClientAssignedIdsInTransaction() throws Exception {
+		ExecutorService executor = Executors.newFixedThreadPool(20);
+
+		List<Future> futures = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+
+			int finalI = i;
+
+			Runnable task = () -> {
+				Bundle input = new Bundle();
+				input.setType(BundleType.TRANSACTION);
+
+				Patient p = new Patient();
+				p.setId("A" + finalI);
+				p.addIdentifier().setValue("A"+finalI);
+				input.addEntry().setResource(p).setFullUrl("Patient/A" + finalI).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/A" + finalI);
+
+				try {
+					ourClient.transaction().withBundle(input).execute();
+				} catch (ResourceVersionConflictException e) {
+					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure"));
+				}
+			};
+			for (int j = 0; j < 2; j++) {
+				Future<?> future = executor.submit(task);
+				futures.add(future);
+			}
+
+		}
+
+		for (Future next : futures) {
+			next.get();
+		}
 	}
 
 	/**

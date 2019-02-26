@@ -2422,6 +2422,10 @@ public class SearchBuilder implements ISearchBuilder {
 				if (myMaxResultsToFetch == null) {
 					myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
 				}
+
+				// FIXME: remove
+				ourLog.info("Creating a query with maximum fetch: {}", myMaxResultsToFetch);
+
 				final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false);
 
 				Query<Long> hibernateQuery = (Query<Long>) query;
@@ -2454,10 +2458,13 @@ public class SearchBuilder implements ISearchBuilder {
 					while (myResultsIterator.hasNext()) {
 						Long next = myResultsIterator.next();
 						if (next != null)
+							// FIXME: remove
 							if (myPidSet.add(next)) {
+								ourLog.info("ADDING: {}", next);
 								myNext = next;
 								break;
 							} else {
+								ourLog.info("SKIPPING: {}", next);
 								mySkipCount++;
 							}
 					}
