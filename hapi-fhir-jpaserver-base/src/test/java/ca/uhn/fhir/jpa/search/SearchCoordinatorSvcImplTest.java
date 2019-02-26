@@ -449,6 +449,7 @@ public class SearchCoordinatorSvcImplTest {
 		public int getSkippedCount() {
 			return myWrap.getSkippedCount();
 		}
+
 	}
 
 	public static class ResultIterator extends BaseIterator<Long> implements IResultIterator {

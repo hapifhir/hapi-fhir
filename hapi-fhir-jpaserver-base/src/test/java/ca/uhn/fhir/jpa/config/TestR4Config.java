@@ -35,7 +35,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		 * starvation
 		 */
 		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
-		ourMaxThreads = 10; // FIXME: remove
 	}
 
 	private Exception myLastStackTrace;

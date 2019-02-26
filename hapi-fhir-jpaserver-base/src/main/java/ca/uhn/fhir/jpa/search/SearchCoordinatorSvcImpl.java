@@ -585,9 +585,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					if (mySearch.getId() == null) {
 						doSaveSearch();
 					}
-					
+
 					// FIXME: remove set info to trace below
-					
+
 
 					List<SearchResult> resultsToSave = Lists.newArrayList();
 					for (Long nextPid : myUnsyncedPids) {
@@ -607,10 +607,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 						if (theResultIter.hasNext() == false) {
 							mySearch.setNumFound(myCountSaved);
-							int loadedCountThisPass = myCountSaved - theResultIter.getSkippedCount();
-
-							ourLog.info("MaxToFetch[{}], LoadedThisPass[{} = {}-{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, loadedCountThisPass,myCountSaved,theResultIter.getSkippedCount(), myAdditionalPrefetchThresholdsRemaining);
-							if (myMaxResultsToFetch != null && myCountSaved < myMaxResultsToFetch && theResultIter.getSkippedCount() == 0) {
+							int skippedCount = theResultIter.getSkippedCount();
+							ourLog.info("MaxToFetch[{}], CountSaved[{}] SkippedCount[{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, myCountSaved, skippedCount, myAdditionalPrefetchThresholdsRemaining);
+							if (myMaxResultsToFetch != null && myCountSaved < myMaxResultsToFetch) {
 								ourLog.info("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSaved);
@@ -858,10 +857,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 */
 			IResultIterator resultIterator = sb.createQuery(myParams, mySearch.getUuid());
 			assert (resultIterator != null);
-
-			// FIXME: remove
-			ourLog.info("*** ABOUT TO SEARCH: {}", resultIterator);
-
 
 			/*
 			 * The following loop actually loads the PIDs of the resources

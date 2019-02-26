@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -105,6 +105,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static final List<Long> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
+	private static final int maxLoad = 800;
 	private static Long NO_MORE = -1L;
 	private static HandlerTypeEnum ourLastHandlerMechanismForUnitTest;
 	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
@@ -112,15 +113,14 @@ public class SearchBuilder implements ISearchBuilder {
 	private static boolean ourTrackHandlersForUnitTest;
 	private final boolean myDontUseHashesForSearch;
 	private final DaoConfig myDaoConfig;
-
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
 	@Autowired
 	private IResourceSearchViewDao myResourceSearchViewDao;
 	@Autowired
 	private FhirContext myContext;
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
 	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired(required = false)
@@ -137,7 +137,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
@@ -1966,8 +1965,6 @@ public class SearchBuilder implements ISearchBuilder {
 		return tagMap;
 	}
 
-	private static final int maxLoad = 800;
-
 	@Override
 	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theIncludedPids, boolean theForHistoryOperation,
 											 EntityManager entityManager, FhirContext context, IDao theDao) {
@@ -2319,6 +2316,29 @@ public class SearchBuilder implements ISearchBuilder {
 		return qp;
 	}
 
+	private Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
+																	  String theResourceType) {
+		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
+		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+		List<String> path = param.getPathsSplit();
+
+		/*
+		 * SearchParameters can declare paths on multiple resources
+		 * types. Here we only want the ones that actually apply.
+		 */
+		path = new ArrayList<>(path);
+
+		for (int i = 0; i < path.size(); i++) {
+			String nextPath = trim(path.get(i));
+			if (!nextPath.contains(theResourceType + ".")) {
+				path.remove(i);
+				i--;
+			}
+		}
+
+		return theFrom.get("mySourcePath").in(path);
+	}
+
 	public enum HandlerTypeEnum {
 		UNIQUE_INDEX, STANDARD_QUERY
 	}
@@ -2423,9 +2443,6 @@ public class SearchBuilder implements ISearchBuilder {
 					myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
 				}
 
-				// FIXME: remove
-				ourLog.info("Creating a query with maximum fetch: {}", myMaxResultsToFetch);
-
 				final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false);
 
 				Query<Long> hibernateQuery = (Query<Long>) query;
@@ -2458,13 +2475,10 @@ public class SearchBuilder implements ISearchBuilder {
 					while (myResultsIterator.hasNext()) {
 						Long next = myResultsIterator.next();
 						if (next != null)
-							// FIXME: remove
 							if (myPidSet.add(next)) {
-								ourLog.info("ADDING: {}", next);
 								myNext = next;
 								break;
 							} else {
-								ourLog.info("SKIPPING: {}", next);
 								mySkipCount++;
 							}
 					}
@@ -2528,6 +2542,7 @@ public class SearchBuilder implements ISearchBuilder {
 		public int getSkippedCount() {
 			return mySkipCount;
 		}
+
 	}
 
 	private class UniqueIndexIterator implements IResultIterator {
@@ -2569,6 +2584,7 @@ public class SearchBuilder implements ISearchBuilder {
 		public int getSkippedCount() {
 			return 0;
 		}
+
 	}
 
 	private static class CountQueryIterator implements Iterator<Long> {
@@ -2678,29 +2694,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static String createLeftMatchLikeExpression(String likeExpression) {
 		return likeExpression.replace("%", "[%]") + "%";
-	}
-
-	private Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
-																				String theResourceType) {
-		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
-		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
-		List<String> path = param.getPathsSplit();
-
-		/*
-		 * SearchParameters can declare paths on multiple resources
-		 * types. Here we only want the ones that actually apply.
-		 */
-		path = new ArrayList<>(path);
-
-		for (int i = 0; i < path.size(); i++) {
-			String nextPath = trim(path.get(i));
-			if (!nextPath.contains(theResourceType + ".")) {
-				path.remove(i);
-				i--;
-			}
-		}
-
-		return theFrom.get("mySourcePath").in(path);
 	}
 
 	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {
