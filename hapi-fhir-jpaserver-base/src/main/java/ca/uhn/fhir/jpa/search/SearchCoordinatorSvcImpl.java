@@ -585,6 +585,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					if (mySearch.getId() == null) {
 						doSaveSearch();
 					}
+					
+					// FIXME: remove set info to trace below
+					
 
 					List<SearchResult> resultsToSave = Lists.newArrayList();
 					for (Long nextPid : myUnsyncedPids) {
@@ -592,24 +595,27 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						nextResult.setResourcePid(nextPid);
 						nextResult.setOrder(myCountSaved++);
 						resultsToSave.add(nextResult);
-						ourLog.trace("Saving ORDER[{}] Resource {}", nextResult.getOrder(), nextResult.getResourcePid());
+						ourLog.info("Saving ORDER[{}] Resource {}", nextResult.getOrder(), nextResult.getResourcePid());
 					}
 					mySearchResultDao.saveAll(resultsToSave);
 
 					synchronized (mySyncedPids) {
 						int numSyncedThisPass = myUnsyncedPids.size();
-						ourLog.trace("Syncing {} search results", numSyncedThisPass);
+						ourLog.info("Syncing {} search results", numSyncedThisPass);
 						mySyncedPids.addAll(myUnsyncedPids);
 						myUnsyncedPids.clear();
 
 						if (theResultIter.hasNext() == false) {
 							mySearch.setNumFound(myCountSaved);
-							int loadedCountThisPass = theResultIter.getSkippedCount() + myCountSaved;
-							if (myMaxResultsToFetch != null && loadedCountThisPass < myMaxResultsToFetch) {
+							int loadedCountThisPass = myCountSaved - theResultIter.getSkippedCount();
+
+							ourLog.info("MaxToFetch[{}], LoadedThisPass[{} = {}-{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, loadedCountThisPass,myCountSaved,theResultIter.getSkippedCount(), myAdditionalPrefetchThresholdsRemaining);
+							if (myMaxResultsToFetch != null && myCountSaved < myMaxResultsToFetch) {
+								ourLog.info("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSaved);
 							} else if (myAdditionalPrefetchThresholdsRemaining) {
-								ourLog.trace("Setting search status to PASSCMPLET");
+								ourLog.info("Setting search status to PASSCMPLET");
 								mySearch.setStatus(SearchStatusEnum.PASSCMPLET);
 								mySearch.setSearchParameterMap(myParams);
 							} else {
@@ -850,8 +856,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * Construct the SQL query we'll be sending to the database
 			 */
-			IResultIterator theResultIterator = sb.createQuery(myParams, mySearch.getUuid());
-			assert (theResultIterator != null);
+			IResultIterator resultIterator = sb.createQuery(myParams, mySearch.getUuid());
+			assert (resultIterator != null);
+
+			// FIXME: remove
+			ourLog.info("*** ABOUT TO SEARCH: {}", resultIterator);
+
 
 			/*
 			 * The following loop actually loads the PIDs of the resources
@@ -859,8 +869,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * every X results, we commit to the HFJ_SEARCH table.
 			 */
 			int syncSize = mySyncSize;
-			while (theResultIterator.hasNext()) {
-				myUnsyncedPids.add(theResultIterator.next());
+			while (resultIterator.hasNext()) {
+				myUnsyncedPids.add(resultIterator.next());
 				myCountFetchedDuringThisPass++;
 
 				boolean shouldSync = myUnsyncedPids.size() >= syncSize;
@@ -879,7 +889,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				Validate.isTrue(isNotAborted(), "Abort has been requested");
 
 				if (shouldSync) {
-					saveUnsynced(theResultIterator);
+					saveUnsynced(resultIterator);
 				}
 
 				if (myLoadingThrottleForUnitTests != null) {
@@ -895,7 +905,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// If no abort was requested, bail out
 			Validate.isTrue(isNotAborted(), "Abort has been requested");
 
-			saveUnsynced(theResultIterator);
+			saveUnsynced(resultIterator);
 		}
 	}
 

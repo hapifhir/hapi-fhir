@@ -506,8 +506,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			 */
 			for (int i = 0; i < theEntries.size(); i++) {
 
-				if (i % 100 == 0) {
-					ourLog.debug("Processed {} non-GET entries out of {}", i, theEntries.size());
+				if (i % 250 == 0) {
+					ourLog.info("Processed {} non-GET entries out of {} in transaction", i, theEntries.size());
 				}
 
 				BUNDLEENTRY nextReqEntry = theEntries.get(i);
@@ -679,7 +679,13 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			FhirTerser terser = myContext.newTerser();
 			theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
+			int i = 0;
 			for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
+
+				if (i++ % 250 == 0) {
+					ourLog.info("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.values().size());
+				}
+
 				IBaseResource nextResource = nextOutcome.getResource();
 				if (nextResource == null) {
 					continue;

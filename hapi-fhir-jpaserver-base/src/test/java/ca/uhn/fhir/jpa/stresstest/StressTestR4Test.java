@@ -1,32 +1,46 @@
 package ca.uhn.fhir.jpa.stresstest;
 
+import ca.uhn.fhir.jpa.config.UnregisterScheduledProcessor;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+@TestPropertySource(properties = {
+	// Since scheduled tasks can cause searches, which messes up the
+	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED + "=true"
+})
 public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
@@ -50,6 +64,86 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		module.setValidationSupport(myValidationSupport);
 		myRequestValidatingInterceptor.addValidatorModule(module);
 	}
+
+
+	@Test
+	public void testPageThroughLotsOfPages() {
+		Bundle bundle = new Bundle();
+
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setId(IdType.newRandomUuid());
+		bundle.addEntry().setFullUrl(dr.getId()).setResource(dr).getRequest().setMethod(HTTPVerb.POST).setUrl("DiagnosticReport");
+		int count = 2400;
+		for (int i = 0; i < count; i++) {
+			Observation o = new Observation();
+			o.setId("A" + i);
+			o.setStatus(Observation.ObservationStatus.FINAL);
+			bundle.addEntry().setFullUrl(o.getId()).setResource(o).getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/A" + i);
+		}
+		StopWatch sw = new StopWatch();
+		ourLog.info("Saving {} resources", bundle.getEntry().size());
+		mySystemDao.transaction(null, bundle);
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+
+		// Load from DAOs
+		List<String> ids = new ArrayList<>();
+		Bundle resultBundle = ourClient.search().forResource("Observation").count(100).returnBundle(Bundle.class).execute();
+		int pageIndex = 0;
+		while (true) {
+			ids.addAll(resultBundle.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList()));
+			if (resultBundle.getLink("next") == null) {
+				break;
+			}
+			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
+			resultBundle = ourClient.loadPage().next(resultBundle).execute();
+		}
+		assertEquals(count, ids.size());
+		assertEquals(count, Sets.newHashSet(ids).size());
+
+		// Load from DAOs
+		ids = new ArrayList<>();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("status", new TokenOrListParam().add("final").add("aaa")); // add some noise to guarantee we don't reuse a previous query
+		IBundleProvider results = myObservationDao.search(map);
+		for (int i = 0; i <= count; i += 100) {
+			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
+			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
+			results = myPagingProvider.retrieveResultList(results.getUuid());
+		}
+		assertEquals(count, ids.size());
+		assertEquals(count, Sets.newHashSet(ids).size());
+
+		// Load from DAOs starting half way through
+		ids = new ArrayList<>();
+		map = new SearchParameterMap();
+		map.add("status", new TokenOrListParam().add("final").add("aaa")); // add some noise to guarantee we don't reuse a previous query
+		results = myObservationDao.search(map);
+		for (int i = 1000; i <= count; i += 100) {
+			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
+			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
+			results = myPagingProvider.retrieveResultList(results.getUuid());
+		}
+		assertEquals(count - 1000, ids.size());
+		assertEquals(count- 1000, Sets.newHashSet(ids).size());
+
+		// Load from DAOs starting near the end
+//		ids = new ArrayList<>();
+//		map = new SearchParameterMap();
+//		map.add("status", new TokenOrListParam().add("final").add("bbb")); // add some noise to guarantee we don't reuse a previous query
+//		results = myObservationDao.search(map);
+//		for (int i = 2100; i <= count; i += 100) {
+//			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
+//			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
+//			results = myPagingProvider.retrieveResultList(results.getUuid());
+//		}
+//		assertEquals(count - 2100, ids.size());
+//		assertEquals(count- 2100, Sets.newHashSet(ids).size());
+
+	}
+
+
+	@Autowired
+	private IPagingProvider myPagingProvider;
 
 	@Test
 	public void testSearchWithLargeNumberOfIncludes() {
@@ -98,7 +192,6 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		resultsAndIncludes = results.getResources(0, 999999);
 		assertEquals(1202, resultsAndIncludes.size());
 	}
-
 
 
 	@Test
@@ -191,11 +284,6 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Loaded {} searches", total);
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	public class BaseTask extends Thread {
 		protected Throwable myError;
 		protected int myTaskCount = 0;
@@ -278,6 +366,11 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 				}
 			}
 		}
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 

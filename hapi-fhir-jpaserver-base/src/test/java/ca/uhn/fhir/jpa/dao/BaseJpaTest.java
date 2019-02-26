@@ -316,6 +316,14 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
+	protected List<String> toUnqualifiedVersionlessIdValues(List<? extends IBaseResource> theFound) {
+		List<String> retVal = new ArrayList<>();
+		for (IBaseResource next : theFound) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		return retVal;
+	}
+
 	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.dstu3.model.Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
