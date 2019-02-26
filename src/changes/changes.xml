@@ -48,6 +48,11 @@
 				using the string name of the datatype (e.g. "dateTime") in order to help
 				building Parameters resources in a version-independent way.
 			</action>
+			<action type="fix">
+				When performing a search using the JPA server, if a search returned between 1500
+				and 2000 results, a query for the final page of results would timeout due to
+				a page calculation error. This has been corrected.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
