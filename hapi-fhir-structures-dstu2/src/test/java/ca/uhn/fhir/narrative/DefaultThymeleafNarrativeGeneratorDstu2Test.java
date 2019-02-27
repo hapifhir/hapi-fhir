@@ -17,13 +17,10 @@ import org.junit.Test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.NarrativeDt;
-import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -31,7 +28,6 @@ import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.DiagnosticReportStatusEnum;
-import ca.uhn.fhir.model.dstu2.valueset.EncounterClassEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MedicationOrderStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -69,7 +65,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		value.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
 
-		myGen.generateNarrative(value);
+		myGen.populateResourceNarrative(value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
@@ -81,7 +77,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		Parameters value = new Parameters();
 		value.setId("123");
 
-		myGen.generateNarrative(value);
+		myGen.populateResourceNarrative(value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, not(containsString("narrative")));
@@ -103,7 +99,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
 
-		myGen.generateNarrative(oo);
+		myGen.populateResourceNarrative(oo);
 		String output = oo.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -141,7 +137,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 			value.addResult().setResource(obs);
 		}
 
-		myGen.generateNarrative(value);
+		myGen.populateResourceNarrative(value);
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -166,7 +162,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		mp.setStatus(MedicationOrderStatusEnum.ACTIVE);
 		mp.setDateWritten(new DateTimeDt("2014-09-01"));
 
-		myGen.generateNarrative(mp);
+		myGen.populateResourceNarrative(mp);
 		String output = mp.getText().getDiv().getValueAsString();
 
 		assertTrue("Expected medication name of ciprofloaxin within narrative: " + output, output.indexOf("ciprofloaxin") > -1);
@@ -179,7 +175,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 
-		myGen.generateNarrative(med);
+		myGen.populateResourceNarrative(med);
 		String output = med.getText().getDiv().getValueAsString();
 		assertThat(output, containsString("ciproflaxin"));
 

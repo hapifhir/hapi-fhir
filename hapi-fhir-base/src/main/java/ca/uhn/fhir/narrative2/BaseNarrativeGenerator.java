@@ -44,10 +44,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 
 	private INarrativeTemplateManifest myManifest;
-	private FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
-	public BaseNarrativeGenerator() {
-		super();
+	public BaseNarrativeGenerator(FhirContext theFhirContext) {
+		Validate.notNull(theFhirContext, "theFhirContext must not be null");
+		myFhirContext = theFhirContext;
 	}
 
 	public INarrativeTemplateManifest getManifest() {
@@ -59,17 +60,11 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 	}
 
 	public FhirContext getFhirContext() {
-		Validate.notNull(myFhirContext, "The FhirContext is not set on this Narrative Generator. Please call setFhirContext(FhirContext) to set this property before using the narrative generator.");
 		return myFhirContext;
 	}
 
-	public void setFhirContext(FhirContext theFhirContext) {
-		Validate.notNull(theFhirContext, "theFhirContext must not be null");
-		myFhirContext = theFhirContext;
-	}
-
 	@Override
-	public boolean generateNarrative(IBaseResource theResource) {
+	public boolean populateResourceNarrative(IBaseResource theResource) {
 		Optional<INarrativeTemplate> templateOpt = getTemplateForElement(theResource);
 		if (templateOpt.isPresent()) {
 			return applyTemplate(templateOpt.get(), theResource);
@@ -83,7 +78,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 	}
 
 	private boolean applyTemplate(INarrativeTemplate theTemplate, IBaseResource theResource) {
-		if (templateDoesntApplyToResourceProfiles(theTemplate, theResource)) {
+		if (templateDoesntApplyToResource(theTemplate, theResource)) {
 			return false;
 		}
 
@@ -91,20 +86,15 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		String resourceName = myFhirContext.getResourceDefinition(theResource).getName();
 		String contextPath = defaultIfEmpty(theTemplate.getContextPath(), resourceName);
 
-		List<IBase> targets = findTargets(theResource, contextPath);
+		// Narrative templates define a path within the resource that they apply to. Here, we're
+		// finding anywhere in the resource that gets a narrative
+		List<IBase> targets = findElementsInResourceRequiringNarratives(theResource, contextPath);
 		for (IBase nextTargetContext : targets) {
 
-			BaseRuntimeElementCompositeDefinition<?> targetElementDef = (BaseRuntimeElementCompositeDefinition<?>) getFhirContext().getElementDefinition(nextTargetContext.getClass());
-			BaseRuntimeChildDefinition targetTextChild = targetElementDef.getChildByName("text");
-			List<IBase> existing = targetTextChild.getAccessor().getValues(nextTargetContext);
-			INarrative nextTargetNarrative;
-			if (existing.isEmpty()) {
-				nextTargetNarrative = (INarrative) getFhirContext().getElementDefinition("narrative").newInstance();
-				targetTextChild.getMutator().addValue(nextTargetContext, nextTargetNarrative);
-			} else {
-				nextTargetNarrative = (INarrative) existing.get(0);
-			}
+			// Extract [element].text of type Narrative
+			INarrative nextTargetNarrative = getOrCreateNarrativeChildElement(nextTargetContext);
 
+			// Create the actual narrative text
 			String narrative = applyTemplate(theTemplate, nextTargetContext);
 			narrative = cleanWhitespace(narrative);
 
@@ -122,7 +112,21 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		return retVal;
 	}
 
-	private List<IBase> findTargets(IBaseResource theResource, String theContextPath) {
+	private INarrative getOrCreateNarrativeChildElement(IBase nextTargetContext) {
+		BaseRuntimeElementCompositeDefinition<?> targetElementDef = (BaseRuntimeElementCompositeDefinition<?>) getFhirContext().getElementDefinition(nextTargetContext.getClass());
+		BaseRuntimeChildDefinition targetTextChild = targetElementDef.getChildByName("text");
+		List<IBase> existing = targetTextChild.getAccessor().getValues(nextTargetContext);
+		INarrative nextTargetNarrative;
+		if (existing.isEmpty()) {
+			nextTargetNarrative = (INarrative) getFhirContext().getElementDefinition("narrative").newInstance();
+			targetTextChild.getMutator().addValue(nextTargetContext, nextTargetNarrative);
+		} else {
+			nextTargetNarrative = (INarrative) existing.get(0);
+		}
+		return nextTargetNarrative;
+	}
+
+	private List<IBase> findElementsInResourceRequiringNarratives(IBaseResource theResource, String theContextPath) {
 		if (myFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 			return Collections.singletonList(theResource);
 		}
@@ -132,7 +136,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 
 	protected abstract String applyTemplate(INarrativeTemplate theTemplate, IBase theTargetContext);
 
-	private boolean templateDoesntApplyToResourceProfiles(INarrativeTemplate theTemplate, IBaseResource theResource) {
+	private boolean templateDoesntApplyToResource(INarrativeTemplate theTemplate, IBaseResource theResource) {
 		boolean retVal = false;
 		if (theTemplate.getAppliesToProfiles() != null && !theTemplate.getAppliesToProfiles().isEmpty()) {
 			Set<String> resourceProfiles = theResource
@@ -154,6 +158,9 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 
 	protected abstract TemplateTypeEnum getStyle();
 
+	/**
+	 * Trims the superfluous whitespace out of an HTML block
+	 */
 	public static String cleanWhitespace(String theResult) {
 		StringBuilder b = new StringBuilder();
 		boolean inWhitespace = false;
@@ -171,10 +178,6 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 				lastNonWhitespaceCharWasTagEnd = true;
 				continue;
 			} else if (nextChar == '\n' || nextChar == '\r') {
-				// if (inWhitespace) {
-				// b.append(' ');
-				// inWhitespace = false;
-				// }
 				continue;
 			}
 

@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,7 +40,7 @@ public class NarrativeTemplate implements INarrativeTemplate {
 	private String myTemplateName;
 
 	public Set<String> getAppliesToDataTypes() {
-		return myAppliesToDataTypes;
+		return Collections.unmodifiableSet(myAppliesToDataTypes);
 	}
 
 	@Override
@@ -61,7 +62,7 @@ public class NarrativeTemplate implements INarrativeTemplate {
 
 	@Override
 	public Set<String> getAppliesToProfiles() {
-		return myAppliesToProfiles;
+		return Collections.unmodifiableSet(myAppliesToProfiles);
 	}
 
 	void addAppliesToProfile(String theAppliesToProfile) {
@@ -70,7 +71,7 @@ public class NarrativeTemplate implements INarrativeTemplate {
 
 	@Override
 	public Set<String> getAppliesToResourceTypes() {
-		return myAppliesToResourceTypes;
+		return Collections.unmodifiableSet(myAppliesToResourceTypes);
 	}
 
 	void addAppliesToResourceType(String theAppliesToResourceType) {
@@ -79,7 +80,7 @@ public class NarrativeTemplate implements INarrativeTemplate {
 
 	@Override
 	public Set<Class<? extends IBase>> getAppliesToResourceClasses() {
-		return myAppliesToResourceClasses;
+		return Collections.unmodifiableSet(myAppliesToResourceClasses);
 	}
 
 	void addAppliesToResourceClass(Class<? extends IBase> theAppliesToResourceClass) {

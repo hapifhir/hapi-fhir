@@ -345,6 +345,7 @@ public enum Pointcut {
 	 * is being returned to the HTTP stack for response. This is not a guarantee that the
 	 * client will ultimately see it, since filters/headers/etc may affect what
 	 * is returned but if a resource is loaded it is likely to be used.
+	 * Note also that caching may affect whether this pointcut is invoked.
 	 * </p>
 	 * <p>
 	 * Hooks will have access to the contents of the resource being returned

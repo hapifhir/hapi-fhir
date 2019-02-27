@@ -2352,10 +2352,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithDateRange() {
-		// https://fhir-nshx.fmcna.com/STU3/fhirapi/ProcedureRequest?category=EVAL&_include=*&_lastUpdated=ge2019-02-22T13:50:00&_lastUpdated=le2019-02-22T17:50:00
-
 		SearchParameterMap sp = new SearchParameterMap();
 		sp.setLoadSynchronous(true);
+		sp.add(MedicationRequest.SP_INTENT, new TokenParam("FOO", "BAR"));
 		sp.setLastUpdated(new DateRangeParam()
 			.setUpperBound(new DateParam("le2019-02-22T17:50:00"))
 			.setLowerBound(new DateParam("ge2019-02-22T13:50:00")));
@@ -2370,8 +2369,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
 
 		String searchQuery = queries.get(0);
-		assertEquals(searchQuery, 3, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
-		assertEquals(searchQuery, 5, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
+		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
+		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
+		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
 	}
 
 

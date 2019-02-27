@@ -20,6 +20,7 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative2.NarrativeTemplateManifest;
 import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -35,15 +36,16 @@ public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrative
 	/**
 	 * Constructor
 	 */
-	public BaseThymeleafNarrativeGenerator() {
+	public BaseThymeleafNarrativeGenerator(FhirContext theFhirContext) {
+		super(theFhirContext);
 	}
 
 	@Override
-	public boolean generateNarrative(IBaseResource theResource) {
+	public boolean populateResourceNarrative(IBaseResource theResource) {
 		if (!myInitialized) {
 			initialize();
 		}
-		super.generateNarrative(theResource);
+		super.populateResourceNarrative(theResource);
 		return false;
 	}
 

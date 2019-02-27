@@ -360,7 +360,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						narr = null;
 					}
 					if (narr != null && narr.isEmpty()) {
-						gen.generateNarrative(theResource);
+						gen.populateResourceNarrative(theResource);
 						if (!narr.isEmpty()) {
 							RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 							String childName = nextChild.getChildNameByDatatype(child.getDatatype());

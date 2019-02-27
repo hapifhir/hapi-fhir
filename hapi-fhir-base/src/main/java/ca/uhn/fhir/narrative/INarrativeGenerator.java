@@ -32,6 +32,6 @@ public interface INarrativeGenerator {
 	 *
 	 * @return Returns <code>true</code> if a narrative was actually generated
 	 */
-	boolean generateNarrative(IBaseResource theResource);
+	boolean populateResourceNarrative(IBaseResource theResource);
 
 }

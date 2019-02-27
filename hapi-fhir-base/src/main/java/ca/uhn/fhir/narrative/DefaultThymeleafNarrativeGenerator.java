@@ -33,7 +33,7 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	private boolean myUseHapiServerConformanceNarrative;
 
 	public DefaultThymeleafNarrativeGenerator(FhirContext theFhirContext) {
-		setFhirContext(theFhirContext);
+		super(theFhirContext);
 	}
 
 	@Override

@@ -20,6 +20,7 @@ package ca.uhn.fhir.narrative2;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.thymeleaf.IEngineConfiguration;
@@ -54,6 +55,13 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 
 	private IMessageResolver myMessageResolver;
 
+	/**
+	 * Constructor
+	 */
+	public ThymeleafNarrativeGenerator(FhirContext theFhirContext) {
+		super(theFhirContext);
+	}
+
 	private TemplateEngine getTemplateEngine() {
 		TemplateEngine engine = new TemplateEngine();
 		ProfileResourceResolver resolver = new ProfileResourceResolver();
@@ -85,12 +93,6 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 		context.setVariable("fhirVersion", getFhirContext().getVersion().getVersion().name());
 
 		String result = getTemplateEngine().process(theTemplate.getTemplateName(), context);
-
-//		if (myCleanWhitespace) {
-//			ourLog.trace("Pre-whitespace cleaning: ", result);
-//			result = cleanWhitespace(result);
-//			ourLog.trace("Post-whitespace cleaning: ", result);
-//		}
 
 		return result;
 	}

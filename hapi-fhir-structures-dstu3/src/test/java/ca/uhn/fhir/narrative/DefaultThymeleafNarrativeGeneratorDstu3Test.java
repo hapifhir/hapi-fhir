@@ -20,7 +20,6 @@ import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.MedicationRequest.MedicationRequestStatus;
-import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -49,7 +48,6 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 	public void before() {
 		myGen = new DefaultThymeleafNarrativeGenerator(ourCtx);
 		myGen.setUseHapiServerConformanceNarrative(true);
-		myGen.setFhirContext(ourCtx);
 
 		ourCtx.setNarrativeGenerator(myGen);
 	}
@@ -66,16 +64,14 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		Patient value = new Patient();
 
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
-		value.addName().setFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
-		//@formatter:off
+		value.addName().setFamily("blow").addGiven("joe").addGiven(null).addGiven("john");
 		value.addAddress()
 			.addLine("123 Fake Street").addLine("Unit 1")
 			.setCity("Toronto").setState("ON").setCountry("Canada");
-		//@formatter:on
 
 		value.setBirthDate(new Date());
 
-		myGen.generateNarrative(value);
+		myGen.populateResourceNarrative(value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
@@ -92,7 +88,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		Patient value = new Patient();
 
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
-		value.addName().setFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
+		value.addName().setFamily("blow").addGiven("joe").addGiven(null).addGiven("john");
 		//@formatter:off
 		value.addAddress()
 			.addLine("123 Fake Street").addLine("Unit 1")
@@ -118,7 +114,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 			}
 		});
 
-		customGen.generateNarrative(value);
+		customGen.populateResourceNarrative(value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("Some beautiful proze"));
@@ -134,7 +130,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		value.addResult().setReference("Observation/2");
 		value.addResult().setReference("Observation/3");
 
-		myGen.generateNarrative(value);
+		myGen.populateResourceNarrative(value);
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -162,7 +158,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		// ourLog.info(output);
 		// assertEquals("Operation Outcome (2 issues)", output);
 
-		myGen.generateNarrative(oo);
+		myGen.populateResourceNarrative(oo);
 		String output = oo.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -201,7 +197,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 			value.addResult().setResource(obs);
 		}
 
-		myGen.generateNarrative(value);
+		myGen.populateResourceNarrative(value);
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -221,7 +217,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		mp.setStatus(MedicationRequestStatus.ACTIVE);
 		mp.setAuthoredOnElement(new DateTimeType("2014-09-01"));
 
-		myGen.generateNarrative(mp);
+		myGen.populateResourceNarrative(mp);
 		String output = mp.getText().getDiv().getValueAsString();
 
 		assertTrue("Expected medication name of ciprofloaxin within narrative: "+output, output.contains("ciprofloaxin"));
@@ -234,7 +230,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 
-		myGen.generateNarrative(med);
+		myGen.populateResourceNarrative(med);
 
 		String output = med.getText().getDiv().getValueAsString();
 		assertThat(output, containsString("ciproflaxin"));

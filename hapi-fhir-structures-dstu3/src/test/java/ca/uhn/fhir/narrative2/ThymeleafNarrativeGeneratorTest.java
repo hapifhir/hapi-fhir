@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -58,11 +59,10 @@ public class ThymeleafNarrativeGeneratorTest {
 		sect.getEntry().add(ref);
 
 		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(myCtx, "classpath:narrative2/narratives.properties");
-		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
+		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator(myCtx);
 		gen.setManifest(manifest);
-		gen.setFhirContext(myCtx);
 
-		gen.generateNarrative(composition);
+		gen.populateResourceNarrative(composition);
 
 		// Firt narrative should be empty
 		String narrative = composition.getSection().get(0).getText().getDiv().getValueAsString();
@@ -71,6 +71,9 @@ public class ThymeleafNarrativeGeneratorTest {
 		// Second narrative should have details
 		narrative = composition.getSection().get(1).getText().getDiv().getValueAsString();
 		ourLog.info("Narrative:\n{}", narrative);
+
+		assertThat(narrative, containsString("<thead><tr><td>Name</td><td>Value</td>"));
+		assertThat(narrative, containsString("<td> 4.2 - 6.0 </td>"));
 	}
 
 	@Test

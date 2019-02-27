@@ -7,7 +7,6 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.composite.NarrativeDt;
 import ca.uhn.fhir.model.dstu2.resource.Practitioner;
 import ca.uhn.fhir.util.TestUtil;
 
@@ -36,7 +35,7 @@ public class CustomThymeleafNarrativeGeneratorDstu2Test {
 		p.addAddress().addLine("line1").addLine("line2");
 		p.getName().addFamily("fam1").addGiven("given");
 
-		gen.generateNarrative(p);
+		gen.populateResourceNarrative(p);
 
 		String actual = p.getText().getDiv().getValueAsString();
 		ourLog.info(actual);

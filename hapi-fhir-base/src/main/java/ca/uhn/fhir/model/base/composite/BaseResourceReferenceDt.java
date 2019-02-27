@@ -130,7 +130,7 @@ public abstract class BaseResourceReferenceDt extends BaseIdentifiableElement im
 	@Override
 	public BaseResourceReferenceDt setResource(IBaseResource theResource) {
 		myResource = theResource;
-		return null;
+		return this;
 	}
 
 	@Override
