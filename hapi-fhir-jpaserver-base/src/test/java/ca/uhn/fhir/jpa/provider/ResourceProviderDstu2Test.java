@@ -1057,17 +1057,15 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
 
-		//@formatter:off
 		Parameters response = ourClient
 			.operation()
 			.onInstance(ptId1)
 			.named("everything")
 			.withParameter(Parameters.class, Constants.PARAM_CONTENT, new StringDt("obsvalue1"))
 			.execute();
-		//@formatter:on
 
 		actual = toUnqualifiedVersionlessIds((ca.uhn.fhir.model.dstu2.resource.Bundle) response.getParameter().get(0).getResource());
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
+		assertThat(actual.toString(), actual, containsInAnyOrder(ptId1, obsId1, devId1));
 
 	}
 
@@ -2094,7 +2092,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IOUtils.closeQuietly(response.getEntity().getContent());
 		ourLog.info(resp);
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
-		matches = bundle.getTotal();
+		matches = bundle.getEntry().size();
 
 		assertThat(matches, greaterThan(0));
 	}
