@@ -586,9 +586,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						doSaveSearch();
 					}
 
-					// FIXME: remove set info to trace below
-
-
 					List<SearchResult> resultsToSave = Lists.newArrayList();
 					for (Long nextPid : myUnsyncedPids) {
 						SearchResult nextResult = new SearchResult(mySearch);
@@ -596,13 +593,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						nextResult.setOrder(myCountSaved++);
 						resultsToSave.add(nextResult);
 						int order = nextResult.getOrder();
-						ourLog.info("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
+						ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
 					}
 					mySearchResultDao.saveAll(resultsToSave);
 
 					synchronized (mySyncedPids) {
 						int numSyncedThisPass = myUnsyncedPids.size();
-						ourLog.info("Syncing {} search results - Have more: {}", numSyncedThisPass, theResultIter.hasNext());
+						ourLog.trace("Syncing {} search results - Have more: {}", numSyncedThisPass, theResultIter.hasNext());
 						mySyncedPids.addAll(myUnsyncedPids);
 						myUnsyncedPids.clear();
 
@@ -610,14 +607,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							mySearch.setNumFound(myCountSaved);
 							int skippedCount = theResultIter.getSkippedCount();
 							int totalFetched = skippedCount + myCountSaved;
-							ourLog.info("MaxToFetch[{}], CountSaved[{}] SkippedCount[{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, myCountSaved, skippedCount, myAdditionalPrefetchThresholdsRemaining);
+							ourLog.trace("MaxToFetch[{}], CountSaved[{}] SkippedCount[{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, myCountSaved, skippedCount, myAdditionalPrefetchThresholdsRemaining);
 
-							if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch/* && (resultsToSave.isEmpty() || skippedCount == 0)*/) {
-								ourLog.info("Setting search status to FINISHED");
+							if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch) {
+								ourLog.trace("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSaved);
 							} else if (myAdditionalPrefetchThresholdsRemaining) {
-								ourLog.info("Setting search status to PASSCMPLET");
+								ourLog.trace("Setting search status to PASSCMPLET");
 								mySearch.setStatus(SearchStatusEnum.PASSCMPLET);
 								mySearch.setSearchParameterMap(myParams);
 							} else {
@@ -673,9 +670,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		@Override
 		public Void call() {
 			StopWatch sw = new StopWatch();
-
-			// FIXME: remove
-			ourLog.info("Starting search task {}", this);
 
 			try {
 				// Create an initial search in the DB and give it an ID
