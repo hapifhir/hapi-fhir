@@ -18,7 +18,9 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -33,15 +35,16 @@ import org.springframework.test.context.TestPropertySource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.contains;
-import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.apache.commons.lang3.StringUtils.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -143,6 +146,41 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testPageThroughLotsOfPages2() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		Bundle bundle = new Bundle();
+
+		int count = 1603;
+		for (int i = 0; i < count; i++) {
+			Observation o = new Observation();
+			o.setId("A" + leftPad(Integer.toString(i), 4, '0'));
+			o.setStatus(Observation.ObservationStatus.FINAL);
+			bundle.addEntry().setFullUrl(o.getId()).setResource(o).getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/A" + i);
+		}
+		StopWatch sw = new StopWatch();
+		ourLog.info("Saving {} resources", bundle.getEntry().size());
+		mySystemDao.transaction(null, bundle);
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+
+		// Load from DAOs
+		List<String> ids = new ArrayList<>();
+		Bundle resultBundle = ourClient.search().forResource("Observation").count(300).returnBundle(Bundle.class).execute();
+		int pageIndex = 0;
+		while (true) {
+			ids.addAll(resultBundle.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList()));
+			if (resultBundle.getLink("next") == null) {
+				break;
+			}
+			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
+			resultBundle = ourClient.loadPage().next(resultBundle).execute();
+		}
+		assertEquals(count, ids.size());
+		assertEquals(count, Sets.newHashSet(ids).size());
+
+	}
+
+	@Test
 	public void testSearchWithLargeNumberOfIncludes() {
 
 		Bundle bundle = new Bundle();
@@ -221,15 +259,15 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testMultithreadedCreateWithDuplicateClientAssignedIdsInTransaction() throws Exception {
+	public void testMultiThreadedCreateWithDuplicateClientAssignedIdsInTransaction() throws Exception {
 		ExecutorService executor = Executors.newFixedThreadPool(20);
 
-		List<Future> futures = new ArrayList<>();
+		List<Future<String>> futures = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
 
 			int finalI = i;
 
-			Runnable task = () -> {
+			Callable<String> task = () -> {
 				Bundle input = new Bundle();
 				input.setType(BundleType.TRANSACTION);
 
@@ -240,20 +278,79 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 				try {
 					ourClient.transaction().withBundle(input).execute();
+					return null;
 				} catch (ResourceVersionConflictException e) {
 					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a client-assigned ID constraint failure"));
+					return e.toString();
 				}
 			};
 			for (int j = 0; j < 2; j++) {
-				Future<?> future = executor.submit(task);
+				Future<String> future = executor.submit(task);
 				futures.add(future);
 			}
 
 		}
 
-		for (Future next : futures) {
-			next.get();
+		List<String> results = new ArrayList<>();
+		for (Future<String> next : futures) {
+			String nextOutcome = next.get();
+			if (isNotBlank(nextOutcome)) {
+				results.add(nextOutcome);
+			}
 		}
+
+		ourLog.info("Results: {}", results);
+		assertThat(results, not(Matchers.empty()));
+	}
+
+	@Test
+	public void testMultiThreadedUpdateSameResourceInTransaction() throws Exception {
+
+		Patient p = new Patient();
+		p.setActive(true);
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		ExecutorService executor = Executors.newFixedThreadPool(20);
+
+		List<Future<String>> futures = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+
+			int finalI = i;
+
+			Callable<String> task = () -> {
+				Bundle input = new Bundle();
+				input.setType(BundleType.TRANSACTION);
+
+				Patient updatePatient = new Patient();
+				updatePatient.setId(id);
+				updatePatient.addIdentifier().setValue("A"+finalI);
+				input.addEntry().setResource(updatePatient).setFullUrl(updatePatient.getId()).getRequest().setMethod(HTTPVerb.PUT).setUrl(updatePatient.getId());
+
+				try {
+					ourClient.transaction().withBundle(input).execute();
+					return null;
+				} catch (ResourceVersionConflictException e) {
+					assertThat(e.toString(), containsString("Error flushing transaction with resource types: [Patient] - The operation has failed with a version constraint failure. This generally means that two clients/threads were trying to update the same resource at the same time, and this request was chosen as the failing request."));
+					return e.toString();
+				}
+			};
+			for (int j = 0; j < 2; j++) {
+				Future<String> future = executor.submit(task);
+				futures.add(future);
+			}
+
+		}
+
+		List<String> results = new ArrayList<>();
+		for (Future<String> next : futures) {
+			String nextOutcome = next.get();
+			if (isNotBlank(nextOutcome)) {
+				results.add(nextOutcome);
+			}
+		}
+
+		ourLog.info("Results: {}", results);
+		assertThat(results, not(Matchers.empty()));
 	}
 
 	/**
