@@ -609,8 +609,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						if (theResultIter.hasNext() == false) {
 							mySearch.setNumFound(myCountSaved);
 							int skippedCount = theResultIter.getSkippedCount();
+							int totalFetched = skippedCount + myCountSaved;
 							ourLog.info("MaxToFetch[{}], CountSaved[{}] SkippedCount[{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, myCountSaved, skippedCount, myAdditionalPrefetchThresholdsRemaining);
-							if (myMaxResultsToFetch != null && myCountSaved < myMaxResultsToFetch && (resultsToSave.isEmpty() || skippedCount == 0 || mySearch.getSearchType() == SearchTypeEnum.EVERYTHING)) {
+
+							if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch/* && (resultsToSave.isEmpty() || skippedCount == 0)*/) {
 								ourLog.info("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSaved);

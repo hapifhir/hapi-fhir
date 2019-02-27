@@ -2465,8 +2465,6 @@ public class SearchBuilder implements ISearchBuilder {
 							if (myPidSet.add(next)) {
 								myNext = next;
 								break;
-							} else {
-								mySkipCount++;
 							}
 					}
 				}
@@ -2496,8 +2494,6 @@ public class SearchBuilder implements ISearchBuilder {
 								if (myPidSet.add(next)) {
 									myNext = next;
 									break;
-								} else {
-									mySkipCount++;
 								}
 						}
 						if (myNext == null) {

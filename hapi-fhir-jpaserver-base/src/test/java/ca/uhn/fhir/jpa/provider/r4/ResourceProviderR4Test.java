@@ -3548,7 +3548,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		response.getEntity().getContent().close();
 		ourLog.info(resp);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
-		matches = bundle.getTotal();
+		matches = bundle.getEntry().size();
 
 		assertThat(matches, greaterThan(0));
 	}
