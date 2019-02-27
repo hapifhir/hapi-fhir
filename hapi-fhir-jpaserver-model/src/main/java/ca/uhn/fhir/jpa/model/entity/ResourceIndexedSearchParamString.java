@@ -33,6 +33,7 @@ import org.hibernate.search.annotations.*;
 import javax.persistence.Index;
 import javax.persistence.*;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.left;
 
 //@formatter:off
@@ -243,7 +244,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	public void setValueExact(String theValueExact) {
-		if (StringUtils.defaultString(theValueExact).length() > MAX_LENGTH) {
+		if (defaultString(theValueExact).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
@@ -254,7 +255,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	public void setValueNormalized(String theValueNormalized) {
-		if (StringUtils.defaultString(theValueNormalized).length() > MAX_LENGTH) {
+		if (defaultString(theValueNormalized).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
 		}
 		myValueNormalized = theValueNormalized;
@@ -313,7 +314,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			return false;
 		}
 		StringParam string = (StringParam)theParam;
-		String normalizedString = StringNormalizer.normalizeString(string.getValue());
-		return getValueNormalized().startsWith(normalizedString);
+		String normalizedString = StringNormalizer.normalizeString(defaultString(string.getValue()));
+		return defaultString(getValueNormalized()).startsWith(normalizedString);
 	}
 }

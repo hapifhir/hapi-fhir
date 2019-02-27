@@ -33,6 +33,7 @@ import org.hibernate.search.annotations.NumericField;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Embeddable
 @Entity
@@ -162,7 +163,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 			return false;
 		}
 		NumberParam number = (NumberParam) theParam;
-		return getValue().equals(number.getValue());
+		return Objects.equals(getValue(), number.getValue());
 	}
 
 }
