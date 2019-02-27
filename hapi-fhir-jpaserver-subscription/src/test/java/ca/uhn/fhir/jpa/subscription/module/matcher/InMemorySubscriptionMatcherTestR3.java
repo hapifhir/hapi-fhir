@@ -568,4 +568,14 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 
 		assertNotMatched(observation, criteria);
 	}
+
+	@Test
+	public void testNullSystemNotNullValue() {
+		String criteria = "Observation?code=17861-6";
+		Observation observation = new Observation();
+		CodeableConcept code = new CodeableConcept();
+		observation.getCode().addCoding().setCode("look ma no system");
+
+		assertNotMatched(observation, criteria);
+	}
 }
