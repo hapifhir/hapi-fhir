@@ -91,6 +91,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
+	@Autowired
+	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -572,10 +574,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 
-		BaseHasResource entity = txTemplate.execute(t->readEntity(theId));
+		BaseHasResource entity = txTemplate.execute(t -> readEntity(theId));
 		if (theId.hasVersionIdPart()) {
 			BaseHasResource currentVersion;
-			currentVersion = txTemplate.execute(t->readEntity(theId.toVersionless()));
+			currentVersion = txTemplate.execute(t -> readEntity(theId.toVersionless()));
 			if (entity.getVersion() == currentVersion.getVersion()) {
 				throw new PreconditionFailedException("Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
@@ -682,7 +684,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-				txTemplate.execute(t->{
+				txTemplate.execute(t -> {
 					myResourceReindexingSvc.markAllResourcesForReindexing(resourceType);
 					return null;
 				});
@@ -693,9 +695,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		mySearchParamRegistry.requestRefresh();
 	}
-
-	@Autowired
-	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaAddOperation(IIdType theResourceId, MT theMetaAdd, RequestDetails theRequestDetails) {
@@ -722,7 +721,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, history);
 		}
 
-		ourLog.debug("Processed metaAddOperation on {} in {}ms", new Object[] {theResourceId, w.getMillisAndRestart()});
+		ourLog.debug("Processed metaAddOperation on {} in {}ms", new Object[]{theResourceId, w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequestDetails);
@@ -756,7 +755,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myEntityManager.flush();
 
-		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", new Object[] {theResourceId.getValue(), w.getMillisAndRestart()});
+		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", new Object[]{theResourceId.getValue(), w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequestDetails);
@@ -918,7 +917,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return read(theId, theRequestDetails, false);
 	}
 
-		@Override
+	@Override
 	public T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk) {
 		validateResourceTypeAndThrowIllegalArgumentException(theId);
 
@@ -941,6 +940,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
+		HookParams params = new HookParams().add(IBaseResource.class, retVal);
+		myInterceptorBroadcaster.callHooks(Pointcut.RESOURCE_MAY_BE_RETURNED, params);
 
 		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
@@ -1189,6 +1191,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		outcome.setId(id);
 		outcome.setResource(theResource);
 		outcome.setEntity(theEntity);
+
+		// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
+		HookParams params = new HookParams().add(IBaseResource.class, theResource);
+		myInterceptorBroadcaster.callHooks(Pointcut.RESOURCE_MAY_BE_RETURNED, params);
+
 		return outcome;
 	}
 

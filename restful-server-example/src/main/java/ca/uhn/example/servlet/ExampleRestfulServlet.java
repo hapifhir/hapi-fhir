@@ -38,7 +38,7 @@ public class ExampleRestfulServlet extends RestfulServer {
 		 * Two resource providers are defined. Each one handles a specific
 		 * type of resource.
 		 */
-		List<IResourceProvider> providers = new ArrayList<IResourceProvider>();
+		List<IResourceProvider> providers = new ArrayList<>();
 		providers.add(new PatientResourceProvider());
 		providers.add(new OrganizationResourceProvider());
 		setResourceProviders(providers);
@@ -48,7 +48,7 @@ public class ExampleRestfulServlet extends RestfulServer {
 		 * but can be useful as it causes HAPI to generate narratives for
 		 * resources which don't otherwise have one.
 		 */
-		INarrativeGenerator narrativeGen = new DefaultThymeleafNarrativeGenerator();
+		INarrativeGenerator narrativeGen = new DefaultThymeleafNarrativeGenerator(getFhirContext());
 		getFhirContext().setNarrativeGenerator(narrativeGen);
 
 		/*

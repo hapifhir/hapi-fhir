@@ -2351,6 +2351,31 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 
 	@Test
+	public void testSearchWithDateRange() {
+		SearchParameterMap sp = new SearchParameterMap();
+		sp.setLoadSynchronous(true);
+		sp.add(MedicationRequest.SP_INTENT, new TokenParam("FOO", "BAR"));
+		sp.setLastUpdated(new DateRangeParam()
+			.setUpperBound(new DateParam("le2019-02-22T17:50:00"))
+			.setLowerBound(new DateParam("ge2019-02-22T13:50:00")));
+		IBundleProvider retrieved = myMedicationRequestDao.search(sp);
+
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, true))
+			.collect(Collectors.toList());
+
+		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
+
+		String searchQuery = queries.get(0);
+		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
+		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
+		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
+	}
+
+
+	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam001");

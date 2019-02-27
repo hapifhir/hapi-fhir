@@ -25,7 +25,7 @@ public interface IBaseReference extends ICompositeType {
 
 	IBaseResource getResource();
 
-	void setResource(IBaseResource theResource);
+	IBaseReference setResource(IBaseResource theResource);
 
 	IIdType getReferenceElement();
 

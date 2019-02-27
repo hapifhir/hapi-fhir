@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.PrePopulatedValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;

@@ -74,7 +74,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	
 			ourRestServer.setResourceProviders((List)myResourceProviders);
 	
-			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(myFhirCtx));
 	
 			ourRestServer.setPlainProviders(mySystemProvider);
 	

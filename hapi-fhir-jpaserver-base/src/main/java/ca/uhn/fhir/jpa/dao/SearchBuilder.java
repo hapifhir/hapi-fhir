@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,9 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -137,6 +140,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
@@ -1921,6 +1926,10 @@ public class SearchBuilder implements ISearchBuilder {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.MATCH.getCode());
 				}
 			}
+
+			// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
+			HookParams params = new HookParams().add(IBaseResource.class, resource);
+			myInterceptorBroadcaster.callHooks(Pointcut.RESOURCE_MAY_BE_RETURNED, params);
 
 			theResourceListToPopulate.set(index, resource);
 		}
