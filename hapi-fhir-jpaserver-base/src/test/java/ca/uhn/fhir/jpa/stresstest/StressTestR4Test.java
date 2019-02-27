@@ -143,6 +143,41 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testPageThroughLotsOfPages2() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		Bundle bundle = new Bundle();
+
+		int count = 1603;
+		for (int i = 0; i < count; i++) {
+			Observation o = new Observation();
+			o.setId("A" + leftPad(Integer.toString(i), 4, '0'));
+			o.setStatus(Observation.ObservationStatus.FINAL);
+			bundle.addEntry().setFullUrl(o.getId()).setResource(o).getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/A" + i);
+		}
+		StopWatch sw = new StopWatch();
+		ourLog.info("Saving {} resources", bundle.getEntry().size());
+		mySystemDao.transaction(null, bundle);
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+
+		// Load from DAOs
+		List<String> ids = new ArrayList<>();
+		Bundle resultBundle = ourClient.search().forResource("Observation").count(300).returnBundle(Bundle.class).execute();
+		int pageIndex = 0;
+		while (true) {
+			ids.addAll(resultBundle.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList()));
+			if (resultBundle.getLink("next") == null) {
+				break;
+			}
+			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
+			resultBundle = ourClient.loadPage().next(resultBundle).execute();
+		}
+		assertEquals(count, ids.size());
+		assertEquals(count, Sets.newHashSet(ids).size());
+
+	}
+
+	@Test
 	public void testSearchWithLargeNumberOfIncludes() {
 
 		Bundle bundle = new Bundle();
