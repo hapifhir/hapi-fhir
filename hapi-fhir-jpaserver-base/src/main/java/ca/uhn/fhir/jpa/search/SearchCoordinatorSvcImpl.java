@@ -77,6 +77,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 
+	
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 	private final ConcurrentHashMap<String, BaseTask> myIdToSearchTask = new ConcurrentHashMap<>();
 	@Autowired
@@ -582,6 +583,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			txTemplate.execute(new TransactionCallbackWithoutResult() {
 				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
+					// FIXME: remove
+
+					ourLog.info("Beginning save");
 					if (mySearch.getId() == null) {
 						doSaveSearch();
 					}
@@ -593,13 +597,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						nextResult.setOrder(myCountSaved++);
 						resultsToSave.add(nextResult);
 						int order = nextResult.getOrder();
-						ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
+						ourLog.info("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
 					}
 					mySearchResultDao.saveAll(resultsToSave);
 
 					synchronized (mySyncedPids) {
 						int numSyncedThisPass = myUnsyncedPids.size();
-						ourLog.trace("Syncing {} search results - Have more: {}", numSyncedThisPass, theResultIter.hasNext());
+						ourLog.info("Syncing {} search results - Have more: {}", numSyncedThisPass, theResultIter.hasNext());
 						mySyncedPids.addAll(myUnsyncedPids);
 						myUnsyncedPids.clear();
 
@@ -607,17 +611,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							mySearch.setNumFound(myCountSaved);
 							int skippedCount = theResultIter.getSkippedCount();
 							int totalFetched = skippedCount + myCountSaved;
-							ourLog.trace("MaxToFetch[{}], CountSaved[{}] SkippedCount[{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, myCountSaved, skippedCount, myAdditionalPrefetchThresholdsRemaining);
+							ourLog.info("MaxToFetch[{}], CountSaved[{}] SkippedCount[{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, myCountSaved, skippedCount, myAdditionalPrefetchThresholdsRemaining);
 
 							if (myMaxResultsToFetch != null && totalFetched < myMaxResultsToFetch) {
-								ourLog.trace("Setting search status to FINISHED");
+								ourLog.info("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSaved);
 							} else if (myAdditionalPrefetchThresholdsRemaining) {
-								ourLog.trace("Setting search status to PASSCMPLET");
+								ourLog.info("Setting search status to PASSCMPLET");
 								mySearch.setStatus(SearchStatusEnum.PASSCMPLET);
 								mySearch.setSearchParameterMap(myParams);
 							} else {
+								ourLog.info("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSaved);
 							}
@@ -689,7 +694,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 				});
 
-				ourLog.info("Completed search for [{}{}] and found {} resources in {}ms", mySearch.getResourceType(), mySearch.getSearchQueryString(), mySyncedPids.size(), sw.getMillis());
+				ourLog.info("Have completed search for [{}{}] and found {} resources in {}ms - Status is {}", mySearch.getResourceType(), mySearch.getSearchQueryString(), mySyncedPids.size(), sw.getMillis(), mySearch.getStatus());
 
 			} catch (Throwable t) {
 
