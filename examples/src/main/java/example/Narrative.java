@@ -21,7 +21,7 @@ patient.addAddress().addLine("742 Evergreen Terrace").setCity("Springfield").set
 FhirContext ctx = FhirContext.forDstu2();
 
 // Use the narrative generator
-ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ctx));
 
 // Encode the output, including the narrative
 String output = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);

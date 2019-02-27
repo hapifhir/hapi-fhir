@@ -103,7 +103,8 @@ public abstract class Resource extends BaseResource implements IAnyResource {
     /**
      * @param value {@link #id} (The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.). This is the underlying object with id, value and extensions. The accessor "getId" gives direct access to the value
      */
-    public Resource setIdElement(IdType value) { 
+    @Override
+	 public Resource setIdElement(IdType value) {
       this.id = value;
       return this;
     }

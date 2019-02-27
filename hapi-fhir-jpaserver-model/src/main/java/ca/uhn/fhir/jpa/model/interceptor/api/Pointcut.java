@@ -30,6 +30,11 @@ import java.util.List;
 public enum Pointcut {
 
 	/**
+	 * This pointcut will be called once when a given interceptor is registered
+	 */
+	REGISTERED,
+
+	/**
 	 * Invoked whenever a persisted resource has been modified and is being submitted to the
 	 * subscription processing pipeline. This method is called before the resource is placed
 	 * on any queues for processing and executes synchronously during the resource modification
@@ -330,7 +335,32 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource");
+	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
+	 * Invoked when a resource may be returned to the user, whether as a part of a READ,
+	 * a SEARCH, or even as the response to a CREATE/UPDATE, etc.
+	 * <p>
+	 * This hook is invoked when a resource has been loaded by the storage engine and
+	 * is being returned to the HTTP stack for response. This is not a guarantee that the
+	 * client will ultimately see it, since filters/headers/etc may affect what
+	 * is returned but if a resource is loaded it is likely to be used.
+	 * Note also that caching may affect whether this pointcut is invoked.
+	 * </p>
+	 * <p>
+	 * Hooks will have access to the contents of the resource being returned
+	 * and may choose to make modifications. These changes will be reflected in
+	 * returned resource but have no effect on storage.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource (the resource being returned)</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	RESOURCE_MAY_BE_RETURNED("org.hl7.fhir.instance.model.api.IBaseResource");
 
 	private final List<String> myParameterTypes;
 

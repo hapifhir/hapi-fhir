@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Sets;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -92,11 +93,26 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 			Class<?> interceptorClass = theInterceptor.getClass();
 			int typeOrder = determineOrder(interceptorClass);
 
-			if (!scanInterceptorForHookMethodsAndAddThem(theInterceptor, typeOrder)) {
+			List<HookInvoker> addedInvokers = scanInterceptorForHookMethods(theInterceptor, typeOrder);
+			if (addedInvokers.isEmpty()) {
 				return false;
 			}
 
+			// Invoke the REGISTERED pointcut for any added hooks
+			addedInvokers.stream()
+				.filter(t -> t.getPointcuts().contains(Pointcut.REGISTERED))
+				.forEach(t -> t.invoke(new HookParams()));
+
+			// Register the interceptor and its various hooks
 			myInterceptors.add(theInterceptor);
+			for (HookInvoker nextAddedHook : addedInvokers) {
+				for (Pointcut nextPointcut : nextAddedHook.getPointcuts()) {
+					if (nextPointcut.equals(Pointcut.REGISTERED)) {
+						continue;
+					}
+					myInvokers.put(nextPointcut, nextAddedHook);
+				}
+			}
 
 			// Make sure we're always sorted according to the order declared in
 			// @Order
@@ -110,27 +126,25 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 		}
 	}
 
-	private boolean scanInterceptorForHookMethodsAndAddThem(Object theInterceptor, int theTypeOrder) {
-		boolean retVal = false;
+	/**
+	 * @return Returns a list of any added invokers
+	 */
+	private List<HookInvoker> scanInterceptorForHookMethods(Object theInterceptor, int theTypeOrder) {
+		ArrayList<HookInvoker> retVal = new ArrayList<>();
 		for (Method nextMethod : theInterceptor.getClass().getDeclaredMethods()) {
 			Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
 
 			if (hook != null) {
-
 				int methodOrder = theTypeOrder;
 				Order methodOrderAnnotation = AnnotationUtils.findAnnotation(nextMethod, Order.class);
 				if (methodOrderAnnotation != null) {
 					methodOrder = methodOrderAnnotation.value();
 				}
 
-				HookInvoker invoker = new HookInvoker(hook, theInterceptor, nextMethod, methodOrder);
-				for (Pointcut nextPointcut : hook.value()) {
-					myInvokers.put(nextPointcut, invoker);
-				}
-
-				retVal = true;
+				retVal.add(new HookInvoker(hook, theInterceptor, nextMethod, methodOrder));
 			}
 		}
+
 		return retVal;
 	}
 
@@ -300,12 +314,14 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 		private final Method myMethod;
 		private final Class<?>[] myParameterTypes;
 		private final int[] myParameterIndexes;
+		private final Set<Pointcut> myPointcuts;
 
 		/**
 		 * Constructor
 		 */
 		private HookInvoker(Hook theHook, @Nonnull Object theInterceptor, @Nonnull Method theHookMethod, int theOrder) {
 			super(theInterceptor, theOrder);
+			myPointcuts = Collections.unmodifiableSet(Sets.newHashSet(theHook.value()));
 			myParameterTypes = theHookMethod.getParameterTypes();
 			myMethod = theHookMethod;
 
@@ -323,6 +339,10 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 				AtomicInteger counter = typeToCount.computeIfAbsent(myParameterTypes[i], t -> new AtomicInteger(0));
 				myParameterIndexes[i] = counter.getAndIncrement();
 			}
+		}
+
+		public Set<Pointcut> getPointcuts() {
+			return myPointcuts;
 		}
 
 		/**
@@ -352,7 +372,7 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 				if (targetException instanceof RuntimeException) {
 					throw ((RuntimeException) targetException);
 				} else {
-					throw new InternalErrorException(targetException);
+					throw new InternalErrorException("Failure invoking interceptor for pointcut(s) " + getPointcuts(), targetException);
 				}
 			} catch (Exception e) {
 				throw new InternalErrorException(e);
