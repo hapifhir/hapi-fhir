@@ -1637,9 +1637,16 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
 
 		assertEquals(1, response.getEntry().size());
+//		assertEquals(21, response.getTotal().intValue());
+//		assertEquals(null, response.getLink("next"));
+
+		// Again
+
+		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
+
+		assertEquals(1, response.getEntry().size());
 		assertEquals(21, response.getTotal().intValue());
 		assertEquals(null, response.getLink("next"));
-
 	}
 
 	@Test
