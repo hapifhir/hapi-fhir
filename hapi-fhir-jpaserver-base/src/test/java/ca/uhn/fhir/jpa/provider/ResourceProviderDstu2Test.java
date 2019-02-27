@@ -1037,11 +1037,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		obs1.getDevice().setReference(devId1);
 		IIdType obsId1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
+		IIdType obsId2;
 		Observation obs2 = new Observation();
 		obs2.getSubject().setReference(ptId1);
 		obs2.getCode().addCoding().setCode("CODE2");
 		obs2.setValue(new StringDt("obsvalue2"));
-		IIdType obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+		obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs3 = new Observation();
 		obs3.getSubject().setReference(ptId2);

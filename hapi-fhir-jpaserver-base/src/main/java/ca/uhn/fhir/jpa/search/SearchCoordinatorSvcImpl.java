@@ -595,7 +595,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						nextResult.setResourcePid(nextPid);
 						nextResult.setOrder(myCountSaved++);
 						resultsToSave.add(nextResult);
-						ourLog.info("Saving ORDER[{}] Resource {}", nextResult.getOrder(), nextResult.getResourcePid());
+						int order = nextResult.getOrder();
+						ourLog.info("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
 					}
 					mySearchResultDao.saveAll(resultsToSave);
 
@@ -609,7 +610,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							mySearch.setNumFound(myCountSaved);
 							int skippedCount = theResultIter.getSkippedCount();
 							ourLog.info("MaxToFetch[{}], CountSaved[{}] SkippedCount[{}], AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, myCountSaved, skippedCount, myAdditionalPrefetchThresholdsRemaining);
-							if (myMaxResultsToFetch != null && myCountSaved < myMaxResultsToFetch && (resultsToSave.isEmpty() || skippedCount == 0)) {
+							if (myMaxResultsToFetch != null && myCountSaved < myMaxResultsToFetch && (resultsToSave.isEmpty() || skippedCount == 0 || mySearch.getSearchType() == SearchTypeEnum.EVERYTHING)) {
 								ourLog.info("Setting search status to FINISHED");
 								mySearch.setStatus(SearchStatusEnum.FINISHED);
 								mySearch.setTotalCount(myCountSaved);
@@ -670,6 +671,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		@Override
 		public Void call() {
 			StopWatch sw = new StopWatch();
+
+			// FIXME: remove
+			ourLog.info("Starting search task {}", this);
 
 			try {
 				// Create an initial search in the DB and give it an ID
