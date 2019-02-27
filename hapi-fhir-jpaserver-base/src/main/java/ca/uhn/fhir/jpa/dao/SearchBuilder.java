@@ -105,7 +105,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static final List<Long> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
-	private static final int maxLoad = 800;
+	/**
+	 * @see #loadResourcesByPid(Collection, List, Set, boolean, EntityManager, FhirContext, IDao)
+	 */
+	private static final int MAXIMUM_PAGE_SIZE = 800;
 	private static Long NO_MORE = -1L;
 	private static HandlerTypeEnum ourLastHandlerMechanismForUnitTest;
 	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
@@ -1990,8 +1993,8 @@ public class SearchBuilder implements ISearchBuilder {
 		 * but this should work too. Sigh.
 		 */
 		List<Long> pids = new ArrayList<>(theIncludePids);
-		for (int i = 0; i < pids.size(); i += maxLoad) {
-			int to = i + maxLoad;
+		for (int i = 0; i < pids.size(); i += MAXIMUM_PAGE_SIZE) {
+			int to = i + MAXIMUM_PAGE_SIZE;
 			to = Math.min(to, pids.size());
 			List<Long> pidsSubList = pids.subList(i, to);
 			doLoadPids(theResourceListToPopulate, theIncludedPids, theForHistoryOperation, entityManager, context, theDao, position, pidsSubList);
@@ -2038,7 +2041,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (matchAll) {
 					String sql;
 					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
-					List<Collection<Long>> partitions = partition(nextRoundMatches, maxLoad);
+					List<Collection<Long>> partitions = partition(nextRoundMatches, MAXIMUM_PAGE_SIZE);
 					for (Collection<Long> nextPartition : partitions) {
 						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
 						q.setParameter("target_pids", nextPartition);
@@ -2091,7 +2094,7 @@ public class SearchBuilder implements ISearchBuilder {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						}
 
-						List<Collection<Long>> partitions = partition(nextRoundMatches, maxLoad);
+						List<Collection<Long>> partitions = partition(nextRoundMatches, MAXIMUM_PAGE_SIZE);
 						for (Collection<Long> nextPartition : partitions) {
 							TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
 							q.setParameter("src_path", nextPath);

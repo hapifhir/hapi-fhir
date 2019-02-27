@@ -920,7 +920,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		@Override
 	public T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk) {
-		validateResourceTypeAndThrowIllegalArgumentException(theId);
+		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		// Notify interceptors
 		if (theRequestDetails != null) {
@@ -954,7 +954,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId) {
-		validateResourceTypeAndThrowIllegalArgumentException(theId);
+		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		Long pid = myIdHelperService.translateForcedIdToPid(getResourceName(), theId.getIdPart());
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
@@ -1420,8 +1420,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateResourceType(entity, myResourceName);
 	}
 
-	private void validateResourceTypeAndThrowIllegalArgumentException(IIdType theId) {
+	private void validateResourceTypeAndThrowInvalidRequestException(IIdType theId) {
 		if (theId.hasResourceType() && !theId.getResourceType().equals(myResourceName)) {
+			// Note- Throw a HAPI FHIR exception here so that hibernate doesn't try to translate it into a database exception
 			throw new InvalidRequestException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
 	}
