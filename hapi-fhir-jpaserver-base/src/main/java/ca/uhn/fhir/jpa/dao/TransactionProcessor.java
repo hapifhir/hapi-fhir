@@ -508,60 +508,65 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			/*
 			 * Look for duplicate conditional creates and consolidate them
 			 */
-			Map<String, String> keyToUuid = new HashMap<>();
+			final HashMap<String, String> keyToUuid = new HashMap<>();
+			final IdentityHashMap<IBaseResource, String> identityToUuid = new IdentityHashMap<>();
 			for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
 				BUNDLEENTRY nextReqEntry = theEntries.get(index);
+				IBaseResource resource = myVersionAdapter.getResource(nextReqEntry);
+				if (resource != null) {
+					String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
+					String entryUrl = myVersionAdapter.getFullUrl(nextReqEntry);
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
+					String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
+					String key = verb + "|" + requestUrl + "|" + ifNoneExist;
 
-//				String encoded = myContext.newJsonParser().encodeResourceToString(myVersionAdapter.getResource(nextReqEntry));
-//				if (encoded.contains("00000011111")) {
-//					ourLog.info("Resource contains 00000011111");
-//				}
-
-				String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
-				String entryUrl = myVersionAdapter.getFullUrl(nextReqEntry);
-				String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
-				String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
-				String key = verb + "|"+ requestUrl + "|" + ifNoneExist;
-
-				// Conditional UPDATE
-				boolean consolidateEntry = false;
-				if ("PUT".equals(verb)) {
-					if (isNotBlank(entryUrl) && isNotBlank(requestUrl)) {
-						int questionMarkIndex = requestUrl.indexOf('?');
-						if (questionMarkIndex >= 0 && requestUrl.length() > (questionMarkIndex+1)) {
-							consolidateEntry = true;
+					// Conditional UPDATE
+					boolean consolidateEntry = false;
+					if ("PUT".equals(verb)) {
+						if (isNotBlank(entryUrl) && isNotBlank(requestUrl)) {
+							int questionMarkIndex = requestUrl.indexOf('?');
+							if (questionMarkIndex >= 0 && requestUrl.length() > (questionMarkIndex + 1)) {
+								consolidateEntry = true;
+							}
 						}
 					}
-				}
 
-				// Conditional CREATE
-				if ("POST".equals(verb)) {
-					if (isNotBlank(entryUrl) && isNotBlank(requestUrl) && isNotBlank(ifNoneExist)) {
-						if (!entryUrl.equals(requestUrl)) {
-							consolidateEntry = true;
+					// Conditional CREATE
+					if ("POST".equals(verb)) {
+						if (isNotBlank(entryUrl) && isNotBlank(requestUrl) && isNotBlank(ifNoneExist)) {
+							if (!entryUrl.equals(requestUrl)) {
+								consolidateEntry = true;
+							}
 						}
 					}
-				}
 
-				if (consolidateEntry) {
-					if (!keyToUuid.containsKey(key)) {
-						keyToUuid.put(key, entryUrl);
-					} else {
-						ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
-						theEntries.remove(index);
-						index--;
-						String existingUuid = keyToUuid.get(key);
-						for (BUNDLEENTRY nextEntry : theEntries) {
-							IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
-							for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
-								if (entryUrl.equals(nextReference.getResourceReference().getReferenceElement().getValue())) {
-									nextReference.getResourceReference().setReference(existingUuid);
+					if (consolidateEntry) {
+						if (!keyToUuid.containsKey(key)) {
+							keyToUuid.put(key, entryUrl);
+							identityToUuid.put(resource, entryUrl);
+						} else {
+							ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
+							theEntries.remove(index);
+							index--;
+							String existingUuid = keyToUuid.get(key);
+							for (BUNDLEENTRY nextEntry : theEntries) {
+								IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
+								for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
+									// We're interested in any references directly to the placeholder ID, but also
+									// references that have a resource target that has the placeholder ID.
+									String nextReferenceId = nextReference.getResourceReference().getReferenceElement().getValue();
+									if (isBlank(nextReferenceId) && nextReference.getResourceReference().getResource() != null) {
+										nextReferenceId = nextReference.getResourceReference().getResource().getIdElement().getValue();
+									}
+									if (entryUrl.equals(nextReferenceId)) {
+										nextReference.getResourceReference().setReference(existingUuid);
+										nextReference.getResourceReference().setResource(null);
+									}
 								}
 							}
 						}
 					}
 				}
-
 			}
 
 
