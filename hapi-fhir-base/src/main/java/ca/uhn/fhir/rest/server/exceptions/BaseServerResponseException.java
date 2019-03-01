@@ -177,8 +177,9 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * to this exception (ie to the constructor) is considered trusted and is safe to
 	 * return to the calling client.
 	 */
-	public void setErrorMessageTrusted(boolean theErrorMessageTrusted) {
+	public BaseServerResponseException setErrorMessageTrusted(boolean theErrorMessageTrusted) {
 		myErrorMessageTrusted = theErrorMessageTrusted;
+		return this;
 	}
 
 	/**
