@@ -3,20 +3,20 @@
   <title>HAPI-FHIR: HAPI FHIR Changelog</title>
   <link rel="alternate" href="https://hapifhir.io/changes-report.html" />
   <subtitle>These are the latest changes of this project.</subtitle>
-  <updated>2019-02-06T02:49:50Z</updated>
+  <updated>2019-03-01T19:23:06Z</updated>
   <dc:creator>James Agnew</dc:creator>
-  <dc:date>2019-02-06T02:49:50Z</dc:date>
+  <dc:date>2019-03-01T19:23:06Z</dc:date>
   <dc:language>en</dc:language>
   <entry>
-    <title>3.7.0</title>
-    <link rel="alternate" href="https://hapifhir.io/changes-report.html#a3.7.0" />
+    <title>3.8.0</title>
+    <link rel="alternate" href="https://hapifhir.io/changes-report.html#a3.8.0" />
     <author>
       <name />
     </author>
-    <updated>2019-02-06T05:00:00Z</updated>
-    <published>2019-02-06T05:00:00Z</published>
-    <summary type="html">&lt;p&gt;Gale&lt;/p&gt;&lt;p&gt;Version 3.7.0 is available with 62 fixed issues.&lt;/p&gt;</summary>
-    <dc:date>2019-02-06T05:00:00Z</dc:date>
+    <updated>2019-03-01T19:23:06Z</updated>
+    <published>2019-03-01T19:23:06Z</published>
+    <summary type="html">&lt;p&gt;Hippo&lt;/p&gt;&lt;p&gt;Version 3.8.0 is available with 11 fixed issues.&lt;/p&gt;</summary>
+    <dc:date>2019-03-01T19:23:06Z</dc:date>
   </entry>
 </feed>
 

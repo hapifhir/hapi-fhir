@@ -32,6 +32,7 @@
                                 <li><a href="ca/uhn/fhir/model/base/composite/BaseIdentifierDt.html#BaseIdentifierDt" target="classFrame">BaseIdentifierDt</a></li>
                                 <li><a href="ca/uhn/fhir/rest/param/binder/BaseJavaPrimitiveBinder.html#BaseJavaPrimitiveBinder" target="classFrame">BaseJavaPrimitiveBinder</a></li>
                                 <li><a href="ca/uhn/fhir/model/base/composite/BaseNarrativeDt.html#BaseNarrativeDt" target="classFrame">BaseNarrativeDt</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/BaseNarrativeGenerator.html#BaseNarrativeGenerator" target="classFrame">BaseNarrativeGenerator</a></li>
                                 <li><a href="ca/uhn/fhir/model/base/resource/BaseOperationOutcome.html#BaseOperationOutcome" target="classFrame">BaseOperationOutcome</a></li>
                                 <li><a href="ca/uhn/fhir/model/base/resource/BaseOperationOutcome.html#BaseOperationOutcome.BaseIssue" target="classFrame">BaseOperationOutcome.BaseIssue</a></li>
                                 <li><a href="ca/uhn/fhir/rest/param/BaseOrListParam.html#BaseOrListParam" target="classFrame">BaseOrListParam</a></li>
@@ -65,8 +66,6 @@
                                 <li><a href="ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html#BaseServerResponseException" target="classFrame">BaseServerResponseException</a></li>
                                 <li><a href="ca/uhn/fhir/rest/server/exceptions/BaseServerResponseException.html#BaseServerResponseException.null" target="classFrame">BaseServerResponseException.null</a></li>
                                 <li><a href="ca/uhn/fhir/narrative/BaseThymeleafNarrativeGenerator.html#BaseThymeleafNarrativeGenerator" target="classFrame">BaseThymeleafNarrativeGenerator</a></li>
-                                <li><a href="ca/uhn/fhir/narrative/BaseThymeleafNarrativeGenerator.html#BaseThymeleafNarrativeGenerator.NarrativeAttributeProcessor" target="classFrame">BaseThymeleafNarrativeGenerator.NarrativeAttributeProcessor</a></li>
-                                <li><a href="ca/uhn/fhir/narrative/BaseThymeleafNarrativeGenerator.html#BaseThymeleafNarrativeGenerator.ProfileResourceResolver" target="classFrame">BaseThymeleafNarrativeGenerator.ProfileResourceResolver</a></li>
                                 <li><a href="ca/uhn/fhir/validation/BaseValidationContext.html#BaseValidationContext" target="classFrame">BaseValidationContext</a></li>
                                 <li><a href="ca/uhn/fhir/util/BinaryUtil.html#BinaryUtil" target="classFrame">BinaryUtil</a></li>
                                 <li><a href="ca/uhn/fhir/model/primitive/BooleanDt.html#BooleanDt" target="classFrame">BooleanDt</a></li>
@@ -238,6 +237,8 @@
                                 <li><a href="ca/uhn/fhir/util/IModelVisitor2.html#IModelVisitor2" target="classFrame">IModelVisitor2</a></li>
                                 <li><a href="org/hl7/fhir/instance/model/api/INarrative.html#INarrative" target="classFrame">INarrative</a></li>
                                 <li><a href="ca/uhn/fhir/narrative/INarrativeGenerator.html#INarrativeGenerator" target="classFrame">INarrativeGenerator</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/INarrativeTemplate.html#INarrativeTemplate" target="classFrame">INarrativeTemplate</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/INarrativeTemplateManifest.html#INarrativeTemplateManifest" target="classFrame">INarrativeTemplateManifest</a></li>
                                 <li><a href="ca/uhn/fhir/rest/gclient/IOperation.html#IOperation" target="classFrame">IOperation</a></li>
                                 <li><a href="ca/uhn/fhir/rest/gclient/IOperationOn.html#IOperationOn" target="classFrame">IOperationOn</a></li>
                                 <li><a href="ca/uhn/fhir/rest/gclient/IOperationProcessMsg.html#IOperationProcessMsg" target="classFrame">IOperationProcessMsg</a></li>
@@ -319,10 +320,13 @@
                                 <li><a href="ca/uhn/fhir/rest/server/exceptions/MethodNotAllowedException.html#MethodNotAllowedException" target="classFrame">MethodNotAllowedException</a></li>
                                 <li><a href="ca/uhn/fhir/rest/api/MethodOutcome.html#MethodOutcome" target="classFrame">MethodOutcome</a></li>
                                 <li><a href="ca/uhn/fhir/context/ModelScanner.html#ModelScanner" target="classFrame">ModelScanner</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/NarrativeTemplate.html#NarrativeTemplate" target="classFrame">NarrativeTemplate</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/NarrativeTemplateManifest.html#NarrativeTemplateManifest" target="classFrame">NarrativeTemplateManifest</a></li>
                                 <li><a href="ca/uhn/fhir/rest/client/exceptions/NonFhirResponseException.html#NonFhirResponseException" target="classFrame">NonFhirResponseException</a></li>
                                 <li><a href="ca/uhn/fhir/util/NonPrettyPrintWriterWrapper.html#NonPrettyPrintWriterWrapper" target="classFrame">NonPrettyPrintWriterWrapper</a></li>
                                 <li><a href="ca/uhn/fhir/rest/server/exceptions/NotImplementedOperationException.html#NotImplementedOperationException" target="classFrame">NotImplementedOperationException</a></li>
                                 <li><a href="ca/uhn/fhir/rest/server/exceptions/NotModifiedException.html#NotModifiedException" target="classFrame">NotModifiedException</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/NullNarrativeGenerator.html#NullNarrativeGenerator" target="classFrame">NullNarrativeGenerator</a></li>
                                 <li><a href="ca/uhn/fhir/rest/param/NumberAndListParam.html#NumberAndListParam" target="classFrame">NumberAndListParam</a></li>
                                 <li><a href="ca/uhn/fhir/rest/gclient/NumberClientParam.html#NumberClientParam" target="classFrame">NumberClientParam</a></li>
                                 <li><a href="ca/uhn/fhir/rest/gclient/NumberClientParam.html#NumberClientParam.IMatches" target="classFrame">NumberClientParam.IMatches</a></li>
@@ -475,8 +479,13 @@
                                 <li><a href="ca/uhn/fhir/rest/api/SummaryEnum.html#SummaryEnum" target="classFrame">SummaryEnum</a></li>
                                 <li><a href="ca/uhn/fhir/model/api/Tag.html#Tag" target="classFrame">Tag</a></li>
                                 <li><a href="ca/uhn/fhir/model/api/TagList.html#TagList" target="classFrame">TagList</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/TemplateTypeEnum.html#TemplateTypeEnum" target="classFrame">TemplateTypeEnum</a></li>
                                 <li><a href="ca/uhn/fhir/model/api/TemporalPrecisionEnum.html#TemporalPrecisionEnum" target="classFrame">TemporalPrecisionEnum</a></li>
                                 <li><a href="ca/uhn/fhir/util/TestUtil.html#TestUtil" target="classFrame">TestUtil</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/ThymeleafNarrativeGenerator.html#ThymeleafNarrativeGenerator" target="classFrame">ThymeleafNarrativeGenerator</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/ThymeleafNarrativeGenerator.html#ThymeleafNarrativeGenerator.NarrativeAttributeProcessor" target="classFrame">ThymeleafNarrativeGenerator.NarrativeAttributeProcessor</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/ThymeleafNarrativeGenerator.html#ThymeleafNarrativeGenerator.NarrativeTagProcessor" target="classFrame">ThymeleafNarrativeGenerator.NarrativeTagProcessor</a></li>
+                                <li><a href="ca/uhn/fhir/narrative2/ThymeleafNarrativeGenerator.html#ThymeleafNarrativeGenerator.ProfileResourceResolver" target="classFrame">ThymeleafNarrativeGenerator.ProfileResourceResolver</a></li>
                                 <li><a href="ca/uhn/fhir/model/primitive/TimeDt.html#TimeDt" target="classFrame">TimeDt</a></li>
                                 <li><a href="ca/uhn/fhir/rest/param/TokenAndListParam.html#TokenAndListParam" target="classFrame">TokenAndListParam</a></li>
                                 <li><a href="ca/uhn/fhir/rest/gclient/TokenClientParam.html#TokenClientParam" target="classFrame">TokenClientParam</a></li>

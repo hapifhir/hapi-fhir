@@ -920,7 +920,7 @@
 <a class="jxr_linenumber" name="L912" href="#L912">912</a> 				TransactionTemplate txTemplate = <strong class="jxr_keyword">new</strong> TransactionTemplate(myManagedTxManager);
 <a class="jxr_linenumber" name="L913" href="#L913">913</a> 				txTemplate.afterPropertiesSet();
 <a class="jxr_linenumber" name="L914" href="#L914">914</a> 				txTemplate.execute(t -&gt; {
-<a class="jxr_linenumber" name="L915" href="#L915">915</a> 					List&lt;Long&gt; previouslyAddedResourcePids = mySearchResultDao.findWithSearchUuid(getSearch());
+<a class="jxr_linenumber" name="L915" href="#L915">915</a> 					List&lt;Long&gt; previouslyAddedResourcePids = mySearchResultDao.findWithSearchUuidOrderIndependent(getSearch());
 <a class="jxr_linenumber" name="L916" href="#L916">916</a> 					ourLog.debug(<span class="jxr_string">"Have {} previously added IDs in search: {}"</span>, previouslyAddedResourcePids.size(), getSearch().getUuid());
 <a class="jxr_linenumber" name="L917" href="#L917">917</a> 					setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
 <a class="jxr_linenumber" name="L918" href="#L918">918</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;

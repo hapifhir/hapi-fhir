@@ -107,7 +107,7 @@
 <a class="jxr_linenumber" name="L99" href="#L99">99</a>  	@Bean(name = <span class="jxr_string">"myResourceCountsCache"</span>)
 <a class="jxr_linenumber" name="L100" href="#L100">100</a> 	<strong class="jxr_keyword">public</strong> <a name="ResourceCountCache" href="../../../../../ca/uhn/fhir/jpa/util/ResourceCountCache.html#ResourceCountCache">ResourceCountCache</a> resourceCountsCache() {
 <a class="jxr_linenumber" name="L101" href="#L101">101</a> 		ResourceCountCache retVal = <strong class="jxr_keyword">new</strong> <a name="ResourceCountCache" href="../../../../../ca/uhn/fhir/jpa/util/ResourceCountCache.html#ResourceCountCache">ResourceCountCache</a>(() -&gt; systemDaoDstu2().getResourceCounts());
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
 <a class="jxr_linenumber" name="L103" href="#L103">103</a> 		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L104" href="#L104">104</a> 	}
 <a class="jxr_linenumber" name="L105" href="#L105">105</a> 
