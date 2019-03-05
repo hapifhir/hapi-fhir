@@ -30,6 +30,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
 import javax.persistence.PersistenceException;
@@ -67,6 +68,10 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		if (isNotBlank(theMessageToPrepend)) {
 			messageToPrepend = theMessageToPrepend + " - ";
 		}
+		if (theException.toString().contains("Batch update")) {
+			theException.toString();
+		}
+		// <editor-fold desc="I HATE YOU">
 		if (theException instanceof ConstraintViolationException) {
 			String constraintName = ((ConstraintViolationException) theException).getConstraintName();
 			switch (defaultString(constraintName)) {
@@ -78,6 +83,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
 			}
 		}
+		// </editor-fold>
 
 		return super.convertHibernateAccessException(theException);
 	}

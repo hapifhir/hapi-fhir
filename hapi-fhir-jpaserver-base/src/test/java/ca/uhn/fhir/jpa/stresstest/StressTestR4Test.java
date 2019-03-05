@@ -85,12 +85,20 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	public void testPageThroughLotsOfPages() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 
+		/*
+		 * This test creates a really huge number of resources to make sure that even large scale
+		 * searches work correctly. 5000 is arbitrary, this test was intended to demonstrate an
+		 * issue that occurred with 1600 resources but I'm using a huge number here just to
+		 * hopefully catch future issues.
+		 */
+		int count = 5000;
+
+
 		Bundle bundle = new Bundle();
 
 		DiagnosticReport dr = new DiagnosticReport();
 		dr.setId(IdType.newRandomUuid());
 		bundle.addEntry().setFullUrl(dr.getId()).setResource(dr).getRequest().setMethod(HTTPVerb.POST).setUrl("DiagnosticReport");
-		int count = 5000;
 		for (int i = 0; i < count; i++) {
 			Observation o = new Observation();
 			o.setId("A" + leftPad(Integer.toString(i), 4, '0'));
@@ -301,6 +309,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Results: {}", results);
 		assertThat(results, not(Matchers.empty()));
+		assertThat(results.get(0), containsString("HTTP 409 Conflict: Error flushing transaction with resource types: [Patient]"));
 	}
 
 	@Test
@@ -351,6 +360,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.info("Results: {}", results);
 		assertThat(results, not(Matchers.empty()));
+		assertThat(results.get(0), containsString("HTTP 409 Conflict: Error flushing transaction with resource types: [Patient]"));
 	}
 
 	/**

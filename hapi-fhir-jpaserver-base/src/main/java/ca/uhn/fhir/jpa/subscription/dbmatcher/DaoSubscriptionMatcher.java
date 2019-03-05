@@ -31,17 +31,16 @@ import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
-	private static boolean ourForceDelayBeforeMatching;
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired
@@ -80,28 +79,10 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		// See the setter for this variable
-		if (ourForceDelayBeforeMatching) {
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException theE) {
-				theE.printStackTrace();
-			}
-		}
-
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		return txTemplate.execute(t -> responseDao.search(responseCriteriaUrl));
 
 	}
 
-	/**
-	 * Forces a delay before performing match queries against the database. This is only there
-	 * to avoid derby nonsense. I can't figure out why this is needed, but if I remove it we
-	 * get weird derby deadlocks.
-	 */
-	@VisibleForTesting
-	public static void setForceDelayBeforeMatchingForUnitTest(boolean theForceDelayBeforeMatching) {
-		ourForceDelayBeforeMatching = theForceDelayBeforeMatching;
-	}
 }

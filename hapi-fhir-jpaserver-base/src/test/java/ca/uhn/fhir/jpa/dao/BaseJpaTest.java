@@ -80,7 +80,6 @@ public abstract class BaseJpaTest {
 
 	static {
 		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
-		DaoSubscriptionMatcher.setForceDelayBeforeMatchingForUnitTest(true);
 	}
 
 	@Rule
