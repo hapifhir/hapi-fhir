@@ -45,10 +45,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.*;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -103,6 +100,14 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 		String actionName = "Transaction";
 		BUNDLE response = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName);
+
+		List<BUNDLEENTRY> entries = myVersionAdapter.getEntries(response);
+		for (int i = 0; i < entries.size(); i++) {
+			if (ElementUtil.isEmpty(entries.get(i))) {
+				entries.remove(i);
+				i--;
+			}
+		}
 
 		return response;
 	}
@@ -505,6 +510,71 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
 			Set<ResourceTable> updatedEntities = new HashSet<>();
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
+
+			/*
+			 * Look for duplicate conditional creates and consolidate them
+			 */
+			final HashMap<String, String> keyToUuid = new HashMap<>();
+			final IdentityHashMap<IBaseResource, String> identityToUuid = new IdentityHashMap<>();
+			for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
+				BUNDLEENTRY nextReqEntry = theEntries.get(index);
+				IBaseResource resource = myVersionAdapter.getResource(nextReqEntry);
+				if (resource != null) {
+					String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
+					String entryUrl = myVersionAdapter.getFullUrl(nextReqEntry);
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
+					String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
+					String key = verb + "|" + requestUrl + "|" + ifNoneExist;
+
+					// Conditional UPDATE
+					boolean consolidateEntry = false;
+					if ("PUT".equals(verb)) {
+						if (isNotBlank(entryUrl) && isNotBlank(requestUrl)) {
+							int questionMarkIndex = requestUrl.indexOf('?');
+							if (questionMarkIndex >= 0 && requestUrl.length() > (questionMarkIndex + 1)) {
+								consolidateEntry = true;
+							}
+						}
+					}
+
+					// Conditional CREATE
+					if ("POST".equals(verb)) {
+						if (isNotBlank(entryUrl) && isNotBlank(requestUrl) && isNotBlank(ifNoneExist)) {
+							if (!entryUrl.equals(requestUrl)) {
+								consolidateEntry = true;
+							}
+						}
+					}
+
+					if (consolidateEntry) {
+						if (!keyToUuid.containsKey(key)) {
+							keyToUuid.put(key, entryUrl);
+							identityToUuid.put(resource, entryUrl);
+						} else {
+							ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
+							theEntries.remove(index);
+							index--;
+							String existingUuid = keyToUuid.get(key);
+							for (BUNDLEENTRY nextEntry : theEntries) {
+								IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
+								for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
+									// We're interested in any references directly to the placeholder ID, but also
+									// references that have a resource target that has the placeholder ID.
+									String nextReferenceId = nextReference.getResourceReference().getReferenceElement().getValue();
+									if (isBlank(nextReferenceId) && nextReference.getResourceReference().getResource() != null) {
+										nextReferenceId = nextReference.getResourceReference().getResource().getIdElement().getValue();
+									}
+									if (entryUrl.equals(nextReferenceId)) {
+										nextReference.getResourceReference().setReference(existingUuid);
+										nextReference.getResourceReference().setResource(null);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
 
 			/*
 			 * Loop through the request and process any entries of type

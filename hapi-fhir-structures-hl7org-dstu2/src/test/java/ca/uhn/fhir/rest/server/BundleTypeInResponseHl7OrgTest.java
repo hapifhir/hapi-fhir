@@ -64,7 +64,7 @@ public class BundleTypeInResponseHl7OrgTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ourCtx));
 
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);

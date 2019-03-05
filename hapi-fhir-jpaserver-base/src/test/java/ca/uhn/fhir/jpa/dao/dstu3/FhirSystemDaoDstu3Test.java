@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
+import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -39,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -174,6 +176,22 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	private Bundle loadBundle(String theFileName) throws IOException {
 		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream(theFileName), StandardCharsets.UTF_8);
 		return myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
+	}
+
+	@Test
+	public void testTransactionWithDuplicateConditionalCreates2() throws IOException {
+		Bundle request = myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(FhirSystemDaoR4.class.getResourceAsStream("/dstu3/duplicate-conditional-create.json"), Constants.CHARSET_UTF8));
+
+		Bundle response = mySystemDao.transaction(null, request);
+
+		ourLog.info("Response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+		List<String> responseTypes = response
+			.getEntry()
+			.stream()
+			.map(t -> new org.hl7.fhir.r4.model.IdType(t.getResponse().getLocation()).getResourceType())
+			.collect(Collectors.toList());
+		assertThat(responseTypes.toString(), responseTypes, contains("Patient", "Encounter", "Location", "Location", "Practitioner", "ProcedureRequest", "DiagnosticReport", "Specimen", "Practitioner", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation"));
 	}
 
 	@Test

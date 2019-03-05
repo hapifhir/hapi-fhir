@@ -1241,7 +1241,7 @@ public class JsonParserDstu3Test {
 		Patient p = new Patient();
 		p.addName().setFamily("Smith").addGiven("John");
 
-		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ourCtx));
 
 		String output = ourCtx.newJsonParser().encodeResourceToString(p);
 		ourLog.info(output);

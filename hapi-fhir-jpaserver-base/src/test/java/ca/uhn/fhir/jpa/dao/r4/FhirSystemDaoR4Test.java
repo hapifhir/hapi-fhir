@@ -38,6 +38,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -1043,6 +1044,183 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("1", respEntry.getResponse().getEtag());
 
 	}
+
+	@Test
+	public void testTransactionWithDuplicateConditionalCreates() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Practitioner p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Practitioner/")
+			.setIfNoneExist("Practitioner?identifier=http://foo|bar");
+
+		Observation o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setReference(p.getId());
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Practitioner/")
+			.setIfNoneExist("Practitioner?identifier=http://foo|bar");
+
+		o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setReference(p.getId());
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		Bundle response = mySystemDao.transaction(null, request);
+
+		ourLog.info("Response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+		List<String> responseTypes = response
+			.getEntry()
+			.stream()
+			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
+			.collect(Collectors.toList());
+		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation", "Observation"));
+	}
+
+
+	@Test
+	public void testTransactionWithDuplicateConditionalCreatesWithResourceLinkReference() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Practitioner p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Practitioner/")
+			.setIfNoneExist("Practitioner?identifier=http://foo|bar");
+
+		Observation o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setResource(p);
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Practitioner/")
+			.setIfNoneExist("Practitioner?identifier=http://foo|bar");
+
+		o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setResource(p);
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		Bundle response = mySystemDao.transaction(null, request);
+
+		ourLog.info("Response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+		List<String> responseTypes = response
+			.getEntry()
+			.stream()
+			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
+			.collect(Collectors.toList());
+		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation", "Observation"));
+	}
+
+	@Test
+	public void testTransactionWithDuplicateConditionalUpdates() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+
+		Practitioner p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Practitioner?identifier=http://foo|bar");
+
+		Observation o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setReference(p.getId());
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		p = new Practitioner();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		request.addEntry()
+			.setFullUrl(p.getId())
+			.setResource(p)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Practitioner?identifier=http://foo|bar");
+
+		o = new Observation();
+		o.setId(IdType.newRandomUuid());
+		o.getPerformerFirstRep().setReference(p.getId());
+		request.addEntry()
+			.setFullUrl(o.getId())
+			.setResource(o)
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Observation/");
+
+		Bundle response = mySystemDao.transaction(null, request);
+
+		ourLog.info("Response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+		List<String> responseTypes = response
+			.getEntry()
+			.stream()
+			.map(t -> new IdType(t.getResponse().getLocation()).getResourceType())
+			.collect(Collectors.toList());
+		assertThat(responseTypes.toString(), responseTypes, contains("Practitioner", "Observation", "Observation"));
+	}
+
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithTwoMatches() {
