@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1157,7 +1157,7 @@ public class Endpoint extends DomainResource {
    * Path: <b>Endpoint.managingOrganization</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="Endpoint.managingOrganization.where(resolve() is Organization)", description="The organization that is managing the endpoint", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="organization", path="Endpoint.managingOrganization", description="The organization that is managing the endpoint", type="reference", target={Organization.class } )
   public static final String SP_ORGANIZATION = "organization";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>organization</b>

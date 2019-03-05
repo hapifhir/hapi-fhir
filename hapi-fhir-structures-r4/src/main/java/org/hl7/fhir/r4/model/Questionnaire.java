@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -108,7 +108,7 @@ public class Questionnaire extends MetadataResource {
          */
         OPENCHOICE, 
         /**
-         * Question with binary content such as a image, PDF, etc. as an answer (valueAttachment).
+         * Question with binary content such as an image, PDF, etc. as an answer (valueAttachment).
          */
         ATTACHMENT, 
         /**
@@ -116,7 +116,7 @@ public class Questionnaire extends MetadataResource {
          */
         REFERENCE, 
         /**
-         * Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity) There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit should be captured (or the a unit that has a ucum conversion from the provided unit).
+         * Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity) There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit should be captured (or the unit that has a ucum conversion from the provided unit).
          */
         QUANTITY, 
         /**
@@ -225,9 +225,9 @@ public class Questionnaire extends MetadataResource {
             case URL: return "Question with a URL (website, FTP site, etc.) answer (valueUri).";
             case CHOICE: return "Question with a Coding drawn from a list of possible answers (specified in either the answerOption property, or via the valueset referenced in the answerValueSet property) as an answer (valueCoding).";
             case OPENCHOICE: return "Answer is a Coding drawn from a list of possible answers (as with the choice type) or a free-text entry in a string (valueCoding or valueString).";
-            case ATTACHMENT: return "Question with binary content such as a image, PDF, etc. as an answer (valueAttachment).";
+            case ATTACHMENT: return "Question with binary content such as an image, PDF, etc. as an answer (valueAttachment).";
             case REFERENCE: return "Question with a reference to another resource (practitioner, organization, etc.) as an answer (valueReference).";
-            case QUANTITY: return "Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity) There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit should be captured (or the a unit that has a ucum conversion from the provided unit).";
+            case QUANTITY: return "Question with a combination of a numeric value and unit, potentially with a comparator (<, >, etc.) as an answer. (valueQuantity) There is an extension 'http://hl7.org/fhir/StructureDefinition/questionnaire-unit' that can be used to define what unit should be captured (or the unit that has a ucum conversion from the provided unit).";
             default: return "?";
           }
         }
@@ -2100,7 +2100,7 @@ public class Questionnaire extends MetadataResource {
          */
         public BooleanType getAnswerBooleanType() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new BooleanType();
           if (!(this.answer instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (BooleanType) this.answer;
@@ -2115,7 +2115,7 @@ public class Questionnaire extends MetadataResource {
          */
         public DecimalType getAnswerDecimalType() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new DecimalType();
           if (!(this.answer instanceof DecimalType))
             throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (DecimalType) this.answer;
@@ -2130,7 +2130,7 @@ public class Questionnaire extends MetadataResource {
          */
         public IntegerType getAnswerIntegerType() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new IntegerType();
           if (!(this.answer instanceof IntegerType))
             throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (IntegerType) this.answer;
@@ -2145,7 +2145,7 @@ public class Questionnaire extends MetadataResource {
          */
         public DateType getAnswerDateType() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new DateType();
           if (!(this.answer instanceof DateType))
             throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (DateType) this.answer;
@@ -2160,7 +2160,7 @@ public class Questionnaire extends MetadataResource {
          */
         public DateTimeType getAnswerDateTimeType() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new DateTimeType();
           if (!(this.answer instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (DateTimeType) this.answer;
@@ -2175,7 +2175,7 @@ public class Questionnaire extends MetadataResource {
          */
         public TimeType getAnswerTimeType() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new TimeType();
           if (!(this.answer instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (TimeType) this.answer;
@@ -2190,7 +2190,7 @@ public class Questionnaire extends MetadataResource {
          */
         public StringType getAnswerStringType() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new StringType();
           if (!(this.answer instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (StringType) this.answer;
@@ -2205,7 +2205,7 @@ public class Questionnaire extends MetadataResource {
          */
         public Coding getAnswerCoding() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new Coding();
           if (!(this.answer instanceof Coding))
             throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (Coding) this.answer;
@@ -2220,7 +2220,7 @@ public class Questionnaire extends MetadataResource {
          */
         public Quantity getAnswerQuantity() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new Quantity();
           if (!(this.answer instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (Quantity) this.answer;
@@ -2235,7 +2235,7 @@ public class Questionnaire extends MetadataResource {
          */
         public Reference getAnswerReference() throws FHIRException { 
           if (this.answer == null)
-            return null;
+            this.answer = new Reference();
           if (!(this.answer instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.answer.getClass().getName()+" was encountered");
           return (Reference) this.answer;
@@ -2494,7 +2494,7 @@ public class Questionnaire extends MetadataResource {
          */
         public IntegerType getValueIntegerType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new IntegerType();
           if (!(this.value instanceof IntegerType))
             throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IntegerType) this.value;
@@ -2509,7 +2509,7 @@ public class Questionnaire extends MetadataResource {
          */
         public DateType getValueDateType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new DateType();
           if (!(this.value instanceof DateType))
             throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateType) this.value;
@@ -2524,7 +2524,7 @@ public class Questionnaire extends MetadataResource {
          */
         public TimeType getValueTimeType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new TimeType();
           if (!(this.value instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (TimeType) this.value;
@@ -2539,7 +2539,7 @@ public class Questionnaire extends MetadataResource {
          */
         public StringType getValueStringType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new StringType();
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
@@ -2554,7 +2554,7 @@ public class Questionnaire extends MetadataResource {
          */
         public Coding getValueCoding() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Coding();
           if (!(this.value instanceof Coding))
             throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Coding) this.value;
@@ -2569,7 +2569,7 @@ public class Questionnaire extends MetadataResource {
          */
         public Reference getValueReference() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Reference();
           if (!(this.value instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Reference) this.value;
@@ -2829,7 +2829,7 @@ public class Questionnaire extends MetadataResource {
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new BooleanType();
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
@@ -2844,7 +2844,7 @@ public class Questionnaire extends MetadataResource {
          */
         public DecimalType getValueDecimalType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new DecimalType();
           if (!(this.value instanceof DecimalType))
             throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DecimalType) this.value;
@@ -2859,7 +2859,7 @@ public class Questionnaire extends MetadataResource {
          */
         public IntegerType getValueIntegerType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new IntegerType();
           if (!(this.value instanceof IntegerType))
             throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IntegerType) this.value;
@@ -2874,7 +2874,7 @@ public class Questionnaire extends MetadataResource {
          */
         public DateType getValueDateType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new DateType();
           if (!(this.value instanceof DateType))
             throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateType) this.value;
@@ -2889,7 +2889,7 @@ public class Questionnaire extends MetadataResource {
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new DateTimeType();
           if (!(this.value instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
@@ -2904,7 +2904,7 @@ public class Questionnaire extends MetadataResource {
          */
         public TimeType getValueTimeType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new TimeType();
           if (!(this.value instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (TimeType) this.value;
@@ -2919,7 +2919,7 @@ public class Questionnaire extends MetadataResource {
          */
         public StringType getValueStringType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new StringType();
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
@@ -2934,7 +2934,7 @@ public class Questionnaire extends MetadataResource {
          */
         public UriType getValueUriType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new UriType();
           if (!(this.value instanceof UriType))
             throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (UriType) this.value;
@@ -2949,7 +2949,7 @@ public class Questionnaire extends MetadataResource {
          */
         public Attachment getValueAttachment() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Attachment();
           if (!(this.value instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
@@ -2964,7 +2964,7 @@ public class Questionnaire extends MetadataResource {
          */
         public Coding getValueCoding() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Coding();
           if (!(this.value instanceof Coding))
             throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Coding) this.value;
@@ -2979,7 +2979,7 @@ public class Questionnaire extends MetadataResource {
          */
         public Quantity getValueQuantity() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Quantity();
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
@@ -2994,7 +2994,7 @@ public class Questionnaire extends MetadataResource {
          */
         public Reference getValueReference() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Reference();
           if (!(this.value instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Reference) this.value;
@@ -3936,7 +3936,7 @@ public class Questionnaire extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate questionnaire instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate questionnaire instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -4382,7 +4382,7 @@ public class Questionnaire extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the questionnaire.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the questionnaire from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate questionnaire instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate questionnaire instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the questionnaire is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this questionnaire is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the questionnaire and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the questionnaire.", 0, 1, copyright));
@@ -4409,7 +4409,7 @@ public class Questionnaire extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the questionnaire.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the questionnaire from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate questionnaire instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate questionnaire instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the questionnaire is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this questionnaire is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the questionnaire and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the questionnaire.", 0, 1, copyright);

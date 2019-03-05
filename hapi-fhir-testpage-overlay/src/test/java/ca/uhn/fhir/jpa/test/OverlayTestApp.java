@@ -56,7 +56,7 @@ public class OverlayTestApp {
 //		restServerDstu2.setPagingProvider(new FifoMemoryPagingProvider(10));
 //		restServerDstu2.setImplementationDescription("This is a great server!!!!");
 //		restServerDstu2.setFhirContext(ourAppCtx.getBean("myFhirContextDstu2", FhirContext.class));
-//		List<IResourceProvider> rpsDev = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
+//		List<IResourceRetriever> rpsDev = (List<IResourceRetriever>) ourAppCtx.getBean("myResourceProvidersDstu2", List.class);
 //		restServerDstu2.setResourceProviders(rpsDev);
 //
 //		JpaSystemProviderDstu2 systemProvDev = (JpaSystemProviderDstu2) ourAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class);
@@ -74,7 +74,7 @@ public class OverlayTestApp {
 //		restServerDstu1.setPagingProvider(new FifoMemoryPagingProvider(10));
 //		restServerDstu1.setImplementationDescription("This is a great server!!!!");
 //		restServerDstu1.setFhirContext(ourAppCtx.getBean("myFhirContextDstu1", FhirContext.class));
-//		List<IResourceProvider> rpsDstu1 = (List<IResourceProvider>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
+//		List<IResourceRetriever> rpsDstu1 = (List<IResourceRetriever>) ourAppCtx.getBean("myResourceProvidersDstu1", List.class);
 //		restServerDstu1.setResourceProviders(rpsDstu1);
 //
 //		JpaSystemProviderDstu1 systemProvDstu1 = (JpaSystemProviderDstu1) ourAppCtx.getBean("mySystemProviderDstu1", JpaSystemProviderDstu1.class);

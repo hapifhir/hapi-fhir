@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
+import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.TemplateEngine;
 
 import javax.servlet.ServletException;
@@ -51,17 +52,13 @@ public class BaseController {
 	private Map<FhirVersionEnum, FhirContext> myContexts = new HashMap<FhirVersionEnum, FhirContext>();
 	private List<String> myFilterHeaders;
 	@Autowired
-	private TemplateEngine myTemplateEngine;
+	private ITemplateEngine myTemplateEngine;
 
 	public BaseController() {
 		super();
 	}
 
 	protected IBaseResource addCommonParams(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
-		if (myConfig.getDebugTemplatesMode()) {
-			myTemplateEngine.getCacheManager().clearAllCaches();
-		}
-
 		final String serverId = theRequest.getServerIdWithDefault(myConfig);
 		final String serverBase = theRequest.getServerBase(theServletRequest, myConfig);
 		final String serverName = theRequest.getServerName(myConfig);

@@ -35,7 +35,7 @@ import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 /**
  * Primitive type "base64Binary" in FHIR: a sequence of bytes represented in base64
  */
-@DatatypeDef(name="base64binary")
+@DatatypeDef(name="base64Binary")
 public class Base64BinaryType extends PrimitiveType<byte[]> {
 
 	private static final long serialVersionUID = 3L;
@@ -67,7 +67,9 @@ public class Base64BinaryType extends PrimitiveType<byte[]> {
 
 	@Override
 	public Base64BinaryType copy() {
-		return new Base64BinaryType(getValue());
+		Base64BinaryType ret = new Base64BinaryType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

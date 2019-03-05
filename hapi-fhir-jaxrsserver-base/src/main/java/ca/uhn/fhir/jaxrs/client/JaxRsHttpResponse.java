@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jaxrs.client;
 
-import java.io.IOException;
+import java.io.*;
 
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,6 @@ import java.io.IOException;
  * #L%
  */
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,9 +31,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import org.apache.commons.io.IOUtils;
 
 /**
  * A Http Response based on JaxRs. This is an adapter around the class {@link javax.ws.rs.core.Response Response}
@@ -118,7 +117,11 @@ public class JaxRsHttpResponse extends BaseHttpResponse implements IHttpResponse
 
 	@Override
 	public InputStream readEntity() {
-		return myResponse.readEntity(java.io.InputStream.class);
+		if (!myBufferedEntity && !myResponse.hasEntity()) {
+			return new ByteArrayInputStream(new byte[0]);
+		} else {
+			return new ByteArrayInputStream(myResponse.readEntity(byte[].class));
+		}
 	}
 
 	@Override

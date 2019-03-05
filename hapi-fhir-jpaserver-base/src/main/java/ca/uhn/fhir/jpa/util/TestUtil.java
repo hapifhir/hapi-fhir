@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.util;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.Patient;
 
 import javax.persistence.*;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -78,6 +82,14 @@ public class TestUtil {
 		for (Field nextField : theClazz.getDeclaredFields()) {
 			ourLog.info(" * Scanning field: {}", nextField.getName());
 			scan(nextField, theNames, theIsSuperClass);
+
+			Lob lobClass = nextField.getAnnotation(Lob.class);
+			if (lobClass != null) {
+				if (nextField.getType().equals(byte[].class) == false) {
+					//Validate.isTrue(false);
+				}
+			}
+
 		}
 
 		if (theClazz.getSuperclass().equals(Object.class)) {
@@ -87,8 +99,8 @@ public class TestUtil {
 		scanClass(theNames, theClazz.getSuperclass(), true);
 	}
 
-	private static void scan(AnnotatedElement ae, Set<String> theNames, boolean theIsSuperClass) {
-		Table table = ae.getAnnotation(Table.class);
+	private static void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass) {
+		Table table = theAnnotatedElement.getAnnotation(Table.class);
 		if (table != null) {
 			assertNotADuplicateName(table.name(), theNames);
 			for (UniqueConstraint nextConstraint : table.uniqueConstraints()) {
@@ -101,28 +113,28 @@ public class TestUtil {
 			}
 		}
 
-		JoinColumn joinColumn = ae.getAnnotation(JoinColumn.class);
+		JoinColumn joinColumn = theAnnotatedElement.getAnnotation(JoinColumn.class);
 		if (joinColumn != null) {
 			assertNotADuplicateName(joinColumn.name(), null);
 			ForeignKey fk = joinColumn.foreignKey();
 			if (theIsSuperClass) {
-				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + ae.toString() + " has a name() and should not as it is a superclass");
+				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement.toString() + " has a name() and should not as it is a superclass");
 			} else {
 				Validate.notNull(fk);
-				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + ae.toString() + " has no name()");
+				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement.toString() + " has no name()");
 				Validate.isTrue(fk.name().startsWith("FK_"));
 				assertNotADuplicateName(fk.name(), theNames);
 			}
 		}
 
-		Column column = ae.getAnnotation(Column.class);
+		Column column = theAnnotatedElement.getAnnotation(Column.class);
 		if (column != null) {
 			assertNotADuplicateName(column.name(), null);
-			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + ae.toString());
+			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + theAnnotatedElement.toString());
 		}
 
-		GeneratedValue gen = ae.getAnnotation(GeneratedValue.class);
-		SequenceGenerator sg = ae.getAnnotation(SequenceGenerator.class);
+		GeneratedValue gen = theAnnotatedElement.getAnnotation(GeneratedValue.class);
+		SequenceGenerator sg = theAnnotatedElement.getAnnotation(SequenceGenerator.class);
 		Validate.isTrue((gen != null) == (sg != null));
 		if (gen != null) {
 			assertNotADuplicateName(gen.generator(), theNames);
@@ -157,10 +169,21 @@ public class TestUtil {
 				ourLog.info("Sleeping for {}ms", timeToSleep);
 				Thread.sleep(timeToSleep);
 			} catch (InterruptedException theE) {
-				theE.printStackTrace();
+				ourLog.error("Interrupted", theE);
 			}
 		}
 	}
 
 
+	public static void clearAllStaticFieldsForUnitTest() {
+		ca.uhn.fhir.util.TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	public static InstantType getTimestamp(IBaseResource resource) {
+		return new InstantType(new Date(resource.getMeta().getLastUpdated().getTime()));
+	}
+
+	public static void sleepOneClick() {
+		sleepAtLeast(1);
+	}
 }

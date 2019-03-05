@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.utils;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.utils.FhirPathEngineTest;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -24,19 +25,46 @@ public class FhirPathEngineR4Test {
 	@Test
 	public void testCrossResourceBoundaries() throws FHIRException {
 		Specimen specimen = new Specimen();
-		specimen.setId("#FOO");
 		specimen.setReceivedTimeElement(new DateTimeType("2011-01-01"));
-		Observation o = new Observation();
-		o.getContained().add(specimen);
 
+		Observation o = new Observation();
 		o.setId("O1");
 		o.setStatus(Observation.ObservationStatus.FINAL);
-		o.setSpecimen(new Reference("#FOO"));
+		o.setSpecimen(new Reference(specimen));
 
-		List<Base> value = ourEngine.evaluate(o, "Observation.specimen.resolve().receivedTime");
+		IParser p = ourCtx.newJsonParser();
+		o = (Observation) p.parseResource(p.encodeResourceToString(o));
+
+		List<Base> value;
+
+//		value = ourEngine.evaluate(o, "Observation.specimen");
+//		assertEquals(1, value.size());
+		value = ourEngine.evaluate(o, "Observation.specimen.resolve()");
+		assertEquals(1, value.size());
+
+
+		value = ourEngine.evaluate(o, "Observation.specimen.resolve().receivedTime");
 		assertEquals(1, value.size());
 		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
+
+	@Test
+	public void testComponentCode() {
+		String path = "(Observation.component.value as Quantity) ";
+
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
+			.setValue(new Quantity().setSystem("http://bar").setCode("code1").setValue(200));
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code2")))
+			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
+
+		List<Base> outcme = ourEngine.evaluate(o1, path);
+		assertEquals(2, outcme.size());
+
+	}
+
 
 	@Test
 	public void testAs() throws Exception {

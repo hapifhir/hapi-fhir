@@ -46,7 +46,13 @@ public class ModelDstu3Test {
 	@Test
 	public void testSetters() {
 		Claim claim = new Claim();
-		claim.setIdentifier(new ArrayList<Identifier>()).setCareTeam(new ArrayList<CareTeamComponent>());
+		claim.setIdentifier(new ArrayList<>()).setCareTeam(new ArrayList<>());
+	}
+
+	@Test
+	public void testbase64BinaryName() {
+		assertEquals("base64Binary", ourCtx.getElementDefinition("base64binary").getName());
+		assertEquals("base64Binary", ourCtx.getElementDefinition("base64Binary").getName());
 	}
 
 	@Test

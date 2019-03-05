@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.6.0</version>
+		<version>3.8.0-SNAPSHOT</version>
 		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -33,7 +33,7 @@
    </description>
 
    <properties>
-		<pax.exam.version>4.12.0</pax.exam.version>
+		<pax.exam.version>4.13.1</pax.exam.version>
    </properties>
 
    <dependencies>
@@ -97,7 +97,11 @@
 			<artifactId>hapi-fhir-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
+		<dependency>
+		  <groupId>org.ops4j.pax.url</groupId>
+		  <artifactId>pax-url-aether</artifactId>
+		  <version>2.5.4</version>
+		</dependency>
 
       <!-- karaf test -->
       <dependency>
@@ -125,8 +129,8 @@
          <type>tar.gz</type>
 			<exclusions>
 				<exclusion>
-					<groupId>org.ops4j.pax.logging</groupId>
-					<artifactId>pax-logging-api</artifactId>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
 				</exclusion>
 			</exclusions>
       </dependency>
@@ -146,19 +150,36 @@
       </dependency>
       <dependency>
          <groupId>org.apache.karaf.features</groupId>
-         <artifactId>enterprise</artifactId>
+         <artifactId>standard</artifactId>
          <version>${apache_karaf_version}</version>
          <classifier>features</classifier>
          <type>xml</type>
          <scope>test</scope>
       </dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.hamcrest</artifactId>
-			<version>1.3_1</version>
-			<scope>runtime</scope>
-		</dependency>
-   </dependencies>
+      <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>enterprise</artifactId>
+            <version>${apache_karaf_version}</version>
+            <classifier>features</classifier>
+            <type>xml</type>
+            <scope>test</scope>
+      </dependency>
+      <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.hamcrest</artifactId>
+            <version>1.3_1</version>
+            <scope>runtime</scope>
+      </dependency>
+      <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+      </dependency>
+      <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <optional>true</optional>
+      </dependency>
+	</dependencies>
 
    <build>
       <plugins>
@@ -181,6 +202,9 @@
 				<configuration>
 					<forkCount>1</forkCount>
 					<reuseForks>false</reuseForks>
+					<systemPropertyVariables>
+						<karaf.version>${apache_karaf_version}</karaf.version>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
       </plugins>

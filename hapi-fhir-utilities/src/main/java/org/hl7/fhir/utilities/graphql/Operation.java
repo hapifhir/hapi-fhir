@@ -3,8 +3,6 @@ package org.hl7.fhir.utilities.graphql;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hl7.fhir.utilities.graphql.Operation.OperationType;
-
 public class  Operation {
   public enum OperationType {qglotQuery, qglotMutation}
   

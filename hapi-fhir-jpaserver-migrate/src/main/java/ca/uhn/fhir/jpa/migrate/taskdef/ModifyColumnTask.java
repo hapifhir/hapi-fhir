@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,12 +95,12 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 
 		ourLog.info("Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
 		if (sql != null) {
-			executeSql(sql);
+			executeSql(getTableName(), sql);
 		}
 
 		if (sqlNotNull != null) {
 			ourLog.info("Updating column {} on table {} to not null", getColumnName(), getTableName());
-			executeSql(sqlNotNull);
+			executeSql(getTableName(), sqlNotNull);
 		}
 	}
 

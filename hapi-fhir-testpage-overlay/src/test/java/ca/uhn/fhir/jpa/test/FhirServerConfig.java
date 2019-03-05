@@ -26,7 +26,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 @EnableTransactionManagement()
 public class FhirServerConfig {
 
-	@Bean()
+	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		return retVal;

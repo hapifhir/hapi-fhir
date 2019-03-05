@@ -213,5 +213,4 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         }
         return false;
     }
-   
 }

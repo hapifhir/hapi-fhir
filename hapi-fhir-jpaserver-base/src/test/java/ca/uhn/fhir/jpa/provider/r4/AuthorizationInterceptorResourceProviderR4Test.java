@@ -4,6 +4,8 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
@@ -148,6 +151,58 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	}
 
+	@Test
+	public void testReadInTransaction() {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		IIdType id = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute().getId().toUnqualifiedVersionless();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				String authHeader = theRequestDetails.getHeader("Authorization");
+				if (!"Bearer AAA".equals(authHeader)) {
+					throw new AuthenticationException("Invalid auth header: " + authHeader);
+				}
+				return new RuleBuilder()
+					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow().read().resourcesOfType(Patient.class).withAnyId()
+					.build();
+			}
+		});
+
+		SimpleRequestHeaderInterceptor interceptor = new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA");
+		try {
+			ourClient.registerInterceptor(interceptor);
+
+			Bundle bundle;
+			Bundle responseBundle;
+
+			// Read
+			bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(id.getValue());
+			responseBundle = ourClient.transaction().withBundle(bundle).execute();
+			patient = (Patient) responseBundle.getEntry().get(0).getResource();
+			assertEquals("Tester", patient.getNameFirstRep().getFamily());
+
+			// Search
+			bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient?");
+			responseBundle = ourClient.transaction().withBundle(bundle).execute();
+			responseBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
+			patient = (Patient) responseBundle.getEntry().get(0).getResource();
+			assertEquals("Tester", patient.getNameFirstRep().getFamily());
+
+		} finally {
+			ourClient.unregisterInterceptor(interceptor);
+		}
+
+	}
+
 	/**
 	 * See #751
 	 */
@@ -233,6 +288,52 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 		try {
 			ourClient.delete().resourceById(obsNotInCompartmentId.toUnqualifiedVersionless()).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
+
+	@Test
+	public void testDeleteIsAllowedForCompartmentUsingTransaction() {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		final IIdType id = ourClient.create().resource(patient).execute().getId();
+
+		Observation obsInCompartment = new Observation();
+		obsInCompartment.setStatus(ObservationStatus.FINAL);
+		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
+		IIdType obsInCompartmentId = ourClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
+
+		Observation obsNotInCompartment = new Observation();
+		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
+		IIdType obsNotInCompartmentId = ourClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().delete().resourcesOfType(Observation.class).inCompartment("Patient", id).andThen()
+					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+		Bundle bundle;
+
+		bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsInCompartmentId.toUnqualifiedVersionless().getValue());
+		ourClient.transaction().withBundle(bundle).execute();
+
+		try {
+			bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsNotInCompartmentId.toUnqualifiedVersionless().getValue());
+			ourClient.transaction().withBundle(bundle).execute();
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
@@ -447,7 +548,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		encounter.addDiagnosis(dc);
 		CodeableConcept reason = new CodeableConcept();
 		reason.setText("SLIPPED ON FLOOR,PAIN L) ELBOW");
-		encounter.addReason(reason);
+		encounter.addReasonCode(reason);
 
 		// add encounter to bundle so its created
 		bundle.addEntry()

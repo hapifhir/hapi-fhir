@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.warm;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,15 @@ package ca.uhn.fhir.jpa.search.warm;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.util.UrlUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -34,6 +39,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	@Autowired
@@ -43,6 +49,8 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	private FhirContext myCtx;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@Override
 	@Scheduled(fixedDelay = 1000)
@@ -69,10 +77,10 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	private void refreshNow(WarmCacheEntry theCacheEntry) {
 		String nextUrl = theCacheEntry.getUrl();
 
-		RuntimeResourceDefinition resourceDef = parseUrlResourceType(myCtx, nextUrl);
+		RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myCtx, nextUrl);
 		IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceDef.getName());
 		String queryPart = parseWarmUrlParamPart(nextUrl);
-		SearchParameterMap responseCriteriaUrl = BaseHapiFhirDao.translateMatchUrl(callingDao, myCtx, queryPart, resourceDef);
+		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
 
 		callingDao.search(responseCriteriaUrl);
 	}
@@ -83,20 +91,6 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 			throw new ConfigurationException("Invalid warm cache URL (must have ? character)");
 		}
 		return theNextUrl.substring(paramIndex);
-	}
-
-	/**
-	 * TODO: this method probably belongs in a utility class, not here
-	 *
-	 * @throws DataFormatException If the resource type is not known
-	 */
-	public static RuntimeResourceDefinition parseUrlResourceType(FhirContext theCtx, String theUrl) throws DataFormatException {
-		int paramIndex = theUrl.indexOf('?');
-		String resourceName = theUrl.substring(0, paramIndex);
-		if (resourceName.contains("/")) {
-			resourceName = resourceName.substring(resourceName.lastIndexOf('/') + 1);
-		}
-		return theCtx.getResourceDefinition(resourceName);
 	}
 
 	@PostConstruct
@@ -112,7 +106,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 			// Validate
 			parseWarmUrlParamPart(next.getUrl());
-			parseUrlResourceType(myCtx, next.getUrl());
+			UrlUtil.parseUrlResourceType(myCtx, next.getUrl());
 
 			myCacheEntryToNextRefresh.put(next, 0L);
 		}

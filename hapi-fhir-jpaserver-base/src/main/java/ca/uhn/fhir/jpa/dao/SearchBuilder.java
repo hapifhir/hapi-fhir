@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,24 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
-import ca.uhn.fhir.jpa.dao.index.ResourceIndexedSearchParams;
-import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.jpa.search.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.entity.ResourceSearchView;
+import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.util.StringNormalizer;
+import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
@@ -56,7 +67,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -69,16 +79,22 @@ import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPre
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -86,37 +102,57 @@ import static org.apache.commons.lang3.StringUtils.*;
  * The SearchBuilder is responsible for actually forming the SQL query that handles
  * searches for resources
  */
-@SuppressWarnings("JpaQlInspection")
+@Component
+@Scope("prototype")
 public class SearchBuilder implements ISearchBuilder {
 
 	private static final List<Long> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
+	private static final int maxLoad = 800;
 	private static Long NO_MORE = -1L;
 	private static HandlerTypeEnum ourLastHandlerMechanismForUnitTest;
 	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
 	private static String ourLastHandlerThreadForUnitTest;
 	private static boolean ourTrackHandlersForUnitTest;
 	private final boolean myDontUseHashesForSearch;
+	private final DaoConfig myDaoConfig;
+	@Autowired
 	protected IResourceTagDao myResourceTagDao;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
+	@Autowired
 	private IResourceSearchViewDao myResourceSearchViewDao;
+	@Autowired
+	private FhirContext myContext;
+	@Autowired
+	private IdHelperService myIdHelperService;
+	@Autowired(required = false)
+	private IFulltextSearchSvc myFulltextSearchSvc;
+	@Autowired
+	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private IHapiTerminologySvc myTerminologySvc;
+	@Autowired
+	private MatchResourceUrlService myMatchResourceUrlService;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
-	private FhirContext myContext;
-	private EntityManager myEntityManager;
-	private IForcedIdDao myForcedIdDao;
-	private IFulltextSearchSvc myFulltextSearchSvc;
 	private Map<JoinKey, Join<?, ?>> myIndexJoins = Maps.newHashMap();
 	private SearchParameterMap myParams;
 	private ArrayList<Predicate> myPredicates;
-	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	private String myResourceName;
 	private AbstractQuery<Long> myResourceTableQuery;
 	private Root<ResourceTable> myResourceTableRoot;
 	private Class<? extends IBaseResource> myResourceType;
-	private ISearchParamRegistry mySearchParamRegistry;
 	private String mySearchUuid;
-	private IHapiTerminologySvc myTerminologySvc;
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<Long> myPidSet;
@@ -124,22 +160,10 @@ public class SearchBuilder implements ISearchBuilder {
 	/**
 	 * Constructor
 	 */
-	SearchBuilder(FhirContext theFhirContext, EntityManager theEntityManager,
-					  IFulltextSearchSvc theFulltextSearchSvc, BaseHapiFhirDao<?> theDao,
-					  IResourceIndexedSearchParamUriDao theResourceIndexedSearchParamUriDao, IForcedIdDao theForcedIdDao,
-					  IHapiTerminologySvc theTerminologySvc, ISearchParamRegistry theSearchParamRegistry,
-					  IResourceTagDao theResourceTagDao, IResourceSearchViewDao theResourceViewDao) {
-		myContext = theFhirContext;
-		myEntityManager = theEntityManager;
-		myFulltextSearchSvc = theFulltextSearchSvc;
+	SearchBuilder(BaseHapiFhirDao<?> theDao) {
 		myCallingDao = theDao;
-		myDontUseHashesForSearch = theDao.getConfig().getDisableHashBasedSearches();
-		myResourceIndexedSearchParamUriDao = theResourceIndexedSearchParamUriDao;
-		myForcedIdDao = theForcedIdDao;
-		myTerminologySvc = theTerminologySvc;
-		mySearchParamRegistry = theSearchParamRegistry;
-		myResourceTagDao = theResourceTagDao;
-		myResourceSearchViewDao = theResourceViewDao;
+		myDaoConfig = theDao.getConfig();
+		myDontUseHashesForSearch = myDaoConfig.getDisableHashBasedSearches();
 	}
 
 	@Override
@@ -220,24 +244,24 @@ public class SearchBuilder implements ISearchBuilder {
 
 			assert parameterName != null;
 			String paramName = parameterName.replaceAll("\\..*", "");
-			RuntimeSearchParam owningParameterDef = myCallingDao.getSearchParamByName(targetResourceDefinition, paramName);
+			RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
 			if (owningParameterDef == null) {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
 			}
 
-			owningParameterDef = myCallingDao.getSearchParamByName(targetResourceDefinition, owningParameter);
+			owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, owningParameter);
 			if (owningParameterDef == null) {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + owningParameter);
 			}
 
 			Class<? extends IBaseResource> resourceType = targetResourceDefinition.getImplementingClass();
-			Set<Long> match = myCallingDao.processMatchUrl(matchUrl, resourceType);
+			Set<Long> match = myMatchResourceUrlService.processMatchUrl(matchUrl, resourceType);
 			if (match.isEmpty()) {
 				// Pick a PID that can never match
 				match = Collections.singleton(-1L);
 			}
 
-			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myIncomingResourceLinks", JoinType.LEFT);
+			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 
 			Predicate predicate = join.get("mySourceResourcePid").in(match);
 			myPredicates.add(predicate);
@@ -364,7 +388,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		List<Predicate> codePredicates = new ArrayList<>();
 
-		for (IQueryParameterType nextOr : theList) {
+		for (int orIdx = 0; orIdx < theList.size(); orIdx++) {
+			IQueryParameterType nextOr = theList.get(orIdx);
 
 			if (nextOr instanceof ReferenceParam) {
 				ReferenceParam ref = (ReferenceParam) nextOr;
@@ -373,7 +398,7 @@ public class SearchBuilder implements ISearchBuilder {
 					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
 
 					if (dt.hasBaseUrl()) {
-						if (myCallingDao.getConfig().getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
+						if (myDaoConfig.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
 							dt = dt.toUnqualified();
 						} else {
 							ourLog.debug("Searching for resource link with target URL: {}", dt.getValue());
@@ -385,7 +410,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 					List<Long> targetPid;
 					try {
-						targetPid = myCallingDao.translateForcedIdToPids(dt);
+						targetPid = myIdHelperService.translateForcedIdToPids(dt);
 					} catch (ResourceNotFoundException e) {
 						// Use a PID that will never exist
 						targetPid = Collections.singletonList(-1L);
@@ -417,7 +442,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 						if (resourceTypes.isEmpty()) {
 							RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
-							RuntimeSearchParam searchParamByName = myCallingDao.getSearchParamByName(resourceDef, theParamName);
+							RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
 							if (searchParamByName == null) {
 								throw new InternalErrorException("Could not find parameter " + theParamName);
 							}
@@ -441,6 +466,11 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (def instanceof RuntimeChildResourceDefinition) {
 								RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
 								resourceTypes.addAll(resDef.getResourceTypes());
+								if (resourceTypes.size() == 1) {
+									if (resourceTypes.get(0).isInterface()) {
+										throw new InvalidRequestException("Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
+									}
+								}
 							} else {
 								throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
 							}
@@ -458,23 +488,28 @@ public class SearchBuilder implements ISearchBuilder {
 						resourceId = ref.getValue();
 
 					} else {
-						RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
-						resourceTypes = new ArrayList<>(1);
-						resourceTypes.add(resDef.getImplementingClass());
-						resourceId = ref.getIdPart();
+						try {
+							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
+							resourceTypes = new ArrayList<>(1);
+							resourceTypes.add(resDef.getImplementingClass());
+							resourceId = ref.getIdPart();
+						} catch (DataFormatException e) {
+							throw new InvalidRequestException("Invalid resource type: " + ref.getResourceType());
+						}
 					}
 
 					boolean foundChainMatch = false;
 
-					String chain = ref.getChain();
-					String remainingChain = null;
-					int chainDotIndex = chain.indexOf('.');
-					if (chainDotIndex != -1) {
-						remainingChain = chain.substring(chainDotIndex + 1);
-						chain = chain.substring(0, chainDotIndex);
-					}
-
 					for (Class<? extends IBaseResource> nextType : resourceTypes) {
+
+						String chain = ref.getChain();
+						String remainingChain = null;
+						int chainDotIndex = chain.indexOf('.');
+						if (chainDotIndex != -1) {
+							remainingChain = chain.substring(chainDotIndex + 1);
+							chain = chain.substring(0, chainDotIndex);
+						}
+
 						RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(nextType);
 						String subResourceName = typeDef.getName();
 
@@ -491,47 +526,39 @@ public class SearchBuilder implements ISearchBuilder {
 							chain = chain.substring(0, qualifierIndex);
 						}
 
-						boolean isMeta = BaseHapiFhirDao.RESOURCE_META_PARAMS.containsKey(chain);
+						boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
 						RuntimeSearchParam param = null;
 						if (!isMeta) {
-							param = myCallingDao.getSearchParamByName(typeDef, chain);
+							param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
 							if (param == null) {
 								ourLog.debug("Type {} doesn't have search param {}", nextType.getSimpleName(), param);
 								continue;
 							}
 						}
 
-						IQueryParameterType chainValue;
-						if (remainingChain != null) {
-							if (param == null || param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
-								ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", nextType.getSimpleName(), chain, remainingChain);
+						ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
+
+						for (IQueryParameterType next : theList) {
+							String nextValue = next.getValueAsQueryToken(myContext);
+							IQueryParameterType chainValue = mapReferenceChainToRawParamType(remainingChain, param, theParamName, qualifier, nextType, chain, isMeta, nextValue);
+							if (chainValue == null) {
 								continue;
 							}
-
-							chainValue = new ReferenceParam();
-							chainValue.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
-							((ReferenceParam) chainValue).setChain(remainingChain);
-						} else if (isMeta) {
-							IQueryParameterType type = BaseHapiFhirDao.newInstanceType(chain);
-							type.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
-							chainValue = type;
-						} else {
-							chainValue = toParameterType(param, qualifier, resourceId);
+							foundChainMatch = true;
+							orValues.add(chainValue);
 						}
-
-						foundChainMatch = true;
 
 						Subquery<Long> subQ = myResourceTableQuery.subquery(Long.class);
 						Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
 						subQ.select(subQfrom.get("myId").as(Long.class));
 
 						List<List<? extends IQueryParameterType>> andOrParams = new ArrayList<>();
-						andOrParams.add(Collections.singletonList(chainValue));
+						andOrParams.add(orValues);
 
 						/*
 						 * We're doing a chain call, so push the current query root
 						 * and predicate list down and put new ones at the top of the
-						 * stack and run a subuery
+						 * stack and run a subquery
 						 */
 						Root<ResourceTable> stackRoot = myResourceTableRoot;
 						ArrayList<Predicate> stackPredicates = myPredicates;
@@ -543,9 +570,11 @@ public class SearchBuilder implements ISearchBuilder {
 						// Create the subquery predicates
 						myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), subResourceName));
 						myPredicates.add(myBuilder.isNull(myResourceTableRoot.get("myDeleted")));
-						searchForIdsWithAndOr(subResourceName, chain, andOrParams);
 
-						subQ.where(toArray(myPredicates));
+						if (foundChainMatch) {
+							searchForIdsWithAndOr(subResourceName, chain, andOrParams);
+							subQ.where(toArray(myPredicates));
+						}
 
 						/*
 						 * Pop the old query root and predicate list back
@@ -563,6 +592,10 @@ public class SearchBuilder implements ISearchBuilder {
 					if (!foundChainMatch) {
 						throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + ref.getChain()));
 					}
+
+					myPredicates.add(myBuilder.or(toArray(codePredicates)));
+					return;
+
 				}
 
 			} else {
@@ -572,6 +605,28 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		myPredicates.add(myBuilder.or(toArray(codePredicates)));
+	}
+
+	private IQueryParameterType mapReferenceChainToRawParamType(String remainingChain, RuntimeSearchParam param, String theParamName, String qualifier, Class<? extends IBaseResource> nextType, String chain, boolean isMeta, String resourceId) {
+		IQueryParameterType chainValue;
+		if (remainingChain != null) {
+			if (param == null || param.getParamType() != RestSearchParameterTypeEnum.REFERENCE) {
+				ourLog.debug("Type {} parameter {} is not a reference, can not chain {}", nextType.getSimpleName(), chain, remainingChain);
+				return null;
+			}
+
+			chainValue = new ReferenceParam();
+			chainValue.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
+			((ReferenceParam) chainValue).setChain(remainingChain);
+		} else if (isMeta) {
+			IQueryParameterType type = myMatchUrlService.newInstanceType(chain);
+			type.setValueAsQueryToken(myContext, theParamName, qualifier, resourceId);
+			chainValue = type;
+		} else {
+			chainValue = toParameterType(param, qualifier, resourceId);
+		}
+
+		return chainValue;
 	}
 
 	private void addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues) {
@@ -764,31 +819,38 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamToken> join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
-
 		if (theList.get(0).getMissing() != null) {
+			Join<ResourceTable, ResourceIndexedSearchParamToken> join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
+		Join<ResourceTable, ResourceIndexedSearchParamToken> join = null;
+		List<IQueryParameterType> tokens = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
 			if (nextOr instanceof TokenParam) {
 				TokenParam id = (TokenParam) nextOr;
 				if (id.isText()) {
 					addPredicateString(theResourceName, theParamName, theList);
-					continue;
+					break;
 				}
 			}
 
-			Predicate singleCode = createPredicateToken(nextOr, theResourceName, theParamName, myBuilder, join);
-			codePredicates.add(singleCode);
+			if (join == null) {
+				join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
+			}
+
+			tokens.add(nextOr);
 		}
 
-		if (codePredicates.isEmpty()) {
+		if (tokens.isEmpty()) {
 			return;
 		}
+
+		List<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myBuilder, join);
+		codePredicates.addAll(singleCode);
 
 		Predicate spPredicate = myBuilder.or(toArray(codePredicates));
 		myPredicates.add(spPredicate);
@@ -911,7 +973,9 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 			case TOKEN: {
 				From<ResourceIndexedSearchParamToken, ResourceIndexedSearchParamToken> tokenJoin = theRoot.join("myParamsToken", JoinType.INNER);
-				retVal = createPredicateToken(leftValue, theResourceName, theParam.getName(), myBuilder, tokenJoin);
+				List<IQueryParameterType> tokens = Collections.singletonList(leftValue);
+				List<Predicate> tokenPredicates = createPredicateToken(tokens, theResourceName, theParam.getName(), myBuilder, tokenJoin);
+				retVal = myBuilder.and(tokenPredicates.toArray(new Predicate[0]));
 				break;
 			}
 			case DATE: {
@@ -942,38 +1006,34 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@SuppressWarnings("unchecked")
 	private <T> Join<ResourceTable, T> createOrReuseJoin(JoinEnum theType, String theSearchParameterName) {
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
-
-		switch (theType) {
-			case DATE:
-				join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
-				break;
-			case NUMBER:
-				join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
-				break;
-			case QUANTITY:
-				join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
-				break;
-			case REFERENCE:
-				join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
-				break;
-			case STRING:
-				join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
-				break;
-			case URI:
-				join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
-				break;
-			case TOKEN:
-				join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
-				break;
-		}
-
 		JoinKey key = new JoinKey(theSearchParameterName, theType);
-		if (!myIndexJoins.containsKey(key)) {
-			myIndexJoins.put(key, join);
-		}
-
-		return (Join<ResourceTable, T>) join;
+		return (Join<ResourceTable, T>) myIndexJoins.computeIfAbsent(key, k -> {
+			Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
+			switch (theType) {
+				case DATE:
+					join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
+					break;
+				case NUMBER:
+					join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
+					break;
+				case QUANTITY:
+					join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
+					break;
+				case REFERENCE:
+					join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
+					break;
+				case STRING:
+					join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
+					break;
+				case URI:
+					join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
+					break;
+				case TOKEN:
+					join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
+					break;
+			}
+			return join;
+		});
 	}
 
 	private Predicate createPredicateDate(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamDate> theFrom) {
@@ -1162,7 +1222,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private Predicate createPredicateString(IQueryParameterType theParameter, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
 														 From<?, ResourceIndexedSearchParamString> theFrom) {
 		String rawSearchTerm;
-		DaoConfig daoConfig = myCallingDao.getConfig();
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;
 			if (!id.isText()) {
@@ -1173,7 +1232,7 @@ public class SearchBuilder implements ISearchBuilder {
 			StringParam id = (StringParam) theParameter;
 			rawSearchTerm = id.getValue();
 			if (id.isContains()) {
-				if (!daoConfig.isAllowContainsSearches()) {
+				if (!myDaoConfig.isAllowContainsSearches()) {
 					throw new MethodNotAllowedException(":contains modifier is disabled on this server");
 				}
 			}
@@ -1190,8 +1249,8 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		if (myDontUseHashesForSearch) {
-			String likeExpression = BaseHapiFhirDao.normalizeString(rawSearchTerm);
-			if (myCallingDao.getConfig().isAllowContainsSearches()) {
+			String likeExpression = StringNormalizer.normalizeString(rawSearchTerm);
+			if (myDaoConfig.isAllowContainsSearches()) {
 				if (theParameter instanceof StringParam) {
 					if (((StringParam) theParameter).isContains()) {
 						likeExpression = createLeftAndRightMatchLikeExpression(likeExpression);
@@ -1226,17 +1285,17 @@ public class SearchBuilder implements ISearchBuilder {
 
 			// Normalized Match
 
-			String normalizedString = BaseHapiFhirDao.normalizeString(rawSearchTerm);
+			String normalizedString = StringNormalizer.normalizeString(rawSearchTerm);
 			String likeExpression;
 			if (theParameter instanceof StringParam &&
 				((StringParam) theParameter).isContains() &&
-				daoConfig.isAllowContainsSearches()) {
+				myDaoConfig.isAllowContainsSearches()) {
 				likeExpression = createLeftAndRightMatchLikeExpression(normalizedString);
 			} else {
 				likeExpression = createLeftMatchLikeExpression(normalizedString);
 			}
 
-			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(daoConfig, theResourceName, theParamName, normalizedString);
+			Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 			Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
 			Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 			return theBuilder.and(hashCode, singleCode);
@@ -1260,188 +1319,181 @@ public class SearchBuilder implements ISearchBuilder {
 		return orPredicates;
 	}
 
-	private Predicate createPredicateToken(IQueryParameterType theParameter, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
-														From<?, ResourceIndexedSearchParamToken> theFrom) {
-		String code;
-		String system;
+	private List<Predicate> createPredicateToken(Collection<IQueryParameterType> theParameters, String theResourceName, String theParamName, CriteriaBuilder theBuilder,
+																From<?, ResourceIndexedSearchParamToken> theFrom) {
+		final List<VersionIndependentConcept> codes = new ArrayList<>();
+
 		TokenParamModifier modifier = null;
-		if (theParameter instanceof TokenParam) {
-			TokenParam id = (TokenParam) theParameter;
-			system = id.getSystem();
-			code = (id.getValue());
-			modifier = id.getModifier();
-		} else if (theParameter instanceof BaseIdentifierDt) {
-			BaseIdentifierDt id = (BaseIdentifierDt) theParameter;
-			system = id.getSystemElement().getValueAsString();
-			code = (id.getValueElement().getValue());
-		} else if (theParameter instanceof BaseCodingDt) {
-			BaseCodingDt id = (BaseCodingDt) theParameter;
-			system = id.getSystemElement().getValueAsString();
-			code = (id.getCodeElement().getValue());
-		} else if (theParameter instanceof NumberParam) {
-			NumberParam number = (NumberParam) theParameter;
-			system = null;
-			code = number.getValueAsQueryToken(myContext);
-		} else {
-			throw new IllegalArgumentException("Invalid token type: " + theParameter.getClass());
+		for (IQueryParameterType nextParameter : theParameters) {
+
+			String code;
+			String system;
+			if (nextParameter instanceof TokenParam) {
+				TokenParam id = (TokenParam) nextParameter;
+				system = id.getSystem();
+				code = (id.getValue());
+				modifier = id.getModifier();
+			} else if (nextParameter instanceof BaseIdentifierDt) {
+				BaseIdentifierDt id = (BaseIdentifierDt) nextParameter;
+				system = id.getSystemElement().getValueAsString();
+				code = (id.getValueElement().getValue());
+			} else if (nextParameter instanceof BaseCodingDt) {
+				BaseCodingDt id = (BaseCodingDt) nextParameter;
+				system = id.getSystemElement().getValueAsString();
+				code = (id.getCodeElement().getValue());
+			} else if (nextParameter instanceof NumberParam) {
+				NumberParam number = (NumberParam) nextParameter;
+				system = null;
+				code = number.getValueAsQueryToken(myContext);
+			} else {
+				throw new IllegalArgumentException("Invalid token type: " + nextParameter.getClass());
+			}
+
+			if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
+				throw new InvalidRequestException(
+					"Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
+			}
+
+			if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
+				throw new InvalidRequestException(
+					"Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
+			}
+
+			/*
+			 * Process token modifiers (:in, :below, :above)
+			 */
+
+			if (modifier == TokenParamModifier.IN) {
+				codes.addAll(myTerminologySvc.expandValueSet(code));
+			} else if (modifier == TokenParamModifier.ABOVE) {
+				system = determineSystemIfMissing(theParamName, code, system);
+				codes.addAll(myTerminologySvc.findCodesAbove(system, code));
+			} else if (modifier == TokenParamModifier.BELOW) {
+				system = determineSystemIfMissing(theParamName, code, system);
+				codes.addAll(myTerminologySvc.findCodesBelow(system, code));
+			} else {
+				codes.add(new VersionIndependentConcept(system, code));
+			}
+
 		}
 
-		if (system != null && system.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException(
-				"Parameter[" + theParamName + "] has system (" + system.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + system);
-		}
-
-		if (code != null && code.length() > ResourceIndexedSearchParamToken.MAX_LENGTH) {
-			throw new InvalidRequestException(
-				"Parameter[" + theParamName + "] has code (" + code.length() + ") that is longer than maximum allowed (" + ResourceIndexedSearchParamToken.MAX_LENGTH + "): " + code);
-		}
-
-		/*
-		 * Process token modifiers (:in, :below, :above)
-		 */
-
-		List<VersionIndependentConcept> codes;
-		if (modifier == TokenParamModifier.IN) {
-			codes = myTerminologySvc.expandValueSet(code);
-		} else if (modifier == TokenParamModifier.ABOVE) {
-			system = determineSystemIfMissing(theParamName, code, system);
-			codes = myTerminologySvc.findCodesAbove(system, code);
-		} else if (modifier == TokenParamModifier.BELOW) {
-			system = determineSystemIfMissing(theParamName, code, system);
-			codes = myTerminologySvc.findCodesBelow(system, code);
-		} else {
-			codes = Collections.singletonList(new VersionIndependentConcept(system, code));
-		}
+		List<VersionIndependentConcept> sortedCodesList = codes
+			.stream()
+			.filter(t -> t.getCode() != null || t.getSystem() != null)
+			.sorted()
+			.distinct()
+			.collect(Collectors.toList());
 
 		if (codes.isEmpty()) {
 			// This will never match anything
-			return new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, false);
+			return Collections.singletonList(new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, false));
 		}
 
+		List<Predicate> retVal = new ArrayList<>();
+
+		// System only
+		List<VersionIndependentConcept> systemOnlyCodes = sortedCodesList.stream().filter(t -> isBlank(t.getCode())).collect(Collectors.toList());
+		if (!systemOnlyCodes.isEmpty()) {
+			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, systemOnlyCodes, modifier, TokenModeEnum.SYSTEM_ONLY));
+		}
+
+		// Code only
+		List<VersionIndependentConcept> codeOnlyCodes = sortedCodesList.stream().filter(t -> t.getSystem() == null).collect(Collectors.toList());
+		if (!codeOnlyCodes.isEmpty()) {
+			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, codeOnlyCodes, modifier, TokenModeEnum.VALUE_ONLY));
+		}
+
+		// System and code
+		List<VersionIndependentConcept> systemAndCodeCodes = sortedCodesList.stream().filter(t -> isNotBlank(t.getCode()) && t.getSystem() != null).collect(Collectors.toList());
+		if (!systemAndCodeCodes.isEmpty()) {
+			retVal.add(addPredicateToken(theResourceName, theParamName, theBuilder, theFrom, systemAndCodeCodes, modifier, TokenModeEnum.SYSTEM_AND_VALUE));
+		}
+
+		return retVal;
+	}
+
+	private Predicate addPredicateToken(String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamToken> theFrom, List<VersionIndependentConcept> theTokens, TokenParamModifier theModifier, TokenModeEnum theTokenMode) {
 		if (myDontUseHashesForSearch) {
-			ArrayList<Predicate> singleCodePredicates = new ArrayList<Predicate>();
-			if (codes != null) {
+			final Path<String> systemExpression = theFrom.get("mySystem");
+			final Path<String> valueExpression = theFrom.get("myValue");
 
-				List<Predicate> orPredicates = new ArrayList<Predicate>();
-				Map<String, List<VersionIndependentConcept>> map = new HashMap<String, List<VersionIndependentConcept>>();
-				for (VersionIndependentConcept nextCode : codes) {
-					List<VersionIndependentConcept> systemCodes = map.get(nextCode.getSystem());
-					if (null == systemCodes) {
-						systemCodes = new ArrayList<>();
-						map.put(nextCode.getSystem(), systemCodes);
-					}
-					systemCodes.add(nextCode);
+			List<Predicate> orPredicates = new ArrayList<>();
+			switch (theTokenMode) {
+				case SYSTEM_ONLY: {
+					List<String> systems = theTokens.stream().map(t -> t.getSystem()).collect(Collectors.toList());
+					Predicate orPredicate = systemExpression.in(systems);
+					orPredicates.add(orPredicate);
+					break;
 				}
-				// Use "in" in case of large numbers of codes due to param modifiers
-				final Path<String> systemExpression = theFrom.get("mySystem");
-				final Path<String> valueExpression = theFrom.get("myValue");
-				for (Map.Entry<String, List<VersionIndependentConcept>> entry : map.entrySet()) {
-					CriteriaBuilder.In<String> codePredicate = theBuilder.in(valueExpression);
-					boolean haveAtLeastOneCode = false;
-					for (VersionIndependentConcept nextCode : entry.getValue()) {
-						if (isNotBlank(nextCode.getCode())) {
-							codePredicate.value(nextCode.getCode());
-							haveAtLeastOneCode = true;
-						}
+				case VALUE_ONLY:
+					List<String> codes = theTokens.stream().map(t -> t.getCode()).collect(Collectors.toList());
+					Predicate orPredicate = valueExpression.in(codes);
+					orPredicates.add(orPredicate);
+					break;
+				case SYSTEM_AND_VALUE:
+					for (VersionIndependentConcept next : theTokens) {
+						orPredicates.add(theBuilder.and(
+							toEqualOrIsNullPredicate(systemExpression, next.getSystem()),
+							toEqualOrIsNullPredicate(valueExpression, next.getCode())
+						));
 					}
-
-					if (entry.getKey() != null) {
-						Predicate systemPredicate = theBuilder.equal(systemExpression, entry.getKey());
-						if (haveAtLeastOneCode) {
-							orPredicates.add(theBuilder.and(systemPredicate, codePredicate));
-						} else {
-							orPredicates.add(systemPredicate);
-						}
-					} else {
-						orPredicates.add(codePredicate);
-					}
-				}
-
-				Predicate or = theBuilder.or(orPredicates.toArray(new Predicate[0]));
-				if (modifier == TokenParamModifier.NOT) {
-					or = theBuilder.not(or);
-				}
-				singleCodePredicates.add(or);
-
-			} else {
-
-				/*
-				 * Ok, this is a normal query
-				 */
-
-				if (StringUtils.isNotBlank(system)) {
-					if (modifier != null && modifier == TokenParamModifier.NOT) {
-						singleCodePredicates.add(theBuilder.notEqual(theFrom.get("mySystem"), system));
-					} else {
-						singleCodePredicates.add(theBuilder.equal(theFrom.get("mySystem"), system));
-					}
-				} else if (system == null) {
-					// don't check the system
-				} else {
-					// If the system is "", we only match on null systems
-					singleCodePredicates.add(theBuilder.isNull(theFrom.get("mySystem")));
-				}
-
-				if (StringUtils.isNotBlank(code)) {
-					if (modifier != null && modifier == TokenParamModifier.NOT) {
-						singleCodePredicates.add(theBuilder.notEqual(theFrom.get("myValue"), code));
-					} else {
-						singleCodePredicates.add(theBuilder.equal(theFrom.get("myValue"), code));
-					}
-				} else {
-					/*
-					 * As of HAPI FHIR 1.5, if the client searched for a token with a system but no specified value this means to
-					 * match all tokens with the given value.
-					 *
-					 * I'm not sure I agree with this, but hey.. FHIR-I voted and this was the result :)
-					 */
-					// singleCodePredicates.add(theBuilder.isNull(theFrom.get("myValue")));
-				}
+					break;
 			}
 
-			Predicate singleCode = theBuilder.and(toArray(singleCodePredicates));
-			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
-		}
+			Predicate or = theBuilder.or(orPredicates.toArray(new Predicate[0]));
+			if (theModifier == TokenParamModifier.NOT) {
+				or = theBuilder.not(or);
+			}
 
+			return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, or);
+		}
 
 		/*
 		 * Note: A null system value means "match any system", but
 		 * an empty-string system value means "match values that
 		 * explicitly have no system".
 		 */
-		boolean haveSystem = codes.get(0).getSystem() != null;
-		boolean haveCode = isNotBlank(codes.get(0).getCode());
 		Expression<Long> hashField;
-		if (!haveSystem && !haveCode) {
-			// If we have neither, this isn't actually an expression so
-			// just return 1=1
-			return new BooleanStaticAssertionPredicate((CriteriaBuilderImpl) theBuilder, true);
-		} else if (haveSystem && haveCode) {
-			hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
-		} else if (haveSystem) {
-			hashField = theFrom.get("myHashSystem").as(Long.class);
-		} else {
-			hashField = theFrom.get("myHashValue").as(Long.class);
-		}
-
-		List<Long> values = new ArrayList<>(codes.size());
-		for (VersionIndependentConcept next : codes) {
-			if (haveSystem && haveCode) {
-				values.add(ResourceIndexedSearchParamToken.calculateHashSystemAndValue(theResourceName, theParamName, next.getSystem(), next.getCode()));
-			} else if (haveSystem) {
-				values.add(ResourceIndexedSearchParamToken.calculateHashSystem(theResourceName, theParamName, next.getSystem()));
-			} else {
-				values.add(ResourceIndexedSearchParamToken.calculateHashValue(theResourceName, theParamName, next.getCode()));
-			}
+		List<Long> values;
+		switch (theTokenMode) {
+			case SYSTEM_ONLY:
+				hashField = theFrom.get("myHashSystem").as(Long.class);
+				values = theTokens
+					.stream()
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystem(theResourceName, theParamName, t.getSystem()))
+					.collect(Collectors.toList());
+				break;
+			case VALUE_ONLY:
+				hashField = theFrom.get("myHashValue").as(Long.class);
+				values = theTokens
+					.stream()
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashValue(theResourceName, theParamName, t.getCode()))
+					.collect(Collectors.toList());
+				break;
+			case SYSTEM_AND_VALUE:
+			default:
+				hashField = theFrom.get("myHashSystemAndValue").as(Long.class);
+				values = theTokens
+					.stream()
+					.map(t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(theResourceName, theParamName, t.getSystem(), t.getCode()))
+					.collect(Collectors.toList());
+				break;
 		}
 
 		Predicate predicate = hashField.in(values);
-		if (modifier == TokenParamModifier.NOT) {
+		if (theModifier == TokenParamModifier.NOT) {
 			Predicate identityPredicate = theBuilder.equal(theFrom.get("myHashIdentity").as(Long.class), BaseResourceIndexedSearchParam.calculateHashIdentity(theResourceName, theParamName));
 			Predicate disjunctionPredicate = theBuilder.not(predicate);
 			predicate = theBuilder.and(identityPredicate, disjunctionPredicate);
 		}
 		return predicate;
+	}
+
+	private <T> Expression<Boolean> toEqualOrIsNullPredicate(Path<T> theExpression, T theCode) {
+		if (theCode == null) {
+			return myBuilder.isNull(theExpression);
+		}
+		return myBuilder.equal(theExpression, theCode);
 	}
 
 	@Override
@@ -1473,7 +1525,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * of parameters passed in
 		 */
 		ourLog.debug("Checking for unique index for query: {}", theParams.toNormalizedQueryString(myContext));
-		if (myCallingDao.getConfig().isUniqueIndexesEnabled()) {
+		if (myDaoConfig.isUniqueIndexesEnabled()) {
 			if (myParams.getIncludes().isEmpty()) {
 				if (myParams.getRevIncludes().isEmpty()) {
 					if (myParams.getEverythingMode() == null) {
@@ -1600,7 +1652,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParm = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				Long pid = BaseHapiFhirDao.translateForcedIdToPid(myCallingDao.getConfig(), myResourceName, idParm.getValue(), myForcedIdDao);
+				Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, idParm.getValue());
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
@@ -1677,7 +1729,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private Predicate createResourceLinkPathPredicate(String theResourceName, String theParamName, From<?, ? extends ResourceLink> from) {
-		return createResourceLinkPathPredicate(myCallingDao, myContext, theParamName, from, theResourceName);
+		return createResourceLinkPathPredicate(myContext, theParamName, from, theResourceName);
 	}
 
 	/**
@@ -1713,7 +1765,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
-		RuntimeSearchParam param = myCallingDao.getSearchParamByName(resourceDef, theSort.getParamName());
+		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theSort.getParamName());
 		if (param == null) {
 			throw new InvalidRequestException("Unknown sort parameter '" + theSort.getParamName() + "'");
 		}
@@ -1807,7 +1859,7 @@ public class SearchBuilder implements ISearchBuilder {
 		String retVal = theSystem;
 		if (retVal == null) {
 			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(myResourceName);
-			RuntimeSearchParam param = myCallingDao.getSearchParamByName(resourceDef, theParamName);
+			RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
 			if (param != null) {
 				Set<String> valueSetUris = Sets.newHashSet();
 				for (String nextPath : param.getPathsSplit()) {
@@ -1834,11 +1886,11 @@ public class SearchBuilder implements ISearchBuilder {
 		return retVal;
 	}
 
-	private void doLoadPids(List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager entityManager, FhirContext context, IDao theDao,
-									Map<Long, Integer> position, Collection<Long> pids) {
+	private void doLoadPids(List<IBaseResource> theResourceListToPopulate, Set<Long> theIncludedPids, boolean theForHistoryOperation, EntityManager theEntityManager, FhirContext theContext, IDao theDao,
+									Map<Long, Integer> thePosition, Collection<Long> thePids) {
 
 		// -- get the resource from the searchView
-		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(pids);
+		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(thePids);
 
 		//-- preload all tags with tag definition if any
 		Map<Long, Collection<ResourceTag>> tagMap = getResourceTagMap(resourceSearchViewList);
@@ -1846,7 +1898,7 @@ public class SearchBuilder implements ISearchBuilder {
 		Long resourceId;
 		for (ResourceSearchView next : resourceSearchViewList) {
 
-			Class<? extends IBaseResource> resourceType = context.getResourceDefinition(next.getResourceType()).getImplementingClass();
+			Class<? extends IBaseResource> resourceType = theContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
 			resourceId = next.getId();
 
@@ -1855,25 +1907,29 @@ public class SearchBuilder implements ISearchBuilder {
 				ourLog.warn("Unable to find resource {}/{}/_history/{} in database", next.getResourceType(), next.getIdDt().getIdPart(), next.getVersion());
 				continue;
 			}
-			Integer index = position.get(resourceId);
+			Integer index = thePosition.get(resourceId);
 			if (index == null) {
 				ourLog.warn("Got back unexpected resource PID {}", resourceId);
 				continue;
 			}
 
 			if (resource instanceof IResource) {
-				if (theRevIncludedPids.contains(resourceId)) {
+				if (theIncludedPids.contains(resourceId)) {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.INCLUDE);
 				} else {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IResource) resource, BundleEntrySearchModeEnum.MATCH);
 				}
 			} else {
-				if (theRevIncludedPids.contains(resourceId)) {
+				if (theIncludedPids.contains(resourceId)) {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.INCLUDE.getCode());
 				} else {
 					ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put((IAnyResource) resource, BundleEntrySearchModeEnum.MATCH.getCode());
 				}
 			}
+
+			// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
+			HookParams params = new HookParams().add(IBaseResource.class, resource);
+			myInterceptorBroadcaster.callHooks(Pointcut.RESOURCE_MAY_BE_RETURNED, params);
 
 			theResourceListToPopulate.set(index, resource);
 		}
@@ -1918,7 +1974,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation,
+	public void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theIncludedPids, boolean theForHistoryOperation,
 											 EntityManager entityManager, FhirContext context, IDao theDao) {
 		if (theIncludePids.isEmpty()) {
 			ourLog.debug("The include pids are empty");
@@ -1941,13 +1997,12 @@ public class SearchBuilder implements ISearchBuilder {
 		 * if it's lots of IDs. I suppose maybe we should be doing this as a join anyhow
 		 * but this should work too. Sigh.
 		 */
-		int maxLoad = 800;
 		List<Long> pids = new ArrayList<>(theIncludePids);
 		for (int i = 0; i < pids.size(); i += maxLoad) {
 			int to = i + maxLoad;
 			to = Math.min(to, pids.size());
 			List<Long> pidsSubList = pids.subList(i, to);
-			doLoadPids(theResourceListToPopulate, theRevIncludedPids, theForHistoryOperation, entityManager, context, theDao, position, pidsSubList);
+			doLoadPids(theResourceListToPopulate, theIncludedPids, theForHistoryOperation, entityManager, context, theDao, position, pidsSubList);
 		}
 
 	}
@@ -1957,7 +2012,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 * so it can't be Collections.emptySet() or some such thing
 	 */
 	@Override
-	public HashSet<Long> loadIncludes(IDao theCallingDao, FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
+	public HashSet<Long> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
 												 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
@@ -1991,14 +2046,17 @@ public class SearchBuilder implements ISearchBuilder {
 				if (matchAll) {
 					String sql;
 					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
-					TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
-					q.setParameter("target_pids", nextRoundMatches);
-					List<ResourceLink> results = q.getResultList();
-					for (ResourceLink resourceLink : results) {
-						if (theReverseMode) {
-							pidsToInclude.add(resourceLink.getSourceResourcePid());
-						} else {
-							pidsToInclude.add(resourceLink.getTargetResourcePid());
+					List<Collection<Long>> partitions = partition(nextRoundMatches, maxLoad);
+					for (Collection<Long> nextPartition : partitions) {
+						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
+						q.setParameter("target_pids", nextPartition);
+						List<ResourceLink> results = q.getResultList();
+						for (ResourceLink resourceLink : results) {
+							if (theReverseMode) {
+								pidsToInclude.add(resourceLink.getSourceResourcePid());
+							} else {
+								pidsToInclude.add(resourceLink.getTargetResourcePid());
+							}
 						}
 					}
 				} else {
@@ -2017,7 +2075,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 					String paramName = nextInclude.getParamName();
 					if (isNotBlank(paramName)) {
-						param = theCallingDao.getSearchParamByName(def, paramName);
+						param = mySearchParamRegistry.getSearchParamByName(def, paramName);
 					} else {
 						param = null;
 					}
@@ -2031,7 +2089,8 @@ public class SearchBuilder implements ISearchBuilder {
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
 						String sql;
-						boolean haveTargetTypesDefinedByParam = param != null && param.getTargets() != null && param.getTargets().isEmpty() == false;
+
+						boolean haveTargetTypesDefinedByParam = param.getTargets() != null && param.getTargets().isEmpty() == false;
 						if (targetResourceType != null) {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids) AND r.myTargetResourceType = :target_resource_type";
 						} else if (haveTargetTypesDefinedByParam) {
@@ -2039,25 +2098,29 @@ public class SearchBuilder implements ISearchBuilder {
 						} else {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						}
-						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
-						q.setParameter("src_path", nextPath);
-						q.setParameter("target_pids", nextRoundMatches);
-						if (targetResourceType != null) {
-							q.setParameter("target_resource_type", targetResourceType);
-						} else if (haveTargetTypesDefinedByParam) {
-							q.setParameter("target_resource_types", param.getTargets());
-						}
-						List<ResourceLink> results = q.getResultList();
-						for (ResourceLink resourceLink : results) {
-							if (theReverseMode) {
-								Long pid = resourceLink.getSourceResourcePid();
-								if (pid != null) {
-									pidsToInclude.add(pid);
-								}
-							} else {
-								Long pid = resourceLink.getTargetResourcePid();
-								if (pid != null) {
-									pidsToInclude.add(pid);
+
+						List<Collection<Long>> partitions = partition(nextRoundMatches, maxLoad);
+						for (Collection<Long> nextPartition : partitions) {
+							TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
+							q.setParameter("src_path", nextPath);
+							q.setParameter("target_pids", nextPartition);
+							if (targetResourceType != null) {
+								q.setParameter("target_resource_type", targetResourceType);
+							} else if (haveTargetTypesDefinedByParam) {
+								q.setParameter("target_resource_types", param.getTargets());
+							}
+							List<ResourceLink> results = q.getResultList();
+							for (ResourceLink resourceLink : results) {
+								if (theReverseMode) {
+									Long pid = resourceLink.getSourceResourcePid();
+									if (pid != null) {
+										pidsToInclude.add(pid);
+									}
+								} else {
+									Long pid = resourceLink.getTargetResourcePid();
+									if (pid != null) {
+										pidsToInclude.add(pid);
+									}
 								}
 							}
 						}
@@ -2085,9 +2148,34 @@ public class SearchBuilder implements ISearchBuilder {
 		return allAdded;
 	}
 
+	private List<Collection<Long>> partition(Collection<Long> theNextRoundMatches, int theMaxLoad) {
+		if (theNextRoundMatches.size() <= theMaxLoad) {
+			return Collections.singletonList(theNextRoundMatches);
+		} else {
+
+			List<Collection<Long>> retVal = new ArrayList<>();
+			Collection<Long> current = null;
+			for (Long next : theNextRoundMatches) {
+				if (current == null) {
+					current = new ArrayList<>(theMaxLoad);
+					retVal.add(current);
+				}
+
+				current.add(next);
+
+				if (current.size() >= theMaxLoad) {
+					current = null;
+				}
+			}
+
+			return retVal;
+		}
+	}
+
 	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams) {
 		myParams = theParams;
 
+		theParams.clean();
 		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : myParams.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			List<List<? extends IQueryParameterType>> andOrParams = nextParamEntry.getValue();
@@ -2098,37 +2186,6 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
-
-		/*
-		 * Filter out
-		 */
-		for (int andListIdx = 0; andListIdx < theAndOrParams.size(); andListIdx++) {
-			List<? extends IQueryParameterType> nextOrList = theAndOrParams.get(andListIdx);
-
-			for (int orListIdx = 0; orListIdx < nextOrList.size(); orListIdx++) {
-				IQueryParameterType nextOr = nextOrList.get(orListIdx);
-				boolean hasNoValue = false;
-				if (nextOr.getMissing() != null) {
-					continue;
-				}
-				if (nextOr instanceof QuantityParam) {
-					if (isBlank(((QuantityParam) nextOr).getValueAsString())) {
-						hasNoValue = true;
-					}
-				}
-
-				if (hasNoValue) {
-					ourLog.debug("Ignoring empty parameter: {}", theParamName);
-					nextOrList.remove(orListIdx);
-					orListIdx--;
-				}
-			}
-
-			if (nextOrList.isEmpty()) {
-				theAndOrParams.remove(andListIdx);
-				andListIdx--;
-			}
-		}
 
 		if (theAndOrParams.isEmpty()) {
 			return;
@@ -2267,6 +2324,35 @@ public class SearchBuilder implements ISearchBuilder {
 		return qp;
 	}
 
+	private Predicate createResourceLinkPathPredicate(FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
+																	  String theResourceType) {
+		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
+		RuntimeSearchParam param = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+		List<String> path = param.getPathsSplit();
+
+		/*
+		 * SearchParameters can declare paths on multiple resources
+		 * types. Here we only want the ones that actually apply.
+		 */
+		path = new ArrayList<>(path);
+
+		for (int i = 0; i < path.size(); i++) {
+			String nextPath = trim(path.get(i));
+			if (!nextPath.contains(theResourceType + ".")) {
+				path.remove(i);
+				i--;
+			}
+		}
+
+		return theFrom.get("mySourcePath").in(path);
+	}
+
+	private enum TokenModeEnum {
+		SYSTEM_ONLY,
+		VALUE_ONLY,
+		SYSTEM_AND_VALUE
+	}
+
 	public enum HandlerTypeEnum {
 		UNIQUE_INDEX, STANDARD_QUERY
 	}
@@ -2288,7 +2374,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private int myCurrentOffset;
 		private ArrayList<Long> myCurrentPids;
 		private Long myNext;
-		private int myPageSize = myCallingDao.getConfig().getEverythingIncludesFetchPageSize();
+		private int myPageSize = myDaoConfig.getEverythingIncludesFetchPageSize();
 
 		IncludesIterator(Set<Long> thePidSet) {
 			myCurrentPids = new ArrayList<>(thePidSet);
@@ -2316,7 +2402,7 @@ public class SearchBuilder implements ISearchBuilder {
 				myCurrentOffset = end;
 				Collection<Long> pidsToScan = myCurrentPids.subList(start, end);
 				Set<Include> includes = Collections.singleton(new Include("*", true));
-				Set<Long> newPids = loadIncludes(myCallingDao, myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated(), mySearchUuid);
+				Set<Long> newPids = loadIncludes(myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated(), mySearchUuid);
 				myCurrentIterator = newPids.iterator();
 
 			}
@@ -2368,7 +2454,7 @@ public class SearchBuilder implements ISearchBuilder {
 			// If we don't have a query yet, create one
 			if (myResultsIterator == null) {
 				if (myMaxResultsToFetch == null) {
-					myMaxResultsToFetch = myCallingDao.getConfig().getFetchSizeDefaultMaximum();
+					myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
 				}
 				final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false);
 
@@ -2483,7 +2569,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myWrap == null) {
 				ourLog.debug("Searching for unique index matches over {} candidate query strings", myUniqueQueryStrings.size());
 				StopWatch sw = new StopWatch();
-				Collection<Long> resourcePids = myCallingDao.getResourceIndexedCompositeStringUniqueDao().findResourcePidsByQueryStrings(myUniqueQueryStrings);
+				Collection<Long> resourcePids = myResourceIndexedCompositeStringUniqueDao.findResourcePidsByQueryStrings(myUniqueQueryStrings);
 				ourLog.debug("Found {} unique index matches in {}ms", resourcePids.size(), sw.getMillis());
 				myWrap = resourcePids.iterator();
 			}
@@ -2619,29 +2705,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static String createLeftMatchLikeExpression(String likeExpression) {
 		return likeExpression.replace("%", "[%]") + "%";
-	}
-
-	private static Predicate createResourceLinkPathPredicate(IDao theCallingDao, FhirContext theContext, String theParamName, From<?, ? extends ResourceLink> theFrom,
-																				String theResourceType) {
-		RuntimeResourceDefinition resourceDef = theContext.getResourceDefinition(theResourceType);
-		RuntimeSearchParam param = theCallingDao.getSearchParamByName(resourceDef, theParamName);
-		List<String> path = param.getPathsSplit();
-
-		/*
-		 * SearchParameters can declare paths on multiple resources
-		 * types. Here we only want the ones that actually apply.
-		 */
-		path = new ArrayList<>(path);
-
-		for (int i = 0; i < path.size(); i++) {
-			String nextPath = trim(path.get(i));
-			if (!nextPath.contains(theResourceType + ".")) {
-				path.remove(i);
-				i--;
-			}
-		}
-
-		return theFrom.get("mySourcePath").in(path);
 	}
 
 	private static List<Long> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<Long> thePids) {

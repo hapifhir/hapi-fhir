@@ -1862,6 +1862,7 @@ public class XmlParserDstu3Test {
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
 			assertThat(out, not(containsString("meta")));
+			assertThat(out, not(containsString("SUBSETTED")));
 		}
 	}
 
@@ -1890,7 +1891,6 @@ public class XmlParserDstu3Test {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1902,7 +1902,6 @@ public class XmlParserDstu3Test {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1944,7 +1943,7 @@ public class XmlParserDstu3Test {
 		Patient p = new Patient();
 		p.addName().setFamily("Smith").addGiven("John");
 
-		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ourCtx));
 
 		String output = ourCtx.newXmlParser().encodeResourceToString(p);
 		ourLog.info(output);

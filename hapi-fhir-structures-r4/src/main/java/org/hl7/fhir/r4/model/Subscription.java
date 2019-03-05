@@ -29,11 +29,12 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.r4.model.Enumerations.*;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -330,11 +331,12 @@ public class Subscription extends DomainResource {
         protected UrlType endpoint;
 
         /**
-         * The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.
+         * The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification. The mime type "text/plain" may also be used for Email and SMS subscriptions.
          */
-        @Child(name = "payload", type = {StringType.class}, order=3, min=0, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="MIME type to send, or omit for no payload", formalDefinition="The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification." )
-        protected StringType payload;
+        @Child(name = "payload", type = {CodeType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Description(shortDefinition="MIME type to send, or omit for no payload", formalDefinition="The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification. The mime type \"text/plain\" may also be used for Email and SMS subscriptions." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/mimetypes")
+        protected CodeType payload;
 
         /**
          * Additional headers / information to send as part of the notification.
@@ -343,7 +345,7 @@ public class Subscription extends DomainResource {
         @Description(shortDefinition="Usage depends on the channel type", formalDefinition="Additional headers / information to send as part of the notification." )
         protected List<StringType> header;
 
-        private static final long serialVersionUID = -155848792L;
+        private static final long serialVersionUID = -771044852L;
 
     /**
      * Constructor
@@ -455,14 +457,14 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @return {@link #payload} (The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
+         * @return {@link #payload} (The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification. The mime type "text/plain" may also be used for Email and SMS subscriptions.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
          */
-        public StringType getPayloadElement() { 
+        public CodeType getPayloadElement() { 
           if (this.payload == null)
             if (Configuration.errorOnAutoCreate())
               throw new Error("Attempt to auto-create SubscriptionChannelComponent.payload");
             else if (Configuration.doAutoCreate())
-              this.payload = new StringType(); // bb
+              this.payload = new CodeType(); // bb
           return this.payload;
         }
 
@@ -475,29 +477,29 @@ public class Subscription extends DomainResource {
         }
 
         /**
-         * @param value {@link #payload} (The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
+         * @param value {@link #payload} (The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification. The mime type "text/plain" may also be used for Email and SMS subscriptions.). This is the underlying object with id, value and extensions. The accessor "getPayload" gives direct access to the value
          */
-        public SubscriptionChannelComponent setPayloadElement(StringType value) { 
+        public SubscriptionChannelComponent setPayloadElement(CodeType value) { 
           this.payload = value;
           return this;
         }
 
         /**
-         * @return The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.
+         * @return The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification. The mime type "text/plain" may also be used for Email and SMS subscriptions.
          */
         public String getPayload() { 
           return this.payload == null ? null : this.payload.getValue();
         }
 
         /**
-         * @param value The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.
+         * @param value The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification. The mime type "text/plain" may also be used for Email and SMS subscriptions.
          */
         public SubscriptionChannelComponent setPayload(String value) { 
           if (Utilities.noString(value))
             this.payload = null;
           else {
             if (this.payload == null)
-              this.payload = new StringType();
+              this.payload = new CodeType();
             this.payload.setValue(value);
           }
           return this;
@@ -568,7 +570,7 @@ public class Subscription extends DomainResource {
           super.listChildren(children);
           children.add(new Property("type", "code", "The type of channel to send notifications on.", 0, 1, type));
           children.add(new Property("endpoint", "url", "The url that describes the actual end-point to send messages to.", 0, 1, endpoint));
-          children.add(new Property("payload", "string", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.", 0, 1, payload));
+          children.add(new Property("payload", "code", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification. The mime type \"text/plain\" may also be used for Email and SMS subscriptions.", 0, 1, payload));
           children.add(new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header));
         }
 
@@ -577,7 +579,7 @@ public class Subscription extends DomainResource {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "code", "The type of channel to send notifications on.", 0, 1, type);
           case 1741102485: /*endpoint*/  return new Property("endpoint", "url", "The url that describes the actual end-point to send messages to.", 0, 1, endpoint);
-          case -786701938: /*payload*/  return new Property("payload", "string", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification.", 0, 1, payload);
+          case -786701938: /*payload*/  return new Property("payload", "code", "The mime type to send the payload in - either application/fhir+xml, or application/fhir+json. If the payload is not present, then there is no payload in the notification, just a notification. The mime type \"text/plain\" may also be used for Email and SMS subscriptions.", 0, 1, payload);
           case -1221270899: /*header*/  return new Property("header", "string", "Additional headers / information to send as part of the notification.", 0, java.lang.Integer.MAX_VALUE, header);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -589,7 +591,7 @@ public class Subscription extends DomainResource {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<SubscriptionChannelType>
         case 1741102485: /*endpoint*/ return this.endpoint == null ? new Base[0] : new Base[] {this.endpoint}; // UrlType
-        case -786701938: /*payload*/ return this.payload == null ? new Base[0] : new Base[] {this.payload}; // StringType
+        case -786701938: /*payload*/ return this.payload == null ? new Base[0] : new Base[] {this.payload}; // CodeType
         case -1221270899: /*header*/ return this.header == null ? new Base[0] : this.header.toArray(new Base[this.header.size()]); // StringType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -607,7 +609,7 @@ public class Subscription extends DomainResource {
           this.endpoint = castToUrl(value); // UrlType
           return value;
         case -786701938: // payload
-          this.payload = castToString(value); // StringType
+          this.payload = castToCode(value); // CodeType
           return value;
         case -1221270899: // header
           this.getHeader().add(castToString(value)); // StringType
@@ -625,7 +627,7 @@ public class Subscription extends DomainResource {
         } else if (name.equals("endpoint")) {
           this.endpoint = castToUrl(value); // UrlType
         } else if (name.equals("payload")) {
-          this.payload = castToString(value); // StringType
+          this.payload = castToCode(value); // CodeType
         } else if (name.equals("header")) {
           this.getHeader().add(castToString(value));
         } else
@@ -650,7 +652,7 @@ public class Subscription extends DomainResource {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"code"};
         case 1741102485: /*endpoint*/ return new String[] {"url"};
-        case -786701938: /*payload*/ return new String[] {"string"};
+        case -786701938: /*payload*/ return new String[] {"code"};
         case -1221270899: /*header*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -773,15 +775,7 @@ public class Subscription extends DomainResource {
     @Description(shortDefinition="The channel on which to report matches to the criteria", formalDefinition="Details where to send notifications when resources are received that meet the criteria." )
     protected SubscriptionChannelComponent channel;
 
-    /**
-     * A tag to add to any resource that matches the criteria, after the subscription is processed.
-     */
-    @Child(name = "tag", type = {Coding.class}, order=7, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="A tag to add to matching resources", formalDefinition="A tag to add to any resource that matches the criteria, after the subscription is processed." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/subscription-tag")
-    protected List<Coding> tag;
-
-    private static final long serialVersionUID = 99986202L;
+    private static final long serialVersionUID = 1072504988L;
 
   /**
    * Constructor
@@ -1111,59 +1105,6 @@ public class Subscription extends DomainResource {
       return this;
     }
 
-    /**
-     * @return {@link #tag} (A tag to add to any resource that matches the criteria, after the subscription is processed.)
-     */
-    public List<Coding> getTag() { 
-      if (this.tag == null)
-        this.tag = new ArrayList<Coding>();
-      return this.tag;
-    }
-
-    /**
-     * @return Returns a reference to <code>this</code> for easy method chaining
-     */
-    public Subscription setTag(List<Coding> theTag) { 
-      this.tag = theTag;
-      return this;
-    }
-
-    public boolean hasTag() { 
-      if (this.tag == null)
-        return false;
-      for (Coding item : this.tag)
-        if (!item.isEmpty())
-          return true;
-      return false;
-    }
-
-    public Coding addTag() { //3
-      Coding t = new Coding();
-      if (this.tag == null)
-        this.tag = new ArrayList<Coding>();
-      this.tag.add(t);
-      return t;
-    }
-
-    public Subscription addTag(Coding t) { //3
-      if (t == null)
-        return this;
-      if (this.tag == null)
-        this.tag = new ArrayList<Coding>();
-      this.tag.add(t);
-      return this;
-    }
-
-    /**
-     * @return The first repetition of repeating field {@link #tag}, creating it if it does not already exist
-     */
-    public Coding getTagFirstRep() { 
-      if (getTag().isEmpty()) {
-        addTag();
-      }
-      return getTag().get(0);
-    }
-
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("status", "code", "The status of the subscription, which marks the server state for managing the subscription.", 0, 1, status));
@@ -1173,7 +1114,6 @@ public class Subscription extends DomainResource {
         children.add(new Property("criteria", "string", "The rules that the server should use to determine when to generate notifications for this subscription.", 0, 1, criteria));
         children.add(new Property("error", "string", "A record of the last error that occurred when the server processed a notification.", 0, 1, error));
         children.add(new Property("channel", "", "Details where to send notifications when resources are received that meet the criteria.", 0, 1, channel));
-        children.add(new Property("tag", "Coding", "A tag to add to any resource that matches the criteria, after the subscription is processed.", 0, java.lang.Integer.MAX_VALUE, tag));
       }
 
       @Override
@@ -1186,7 +1126,6 @@ public class Subscription extends DomainResource {
         case 1952046943: /*criteria*/  return new Property("criteria", "string", "The rules that the server should use to determine when to generate notifications for this subscription.", 0, 1, criteria);
         case 96784904: /*error*/  return new Property("error", "string", "A record of the last error that occurred when the server processed a notification.", 0, 1, error);
         case 738950403: /*channel*/  return new Property("channel", "", "Details where to send notifications when resources are received that meet the criteria.", 0, 1, channel);
-        case 114586: /*tag*/  return new Property("tag", "Coding", "A tag to add to any resource that matches the criteria, after the subscription is processed.", 0, java.lang.Integer.MAX_VALUE, tag);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1202,7 +1141,6 @@ public class Subscription extends DomainResource {
         case 1952046943: /*criteria*/ return this.criteria == null ? new Base[0] : new Base[] {this.criteria}; // StringType
         case 96784904: /*error*/ return this.error == null ? new Base[0] : new Base[] {this.error}; // StringType
         case 738950403: /*channel*/ return this.channel == null ? new Base[0] : new Base[] {this.channel}; // SubscriptionChannelComponent
-        case 114586: /*tag*/ return this.tag == null ? new Base[0] : this.tag.toArray(new Base[this.tag.size()]); // Coding
         default: return super.getProperty(hash, name, checkValid);
         }
 
@@ -1233,9 +1171,6 @@ public class Subscription extends DomainResource {
         case 738950403: // channel
           this.channel = (SubscriptionChannelComponent) value; // SubscriptionChannelComponent
           return value;
-        case 114586: // tag
-          this.getTag().add(castToCoding(value)); // Coding
-          return value;
         default: return super.setProperty(hash, name, value);
         }
 
@@ -1258,8 +1193,6 @@ public class Subscription extends DomainResource {
           this.error = castToString(value); // StringType
         } else if (name.equals("channel")) {
           this.channel = (SubscriptionChannelComponent) value; // SubscriptionChannelComponent
-        } else if (name.equals("tag")) {
-          this.getTag().add(castToCoding(value));
         } else
           return super.setProperty(name, value);
         return value;
@@ -1275,7 +1208,6 @@ public class Subscription extends DomainResource {
         case 1952046943:  return getCriteriaElement();
         case 96784904:  return getErrorElement();
         case 738950403:  return getChannel(); 
-        case 114586:  return addTag(); 
         default: return super.makeProperty(hash, name);
         }
 
@@ -1291,7 +1223,6 @@ public class Subscription extends DomainResource {
         case 1952046943: /*criteria*/ return new String[] {"string"};
         case 96784904: /*error*/ return new String[] {"string"};
         case 738950403: /*channel*/ return new String[] {};
-        case 114586: /*tag*/ return new String[] {"Coding"};
         default: return super.getTypesForProperty(hash, name);
         }
 
@@ -1321,9 +1252,6 @@ public class Subscription extends DomainResource {
           this.channel = new SubscriptionChannelComponent();
           return this.channel;
         }
-        else if (name.equals("tag")) {
-          return addTag();
-        }
         else
           return super.addChild(name);
       }
@@ -1347,11 +1275,6 @@ public class Subscription extends DomainResource {
         dst.criteria = criteria == null ? null : criteria.copy();
         dst.error = error == null ? null : error.copy();
         dst.channel = channel == null ? null : channel.copy();
-        if (tag != null) {
-          dst.tag = new ArrayList<Coding>();
-          for (Coding i : tag)
-            dst.tag.add(i.copy());
-        };
         return dst;
       }
 
@@ -1368,7 +1291,7 @@ public class Subscription extends DomainResource {
         Subscription o = (Subscription) other_;
         return compareDeep(status, o.status, true) && compareDeep(contact, o.contact, true) && compareDeep(end, o.end, true)
            && compareDeep(reason, o.reason, true) && compareDeep(criteria, o.criteria, true) && compareDeep(error, o.error, true)
-           && compareDeep(channel, o.channel, true) && compareDeep(tag, o.tag, true);
+           && compareDeep(channel, o.channel, true);
       }
 
       @Override
@@ -1384,7 +1307,7 @@ public class Subscription extends DomainResource {
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(status, contact, end, reason
-          , criteria, error, channel, tag);
+          , criteria, error, channel);
       }
 
   @Override
@@ -1396,21 +1319,21 @@ public class Subscription extends DomainResource {
    * Search parameter: <b>payload</b>
    * <p>
    * Description: <b>The mime-type of the notification payload</b><br>
-   * Type: <b>string</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="The mime-type of the notification payload", type="string" )
+  @SearchParamDefinition(name="payload", path="Subscription.channel.payload", description="The mime-type of the notification payload", type="token" )
   public static final String SP_PAYLOAD = "payload";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>payload</b>
    * <p>
    * Description: <b>The mime-type of the notification payload</b><br>
-   * Type: <b>string</b><br>
+   * Type: <b>token</b><br>
    * Path: <b>Subscription.channel.payload</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.StringClientParam PAYLOAD = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_PAYLOAD);
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam PAYLOAD = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_PAYLOAD);
 
  /**
    * Search parameter: <b>criteria</b>
@@ -1431,26 +1354,6 @@ public class Subscription extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam CRITERIA = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_CRITERIA);
-
- /**
-   * Search parameter: <b>add-tag</b>
-   * <p>
-   * Description: <b>A tag to be added to the resource matching the criteria</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Subscription.tag</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="add-tag", path="Subscription.tag", description="A tag to be added to the resource matching the criteria", type="token" )
-  public static final String SP_ADD_TAG = "add-tag";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>add-tag</b>
-   * <p>
-   * Description: <b>A tag to be added to the resource matching the criteria</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Subscription.tag</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ADD_TAG = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ADD_TAG);
 
  /**
    * Search parameter: <b>contact</b>

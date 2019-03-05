@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.gclient;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.gclient;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperationUntypedWithInput<T>, T> {
@@ -43,4 +44,9 @@ public interface IOperationUntypedWithInput<T> extends IClientExecutable<IOperat
 	 */
 	<R extends IBaseResource> IOperationUntypedWithInput<R> returnResourceType(Class<R> theReturnType);
 
+	/**
+	 * Request that the method chain returns a {@link MethodOutcome} object. This object
+	 * will contain details
+	 */
+	IOperationUntypedWithInput<MethodOutcome> returnMethodOutcome();
 }

@@ -452,7 +452,7 @@ private boolean elementIsOk(String name) throws FHIRFormatError  {
     } else {
       unwindPoint = null;
       List<XhtmlNode> p = new ArrayList<XhtmlNode>();
-      parseElementInner(root, p, nsm);
+      parseElementInner(root, p, nsm, true);
     }
     return result;
   }
@@ -507,7 +507,7 @@ private boolean elementIsOk(String name) throws FHIRFormatError  {
       s.setLength(0);
     }
   }
-  private void parseElementInner(XhtmlNode node, List<XhtmlNode> parents, NSMap nsm) throws FHIRFormatError, IOException 
+  private void parseElementInner(XhtmlNode node, List<XhtmlNode> parents, NSMap nsm, boolean escaping) throws FHIRFormatError, IOException 
   {
     StringBuilder s = new StringBuilder();
     while (peekChar() != '\0' && !parents.contains(unwindPoint) && !(node == unwindPoint))
@@ -564,7 +564,7 @@ private boolean elementIsOk(String name) throws FHIRFormatError  {
         else
           throw new FHIRFormatError("Unable to Parse HTML - node '" + node.getName() + "' has unexpected content '"+peekChar()+"' (last text = '"+lastText+"'"+descLoc());
       }
-      else if (peekChar() == '&')
+      else if (peekChar() == '&') // escaping && 
       {
         parseLiteral(s);
       }
@@ -591,7 +591,7 @@ private boolean elementIsOk(String name) throws FHIRFormatError  {
         throw new FHIRFormatError("unexpected non-end of element "+name+" "+descLoc());
       readChar();
     } else {
-       parseElementInner(node, newParents, nsm);
+       parseElementInner(node, newParents, nsm, "script".equals(name.getName()));
     }
   }
   
@@ -1164,7 +1164,7 @@ private boolean elementIsOk(String name) throws FHIRFormatError  {
     result.setName(n);
     unwindPoint = null;
     List<XhtmlNode> p = new ArrayList<XhtmlNode>();
-    parseElementInner(result, p, null);
+    parseElementInner(result, p, null, true);
 
     return result;
   }

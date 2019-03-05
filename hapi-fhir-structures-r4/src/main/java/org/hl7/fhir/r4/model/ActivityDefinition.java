@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -360,7 +360,11 @@ public class ActivityDefinition extends MetadataResource {
          */
         PLAN, 
         /**
-         * The request represents a request/demand and authorization for action.
+         * The request represents a legally binding instruction authored by a Patient or RelatedPerson.
+         */
+        DIRECTIVE, 
+        /**
+         * The request represents a request/demand and authorization for action by a Practitioner.
          */
         ORDER, 
         /**
@@ -394,6 +398,8 @@ public class ActivityDefinition extends MetadataResource {
           return PROPOSAL;
         if ("plan".equals(codeString))
           return PLAN;
+        if ("directive".equals(codeString))
+          return DIRECTIVE;
         if ("order".equals(codeString))
           return ORDER;
         if ("original-order".equals(codeString))
@@ -415,6 +421,7 @@ public class ActivityDefinition extends MetadataResource {
           switch (this) {
             case PROPOSAL: return "proposal";
             case PLAN: return "plan";
+            case DIRECTIVE: return "directive";
             case ORDER: return "order";
             case ORIGINALORDER: return "original-order";
             case REFLEXORDER: return "reflex-order";
@@ -428,6 +435,7 @@ public class ActivityDefinition extends MetadataResource {
           switch (this) {
             case PROPOSAL: return "http://hl7.org/fhir/request-intent";
             case PLAN: return "http://hl7.org/fhir/request-intent";
+            case DIRECTIVE: return "http://hl7.org/fhir/request-intent";
             case ORDER: return "http://hl7.org/fhir/request-intent";
             case ORIGINALORDER: return "http://hl7.org/fhir/request-intent";
             case REFLEXORDER: return "http://hl7.org/fhir/request-intent";
@@ -441,7 +449,8 @@ public class ActivityDefinition extends MetadataResource {
           switch (this) {
             case PROPOSAL: return "The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act.";
             case PLAN: return "The request represents an intention to ensure something occurs without providing an authorization for others to act.";
-            case ORDER: return "The request represents a request/demand and authorization for action.";
+            case DIRECTIVE: return "The request represents a legally binding instruction authored by a Patient or RelatedPerson.";
+            case ORDER: return "The request represents a request/demand and authorization for action by a Practitioner.";
             case ORIGINALORDER: return "The request represents an original authorization for action.";
             case REFLEXORDER: return "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization.";
             case FILLERORDER: return "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller's intention to act upon a submitted order.";
@@ -454,6 +463,7 @@ public class ActivityDefinition extends MetadataResource {
           switch (this) {
             case PROPOSAL: return "Proposal";
             case PLAN: return "Plan";
+            case DIRECTIVE: return "Directive";
             case ORDER: return "Order";
             case ORIGINALORDER: return "Original Order";
             case REFLEXORDER: return "Reflex Order";
@@ -474,6 +484,8 @@ public class ActivityDefinition extends MetadataResource {
           return RequestIntent.PROPOSAL;
         if ("plan".equals(codeString))
           return RequestIntent.PLAN;
+        if ("directive".equals(codeString))
+          return RequestIntent.DIRECTIVE;
         if ("order".equals(codeString))
           return RequestIntent.ORDER;
         if ("original-order".equals(codeString))
@@ -500,6 +512,8 @@ public class ActivityDefinition extends MetadataResource {
           return new Enumeration<RequestIntent>(this, RequestIntent.PROPOSAL);
         if ("plan".equals(codeString))
           return new Enumeration<RequestIntent>(this, RequestIntent.PLAN);
+        if ("directive".equals(codeString))
+          return new Enumeration<RequestIntent>(this, RequestIntent.DIRECTIVE);
         if ("order".equals(codeString))
           return new Enumeration<RequestIntent>(this, RequestIntent.ORDER);
         if ("original-order".equals(codeString))
@@ -519,6 +533,8 @@ public class ActivityDefinition extends MetadataResource {
         return "proposal";
       if (code == RequestIntent.PLAN)
         return "plan";
+      if (code == RequestIntent.DIRECTIVE)
+        return "directive";
       if (code == RequestIntent.ORDER)
         return "order";
       if (code == RequestIntent.ORIGINALORDER)
@@ -1018,10 +1034,10 @@ public class ActivityDefinition extends MetadataResource {
     @Block()
     public static class ActivityDefinitionDynamicValueComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
+         * The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).
          */
         @Child(name = "path", type = {StringType.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="The path to the element to be set dynamically", formalDefinition="The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression." )
+        @Description(shortDefinition="The path to the element to be set dynamically", formalDefinition="The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details)." )
         protected StringType path;
 
         /**
@@ -1050,7 +1066,7 @@ public class ActivityDefinition extends MetadataResource {
       }
 
         /**
-         * @return {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @return {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public StringType getPathElement() { 
           if (this.path == null)
@@ -1070,7 +1086,7 @@ public class ActivityDefinition extends MetadataResource {
         }
 
         /**
-         * @param value {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
+         * @param value {@link #path} (The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).). This is the underlying object with id, value and extensions. The accessor "getPath" gives direct access to the value
          */
         public ActivityDefinitionDynamicValueComponent setPathElement(StringType value) { 
           this.path = value;
@@ -1078,14 +1094,14 @@ public class ActivityDefinition extends MetadataResource {
         }
 
         /**
-         * @return The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
+         * @return The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).
          */
         public String getPath() { 
           return this.path == null ? null : this.path.getValue();
         }
 
         /**
-         * @param value The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.
+         * @param value The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).
          */
         public ActivityDefinitionDynamicValueComponent setPath(String value) { 
             if (this.path == null)
@@ -1120,14 +1136,14 @@ public class ActivityDefinition extends MetadataResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.", 0, 1, path));
+          children.add(new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).", 0, 1, path));
           children.add(new Property("expression", "Expression", "An expression specifying the value of the customized element.", 0, 1, expression));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3433509: /*path*/  return new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression.", 0, 1, path);
+          case 3433509: /*path*/  return new Property("path", "string", "The path to the element to be customized. This is the path on the resource that will hold the result of the calculation defined by the expression. The specified path SHALL be a FHIRPath resolveable on the specified target type of the ActivityDefinition, and SHALL consist only of identifiers, constant indexers, and a restricted subset of functions. The path is allowed to contain qualifiers (.) to traverse sub-elements, as well as indexers ([x]) to traverse multiple-cardinality sub-elements (see the [Simple FHIRPath Profile](fhirpath.html#simple) for full details).", 0, 1, path);
           case -1795452264: /*expression*/  return new Property("expression", "Expression", "An expression specifying the value of the customized element.", 0, 1, expression);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1924,7 +1940,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public CodeableConcept getSubjectCodeableConcept() throws FHIRException { 
       if (this.subject == null)
-        return null;
+        this.subject = new CodeableConcept();
       if (!(this.subject instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.subject.getClass().getName()+" was encountered");
       return (CodeableConcept) this.subject;
@@ -1939,7 +1955,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public Reference getSubjectReference() throws FHIRException { 
       if (this.subject == null)
-        return null;
+        this.subject = new Reference();
       if (!(this.subject instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.subject.getClass().getName()+" was encountered");
       return (Reference) this.subject;
@@ -2164,7 +2180,7 @@ public class ActivityDefinition extends MetadataResource {
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate activity definition instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate activity definition instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -3194,7 +3210,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public Timing getTimingTiming() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new Timing();
       if (!(this.timing instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Timing) this.timing;
@@ -3209,7 +3225,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public DateTimeType getTimingDateTimeType() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new DateTimeType();
       if (!(this.timing instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (DateTimeType) this.timing;
@@ -3224,7 +3240,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public Age getTimingAge() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new Age();
       if (!(this.timing instanceof Age))
         throw new FHIRException("Type mismatch: the type Age was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Age) this.timing;
@@ -3239,7 +3255,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public Period getTimingPeriod() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new Period();
       if (!(this.timing instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Period) this.timing;
@@ -3254,7 +3270,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public Range getTimingRange() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new Range();
       if (!(this.timing instanceof Range))
         throw new FHIRException("Type mismatch: the type Range was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Range) this.timing;
@@ -3269,7 +3285,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public Duration getTimingDuration() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new Duration();
       if (!(this.timing instanceof Duration))
         throw new FHIRException("Type mismatch: the type Duration was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Duration) this.timing;
@@ -3402,7 +3418,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public Reference getProductReference() throws FHIRException { 
       if (this.product == null)
-        return null;
+        this.product = new Reference();
       if (!(this.product instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.product.getClass().getName()+" was encountered");
       return (Reference) this.product;
@@ -3417,7 +3433,7 @@ public class ActivityDefinition extends MetadataResource {
      */
     public CodeableConcept getProductCodeableConcept() throws FHIRException { 
       if (this.product == null)
-        return null;
+        this.product = new CodeableConcept();
       if (!(this.product instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.product.getClass().getName()+" was encountered");
       return (CodeableConcept) this.product;
@@ -3913,7 +3929,7 @@ public class ActivityDefinition extends MetadataResource {
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the activity definition.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the activity definition from a consumer's perspective.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate activity definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate activity definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the activity definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this activity definition is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("usage", "string", "A detailed description of how the activity definition is used from a clinical perspective.", 0, 1, usage));
@@ -3967,7 +3983,7 @@ public class ActivityDefinition extends MetadataResource {
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the activity definition.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the activity definition from a consumer's perspective.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate activity definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate activity definition instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the activity definition is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this activity definition is needed and why it has been designed as it has.", 0, 1, purpose);
         case 111574433: /*usage*/  return new Property("usage", "string", "A detailed description of how the activity definition is used from a clinical perspective.", 0, 1, usage);

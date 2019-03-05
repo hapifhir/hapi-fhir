@@ -6,7 +6,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,13 @@ public interface IRestfulServerDefaults {
 	ETagSupportEnum getETagSupport();
 
 	/**
+	 * @return Returns the support option for the <code>_elements</code> parameter on search
+	 * and read operations.
+	 * @see <a href="http://hapifhir.io/doc_rest_server.html#extended_elements_support">Extended Elements Support</a>
+	 */
+	ElementsSupportEnum getElementsSupport();
+
+	/**
 	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
 	 * providers should generally use this context if one is needed, as opposed to
 	 * creating their own.
@@ -78,12 +85,6 @@ public interface IRestfulServerDefaults {
 	 */
 	boolean isDefaultPrettyPrint();
 
-	/**
-	 * @return If <code>true</code> the server will use browser friendly content-types (instead of standard FHIR ones)
-	 *         when it detects that the request is coming from a browser
-	 *         instead of a FHIR
-	 */
-	boolean isUseBrowserFriendlyContentTypes();
 
 
 }

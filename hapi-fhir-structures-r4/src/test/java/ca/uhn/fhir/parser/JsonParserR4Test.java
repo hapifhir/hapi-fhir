@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -252,6 +253,7 @@ public class JsonParserR4Test {
 	}
 
 	@Test
+	@Ignore
 	public void testExcludeRootStuff() {
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 		Set<String> excludes = new HashSet<>();

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum FlagStatus {
 
         /**
-         * A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag.
+         * A current flag that should be displayed to a user. A system may use the category to determine which user roles should view the flag.
          */
         ACTIVE, 
         /**
-         * The flag does not need to be displayed any more.
+         * The flag no longer needs to be displayed.
          */
         INACTIVE, 
         /**
-         * The flag was added in error, and should no longer be displayed.
+         * The flag was added in error and should no longer be displayed.
          */
         ENTEREDINERROR, 
         /**
@@ -76,9 +76,9 @@ public enum FlagStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case ACTIVE: return "A current flag that should be displayed to a user. A system may use the category to determine which roles should view the flag.";
-            case INACTIVE: return "The flag does not need to be displayed any more.";
-            case ENTEREDINERROR: return "The flag was added in error, and should no longer be displayed.";
+            case ACTIVE: return "A current flag that should be displayed to a user. A system may use the category to determine which user roles should view the flag.";
+            case INACTIVE: return "The flag no longer needs to be displayed.";
+            case ENTEREDINERROR: return "The flag was added in error and should no longer be displayed.";
             default: return "?";
           }
         }

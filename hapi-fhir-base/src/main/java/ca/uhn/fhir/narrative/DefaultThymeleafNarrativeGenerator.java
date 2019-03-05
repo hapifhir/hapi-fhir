@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +31,10 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	static final String HAPISERVER_NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
 
 	private boolean myUseHapiServerConformanceNarrative;
+
+	public DefaultThymeleafNarrativeGenerator(FhirContext theFhirContext) {
+		super(theFhirContext);
+	}
 
 	@Override
 	protected List<String> getPropertyFile() {

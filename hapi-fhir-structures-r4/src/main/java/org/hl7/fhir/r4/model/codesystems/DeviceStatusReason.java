@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -57,7 +57,7 @@ public enum DeviceStatusReason {
          */
         NOTREADY, 
         /**
-         * The device transducer is diconnected.
+         * The device transducer is disconnected.
          */
         TRANSDUCDISCON, 
         /**
@@ -116,7 +116,7 @@ public enum DeviceStatusReason {
             case STANDBY: return "The device is ready but not actively operating.";
             case OFFLINE: return "The device is offline.";
             case NOTREADY: return "The device is not ready.";
-            case TRANSDUCDISCON: return "The device transducer is diconnected.";
+            case TRANSDUCDISCON: return "The device transducer is disconnected.";
             case HWDISCON: return "The device hardware is disconnected.";
             case OFF: return "The device is off.";
             default: return "?";
@@ -129,8 +129,8 @@ public enum DeviceStatusReason {
             case STANDBY: return "Standby";
             case OFFLINE: return "Offline";
             case NOTREADY: return "Not Ready";
-            case TRANSDUCDISCON: return "Transducer Diconnected";
-            case HWDISCON: return "Hardware Disconnectd";
+            case TRANSDUCDISCON: return "Transducer Disconnected";
+            case HWDISCON: return "Hardware Disconnected";
             case OFF: return "Off";
             default: return "?";
           }

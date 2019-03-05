@@ -195,8 +195,8 @@
 															<tr th:each="entry : ${bundle.entries}">
 																<td style="white-space: nowrap;">
 																	<th:block th:if="${entry.resource} != null">
-																		<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart,'')} + '\');'" type="submit" name="action" value="read"><i class="fa fa-book"></i> Read</button>
-																		<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.id.resourceType} + '\', \'' + ${entry.resource.id.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.id.versionIdPart, '')} + '\');'" type="submit" name="action" value="home"><i class="fa fa-pencil"></i> Update</button>
+																		<button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="readFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="read"><i class="fa fa-book"></i> Read</button>
+																		<button class="btn btn-primary btn-xs" th:data1="${entry.resource.id.resourceType}" th:data2="${entry.resource.id.idPart}" th:data3="${#strings.defaultString(entry.resource.id.versionIdPart,'')}" onclick="updateFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home"><i class="fa fa-pencil"></i> Update</button>
 																	</th:block>
 																</td>
 																<td>
@@ -307,8 +307,8 @@
 															<tr th:each="entry : ${riBundle.entry}">
 																<td style="white-space: nowrap;">
 																	<th:block th:if="${entry.resource} != null">
-																		<button class="btn btn-primary btn-xs" th:onclick="'readFromEntriesTable(this, \'' + ${entry.resource.idElement.resourceType} + '\', \'' + ${entry.resource.idElement.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.idElement.versionIdPart,'')} + '\');'" type="submit" name="action" value="read"><i class="fa fa-book"></i> Read</button>
-																		<button class="btn btn-primary btn-xs" th:onclick="'updateFromEntriesTable(this, \'' + ${entry.resource.idElement.resourceType} + '\', \'' + ${entry.resource.idElement.idPart} + '\', \'' + ${#strings.defaultString(entry.resource.idElement.versionIdPart, '')} + '\');'" type="submit" name="action" value="home"><i class="fa fa-pencil"></i> Update</button>
+                                                      <button class="btn btn-primary btn-xs" th:data1="${entry.resource.idElement.resourceType}" th:data2="${entry.resource.idElement.idPart}" th:data3="${#strings.defaultString(entry.resource.idElement.versionIdPart,'')}" onclick="readFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="read"><i class="fa fa-book"></i> Read</button>
+                                                      <button class="btn btn-primary btn-xs" th:data1="${entry.resource.idElement.resourceType}" th:data2="${entry.resource.idElement.idPart}" th:data3="${#strings.defaultString(entry.resource.idElement.versionIdPart,'')}" onclick="updateFromEntriesTable(this, this.getAttribute('data1'), this.getAttribute('data2'), this.getAttribute('data3'));" type="submit" name="action" value="home"><i class="fa fa-pencil"></i> Update</button>
 																	</th:block>
 																</td>
 																<td>

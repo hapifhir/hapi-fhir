@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,12 +67,13 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 			return;
 		}
 
-		String unique = myUnique ? "UNIQUE " : "";
+		String unique = myUnique ? "unique " : "";
 		String columns = String.join(", ", myColumns);
-		String sql = "CREATE " + unique + " INDEX " + myIndexName + " ON " + getTableName() + "(" + columns + ")";
+		String sql = "create " + unique + "index " + myIndexName + " on " + getTableName() + "(" + columns + ")";
+		String tableName = getTableName();
 
 		try {
-			executeSql(sql);
+			executeSql(tableName, sql);
 		} catch (Exception e) {
 			if (e.toString().contains("already exists")) {
 				ourLog.warn("Index {} already exists", myIndexName);

@@ -60,7 +60,9 @@ public class UuidType extends UriType {
 	 */
 	@Override
 	public UuidType copy() {
-		return new UuidType(getValue());
+		UuidType ret = new UuidType(getValue());
+		copyValues(ret);
+    return ret;
 	}
 	
 	public String fhirType() {

@@ -1,8 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -13,7 +21,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -230,7 +237,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED, tableOpt.get().getIndexStatus().longValue());
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), not(greaterThan(0)));
 		});
 
@@ -3065,17 +3072,17 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("foo").setValue(methodName);
-		e1.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);
+		e1.getLength().setSystem(SearchParamConstants.UCUM_NS).setCode("min").setValue(4.0 * 24 * 60);
 		IIdType id1 = myEncounterDao.create(e1, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter e3 = new Encounter();
 		e3.addIdentifier().setSystem("foo").setValue(methodName);
-		e3.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("year").setValue(3.0);
+		e3.getLength().setSystem(SearchParamConstants.UCUM_NS).setCode("year").setValue(3.0);
 		IIdType id3 = myEncounterDao.create(e3, mySrd).getId().toUnqualifiedVersionless();
 
 		Encounter e2 = new Encounter();
 		e2.addIdentifier().setSystem("foo").setValue(methodName);
-		e2.getLength().setSystem(BaseHapiFhirDao.UCUM_NS).setCode("year").setValue(2.0);
+		e2.getLength().setSystem(SearchParamConstants.UCUM_NS).setCode("year").setValue(2.0);
 		IIdType id2 = myEncounterDao.create(e2, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
@@ -3152,15 +3159,21 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		p.addName().setFamily(methodName);
 		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
+		TestUtil.sleepOneClick();
+
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system2").setValue(methodName);
 		p.addName().setFamily(methodName);
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
+		TestUtil.sleepOneClick();
+
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system3").setValue(methodName);
 		p.addName().setFamily(methodName);
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		TestUtil.sleepOneClick();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system4").setValue(methodName);
@@ -3196,32 +3209,32 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	public void testSortByNumber() {
 		String methodName = "testSortByNumber";
 
-		ImmunizationRecommendation e1 = new ImmunizationRecommendation();
+		MolecularSequence e1 = new MolecularSequence();
 		e1.addIdentifier().setSystem("foo").setValue(methodName);
-		e1.addRecommendation().setDoseNumber(new PositiveIntType(1));
-		IIdType id1 = myImmunizationRecommendationDao.create(e1, mySrd).getId().toUnqualifiedVersionless();
+		e1.addVariant().setStart(1);
+		IIdType id1 = myMolecularSequenceDao.create(e1, mySrd).getId().toUnqualifiedVersionless();
 
-		ImmunizationRecommendation e3 = new ImmunizationRecommendation();
+		MolecularSequence e3 = new MolecularSequence();
 		e3.addIdentifier().setSystem("foo").setValue(methodName);
-		e3.addRecommendation().setDoseNumber(new PositiveIntType(3));
-		IIdType id3 = myImmunizationRecommendationDao.create(e3, mySrd).getId().toUnqualifiedVersionless();
+		e3.addVariant().setStart(3);
+		IIdType id3 = myMolecularSequenceDao.create(e3, mySrd).getId().toUnqualifiedVersionless();
 
-		ImmunizationRecommendation e2 = new ImmunizationRecommendation();
+		MolecularSequence e2 = new MolecularSequence();
 		e2.addIdentifier().setSystem("foo").setValue(methodName);
-		e2.addRecommendation().setDoseNumber(new PositiveIntType(2));
-		IIdType id2 = myImmunizationRecommendationDao.create(e2, mySrd).getId().toUnqualifiedVersionless();
+		e2.addVariant().setStart(2);
+		IIdType id2 = myMolecularSequenceDao.create(e2, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm;
 		List<String> actual;
 
 		pm = new SearchParameterMap();
-		pm.setSort(new SortSpec(ImmunizationRecommendation.SP_DOSE_NUMBER));
-		actual = toUnqualifiedVersionlessIdValues(myImmunizationRecommendationDao.search(pm));
+		pm.setSort(new SortSpec(MolecularSequence.SP_VARIANT_START));
+		actual = toUnqualifiedVersionlessIdValues(myMolecularSequenceDao.search(pm));
 		assertThat(actual, contains(toValues(id1, id2, id3)));
 
 		pm = new SearchParameterMap();
-		pm.setSort(new SortSpec(ImmunizationRecommendation.SP_DOSE_NUMBER, SortOrderEnum.DESC));
-		actual = toUnqualifiedVersionlessIdValues(myImmunizationRecommendationDao.search(pm));
+		pm.setSort(new SortSpec(MolecularSequence.SP_VARIANT_START, SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIdValues(myMolecularSequenceDao.search(pm));
 		assertThat(actual, contains(toValues(id3, id2, id1)));
 	}
 

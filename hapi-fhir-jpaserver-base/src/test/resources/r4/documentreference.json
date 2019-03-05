@@ -57,16 +57,12 @@
       }
     ]
   },
-	"agent" : [
+	"author" : [
 		{
-			"who": {
 				"reference": "#a1"
-			}
 		},
 		{
-			"who": {
 				"reference": "#a2"
-			}
 		}
 	],
   "status" : "current",

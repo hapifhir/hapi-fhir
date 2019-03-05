@@ -9,6 +9,7 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
 import org.hamcrest.Matchers;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.model.*;
@@ -38,7 +39,6 @@ import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.BOOLE
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE;
 import static org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -348,10 +348,29 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	}
 	
 	@Test
-	public void testRequiredQuestionWithEnableWhenHidesQuestionHasAnswerTrue() {
-
+	public void testEnableWhenWithHasAnswerTrueDisablesQuestionWhenNoAnswerIsPresent() {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).addEnableWhen().setQuestion("link0").setHasAnswer(true);
+		
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
+	@Test
+	public void testRequiredQuestionQuantityWithEnableWhenHidesQuestionHasAnswerTrue() {
+
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.QUANTITY);
 		
 		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
@@ -385,6 +404,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		item1.addEnableWhen(enable);
 		enable.setQuestion("link0");
 		enable.setHasAnswer(true);
+		enable.setAnswer(new Quantity().setValue(1L));
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
@@ -404,9 +424,17 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.QUANTITY);
 		
+		//link1 question is enabled when link0 has answer
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1").setRequired(true);
+		q.addItem(item1);
+		QuestionnaireItemEnableWhenComponent enable = new QuestionnaireItemEnableWhenComponent();
+		item1.addEnableWhen(enable);
+		enable.setQuestion("link0");
+		enable.setAnswer(new Quantity().setValue(2L));
+
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
-
 		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Quantity().setValue(1L));
 
@@ -420,7 +448,6 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	
 	@Test
 	public void testRequiredQuestionQuantityWithEnableWhenEnablesQuestionValue() {
-
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.QUANTITY);
 		
@@ -445,7 +472,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("No response found for required item link1"));
 	}
-
+	
 	@Test
 	public void testRequiredQuestionWithEnableWhenHasAnswerTrueWithAnswer() {
 
@@ -585,7 +612,6 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
 		
 		ValidationResult errors = myVal.validateWithResult(qr);
-		
 		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
 		assertTrue("Must contain structural error about misplaced link1 item",
 				errors.getMessages().stream().filter(vm -> vm.getMessage().contains("Structural Error"))

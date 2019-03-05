@@ -5,7 +5,7 @@ import java.io.IOException;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * This method returns the server base, including the resource path.
-	 * {@link javax.ws.rs.core.UriInfo#getBaseUri() UriInfo#getBaseUri()}
+	 * {@link UriInfo#getBaseUri() UriInfo#getBaseUri()}
 	 * 
 	 * @return the ascii string for the base resource provider path
 	 */
@@ -117,6 +117,14 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	@Override
 	public ETagSupportEnum getETagSupport() {
 		return ETagSupportEnum.DISABLED;
+	}
+
+	/**
+	 * DEFAULT = {@link ElementsSupportEnum#STANDARD}
+	 */
+	@Override
+	public ElementsSupportEnum getElementsSupport() {
+		return ElementsSupportEnum.STANDARD;
 	}
 
 	@Override
@@ -240,14 +248,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 */
 	@Override
 	public boolean isDefaultPrettyPrint() {
-		return true;
-	}
-
-	/**
-	 * DEFAULT = false
-	 */
-	@Override
-	public boolean isUseBrowserFriendlyContentTypes() {
 		return true;
 	}
 

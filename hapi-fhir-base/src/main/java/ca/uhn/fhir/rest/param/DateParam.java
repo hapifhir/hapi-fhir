@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,7 +255,15 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		return b.build();
 	}
 
-	public class DateParamDateTimeHolder extends BaseDateTimeDt {
+	public static class DateParamDateTimeHolder extends BaseDateTimeDt {
+
+		/**
+		 * Constructor
+		 */
+		public DateParamDateTimeHolder() {
+			super();
+		}
+
 		@Override
 		protected TemporalPrecisionEnum getDefaultPrecisionForDatatype() {
 			return TemporalPrecisionEnum.SECOND;

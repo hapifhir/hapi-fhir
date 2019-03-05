@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -276,98 +276,6 @@ public class MeasureReport extends DomainResource {
       return "?";
       }
     public String toSystem(MeasureReportType code) {
-      return code.getSystem();
-      }
-    }
-
-    public enum MeasureImprovementNotation {
-        /**
-         * Improvement in the measure is noted as an increase in the measure score.
-         */
-        INCREASE, 
-        /**
-         * Improvement in the measure is noted as a decrease in the measure score.
-         */
-        DECREASE, 
-        /**
-         * added to help the parsers with the generic types
-         */
-        NULL;
-        public static MeasureImprovementNotation fromCode(String codeString) throws FHIRException {
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("increase".equals(codeString))
-          return INCREASE;
-        if ("decrease".equals(codeString))
-          return DECREASE;
-        if (Configuration.isAcceptInvalidEnums())
-          return null;
-        else
-          throw new FHIRException("Unknown MeasureImprovementNotation code '"+codeString+"'");
-        }
-        public String toCode() {
-          switch (this) {
-            case INCREASE: return "increase";
-            case DECREASE: return "decrease";
-            default: return "?";
-          }
-        }
-        public String getSystem() {
-          switch (this) {
-            case INCREASE: return "http://hl7.org/fhir/measure-improvement-notation";
-            case DECREASE: return "http://hl7.org/fhir/measure-improvement-notation";
-            default: return "?";
-          }
-        }
-        public String getDefinition() {
-          switch (this) {
-            case INCREASE: return "Improvement in the measure is noted as an increase in the measure score.";
-            case DECREASE: return "Improvement in the measure is noted as a decrease in the measure score.";
-            default: return "?";
-          }
-        }
-        public String getDisplay() {
-          switch (this) {
-            case INCREASE: return "Increase";
-            case DECREASE: return "Decrease";
-            default: return "?";
-          }
-        }
-    }
-
-  public static class MeasureImprovementNotationEnumFactory implements EnumFactory<MeasureImprovementNotation> {
-    public MeasureImprovementNotation fromCode(String codeString) throws IllegalArgumentException {
-      if (codeString == null || "".equals(codeString))
-            if (codeString == null || "".equals(codeString))
-                return null;
-        if ("increase".equals(codeString))
-          return MeasureImprovementNotation.INCREASE;
-        if ("decrease".equals(codeString))
-          return MeasureImprovementNotation.DECREASE;
-        throw new IllegalArgumentException("Unknown MeasureImprovementNotation code '"+codeString+"'");
-        }
-        public Enumeration<MeasureImprovementNotation> fromType(Base code) throws FHIRException {
-          if (code == null)
-            return null;
-          if (code.isEmpty())
-            return new Enumeration<MeasureImprovementNotation>(this);
-          String codeString = ((PrimitiveType) code).asStringValue();
-          if (codeString == null || "".equals(codeString))
-            return null;
-        if ("increase".equals(codeString))
-          return new Enumeration<MeasureImprovementNotation>(this, MeasureImprovementNotation.INCREASE);
-        if ("decrease".equals(codeString))
-          return new Enumeration<MeasureImprovementNotation>(this, MeasureImprovementNotation.DECREASE);
-        throw new FHIRException("Unknown MeasureImprovementNotation code '"+codeString+"'");
-        }
-    public String toCode(MeasureImprovementNotation code) {
-      if (code == MeasureImprovementNotation.INCREASE)
-        return "increase";
-      if (code == MeasureImprovementNotation.DECREASE)
-        return "decrease";
-      return "?";
-      }
-    public String toSystem(MeasureImprovementNotation code) {
       return code.getSystem();
       }
     }
@@ -1023,18 +931,18 @@ public class MeasureReport extends DomainResource {
         /**
          * The meaning of this stratifier, as defined in the measure definition.
          */
-        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="What stratifier of the group", formalDefinition="The meaning of this stratifier, as defined in the measure definition." )
-        protected CodeableConcept code;
+        protected List<CodeableConcept> code;
 
         /**
          * This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value.
          */
         @Child(name = "stratum", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-        @Description(shortDefinition="Stratum results, one for each unique value in the stratifier", formalDefinition="This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value." )
+        @Description(shortDefinition="Stratum results, one for each unique value, or set of values, in the stratifier, or stratifier components", formalDefinition="This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value." )
         protected List<StratifierGroupComponent> stratum;
 
-        private static final long serialVersionUID = 362479683L;
+        private static final long serialVersionUID = 259550185L;
 
     /**
      * Constructor
@@ -1046,25 +954,54 @@ public class MeasureReport extends DomainResource {
         /**
          * @return {@link #code} (The meaning of this stratifier, as defined in the measure definition.)
          */
-        public CodeableConcept getCode() { 
+        public List<CodeableConcept> getCode() { 
           if (this.code == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create MeasureReportGroupStratifierComponent.code");
-            else if (Configuration.doAutoCreate())
-              this.code = new CodeableConcept(); // cc
+            this.code = new ArrayList<CodeableConcept>();
           return this.code;
         }
 
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public MeasureReportGroupStratifierComponent setCode(List<CodeableConcept> theCode) { 
+          this.code = theCode;
+          return this;
+        }
+
         public boolean hasCode() { 
-          return this.code != null && !this.code.isEmpty();
+          if (this.code == null)
+            return false;
+          for (CodeableConcept item : this.code)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public CodeableConcept addCode() { //3
+          CodeableConcept t = new CodeableConcept();
+          if (this.code == null)
+            this.code = new ArrayList<CodeableConcept>();
+          this.code.add(t);
+          return t;
+        }
+
+        public MeasureReportGroupStratifierComponent addCode(CodeableConcept t) { //3
+          if (t == null)
+            return this;
+          if (this.code == null)
+            this.code = new ArrayList<CodeableConcept>();
+          this.code.add(t);
+          return this;
         }
 
         /**
-         * @param value {@link #code} (The meaning of this stratifier, as defined in the measure definition.)
+         * @return The first repetition of repeating field {@link #code}, creating it if it does not already exist
          */
-        public MeasureReportGroupStratifierComponent setCode(CodeableConcept value) { 
-          this.code = value;
-          return this;
+        public CodeableConcept getCodeFirstRep() { 
+          if (getCode().isEmpty()) {
+            addCode();
+          }
+          return getCode().get(0);
         }
 
         /**
@@ -1122,14 +1059,14 @@ public class MeasureReport extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("code", "CodeableConcept", "The meaning of this stratifier, as defined in the measure definition.", 0, 1, code));
+          children.add(new Property("code", "CodeableConcept", "The meaning of this stratifier, as defined in the measure definition.", 0, java.lang.Integer.MAX_VALUE, code));
           children.add(new Property("stratum", "", "This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value.", 0, java.lang.Integer.MAX_VALUE, stratum));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The meaning of this stratifier, as defined in the measure definition.", 0, 1, code);
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The meaning of this stratifier, as defined in the measure definition.", 0, java.lang.Integer.MAX_VALUE, code);
           case -1881991236: /*stratum*/  return new Property("stratum", "", "This element contains the results for a single stratum within the stratifier. For example, when stratifying on administrative gender, there will be four strata, one for each possible gender value.", 0, java.lang.Integer.MAX_VALUE, stratum);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1139,7 +1076,7 @@ public class MeasureReport extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
-        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : this.code.toArray(new Base[this.code.size()]); // CodeableConcept
         case -1881991236: /*stratum*/ return this.stratum == null ? new Base[0] : this.stratum.toArray(new Base[this.stratum.size()]); // StratifierGroupComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1150,7 +1087,7 @@ public class MeasureReport extends DomainResource {
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
         case 3059181: // code
-          this.code = castToCodeableConcept(value); // CodeableConcept
+          this.getCode().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case -1881991236: // stratum
           this.getStratum().add((StratifierGroupComponent) value); // StratifierGroupComponent
@@ -1163,7 +1100,7 @@ public class MeasureReport extends DomainResource {
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("code")) {
-          this.code = castToCodeableConcept(value); // CodeableConcept
+          this.getCode().add(castToCodeableConcept(value));
         } else if (name.equals("stratum")) {
           this.getStratum().add((StratifierGroupComponent) value);
         } else
@@ -1174,7 +1111,7 @@ public class MeasureReport extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
-        case 3059181:  return getCode(); 
+        case 3059181:  return addCode(); 
         case -1881991236:  return addStratum(); 
         default: return super.makeProperty(hash, name);
         }
@@ -1194,8 +1131,7 @@ public class MeasureReport extends DomainResource {
       @Override
       public Base addChild(String name) throws FHIRException {
         if (name.equals("code")) {
-          this.code = new CodeableConcept();
-          return this.code;
+          return addCode();
         }
         else if (name.equals("stratum")) {
           return addStratum();
@@ -1207,7 +1143,11 @@ public class MeasureReport extends DomainResource {
       public MeasureReportGroupStratifierComponent copy() {
         MeasureReportGroupStratifierComponent dst = new MeasureReportGroupStratifierComponent();
         copyValues(dst);
-        dst.code = code == null ? null : code.copy();
+        if (code != null) {
+          dst.code = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : code)
+            dst.code.add(i.copy());
+        };
         if (stratum != null) {
           dst.stratum = new ArrayList<StratifierGroupComponent>();
           for (StratifierGroupComponent i : stratum)
@@ -1252,39 +1192,38 @@ public class MeasureReport extends DomainResource {
         /**
          * The value for this stratum, expressed as a CodeableConcept. When defining stratifiers on complex values, the value must be rendered such that the value for each stratum within the stratifier is unique.
          */
-        @Child(name = "value", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "value", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="The stratum value, e.g. male", formalDefinition="The value for this stratum, expressed as a CodeableConcept. When defining stratifiers on complex values, the value must be rendered such that the value for each stratum within the stratifier is unique." )
         protected CodeableConcept value;
 
         /**
+         * A stratifier component value.
+         */
+        @Child(name = "component", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Description(shortDefinition="Stratifier component values", formalDefinition="A stratifier component value." )
+        protected List<StratifierGroupComponentComponent> component;
+
+        /**
          * The populations that make up the stratum, one for each type of population appropriate to the measure.
          */
-        @Child(name = "population", type = {}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "population", type = {}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Population results in this stratum", formalDefinition="The populations that make up the stratum, one for each type of population appropriate to the measure." )
         protected List<StratifierGroupPopulationComponent> population;
 
         /**
          * The measure score for this stratum, calculated as appropriate for the measure type and scoring method, and based on only the members of this stratum.
          */
-        @Child(name = "measureScore", type = {Quantity.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "measureScore", type = {Quantity.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="What score this stratum achieved", formalDefinition="The measure score for this stratum, calculated as appropriate for the measure type and scoring method, and based on only the members of this stratum." )
         protected Quantity measureScore;
 
-        private static final long serialVersionUID = 515764240L;
+        private static final long serialVersionUID = 892251179L;
 
     /**
      * Constructor
      */
       public StratifierGroupComponent() {
         super();
-      }
-
-    /**
-     * Constructor
-     */
-      public StratifierGroupComponent(CodeableConcept value) {
-        super();
-        this.value = value;
       }
 
         /**
@@ -1309,6 +1248,59 @@ public class MeasureReport extends DomainResource {
         public StratifierGroupComponent setValue(CodeableConcept value) { 
           this.value = value;
           return this;
+        }
+
+        /**
+         * @return {@link #component} (A stratifier component value.)
+         */
+        public List<StratifierGroupComponentComponent> getComponent() { 
+          if (this.component == null)
+            this.component = new ArrayList<StratifierGroupComponentComponent>();
+          return this.component;
+        }
+
+        /**
+         * @return Returns a reference to <code>this</code> for easy method chaining
+         */
+        public StratifierGroupComponent setComponent(List<StratifierGroupComponentComponent> theComponent) { 
+          this.component = theComponent;
+          return this;
+        }
+
+        public boolean hasComponent() { 
+          if (this.component == null)
+            return false;
+          for (StratifierGroupComponentComponent item : this.component)
+            if (!item.isEmpty())
+              return true;
+          return false;
+        }
+
+        public StratifierGroupComponentComponent addComponent() { //3
+          StratifierGroupComponentComponent t = new StratifierGroupComponentComponent();
+          if (this.component == null)
+            this.component = new ArrayList<StratifierGroupComponentComponent>();
+          this.component.add(t);
+          return t;
+        }
+
+        public StratifierGroupComponent addComponent(StratifierGroupComponentComponent t) { //3
+          if (t == null)
+            return this;
+          if (this.component == null)
+            this.component = new ArrayList<StratifierGroupComponentComponent>();
+          this.component.add(t);
+          return this;
+        }
+
+        /**
+         * @return The first repetition of repeating field {@link #component}, creating it if it does not already exist
+         */
+        public StratifierGroupComponentComponent getComponentFirstRep() { 
+          if (getComponent().isEmpty()) {
+            addComponent();
+          }
+          return getComponent().get(0);
         }
 
         /**
@@ -1391,6 +1383,7 @@ public class MeasureReport extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("value", "CodeableConcept", "The value for this stratum, expressed as a CodeableConcept. When defining stratifiers on complex values, the value must be rendered such that the value for each stratum within the stratifier is unique.", 0, 1, value));
+          children.add(new Property("component", "", "A stratifier component value.", 0, java.lang.Integer.MAX_VALUE, component));
           children.add(new Property("population", "", "The populations that make up the stratum, one for each type of population appropriate to the measure.", 0, java.lang.Integer.MAX_VALUE, population));
           children.add(new Property("measureScore", "Quantity", "The measure score for this stratum, calculated as appropriate for the measure type and scoring method, and based on only the members of this stratum.", 0, 1, measureScore));
         }
@@ -1399,6 +1392,7 @@ public class MeasureReport extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 111972721: /*value*/  return new Property("value", "CodeableConcept", "The value for this stratum, expressed as a CodeableConcept. When defining stratifiers on complex values, the value must be rendered such that the value for each stratum within the stratifier is unique.", 0, 1, value);
+          case -1399907075: /*component*/  return new Property("component", "", "A stratifier component value.", 0, java.lang.Integer.MAX_VALUE, component);
           case -2023558323: /*population*/  return new Property("population", "", "The populations that make up the stratum, one for each type of population appropriate to the measure.", 0, java.lang.Integer.MAX_VALUE, population);
           case -386313260: /*measureScore*/  return new Property("measureScore", "Quantity", "The measure score for this stratum, calculated as appropriate for the measure type and scoring method, and based on only the members of this stratum.", 0, 1, measureScore);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1410,6 +1404,7 @@ public class MeasureReport extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // CodeableConcept
+        case -1399907075: /*component*/ return this.component == null ? new Base[0] : this.component.toArray(new Base[this.component.size()]); // StratifierGroupComponentComponent
         case -2023558323: /*population*/ return this.population == null ? new Base[0] : this.population.toArray(new Base[this.population.size()]); // StratifierGroupPopulationComponent
         case -386313260: /*measureScore*/ return this.measureScore == null ? new Base[0] : new Base[] {this.measureScore}; // Quantity
         default: return super.getProperty(hash, name, checkValid);
@@ -1422,6 +1417,9 @@ public class MeasureReport extends DomainResource {
         switch (hash) {
         case 111972721: // value
           this.value = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case -1399907075: // component
+          this.getComponent().add((StratifierGroupComponentComponent) value); // StratifierGroupComponentComponent
           return value;
         case -2023558323: // population
           this.getPopulation().add((StratifierGroupPopulationComponent) value); // StratifierGroupPopulationComponent
@@ -1438,6 +1436,8 @@ public class MeasureReport extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("value")) {
           this.value = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("component")) {
+          this.getComponent().add((StratifierGroupComponentComponent) value);
         } else if (name.equals("population")) {
           this.getPopulation().add((StratifierGroupPopulationComponent) value);
         } else if (name.equals("measureScore")) {
@@ -1451,6 +1451,7 @@ public class MeasureReport extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 111972721:  return getValue(); 
+        case -1399907075:  return addComponent(); 
         case -2023558323:  return addPopulation(); 
         case -386313260:  return getMeasureScore(); 
         default: return super.makeProperty(hash, name);
@@ -1462,6 +1463,7 @@ public class MeasureReport extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 111972721: /*value*/ return new String[] {"CodeableConcept"};
+        case -1399907075: /*component*/ return new String[] {};
         case -2023558323: /*population*/ return new String[] {};
         case -386313260: /*measureScore*/ return new String[] {"Quantity"};
         default: return super.getTypesForProperty(hash, name);
@@ -1474,6 +1476,9 @@ public class MeasureReport extends DomainResource {
         if (name.equals("value")) {
           this.value = new CodeableConcept();
           return this.value;
+        }
+        else if (name.equals("component")) {
+          return addComponent();
         }
         else if (name.equals("population")) {
           return addPopulation();
@@ -1490,6 +1495,11 @@ public class MeasureReport extends DomainResource {
         StratifierGroupComponent dst = new StratifierGroupComponent();
         copyValues(dst);
         dst.value = value == null ? null : value.copy();
+        if (component != null) {
+          dst.component = new ArrayList<StratifierGroupComponentComponent>();
+          for (StratifierGroupComponentComponent i : component)
+            dst.component.add(i.copy());
+        };
         if (population != null) {
           dst.population = new ArrayList<StratifierGroupPopulationComponent>();
           for (StratifierGroupPopulationComponent i : population)
@@ -1506,8 +1516,8 @@ public class MeasureReport extends DomainResource {
         if (!(other_ instanceof StratifierGroupComponent))
           return false;
         StratifierGroupComponent o = (StratifierGroupComponent) other_;
-        return compareDeep(value, o.value, true) && compareDeep(population, o.population, true) && compareDeep(measureScore, o.measureScore, true)
-          ;
+        return compareDeep(value, o.value, true) && compareDeep(component, o.component, true) && compareDeep(population, o.population, true)
+           && compareDeep(measureScore, o.measureScore, true);
       }
 
       @Override
@@ -1521,12 +1531,218 @@ public class MeasureReport extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value, population, measureScore
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(value, component, population
+          , measureScore);
       }
 
   public String fhirType() {
     return "MeasureReport.group.stratifier.stratum";
+
+  }
+
+  }
+
+    @Block()
+    public static class StratifierGroupComponentComponent extends BackboneElement implements IBaseBackboneElement {
+        /**
+         * The code for the stratum component value.
+         */
+        @Child(name = "code", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="What stratifier component of the group", formalDefinition="The code for the stratum component value." )
+        protected CodeableConcept code;
+
+        /**
+         * The stratum component value.
+         */
+        @Child(name = "value", type = {CodeableConcept.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The stratum component value, e.g. male", formalDefinition="The stratum component value." )
+        protected CodeableConcept value;
+
+        private static final long serialVersionUID = 1750253426L;
+
+    /**
+     * Constructor
+     */
+      public StratifierGroupComponentComponent() {
+        super();
+      }
+
+    /**
+     * Constructor
+     */
+      public StratifierGroupComponentComponent(CodeableConcept code, CodeableConcept value) {
+        super();
+        this.code = code;
+        this.value = value;
+      }
+
+        /**
+         * @return {@link #code} (The code for the stratum component value.)
+         */
+        public CodeableConcept getCode() { 
+          if (this.code == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create StratifierGroupComponentComponent.code");
+            else if (Configuration.doAutoCreate())
+              this.code = new CodeableConcept(); // cc
+          return this.code;
+        }
+
+        public boolean hasCode() { 
+          return this.code != null && !this.code.isEmpty();
+        }
+
+        /**
+         * @param value {@link #code} (The code for the stratum component value.)
+         */
+        public StratifierGroupComponentComponent setCode(CodeableConcept value) { 
+          this.code = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #value} (The stratum component value.)
+         */
+        public CodeableConcept getValue() { 
+          if (this.value == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create StratifierGroupComponentComponent.value");
+            else if (Configuration.doAutoCreate())
+              this.value = new CodeableConcept(); // cc
+          return this.value;
+        }
+
+        public boolean hasValue() { 
+          return this.value != null && !this.value.isEmpty();
+        }
+
+        /**
+         * @param value {@link #value} (The stratum component value.)
+         */
+        public StratifierGroupComponentComponent setValue(CodeableConcept value) { 
+          this.value = value;
+          return this;
+        }
+
+        protected void listChildren(List<Property> children) {
+          super.listChildren(children);
+          children.add(new Property("code", "CodeableConcept", "The code for the stratum component value.", 0, 1, code));
+          children.add(new Property("value", "CodeableConcept", "The stratum component value.", 0, 1, value));
+        }
+
+        @Override
+        public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
+          switch (_hash) {
+          case 3059181: /*code*/  return new Property("code", "CodeableConcept", "The code for the stratum component value.", 0, 1, code);
+          case 111972721: /*value*/  return new Property("value", "CodeableConcept", "The stratum component value.", 0, 1, value);
+          default: return super.getNamedProperty(_hash, _name, _checkValid);
+          }
+
+        }
+
+      @Override
+      public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return this.code == null ? new Base[0] : new Base[] {this.code}; // CodeableConcept
+        case 111972721: /*value*/ return this.value == null ? new Base[0] : new Base[] {this.value}; // CodeableConcept
+        default: return super.getProperty(hash, name, checkValid);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(int hash, String name, Base value) throws FHIRException {
+        switch (hash) {
+        case 3059181: // code
+          this.code = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        case 111972721: // value
+          this.value = castToCodeableConcept(value); // CodeableConcept
+          return value;
+        default: return super.setProperty(hash, name, value);
+        }
+
+      }
+
+      @Override
+      public Base setProperty(String name, Base value) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("value")) {
+          this.value = castToCodeableConcept(value); // CodeableConcept
+        } else
+          return super.setProperty(name, value);
+        return value;
+      }
+
+      @Override
+      public Base makeProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181:  return getCode(); 
+        case 111972721:  return getValue(); 
+        default: return super.makeProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public String[] getTypesForProperty(int hash, String name) throws FHIRException {
+        switch (hash) {
+        case 3059181: /*code*/ return new String[] {"CodeableConcept"};
+        case 111972721: /*value*/ return new String[] {"CodeableConcept"};
+        default: return super.getTypesForProperty(hash, name);
+        }
+
+      }
+
+      @Override
+      public Base addChild(String name) throws FHIRException {
+        if (name.equals("code")) {
+          this.code = new CodeableConcept();
+          return this.code;
+        }
+        else if (name.equals("value")) {
+          this.value = new CodeableConcept();
+          return this.value;
+        }
+        else
+          return super.addChild(name);
+      }
+
+      public StratifierGroupComponentComponent copy() {
+        StratifierGroupComponentComponent dst = new StratifierGroupComponentComponent();
+        copyValues(dst);
+        dst.code = code == null ? null : code.copy();
+        dst.value = value == null ? null : value.copy();
+        return dst;
+      }
+
+      @Override
+      public boolean equalsDeep(Base other_) {
+        if (!super.equalsDeep(other_))
+          return false;
+        if (!(other_ instanceof StratifierGroupComponentComponent))
+          return false;
+        StratifierGroupComponentComponent o = (StratifierGroupComponentComponent) other_;
+        return compareDeep(code, o.code, true) && compareDeep(value, o.value, true);
+      }
+
+      @Override
+      public boolean equalsShallow(Base other_) {
+        if (!super.equalsShallow(other_))
+          return false;
+        if (!(other_ instanceof StratifierGroupComponentComponent))
+          return false;
+        StratifierGroupComponentComponent o = (StratifierGroupComponentComponent) other_;
+        return true;
+      }
+
+      public boolean isEmpty() {
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(code, value);
+      }
+
+  public String fhirType() {
+    return "MeasureReport.group.stratifier.stratum.component";
 
   }
 
@@ -1894,10 +2110,10 @@ public class MeasureReport extends DomainResource {
     /**
      * Whether improvement in the measure is noted by an increase or decrease in the measure score.
      */
-    @Child(name = "improvementNotation", type = {CodeType.class}, order=8, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "improvementNotation", type = {CodeableConcept.class}, order=8, min=0, max=1, modifier=true, summary=true)
     @Description(shortDefinition="increase | decrease", formalDefinition="Whether improvement in the measure is noted by an increase or decrease in the measure score." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/measure-improvement-notation")
-    protected Enumeration<MeasureImprovementNotation> improvementNotation;
+    protected CodeableConcept improvementNotation;
 
     /**
      * The results of the calculation, one for each population group in the measure.
@@ -1918,7 +2134,7 @@ public class MeasureReport extends DomainResource {
     protected List<Resource> evaluatedResourceTarget;
 
 
-    private static final long serialVersionUID = -1690162707L;
+    private static final long serialVersionUID = 355307999L;
 
   /**
    * Constructor
@@ -2278,19 +2494,15 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @return {@link #improvementNotation} (Whether improvement in the measure is noted by an increase or decrease in the measure score.). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     * @return {@link #improvementNotation} (Whether improvement in the measure is noted by an increase or decrease in the measure score.)
      */
-    public Enumeration<MeasureImprovementNotation> getImprovementNotationElement() { 
+    public CodeableConcept getImprovementNotation() { 
       if (this.improvementNotation == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create MeasureReport.improvementNotation");
         else if (Configuration.doAutoCreate())
-          this.improvementNotation = new Enumeration<MeasureImprovementNotation>(new MeasureImprovementNotationEnumFactory()); // bb
+          this.improvementNotation = new CodeableConcept(); // cc
       return this.improvementNotation;
-    }
-
-    public boolean hasImprovementNotationElement() { 
-      return this.improvementNotation != null && !this.improvementNotation.isEmpty();
     }
 
     public boolean hasImprovementNotation() { 
@@ -2298,31 +2510,10 @@ public class MeasureReport extends DomainResource {
     }
 
     /**
-     * @param value {@link #improvementNotation} (Whether improvement in the measure is noted by an increase or decrease in the measure score.). This is the underlying object with id, value and extensions. The accessor "getImprovementNotation" gives direct access to the value
+     * @param value {@link #improvementNotation} (Whether improvement in the measure is noted by an increase or decrease in the measure score.)
      */
-    public MeasureReport setImprovementNotationElement(Enumeration<MeasureImprovementNotation> value) { 
+    public MeasureReport setImprovementNotation(CodeableConcept value) { 
       this.improvementNotation = value;
-      return this;
-    }
-
-    /**
-     * @return Whether improvement in the measure is noted by an increase or decrease in the measure score.
-     */
-    public MeasureImprovementNotation getImprovementNotation() { 
-      return this.improvementNotation == null ? null : this.improvementNotation.getValue();
-    }
-
-    /**
-     * @param value Whether improvement in the measure is noted by an increase or decrease in the measure score.
-     */
-    public MeasureReport setImprovementNotation(MeasureImprovementNotation value) { 
-      if (value == null)
-        this.improvementNotation = null;
-      else {
-        if (this.improvementNotation == null)
-          this.improvementNotation = new Enumeration<MeasureImprovementNotation>(new MeasureImprovementNotationEnumFactory());
-        this.improvementNotation.setValue(value);
-      }
       return this;
     }
 
@@ -2452,7 +2643,7 @@ public class MeasureReport extends DomainResource {
         children.add(new Property("date", "dateTime", "The date this measure report was generated.", 0, 1, date));
         children.add(new Property("reporter", "Reference(Practitioner|PractitionerRole|Location|Organization)", "The individual, location, or organization that is reporting the data.", 0, 1, reporter));
         children.add(new Property("period", "Period", "The reporting period for which the report was calculated.", 0, 1, period));
-        children.add(new Property("improvementNotation", "code", "Whether improvement in the measure is noted by an increase or decrease in the measure score.", 0, 1, improvementNotation));
+        children.add(new Property("improvementNotation", "CodeableConcept", "Whether improvement in the measure is noted by an increase or decrease in the measure score.", 0, 1, improvementNotation));
         children.add(new Property("group", "", "The results of the calculation, one for each population group in the measure.", 0, java.lang.Integer.MAX_VALUE, group));
         children.add(new Property("evaluatedResource", "Reference(Any)", "A reference to a Bundle containing the Resources that were used in the calculation of this measure.", 0, java.lang.Integer.MAX_VALUE, evaluatedResource));
       }
@@ -2468,7 +2659,7 @@ public class MeasureReport extends DomainResource {
         case 3076014: /*date*/  return new Property("date", "dateTime", "The date this measure report was generated.", 0, 1, date);
         case -427039519: /*reporter*/  return new Property("reporter", "Reference(Practitioner|PractitionerRole|Location|Organization)", "The individual, location, or organization that is reporting the data.", 0, 1, reporter);
         case -991726143: /*period*/  return new Property("period", "Period", "The reporting period for which the report was calculated.", 0, 1, period);
-        case -2085456136: /*improvementNotation*/  return new Property("improvementNotation", "code", "Whether improvement in the measure is noted by an increase or decrease in the measure score.", 0, 1, improvementNotation);
+        case -2085456136: /*improvementNotation*/  return new Property("improvementNotation", "CodeableConcept", "Whether improvement in the measure is noted by an increase or decrease in the measure score.", 0, 1, improvementNotation);
         case 98629247: /*group*/  return new Property("group", "", "The results of the calculation, one for each population group in the measure.", 0, java.lang.Integer.MAX_VALUE, group);
         case -1056771047: /*evaluatedResource*/  return new Property("evaluatedResource", "Reference(Any)", "A reference to a Bundle containing the Resources that were used in the calculation of this measure.", 0, java.lang.Integer.MAX_VALUE, evaluatedResource);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -2487,7 +2678,7 @@ public class MeasureReport extends DomainResource {
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateTimeType
         case -427039519: /*reporter*/ return this.reporter == null ? new Base[0] : new Base[] {this.reporter}; // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
-        case -2085456136: /*improvementNotation*/ return this.improvementNotation == null ? new Base[0] : new Base[] {this.improvementNotation}; // Enumeration<MeasureImprovementNotation>
+        case -2085456136: /*improvementNotation*/ return this.improvementNotation == null ? new Base[0] : new Base[] {this.improvementNotation}; // CodeableConcept
         case 98629247: /*group*/ return this.group == null ? new Base[0] : this.group.toArray(new Base[this.group.size()]); // MeasureReportGroupComponent
         case -1056771047: /*evaluatedResource*/ return this.evaluatedResource == null ? new Base[0] : this.evaluatedResource.toArray(new Base[this.evaluatedResource.size()]); // Reference
         default: return super.getProperty(hash, name, checkValid);
@@ -2525,8 +2716,7 @@ public class MeasureReport extends DomainResource {
           this.period = castToPeriod(value); // Period
           return value;
         case -2085456136: // improvementNotation
-          value = new MeasureImprovementNotationEnumFactory().fromType(castToCode(value));
-          this.improvementNotation = (Enumeration) value; // Enumeration<MeasureImprovementNotation>
+          this.improvementNotation = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 98629247: // group
           this.getGroup().add((MeasureReportGroupComponent) value); // MeasureReportGroupComponent
@@ -2560,8 +2750,7 @@ public class MeasureReport extends DomainResource {
         } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
         } else if (name.equals("improvementNotation")) {
-          value = new MeasureImprovementNotationEnumFactory().fromType(castToCode(value));
-          this.improvementNotation = (Enumeration) value; // Enumeration<MeasureImprovementNotation>
+          this.improvementNotation = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("group")) {
           this.getGroup().add((MeasureReportGroupComponent) value);
         } else if (name.equals("evaluatedResource")) {
@@ -2582,7 +2771,7 @@ public class MeasureReport extends DomainResource {
         case 3076014:  return getDateElement();
         case -427039519:  return getReporter(); 
         case -991726143:  return getPeriod(); 
-        case -2085456136:  return getImprovementNotationElement();
+        case -2085456136:  return getImprovementNotation(); 
         case 98629247:  return addGroup(); 
         case -1056771047:  return addEvaluatedResource(); 
         default: return super.makeProperty(hash, name);
@@ -2601,7 +2790,7 @@ public class MeasureReport extends DomainResource {
         case 3076014: /*date*/ return new String[] {"dateTime"};
         case -427039519: /*reporter*/ return new String[] {"Reference"};
         case -991726143: /*period*/ return new String[] {"Period"};
-        case -2085456136: /*improvementNotation*/ return new String[] {"code"};
+        case -2085456136: /*improvementNotation*/ return new String[] {"CodeableConcept"};
         case 98629247: /*group*/ return new String[] {};
         case -1056771047: /*evaluatedResource*/ return new String[] {"Reference"};
         default: return super.getTypesForProperty(hash, name);
@@ -2639,7 +2828,8 @@ public class MeasureReport extends DomainResource {
           return this.period;
         }
         else if (name.equals("improvementNotation")) {
-          throw new FHIRException("Cannot call addChild on a primitive type MeasureReport.improvementNotation");
+          this.improvementNotation = new CodeableConcept();
+          return this.improvementNotation;
         }
         else if (name.equals("group")) {
           return addGroup();
@@ -2711,7 +2901,7 @@ public class MeasureReport extends DomainResource {
           return false;
         MeasureReport o = (MeasureReport) other_;
         return compareValues(status, o.status, true) && compareValues(type, o.type, true) && compareValues(date, o.date, true)
-           && compareValues(improvementNotation, o.improvementNotation, true);
+          ;
       }
 
       public boolean isEmpty() {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
+ * A Capability Statement documents a set of capabilities (behaviors) of a FHIR Server for a particular version of FHIR that may be used as a statement of actual server functionality or a statement of required or desired server implementation.
  */
 @ResourceDef(name="CapabilityStatement", profile="http://hl7.org/fhir/StructureDefinition/CapabilityStatement")
 @ChildOrder(names={"url", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "kind", "instantiates", "imports", "software", "implementation", "fhirVersion", "format", "patchFormat", "implementationGuide", "rest", "messaging", "document"})
@@ -4960,10 +4960,10 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         protected StringType name;
 
         /**
-         * Where the formal definition can be found.
+         * Where the formal definition can be found. If a server references the base definition of an Operation (i.e. from the specification itself such as ```http://hl7.org/fhir/OperationDefinition/ValueSet-expand```), that means it supports the full capabilities of the operation - e.g. both GET and POST invocation.  If it only supports a subset, it must define its own custom [[[OperationDefinition]]] with a 'base' of the original OperationDefinition.  The custom definition would describe the specific subset of functionality supported.
          */
         @Child(name = "definition", type = {CanonicalType.class}, order=2, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="The defined operation/query", formalDefinition="Where the formal definition can be found." )
+        @Description(shortDefinition="The defined operation/query", formalDefinition="Where the formal definition can be found. If a server references the base definition of an Operation (i.e. from the specification itself such as ```http://hl7.org/fhir/OperationDefinition/ValueSet-expand```), that means it supports the full capabilities of the operation - e.g. both GET and POST invocation.  If it only supports a subset, it must define its own custom [[[OperationDefinition]]] with a 'base' of the original OperationDefinition.  The custom definition would describe the specific subset of functionality supported." )
         protected CanonicalType definition;
 
         /**
@@ -5037,7 +5037,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return {@link #definition} (Where the formal definition can be found.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         * @return {@link #definition} (Where the formal definition can be found. If a server references the base definition of an Operation (i.e. from the specification itself such as ```http://hl7.org/fhir/OperationDefinition/ValueSet-expand```), that means it supports the full capabilities of the operation - e.g. both GET and POST invocation.  If it only supports a subset, it must define its own custom [[[OperationDefinition]]] with a 'base' of the original OperationDefinition.  The custom definition would describe the specific subset of functionality supported.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
         public CanonicalType getDefinitionElement() { 
           if (this.definition == null)
@@ -5057,7 +5057,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @param value {@link #definition} (Where the formal definition can be found.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
+         * @param value {@link #definition} (Where the formal definition can be found. If a server references the base definition of an Operation (i.e. from the specification itself such as ```http://hl7.org/fhir/OperationDefinition/ValueSet-expand```), that means it supports the full capabilities of the operation - e.g. both GET and POST invocation.  If it only supports a subset, it must define its own custom [[[OperationDefinition]]] with a 'base' of the original OperationDefinition.  The custom definition would describe the specific subset of functionality supported.). This is the underlying object with id, value and extensions. The accessor "getDefinition" gives direct access to the value
          */
         public CapabilityStatementRestResourceOperationComponent setDefinitionElement(CanonicalType value) { 
           this.definition = value;
@@ -5065,14 +5065,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         }
 
         /**
-         * @return Where the formal definition can be found.
+         * @return Where the formal definition can be found. If a server references the base definition of an Operation (i.e. from the specification itself such as ```http://hl7.org/fhir/OperationDefinition/ValueSet-expand```), that means it supports the full capabilities of the operation - e.g. both GET and POST invocation.  If it only supports a subset, it must define its own custom [[[OperationDefinition]]] with a 'base' of the original OperationDefinition.  The custom definition would describe the specific subset of functionality supported.
          */
         public String getDefinition() { 
           return this.definition == null ? null : this.definition.getValue();
         }
 
         /**
-         * @param value Where the formal definition can be found.
+         * @param value Where the formal definition can be found. If a server references the base definition of an Operation (i.e. from the specification itself such as ```http://hl7.org/fhir/OperationDefinition/ValueSet-expand```), that means it supports the full capabilities of the operation - e.g. both GET and POST invocation.  If it only supports a subset, it must define its own custom [[[OperationDefinition]]] with a 'base' of the original OperationDefinition.  The custom definition would describe the specific subset of functionality supported.
          */
         public CapabilityStatementRestResourceOperationComponent setDefinition(String value) { 
             if (this.definition == null)
@@ -5133,7 +5133,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("name", "string", "The name of the operation or query. For an operation, this is the name  prefixed with $ and used in the URL. For a query, this is the name used in the _query parameter when the query is called.", 0, 1, name));
-          children.add(new Property("definition", "canonical(OperationDefinition)", "Where the formal definition can be found.", 0, 1, definition));
+          children.add(new Property("definition", "canonical(OperationDefinition)", "Where the formal definition can be found. If a server references the base definition of an Operation (i.e. from the specification itself such as ```http://hl7.org/fhir/OperationDefinition/ValueSet-expand```), that means it supports the full capabilities of the operation - e.g. both GET and POST invocation.  If it only supports a subset, it must define its own custom [[[OperationDefinition]]] with a 'base' of the original OperationDefinition.  The custom definition would describe the specific subset of functionality supported.", 0, 1, definition));
           children.add(new Property("documentation", "markdown", "Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.", 0, 1, documentation));
         }
 
@@ -5141,7 +5141,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3373707: /*name*/  return new Property("name", "string", "The name of the operation or query. For an operation, this is the name  prefixed with $ and used in the URL. For a query, this is the name used in the _query parameter when the query is called.", 0, 1, name);
-          case -1014418093: /*definition*/  return new Property("definition", "canonical(OperationDefinition)", "Where the formal definition can be found.", 0, 1, definition);
+          case -1014418093: /*definition*/  return new Property("definition", "canonical(OperationDefinition)", "Where the formal definition can be found. If a server references the base definition of an Operation (i.e. from the specification itself such as ```http://hl7.org/fhir/OperationDefinition/ValueSet-expand```), that means it supports the full capabilities of the operation - e.g. both GET and POST invocation.  If it only supports a subset, it must define its own custom [[[OperationDefinition]]] with a 'base' of the original OperationDefinition.  The custom definition would describe the specific subset of functionality supported.", 0, 1, definition);
           case 1587405498: /*documentation*/  return new Property("documentation", "markdown", "Documentation that describes anything special about the operation behavior, possibly detailing different behavior for system, type and instance-level invocation of the operation.", 0, 1, documentation);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -6769,12 +6769,12 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     protected CapabilityStatementImplementationComponent implementation;
 
     /**
-     * The version of the FHIR specification on which this capability statement is based.
+     * The version of the FHIR specification that this CapabilityStatement describes (which SHALL be the same as the FHIR version of the CapabilityStatement itself). There is no default value.
      */
-    @Child(name = "fhirVersion", type = {IdType.class}, order=7, min=1, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="FHIR Version the system uses", formalDefinition="The version of the FHIR specification on which this capability statement is based." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fhir-versions")
-    protected IdType fhirVersion;
+    @Child(name = "fhirVersion", type = {CodeType.class}, order=7, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="FHIR Version the system supports", formalDefinition="The version of the FHIR specification that this CapabilityStatement describes (which SHALL be the same as the FHIR version of the CapabilityStatement itself). There is no default value." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/FHIR-version")
+    protected Enumeration<FHIRVersion> fhirVersion;
 
     /**
      * A list of the formats supported by this implementation using their content types.
@@ -6820,7 +6820,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     @Description(shortDefinition="Document definition", formalDefinition="A document definition." )
     protected List<CapabilityStatementDocumentComponent> document;
 
-    private static final long serialVersionUID = -1192000348L;
+    private static final long serialVersionUID = -1050288843L;
 
   /**
    * Constructor
@@ -6832,7 +6832,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
   /**
    * Constructor
    */
-    public CapabilityStatement(Enumeration<PublicationStatus> status, DateTimeType date, Enumeration<CapabilityStatementKind> kind, IdType fhirVersion) {
+    public CapabilityStatement(Enumeration<PublicationStatus> status, DateTimeType date, Enumeration<CapabilityStatementKind> kind, Enumeration<FHIRVersion> fhirVersion) {
       super();
       this.status = status;
       this.date = date;
@@ -7323,7 +7323,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate capability statement instances.)
+     * @return {@link #useContext} (The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate capability statement instances.)
      */
     public List<UsageContext> getUseContext() { 
       if (this.useContext == null)
@@ -7742,14 +7742,14 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @return {@link #fhirVersion} (The version of the FHIR specification on which this capability statement is based.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @return {@link #fhirVersion} (The version of the FHIR specification that this CapabilityStatement describes (which SHALL be the same as the FHIR version of the CapabilityStatement itself). There is no default value.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
-    public IdType getFhirVersionElement() { 
+    public Enumeration<FHIRVersion> getFhirVersionElement() { 
       if (this.fhirVersion == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create CapabilityStatement.fhirVersion");
         else if (Configuration.doAutoCreate())
-          this.fhirVersion = new IdType(); // bb
+          this.fhirVersion = new Enumeration<FHIRVersion>(new FHIRVersionEnumFactory()); // bb
       return this.fhirVersion;
     }
 
@@ -7762,26 +7762,26 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
     }
 
     /**
-     * @param value {@link #fhirVersion} (The version of the FHIR specification on which this capability statement is based.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
+     * @param value {@link #fhirVersion} (The version of the FHIR specification that this CapabilityStatement describes (which SHALL be the same as the FHIR version of the CapabilityStatement itself). There is no default value.). This is the underlying object with id, value and extensions. The accessor "getFhirVersion" gives direct access to the value
      */
-    public CapabilityStatement setFhirVersionElement(IdType value) { 
+    public CapabilityStatement setFhirVersionElement(Enumeration<FHIRVersion> value) { 
       this.fhirVersion = value;
       return this;
     }
 
     /**
-     * @return The version of the FHIR specification on which this capability statement is based.
+     * @return The version of the FHIR specification that this CapabilityStatement describes (which SHALL be the same as the FHIR version of the CapabilityStatement itself). There is no default value.
      */
-    public String getFhirVersion() { 
+    public FHIRVersion getFhirVersion() { 
       return this.fhirVersion == null ? null : this.fhirVersion.getValue();
     }
 
     /**
-     * @param value The version of the FHIR specification on which this capability statement is based.
+     * @param value The version of the FHIR specification that this CapabilityStatement describes (which SHALL be the same as the FHIR version of the CapabilityStatement itself). There is no default value.
      */
-    public CapabilityStatement setFhirVersion(String value) { 
+    public CapabilityStatement setFhirVersion(FHIRVersion value) { 
         if (this.fhirVersion == null)
-          this.fhirVersion = new IdType();
+          this.fhirVersion = new Enumeration<FHIRVersion>(new FHIRVersionEnumFactory());
         this.fhirVersion.setValue(value);
       return this;
     }
@@ -8140,7 +8140,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         children.add(new Property("publisher", "string", "The name of the organization or individual that published the capability statement.", 0, 1, publisher));
         children.add(new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact));
         children.add(new Property("description", "markdown", "A free text natural language description of the capability statement from a consumer's perspective. Typically, this is used when the capability statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.", 0, 1, description));
-        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate capability statement instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
+        children.add(new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate capability statement instances.", 0, java.lang.Integer.MAX_VALUE, useContext));
         children.add(new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the capability statement is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction));
         children.add(new Property("purpose", "markdown", "Explanation of why this capability statement is needed and why it has been designed as it has.", 0, 1, purpose));
         children.add(new Property("copyright", "markdown", "A copyright statement relating to the capability statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the capability statement.", 0, 1, copyright));
@@ -8149,7 +8149,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         children.add(new Property("imports", "canonical(CapabilityStatement)", "Reference to a canonical URL of another CapabilityStatement that this software adds to. The capability statement automatically includes everything in the other statement, and it is not duplicated, though the server may repeat the same resources, interactions and operations to add additional details to them.", 0, java.lang.Integer.MAX_VALUE, imports));
         children.add(new Property("software", "", "Software that is covered by this capability statement.  It is used when the capability statement describes the capabilities of a particular software version, independent of an installation.", 0, 1, software));
         children.add(new Property("implementation", "", "Identifies a specific implementation instance that is described by the capability statement - i.e. a particular installation, rather than the capabilities of a software program.", 0, 1, implementation));
-        children.add(new Property("fhirVersion", "id", "The version of the FHIR specification on which this capability statement is based.", 0, 1, fhirVersion));
+        children.add(new Property("fhirVersion", "code", "The version of the FHIR specification that this CapabilityStatement describes (which SHALL be the same as the FHIR version of the CapabilityStatement itself). There is no default value.", 0, 1, fhirVersion));
         children.add(new Property("format", "code", "A list of the formats supported by this implementation using their content types.", 0, java.lang.Integer.MAX_VALUE, format));
         children.add(new Property("patchFormat", "code", "A list of the patch formats supported by this implementation using their content types.", 0, java.lang.Integer.MAX_VALUE, patchFormat));
         children.add(new Property("implementationGuide", "canonical(ImplementationGuide)", "A list of implementation guides that the server does (or should) support in their entirety.", 0, java.lang.Integer.MAX_VALUE, implementationGuide));
@@ -8171,7 +8171,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         case 1447404028: /*publisher*/  return new Property("publisher", "string", "The name of the organization or individual that published the capability statement.", 0, 1, publisher);
         case 951526432: /*contact*/  return new Property("contact", "ContactDetail", "Contact details to assist a user in finding and communicating with the publisher.", 0, java.lang.Integer.MAX_VALUE, contact);
         case -1724546052: /*description*/  return new Property("description", "markdown", "A free text natural language description of the capability statement from a consumer's perspective. Typically, this is used when the capability statement describes a desired rather than an actual solution, for example as a formal expression of requirements as part of an RFP.", 0, 1, description);
-        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching for appropriate capability statement instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
+        case -669707736: /*useContext*/  return new Property("useContext", "UsageContext", "The content was developed with a focus and intent of supporting the contexts that are listed. These contexts may be general categories (gender, age, ...) or may be references to specific programs (insurance plans, studies, ...) and may be used to assist with indexing and searching for appropriate capability statement instances.", 0, java.lang.Integer.MAX_VALUE, useContext);
         case -507075711: /*jurisdiction*/  return new Property("jurisdiction", "CodeableConcept", "A legal or geographic region in which the capability statement is intended to be used.", 0, java.lang.Integer.MAX_VALUE, jurisdiction);
         case -220463842: /*purpose*/  return new Property("purpose", "markdown", "Explanation of why this capability statement is needed and why it has been designed as it has.", 0, 1, purpose);
         case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to the capability statement and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the capability statement.", 0, 1, copyright);
@@ -8180,7 +8180,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         case 1926037870: /*imports*/  return new Property("imports", "canonical(CapabilityStatement)", "Reference to a canonical URL of another CapabilityStatement that this software adds to. The capability statement automatically includes everything in the other statement, and it is not duplicated, though the server may repeat the same resources, interactions and operations to add additional details to them.", 0, java.lang.Integer.MAX_VALUE, imports);
         case 1319330215: /*software*/  return new Property("software", "", "Software that is covered by this capability statement.  It is used when the capability statement describes the capabilities of a particular software version, independent of an installation.", 0, 1, software);
         case 1683336114: /*implementation*/  return new Property("implementation", "", "Identifies a specific implementation instance that is described by the capability statement - i.e. a particular installation, rather than the capabilities of a software program.", 0, 1, implementation);
-        case 461006061: /*fhirVersion*/  return new Property("fhirVersion", "id", "The version of the FHIR specification on which this capability statement is based.", 0, 1, fhirVersion);
+        case 461006061: /*fhirVersion*/  return new Property("fhirVersion", "code", "The version of the FHIR specification that this CapabilityStatement describes (which SHALL be the same as the FHIR version of the CapabilityStatement itself). There is no default value.", 0, 1, fhirVersion);
         case -1268779017: /*format*/  return new Property("format", "code", "A list of the formats supported by this implementation using their content types.", 0, java.lang.Integer.MAX_VALUE, format);
         case 172338783: /*patchFormat*/  return new Property("patchFormat", "code", "A list of the patch formats supported by this implementation using their content types.", 0, java.lang.Integer.MAX_VALUE, patchFormat);
         case 156966506: /*implementationGuide*/  return new Property("implementationGuide", "canonical(ImplementationGuide)", "A list of implementation guides that the server does (or should) support in their entirety.", 0, java.lang.Integer.MAX_VALUE, implementationGuide);
@@ -8214,7 +8214,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         case 1926037870: /*imports*/ return this.imports == null ? new Base[0] : this.imports.toArray(new Base[this.imports.size()]); // CanonicalType
         case 1319330215: /*software*/ return this.software == null ? new Base[0] : new Base[] {this.software}; // CapabilityStatementSoftwareComponent
         case 1683336114: /*implementation*/ return this.implementation == null ? new Base[0] : new Base[] {this.implementation}; // CapabilityStatementImplementationComponent
-        case 461006061: /*fhirVersion*/ return this.fhirVersion == null ? new Base[0] : new Base[] {this.fhirVersion}; // IdType
+        case 461006061: /*fhirVersion*/ return this.fhirVersion == null ? new Base[0] : new Base[] {this.fhirVersion}; // Enumeration<FHIRVersion>
         case -1268779017: /*format*/ return this.format == null ? new Base[0] : this.format.toArray(new Base[this.format.size()]); // CodeType
         case 172338783: /*patchFormat*/ return this.patchFormat == null ? new Base[0] : this.patchFormat.toArray(new Base[this.patchFormat.size()]); // CodeType
         case 156966506: /*implementationGuide*/ return this.implementationGuide == null ? new Base[0] : this.implementationGuide.toArray(new Base[this.implementationGuide.size()]); // CanonicalType
@@ -8289,7 +8289,8 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
           this.implementation = (CapabilityStatementImplementationComponent) value; // CapabilityStatementImplementationComponent
           return value;
         case 461006061: // fhirVersion
-          this.fhirVersion = castToId(value); // IdType
+          value = new FHIRVersionEnumFactory().fromType(castToCode(value));
+          this.fhirVersion = (Enumeration) value; // Enumeration<FHIRVersion>
           return value;
         case -1268779017: // format
           this.getFormat().add(castToCode(value)); // CodeType
@@ -8357,7 +8358,8 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         } else if (name.equals("implementation")) {
           this.implementation = (CapabilityStatementImplementationComponent) value; // CapabilityStatementImplementationComponent
         } else if (name.equals("fhirVersion")) {
-          this.fhirVersion = castToId(value); // IdType
+          value = new FHIRVersionEnumFactory().fromType(castToCode(value));
+          this.fhirVersion = (Enumeration) value; // Enumeration<FHIRVersion>
         } else if (name.equals("format")) {
           this.getFormat().add(castToCode(value));
         } else if (name.equals("patchFormat")) {
@@ -8431,7 +8433,7 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
         case 1926037870: /*imports*/ return new String[] {"canonical"};
         case 1319330215: /*software*/ return new String[] {};
         case 1683336114: /*implementation*/ return new String[] {};
-        case 461006061: /*fhirVersion*/ return new String[] {"id"};
+        case 461006061: /*fhirVersion*/ return new String[] {"code"};
         case -1268779017: /*format*/ return new String[] {"code"};
         case 172338783: /*patchFormat*/ return new String[] {"code"};
         case 156966506: /*implementationGuide*/ return new String[] {"canonical"};
@@ -8721,17 +8723,17 @@ public class CapabilityStatement extends MetadataResource implements IBaseConfor
  /**
    * Search parameter: <b>software</b>
    * <p>
-   * Description: <b>Part of a the name of a software application</b><br>
+   * Description: <b>Part of the name of a software application</b><br>
    * Type: <b>string</b><br>
    * Path: <b>CapabilityStatement.software.name</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="software", path="CapabilityStatement.software.name", description="Part of a the name of a software application", type="string" )
+  @SearchParamDefinition(name="software", path="CapabilityStatement.software.name", description="Part of the name of a software application", type="string" )
   public static final String SP_SOFTWARE = "software";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>software</b>
    * <p>
-   * Description: <b>Part of a the name of a software application</b><br>
+   * Description: <b>Part of the name of a software application</b><br>
    * Type: <b>string</b><br>
    * Path: <b>CapabilityStatement.software.name</b><br>
    * </p>

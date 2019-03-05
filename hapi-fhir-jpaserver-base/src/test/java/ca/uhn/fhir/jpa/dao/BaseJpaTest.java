@@ -1,13 +1,16 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.CaptureQueriesListener;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
-import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.JpaConstants;
@@ -51,7 +54,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
@@ -84,10 +89,13 @@ public abstract class BaseJpaTest {
 	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
 	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
+	@Autowired
+	protected IInterceptorRegistry myInterceptorRegistry;
 
 	@After
 	public void afterPerformCleanup() {
 		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
+		CaptureQueriesListener.clear();
 	}
 
 	@After
@@ -126,6 +134,12 @@ public abstract class BaseJpaTest {
 		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
+	}
+
+	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
+		CountDownLatch deliveryLatch = new CountDownLatch(theCount);
+		myInterceptorRegistry.registerAnonymousHookForUnitTest(theLatchPointcut, Integer.MAX_VALUE, t -> deliveryLatch.countDown());
+		return deliveryLatch;
 	}
 
 	protected abstract FhirContext getContext();
@@ -428,6 +442,20 @@ public abstract class BaseJpaTest {
 				})
 				.collect(Collectors.joining(", "));
 			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+		}
+	}
+
+	public static void waitForTrue(Supplier<Boolean> theList) {
+		StopWatch sw = new StopWatch();
+		while (!theList.get() && sw.getMillis() <= 16000) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= 16000) {
+			fail("Waited " + sw.toString() + " and is still false");
 		}
 	}
 

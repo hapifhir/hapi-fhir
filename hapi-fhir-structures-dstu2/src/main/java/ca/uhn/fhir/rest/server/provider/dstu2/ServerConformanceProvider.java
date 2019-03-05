@@ -45,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -387,16 +387,24 @@ public class ServerConformanceProvider implements IServerConformanceProvider<Con
 					}
 				}
 
-				RestResourceSearchParam param = resource.addSearchParam();
+				String finalNextParamUnchainedName = nextParamUnchainedName;
+				RestResourceSearchParam param =
+					resource
+						.getSearchParam()
+						.stream()
+						.filter(t -> t.getName().equals(finalNextParamUnchainedName))
+						.findFirst()
+						.orElseGet(() -> resource.addSearchParam());
+
 				param.setName(nextParamUnchainedName);
 				if (StringUtils.isNotBlank(chain)) {
 					param.addChain(chain);
-				}
-
-				if (nextParameter.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-					for (String nextWhitelist : new TreeSet<String>(nextParameter.getQualifierWhitelist())) {
-						if (nextWhitelist.startsWith(".")) {
-							param.addChain(nextWhitelist.substring(1));
+				} else {
+					if (nextParameter.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+						for (String nextWhitelist : new TreeSet<String>(nextParameter.getQualifierWhitelist())) {
+							if (nextWhitelist.startsWith(".")) {
+								param.addChain(nextWhitelist.substring(1));
+							}
 						}
 					}
 				}

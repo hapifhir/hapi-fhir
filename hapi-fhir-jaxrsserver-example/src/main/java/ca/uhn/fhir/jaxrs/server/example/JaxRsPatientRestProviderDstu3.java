@@ -151,11 +151,6 @@ public class JaxRsPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider
 		return true;
 	}
 
-	@Override
-	public boolean isUseBrowserFriendlyContentTypes() {
-		return true;
-	}
-
 	@GET
 	@Path("/{id}/$firstVersion")
 	public Response operationFirstVersionUsingGet(@PathParam("id") String id) throws IOException {

@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
@@ -89,7 +91,14 @@ public class HashMapResourceProviderTest {
 
 		assertEquals(0, myPatientResourceProvider.getCountDelete());
 
-		ourClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
+		IDeleteTyped iDeleteTyped = ourClient.delete().resourceById(id.toUnqualifiedVersionless());
+		ourLog.info("About to execute");
+		try {
+			iDeleteTyped.execute();
+		} catch (NullPointerException e) {
+			ourLog.error("NPE", e);
+			fail(e.toString());
+		}
 
 		assertEquals(1, myPatientResourceProvider.getCountDelete());
 
@@ -229,7 +238,7 @@ public class HashMapResourceProviderTest {
 		Bundle resp = ourClient
 			.search()
 			.forResource("Patient")
-			.where(Patient.RES_ID.exactly().codes("2", "3"))
+			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
 			.returnBundle(Bundle.class).execute();
 		assertEquals(2, resp.getTotal());
 		assertEquals(2, resp.getEntry().size());
@@ -240,8 +249,8 @@ public class HashMapResourceProviderTest {
 		resp = ourClient
 			.search()
 			.forResource("Patient")
-			.where(Patient.RES_ID.exactly().codes("2", "3"))
-			.where(Patient.RES_ID.exactly().codes("2", "3"))
+			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
+			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
 			.returnBundle(Bundle.class).execute();
 		assertEquals(2, resp.getTotal());
 		assertEquals(2, resp.getEntry().size());
@@ -251,8 +260,8 @@ public class HashMapResourceProviderTest {
 		resp = ourClient
 			.search()
 			.forResource("Patient")
-			.where(Patient.RES_ID.exactly().codes("2", "3"))
-			.where(Patient.RES_ID.exactly().codes("4", "3"))
+			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
+			.where(IAnyResource.RES_ID.exactly().codes("4", "3"))
 			.returnBundle(Bundle.class).execute();
 		respIds = resp.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		assertThat(respIds, containsInAnyOrder("Patient/3"));

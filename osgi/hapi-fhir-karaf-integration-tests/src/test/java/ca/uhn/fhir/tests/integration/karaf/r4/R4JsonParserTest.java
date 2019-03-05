@@ -8,14 +8,7 @@ import ca.uhn.fhir.parser.IParser;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.MedicationDispense;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
@@ -32,6 +25,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
 import static org.ops4j.pax.exam.CoreOptions.options;
 import static org.ops4j.pax.exam.CoreOptions.when;
@@ -151,57 +145,6 @@ public class R4JsonParserTest {
 		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
 	}
 
-	@Test
-	public void testExcludeRootStuff() {
-		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
-		Set<String> excludes = new HashSet<>();
-		excludes.add("id");
-		excludes.add("meta");
-		parser.setDontEncodeElements(excludes);
-
-		Bundle b = createBundleWithPatient();
-
-		String encoded = parser.encodeResourceToString(b);
-		ourLog.info(encoded);
-
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, (containsString("PATIENTID")));
-		assertThat(encoded, (containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
-
-		b = parser.parseResource(Bundle.class, encoded);
-
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
-		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
-	}
-
-	@Test
-	public void testExcludeStarDotStuff() {
-		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
-		Set<String> excludes = new HashSet<>();
-		excludes.add("*.id");
-		excludes.add("*.meta");
-		parser.setDontEncodeElements(excludes);
-
-		Bundle b = createBundleWithPatient();
-
-		String encoded = parser.encodeResourceToString(b);
-		ourLog.info(encoded);
-
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, not(containsString("PATIENTID")));
-		assertThat(encoded, not(containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
-
-		b = parser.parseResource(Bundle.class, encoded);
-
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertNotEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
-		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
-	}
 
 	/**
 	 * Test that long JSON strings don't get broken up
@@ -215,6 +158,28 @@ public class R4JsonParserTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 
 		assertThat(encoded, containsString(longString));
+	}
+
+
+	@Test
+	public void testSetDontEncodeResourcesWithMetaSubPath() {
+		Patient p = new Patient();
+		p.setId("AAA");
+		p.getMeta().setVersionId("BBB");
+		p.getMeta().setLastUpdatedElement(new InstantType("2011-01-01T00:00:00.000Z"));
+		p.getMeta().addTag().setSystem("SYS").setCode("CODE");
+		p.addName().setFamily("FAMILY");
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setDontEncodeElements(Sets.newHashSet("id", "*.meta.versionId", "*.meta.lastUpdated"));
+		String output = parser.encodeResourceToString(p);
+
+		assertThat(output, containsString("FAMILY"));
+		assertThat(output, containsString("SYS"));
+		assertThat(output, containsString("CODE"));
+		assertThat(output, not(containsString("AAA")));
+		assertThat(output, not(containsString("BBB")));
+		assertThat(output, not(containsString("2011")));
 	}
 
 	@Test

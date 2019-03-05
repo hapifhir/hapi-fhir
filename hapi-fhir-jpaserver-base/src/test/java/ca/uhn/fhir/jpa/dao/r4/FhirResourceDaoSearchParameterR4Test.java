@@ -73,7 +73,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 			myDao.validateResourceForStorage(nextSearchParameter, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid SearchParameter.expression value \"Patient////\": Error at 1, 1: Premature ExpressionNode termination at unexpected token \"////\"", e.getMessage());
+			assertEquals("Invalid SearchParameter.expression value \"Patient////\": Error in ?? at 1, 1: Premature ExpressionNode termination at unexpected token \"////\"", e.getMessage());
 		}
 	}
 

@@ -390,3 +390,4 @@ public class QuestionnaireResponseValidator extends BaseValidator {
 		return allowedAnswerTypes;
 	}
 }
+

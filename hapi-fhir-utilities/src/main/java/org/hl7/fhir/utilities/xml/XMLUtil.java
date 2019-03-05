@@ -31,7 +31,6 @@ package org.hl7.fhir.utilities.xml;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,7 +50,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.lang3.text.FormattableUtils;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.utilities.Utilities;
 import org.w3c.dom.Attr;
@@ -553,6 +551,11 @@ public class XMLUtil {
     Node node = doc.createTextNode("\n"+Utilities.padLeft("", ' ', indent));
     element.appendChild(node);
    
+  }
+
+  public static String getNamedChildText(Element element, String name) {
+    Element e = getNamedChild(element, name);
+    return e == null ? null : e.getTextContent();
   }
 
  	

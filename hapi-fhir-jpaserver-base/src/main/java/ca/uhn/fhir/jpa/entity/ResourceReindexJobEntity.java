@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -53,6 +55,16 @@ public class ResourceReindexJobEntity implements Serializable {
 	@Column(name = "SUSPENDED_UNTIL", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date mySuspendedUntil;
+	@Column(name = "REINDEX_COUNT", nullable = true)
+	private Integer myReindexCount;
+
+	public Integer getReindexCount() {
+		return myReindexCount;
+	}
+
+	public void setReindexCount(Integer theReindexCount) {
+		myReindexCount = theReindexCount;
+	}
 
 	public Date getSuspendedUntil() {
 		return mySuspendedUntil;
@@ -109,5 +121,21 @@ public class ResourceReindexJobEntity implements Serializable {
 
 	public void setDeleted(boolean theDeleted) {
 		myDeleted = theDeleted;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("id", myId)
+			.append("resourceType", myResourceType)
+			.append("thresholdLow", myThresholdLow)
+			.append("thresholdHigh", myThresholdHigh);
+		if (myDeleted) {
+			b.append("deleted", myDeleted);
+		}
+		if (mySuspendedUntil != null) {
+			b.append("suspendedUntil", mySuspendedUntil);
+		}
+		return b.toString();
 	}
 }

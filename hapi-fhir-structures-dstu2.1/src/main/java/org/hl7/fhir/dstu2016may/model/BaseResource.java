@@ -13,7 +13,8 @@ public abstract class BaseResource extends Base implements IAnyResource, IElemen
 	/**
      * @param value The logical id of the resource, as used in the url for the resoure. Once assigned, this value never changes.
      */
-    public BaseResource setId(IIdType value) {
+    @Override
+	 public BaseResource setId(IIdType value) {
         if (value == null) {
                 setIdElement((IdType)null);
         } else if (value instanceof IdType) {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -670,7 +670,7 @@ public class Contract extends DomainResource {
         /**
          * The  individual or organization that published the Contract precursor content.
          */
-        @Child(name = "publisher", type = {Person.class, Practitioner.class, Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "publisher", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=3, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Publisher Entity", formalDefinition="The  individual or organization that published the Contract precursor content." )
         protected Reference publisher;
 
@@ -953,7 +953,7 @@ public class Contract extends DomainResource {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "Precusory content structure and use, i.e., a boilerplate, template, application for a contract such as an insurance policy or benefits under a program, e.g., workers compensation.", 0, 1, type));
           children.add(new Property("subType", "CodeableConcept", "Detailed Precusory content type.", 0, 1, subType));
-          children.add(new Property("publisher", "Reference(Person|Practitioner|Organization)", "The  individual or organization that published the Contract precursor content.", 0, 1, publisher));
+          children.add(new Property("publisher", "Reference(Practitioner|PractitionerRole|Organization)", "The  individual or organization that published the Contract precursor content.", 0, 1, publisher));
           children.add(new Property("publicationDate", "dateTime", "The date (and optionally time) when the contract was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the contract changes.", 0, 1, publicationDate));
           children.add(new Property("publicationStatus", "code", "draft | active | retired | unknown.", 0, 1, publicationStatus));
           children.add(new Property("copyright", "markdown", "A copyright statement relating to Contract precursor content. Copyright statements are generally legal restrictions on the use and publishing of the Contract precursor content.", 0, 1, copyright));
@@ -964,7 +964,7 @@ public class Contract extends DomainResource {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Precusory content structure and use, i.e., a boilerplate, template, application for a contract such as an insurance policy or benefits under a program, e.g., workers compensation.", 0, 1, type);
           case -1868521062: /*subType*/  return new Property("subType", "CodeableConcept", "Detailed Precusory content type.", 0, 1, subType);
-          case 1447404028: /*publisher*/  return new Property("publisher", "Reference(Person|Practitioner|Organization)", "The  individual or organization that published the Contract precursor content.", 0, 1, publisher);
+          case 1447404028: /*publisher*/  return new Property("publisher", "Reference(Practitioner|PractitionerRole|Organization)", "The  individual or organization that published the Contract precursor content.", 0, 1, publisher);
           case 1470566394: /*publicationDate*/  return new Property("publicationDate", "dateTime", "The date (and optionally time) when the contract was published. The date must change when the business version changes and it must change if the status code changes. In addition, it should change when the substantive content of the contract changes.", 0, 1, publicationDate);
           case 616500542: /*publicationStatus*/  return new Property("publicationStatus", "code", "draft | active | retired | unknown.", 0, 1, publicationStatus);
           case 1522889671: /*copyright*/  return new Property("copyright", "markdown", "A copyright statement relating to Contract precursor content. Copyright statements are generally legal restrictions on the use and publishing of the Contract precursor content.", 0, 1, copyright);
@@ -1350,7 +1350,7 @@ public class Contract extends DomainResource {
          */
         public CodeableConcept getTopicCodeableConcept() throws FHIRException { 
           if (this.topic == null)
-            return null;
+            this.topic = new CodeableConcept();
           if (!(this.topic instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.topic.getClass().getName()+" was encountered");
           return (CodeableConcept) this.topic;
@@ -1365,7 +1365,7 @@ public class Contract extends DomainResource {
          */
         public Reference getTopicReference() throws FHIRException { 
           if (this.topic == null)
-            return null;
+            this.topic = new Reference();
           if (!(this.topic instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.topic.getClass().getName()+" was encountered");
           return (Reference) this.topic;
@@ -3255,7 +3255,7 @@ public class Contract extends DomainResource {
         /**
          * Participant in the offer.
          */
-        @Child(name = "reference", type = {Patient.class, Person.class, RelatedPerson.class, Practitioner.class, Device.class, Group.class, Organization.class}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "reference", type = {Patient.class, RelatedPerson.class, Practitioner.class, PractitionerRole.class, Device.class, Group.class, Organization.class}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Referenced entity", formalDefinition="Participant in the offer." )
         protected List<Reference> reference;
         /**
@@ -3378,14 +3378,14 @@ public class Contract extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("reference", "Reference(Patient|Person|RelatedPerson|Practitioner|Device|Group|Organization)", "Participant in the offer.", 0, java.lang.Integer.MAX_VALUE, reference));
+          children.add(new Property("reference", "Reference(Patient|RelatedPerson|Practitioner|PractitionerRole|Device|Group|Organization)", "Participant in the offer.", 0, java.lang.Integer.MAX_VALUE, reference));
           children.add(new Property("role", "CodeableConcept", "How the party participates in the offer.", 0, 1, role));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -925155509: /*reference*/  return new Property("reference", "Reference(Patient|Person|RelatedPerson|Practitioner|Device|Group|Organization)", "Participant in the offer.", 0, java.lang.Integer.MAX_VALUE, reference);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Patient|RelatedPerson|Practitioner|PractitionerRole|Device|Group|Organization)", "Participant in the offer.", 0, java.lang.Integer.MAX_VALUE, reference);
           case 3506294: /*role*/  return new Property("role", "CodeableConcept", "How the party participates in the offer.", 0, 1, role);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -3541,7 +3541,7 @@ public class Contract extends DomainResource {
          */
         public BooleanType getValueBooleanType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new BooleanType();
           if (!(this.value instanceof BooleanType))
             throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (BooleanType) this.value;
@@ -3556,7 +3556,7 @@ public class Contract extends DomainResource {
          */
         public DecimalType getValueDecimalType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new DecimalType();
           if (!(this.value instanceof DecimalType))
             throw new FHIRException("Type mismatch: the type DecimalType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DecimalType) this.value;
@@ -3571,7 +3571,7 @@ public class Contract extends DomainResource {
          */
         public IntegerType getValueIntegerType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new IntegerType();
           if (!(this.value instanceof IntegerType))
             throw new FHIRException("Type mismatch: the type IntegerType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (IntegerType) this.value;
@@ -3586,7 +3586,7 @@ public class Contract extends DomainResource {
          */
         public DateType getValueDateType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new DateType();
           if (!(this.value instanceof DateType))
             throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateType) this.value;
@@ -3601,7 +3601,7 @@ public class Contract extends DomainResource {
          */
         public DateTimeType getValueDateTimeType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new DateTimeType();
           if (!(this.value instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (DateTimeType) this.value;
@@ -3616,7 +3616,7 @@ public class Contract extends DomainResource {
          */
         public TimeType getValueTimeType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new TimeType();
           if (!(this.value instanceof TimeType))
             throw new FHIRException("Type mismatch: the type TimeType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (TimeType) this.value;
@@ -3631,7 +3631,7 @@ public class Contract extends DomainResource {
          */
         public StringType getValueStringType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new StringType();
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
@@ -3646,7 +3646,7 @@ public class Contract extends DomainResource {
          */
         public UriType getValueUriType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new UriType();
           if (!(this.value instanceof UriType))
             throw new FHIRException("Type mismatch: the type UriType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (UriType) this.value;
@@ -3661,7 +3661,7 @@ public class Contract extends DomainResource {
          */
         public Attachment getValueAttachment() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Attachment();
           if (!(this.value instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Attachment) this.value;
@@ -3676,7 +3676,7 @@ public class Contract extends DomainResource {
          */
         public Coding getValueCoding() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Coding();
           if (!(this.value instanceof Coding))
             throw new FHIRException("Type mismatch: the type Coding was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Coding) this.value;
@@ -3691,7 +3691,7 @@ public class Contract extends DomainResource {
          */
         public Quantity getValueQuantity() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Quantity();
           if (!(this.value instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Quantity) this.value;
@@ -3706,7 +3706,7 @@ public class Contract extends DomainResource {
          */
         public Reference getValueReference() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Reference();
           if (!(this.value instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Reference) this.value;
@@ -5532,7 +5532,7 @@ public class Contract extends DomainResource {
         /**
          * Who will make payment.
          */
-        @Child(name = "responsible", type = {Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=11, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "responsible", type = {Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class}, order=11, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Who will make payment", formalDefinition="Who will make payment." )
         protected Reference responsible;
 
@@ -5544,7 +5544,7 @@ public class Contract extends DomainResource {
         /**
          * Who will receive payment.
          */
-        @Child(name = "recipient", type = {Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=12, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "recipient", type = {Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class}, order=12, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Who will receive payment", formalDefinition="Who will receive payment." )
         protected Reference recipient;
 
@@ -5588,7 +5588,7 @@ public class Contract extends DomainResource {
          */
         public CodeableConcept getEntityCodeableConcept() throws FHIRException { 
           if (this.entity == null)
-            return null;
+            this.entity = new CodeableConcept();
           if (!(this.entity instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (CodeableConcept) this.entity;
@@ -5603,7 +5603,7 @@ public class Contract extends DomainResource {
          */
         public Reference getEntityReference() throws FHIRException { 
           if (this.entity == null)
-            return null;
+            this.entity = new Reference();
           if (!(this.entity instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.entity.getClass().getName()+" was encountered");
           return (Reference) this.entity;
@@ -6216,8 +6216,8 @@ public class Contract extends DomainResource {
           children.add(new Property("net", "Money", "Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net));
           children.add(new Property("payment", "string", "Terms of valuation.", 0, 1, payment));
           children.add(new Property("paymentDate", "dateTime", "When payment is due.", 0, 1, paymentDate));
-          children.add(new Property("responsible", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Who will make payment.", 0, 1, responsible));
-          children.add(new Property("recipient", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Who will receive payment.", 0, 1, recipient));
+          children.add(new Property("responsible", "Reference(Organization|Patient|Practitioner|PractitionerRole|RelatedPerson)", "Who will make payment.", 0, 1, responsible));
+          children.add(new Property("recipient", "Reference(Organization|Patient|Practitioner|PractitionerRole|RelatedPerson)", "Who will receive payment.", 0, 1, recipient));
           children.add(new Property("linkId", "string", "Id  of the clause or question text related to the context of this valuedItem in the referenced form or QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, linkId));
           children.add(new Property("securityLabelNumber", "unsignedInt", "A set of security labels that define which terms are controlled by this condition.", 0, java.lang.Integer.MAX_VALUE, securityLabelNumber));
         }
@@ -6238,8 +6238,8 @@ public class Contract extends DomainResource {
           case 108957: /*net*/  return new Property("net", "Money", "Expresses the product of the Contract Valued Item unitQuantity and the unitPriceAmt. For example, the formula: unit Quantity * unit Price (Cost per Point) * factor Number  * points = net Amount. Quantity, factor and points are assumed to be 1 if not supplied.", 0, 1, net);
           case -786681338: /*payment*/  return new Property("payment", "string", "Terms of valuation.", 0, 1, payment);
           case -1540873516: /*paymentDate*/  return new Property("paymentDate", "dateTime", "When payment is due.", 0, 1, paymentDate);
-          case 1847674614: /*responsible*/  return new Property("responsible", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Who will make payment.", 0, 1, responsible);
-          case 820081177: /*recipient*/  return new Property("recipient", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Who will receive payment.", 0, 1, recipient);
+          case 1847674614: /*responsible*/  return new Property("responsible", "Reference(Organization|Patient|Practitioner|PractitionerRole|RelatedPerson)", "Who will make payment.", 0, 1, responsible);
+          case 820081177: /*recipient*/  return new Property("recipient", "Reference(Organization|Patient|Practitioner|PractitionerRole|RelatedPerson)", "Who will receive payment.", 0, 1, recipient);
           case -1102667083: /*linkId*/  return new Property("linkId", "string", "Id  of the clause or question text related to the context of this valuedItem in the referenced form or QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, linkId);
           case -149460995: /*securityLabelNumber*/  return new Property("securityLabelNumber", "unsignedInt", "A set of security labels that define which terms are controlled by this condition.", 0, java.lang.Integer.MAX_VALUE, securityLabelNumber);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -6603,7 +6603,7 @@ public class Contract extends DomainResource {
         /**
          * Who or what initiated the action and has responsibility for its activation.
          */
-        @Child(name = "requester", type = {Patient.class, Person.class, RelatedPerson.class, Practitioner.class, Device.class, Group.class, Organization.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "requester", type = {Patient.class, RelatedPerson.class, Practitioner.class, PractitionerRole.class, Device.class, Group.class, Organization.class}, order=10, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Who asked for action", formalDefinition="Who or what initiated the action and has responsibility for its activation." )
         protected List<Reference> requester;
         /**
@@ -6638,7 +6638,7 @@ public class Contract extends DomainResource {
         /**
          * Indicates who or what is being asked to perform (or not perform) the ction.
          */
-        @Child(name = "performer", type = {Person.class, RelatedPerson.class, Patient.class, Practitioner.class, PractitionerRole.class, CareTeam.class, Device.class, Substance.class, Organization.class, Location.class}, order=14, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "performer", type = {RelatedPerson.class, Patient.class, Practitioner.class, PractitionerRole.class, CareTeam.class, Device.class, Substance.class, Organization.class, Location.class}, order=14, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Actor that wil execute (or not) the action", formalDefinition="Indicates who or what is being asked to perform (or not perform) the ction." )
         protected Reference performer;
 
@@ -7064,7 +7064,7 @@ public class Contract extends DomainResource {
          */
         public DateTimeType getOccurrenceDateTimeType() throws FHIRException { 
           if (this.occurrence == null)
-            return null;
+            this.occurrence = new DateTimeType();
           if (!(this.occurrence instanceof DateTimeType))
             throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurrence.getClass().getName()+" was encountered");
           return (DateTimeType) this.occurrence;
@@ -7079,7 +7079,7 @@ public class Contract extends DomainResource {
          */
         public Period getOccurrencePeriod() throws FHIRException { 
           if (this.occurrence == null)
-            return null;
+            this.occurrence = new Period();
           if (!(this.occurrence instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurrence.getClass().getName()+" was encountered");
           return (Period) this.occurrence;
@@ -7094,7 +7094,7 @@ public class Contract extends DomainResource {
          */
         public Timing getOccurrenceTiming() throws FHIRException { 
           if (this.occurrence == null)
-            return null;
+            this.occurrence = new Timing();
           if (!(this.occurrence instanceof Timing))
             throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.occurrence.getClass().getName()+" was encountered");
           return (Timing) this.occurrence;
@@ -7782,11 +7782,11 @@ public class Contract extends DomainResource {
           children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Encounter or Episode with primary association to specified term activity.", 0, 1, context));
           children.add(new Property("contextLinkId", "string", "Id [identifier??] of the clause or question text related to the requester of this action in the referenced form or QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, contextLinkId));
           children.add(new Property("occurrence[x]", "dateTime|Period|Timing", "When action happens.", 0, 1, occurrence));
-          children.add(new Property("requester", "Reference(Patient|Person|RelatedPerson|Practitioner|Device|Group|Organization)", "Who or what initiated the action and has responsibility for its activation.", 0, java.lang.Integer.MAX_VALUE, requester));
+          children.add(new Property("requester", "Reference(Patient|RelatedPerson|Practitioner|PractitionerRole|Device|Group|Organization)", "Who or what initiated the action and has responsibility for its activation.", 0, java.lang.Integer.MAX_VALUE, requester));
           children.add(new Property("requesterLinkId", "string", "Id [identifier??] of the clause or question text related to the requester of this action in the referenced form or QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, requesterLinkId));
           children.add(new Property("performerType", "CodeableConcept", "The type of individual that is desired or required to perform or not perform the action.", 0, java.lang.Integer.MAX_VALUE, performerType));
           children.add(new Property("performerRole", "CodeableConcept", "The type of role or competency of an individual desired or required to perform or not perform the action.", 0, 1, performerRole));
-          children.add(new Property("performer", "Reference(Person|RelatedPerson|Patient|Practitioner|PractitionerRole|CareTeam|Device|Substance|Organization|Location)", "Indicates who or what is being asked to perform (or not perform) the ction.", 0, 1, performer));
+          children.add(new Property("performer", "Reference(RelatedPerson|Patient|Practitioner|PractitionerRole|CareTeam|Device|Substance|Organization|Location)", "Indicates who or what is being asked to perform (or not perform) the ction.", 0, 1, performer));
           children.add(new Property("performerLinkId", "string", "Id [identifier??] of the clause or question text related to the reason type or reference of this  action in the referenced form or QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, performerLinkId));
           children.add(new Property("reasonCode", "CodeableConcept", "Rationale for the action to be performed or not performed. Describes why the action is permitted or prohibited.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
           children.add(new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference|Questionnaire|QuestionnaireResponse)", "Indicates another resource whose existence justifies permitting or not permitting this action.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
@@ -7812,11 +7812,11 @@ public class Contract extends DomainResource {
           case -298443636: /*occurrenceDateTime*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "When action happens.", 0, 1, occurrence);
           case 1397156594: /*occurrencePeriod*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "When action happens.", 0, 1, occurrence);
           case 1515218299: /*occurrenceTiming*/  return new Property("occurrence[x]", "dateTime|Period|Timing", "When action happens.", 0, 1, occurrence);
-          case 693933948: /*requester*/  return new Property("requester", "Reference(Patient|Person|RelatedPerson|Practitioner|Device|Group|Organization)", "Who or what initiated the action and has responsibility for its activation.", 0, java.lang.Integer.MAX_VALUE, requester);
+          case 693933948: /*requester*/  return new Property("requester", "Reference(Patient|RelatedPerson|Practitioner|PractitionerRole|Device|Group|Organization)", "Who or what initiated the action and has responsibility for its activation.", 0, java.lang.Integer.MAX_VALUE, requester);
           case -1468032687: /*requesterLinkId*/  return new Property("requesterLinkId", "string", "Id [identifier??] of the clause or question text related to the requester of this action in the referenced form or QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, requesterLinkId);
           case -901444568: /*performerType*/  return new Property("performerType", "CodeableConcept", "The type of individual that is desired or required to perform or not perform the action.", 0, java.lang.Integer.MAX_VALUE, performerType);
           case -901513884: /*performerRole*/  return new Property("performerRole", "CodeableConcept", "The type of role or competency of an individual desired or required to perform or not perform the action.", 0, 1, performerRole);
-          case 481140686: /*performer*/  return new Property("performer", "Reference(Person|RelatedPerson|Patient|Practitioner|PractitionerRole|CareTeam|Device|Substance|Organization|Location)", "Indicates who or what is being asked to perform (or not perform) the ction.", 0, 1, performer);
+          case 481140686: /*performer*/  return new Property("performer", "Reference(RelatedPerson|Patient|Practitioner|PractitionerRole|CareTeam|Device|Substance|Organization|Location)", "Indicates who or what is being asked to perform (or not perform) the ction.", 0, 1, performer);
           case 1051302947: /*performerLinkId*/  return new Property("performerLinkId", "string", "Id [identifier??] of the clause or question text related to the reason type or reference of this  action in the referenced form or QuestionnaireResponse.", 0, java.lang.Integer.MAX_VALUE, performerLinkId);
           case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Rationale for the action to be performed or not performed. Describes why the action is permitted or prohibited.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
           case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Observation|DiagnosticReport|DocumentReference|Questionnaire|QuestionnaireResponse)", "Indicates another resource whose existence justifies permitting or not permitting this action.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
@@ -8250,7 +8250,7 @@ public class Contract extends DomainResource {
         /**
          * The entity the action is performed or not performed on or for.
          */
-        @Child(name = "reference", type = {Patient.class, Person.class, RelatedPerson.class, Practitioner.class, Device.class, Group.class, Organization.class}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "reference", type = {Patient.class, RelatedPerson.class, Practitioner.class, PractitionerRole.class, Device.class, Group.class, Organization.class}, order=1, min=1, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Entity of the action", formalDefinition="The entity the action is performed or not performed on or for." )
         protected List<Reference> reference;
         /**
@@ -8365,14 +8365,14 @@ public class Contract extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("reference", "Reference(Patient|Person|RelatedPerson|Practitioner|Device|Group|Organization)", "The entity the action is performed or not performed on or for.", 0, java.lang.Integer.MAX_VALUE, reference));
+          children.add(new Property("reference", "Reference(Patient|RelatedPerson|Practitioner|PractitionerRole|Device|Group|Organization)", "The entity the action is performed or not performed on or for.", 0, java.lang.Integer.MAX_VALUE, reference));
           children.add(new Property("role", "CodeableConcept", "Role type of agent assigned roles in this Contract.", 0, 1, role));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case -925155509: /*reference*/  return new Property("reference", "Reference(Patient|Person|RelatedPerson|Practitioner|Device|Group|Organization)", "The entity the action is performed or not performed on or for.", 0, java.lang.Integer.MAX_VALUE, reference);
+          case -925155509: /*reference*/  return new Property("reference", "Reference(Patient|RelatedPerson|Practitioner|PractitionerRole|Device|Group|Organization)", "The entity the action is performed or not performed on or for.", 0, java.lang.Integer.MAX_VALUE, reference);
           case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Role type of agent assigned roles in this Contract.", 0, 1, role);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -8503,7 +8503,7 @@ public class Contract extends DomainResource {
         /**
          * Party which is a signator to this Contract.
          */
-        @Child(name = "party", type = {Organization.class, Patient.class, Practitioner.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "party", type = {Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class}, order=2, min=1, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Contract Signatory Party", formalDefinition="Party which is a signator to this Contract." )
         protected Reference party;
 
@@ -8656,7 +8656,7 @@ public class Contract extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "Coding", "Role of this Contract signer, e.g. notary, grantee.", 0, 1, type));
-          children.add(new Property("party", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Party which is a signator to this Contract.", 0, 1, party));
+          children.add(new Property("party", "Reference(Organization|Patient|Practitioner|PractitionerRole|RelatedPerson)", "Party which is a signator to this Contract.", 0, 1, party));
           children.add(new Property("signature", "Signature", "Legally binding Contract DSIG signature contents in Base64.", 0, java.lang.Integer.MAX_VALUE, signature));
         }
 
@@ -8664,7 +8664,7 @@ public class Contract extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "Coding", "Role of this Contract signer, e.g. notary, grantee.", 0, 1, type);
-          case 106437350: /*party*/  return new Property("party", "Reference(Organization|Patient|Practitioner|RelatedPerson)", "Party which is a signator to this Contract.", 0, 1, party);
+          case 106437350: /*party*/  return new Property("party", "Reference(Organization|Patient|Practitioner|PractitionerRole|RelatedPerson)", "Party which is a signator to this Contract.", 0, 1, party);
           case 1073584312: /*signature*/  return new Property("signature", "Signature", "Legally binding Contract DSIG signature contents in Base64.", 0, java.lang.Integer.MAX_VALUE, signature);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -8834,7 +8834,7 @@ public class Contract extends DomainResource {
          */
         public Attachment getContentAttachment() throws FHIRException { 
           if (this.content == null)
-            return null;
+            this.content = new Attachment();
           if (!(this.content instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
@@ -8849,7 +8849,7 @@ public class Contract extends DomainResource {
          */
         public Reference getContentReference() throws FHIRException { 
           if (this.content == null)
-            return null;
+            this.content = new Reference();
           if (!(this.content instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
@@ -9028,7 +9028,7 @@ public class Contract extends DomainResource {
          */
         public Attachment getContentAttachment() throws FHIRException { 
           if (this.content == null)
-            return null;
+            this.content = new Attachment();
           if (!(this.content instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
@@ -9043,7 +9043,7 @@ public class Contract extends DomainResource {
          */
         public Reference getContentReference() throws FHIRException { 
           if (this.content == null)
-            return null;
+            this.content = new Reference();
           if (!(this.content instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
@@ -9222,7 +9222,7 @@ public class Contract extends DomainResource {
          */
         public Attachment getContentAttachment() throws FHIRException { 
           if (this.content == null)
-            return null;
+            this.content = new Attachment();
           if (!(this.content instanceof Attachment))
             throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Attachment) this.content;
@@ -9237,7 +9237,7 @@ public class Contract extends DomainResource {
          */
         public Reference getContentReference() throws FHIRException { 
           if (this.content == null)
-            return null;
+            this.content = new Reference();
           if (!(this.content instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.content.getClass().getName()+" was encountered");
           return (Reference) this.content;
@@ -9543,7 +9543,7 @@ public class Contract extends DomainResource {
     /**
      * The individual or organization that authored the Contract definition, derivative, or instance in any legal state.
      */
-    @Child(name = "author", type = {Person.class, Patient.class, Practitioner.class, Organization.class}, order=19, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "author", type = {Patient.class, Practitioner.class, PractitionerRole.class, Organization.class}, order=19, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Source of Contract", formalDefinition="The individual or organization that authored the Contract definition, derivative, or instance in any legal state." )
     protected Reference author;
 
@@ -10674,7 +10674,7 @@ public class Contract extends DomainResource {
      */
     public CodeableConcept getTopicCodeableConcept() throws FHIRException { 
       if (this.topic == null)
-        return null;
+        this.topic = new CodeableConcept();
       if (!(this.topic instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.topic.getClass().getName()+" was encountered");
       return (CodeableConcept) this.topic;
@@ -10689,7 +10689,7 @@ public class Contract extends DomainResource {
      */
     public Reference getTopicReference() throws FHIRException { 
       if (this.topic == null)
-        return null;
+        this.topic = new Reference();
       if (!(this.topic instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.topic.getClass().getName()+" was encountered");
       return (Reference) this.topic;
@@ -11229,7 +11229,7 @@ public class Contract extends DomainResource {
      */
     public Attachment getLegallyBindingAttachment() throws FHIRException { 
       if (this.legallyBinding == null)
-        return null;
+        this.legallyBinding = new Attachment();
       if (!(this.legallyBinding instanceof Attachment))
         throw new FHIRException("Type mismatch: the type Attachment was expected, but "+this.legallyBinding.getClass().getName()+" was encountered");
       return (Attachment) this.legallyBinding;
@@ -11244,7 +11244,7 @@ public class Contract extends DomainResource {
      */
     public Reference getLegallyBindingReference() throws FHIRException { 
       if (this.legallyBinding == null)
-        return null;
+        this.legallyBinding = new Reference();
       if (!(this.legallyBinding instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.legallyBinding.getClass().getName()+" was encountered");
       return (Reference) this.legallyBinding;
@@ -11289,7 +11289,7 @@ public class Contract extends DomainResource {
         children.add(new Property("title", "string", "A short, descriptive, user-friendly title for this Contract definition, derivative, or instance in any legal state.t giving additional information about its content.", 0, 1, title));
         children.add(new Property("subtitle", "string", "An explanatory or alternate user-friendly title for this Contract definition, derivative, or instance in any legal state.t giving additional information about its content.", 0, 1, subtitle));
         children.add(new Property("alias", "string", "Alternative representation of the title for this Contract definition, derivative, or instance in any legal state., e.g., a domain specific contract number related to legislation.", 0, java.lang.Integer.MAX_VALUE, alias));
-        children.add(new Property("author", "Reference(Person|Patient|Practitioner|Organization)", "The individual or organization that authored the Contract definition, derivative, or instance in any legal state.", 0, 1, author));
+        children.add(new Property("author", "Reference(Patient|Practitioner|PractitionerRole|Organization)", "The individual or organization that authored the Contract definition, derivative, or instance in any legal state.", 0, 1, author));
         children.add(new Property("scope", "CodeableConcept", "A selector of legal concerns for this Contract definition, derivative, or instance in any legal state.", 0, 1, scope));
         children.add(new Property("topic[x]", "CodeableConcept|Reference(Any)", "Narrows the range of legal concerns to focus on the achievement of specific contractual objectives.", 0, 1, topic));
         children.add(new Property("type", "CodeableConcept", "A high-level category for the legal instrument, whether constructed as a Contract definition, derivative, or instance in any legal state.  Provides additional information about its content within the context of the Contract's scope to distinguish the kinds of systems that would be interested in the contract.", 0, 1, type));
@@ -11327,7 +11327,7 @@ public class Contract extends DomainResource {
         case 110371416: /*title*/  return new Property("title", "string", "A short, descriptive, user-friendly title for this Contract definition, derivative, or instance in any legal state.t giving additional information about its content.", 0, 1, title);
         case -2060497896: /*subtitle*/  return new Property("subtitle", "string", "An explanatory or alternate user-friendly title for this Contract definition, derivative, or instance in any legal state.t giving additional information about its content.", 0, 1, subtitle);
         case 92902992: /*alias*/  return new Property("alias", "string", "Alternative representation of the title for this Contract definition, derivative, or instance in any legal state., e.g., a domain specific contract number related to legislation.", 0, java.lang.Integer.MAX_VALUE, alias);
-        case -1406328437: /*author*/  return new Property("author", "Reference(Person|Patient|Practitioner|Organization)", "The individual or organization that authored the Contract definition, derivative, or instance in any legal state.", 0, 1, author);
+        case -1406328437: /*author*/  return new Property("author", "Reference(Patient|Practitioner|PractitionerRole|Organization)", "The individual or organization that authored the Contract definition, derivative, or instance in any legal state.", 0, 1, author);
         case 109264468: /*scope*/  return new Property("scope", "CodeableConcept", "A selector of legal concerns for this Contract definition, derivative, or instance in any legal state.", 0, 1, scope);
         case -957295375: /*topic[x]*/  return new Property("topic[x]", "CodeableConcept|Reference(Any)", "Narrows the range of legal concerns to focus on the achievement of specific contractual objectives.", 0, 1, topic);
         case 110546223: /*topic*/  return new Property("topic[x]", "CodeableConcept|Reference(Any)", "Narrows the range of legal concerns to focus on the achievement of specific contractual objectives.", 0, 1, topic);
@@ -12126,7 +12126,7 @@ public class Contract extends DomainResource {
    * Path: <b>Contract.signer.party</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="signer", path="Contract.signer.party", description="Contract Signatory Party", type="reference", target={Organization.class, Patient.class, Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="signer", path="Contract.signer.party", description="Contract Signatory Party", type="reference", target={Organization.class, Patient.class, Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_SIGNER = "signer";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>signer</b>

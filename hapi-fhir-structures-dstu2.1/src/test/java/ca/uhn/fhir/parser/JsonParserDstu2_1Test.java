@@ -1011,6 +1011,7 @@ public class JsonParserDstu2_1Test {
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
 			assertThat(out, not(containsString("meta")));
+			assertThat(out, not(containsString("SUBSETTED")));
 		}
 	}
 
@@ -1019,7 +1020,7 @@ public class JsonParserDstu2_1Test {
 		Patient p = new Patient();
 		p.addName().addFamily("Smith").addGiven("John");
 
-		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ourCtx));
 
 		String output = ourCtx.newJsonParser().encodeResourceToString(p);
 		ourLog.info(output);

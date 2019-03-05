@@ -15,17 +15,14 @@ import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhirtest.config.*;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -34,7 +31,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class TestRestfulServer extends RestfulServer {
@@ -147,6 +143,7 @@ public class TestRestfulServer extends RestfulServer {
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
+				plainProviders.add(myAppCtx.getBean(GraphQLProvider.class));
 				break;
 			}
 			default:
@@ -162,7 +159,7 @@ public class TestRestfulServer extends RestfulServer {
 		 * This server tries to dynamically generate narratives
 		 */
 		FhirContext ctx = getFhirContext();
-		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(getFhirContext()));
 
 		/*
 		 * The resource and system providers (which actually implement the various FHIR
@@ -205,6 +202,11 @@ public class TestRestfulServer extends RestfulServer {
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		/*
+		 * Use extended support for the _elements parameter
+		 */
+		setElementsSupport(ElementsSupportEnum.EXTENDED);
+
+		/*
 		 * The server's base URL (e.g. http://fhirtest.uhn.ca/baseDstu2) is
 		 * pulled from a system property, which is helpful if you want to try
 		 * hosting your own copy of this server.
@@ -223,15 +225,6 @@ public class TestRestfulServer extends RestfulServer {
 		 * Spool results to the database
 		 */
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
-
-		/*
-		 * Load interceptors for the server from Spring
-		 */
-		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
-		for (IServerInterceptor interceptor : interceptorBeans) {
-			this.registerInterceptor(interceptor);
-		}
-
 	}
 
 	/**

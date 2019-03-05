@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -69,6 +69,10 @@ public enum UsageContextType {
          */
         SPECIES, 
         /**
+         * A program/project of work for which this artifact is applicable.
+         */
+        PROGRAM, 
+        /**
          * added to help the parsers
          */
         NULL;
@@ -91,6 +95,8 @@ public enum UsageContextType {
           return VENUE;
         if ("species".equals(codeString))
           return SPECIES;
+        if ("program".equals(codeString))
+          return PROGRAM;
         throw new FHIRException("Unknown UsageContextType code '"+codeString+"'");
         }
         public String toCode() {
@@ -103,6 +109,7 @@ public enum UsageContextType {
             case TASK: return "task";
             case VENUE: return "venue";
             case SPECIES: return "species";
+            case PROGRAM: return "program";
             default: return "?";
           }
         }
@@ -119,6 +126,7 @@ public enum UsageContextType {
             case TASK: return "The context for the clinical task(s) represented by this artifact. For example, this could be any task context represented by the HL7 ActTaskCode value set http://terminology.hl7.org/ValueSet/v3-ActTaskCode. General categories include: order entry, patient documentation and patient information review.";
             case VENUE: return "The venue in which an artifact could be used. For example, Outpatient, Inpatient, Home, Nursing home. The code value may originate from the HL7 ServiceDeliveryLocationRoleType value set (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType).";
             case SPECIES: return "The species to which an artifact applies. For example, SNOMED - 387961004 | Kingdom Animalia (organism).";
+            case PROGRAM: return "A program/project of work for which this artifact is applicable.";
             default: return "?";
           }
         }
@@ -132,6 +140,7 @@ public enum UsageContextType {
             case TASK: return "Workflow Task";
             case VENUE: return "Clinical Venue";
             case SPECIES: return "Species";
+            case PROGRAM: return "Program";
             default: return "?";
           }
     }

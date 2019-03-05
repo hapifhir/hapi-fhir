@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * This resource provides payment details and claim references supporting a bulk payment.
+ * This resource provides the details including amount of a payment and allocates the payment items being paid.
  */
 @ResourceDef(name="PaymentReconciliation", profile="http://hl7.org/fhir/StructureDefinition/PaymentReconciliation")
 public class PaymentReconciliation extends DomainResource {
@@ -176,76 +176,102 @@ public class PaymentReconciliation extends DomainResource {
     @Block()
     public static class DetailsComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * Code to indicate the nature of the payment, adjustment, funds advance, etc.
+         * Unique identifier for the current payment item for the referenced payable.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Type code", formalDefinition="Code to indicate the nature of the payment, adjustment, funds advance, etc." )
+        @Child(name = "identifier", type = {Identifier.class}, order=1, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Business identifier of the payment detail", formalDefinition="Unique identifier for the current payment item for the referenced payable." )
+        protected Identifier identifier;
+
+        /**
+         * Unique identifier for the prior payment item for the referenced payable.
+         */
+        @Child(name = "predecessor", type = {Identifier.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Business identifier of the prior payment detail", formalDefinition="Unique identifier for the prior payment item for the referenced payable." )
+        protected Identifier predecessor;
+
+        /**
+         * Code to indicate the nature of the payment.
+         */
+        @Child(name = "type", type = {CodeableConcept.class}, order=3, min=1, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Category of payment", formalDefinition="Code to indicate the nature of the payment." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/payment-type")
         protected CodeableConcept type;
 
         /**
-         * The claim or financial resource.
+         * A resource, such as a Claim, the evaluation of which could lead to payment.
          */
-        @Child(name = "request", type = {Reference.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Claim", formalDefinition="The claim or financial resource." )
+        @Child(name = "request", type = {Reference.class}, order=4, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Request giving rise to the payment", formalDefinition="A resource, such as a Claim, the evaluation of which could lead to payment." )
         protected Reference request;
 
         /**
-         * The actual object that is the target of the reference (The claim or financial resource.)
+         * The actual object that is the target of the reference (A resource, such as a Claim, the evaluation of which could lead to payment.)
          */
         protected Resource requestTarget;
 
         /**
-         * The claim response resource.
+         * The party which submitted the claim or financial transaction.
          */
-        @Child(name = "response", type = {Reference.class}, order=3, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Claim Response", formalDefinition="The claim response resource." )
+        @Child(name = "submitter", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Submitter of the request", formalDefinition="The party which submitted the claim or financial transaction." )
+        protected Reference submitter;
+
+        /**
+         * The actual object that is the target of the reference (The party which submitted the claim or financial transaction.)
+         */
+        protected Resource submitterTarget;
+
+        /**
+         * A resource, such as a ClaimResponse, which contains a commitment to payment.
+         */
+        @Child(name = "response", type = {Reference.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Response committing to a payment", formalDefinition="A resource, such as a ClaimResponse, which contains a commitment to payment." )
         protected Reference response;
 
         /**
-         * The actual object that is the target of the reference (The claim response resource.)
+         * The actual object that is the target of the reference (A resource, such as a ClaimResponse, which contains a commitment to payment.)
          */
         protected Resource responseTarget;
 
         /**
-         * The Organization which submitted the claim or financial transaction.
+         * The date from the response resource containing a commitment to pay.
          */
-        @Child(name = "submitter", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Organization which submitted the claim", formalDefinition="The Organization which submitted the claim or financial transaction." )
-        protected Reference submitter;
-
-        /**
-         * The actual object that is the target of the reference (The Organization which submitted the claim or financial transaction.)
-         */
-        protected Organization submitterTarget;
-
-        /**
-         * The organization which is receiving the payment.
-         */
-        @Child(name = "payee", type = {Organization.class}, order=5, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Organization which is receiving the payment", formalDefinition="The organization which is receiving the payment." )
-        protected Reference payee;
-
-        /**
-         * The actual object that is the target of the reference (The organization which is receiving the payment.)
-         */
-        protected Organization payeeTarget;
-
-        /**
-         * The date of the invoice or financial resource.
-         */
-        @Child(name = "date", type = {DateType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Invoice date", formalDefinition="The date of the invoice or financial resource." )
+        @Child(name = "date", type = {DateType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Date of commitment to pay", formalDefinition="The date from the response resource containing a commitment to pay." )
         protected DateType date;
 
         /**
-         * Amount paid for this detail.
+         * A reference to the individual who is responsible for inquiries regarding the response and its payment.
          */
-        @Child(name = "amount", type = {Money.class}, order=7, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Amount being paid", formalDefinition="Amount paid for this detail." )
+        @Child(name = "responsible", type = {PractitionerRole.class}, order=8, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Contact for the response", formalDefinition="A reference to the individual who is responsible for inquiries regarding the response and its payment." )
+        protected Reference responsible;
+
+        /**
+         * The actual object that is the target of the reference (A reference to the individual who is responsible for inquiries regarding the response and its payment.)
+         */
+        protected PractitionerRole responsibleTarget;
+
+        /**
+         * The party which is receiving the payment.
+         */
+        @Child(name = "payee", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=9, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Recipient of the payment", formalDefinition="The party which is receiving the payment." )
+        protected Reference payee;
+
+        /**
+         * The actual object that is the target of the reference (The party which is receiving the payment.)
+         */
+        protected Resource payeeTarget;
+
+        /**
+         * The monetary amount allocated from the total payment to the payable.
+         */
+        @Child(name = "amount", type = {Money.class}, order=10, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="Amount allocated to this payable", formalDefinition="The monetary amount allocated from the total payment to the payable." )
         protected Money amount;
 
-        private static final long serialVersionUID = 661095855L;
+        private static final long serialVersionUID = -1361848619L;
 
     /**
      * Constructor
@@ -263,7 +289,55 @@ public class PaymentReconciliation extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (Code to indicate the nature of the payment, adjustment, funds advance, etc.)
+         * @return {@link #identifier} (Unique identifier for the current payment item for the referenced payable.)
+         */
+        public Identifier getIdentifier() { 
+          if (this.identifier == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.identifier");
+            else if (Configuration.doAutoCreate())
+              this.identifier = new Identifier(); // cc
+          return this.identifier;
+        }
+
+        public boolean hasIdentifier() { 
+          return this.identifier != null && !this.identifier.isEmpty();
+        }
+
+        /**
+         * @param value {@link #identifier} (Unique identifier for the current payment item for the referenced payable.)
+         */
+        public DetailsComponent setIdentifier(Identifier value) { 
+          this.identifier = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #predecessor} (Unique identifier for the prior payment item for the referenced payable.)
+         */
+        public Identifier getPredecessor() { 
+          if (this.predecessor == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.predecessor");
+            else if (Configuration.doAutoCreate())
+              this.predecessor = new Identifier(); // cc
+          return this.predecessor;
+        }
+
+        public boolean hasPredecessor() { 
+          return this.predecessor != null && !this.predecessor.isEmpty();
+        }
+
+        /**
+         * @param value {@link #predecessor} (Unique identifier for the prior payment item for the referenced payable.)
+         */
+        public DetailsComponent setPredecessor(Identifier value) { 
+          this.predecessor = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #type} (Code to indicate the nature of the payment.)
          */
         public CodeableConcept getType() { 
           if (this.type == null)
@@ -279,7 +353,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (Code to indicate the nature of the payment, adjustment, funds advance, etc.)
+         * @param value {@link #type} (Code to indicate the nature of the payment.)
          */
         public DetailsComponent setType(CodeableConcept value) { 
           this.type = value;
@@ -287,7 +361,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return {@link #request} (The claim or financial resource.)
+         * @return {@link #request} (A resource, such as a Claim, the evaluation of which could lead to payment.)
          */
         public Reference getRequest() { 
           if (this.request == null)
@@ -303,7 +377,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @param value {@link #request} (The claim or financial resource.)
+         * @param value {@link #request} (A resource, such as a Claim, the evaluation of which could lead to payment.)
          */
         public DetailsComponent setRequest(Reference value) { 
           this.request = value;
@@ -311,14 +385,14 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The claim or financial resource.)
+         * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A resource, such as a Claim, the evaluation of which could lead to payment.)
          */
         public Resource getRequestTarget() { 
           return this.requestTarget;
         }
 
         /**
-         * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The claim or financial resource.)
+         * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A resource, such as a Claim, the evaluation of which could lead to payment.)
          */
         public DetailsComponent setRequestTarget(Resource value) { 
           this.requestTarget = value;
@@ -326,46 +400,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return {@link #response} (The claim response resource.)
-         */
-        public Reference getResponse() { 
-          if (this.response == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DetailsComponent.response");
-            else if (Configuration.doAutoCreate())
-              this.response = new Reference(); // cc
-          return this.response;
-        }
-
-        public boolean hasResponse() { 
-          return this.response != null && !this.response.isEmpty();
-        }
-
-        /**
-         * @param value {@link #response} (The claim response resource.)
-         */
-        public DetailsComponent setResponse(Reference value) { 
-          this.response = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #response} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The claim response resource.)
-         */
-        public Resource getResponseTarget() { 
-          return this.responseTarget;
-        }
-
-        /**
-         * @param value {@link #response} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The claim response resource.)
-         */
-        public DetailsComponent setResponseTarget(Resource value) { 
-          this.responseTarget = value;
-          return this;
-        }
-
-        /**
-         * @return {@link #submitter} (The Organization which submitted the claim or financial transaction.)
+         * @return {@link #submitter} (The party which submitted the claim or financial transaction.)
          */
         public Reference getSubmitter() { 
           if (this.submitter == null)
@@ -381,7 +416,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @param value {@link #submitter} (The Organization which submitted the claim or financial transaction.)
+         * @param value {@link #submitter} (The party which submitted the claim or financial transaction.)
          */
         public DetailsComponent setSubmitter(Reference value) { 
           this.submitter = value;
@@ -389,71 +424,61 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return {@link #submitter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Organization which submitted the claim or financial transaction.)
+         * @return {@link #submitter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The party which submitted the claim or financial transaction.)
          */
-        public Organization getSubmitterTarget() { 
-          if (this.submitterTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DetailsComponent.submitter");
-            else if (Configuration.doAutoCreate())
-              this.submitterTarget = new Organization(); // aa
+        public Resource getSubmitterTarget() { 
           return this.submitterTarget;
         }
 
         /**
-         * @param value {@link #submitter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Organization which submitted the claim or financial transaction.)
+         * @param value {@link #submitter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The party which submitted the claim or financial transaction.)
          */
-        public DetailsComponent setSubmitterTarget(Organization value) { 
+        public DetailsComponent setSubmitterTarget(Resource value) { 
           this.submitterTarget = value;
           return this;
         }
 
         /**
-         * @return {@link #payee} (The organization which is receiving the payment.)
+         * @return {@link #response} (A resource, such as a ClaimResponse, which contains a commitment to payment.)
          */
-        public Reference getPayee() { 
-          if (this.payee == null)
+        public Reference getResponse() { 
+          if (this.response == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DetailsComponent.payee");
+              throw new Error("Attempt to auto-create DetailsComponent.response");
             else if (Configuration.doAutoCreate())
-              this.payee = new Reference(); // cc
-          return this.payee;
+              this.response = new Reference(); // cc
+          return this.response;
         }
 
-        public boolean hasPayee() { 
-          return this.payee != null && !this.payee.isEmpty();
+        public boolean hasResponse() { 
+          return this.response != null && !this.response.isEmpty();
         }
 
         /**
-         * @param value {@link #payee} (The organization which is receiving the payment.)
+         * @param value {@link #response} (A resource, such as a ClaimResponse, which contains a commitment to payment.)
          */
-        public DetailsComponent setPayee(Reference value) { 
-          this.payee = value;
+        public DetailsComponent setResponse(Reference value) { 
+          this.response = value;
           return this;
         }
 
         /**
-         * @return {@link #payee} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The organization which is receiving the payment.)
+         * @return {@link #response} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A resource, such as a ClaimResponse, which contains a commitment to payment.)
          */
-        public Organization getPayeeTarget() { 
-          if (this.payeeTarget == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DetailsComponent.payee");
-            else if (Configuration.doAutoCreate())
-              this.payeeTarget = new Organization(); // aa
-          return this.payeeTarget;
+        public Resource getResponseTarget() { 
+          return this.responseTarget;
         }
 
         /**
-         * @param value {@link #payee} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The organization which is receiving the payment.)
+         * @param value {@link #response} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A resource, such as a ClaimResponse, which contains a commitment to payment.)
          */
-        public DetailsComponent setPayeeTarget(Organization value) { 
-          this.payeeTarget = value;
+        public DetailsComponent setResponseTarget(Resource value) { 
+          this.responseTarget = value;
           return this;
         }
 
         /**
-         * @return {@link #date} (The date of the invoice or financial resource.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+         * @return {@link #date} (The date from the response resource containing a commitment to pay.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
          */
         public DateType getDateElement() { 
           if (this.date == null)
@@ -473,7 +498,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @param value {@link #date} (The date of the invoice or financial resource.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
+         * @param value {@link #date} (The date from the response resource containing a commitment to pay.). This is the underlying object with id, value and extensions. The accessor "getDate" gives direct access to the value
          */
         public DetailsComponent setDateElement(DateType value) { 
           this.date = value;
@@ -481,14 +506,14 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return The date of the invoice or financial resource.
+         * @return The date from the response resource containing a commitment to pay.
          */
         public Date getDate() { 
           return this.date == null ? null : this.date.getValue();
         }
 
         /**
-         * @param value The date of the invoice or financial resource.
+         * @param value The date from the response resource containing a commitment to pay.
          */
         public DetailsComponent setDate(Date value) { 
           if (value == null)
@@ -502,7 +527,90 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return {@link #amount} (Amount paid for this detail.)
+         * @return {@link #responsible} (A reference to the individual who is responsible for inquiries regarding the response and its payment.)
+         */
+        public Reference getResponsible() { 
+          if (this.responsible == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.responsible");
+            else if (Configuration.doAutoCreate())
+              this.responsible = new Reference(); // cc
+          return this.responsible;
+        }
+
+        public boolean hasResponsible() { 
+          return this.responsible != null && !this.responsible.isEmpty();
+        }
+
+        /**
+         * @param value {@link #responsible} (A reference to the individual who is responsible for inquiries regarding the response and its payment.)
+         */
+        public DetailsComponent setResponsible(Reference value) { 
+          this.responsible = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #responsible} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A reference to the individual who is responsible for inquiries regarding the response and its payment.)
+         */
+        public PractitionerRole getResponsibleTarget() { 
+          if (this.responsibleTarget == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.responsible");
+            else if (Configuration.doAutoCreate())
+              this.responsibleTarget = new PractitionerRole(); // aa
+          return this.responsibleTarget;
+        }
+
+        /**
+         * @param value {@link #responsible} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A reference to the individual who is responsible for inquiries regarding the response and its payment.)
+         */
+        public DetailsComponent setResponsibleTarget(PractitionerRole value) { 
+          this.responsibleTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #payee} (The party which is receiving the payment.)
+         */
+        public Reference getPayee() { 
+          if (this.payee == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create DetailsComponent.payee");
+            else if (Configuration.doAutoCreate())
+              this.payee = new Reference(); // cc
+          return this.payee;
+        }
+
+        public boolean hasPayee() { 
+          return this.payee != null && !this.payee.isEmpty();
+        }
+
+        /**
+         * @param value {@link #payee} (The party which is receiving the payment.)
+         */
+        public DetailsComponent setPayee(Reference value) { 
+          this.payee = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #payee} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The party which is receiving the payment.)
+         */
+        public Resource getPayeeTarget() { 
+          return this.payeeTarget;
+        }
+
+        /**
+         * @param value {@link #payee} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The party which is receiving the payment.)
+         */
+        public DetailsComponent setPayeeTarget(Resource value) { 
+          this.payeeTarget = value;
+          return this;
+        }
+
+        /**
+         * @return {@link #amount} (The monetary amount allocated from the total payment to the payable.)
          */
         public Money getAmount() { 
           if (this.amount == null)
@@ -518,7 +626,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @param value {@link #amount} (Amount paid for this detail.)
+         * @param value {@link #amount} (The monetary amount allocated from the total payment to the payable.)
          */
         public DetailsComponent setAmount(Money value) { 
           this.amount = value;
@@ -527,25 +635,31 @@ public class PaymentReconciliation extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("type", "CodeableConcept", "Code to indicate the nature of the payment, adjustment, funds advance, etc.", 0, 1, type));
-          children.add(new Property("request", "Reference(Any)", "The claim or financial resource.", 0, 1, request));
-          children.add(new Property("response", "Reference(Any)", "The claim response resource.", 0, 1, response));
-          children.add(new Property("submitter", "Reference(Organization)", "The Organization which submitted the claim or financial transaction.", 0, 1, submitter));
-          children.add(new Property("payee", "Reference(Organization)", "The organization which is receiving the payment.", 0, 1, payee));
-          children.add(new Property("date", "date", "The date of the invoice or financial resource.", 0, 1, date));
-          children.add(new Property("amount", "Money", "Amount paid for this detail.", 0, 1, amount));
+          children.add(new Property("identifier", "Identifier", "Unique identifier for the current payment item for the referenced payable.", 0, 1, identifier));
+          children.add(new Property("predecessor", "Identifier", "Unique identifier for the prior payment item for the referenced payable.", 0, 1, predecessor));
+          children.add(new Property("type", "CodeableConcept", "Code to indicate the nature of the payment.", 0, 1, type));
+          children.add(new Property("request", "Reference(Any)", "A resource, such as a Claim, the evaluation of which could lead to payment.", 0, 1, request));
+          children.add(new Property("submitter", "Reference(Practitioner|PractitionerRole|Organization)", "The party which submitted the claim or financial transaction.", 0, 1, submitter));
+          children.add(new Property("response", "Reference(Any)", "A resource, such as a ClaimResponse, which contains a commitment to payment.", 0, 1, response));
+          children.add(new Property("date", "date", "The date from the response resource containing a commitment to pay.", 0, 1, date));
+          children.add(new Property("responsible", "Reference(PractitionerRole)", "A reference to the individual who is responsible for inquiries regarding the response and its payment.", 0, 1, responsible));
+          children.add(new Property("payee", "Reference(Practitioner|PractitionerRole|Organization)", "The party which is receiving the payment.", 0, 1, payee));
+          children.add(new Property("amount", "Money", "The monetary amount allocated from the total payment to the payable.", 0, 1, amount));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Code to indicate the nature of the payment, adjustment, funds advance, etc.", 0, 1, type);
-          case 1095692943: /*request*/  return new Property("request", "Reference(Any)", "The claim or financial resource.", 0, 1, request);
-          case -340323263: /*response*/  return new Property("response", "Reference(Any)", "The claim response resource.", 0, 1, response);
-          case 348678409: /*submitter*/  return new Property("submitter", "Reference(Organization)", "The Organization which submitted the claim or financial transaction.", 0, 1, submitter);
-          case 106443592: /*payee*/  return new Property("payee", "Reference(Organization)", "The organization which is receiving the payment.", 0, 1, payee);
-          case 3076014: /*date*/  return new Property("date", "date", "The date of the invoice or financial resource.", 0, 1, date);
-          case -1413853096: /*amount*/  return new Property("amount", "Money", "Amount paid for this detail.", 0, 1, amount);
+          case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "Unique identifier for the current payment item for the referenced payable.", 0, 1, identifier);
+          case -1925032183: /*predecessor*/  return new Property("predecessor", "Identifier", "Unique identifier for the prior payment item for the referenced payable.", 0, 1, predecessor);
+          case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Code to indicate the nature of the payment.", 0, 1, type);
+          case 1095692943: /*request*/  return new Property("request", "Reference(Any)", "A resource, such as a Claim, the evaluation of which could lead to payment.", 0, 1, request);
+          case 348678409: /*submitter*/  return new Property("submitter", "Reference(Practitioner|PractitionerRole|Organization)", "The party which submitted the claim or financial transaction.", 0, 1, submitter);
+          case -340323263: /*response*/  return new Property("response", "Reference(Any)", "A resource, such as a ClaimResponse, which contains a commitment to payment.", 0, 1, response);
+          case 3076014: /*date*/  return new Property("date", "date", "The date from the response resource containing a commitment to pay.", 0, 1, date);
+          case 1847674614: /*responsible*/  return new Property("responsible", "Reference(PractitionerRole)", "A reference to the individual who is responsible for inquiries regarding the response and its payment.", 0, 1, responsible);
+          case 106443592: /*payee*/  return new Property("payee", "Reference(Practitioner|PractitionerRole|Organization)", "The party which is receiving the payment.", 0, 1, payee);
+          case -1413853096: /*amount*/  return new Property("amount", "Money", "The monetary amount allocated from the total payment to the payable.", 0, 1, amount);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -554,12 +668,15 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
+        case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
+        case -1925032183: /*predecessor*/ return this.predecessor == null ? new Base[0] : new Base[] {this.predecessor}; // Identifier
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
         case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
-        case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // Reference
         case 348678409: /*submitter*/ return this.submitter == null ? new Base[0] : new Base[] {this.submitter}; // Reference
-        case 106443592: /*payee*/ return this.payee == null ? new Base[0] : new Base[] {this.payee}; // Reference
+        case -340323263: /*response*/ return this.response == null ? new Base[0] : new Base[] {this.response}; // Reference
         case 3076014: /*date*/ return this.date == null ? new Base[0] : new Base[] {this.date}; // DateType
+        case 1847674614: /*responsible*/ return this.responsible == null ? new Base[0] : new Base[] {this.responsible}; // Reference
+        case 106443592: /*payee*/ return this.payee == null ? new Base[0] : new Base[] {this.payee}; // Reference
         case -1413853096: /*amount*/ return this.amount == null ? new Base[0] : new Base[] {this.amount}; // Money
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -569,23 +686,32 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public Base setProperty(int hash, String name, Base value) throws FHIRException {
         switch (hash) {
+        case -1618432855: // identifier
+          this.identifier = castToIdentifier(value); // Identifier
+          return value;
+        case -1925032183: // predecessor
+          this.predecessor = castToIdentifier(value); // Identifier
+          return value;
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
           return value;
-        case -340323263: // response
-          this.response = castToReference(value); // Reference
-          return value;
         case 348678409: // submitter
           this.submitter = castToReference(value); // Reference
           return value;
-        case 106443592: // payee
-          this.payee = castToReference(value); // Reference
+        case -340323263: // response
+          this.response = castToReference(value); // Reference
           return value;
         case 3076014: // date
           this.date = castToDate(value); // DateType
+          return value;
+        case 1847674614: // responsible
+          this.responsible = castToReference(value); // Reference
+          return value;
+        case 106443592: // payee
+          this.payee = castToReference(value); // Reference
           return value;
         case -1413853096: // amount
           this.amount = castToMoney(value); // Money
@@ -597,18 +723,24 @@ public class PaymentReconciliation extends DomainResource {
 
       @Override
       public Base setProperty(String name, Base value) throws FHIRException {
-        if (name.equals("type")) {
+        if (name.equals("identifier")) {
+          this.identifier = castToIdentifier(value); // Identifier
+        } else if (name.equals("predecessor")) {
+          this.predecessor = castToIdentifier(value); // Identifier
+        } else if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
-        } else if (name.equals("response")) {
-          this.response = castToReference(value); // Reference
         } else if (name.equals("submitter")) {
           this.submitter = castToReference(value); // Reference
-        } else if (name.equals("payee")) {
-          this.payee = castToReference(value); // Reference
+        } else if (name.equals("response")) {
+          this.response = castToReference(value); // Reference
         } else if (name.equals("date")) {
           this.date = castToDate(value); // DateType
+        } else if (name.equals("responsible")) {
+          this.responsible = castToReference(value); // Reference
+        } else if (name.equals("payee")) {
+          this.payee = castToReference(value); // Reference
         } else if (name.equals("amount")) {
           this.amount = castToMoney(value); // Money
         } else
@@ -619,12 +751,15 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case -1618432855:  return getIdentifier(); 
+        case -1925032183:  return getPredecessor(); 
         case 3575610:  return getType(); 
         case 1095692943:  return getRequest(); 
-        case -340323263:  return getResponse(); 
         case 348678409:  return getSubmitter(); 
-        case 106443592:  return getPayee(); 
+        case -340323263:  return getResponse(); 
         case 3076014:  return getDateElement();
+        case 1847674614:  return getResponsible(); 
+        case 106443592:  return getPayee(); 
         case -1413853096:  return getAmount(); 
         default: return super.makeProperty(hash, name);
         }
@@ -634,12 +769,15 @@ public class PaymentReconciliation extends DomainResource {
       @Override
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
+        case -1618432855: /*identifier*/ return new String[] {"Identifier"};
+        case -1925032183: /*predecessor*/ return new String[] {"Identifier"};
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
         case 1095692943: /*request*/ return new String[] {"Reference"};
-        case -340323263: /*response*/ return new String[] {"Reference"};
         case 348678409: /*submitter*/ return new String[] {"Reference"};
-        case 106443592: /*payee*/ return new String[] {"Reference"};
+        case -340323263: /*response*/ return new String[] {"Reference"};
         case 3076014: /*date*/ return new String[] {"date"};
+        case 1847674614: /*responsible*/ return new String[] {"Reference"};
+        case 106443592: /*payee*/ return new String[] {"Reference"};
         case -1413853096: /*amount*/ return new String[] {"Money"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -648,7 +786,15 @@ public class PaymentReconciliation extends DomainResource {
 
       @Override
       public Base addChild(String name) throws FHIRException {
-        if (name.equals("type")) {
+        if (name.equals("identifier")) {
+          this.identifier = new Identifier();
+          return this.identifier;
+        }
+        else if (name.equals("predecessor")) {
+          this.predecessor = new Identifier();
+          return this.predecessor;
+        }
+        else if (name.equals("type")) {
           this.type = new CodeableConcept();
           return this.type;
         }
@@ -656,20 +802,24 @@ public class PaymentReconciliation extends DomainResource {
           this.request = new Reference();
           return this.request;
         }
-        else if (name.equals("response")) {
-          this.response = new Reference();
-          return this.response;
-        }
         else if (name.equals("submitter")) {
           this.submitter = new Reference();
           return this.submitter;
         }
-        else if (name.equals("payee")) {
-          this.payee = new Reference();
-          return this.payee;
+        else if (name.equals("response")) {
+          this.response = new Reference();
+          return this.response;
         }
         else if (name.equals("date")) {
           throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.date");
+        }
+        else if (name.equals("responsible")) {
+          this.responsible = new Reference();
+          return this.responsible;
+        }
+        else if (name.equals("payee")) {
+          this.payee = new Reference();
+          return this.payee;
         }
         else if (name.equals("amount")) {
           this.amount = new Money();
@@ -682,12 +832,15 @@ public class PaymentReconciliation extends DomainResource {
       public DetailsComponent copy() {
         DetailsComponent dst = new DetailsComponent();
         copyValues(dst);
+        dst.identifier = identifier == null ? null : identifier.copy();
+        dst.predecessor = predecessor == null ? null : predecessor.copy();
         dst.type = type == null ? null : type.copy();
         dst.request = request == null ? null : request.copy();
-        dst.response = response == null ? null : response.copy();
         dst.submitter = submitter == null ? null : submitter.copy();
-        dst.payee = payee == null ? null : payee.copy();
+        dst.response = response == null ? null : response.copy();
         dst.date = date == null ? null : date.copy();
+        dst.responsible = responsible == null ? null : responsible.copy();
+        dst.payee = payee == null ? null : payee.copy();
         dst.amount = amount == null ? null : amount.copy();
         return dst;
       }
@@ -699,9 +852,10 @@ public class PaymentReconciliation extends DomainResource {
         if (!(other_ instanceof DetailsComponent))
           return false;
         DetailsComponent o = (DetailsComponent) other_;
-        return compareDeep(type, o.type, true) && compareDeep(request, o.request, true) && compareDeep(response, o.response, true)
-           && compareDeep(submitter, o.submitter, true) && compareDeep(payee, o.payee, true) && compareDeep(date, o.date, true)
-           && compareDeep(amount, o.amount, true);
+        return compareDeep(identifier, o.identifier, true) && compareDeep(predecessor, o.predecessor, true)
+           && compareDeep(type, o.type, true) && compareDeep(request, o.request, true) && compareDeep(submitter, o.submitter, true)
+           && compareDeep(response, o.response, true) && compareDeep(date, o.date, true) && compareDeep(responsible, o.responsible, true)
+           && compareDeep(payee, o.payee, true) && compareDeep(amount, o.amount, true);
       }
 
       @Override
@@ -715,8 +869,8 @@ public class PaymentReconciliation extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, request, response
-          , submitter, payee, date, amount);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, predecessor, type
+          , request, submitter, response, date, responsible, payee, amount);
       }
 
   public String fhirType() {
@@ -729,18 +883,18 @@ public class PaymentReconciliation extends DomainResource {
     @Block()
     public static class NotesComponent extends BackboneElement implements IBaseBackboneElement {
         /**
-         * The note purpose: Print/Display.
+         * The business purpose of the note text.
          */
         @Child(name = "type", type = {CodeType.class}, order=1, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="display | print | printoper", formalDefinition="The note purpose: Print/Display." )
+        @Description(shortDefinition="display | print | printoper", formalDefinition="The business purpose of the note text." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/note-type")
         protected Enumeration<NoteType> type;
 
         /**
-         * The note text.
+         * The explanation or description associated with the processing.
          */
         @Child(name = "text", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="Comment on the processing", formalDefinition="The note text." )
+        @Description(shortDefinition="Note explanatory text", formalDefinition="The explanation or description associated with the processing." )
         protected StringType text;
 
         private static final long serialVersionUID = 529250161L;
@@ -753,7 +907,7 @@ public class PaymentReconciliation extends DomainResource {
       }
 
         /**
-         * @return {@link #type} (The note purpose: Print/Display.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @return {@link #type} (The business purpose of the note text.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public Enumeration<NoteType> getTypeElement() { 
           if (this.type == null)
@@ -773,7 +927,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @param value {@link #type} (The note purpose: Print/Display.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
+         * @param value {@link #type} (The business purpose of the note text.). This is the underlying object with id, value and extensions. The accessor "getType" gives direct access to the value
          */
         public NotesComponent setTypeElement(Enumeration<NoteType> value) { 
           this.type = value;
@@ -781,14 +935,14 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return The note purpose: Print/Display.
+         * @return The business purpose of the note text.
          */
         public NoteType getType() { 
           return this.type == null ? null : this.type.getValue();
         }
 
         /**
-         * @param value The note purpose: Print/Display.
+         * @param value The business purpose of the note text.
          */
         public NotesComponent setType(NoteType value) { 
           if (value == null)
@@ -802,7 +956,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return {@link #text} (The note text.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+         * @return {@link #text} (The explanation or description associated with the processing.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
          */
         public StringType getTextElement() { 
           if (this.text == null)
@@ -822,7 +976,7 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @param value {@link #text} (The note text.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
+         * @param value {@link #text} (The explanation or description associated with the processing.). This is the underlying object with id, value and extensions. The accessor "getText" gives direct access to the value
          */
         public NotesComponent setTextElement(StringType value) { 
           this.text = value;
@@ -830,14 +984,14 @@ public class PaymentReconciliation extends DomainResource {
         }
 
         /**
-         * @return The note text.
+         * @return The explanation or description associated with the processing.
          */
         public String getText() { 
           return this.text == null ? null : this.text.getValue();
         }
 
         /**
-         * @param value The note text.
+         * @param value The explanation or description associated with the processing.
          */
         public NotesComponent setText(String value) { 
           if (Utilities.noString(value))
@@ -852,15 +1006,15 @@ public class PaymentReconciliation extends DomainResource {
 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
-          children.add(new Property("type", "code", "The note purpose: Print/Display.", 0, 1, type));
-          children.add(new Property("text", "string", "The note text.", 0, 1, text));
+          children.add(new Property("type", "code", "The business purpose of the note text.", 0, 1, type));
+          children.add(new Property("text", "string", "The explanation or description associated with the processing.", 0, 1, text));
         }
 
         @Override
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
-          case 3575610: /*type*/  return new Property("type", "code", "The note purpose: Print/Display.", 0, 1, type);
-          case 3556653: /*text*/  return new Property("text", "string", "The note text.", 0, 1, text);
+          case 3575610: /*type*/  return new Property("type", "code", "The business purpose of the note text.", 0, 1, type);
+          case 3556653: /*text*/  return new Property("text", "string", "The explanation or description associated with the processing.", 0, 1, text);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -975,16 +1129,16 @@ public class PaymentReconciliation extends DomainResource {
   }
 
     /**
-     * The Response business identifier.
+     * A unique identifier assigned to this payment reconciliation.
      */
     @Child(name = "identifier", type = {Identifier.class}, order=0, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Business Identifier", formalDefinition="The Response business identifier." )
+    @Description(shortDefinition="Business Identifier for a payment reconciliation", formalDefinition="A unique identifier assigned to this payment reconciliation." )
     protected List<Identifier> identifier;
 
     /**
      * The status of the resource instance.
      */
-    @Child(name = "status", type = {CodeType.class}, order=1, min=0, max=1, modifier=true, summary=true)
+    @Child(name = "status", type = {CodeType.class}, order=1, min=1, max=1, modifier=true, summary=true)
     @Description(shortDefinition="active | cancelled | draft | entered-in-error", formalDefinition="The status of the resource instance." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/fm-status")
     protected Enumeration<PaymentReconciliationStatus> status;
@@ -992,98 +1146,112 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * The period of time for which payments have been gathered into this bulk payment for settlement.
      */
-    @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "period", type = {Period.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Period covered", formalDefinition="The period of time for which payments have been gathered into this bulk payment for settlement." )
     protected Period period;
 
     /**
      * The date when the resource was created.
      */
-    @Child(name = "created", type = {DateTimeType.class}, order=3, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "created", type = {DateTimeType.class}, order=3, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Creation date", formalDefinition="The date when the resource was created." )
     protected DateTimeType created;
 
     /**
-     * The Insurer who produced this adjudicated response.
+     * The party who generated the payment.
      */
-    @Child(name = "organization", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Insurer", formalDefinition="The Insurer who produced this adjudicated response." )
-    protected Reference organization;
+    @Child(name = "paymentIssuer", type = {Organization.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Party generating payment", formalDefinition="The party who generated the payment." )
+    protected Reference paymentIssuer;
 
     /**
-     * The actual object that is the target of the reference (The Insurer who produced this adjudicated response.)
+     * The actual object that is the target of the reference (The party who generated the payment.)
      */
-    protected Organization organizationTarget;
+    protected Organization paymentIssuerTarget;
 
     /**
      * Original request resource reference.
      */
-    @Child(name = "request", type = {ProcessRequest.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Claim reference", formalDefinition="Original request resource reference." )
+    @Child(name = "request", type = {Task.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Reference to requesting resource", formalDefinition="Original request resource reference." )
     protected Reference request;
 
     /**
      * The actual object that is the target of the reference (Original request resource reference.)
      */
-    protected ProcessRequest requestTarget;
-
-    /**
-     * Transaction status: error, complete.
-     */
-    @Child(name = "outcome", type = {CodeType.class}, order=6, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="queued | complete | error | partial", formalDefinition="Transaction status: error, complete." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
-    protected Enumeration<RemittanceOutcome> outcome;
-
-    /**
-     * A description of the status of the adjudication.
-     */
-    @Child(name = "disposition", type = {StringType.class}, order=7, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Disposition Message", formalDefinition="A description of the status of the adjudication." )
-    protected StringType disposition;
+    protected Task requestTarget;
 
     /**
      * The practitioner who is responsible for the services rendered to the patient.
      */
-    @Child(name = "requestProvider", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "requestor", type = {Practitioner.class, PractitionerRole.class, Organization.class}, order=6, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Responsible practitioner", formalDefinition="The practitioner who is responsible for the services rendered to the patient." )
-    protected Reference requestProvider;
+    protected Reference requestor;
 
     /**
      * The actual object that is the target of the reference (The practitioner who is responsible for the services rendered to the patient.)
      */
-    protected Resource requestProviderTarget;
+    protected Resource requestorTarget;
 
     /**
-     * List of individual settlement amounts and the corresponding transaction.
+     * The outcome of a request for a reconciliation.
      */
-    @Child(name = "detail", type = {}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="List of settlements", formalDefinition="List of individual settlement amounts and the corresponding transaction." )
+    @Child(name = "outcome", type = {CodeType.class}, order=7, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="queued | complete | error | partial", formalDefinition="The outcome of a request for a reconciliation." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/remittance-outcome")
+    protected Enumeration<RemittanceOutcome> outcome;
+
+    /**
+     * A human readable description of the status of the request for the reconciliation.
+     */
+    @Child(name = "disposition", type = {StringType.class}, order=8, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Disposition message", formalDefinition="A human readable description of the status of the request for the reconciliation." )
+    protected StringType disposition;
+
+    /**
+     * The date of payment as indicated on the financial instrument.
+     */
+    @Child(name = "paymentDate", type = {DateType.class}, order=9, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="When payment issued", formalDefinition="The date of payment as indicated on the financial instrument." )
+    protected DateType paymentDate;
+
+    /**
+     * Total payment amount as indicated on the financial instrument.
+     */
+    @Child(name = "paymentAmount", type = {Money.class}, order=10, min=1, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Total amount of Payment", formalDefinition="Total payment amount as indicated on the financial instrument." )
+    protected Money paymentAmount;
+
+    /**
+     * Issuer's unique identifier for the payment instrument.
+     */
+    @Child(name = "paymentIdentifier", type = {Identifier.class}, order=11, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Business identifier for the payment", formalDefinition="Issuer's unique identifier for the payment instrument." )
+    protected Identifier paymentIdentifier;
+
+    /**
+     * Distribution of the payment amount for a previously acknowledged payable.
+     */
+    @Child(name = "detail", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Settlement particulars", formalDefinition="Distribution of the payment amount for a previously acknowledged payable." )
     protected List<DetailsComponent> detail;
 
     /**
-     * The form to be used for printing the content.
+     * A code for the form to be used for printing the content.
      */
-    @Child(name = "form", type = {CodeableConcept.class}, order=10, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Printed Form Identifier", formalDefinition="The form to be used for printing the content." )
+    @Child(name = "formCode", type = {CodeableConcept.class}, order=13, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="Printed form identifier", formalDefinition="A code for the form to be used for printing the content." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/forms")
-    protected CodeableConcept form;
+    protected CodeableConcept formCode;
 
     /**
-     * Total payment amount.
+     * A note that describes or explains the processing in a human readable form.
      */
-    @Child(name = "total", type = {Money.class}, order=11, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="Total amount of Payment", formalDefinition="Total payment amount." )
-    protected Money total;
-
-    /**
-     * Suite of notes.
-     */
-    @Child(name = "processNote", type = {}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="Processing comments", formalDefinition="Suite of notes." )
+    @Child(name = "processNote", type = {}, order=14, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Description(shortDefinition="Note concerning processing", formalDefinition="A note that describes or explains the processing in a human readable form." )
     protected List<NotesComponent> processNote;
 
-    private static final long serialVersionUID = -973239463L;
+    private static final long serialVersionUID = -1620965037L;
 
   /**
    * Constructor
@@ -1092,8 +1260,19 @@ public class PaymentReconciliation extends DomainResource {
       super();
     }
 
+  /**
+   * Constructor
+   */
+    public PaymentReconciliation(Enumeration<PaymentReconciliationStatus> status, DateTimeType created, DateType paymentDate, Money paymentAmount) {
+      super();
+      this.status = status;
+      this.created = created;
+      this.paymentDate = paymentDate;
+      this.paymentAmount = paymentAmount;
+    }
+
     /**
-     * @return {@link #identifier} (The Response business identifier.)
+     * @return {@link #identifier} (A unique identifier assigned to this payment reconciliation.)
      */
     public List<Identifier> getIdentifier() { 
       if (this.identifier == null)
@@ -1184,13 +1363,9 @@ public class PaymentReconciliation extends DomainResource {
      * @param value The status of the resource instance.
      */
     public PaymentReconciliation setStatus(PaymentReconciliationStatus value) { 
-      if (value == null)
-        this.status = null;
-      else {
         if (this.status == null)
           this.status = new Enumeration<PaymentReconciliationStatus>(new PaymentReconciliationStatusEnumFactory());
         this.status.setValue(value);
-      }
       return this;
     }
 
@@ -1257,57 +1432,53 @@ public class PaymentReconciliation extends DomainResource {
      * @param value The date when the resource was created.
      */
     public PaymentReconciliation setCreated(Date value) { 
-      if (value == null)
-        this.created = null;
-      else {
         if (this.created == null)
           this.created = new DateTimeType();
         this.created.setValue(value);
-      }
       return this;
     }
 
     /**
-     * @return {@link #organization} (The Insurer who produced this adjudicated response.)
+     * @return {@link #paymentIssuer} (The party who generated the payment.)
      */
-    public Reference getOrganization() { 
-      if (this.organization == null)
+    public Reference getPaymentIssuer() { 
+      if (this.paymentIssuer == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.organization");
+          throw new Error("Attempt to auto-create PaymentReconciliation.paymentIssuer");
         else if (Configuration.doAutoCreate())
-          this.organization = new Reference(); // cc
-      return this.organization;
+          this.paymentIssuer = new Reference(); // cc
+      return this.paymentIssuer;
     }
 
-    public boolean hasOrganization() { 
-      return this.organization != null && !this.organization.isEmpty();
+    public boolean hasPaymentIssuer() { 
+      return this.paymentIssuer != null && !this.paymentIssuer.isEmpty();
     }
 
     /**
-     * @param value {@link #organization} (The Insurer who produced this adjudicated response.)
+     * @param value {@link #paymentIssuer} (The party who generated the payment.)
      */
-    public PaymentReconciliation setOrganization(Reference value) { 
-      this.organization = value;
+    public PaymentReconciliation setPaymentIssuer(Reference value) { 
+      this.paymentIssuer = value;
       return this;
     }
 
     /**
-     * @return {@link #organization} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Insurer who produced this adjudicated response.)
+     * @return {@link #paymentIssuer} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The party who generated the payment.)
      */
-    public Organization getOrganizationTarget() { 
-      if (this.organizationTarget == null)
+    public Organization getPaymentIssuerTarget() { 
+      if (this.paymentIssuerTarget == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.organization");
+          throw new Error("Attempt to auto-create PaymentReconciliation.paymentIssuer");
         else if (Configuration.doAutoCreate())
-          this.organizationTarget = new Organization(); // aa
-      return this.organizationTarget;
+          this.paymentIssuerTarget = new Organization(); // aa
+      return this.paymentIssuerTarget;
     }
 
     /**
-     * @param value {@link #organization} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Insurer who produced this adjudicated response.)
+     * @param value {@link #paymentIssuer} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The party who generated the payment.)
      */
-    public PaymentReconciliation setOrganizationTarget(Organization value) { 
-      this.organizationTarget = value;
+    public PaymentReconciliation setPaymentIssuerTarget(Organization value) { 
+      this.paymentIssuerTarget = value;
       return this;
     }
 
@@ -1338,25 +1509,64 @@ public class PaymentReconciliation extends DomainResource {
     /**
      * @return {@link #request} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
      */
-    public ProcessRequest getRequestTarget() { 
+    public Task getRequestTarget() { 
       if (this.requestTarget == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create PaymentReconciliation.request");
         else if (Configuration.doAutoCreate())
-          this.requestTarget = new ProcessRequest(); // aa
+          this.requestTarget = new Task(); // aa
       return this.requestTarget;
     }
 
     /**
      * @param value {@link #request} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Original request resource reference.)
      */
-    public PaymentReconciliation setRequestTarget(ProcessRequest value) { 
+    public PaymentReconciliation setRequestTarget(Task value) { 
       this.requestTarget = value;
       return this;
     }
 
     /**
-     * @return {@link #outcome} (Transaction status: error, complete.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
+     * @return {@link #requestor} (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public Reference getRequestor() { 
+      if (this.requestor == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.requestor");
+        else if (Configuration.doAutoCreate())
+          this.requestor = new Reference(); // cc
+      return this.requestor;
+    }
+
+    public boolean hasRequestor() { 
+      return this.requestor != null && !this.requestor.isEmpty();
+    }
+
+    /**
+     * @param value {@link #requestor} (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public PaymentReconciliation setRequestor(Reference value) { 
+      this.requestor = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #requestor} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public Resource getRequestorTarget() { 
+      return this.requestorTarget;
+    }
+
+    /**
+     * @param value {@link #requestor} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     */
+    public PaymentReconciliation setRequestorTarget(Resource value) { 
+      this.requestorTarget = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #outcome} (The outcome of a request for a reconciliation.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
     public Enumeration<RemittanceOutcome> getOutcomeElement() { 
       if (this.outcome == null)
@@ -1376,7 +1586,7 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @param value {@link #outcome} (Transaction status: error, complete.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
+     * @param value {@link #outcome} (The outcome of a request for a reconciliation.). This is the underlying object with id, value and extensions. The accessor "getOutcome" gives direct access to the value
      */
     public PaymentReconciliation setOutcomeElement(Enumeration<RemittanceOutcome> value) { 
       this.outcome = value;
@@ -1384,14 +1594,14 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @return Transaction status: error, complete.
+     * @return The outcome of a request for a reconciliation.
      */
     public RemittanceOutcome getOutcome() { 
       return this.outcome == null ? null : this.outcome.getValue();
     }
 
     /**
-     * @param value Transaction status: error, complete.
+     * @param value The outcome of a request for a reconciliation.
      */
     public PaymentReconciliation setOutcome(RemittanceOutcome value) { 
       if (value == null)
@@ -1405,7 +1615,7 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @return {@link #disposition} (A description of the status of the adjudication.). This is the underlying object with id, value and extensions. The accessor "getDisposition" gives direct access to the value
+     * @return {@link #disposition} (A human readable description of the status of the request for the reconciliation.). This is the underlying object with id, value and extensions. The accessor "getDisposition" gives direct access to the value
      */
     public StringType getDispositionElement() { 
       if (this.disposition == null)
@@ -1425,7 +1635,7 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @param value {@link #disposition} (A description of the status of the adjudication.). This is the underlying object with id, value and extensions. The accessor "getDisposition" gives direct access to the value
+     * @param value {@link #disposition} (A human readable description of the status of the request for the reconciliation.). This is the underlying object with id, value and extensions. The accessor "getDisposition" gives direct access to the value
      */
     public PaymentReconciliation setDispositionElement(StringType value) { 
       this.disposition = value;
@@ -1433,14 +1643,14 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @return A description of the status of the adjudication.
+     * @return A human readable description of the status of the request for the reconciliation.
      */
     public String getDisposition() { 
       return this.disposition == null ? null : this.disposition.getValue();
     }
 
     /**
-     * @param value A description of the status of the adjudication.
+     * @param value A human readable description of the status of the request for the reconciliation.
      */
     public PaymentReconciliation setDisposition(String value) { 
       if (Utilities.noString(value))
@@ -1454,46 +1664,100 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @return {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
+     * @return {@link #paymentDate} (The date of payment as indicated on the financial instrument.). This is the underlying object with id, value and extensions. The accessor "getPaymentDate" gives direct access to the value
      */
-    public Reference getRequestProvider() { 
-      if (this.requestProvider == null)
+    public DateType getPaymentDateElement() { 
+      if (this.paymentDate == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.requestProvider");
+          throw new Error("Attempt to auto-create PaymentReconciliation.paymentDate");
         else if (Configuration.doAutoCreate())
-          this.requestProvider = new Reference(); // cc
-      return this.requestProvider;
+          this.paymentDate = new DateType(); // bb
+      return this.paymentDate;
     }
 
-    public boolean hasRequestProvider() { 
-      return this.requestProvider != null && !this.requestProvider.isEmpty();
+    public boolean hasPaymentDateElement() { 
+      return this.paymentDate != null && !this.paymentDate.isEmpty();
+    }
+
+    public boolean hasPaymentDate() { 
+      return this.paymentDate != null && !this.paymentDate.isEmpty();
     }
 
     /**
-     * @param value {@link #requestProvider} (The practitioner who is responsible for the services rendered to the patient.)
+     * @param value {@link #paymentDate} (The date of payment as indicated on the financial instrument.). This is the underlying object with id, value and extensions. The accessor "getPaymentDate" gives direct access to the value
      */
-    public PaymentReconciliation setRequestProvider(Reference value) { 
-      this.requestProvider = value;
+    public PaymentReconciliation setPaymentDateElement(DateType value) { 
+      this.paymentDate = value;
       return this;
     }
 
     /**
-     * @return {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     * @return The date of payment as indicated on the financial instrument.
      */
-    public Resource getRequestProviderTarget() { 
-      return this.requestProviderTarget;
+    public Date getPaymentDate() { 
+      return this.paymentDate == null ? null : this.paymentDate.getValue();
     }
 
     /**
-     * @param value {@link #requestProvider} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The practitioner who is responsible for the services rendered to the patient.)
+     * @param value The date of payment as indicated on the financial instrument.
      */
-    public PaymentReconciliation setRequestProviderTarget(Resource value) { 
-      this.requestProviderTarget = value;
+    public PaymentReconciliation setPaymentDate(Date value) { 
+        if (this.paymentDate == null)
+          this.paymentDate = new DateType();
+        this.paymentDate.setValue(value);
       return this;
     }
 
     /**
-     * @return {@link #detail} (List of individual settlement amounts and the corresponding transaction.)
+     * @return {@link #paymentAmount} (Total payment amount as indicated on the financial instrument.)
+     */
+    public Money getPaymentAmount() { 
+      if (this.paymentAmount == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.paymentAmount");
+        else if (Configuration.doAutoCreate())
+          this.paymentAmount = new Money(); // cc
+      return this.paymentAmount;
+    }
+
+    public boolean hasPaymentAmount() { 
+      return this.paymentAmount != null && !this.paymentAmount.isEmpty();
+    }
+
+    /**
+     * @param value {@link #paymentAmount} (Total payment amount as indicated on the financial instrument.)
+     */
+    public PaymentReconciliation setPaymentAmount(Money value) { 
+      this.paymentAmount = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #paymentIdentifier} (Issuer's unique identifier for the payment instrument.)
+     */
+    public Identifier getPaymentIdentifier() { 
+      if (this.paymentIdentifier == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create PaymentReconciliation.paymentIdentifier");
+        else if (Configuration.doAutoCreate())
+          this.paymentIdentifier = new Identifier(); // cc
+      return this.paymentIdentifier;
+    }
+
+    public boolean hasPaymentIdentifier() { 
+      return this.paymentIdentifier != null && !this.paymentIdentifier.isEmpty();
+    }
+
+    /**
+     * @param value {@link #paymentIdentifier} (Issuer's unique identifier for the payment instrument.)
+     */
+    public PaymentReconciliation setPaymentIdentifier(Identifier value) { 
+      this.paymentIdentifier = value;
+      return this;
+    }
+
+    /**
+     * @return {@link #detail} (Distribution of the payment amount for a previously acknowledged payable.)
      */
     public List<DetailsComponent> getDetail() { 
       if (this.detail == null)
@@ -1546,55 +1810,31 @@ public class PaymentReconciliation extends DomainResource {
     }
 
     /**
-     * @return {@link #form} (The form to be used for printing the content.)
+     * @return {@link #formCode} (A code for the form to be used for printing the content.)
      */
-    public CodeableConcept getForm() { 
-      if (this.form == null)
+    public CodeableConcept getFormCode() { 
+      if (this.formCode == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.form");
+          throw new Error("Attempt to auto-create PaymentReconciliation.formCode");
         else if (Configuration.doAutoCreate())
-          this.form = new CodeableConcept(); // cc
-      return this.form;
+          this.formCode = new CodeableConcept(); // cc
+      return this.formCode;
     }
 
-    public boolean hasForm() { 
-      return this.form != null && !this.form.isEmpty();
+    public boolean hasFormCode() { 
+      return this.formCode != null && !this.formCode.isEmpty();
     }
 
     /**
-     * @param value {@link #form} (The form to be used for printing the content.)
+     * @param value {@link #formCode} (A code for the form to be used for printing the content.)
      */
-    public PaymentReconciliation setForm(CodeableConcept value) { 
-      this.form = value;
+    public PaymentReconciliation setFormCode(CodeableConcept value) { 
+      this.formCode = value;
       return this;
     }
 
     /**
-     * @return {@link #total} (Total payment amount.)
-     */
-    public Money getTotal() { 
-      if (this.total == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create PaymentReconciliation.total");
-        else if (Configuration.doAutoCreate())
-          this.total = new Money(); // cc
-      return this.total;
-    }
-
-    public boolean hasTotal() { 
-      return this.total != null && !this.total.isEmpty();
-    }
-
-    /**
-     * @param value {@link #total} (Total payment amount.)
-     */
-    public PaymentReconciliation setTotal(Money value) { 
-      this.total = value;
-      return this;
-    }
-
-    /**
-     * @return {@link #processNote} (Suite of notes.)
+     * @return {@link #processNote} (A note that describes or explains the processing in a human readable form.)
      */
     public List<NotesComponent> getProcessNote() { 
       if (this.processNote == null)
@@ -1648,37 +1888,41 @@ public class PaymentReconciliation extends DomainResource {
 
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
-        children.add(new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier));
+        children.add(new Property("identifier", "Identifier", "A unique identifier assigned to this payment reconciliation.", 0, java.lang.Integer.MAX_VALUE, identifier));
         children.add(new Property("status", "code", "The status of the resource instance.", 0, 1, status));
         children.add(new Property("period", "Period", "The period of time for which payments have been gathered into this bulk payment for settlement.", 0, 1, period));
         children.add(new Property("created", "dateTime", "The date when the resource was created.", 0, 1, created));
-        children.add(new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, organization));
-        children.add(new Property("request", "Reference(ProcessRequest)", "Original request resource reference.", 0, 1, request));
-        children.add(new Property("outcome", "code", "Transaction status: error, complete.", 0, 1, outcome));
-        children.add(new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition));
-        children.add(new Property("requestProvider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider));
-        children.add(new Property("detail", "", "List of individual settlement amounts and the corresponding transaction.", 0, java.lang.Integer.MAX_VALUE, detail));
-        children.add(new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form));
-        children.add(new Property("total", "Money", "Total payment amount.", 0, 1, total));
-        children.add(new Property("processNote", "", "Suite of notes.", 0, java.lang.Integer.MAX_VALUE, processNote));
+        children.add(new Property("paymentIssuer", "Reference(Organization)", "The party who generated the payment.", 0, 1, paymentIssuer));
+        children.add(new Property("request", "Reference(Task)", "Original request resource reference.", 0, 1, request));
+        children.add(new Property("requestor", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestor));
+        children.add(new Property("outcome", "code", "The outcome of a request for a reconciliation.", 0, 1, outcome));
+        children.add(new Property("disposition", "string", "A human readable description of the status of the request for the reconciliation.", 0, 1, disposition));
+        children.add(new Property("paymentDate", "date", "The date of payment as indicated on the financial instrument.", 0, 1, paymentDate));
+        children.add(new Property("paymentAmount", "Money", "Total payment amount as indicated on the financial instrument.", 0, 1, paymentAmount));
+        children.add(new Property("paymentIdentifier", "Identifier", "Issuer's unique identifier for the payment instrument.", 0, 1, paymentIdentifier));
+        children.add(new Property("detail", "", "Distribution of the payment amount for a previously acknowledged payable.", 0, java.lang.Integer.MAX_VALUE, detail));
+        children.add(new Property("formCode", "CodeableConcept", "A code for the form to be used for printing the content.", 0, 1, formCode));
+        children.add(new Property("processNote", "", "A note that describes or explains the processing in a human readable form.", 0, java.lang.Integer.MAX_VALUE, processNote));
       }
 
       @Override
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
-        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "The Response business identifier.", 0, java.lang.Integer.MAX_VALUE, identifier);
+        case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A unique identifier assigned to this payment reconciliation.", 0, java.lang.Integer.MAX_VALUE, identifier);
         case -892481550: /*status*/  return new Property("status", "code", "The status of the resource instance.", 0, 1, status);
         case -991726143: /*period*/  return new Property("period", "Period", "The period of time for which payments have been gathered into this bulk payment for settlement.", 0, 1, period);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "The date when the resource was created.", 0, 1, created);
-        case 1178922291: /*organization*/  return new Property("organization", "Reference(Organization)", "The Insurer who produced this adjudicated response.", 0, 1, organization);
-        case 1095692943: /*request*/  return new Property("request", "Reference(ProcessRequest)", "Original request resource reference.", 0, 1, request);
-        case -1106507950: /*outcome*/  return new Property("outcome", "code", "Transaction status: error, complete.", 0, 1, outcome);
-        case 583380919: /*disposition*/  return new Property("disposition", "string", "A description of the status of the adjudication.", 0, 1, disposition);
-        case 1601527200: /*requestProvider*/  return new Property("requestProvider", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestProvider);
-        case -1335224239: /*detail*/  return new Property("detail", "", "List of individual settlement amounts and the corresponding transaction.", 0, java.lang.Integer.MAX_VALUE, detail);
-        case 3148996: /*form*/  return new Property("form", "CodeableConcept", "The form to be used for printing the content.", 0, 1, form);
-        case 110549828: /*total*/  return new Property("total", "Money", "Total payment amount.", 0, 1, total);
-        case 202339073: /*processNote*/  return new Property("processNote", "", "Suite of notes.", 0, java.lang.Integer.MAX_VALUE, processNote);
+        case 1144026207: /*paymentIssuer*/  return new Property("paymentIssuer", "Reference(Organization)", "The party who generated the payment.", 0, 1, paymentIssuer);
+        case 1095692943: /*request*/  return new Property("request", "Reference(Task)", "Original request resource reference.", 0, 1, request);
+        case 693934258: /*requestor*/  return new Property("requestor", "Reference(Practitioner|PractitionerRole|Organization)", "The practitioner who is responsible for the services rendered to the patient.", 0, 1, requestor);
+        case -1106507950: /*outcome*/  return new Property("outcome", "code", "The outcome of a request for a reconciliation.", 0, 1, outcome);
+        case 583380919: /*disposition*/  return new Property("disposition", "string", "A human readable description of the status of the request for the reconciliation.", 0, 1, disposition);
+        case -1540873516: /*paymentDate*/  return new Property("paymentDate", "date", "The date of payment as indicated on the financial instrument.", 0, 1, paymentDate);
+        case 909332990: /*paymentAmount*/  return new Property("paymentAmount", "Money", "Total payment amount as indicated on the financial instrument.", 0, 1, paymentAmount);
+        case 1555852111: /*paymentIdentifier*/  return new Property("paymentIdentifier", "Identifier", "Issuer's unique identifier for the payment instrument.", 0, 1, paymentIdentifier);
+        case -1335224239: /*detail*/  return new Property("detail", "", "Distribution of the payment amount for a previously acknowledged payable.", 0, java.lang.Integer.MAX_VALUE, detail);
+        case 473181393: /*formCode*/  return new Property("formCode", "CodeableConcept", "A code for the form to be used for printing the content.", 0, 1, formCode);
+        case 202339073: /*processNote*/  return new Property("processNote", "", "A note that describes or explains the processing in a human readable form.", 0, java.lang.Integer.MAX_VALUE, processNote);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
 
@@ -1691,14 +1935,16 @@ public class PaymentReconciliation extends DomainResource {
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<PaymentReconciliationStatus>
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
-        case 1178922291: /*organization*/ return this.organization == null ? new Base[0] : new Base[] {this.organization}; // Reference
+        case 1144026207: /*paymentIssuer*/ return this.paymentIssuer == null ? new Base[0] : new Base[] {this.paymentIssuer}; // Reference
         case 1095692943: /*request*/ return this.request == null ? new Base[0] : new Base[] {this.request}; // Reference
+        case 693934258: /*requestor*/ return this.requestor == null ? new Base[0] : new Base[] {this.requestor}; // Reference
         case -1106507950: /*outcome*/ return this.outcome == null ? new Base[0] : new Base[] {this.outcome}; // Enumeration<RemittanceOutcome>
         case 583380919: /*disposition*/ return this.disposition == null ? new Base[0] : new Base[] {this.disposition}; // StringType
-        case 1601527200: /*requestProvider*/ return this.requestProvider == null ? new Base[0] : new Base[] {this.requestProvider}; // Reference
+        case -1540873516: /*paymentDate*/ return this.paymentDate == null ? new Base[0] : new Base[] {this.paymentDate}; // DateType
+        case 909332990: /*paymentAmount*/ return this.paymentAmount == null ? new Base[0] : new Base[] {this.paymentAmount}; // Money
+        case 1555852111: /*paymentIdentifier*/ return this.paymentIdentifier == null ? new Base[0] : new Base[] {this.paymentIdentifier}; // Identifier
         case -1335224239: /*detail*/ return this.detail == null ? new Base[0] : this.detail.toArray(new Base[this.detail.size()]); // DetailsComponent
-        case 3148996: /*form*/ return this.form == null ? new Base[0] : new Base[] {this.form}; // CodeableConcept
-        case 110549828: /*total*/ return this.total == null ? new Base[0] : new Base[] {this.total}; // Money
+        case 473181393: /*formCode*/ return this.formCode == null ? new Base[0] : new Base[] {this.formCode}; // CodeableConcept
         case 202339073: /*processNote*/ return this.processNote == null ? new Base[0] : this.processNote.toArray(new Base[this.processNote.size()]); // NotesComponent
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1721,11 +1967,14 @@ public class PaymentReconciliation extends DomainResource {
         case 1028554472: // created
           this.created = castToDateTime(value); // DateTimeType
           return value;
-        case 1178922291: // organization
-          this.organization = castToReference(value); // Reference
+        case 1144026207: // paymentIssuer
+          this.paymentIssuer = castToReference(value); // Reference
           return value;
         case 1095692943: // request
           this.request = castToReference(value); // Reference
+          return value;
+        case 693934258: // requestor
+          this.requestor = castToReference(value); // Reference
           return value;
         case -1106507950: // outcome
           value = new RemittanceOutcomeEnumFactory().fromType(castToCode(value));
@@ -1734,17 +1983,20 @@ public class PaymentReconciliation extends DomainResource {
         case 583380919: // disposition
           this.disposition = castToString(value); // StringType
           return value;
-        case 1601527200: // requestProvider
-          this.requestProvider = castToReference(value); // Reference
+        case -1540873516: // paymentDate
+          this.paymentDate = castToDate(value); // DateType
+          return value;
+        case 909332990: // paymentAmount
+          this.paymentAmount = castToMoney(value); // Money
+          return value;
+        case 1555852111: // paymentIdentifier
+          this.paymentIdentifier = castToIdentifier(value); // Identifier
           return value;
         case -1335224239: // detail
           this.getDetail().add((DetailsComponent) value); // DetailsComponent
           return value;
-        case 3148996: // form
-          this.form = castToCodeableConcept(value); // CodeableConcept
-          return value;
-        case 110549828: // total
-          this.total = castToMoney(value); // Money
+        case 473181393: // formCode
+          this.formCode = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 202339073: // processNote
           this.getProcessNote().add((NotesComponent) value); // NotesComponent
@@ -1765,23 +2017,27 @@ public class PaymentReconciliation extends DomainResource {
           this.period = castToPeriod(value); // Period
         } else if (name.equals("created")) {
           this.created = castToDateTime(value); // DateTimeType
-        } else if (name.equals("organization")) {
-          this.organization = castToReference(value); // Reference
+        } else if (name.equals("paymentIssuer")) {
+          this.paymentIssuer = castToReference(value); // Reference
         } else if (name.equals("request")) {
           this.request = castToReference(value); // Reference
+        } else if (name.equals("requestor")) {
+          this.requestor = castToReference(value); // Reference
         } else if (name.equals("outcome")) {
           value = new RemittanceOutcomeEnumFactory().fromType(castToCode(value));
           this.outcome = (Enumeration) value; // Enumeration<RemittanceOutcome>
         } else if (name.equals("disposition")) {
           this.disposition = castToString(value); // StringType
-        } else if (name.equals("requestProvider")) {
-          this.requestProvider = castToReference(value); // Reference
+        } else if (name.equals("paymentDate")) {
+          this.paymentDate = castToDate(value); // DateType
+        } else if (name.equals("paymentAmount")) {
+          this.paymentAmount = castToMoney(value); // Money
+        } else if (name.equals("paymentIdentifier")) {
+          this.paymentIdentifier = castToIdentifier(value); // Identifier
         } else if (name.equals("detail")) {
           this.getDetail().add((DetailsComponent) value);
-        } else if (name.equals("form")) {
-          this.form = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("total")) {
-          this.total = castToMoney(value); // Money
+        } else if (name.equals("formCode")) {
+          this.formCode = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("processNote")) {
           this.getProcessNote().add((NotesComponent) value);
         } else
@@ -1796,14 +2052,16 @@ public class PaymentReconciliation extends DomainResource {
         case -892481550:  return getStatusElement();
         case -991726143:  return getPeriod(); 
         case 1028554472:  return getCreatedElement();
-        case 1178922291:  return getOrganization(); 
+        case 1144026207:  return getPaymentIssuer(); 
         case 1095692943:  return getRequest(); 
+        case 693934258:  return getRequestor(); 
         case -1106507950:  return getOutcomeElement();
         case 583380919:  return getDispositionElement();
-        case 1601527200:  return getRequestProvider(); 
+        case -1540873516:  return getPaymentDateElement();
+        case 909332990:  return getPaymentAmount(); 
+        case 1555852111:  return getPaymentIdentifier(); 
         case -1335224239:  return addDetail(); 
-        case 3148996:  return getForm(); 
-        case 110549828:  return getTotal(); 
+        case 473181393:  return getFormCode(); 
         case 202339073:  return addProcessNote(); 
         default: return super.makeProperty(hash, name);
         }
@@ -1817,14 +2075,16 @@ public class PaymentReconciliation extends DomainResource {
         case -892481550: /*status*/ return new String[] {"code"};
         case -991726143: /*period*/ return new String[] {"Period"};
         case 1028554472: /*created*/ return new String[] {"dateTime"};
-        case 1178922291: /*organization*/ return new String[] {"Reference"};
+        case 1144026207: /*paymentIssuer*/ return new String[] {"Reference"};
         case 1095692943: /*request*/ return new String[] {"Reference"};
+        case 693934258: /*requestor*/ return new String[] {"Reference"};
         case -1106507950: /*outcome*/ return new String[] {"code"};
         case 583380919: /*disposition*/ return new String[] {"string"};
-        case 1601527200: /*requestProvider*/ return new String[] {"Reference"};
+        case -1540873516: /*paymentDate*/ return new String[] {"date"};
+        case 909332990: /*paymentAmount*/ return new String[] {"Money"};
+        case 1555852111: /*paymentIdentifier*/ return new String[] {"Identifier"};
         case -1335224239: /*detail*/ return new String[] {};
-        case 3148996: /*form*/ return new String[] {"CodeableConcept"};
-        case 110549828: /*total*/ return new String[] {"Money"};
+        case 473181393: /*formCode*/ return new String[] {"CodeableConcept"};
         case 202339073: /*processNote*/ return new String[] {};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1846,13 +2106,17 @@ public class PaymentReconciliation extends DomainResource {
         else if (name.equals("created")) {
           throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.created");
         }
-        else if (name.equals("organization")) {
-          this.organization = new Reference();
-          return this.organization;
+        else if (name.equals("paymentIssuer")) {
+          this.paymentIssuer = new Reference();
+          return this.paymentIssuer;
         }
         else if (name.equals("request")) {
           this.request = new Reference();
           return this.request;
+        }
+        else if (name.equals("requestor")) {
+          this.requestor = new Reference();
+          return this.requestor;
         }
         else if (name.equals("outcome")) {
           throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.outcome");
@@ -1860,20 +2124,23 @@ public class PaymentReconciliation extends DomainResource {
         else if (name.equals("disposition")) {
           throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.disposition");
         }
-        else if (name.equals("requestProvider")) {
-          this.requestProvider = new Reference();
-          return this.requestProvider;
+        else if (name.equals("paymentDate")) {
+          throw new FHIRException("Cannot call addChild on a primitive type PaymentReconciliation.paymentDate");
+        }
+        else if (name.equals("paymentAmount")) {
+          this.paymentAmount = new Money();
+          return this.paymentAmount;
+        }
+        else if (name.equals("paymentIdentifier")) {
+          this.paymentIdentifier = new Identifier();
+          return this.paymentIdentifier;
         }
         else if (name.equals("detail")) {
           return addDetail();
         }
-        else if (name.equals("form")) {
-          this.form = new CodeableConcept();
-          return this.form;
-        }
-        else if (name.equals("total")) {
-          this.total = new Money();
-          return this.total;
+        else if (name.equals("formCode")) {
+          this.formCode = new CodeableConcept();
+          return this.formCode;
         }
         else if (name.equals("processNote")) {
           return addProcessNote();
@@ -1898,18 +2165,20 @@ public class PaymentReconciliation extends DomainResource {
         dst.status = status == null ? null : status.copy();
         dst.period = period == null ? null : period.copy();
         dst.created = created == null ? null : created.copy();
-        dst.organization = organization == null ? null : organization.copy();
+        dst.paymentIssuer = paymentIssuer == null ? null : paymentIssuer.copy();
         dst.request = request == null ? null : request.copy();
+        dst.requestor = requestor == null ? null : requestor.copy();
         dst.outcome = outcome == null ? null : outcome.copy();
         dst.disposition = disposition == null ? null : disposition.copy();
-        dst.requestProvider = requestProvider == null ? null : requestProvider.copy();
+        dst.paymentDate = paymentDate == null ? null : paymentDate.copy();
+        dst.paymentAmount = paymentAmount == null ? null : paymentAmount.copy();
+        dst.paymentIdentifier = paymentIdentifier == null ? null : paymentIdentifier.copy();
         if (detail != null) {
           dst.detail = new ArrayList<DetailsComponent>();
           for (DetailsComponent i : detail)
             dst.detail.add(i.copy());
         };
-        dst.form = form == null ? null : form.copy();
-        dst.total = total == null ? null : total.copy();
+        dst.formCode = formCode == null ? null : formCode.copy();
         if (processNote != null) {
           dst.processNote = new ArrayList<NotesComponent>();
           for (NotesComponent i : processNote)
@@ -1930,10 +2199,11 @@ public class PaymentReconciliation extends DomainResource {
           return false;
         PaymentReconciliation o = (PaymentReconciliation) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(status, o.status, true) && compareDeep(period, o.period, true)
-           && compareDeep(created, o.created, true) && compareDeep(organization, o.organization, true) && compareDeep(request, o.request, true)
-           && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true) && compareDeep(requestProvider, o.requestProvider, true)
-           && compareDeep(detail, o.detail, true) && compareDeep(form, o.form, true) && compareDeep(total, o.total, true)
-           && compareDeep(processNote, o.processNote, true);
+           && compareDeep(created, o.created, true) && compareDeep(paymentIssuer, o.paymentIssuer, true) && compareDeep(request, o.request, true)
+           && compareDeep(requestor, o.requestor, true) && compareDeep(outcome, o.outcome, true) && compareDeep(disposition, o.disposition, true)
+           && compareDeep(paymentDate, o.paymentDate, true) && compareDeep(paymentAmount, o.paymentAmount, true)
+           && compareDeep(paymentIdentifier, o.paymentIdentifier, true) && compareDeep(detail, o.detail, true)
+           && compareDeep(formCode, o.formCode, true) && compareDeep(processNote, o.processNote, true);
       }
 
       @Override
@@ -1944,13 +2214,14 @@ public class PaymentReconciliation extends DomainResource {
           return false;
         PaymentReconciliation o = (PaymentReconciliation) other_;
         return compareValues(status, o.status, true) && compareValues(created, o.created, true) && compareValues(outcome, o.outcome, true)
-           && compareValues(disposition, o.disposition, true);
+           && compareValues(disposition, o.disposition, true) && compareValues(paymentDate, o.paymentDate, true)
+          ;
       }
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, period
-          , created, organization, request, outcome, disposition, requestProvider, detail
-          , form, total, processNote);
+          , created, paymentIssuer, request, requestor, outcome, disposition, paymentDate
+          , paymentAmount, paymentIdentifier, detail, formCode, processNote);
       }
 
   @Override
@@ -1986,7 +2257,7 @@ public class PaymentReconciliation extends DomainResource {
    * Path: <b>PaymentReconciliation.request</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="request", path="PaymentReconciliation.request", description="The reference to the claim", type="reference", target={ProcessRequest.class } )
+  @SearchParamDefinition(name="request", path="PaymentReconciliation.request", description="The reference to the claim", type="reference", target={Task.class } )
   public static final String SP_REQUEST = "request";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>request</b>
@@ -2045,56 +2316,30 @@ public class PaymentReconciliation extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.DateClientParam CREATED = new ca.uhn.fhir.rest.gclient.DateClientParam(SP_CREATED);
 
  /**
-   * Search parameter: <b>organization</b>
+   * Search parameter: <b>payment-issuer</b>
    * <p>
    * Description: <b>The organization which generated this resource</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.organization</b><br>
+   * Path: <b>PaymentReconciliation.paymentIssuer</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="organization", path="PaymentReconciliation.organization", description="The organization which generated this resource", type="reference", target={Organization.class } )
-  public static final String SP_ORGANIZATION = "organization";
+  @SearchParamDefinition(name="payment-issuer", path="PaymentReconciliation.paymentIssuer", description="The organization which generated this resource", type="reference", target={Organization.class } )
+  public static final String SP_PAYMENT_ISSUER = "payment-issuer";
  /**
-   * <b>Fluent Client</b> search parameter constant for <b>organization</b>
+   * <b>Fluent Client</b> search parameter constant for <b>payment-issuer</b>
    * <p>
    * Description: <b>The organization which generated this resource</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.organization</b><br>
+   * Path: <b>PaymentReconciliation.paymentIssuer</b><br>
    * </p>
    */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ORGANIZATION = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ORGANIZATION);
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam PAYMENT_ISSUER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_PAYMENT_ISSUER);
 
 /**
    * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:organization</b>".
+   * the path value of "<b>PaymentReconciliation:payment-issuer</b>".
    */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_ORGANIZATION = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:organization").toLocked();
-
- /**
-   * Search parameter: <b>request-provider</b>
-   * <p>
-   * Description: <b>The reference to the provider who submitted the claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestProvider</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="request-provider", path="PaymentReconciliation.requestProvider", description="The reference to the provider who submitted the claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
-  public static final String SP_REQUEST_PROVIDER = "request-provider";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>request-provider</b>
-   * <p>
-   * Description: <b>The reference to the provider who submitted the claim</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>PaymentReconciliation.requestProvider</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUEST_PROVIDER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUEST_PROVIDER);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>PaymentReconciliation:request-provider</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUEST_PROVIDER = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:request-provider").toLocked();
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_PAYMENT_ISSUER = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:payment-issuer").toLocked();
 
  /**
    * Search parameter: <b>outcome</b>
@@ -2115,6 +2360,32 @@ public class PaymentReconciliation extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam OUTCOME = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_OUTCOME);
+
+ /**
+   * Search parameter: <b>requestor</b>
+   * <p>
+   * Description: <b>The reference to the provider who submitted the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestor</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="requestor", path="PaymentReconciliation.requestor", description="The reference to the provider who submitted the claim", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Organization.class, Practitioner.class, PractitionerRole.class } )
+  public static final String SP_REQUESTOR = "requestor";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>requestor</b>
+   * <p>
+   * Description: <b>The reference to the provider who submitted the claim</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>PaymentReconciliation.requestor</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REQUESTOR = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REQUESTOR);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>PaymentReconciliation:requestor</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REQUESTOR = new ca.uhn.fhir.model.api.Include("PaymentReconciliation:requestor").toLocked();
 
  /**
    * Search parameter: <b>status</b>

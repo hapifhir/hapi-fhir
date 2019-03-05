@@ -580,6 +580,45 @@ public class ServerConformanceProviderDstu2Test {
 	}
 
 	@Test
+	public void testSearchReferenceParameterWithExplicitChainsDocumentation() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new SearchProviderWithExplicitChains());
+
+		ServerConformanceProvider sc = new ServerConformanceProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		boolean found = false;
+		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
+		for (ResourceBinding resourceBinding : resourceBindings) {
+			if (resourceBinding.getResourceName().equals("Patient")) {
+				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
+				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
+				assertEquals("The organization at which this person is a patient", param.getDescription());
+				found = true;
+			}
+		}
+		assertTrue(found);
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		RestResource resource = findRestResource(conformance, "Patient");
+
+		assertEquals(1, resource.getSearchParam().size());
+		RestResourceSearchParam param = resource.getSearchParam().get(0);
+		assertEquals("organization", param.getName());
+		assertEquals("bar", param.getChain().get(0).getValue());
+		assertEquals("baz.bob", param.getChain().get(1).getValue());
+		assertEquals("foo", param.getChain().get(2).getValue());
+		assertEquals(3, param.getChain().size());
+	}
+
+	@Test
 	public void testSystemHistorySupported() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -846,6 +885,19 @@ public class ServerConformanceProviderDstu2Test {
 				@Description(shortDefinition = "The organization at which this person is a patient") 
 				@RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist= {"foo", "bar"}) 
 				ReferenceAndListParam theIdentifier) {
+			return null;
+		}
+
+	}
+
+	public static class SearchProviderWithExplicitChains {
+
+		@Search(type = Patient.class)
+		public Patient findPatient1(
+			@Description(shortDefinition = "The organization at which this person is a patient")
+			@RequiredParam(name = "organization.foo")	ReferenceAndListParam theFoo,
+			@RequiredParam(name = "organization.bar")	ReferenceAndListParam theBar,
+			@RequiredParam(name = "organization.baz.bob") ReferenceAndListParam theBazbob) {
 			return null;
 		}
 

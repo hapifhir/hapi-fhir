@@ -4,11 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.r4.*;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -64,7 +67,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@SuppressWarnings("deprecation")
 	@After
 	public void after() {
-		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 	}
 
@@ -247,7 +249,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testResponseUsesCorrectContentType() throws Exception {
-		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		HttpGet get = new HttpGet(ourServerBase);
@@ -276,6 +277,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
 		myObservationDao.update(obs, mySrd);
 
+		// Try to wait for the indexing to complete
+		waitForSize(2, ()-> fetchSuggestionCount(ptId));
+
 		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
@@ -292,6 +296,16 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		} finally {
 			http.close();
+		}
+	}
+
+	private Number fetchSuggestionCount(IIdType thePtId) throws IOException {
+		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + thePtId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
+		try (CloseableHttpResponse http = ourHttpClient.execute(get)) {
+			assertEquals(200, http.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
+			Parameters parameters = ourCtx.newXmlParser().parseResource(Parameters.class, output);
+			return parameters.getParameter().size();
 		}
 	}
 
@@ -411,6 +425,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 			myPatientDao.read(new IdType("Patient/Patient1063259"));
 
+
+			SearchParameterMap params = new SearchParameterMap();
+			params.add("subject", new ReferenceParam("Patient1063259"));
+			params.setLoadSynchronous(true);
+			IBundleProvider result = myDiagnosticReportDao.search(params);
+			assertEquals(1, result.size().intValue());
+
 			deleteAllOfType("Binary");
 			deleteAllOfType("Location");
 			deleteAllOfType("DiagnosticReport");
@@ -426,6 +447,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			} catch (ResourceGoneException e) {
 				// good
 			}
+
+			result = myDiagnosticReportDao.search(params);
+			assertEquals(0, result.size().intValue());
 
 		}
 

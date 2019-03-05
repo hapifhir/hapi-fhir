@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,7 @@ public enum EncounterSpecialArrangements {
          */
         ATT, 
         /**
-         * The patient has a guide-dog and the location used for the encounter should be able to support the presence of the service animal.
+         * The patient has a guide dog and the location used for the encounter should be able to support the presence of the service animal.
          */
         DOG, 
         /**
@@ -94,7 +94,7 @@ public enum EncounterSpecialArrangements {
             case ADDBED: return "An additional bed made available for a person accompanying the patient, for example a parent accompanying a child.";
             case INT: return "The patient is not fluent in the local language and requires an interpreter to be available. Refer to the Patient.Language property for the type of interpreter required.";
             case ATT: return "A person who accompanies a patient to provide assistive services necessary for the patient's care during the encounter.";
-            case DOG: return "The patient has a guide-dog and the location used for the encounter should be able to support the presence of the service animal.";
+            case DOG: return "The patient has a guide dog and the location used for the encounter should be able to support the presence of the service animal.";
             default: return "?";
           }
         }

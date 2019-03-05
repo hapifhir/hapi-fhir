@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -1276,13 +1276,13 @@ public class MedicinalProductPharmaceutical extends DomainResource {
     /**
      * Accompanying device.
      */
-    @Child(name = "device", type = {MedicinalProductDeviceSpec.class, DeviceDefinition.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "device", type = {DeviceDefinition.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Accompanying device", formalDefinition="Accompanying device." )
     protected List<Reference> device;
     /**
      * The actual objects that are the target of the reference (Accompanying device.)
      */
-    protected List<Resource> deviceTarget;
+    protected List<DeviceDefinition> deviceTarget;
 
 
     /**
@@ -1299,7 +1299,7 @@ public class MedicinalProductPharmaceutical extends DomainResource {
     @Description(shortDefinition="The path by which the pharmaceutical product is taken into or makes contact with the body", formalDefinition="The path by which the pharmaceutical product is taken into or makes contact with the body." )
     protected List<MedicinalProductPharmaceuticalRouteOfAdministrationComponent> routeOfAdministration;
 
-    private static final long serialVersionUID = 920439689L;
+    private static final long serialVersionUID = -1201548050L;
 
   /**
    * Constructor
@@ -1549,10 +1549,22 @@ public class MedicinalProductPharmaceutical extends DomainResource {
      * @deprecated Use Reference#setResource(IBaseResource) instead
      */
     @Deprecated
-    public List<Resource> getDeviceTarget() { 
+    public List<DeviceDefinition> getDeviceTarget() { 
       if (this.deviceTarget == null)
-        this.deviceTarget = new ArrayList<Resource>();
+        this.deviceTarget = new ArrayList<DeviceDefinition>();
       return this.deviceTarget;
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public DeviceDefinition addDeviceTarget() { 
+      DeviceDefinition r = new DeviceDefinition();
+      if (this.deviceTarget == null)
+        this.deviceTarget = new ArrayList<DeviceDefinition>();
+      this.deviceTarget.add(r);
+      return r;
     }
 
     /**
@@ -1667,7 +1679,7 @@ public class MedicinalProductPharmaceutical extends DomainResource {
         children.add(new Property("administrableDoseForm", "CodeableConcept", "The administrable dose form, after necessary reconstitution.", 0, 1, administrableDoseForm));
         children.add(new Property("unitOfPresentation", "CodeableConcept", "Todo.", 0, 1, unitOfPresentation));
         children.add(new Property("ingredient", "Reference(MedicinalProductIngredient)", "Ingredient.", 0, java.lang.Integer.MAX_VALUE, ingredient));
-        children.add(new Property("device", "Reference(MedicinalProductDeviceSpec|DeviceDefinition)", "Accompanying device.", 0, java.lang.Integer.MAX_VALUE, device));
+        children.add(new Property("device", "Reference(DeviceDefinition)", "Accompanying device.", 0, java.lang.Integer.MAX_VALUE, device));
         children.add(new Property("characteristics", "", "Characteristics e.g. a products onset of action.", 0, java.lang.Integer.MAX_VALUE, characteristics));
         children.add(new Property("routeOfAdministration", "", "The path by which the pharmaceutical product is taken into or makes contact with the body.", 0, java.lang.Integer.MAX_VALUE, routeOfAdministration));
       }
@@ -1679,7 +1691,7 @@ public class MedicinalProductPharmaceutical extends DomainResource {
         case 1446105202: /*administrableDoseForm*/  return new Property("administrableDoseForm", "CodeableConcept", "The administrable dose form, after necessary reconstitution.", 0, 1, administrableDoseForm);
         case -1427765963: /*unitOfPresentation*/  return new Property("unitOfPresentation", "CodeableConcept", "Todo.", 0, 1, unitOfPresentation);
         case -206409263: /*ingredient*/  return new Property("ingredient", "Reference(MedicinalProductIngredient)", "Ingredient.", 0, java.lang.Integer.MAX_VALUE, ingredient);
-        case -1335157162: /*device*/  return new Property("device", "Reference(MedicinalProductDeviceSpec|DeviceDefinition)", "Accompanying device.", 0, java.lang.Integer.MAX_VALUE, device);
+        case -1335157162: /*device*/  return new Property("device", "Reference(DeviceDefinition)", "Accompanying device.", 0, java.lang.Integer.MAX_VALUE, device);
         case -1529171400: /*characteristics*/  return new Property("characteristics", "", "Characteristics e.g. a products onset of action.", 0, java.lang.Integer.MAX_VALUE, characteristics);
         case 1742084734: /*routeOfAdministration*/  return new Property("routeOfAdministration", "", "The path by which the pharmaceutical product is taken into or makes contact with the body.", 0, java.lang.Integer.MAX_VALUE, routeOfAdministration);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1885,6 +1897,66 @@ public class MedicinalProductPharmaceutical extends DomainResource {
   public ResourceType getResourceType() {
     return ResourceType.MedicinalProductPharmaceutical;
    }
+
+ /**
+   * Search parameter: <b>identifier</b>
+   * <p>
+   * Description: <b>An identifier for the pharmaceutical medicinal product</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicinalProductPharmaceutical.identifier</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="identifier", path="MedicinalProductPharmaceutical.identifier", description="An identifier for the pharmaceutical medicinal product", type="token" )
+  public static final String SP_IDENTIFIER = "identifier";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>identifier</b>
+   * <p>
+   * Description: <b>An identifier for the pharmaceutical medicinal product</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicinalProductPharmaceutical.identifier</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
+
+ /**
+   * Search parameter: <b>route</b>
+   * <p>
+   * Description: <b>Coded expression for the route</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicinalProductPharmaceutical.routeOfAdministration.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="route", path="MedicinalProductPharmaceutical.routeOfAdministration.code", description="Coded expression for the route", type="token" )
+  public static final String SP_ROUTE = "route";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>route</b>
+   * <p>
+   * Description: <b>Coded expression for the route</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicinalProductPharmaceutical.routeOfAdministration.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam ROUTE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_ROUTE);
+
+ /**
+   * Search parameter: <b>target-species</b>
+   * <p>
+   * Description: <b>Coded expression for the species</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicinalProductPharmaceutical.routeOfAdministration.targetSpecies.code</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="target-species", path="MedicinalProductPharmaceutical.routeOfAdministration.targetSpecies.code", description="Coded expression for the species", type="token" )
+  public static final String SP_TARGET_SPECIES = "target-species";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>target-species</b>
+   * <p>
+   * Description: <b>Coded expression for the species</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>MedicinalProductPharmaceutical.routeOfAdministration.targetSpecies.code</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam TARGET_SPECIES = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TARGET_SPECIES);
 
 
 }

@@ -23,7 +23,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ public class FhirTerser {
 		if (theChildDefinition == null)
 			return null;
 		if (theCurrentList == null || theCurrentList.isEmpty())
-			return new ArrayList<String>(Arrays.asList(theChildDefinition.getElementName()));
-		List<String> newList = new ArrayList<String>(theCurrentList);
+			return new ArrayList<>(Arrays.asList(theChildDefinition.getElementName()));
+		List<String> newList = new ArrayList<>(theCurrentList);
 		newList.add(theChildDefinition.getElementName());
 		return newList;
 	}

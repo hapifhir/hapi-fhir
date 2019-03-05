@@ -1,0 +1,1562 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"fullUrl": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d",
+			"resource": {
+				"resourceType": "Patient",
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2186-5",
+									"display": "Non Hispanic or Latino"
+								}
+							}
+						]
+					}
+				],
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "MR"
+								}
+							]
+						},
+						"system": "urn:ORGNAME:SITENAME:S:patientid",
+						"value": "000446534"
+					},
+					{
+						"use": "secondary",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/identifier-type",
+									"code": "SB"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-ssn",
+						"value": "222222222"
+					}
+				],
+				"name": [
+					{
+						"use": "official",
+						"family": "SIMPSON",
+						"given": [
+							"HOMER",
+							"L"
+						]
+					}
+				],
+				"gender": "female",
+				"birthDate": "1996-01-01",
+				"address": [
+					{
+						"line": [
+							"342 EVERGREEN TERR"
+						],
+						"city": "SPRINGFIELD",
+						"state": "SC",
+						"postalCode": "90210",
+						"country": "US"
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Patient",
+				"ifNoneExist": "Patient?identifier=urn%3AORGNAME%3ASITENAME%3AS%3Apatientid%7C000446534"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433",
+			"resource": {
+				"resourceType": "Encounter",
+				"extension": [
+					{
+						"url": "http://example.org/fhir/StructureDefinition/encounter-patientType",
+						"valueCoding": {
+							"system": "urn:ORGNAME:SITENAME:encounter:patientType",
+							"code": "IP",
+							"display": "Inpatient"
+						}
+					},
+					{
+						"url": "http://example.org/fhir/StructureDefinition/encounter-admitType",
+						"valueCoding": {
+							"system": "urn:ORGNAME:SITENAME:encounter:admitType",
+							"code": "P",
+							"display": "DESCRIPTION REQUIRED"
+						}
+					}
+				],
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "VN"
+								}
+							]
+						},
+						"system": "urn:ORGNAME:SITENAME:S:encounterid",
+						"value": "999990000000"
+					}
+				],
+				"class": {
+					"system": "http://hl7.org/fhir/v3/ActCode",
+					"code": "IMP",
+					"display": "Inpatient"
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"period": {
+					"start": "2018-11-30T22:27:00-05:00"
+				},
+				"location": [
+					{
+						"location": {
+							"reference": "urn:uuid:9b686a9e-40fc-4799-8fc3-443cb0e95a34"
+						}
+					},
+					{
+						"location": {
+							"reference": "urn:uuid:3736e704-043b-458b-a8c9-e50e296eb470"
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Encounter",
+				"ifNoneExist": "Encounter?identifier=urn%3AORGNAME%3ASITENAME%3AS%3Aencounterid%7C999990000000"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:9b686a9e-40fc-4799-8fc3-443cb0e95a34",
+			"resource": {
+				"resourceType": "Location",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:fac-S:deptid",
+						"value": "2TT"
+					}
+				],
+				"name": "2TT",
+				"mode": "instance",
+				"type": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v3/RoleCode",
+							"code": "HU",
+							"display": "Hospital unit"
+						}
+					]
+				},
+				"physicalType": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/location-physical-type",
+							"code": "wa",
+							"display": "Ward"
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Location",
+				"ifNoneExist": "Location?identifier=urn%3AORGNAME%3ASITENAME%3Afac-S%3Adeptid%7C2TT"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:3736e704-043b-458b-a8c9-e50e296eb470",
+			"resource": {
+				"resourceType": "Location",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:fac-S:locationid",
+						"value": "2TT-T01A"
+					}
+				],
+				"name": "T01A",
+				"mode": "instance",
+				"physicalType": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/location-physical-type",
+							"code": "ro",
+							"display": "Room"
+						}
+					]
+				},
+				"partOf": {
+					"reference": "urn:uuid:9b686a9e-40fc-4799-8fc3-443cb0e95a34"
+				}
+			},
+			"request": {
+				"method": "POST",
+				"url": "/Location",
+				"ifNoneExist": "Location?identifier=urn%3AORGNAME%3ASITENAME%3Afac-S%3Alocationid%7C2TT-T01A"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:46095d77-97ef-49ca-b236-162c95c27984",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "urn:ORGNAME:SITENAME:la01:practitionerid",
+						"value": "18220"
+					}
+				],
+				"name": [
+					{
+						"family": "HIBBERT",
+						"given": [
+							"ROBERT",
+							"F"
+						],
+						"prefix": [
+							"O"
+						],
+						"suffix": [
+							"MD"
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Apractitionerid%7C18220"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:deffc0fc-1d72-4bd8-8ccf-55454dd92f6c",
+			"resource": {
+				"resourceType": "ProcedureRequest",
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PLAC"
+								}
+							]
+						},
+						"system": "urn:ORGNAME:SITENAME:SYSNAME:placernum",
+						"value": "000033333333"
+					}
+				],
+				"requisition": {
+					"system": "urn:ORGNAME:SITENAME:la01:placergroupnum",
+					"value": "RQ0000222222"
+				},
+				"status": "completed",
+				"intent": "filler-order",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://snomed.info/sct",
+								"code": "103693007",
+								"display": "Diagnostic procedure"
+							}
+						]
+					}
+				],
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"occurrenceDateTime": "2018-11-30T23:41:00-05:00",
+				"authoredOn": "2018-12-01T00:10:00-05:00",
+				"requester": {
+					"agent": {
+						"reference": "urn:uuid:46095d77-97ef-49ca-b236-162c95c27984"
+					}
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/ProcedureRequest?identifier=urn%3AORGNAME%3ASITENAME%3ASYSNAME%3Aplacernum%7C000033333333"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:dfd09e8e-d15b-4a1c-9407-d035e2d6fbed",
+			"resource": {
+				"resourceType": "DiagnosticReport",
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "FILL"
+								}
+							]
+						},
+						"system": "urn:ORGNAME:SITENAME:la01:fillernum",
+						"value": "18334614220"
+					}
+				],
+				"basedOn": [
+					{
+						"reference": "urn:uuid:deffc0fc-1d72-4bd8-8ccf-55454dd92f6c"
+					}
+				],
+				"status": "final",
+				"category": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0074",
+							"code": "HM"
+						}
+					]
+				},
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:lab:requestcode",
+							"code": "20050",
+							"display": "COMPLETE BLOOD COUNT"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00.000-05:00",
+				"specimen": [
+					{
+						"reference": "urn:uuid:7271012f-5060-4e71-9bd3-1e19f5387cb8"
+					}
+				],
+				"result": [
+					{
+						"reference": "urn:uuid:42189d7d-a67b-4087-ac99-d1641294b232"
+					},
+					{
+						"reference": "urn:uuid:6f043a64-9456-41ef-98c5-b326da0d639e"
+					},
+					{
+						"reference": "urn:uuid:c3dea9ef-ffe2-44f4-bfb3-938af5cd4e56"
+					},
+					{
+						"reference": "urn:uuid:1b03820f-cb4e-43df-aaae-0a16a6e2b4fb"
+					},
+					{
+						"reference": "urn:uuid:1ed6de2e-2838-427d-8026-e86784c96d18"
+					},
+					{
+						"reference": "urn:uuid:6be08009-7377-4d51-934a-f570974e350b"
+					},
+					{
+						"reference": "urn:uuid:9f028aa7-b7ed-422f-afa2-f49ef8b2704c"
+					},
+					{
+						"reference": "urn:uuid:79e51247-212f-49c0-b594-2ffe12acdfe7"
+					},
+					{
+						"reference": "urn:uuid:6304b644-1337-422b-a419-45aad58f744b"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/DiagnosticReport?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Afillernum%7C18334614220"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:7271012f-5060-4e71-9bd3-1e19f5387cb8",
+			"resource": {
+				"resourceType": "Specimen",
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "FILL"
+								}
+							]
+						},
+						"system": "urn:ORGNAME:SITENAME:la01:specimenid",
+						"value": "18334614220"
+					}
+				],
+				"type": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:specimen:type",
+							"code": "2",
+							"display": "BLOOD"
+						},
+						{
+							"system": "http://snomed.info/sct",
+							"code": "122555007",
+							"display": "Venous blood specimen (specimen)"
+						}
+					]
+				},
+				"receivedTime": "2018-12-01T00:03:00-05:00",
+				"collection": {
+					"collectedDateTime": "2018-11-30T23:41:00-05:00"
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Specimen?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aspecimenid%7C18334614220"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:abeb3df8-af56-4715-8ae2-bfd75294299d",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "00000011111"
+					}
+				],
+				"name": [
+					{
+						"family": "SMITH",
+						"given": [
+							"John",
+							"D."
+						],
+						"prefix": [
+							"Dr."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-npi%7C00000011111"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:42189d7d-a67b-4087-ac99-d1641294b232",
+			"resource": {
+				"resourceType": "Observation",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:la01:observationid",
+						"value": "18334614220-WBC"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:observation:code",
+							"code": "WBC",
+							"display": "White Blood Cell Count"
+						},
+						{
+							"system": "http://loinc.org",
+							"code": "6690-2",
+							"display": "Leukocytes:NCnc:Pt:Bld:Qn:Automated count"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00-05:00",
+				"performer": [
+					{
+						"reference": "urn:uuid:abeb3df8-af56-4715-8ae2-bfd75294299d"
+					}
+				],
+				"valueQuantity": {
+					"value": 11.7,
+					"unit": "kg/m3",
+					"system": "http://unitsofmeasure.org",
+					"code": "kg/m3"
+				},
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "H"
+						}
+					]
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 3.7,
+							"unit": "kg/m3",
+							"system": "http://unitsofmeasure.org",
+							"code": "kg/m3"
+						},
+						"high": {
+							"value": 10.6,
+							"unit": "kg/m3",
+							"system": "http://unitsofmeasure.org",
+							"code": "kg/m3"
+						},
+						"text": "3.7-10.6"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Observation?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aobservationid%7C18334614220-WBC"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:927674d0-c9a5-4ef7-be7e-94d100e5e2d1",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "00000011111"
+					}
+				],
+				"name": [
+					{
+						"family": "SMITH",
+						"given": [
+							"John",
+							"D."
+						],
+						"prefix": [
+							"Dr."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-npi%7C00000011111"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:6f043a64-9456-41ef-98c5-b326da0d639e",
+			"resource": {
+				"resourceType": "Observation",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:la01:observationid",
+						"value": "18334614220-RBC"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:observation:code",
+							"code": "RBC",
+							"display": "Red Blood Cell Count"
+						},
+						{
+							"system": "http://loinc.org",
+							"code": "789-8",
+							"display": "Erythrocytes:NCnc:Pt:Bld:Qn:Automated count"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00-05:00",
+				"performer": [
+					{
+						"reference": "urn:uuid:927674d0-c9a5-4ef7-be7e-94d100e5e2d1"
+					}
+				],
+				"valueQuantity": {
+					"value": 4.36,
+					"unit": "million/cmm",
+					"system": "urn:ORGNAME:SITENAME:lab:units",
+					"code": "million/cmm"
+				},
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "N"
+						}
+					]
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 3.57,
+							"unit": "million/cmm",
+							"system": "urn:ORGNAME:SITENAME:lab:units",
+							"code": "million/cmm"
+						},
+						"high": {
+							"value": 4.97,
+							"unit": "million/cmm",
+							"system": "urn:ORGNAME:SITENAME:lab:units",
+							"code": "million/cmm"
+						},
+						"text": "3.57-4.97"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Observation?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aobservationid%7C18334614220-RBC"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:e0d138c2-7f0a-4bbe-8a27-95a81e3a4f02",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "00000011111"
+					}
+				],
+				"name": [
+					{
+						"family": "SMITH",
+						"given": [
+							"John",
+							"D."
+						],
+						"prefix": [
+							"Dr."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-npi%7C00000011111"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:c3dea9ef-ffe2-44f4-bfb3-938af5cd4e56",
+			"resource": {
+				"resourceType": "Observation",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:la01:observationid",
+						"value": "18334614220-HGB"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:observation:code",
+							"code": "HGB",
+							"display": "Hemoglobin"
+						},
+						{
+							"system": "http://loinc.org",
+							"code": "718-7",
+							"display": "Hemoglobin:MCnc:Pt:Bld:Qn"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00-05:00",
+				"performer": [
+					{
+						"reference": "urn:uuid:e0d138c2-7f0a-4bbe-8a27-95a81e3a4f02"
+					}
+				],
+				"valueQuantity": {
+					"value": 13.9,
+					"unit": "g/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "g/dL"
+				},
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "N"
+						}
+					]
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 11.0,
+							"unit": "g/dL",
+							"system": "http://unitsofmeasure.org",
+							"code": "g/dL"
+						},
+						"high": {
+							"value": 14.9,
+							"unit": "g/dL",
+							"system": "http://unitsofmeasure.org",
+							"code": "g/dL"
+						},
+						"text": "11.0-14.9"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Observation?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aobservationid%7C18334614220-HGB"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:22de08e9-f959-43b3-8efd-389eb2dd9e98",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "00000011111"
+					}
+				],
+				"name": [
+					{
+						"family": "SMITH",
+						"given": [
+							"John",
+							"D."
+						],
+						"prefix": [
+							"Dr."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-npi%7C00000011111"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:1b03820f-cb4e-43df-aaae-0a16a6e2b4fb",
+			"resource": {
+				"resourceType": "Observation",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:la01:observationid",
+						"value": "18334614220-HCT"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:observation:code",
+							"code": "HCT",
+							"display": "Hematocrit"
+						},
+						{
+							"system": "http://loinc.org",
+							"code": "4544-3",
+							"display": "Hematocrit:VFr:Pt:Bld:Qn:Automated count"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00-05:00",
+				"performer": [
+					{
+						"reference": "urn:uuid:22de08e9-f959-43b3-8efd-389eb2dd9e98"
+					}
+				],
+				"valueQuantity": {
+					"value": 38.6,
+					"unit": "%",
+					"system": "http://unitsofmeasure.org",
+					"code": "%"
+				},
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "N"
+						}
+					]
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 32.6,
+							"unit": "%",
+							"system": "http://unitsofmeasure.org",
+							"code": "%"
+						},
+						"high": {
+							"value": 43.4,
+							"unit": "%",
+							"system": "http://unitsofmeasure.org",
+							"code": "%"
+						},
+						"text": "32.6-43.4"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Observation?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aobservationid%7C18334614220-HCT"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:848d74ec-add4-42a5-8fb7-5e086e3886b8",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "00000011111"
+					}
+				],
+				"name": [
+					{
+						"family": "SMITH",
+						"given": [
+							"John",
+							"D."
+						],
+						"prefix": [
+							"Dr."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-npi%7C00000011111"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:1ed6de2e-2838-427d-8026-e86784c96d18",
+			"resource": {
+				"resourceType": "Observation",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:la01:observationid",
+						"value": "18334614220-MCV"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:observation:code",
+							"code": "MCV",
+							"display": "Mean Corpuscular Volume"
+						},
+						{
+							"system": "http://loinc.org",
+							"code": "787-2",
+							"display": "Erythrocyte mean corpuscular volume:EntVol:Pt:RBC:Qn:Automated count"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00-05:00",
+				"performer": [
+					{
+						"reference": "urn:uuid:848d74ec-add4-42a5-8fb7-5e086e3886b8"
+					}
+				],
+				"valueQuantity": {
+					"value": 88.6,
+					"unit": "fL",
+					"system": "http://unitsofmeasure.org",
+					"code": "fL"
+				},
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "N"
+						}
+					]
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 80.1,
+							"unit": "fL",
+							"system": "http://unitsofmeasure.org",
+							"code": "fL"
+						},
+						"high": {
+							"value": 98.4,
+							"unit": "fL",
+							"system": "http://unitsofmeasure.org",
+							"code": "fL"
+						},
+						"text": "80.1-98.4"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Observation?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aobservationid%7C18334614220-MCV"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:c9416c02-202e-4656-8580-2037ba03779d",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "00000011111"
+					}
+				],
+				"name": [
+					{
+						"family": "SMITH",
+						"given": [
+							"John",
+							"D."
+						],
+						"prefix": [
+							"Dr."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-npi%7C00000011111"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:6be08009-7377-4d51-934a-f570974e350b",
+			"resource": {
+				"resourceType": "Observation",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:la01:observationid",
+						"value": "18334614220-MCH"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:observation:code",
+							"code": "MCH",
+							"display": "Mean Corpuscular Hemoglobin"
+						},
+						{
+							"system": "http://loinc.org",
+							"code": "785-6",
+							"display": "Erythrocyte mean corpuscular hemoglobin:EntMass:Pt:RBC:Qn:Automated count"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00-05:00",
+				"performer": [
+					{
+						"reference": "urn:uuid:c9416c02-202e-4656-8580-2037ba03779d"
+					}
+				],
+				"valueQuantity": {
+					"value": 32.0,
+					"unit": "pg",
+					"system": "http://unitsofmeasure.org",
+					"code": "pg"
+				},
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "N"
+						}
+					]
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 26.9,
+							"unit": "pg",
+							"system": "http://unitsofmeasure.org",
+							"code": "pg"
+						},
+						"high": {
+							"value": 34.1,
+							"unit": "pg",
+							"system": "http://unitsofmeasure.org",
+							"code": "pg"
+						},
+						"text": "26.9-34.1"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Observation?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aobservationid%7C18334614220-MCH"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:92a23e86-97d5-4e7f-b8a3-b45636820e6d",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "00000011111"
+					}
+				],
+				"name": [
+					{
+						"family": "SMITH",
+						"given": [
+							"John",
+							"D."
+						],
+						"prefix": [
+							"Dr."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-npi%7C00000011111"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:9f028aa7-b7ed-422f-afa2-f49ef8b2704c",
+			"resource": {
+				"resourceType": "Observation",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:la01:observationid",
+						"value": "18334614220-MCHC"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:observation:code",
+							"code": "MCHC",
+							"display": "Mean Corpuscular Hemoglobin Concentration"
+						},
+						{
+							"system": "http://loinc.org",
+							"code": "786-4",
+							"display": "Erythrocyte mean corpuscular hemoglobin concentration:MCnc:Pt:RBC:Qn:Automated count"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00-05:00",
+				"performer": [
+					{
+						"reference": "urn:uuid:92a23e86-97d5-4e7f-b8a3-b45636820e6d"
+					}
+				],
+				"valueQuantity": {
+					"value": 36.1,
+					"unit": "g/dL",
+					"system": "http://unitsofmeasure.org",
+					"code": "g/dL"
+				},
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "H"
+						}
+					]
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 32.9,
+							"unit": "g/dL",
+							"system": "http://unitsofmeasure.org",
+							"code": "g/dL"
+						},
+						"high": {
+							"value": 35.4,
+							"unit": "g/dL",
+							"system": "http://unitsofmeasure.org",
+							"code": "g/dL"
+						},
+						"text": "32.9-35.4"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Observation?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aobservationid%7C18334614220-MCHC"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:44d27ae1-8080-46ee-b2c2-fd0e652db00b",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "00000011111"
+					}
+				],
+				"name": [
+					{
+						"family": "SMITH",
+						"given": [
+							"John",
+							"D."
+						],
+						"prefix": [
+							"Dr."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-npi%7C00000011111"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:79e51247-212f-49c0-b594-2ffe12acdfe7",
+			"resource": {
+				"resourceType": "Observation",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:la01:observationid",
+						"value": "18334614220-RDW"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:observation:code",
+							"code": "RDW",
+							"display": "Red Cell Distribution Width"
+						},
+						{
+							"system": "http://loinc.org",
+							"code": "21000-5",
+							"display": "Erythrocyte distribution width:EntVol:Pt:RBC:Qn:Automated count"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00-05:00",
+				"performer": [
+					{
+						"reference": "urn:uuid:44d27ae1-8080-46ee-b2c2-fd0e652db00b"
+					}
+				],
+				"valueQuantity": {
+					"value": 12.1,
+					"unit": "%",
+					"system": "http://unitsofmeasure.org",
+					"code": "%"
+				},
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "N"
+						}
+					]
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 11.8,
+							"unit": "%",
+							"system": "http://unitsofmeasure.org",
+							"code": "%"
+						},
+						"high": {
+							"value": 15.2,
+							"unit": "%",
+							"system": "http://unitsofmeasure.org",
+							"code": "%"
+						},
+						"text": "11.8-15.2"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Observation?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aobservationid%7C18334614220-RDW"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:b587c444-ffe4-470e-988e-c622afa76536",
+			"resource": {
+				"resourceType": "Practitioner",
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "PRN",
+									"display": "Provider Number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "00000011111"
+					}
+				],
+				"name": [
+					{
+						"family": "SMITH",
+						"given": [
+							"John",
+							"D."
+						],
+						"prefix": [
+							"Dr."
+						]
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Practitioner?identifier=http%3A%2F%2Fhl7.org%2Ffhir%2Fsid%2Fus-npi%7C00000011111"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:6304b644-1337-422b-a419-45aad58f744b",
+			"resource": {
+				"resourceType": "Observation",
+				"identifier": [
+					{
+						"system": "urn:ORGNAME:SITENAME:la01:observationid",
+						"value": "18334614220-PLT"
+					}
+				],
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://hl7.org/fhir/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "urn:ORGNAME:SITENAME:la01:observation:code",
+							"code": "PLT",
+							"display": "Platelet"
+						},
+						{
+							"system": "http://loinc.org",
+							"code": "777-3",
+							"display": "Platelets:NCnc:Pt:Bld:Qn:Automated count"
+						}
+					]
+				},
+				"subject": {
+					"reference": "urn:uuid:49f02bbd-7ba7-48a7-bdba-684c4ce5948d"
+				},
+				"context": {
+					"reference": "urn:uuid:946bd9ee-6510-47a5-ad3c-91527a97d433"
+				},
+				"effectiveDateTime": "2018-11-30T23:41:00-05:00",
+				"issued": "2018-12-01T00:10:00-05:00",
+				"performer": [
+					{
+						"reference": "urn:uuid:b587c444-ffe4-470e-988e-c622afa76536"
+					}
+				],
+				"valueQuantity": {
+					"value": 209,
+					"unit": "kg/m3",
+					"system": "http://unitsofmeasure.org",
+					"code": "kg/m3"
+				},
+				"interpretation": {
+					"coding": [
+						{
+							"system": "http://hl7.org/fhir/v2/0078",
+							"code": "N"
+						}
+					]
+				},
+				"comment": "The above 9 analytes were performed by SPARTANBURG MEDICAL CENTER\\.br\\101 EAST WOOD STREET,SPARTANBURG,SC 29303",
+				"_comment": {
+					"extension": [
+						{
+							"url": "urn:cedar:extension:stringFormat",
+							"valueCode": "HL7V2"
+						}
+					]
+				},
+				"referenceRange": [
+					{
+						"low": {
+							"value": 141,
+							"unit": "kg/m3",
+							"system": "http://unitsofmeasure.org",
+							"code": "kg/m3"
+						},
+						"high": {
+							"value": 359,
+							"unit": "kg/m3",
+							"system": "http://unitsofmeasure.org",
+							"code": "kg/m3"
+						},
+						"text": "141-359"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "/Observation?identifier=urn%3AORGNAME%3ASITENAME%3Ala01%3Aobservationid%7C18334614220-PLT"
+			}
+		}
+	]
+}

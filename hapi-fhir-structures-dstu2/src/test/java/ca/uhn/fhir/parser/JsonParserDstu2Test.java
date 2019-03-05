@@ -38,6 +38,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -69,6 +70,29 @@ public class JsonParserDstu2Test {
 		assertThat(timestampFields.organization.getReference().getIdPart(), equalTo("sjanic_org"));
 		assertThat(timestampFields.role.getCodingFirstRep().getSystem(), equalTo("sjanic"));
 		assertThat(timestampFields.role.getCodingFirstRep().getCode(), equalTo("Doctor"));
+	}
+
+
+	@Test
+	public void testSetDontEncodeResourcesWithMetaSubPath() {
+		Patient p = new Patient();
+		ResourceMetadataKeyEnum.VERSION.put(p, "BBB");
+		p.setId("AAA");
+		p.getMeta().setVersionId("BBB");
+		p.getMeta().setLastUpdated(new InstantDt("2011-01-01T00:00:00.000Z").getValue());
+		p.getMeta().addTag().setSystem("SYS").setCode("CODE");
+		p.addName().addFamily("FAMILY");
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setDontEncodeElements(Sets.newHashSet("id", "*.meta.versionId", "*.meta.lastUpdated"));
+		String output = parser.encodeResourceToString(p);
+
+		assertThat(output, containsString("FAMILY"));
+		assertThat(output, containsString("SYS"));
+		assertThat(output, containsString("CODE"));
+		assertThat(output, not(containsString("AAA")));
+		assertThat(output, not(containsString("BBB")));
+		assertThat(output, not(containsString("2011")));
 	}
 
 
@@ -2084,6 +2108,19 @@ public class JsonParserDstu2Test {
 		ourLog.info(message);
 		Assert.assertThat(message, containsString("contained"));
 	}
+
+
+	@Test
+	public void testParseQuestionnaireResponseAnswerWithValueReference() {
+		String response = "{\"resourceType\":\"QuestionnaireResponse\",\"group\":{\"question\":[{\"answer\": [{\"valueReference\": {\"reference\": \"Observation/testid\"}}]}]}}";
+		QuestionnaireResponse r = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, response);
+
+		QuestionnaireResponse.GroupQuestionAnswer answer = r.getGroup().getQuestion().get(0).getAnswer().get(0);
+		assertNotNull(answer);
+		assertNotNull(answer.getValue());
+		assertEquals("Observation/testid", ((ResourceReferenceDt)answer.getValue()).getReference().getValue());
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

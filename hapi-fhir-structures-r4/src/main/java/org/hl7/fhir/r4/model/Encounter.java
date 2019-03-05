@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -833,7 +833,7 @@ public class Encounter extends DomainResource {
         /**
          * Persons involved in the encounter other than the patient.
          */
-        @Child(name = "individual", type = {Practitioner.class, RelatedPerson.class}, order=3, min=0, max=1, modifier=false, summary=true)
+        @Child(name = "individual", type = {Practitioner.class, PractitionerRole.class, RelatedPerson.class}, order=3, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="Persons involved in the encounter other than the patient", formalDefinition="Persons involved in the encounter other than the patient." )
         protected Reference individual;
 
@@ -971,7 +971,7 @@ public class Encounter extends DomainResource {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "Role of participant in encounter.", 0, java.lang.Integer.MAX_VALUE, type));
           children.add(new Property("period", "Period", "The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.", 0, 1, period));
-          children.add(new Property("individual", "Reference(Practitioner|RelatedPerson)", "Persons involved in the encounter other than the patient.", 0, 1, individual));
+          children.add(new Property("individual", "Reference(Practitioner|PractitionerRole|RelatedPerson)", "Persons involved in the encounter other than the patient.", 0, 1, individual));
         }
 
         @Override
@@ -979,7 +979,7 @@ public class Encounter extends DomainResource {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Role of participant in encounter.", 0, java.lang.Integer.MAX_VALUE, type);
           case -991726143: /*period*/  return new Property("period", "Period", "The period of time that the specified participant participated in the encounter. These can overlap or be sub-sets of the overall encounter's period.", 0, 1, period);
-          case -46292327: /*individual*/  return new Property("individual", "Reference(Practitioner|RelatedPerson)", "Persons involved in the encounter other than the patient.", 0, 1, individual);
+          case -46292327: /*individual*/  return new Property("individual", "Reference(Practitioner|PractitionerRole|RelatedPerson)", "Persons involved in the encounter other than the patient.", 0, 1, individual);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
 
@@ -1117,7 +1117,7 @@ public class Encounter extends DomainResource {
          * Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.
          */
         @Child(name = "condition", type = {Condition.class, Procedure.class}, order=1, min=1, max=1, modifier=false, summary=true)
-        @Description(shortDefinition="Reason the encounter takes place (resource)", formalDefinition="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure." )
+        @Description(shortDefinition="The diagnosis or procedure relevant to the encounter", formalDefinition="Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure." )
         protected Reference condition;
 
         /**
@@ -1128,10 +1128,10 @@ public class Encounter extends DomainResource {
         /**
          * Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).
          */
-        @Child(name = "role", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "use", type = {CodeableConcept.class}, order=2, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …)", formalDefinition="Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …)." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/diagnosis-role")
-        protected CodeableConcept role;
+        protected CodeableConcept use;
 
         /**
          * Ranking of the diagnosis (for each role type).
@@ -1140,7 +1140,7 @@ public class Encounter extends DomainResource {
         @Description(shortDefinition="Ranking of the diagnosis (for each role type)", formalDefinition="Ranking of the diagnosis (for each role type)." )
         protected PositiveIntType rank;
 
-        private static final long serialVersionUID = 1005913665L;
+        private static final long serialVersionUID = 128213376L;
 
     /**
      * Constructor
@@ -1197,26 +1197,26 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @return {@link #role} (Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).)
+         * @return {@link #use} (Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).)
          */
-        public CodeableConcept getRole() { 
-          if (this.role == null)
+        public CodeableConcept getUse() { 
+          if (this.use == null)
             if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create DiagnosisComponent.role");
+              throw new Error("Attempt to auto-create DiagnosisComponent.use");
             else if (Configuration.doAutoCreate())
-              this.role = new CodeableConcept(); // cc
-          return this.role;
+              this.use = new CodeableConcept(); // cc
+          return this.use;
         }
 
-        public boolean hasRole() { 
-          return this.role != null && !this.role.isEmpty();
+        public boolean hasUse() { 
+          return this.use != null && !this.use.isEmpty();
         }
 
         /**
-         * @param value {@link #role} (Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).)
+         * @param value {@link #use} (Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).)
          */
-        public DiagnosisComponent setRole(CodeableConcept value) { 
-          this.role = value;
+        public DiagnosisComponent setUse(CodeableConcept value) { 
+          this.use = value;
           return this;
         }
 
@@ -1268,7 +1268,7 @@ public class Encounter extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("condition", "Reference(Condition|Procedure)", "Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.", 0, 1, condition));
-          children.add(new Property("role", "CodeableConcept", "Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).", 0, 1, role));
+          children.add(new Property("use", "CodeableConcept", "Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).", 0, 1, use));
           children.add(new Property("rank", "positiveInt", "Ranking of the diagnosis (for each role type).", 0, 1, rank));
         }
 
@@ -1276,7 +1276,7 @@ public class Encounter extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case -861311717: /*condition*/  return new Property("condition", "Reference(Condition|Procedure)", "Reason the encounter takes place, as specified using information from another resource. For admissions, this is the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure.", 0, 1, condition);
-          case 3506294: /*role*/  return new Property("role", "CodeableConcept", "Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).", 0, 1, role);
+          case 116103: /*use*/  return new Property("use", "CodeableConcept", "Role that this diagnosis has within the encounter (e.g. admission, billing, discharge …).", 0, 1, use);
           case 3492908: /*rank*/  return new Property("rank", "positiveInt", "Ranking of the diagnosis (for each role type).", 0, 1, rank);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -1287,7 +1287,7 @@ public class Encounter extends DomainResource {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // Reference
-        case 3506294: /*role*/ return this.role == null ? new Base[0] : new Base[] {this.role}; // CodeableConcept
+        case 116103: /*use*/ return this.use == null ? new Base[0] : new Base[] {this.use}; // CodeableConcept
         case 3492908: /*rank*/ return this.rank == null ? new Base[0] : new Base[] {this.rank}; // PositiveIntType
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -1300,8 +1300,8 @@ public class Encounter extends DomainResource {
         case -861311717: // condition
           this.condition = castToReference(value); // Reference
           return value;
-        case 3506294: // role
-          this.role = castToCodeableConcept(value); // CodeableConcept
+        case 116103: // use
+          this.use = castToCodeableConcept(value); // CodeableConcept
           return value;
         case 3492908: // rank
           this.rank = castToPositiveInt(value); // PositiveIntType
@@ -1315,8 +1315,8 @@ public class Encounter extends DomainResource {
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("condition")) {
           this.condition = castToReference(value); // Reference
-        } else if (name.equals("role")) {
-          this.role = castToCodeableConcept(value); // CodeableConcept
+        } else if (name.equals("use")) {
+          this.use = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("rank")) {
           this.rank = castToPositiveInt(value); // PositiveIntType
         } else
@@ -1328,7 +1328,7 @@ public class Encounter extends DomainResource {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -861311717:  return getCondition(); 
-        case 3506294:  return getRole(); 
+        case 116103:  return getUse(); 
         case 3492908:  return getRankElement();
         default: return super.makeProperty(hash, name);
         }
@@ -1339,7 +1339,7 @@ public class Encounter extends DomainResource {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case -861311717: /*condition*/ return new String[] {"Reference"};
-        case 3506294: /*role*/ return new String[] {"CodeableConcept"};
+        case 116103: /*use*/ return new String[] {"CodeableConcept"};
         case 3492908: /*rank*/ return new String[] {"positiveInt"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -1352,9 +1352,9 @@ public class Encounter extends DomainResource {
           this.condition = new Reference();
           return this.condition;
         }
-        else if (name.equals("role")) {
-          this.role = new CodeableConcept();
-          return this.role;
+        else if (name.equals("use")) {
+          this.use = new CodeableConcept();
+          return this.use;
         }
         else if (name.equals("rank")) {
           throw new FHIRException("Cannot call addChild on a primitive type Encounter.rank");
@@ -1367,7 +1367,7 @@ public class Encounter extends DomainResource {
         DiagnosisComponent dst = new DiagnosisComponent();
         copyValues(dst);
         dst.condition = condition == null ? null : condition.copy();
-        dst.role = role == null ? null : role.copy();
+        dst.use = use == null ? null : use.copy();
         dst.rank = rank == null ? null : rank.copy();
         return dst;
       }
@@ -1379,7 +1379,7 @@ public class Encounter extends DomainResource {
         if (!(other_ instanceof DiagnosisComponent))
           return false;
         DiagnosisComponent o = (DiagnosisComponent) other_;
-        return compareDeep(condition, o.condition, true) && compareDeep(role, o.role, true) && compareDeep(rank, o.rank, true)
+        return compareDeep(condition, o.condition, true) && compareDeep(use, o.use, true) && compareDeep(rank, o.rank, true)
           ;
       }
 
@@ -1394,7 +1394,7 @@ public class Encounter extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(condition, role, rank);
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(condition, use, rank);
       }
 
   public String fhirType() {
@@ -2086,21 +2086,29 @@ public class Encounter extends DomainResource {
         protected Location locationTarget;
 
         /**
-         * The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.
+         * The status of the participants' presence at the specified location during the period specified. If the participant is no longer at the location, then the period will have an end date/time.
          */
         @Child(name = "status", type = {CodeType.class}, order=2, min=0, max=1, modifier=false, summary=false)
-        @Description(shortDefinition="planned | active | reserved | completed", formalDefinition="The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time." )
+        @Description(shortDefinition="planned | active | reserved | completed", formalDefinition="The status of the participants' presence at the specified location during the period specified. If the participant is no longer at the location, then the period will have an end date/time." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/encounter-location-status")
         protected Enumeration<EncounterLocationStatus> status;
 
         /**
+         * This will be used to specify the required levels (bed/ward/room/etc.) desired to be recorded to simplify either messaging or query.
+         */
+        @Child(name = "physicalType", type = {CodeableConcept.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Description(shortDefinition="The physical type of the location (usually the level in the location hierachy - bed room ward etc.)", formalDefinition="This will be used to specify the required levels (bed/ward/room/etc.) desired to be recorded to simplify either messaging or query." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/location-physical-type")
+        protected CodeableConcept physicalType;
+
+        /**
          * Time period during which the patient was present at the location.
          */
-        @Child(name = "period", type = {Period.class}, order=3, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "period", type = {Period.class}, order=4, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Time period during which the patient was present at the location", formalDefinition="Time period during which the patient was present at the location." )
         protected Period period;
 
-        private static final long serialVersionUID = -322984880L;
+        private static final long serialVersionUID = -755081862L;
 
     /**
      * Constructor
@@ -2162,7 +2170,7 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @return {@link #status} (The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+         * @return {@link #status} (The status of the participants' presence at the specified location during the period specified. If the participant is no longer at the location, then the period will have an end date/time.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
         public Enumeration<EncounterLocationStatus> getStatusElement() { 
           if (this.status == null)
@@ -2182,7 +2190,7 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @param value {@link #status} (The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
+         * @param value {@link #status} (The status of the participants' presence at the specified location during the period specified. If the participant is no longer at the location, then the period will have an end date/time.). This is the underlying object with id, value and extensions. The accessor "getStatus" gives direct access to the value
          */
         public EncounterLocationComponent setStatusElement(Enumeration<EncounterLocationStatus> value) { 
           this.status = value;
@@ -2190,14 +2198,14 @@ public class Encounter extends DomainResource {
         }
 
         /**
-         * @return The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.
+         * @return The status of the participants' presence at the specified location during the period specified. If the participant is no longer at the location, then the period will have an end date/time.
          */
         public EncounterLocationStatus getStatus() { 
           return this.status == null ? null : this.status.getValue();
         }
 
         /**
-         * @param value The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.
+         * @param value The status of the participants' presence at the specified location during the period specified. If the participant is no longer at the location, then the period will have an end date/time.
          */
         public EncounterLocationComponent setStatus(EncounterLocationStatus value) { 
           if (value == null)
@@ -2207,6 +2215,30 @@ public class Encounter extends DomainResource {
               this.status = new Enumeration<EncounterLocationStatus>(new EncounterLocationStatusEnumFactory());
             this.status.setValue(value);
           }
+          return this;
+        }
+
+        /**
+         * @return {@link #physicalType} (This will be used to specify the required levels (bed/ward/room/etc.) desired to be recorded to simplify either messaging or query.)
+         */
+        public CodeableConcept getPhysicalType() { 
+          if (this.physicalType == null)
+            if (Configuration.errorOnAutoCreate())
+              throw new Error("Attempt to auto-create EncounterLocationComponent.physicalType");
+            else if (Configuration.doAutoCreate())
+              this.physicalType = new CodeableConcept(); // cc
+          return this.physicalType;
+        }
+
+        public boolean hasPhysicalType() { 
+          return this.physicalType != null && !this.physicalType.isEmpty();
+        }
+
+        /**
+         * @param value {@link #physicalType} (This will be used to specify the required levels (bed/ward/room/etc.) desired to be recorded to simplify either messaging or query.)
+         */
+        public EncounterLocationComponent setPhysicalType(CodeableConcept value) { 
+          this.physicalType = value;
           return this;
         }
 
@@ -2237,7 +2269,8 @@ public class Encounter extends DomainResource {
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("location", "Reference(Location)", "The location where the encounter takes place.", 0, 1, location));
-          children.add(new Property("status", "code", "The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.", 0, 1, status));
+          children.add(new Property("status", "code", "The status of the participants' presence at the specified location during the period specified. If the participant is no longer at the location, then the period will have an end date/time.", 0, 1, status));
+          children.add(new Property("physicalType", "CodeableConcept", "This will be used to specify the required levels (bed/ward/room/etc.) desired to be recorded to simplify either messaging or query.", 0, 1, physicalType));
           children.add(new Property("period", "Period", "Time period during which the patient was present at the location.", 0, 1, period));
         }
 
@@ -2245,7 +2278,8 @@ public class Encounter extends DomainResource {
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 1901043637: /*location*/  return new Property("location", "Reference(Location)", "The location where the encounter takes place.", 0, 1, location);
-          case -892481550: /*status*/  return new Property("status", "code", "The status of the participants' presence at the specified location during the period specified. If the participant is is no longer at the location, then the period will have an end date/time.", 0, 1, status);
+          case -892481550: /*status*/  return new Property("status", "code", "The status of the participants' presence at the specified location during the period specified. If the participant is no longer at the location, then the period will have an end date/time.", 0, 1, status);
+          case -1474715471: /*physicalType*/  return new Property("physicalType", "CodeableConcept", "This will be used to specify the required levels (bed/ward/room/etc.) desired to be recorded to simplify either messaging or query.", 0, 1, physicalType);
           case -991726143: /*period*/  return new Property("period", "Period", "Time period during which the patient was present at the location.", 0, 1, period);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -2257,6 +2291,7 @@ public class Encounter extends DomainResource {
         switch (hash) {
         case 1901043637: /*location*/ return this.location == null ? new Base[0] : new Base[] {this.location}; // Reference
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<EncounterLocationStatus>
+        case -1474715471: /*physicalType*/ return this.physicalType == null ? new Base[0] : new Base[] {this.physicalType}; // CodeableConcept
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2273,6 +2308,9 @@ public class Encounter extends DomainResource {
           value = new EncounterLocationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<EncounterLocationStatus>
           return value;
+        case -1474715471: // physicalType
+          this.physicalType = castToCodeableConcept(value); // CodeableConcept
+          return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
           return value;
@@ -2288,6 +2326,8 @@ public class Encounter extends DomainResource {
         } else if (name.equals("status")) {
           value = new EncounterLocationStatusEnumFactory().fromType(castToCode(value));
           this.status = (Enumeration) value; // Enumeration<EncounterLocationStatus>
+        } else if (name.equals("physicalType")) {
+          this.physicalType = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
         } else
@@ -2300,6 +2340,7 @@ public class Encounter extends DomainResource {
         switch (hash) {
         case 1901043637:  return getLocation(); 
         case -892481550:  return getStatusElement();
+        case -1474715471:  return getPhysicalType(); 
         case -991726143:  return getPeriod(); 
         default: return super.makeProperty(hash, name);
         }
@@ -2311,6 +2352,7 @@ public class Encounter extends DomainResource {
         switch (hash) {
         case 1901043637: /*location*/ return new String[] {"Reference"};
         case -892481550: /*status*/ return new String[] {"code"};
+        case -1474715471: /*physicalType*/ return new String[] {"CodeableConcept"};
         case -991726143: /*period*/ return new String[] {"Period"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -2326,6 +2368,10 @@ public class Encounter extends DomainResource {
         else if (name.equals("status")) {
           throw new FHIRException("Cannot call addChild on a primitive type Encounter.status");
         }
+        else if (name.equals("physicalType")) {
+          this.physicalType = new CodeableConcept();
+          return this.physicalType;
+        }
         else if (name.equals("period")) {
           this.period = new Period();
           return this.period;
@@ -2339,6 +2385,7 @@ public class Encounter extends DomainResource {
         copyValues(dst);
         dst.location = location == null ? null : location.copy();
         dst.status = status == null ? null : status.copy();
+        dst.physicalType = physicalType == null ? null : physicalType.copy();
         dst.period = period == null ? null : period.copy();
         return dst;
       }
@@ -2350,8 +2397,8 @@ public class Encounter extends DomainResource {
         if (!(other_ instanceof EncounterLocationComponent))
           return false;
         EncounterLocationComponent o = (EncounterLocationComponent) other_;
-        return compareDeep(location, o.location, true) && compareDeep(status, o.status, true) && compareDeep(period, o.period, true)
-          ;
+        return compareDeep(location, o.location, true) && compareDeep(status, o.status, true) && compareDeep(physicalType, o.physicalType, true)
+           && compareDeep(period, o.period, true);
       }
 
       @Override
@@ -2365,8 +2412,8 @@ public class Encounter extends DomainResource {
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(location, status, period
-          );
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(location, status, physicalType
+          , period);
       }
 
   public String fhirType() {
@@ -2407,10 +2454,10 @@ public class Encounter extends DomainResource {
     protected Coding class_;
 
     /**
-     * The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.
+     * The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transitions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kind of discharge from emergency to inpatient.
      */
     @Child(name = "classHistory", type = {}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
-    @Description(shortDefinition="List of past encounter classes", formalDefinition="The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient." )
+    @Description(shortDefinition="List of past encounter classes", formalDefinition="The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transitions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kind of discharge from emergency to inpatient." )
     protected List<ClassHistoryComponent> classHistory;
 
     /**
@@ -2450,13 +2497,13 @@ public class Encounter extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).
+     * Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).
      */
     @Child(name = "episodeOfCare", type = {EpisodeOfCare.class}, order=9, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Episode(s) of care that this encounter should be recorded against", formalDefinition="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)." )
+    @Description(shortDefinition="Episode(s) of care that this encounter should be recorded against", formalDefinition="Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years)." )
     protected List<Reference> episodeOfCare;
     /**
-     * The actual objects that are the target of the reference (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
+     * The actual objects that are the target of the reference (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
      */
     protected List<EpisodeOfCare> episodeOfCareTarget;
 
@@ -2483,14 +2530,14 @@ public class Encounter extends DomainResource {
     /**
      * The appointment that scheduled this encounter.
      */
-    @Child(name = "appointment", type = {Appointment.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "appointment", type = {Appointment.class}, order=12, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The appointment that scheduled this encounter", formalDefinition="The appointment that scheduled this encounter." )
-    protected Reference appointment;
-
+    protected List<Reference> appointment;
     /**
-     * The actual object that is the target of the reference (The appointment that scheduled this encounter.)
+     * The actual objects that are the target of the reference (The appointment that scheduled this encounter.)
      */
-    protected Appointment appointmentTarget;
+    protected List<Appointment> appointmentTarget;
+
 
     /**
      * The start and end time of the encounter.
@@ -2509,22 +2556,34 @@ public class Encounter extends DomainResource {
     /**
      * Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.
      */
-    @Child(name = "reason", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
-    @Description(shortDefinition="Reason the encounter takes place (code)", formalDefinition="Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis." )
+    @Child(name = "reasonCode", type = {CodeableConcept.class}, order=15, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Coded reason the encounter takes place", formalDefinition="Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis." )
     @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/encounter-reason")
-    protected List<CodeableConcept> reason;
+    protected List<CodeableConcept> reasonCode;
+
+    /**
+     * Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.
+     */
+    @Child(name = "reasonReference", type = {Condition.class, Procedure.class, Observation.class, ImmunizationRecommendation.class}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Reason the encounter takes place (reference)", formalDefinition="Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis." )
+    protected List<Reference> reasonReference;
+    /**
+     * The actual objects that are the target of the reference (Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.)
+     */
+    protected List<Resource> reasonReferenceTarget;
+
 
     /**
      * The list of diagnosis relevant to this encounter.
      */
-    @Child(name = "diagnosis", type = {}, order=16, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Child(name = "diagnosis", type = {}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="The list of diagnosis relevant to this encounter", formalDefinition="The list of diagnosis relevant to this encounter." )
     protected List<DiagnosisComponent> diagnosis;
 
     /**
      * The set of accounts that may be used for billing for this Encounter.
      */
-    @Child(name = "account", type = {Account.class}, order=17, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "account", type = {Account.class}, order=18, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="The set of accounts that may be used for billing for this Encounter", formalDefinition="The set of accounts that may be used for billing for this Encounter." )
     protected List<Reference> account;
     /**
@@ -2536,21 +2595,21 @@ public class Encounter extends DomainResource {
     /**
      * Details about the admission to a healthcare service.
      */
-    @Child(name = "hospitalization", type = {}, order=18, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "hospitalization", type = {}, order=19, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Details about the admission to a healthcare service", formalDefinition="Details about the admission to a healthcare service." )
     protected EncounterHospitalizationComponent hospitalization;
 
     /**
      * List of locations where  the patient has been during this encounter.
      */
-    @Child(name = "location", type = {}, order=19, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+    @Child(name = "location", type = {}, order=20, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
     @Description(shortDefinition="List of locations where the patient has been", formalDefinition="List of locations where  the patient has been during this encounter." )
     protected List<EncounterLocationComponent> location;
 
     /**
      * The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy.
      */
-    @Child(name = "serviceProvider", type = {Organization.class}, order=20, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "serviceProvider", type = {Organization.class}, order=21, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The organization (facility) responsible for this encounter", formalDefinition="The organization that is primarily responsible for this Encounter's services. This MAY be the same as the organization on the Patient record, however it could be different, such as if the actor performing the services was from an external organization (which may be billed seperately) for an external consultation.  Refer to the example bundle showing an abbreviated set of Encounters for a colonoscopy." )
     protected Reference serviceProvider;
 
@@ -2562,7 +2621,7 @@ public class Encounter extends DomainResource {
     /**
      * Another Encounter of which this encounter is a part of (administratively or in time).
      */
-    @Child(name = "partOf", type = {Encounter.class}, order=21, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "partOf", type = {Encounter.class}, order=22, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="Another Encounter this encounter is part of", formalDefinition="Another Encounter of which this encounter is a part of (administratively or in time)." )
     protected Reference partOf;
 
@@ -2571,7 +2630,7 @@ public class Encounter extends DomainResource {
      */
     protected Encounter partOfTarget;
 
-    private static final long serialVersionUID = -244598838L;
+    private static final long serialVersionUID = 1358318037L;
 
   /**
    * Constructor
@@ -2765,7 +2824,7 @@ public class Encounter extends DomainResource {
     }
 
     /**
-     * @return {@link #classHistory} (The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.)
+     * @return {@link #classHistory} (The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transitions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kind of discharge from emergency to inpatient.)
      */
     public List<ClassHistoryComponent> getClassHistory() { 
       if (this.classHistory == null)
@@ -2958,7 +3017,7 @@ public class Encounter extends DomainResource {
     }
 
     /**
-     * @return {@link #episodeOfCare} (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
+     * @return {@link #episodeOfCare} (Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).)
      */
     public List<Reference> getEpisodeOfCare() { 
       if (this.episodeOfCare == null)
@@ -3163,45 +3222,76 @@ public class Encounter extends DomainResource {
     /**
      * @return {@link #appointment} (The appointment that scheduled this encounter.)
      */
-    public Reference getAppointment() { 
+    public List<Reference> getAppointment() { 
       if (this.appointment == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Encounter.appointment");
-        else if (Configuration.doAutoCreate())
-          this.appointment = new Reference(); // cc
+        this.appointment = new ArrayList<Reference>();
       return this.appointment;
     }
 
-    public boolean hasAppointment() { 
-      return this.appointment != null && !this.appointment.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setAppointment(List<Reference> theAppointment) { 
+      this.appointment = theAppointment;
+      return this;
     }
 
-    /**
-     * @param value {@link #appointment} (The appointment that scheduled this encounter.)
-     */
-    public Encounter setAppointment(Reference value) { 
-      this.appointment = value;
+    public boolean hasAppointment() { 
+      if (this.appointment == null)
+        return false;
+      for (Reference item : this.appointment)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addAppointment() { //3
+      Reference t = new Reference();
+      if (this.appointment == null)
+        this.appointment = new ArrayList<Reference>();
+      this.appointment.add(t);
+      return t;
+    }
+
+    public Encounter addAppointment(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.appointment == null)
+        this.appointment = new ArrayList<Reference>();
+      this.appointment.add(t);
       return this;
     }
 
     /**
-     * @return {@link #appointment} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The appointment that scheduled this encounter.)
+     * @return The first repetition of repeating field {@link #appointment}, creating it if it does not already exist
      */
-    public Appointment getAppointmentTarget() { 
+    public Reference getAppointmentFirstRep() { 
+      if (getAppointment().isEmpty()) {
+        addAppointment();
+      }
+      return getAppointment().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Appointment> getAppointmentTarget() { 
       if (this.appointmentTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Encounter.appointment");
-        else if (Configuration.doAutoCreate())
-          this.appointmentTarget = new Appointment(); // aa
+        this.appointmentTarget = new ArrayList<Appointment>();
       return this.appointmentTarget;
     }
 
     /**
-     * @param value {@link #appointment} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The appointment that scheduled this encounter.)
+     * @deprecated Use Reference#setResource(IBaseResource) instead
      */
-    public Encounter setAppointmentTarget(Appointment value) { 
-      this.appointmentTarget = value;
-      return this;
+    @Deprecated
+    public Appointment addAppointmentTarget() { 
+      Appointment r = new Appointment();
+      if (this.appointmentTarget == null)
+        this.appointmentTarget = new ArrayList<Appointment>();
+      this.appointmentTarget.add(r);
+      return r;
     }
 
     /**
@@ -3253,56 +3343,119 @@ public class Encounter extends DomainResource {
     }
 
     /**
-     * @return {@link #reason} (Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.)
+     * @return {@link #reasonCode} (Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.)
      */
-    public List<CodeableConcept> getReason() { 
-      if (this.reason == null)
-        this.reason = new ArrayList<CodeableConcept>();
-      return this.reason;
+    public List<CodeableConcept> getReasonCode() { 
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      return this.reasonCode;
     }
 
     /**
      * @return Returns a reference to <code>this</code> for easy method chaining
      */
-    public Encounter setReason(List<CodeableConcept> theReason) { 
-      this.reason = theReason;
+    public Encounter setReasonCode(List<CodeableConcept> theReasonCode) { 
+      this.reasonCode = theReasonCode;
       return this;
     }
 
-    public boolean hasReason() { 
-      if (this.reason == null)
+    public boolean hasReasonCode() { 
+      if (this.reasonCode == null)
         return false;
-      for (CodeableConcept item : this.reason)
+      for (CodeableConcept item : this.reasonCode)
         if (!item.isEmpty())
           return true;
       return false;
     }
 
-    public CodeableConcept addReason() { //3
+    public CodeableConcept addReasonCode() { //3
       CodeableConcept t = new CodeableConcept();
-      if (this.reason == null)
-        this.reason = new ArrayList<CodeableConcept>();
-      this.reason.add(t);
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
       return t;
     }
 
-    public Encounter addReason(CodeableConcept t) { //3
+    public Encounter addReasonCode(CodeableConcept t) { //3
       if (t == null)
         return this;
-      if (this.reason == null)
-        this.reason = new ArrayList<CodeableConcept>();
-      this.reason.add(t);
+      if (this.reasonCode == null)
+        this.reasonCode = new ArrayList<CodeableConcept>();
+      this.reasonCode.add(t);
       return this;
     }
 
     /**
-     * @return The first repetition of repeating field {@link #reason}, creating it if it does not already exist
+     * @return The first repetition of repeating field {@link #reasonCode}, creating it if it does not already exist
      */
-    public CodeableConcept getReasonFirstRep() { 
-      if (getReason().isEmpty()) {
-        addReason();
+    public CodeableConcept getReasonCodeFirstRep() { 
+      if (getReasonCode().isEmpty()) {
+        addReasonCode();
       }
-      return getReason().get(0);
+      return getReasonCode().get(0);
+    }
+
+    /**
+     * @return {@link #reasonReference} (Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.)
+     */
+    public List<Reference> getReasonReference() { 
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      return this.reasonReference;
+    }
+
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public Encounter setReasonReference(List<Reference> theReasonReference) { 
+      this.reasonReference = theReasonReference;
+      return this;
+    }
+
+    public boolean hasReasonReference() { 
+      if (this.reasonReference == null)
+        return false;
+      for (Reference item : this.reasonReference)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public Reference addReasonReference() { //3
+      Reference t = new Reference();
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return t;
+    }
+
+    public Encounter addReasonReference(Reference t) { //3
+      if (t == null)
+        return this;
+      if (this.reasonReference == null)
+        this.reasonReference = new ArrayList<Reference>();
+      this.reasonReference.add(t);
+      return this;
+    }
+
+    /**
+     * @return The first repetition of repeating field {@link #reasonReference}, creating it if it does not already exist
+     */
+    public Reference getReasonReferenceFirstRep() { 
+      if (getReasonReference().isEmpty()) {
+        addReasonReference();
+      }
+      return getReasonReference().get(0);
+    }
+
+    /**
+     * @deprecated Use Reference#setResource(IBaseResource) instead
+     */
+    @Deprecated
+    public List<Resource> getReasonReferenceTarget() { 
+      if (this.reasonReferenceTarget == null)
+        this.reasonReferenceTarget = new ArrayList<Resource>();
+      return this.reasonReferenceTarget;
     }
 
     /**
@@ -3604,18 +3757,19 @@ public class Encounter extends DomainResource {
         children.add(new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, 1, status));
         children.add(new Property("statusHistory", "", "The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.", 0, java.lang.Integer.MAX_VALUE, statusHistory));
         children.add(new Property("class", "Coding", "Concepts representing classification of patient encounter such as ambulatory (outpatient), inpatient, emergency, home health or others due to local variations.", 0, 1, class_));
-        children.add(new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory));
+        children.add(new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transitions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kind of discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory));
         children.add(new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type));
         children.add(new Property("serviceType", "CodeableConcept", "Broad categorization of the service that is to be provided (e.g. cardiology).", 0, 1, serviceType));
         children.add(new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority));
         children.add(new Property("subject", "Reference(Patient|Group)", "The patient or group present at the encounter.", 0, 1, subject));
-        children.add(new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare));
+        children.add(new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare));
         children.add(new Property("basedOn", "Reference(ServiceRequest)", "The request this encounter satisfies (e.g. incoming referral or procedure request).", 0, java.lang.Integer.MAX_VALUE, basedOn));
         children.add(new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant));
-        children.add(new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment));
+        children.add(new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, java.lang.Integer.MAX_VALUE, appointment));
         children.add(new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period));
         children.add(new Property("length", "Duration", "Quantity of time the encounter lasted. This excludes the time during leaves of absence.", 0, 1, length));
-        children.add(new Property("reason", "CodeableConcept", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reason));
+        children.add(new Property("reasonCode", "CodeableConcept", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reasonCode));
+        children.add(new Property("reasonReference", "Reference(Condition|Procedure|Observation|ImmunizationRecommendation)", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reasonReference));
         children.add(new Property("diagnosis", "", "The list of diagnosis relevant to this encounter.", 0, java.lang.Integer.MAX_VALUE, diagnosis));
         children.add(new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this Encounter.", 0, java.lang.Integer.MAX_VALUE, account));
         children.add(new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, 1, hospitalization));
@@ -3631,18 +3785,19 @@ public class Encounter extends DomainResource {
         case -892481550: /*status*/  return new Property("status", "code", "planned | arrived | triaged | in-progress | onleave | finished | cancelled +.", 0, 1, status);
         case -986695614: /*statusHistory*/  return new Property("statusHistory", "", "The status history permits the encounter resource to contain the status history without needing to read through the historical versions of the resource, or even have the server store them.", 0, java.lang.Integer.MAX_VALUE, statusHistory);
         case 94742904: /*class*/  return new Property("class", "Coding", "Concepts representing classification of patient encounter such as ambulatory (outpatient), inpatient, emergency, home health or others due to local variations.", 0, 1, class_);
-        case 962575356: /*classHistory*/  return new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transisions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kindof discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory);
+        case 962575356: /*classHistory*/  return new Property("classHistory", "", "The class history permits the tracking of the encounters transitions without needing to go  through the resource history.  This would be used for a case where an admission starts of as an emergency encounter, then transitions into an inpatient scenario. Doing this and not restarting a new encounter ensures that any lab/diagnostic results can more easily follow the patient and not require re-processing and not get lost or cancelled during a kind of discharge from emergency to inpatient.", 0, java.lang.Integer.MAX_VALUE, classHistory);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Specific type of encounter (e.g. e-mail consultation, surgical day-care, skilled nursing, rehabilitation).", 0, java.lang.Integer.MAX_VALUE, type);
         case -1928370289: /*serviceType*/  return new Property("serviceType", "CodeableConcept", "Broad categorization of the service that is to be provided (e.g. cardiology).", 0, 1, serviceType);
         case -1165461084: /*priority*/  return new Property("priority", "CodeableConcept", "Indicates the urgency of the encounter.", 0, 1, priority);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "The patient or group present at the encounter.", 0, 1, subject);
-        case -1892140189: /*episodeOfCare*/  return new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care, and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare);
+        case -1892140189: /*episodeOfCare*/  return new Property("episodeOfCare", "Reference(EpisodeOfCare)", "Where a specific encounter should be classified as a part of a specific episode(s) of care this field should be used. This association can facilitate grouping of related encounters together for a specific purpose, such as government reporting, issue tracking, association via a common problem.  The association is recorded on the encounter as these are typically created after the episode of care and grouped on entry rather than editing the episode of care to append another encounter to it (the episode of care could span years).", 0, java.lang.Integer.MAX_VALUE, episodeOfCare);
         case -332612366: /*basedOn*/  return new Property("basedOn", "Reference(ServiceRequest)", "The request this encounter satisfies (e.g. incoming referral or procedure request).", 0, java.lang.Integer.MAX_VALUE, basedOn);
         case 767422259: /*participant*/  return new Property("participant", "", "The list of people responsible for providing the service.", 0, java.lang.Integer.MAX_VALUE, participant);
-        case -1474995297: /*appointment*/  return new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, 1, appointment);
+        case -1474995297: /*appointment*/  return new Property("appointment", "Reference(Appointment)", "The appointment that scheduled this encounter.", 0, java.lang.Integer.MAX_VALUE, appointment);
         case -991726143: /*period*/  return new Property("period", "Period", "The start and end time of the encounter.", 0, 1, period);
         case -1106363674: /*length*/  return new Property("length", "Duration", "Quantity of time the encounter lasted. This excludes the time during leaves of absence.", 0, 1, length);
-        case -934964668: /*reason*/  return new Property("reason", "CodeableConcept", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reason);
+        case 722137681: /*reasonCode*/  return new Property("reasonCode", "CodeableConcept", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reasonCode);
+        case -1146218137: /*reasonReference*/  return new Property("reasonReference", "Reference(Condition|Procedure|Observation|ImmunizationRecommendation)", "Reason the encounter takes place, expressed as a code. For admissions, this can be used for a coded admission diagnosis.", 0, java.lang.Integer.MAX_VALUE, reasonReference);
         case 1196993265: /*diagnosis*/  return new Property("diagnosis", "", "The list of diagnosis relevant to this encounter.", 0, java.lang.Integer.MAX_VALUE, diagnosis);
         case -1177318867: /*account*/  return new Property("account", "Reference(Account)", "The set of accounts that may be used for billing for this Encounter.", 0, java.lang.Integer.MAX_VALUE, account);
         case 1057894634: /*hospitalization*/  return new Property("hospitalization", "", "Details about the admission to a healthcare service.", 0, 1, hospitalization);
@@ -3669,10 +3824,11 @@ public class Encounter extends DomainResource {
         case -1892140189: /*episodeOfCare*/ return this.episodeOfCare == null ? new Base[0] : this.episodeOfCare.toArray(new Base[this.episodeOfCare.size()]); // Reference
         case -332612366: /*basedOn*/ return this.basedOn == null ? new Base[0] : this.basedOn.toArray(new Base[this.basedOn.size()]); // Reference
         case 767422259: /*participant*/ return this.participant == null ? new Base[0] : this.participant.toArray(new Base[this.participant.size()]); // EncounterParticipantComponent
-        case -1474995297: /*appointment*/ return this.appointment == null ? new Base[0] : new Base[] {this.appointment}; // Reference
+        case -1474995297: /*appointment*/ return this.appointment == null ? new Base[0] : this.appointment.toArray(new Base[this.appointment.size()]); // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case -1106363674: /*length*/ return this.length == null ? new Base[0] : new Base[] {this.length}; // Duration
-        case -934964668: /*reason*/ return this.reason == null ? new Base[0] : this.reason.toArray(new Base[this.reason.size()]); // CodeableConcept
+        case 722137681: /*reasonCode*/ return this.reasonCode == null ? new Base[0] : this.reasonCode.toArray(new Base[this.reasonCode.size()]); // CodeableConcept
+        case -1146218137: /*reasonReference*/ return this.reasonReference == null ? new Base[0] : this.reasonReference.toArray(new Base[this.reasonReference.size()]); // Reference
         case 1196993265: /*diagnosis*/ return this.diagnosis == null ? new Base[0] : this.diagnosis.toArray(new Base[this.diagnosis.size()]); // DiagnosisComponent
         case -1177318867: /*account*/ return this.account == null ? new Base[0] : this.account.toArray(new Base[this.account.size()]); // Reference
         case 1057894634: /*hospitalization*/ return this.hospitalization == null ? new Base[0] : new Base[] {this.hospitalization}; // EncounterHospitalizationComponent
@@ -3725,7 +3881,7 @@ public class Encounter extends DomainResource {
           this.getParticipant().add((EncounterParticipantComponent) value); // EncounterParticipantComponent
           return value;
         case -1474995297: // appointment
-          this.appointment = castToReference(value); // Reference
+          this.getAppointment().add(castToReference(value)); // Reference
           return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
@@ -3733,8 +3889,11 @@ public class Encounter extends DomainResource {
         case -1106363674: // length
           this.length = castToDuration(value); // Duration
           return value;
-        case -934964668: // reason
-          this.getReason().add(castToCodeableConcept(value)); // CodeableConcept
+        case 722137681: // reasonCode
+          this.getReasonCode().add(castToCodeableConcept(value)); // CodeableConcept
+          return value;
+        case -1146218137: // reasonReference
+          this.getReasonReference().add(castToReference(value)); // Reference
           return value;
         case 1196993265: // diagnosis
           this.getDiagnosis().add((DiagnosisComponent) value); // DiagnosisComponent
@@ -3787,13 +3946,15 @@ public class Encounter extends DomainResource {
         } else if (name.equals("participant")) {
           this.getParticipant().add((EncounterParticipantComponent) value);
         } else if (name.equals("appointment")) {
-          this.appointment = castToReference(value); // Reference
+          this.getAppointment().add(castToReference(value));
         } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
         } else if (name.equals("length")) {
           this.length = castToDuration(value); // Duration
-        } else if (name.equals("reason")) {
-          this.getReason().add(castToCodeableConcept(value));
+        } else if (name.equals("reasonCode")) {
+          this.getReasonCode().add(castToCodeableConcept(value));
+        } else if (name.equals("reasonReference")) {
+          this.getReasonReference().add(castToReference(value));
         } else if (name.equals("diagnosis")) {
           this.getDiagnosis().add((DiagnosisComponent) value);
         } else if (name.equals("account")) {
@@ -3826,10 +3987,11 @@ public class Encounter extends DomainResource {
         case -1892140189:  return addEpisodeOfCare(); 
         case -332612366:  return addBasedOn(); 
         case 767422259:  return addParticipant(); 
-        case -1474995297:  return getAppointment(); 
+        case -1474995297:  return addAppointment(); 
         case -991726143:  return getPeriod(); 
         case -1106363674:  return getLength(); 
-        case -934964668:  return addReason(); 
+        case 722137681:  return addReasonCode(); 
+        case -1146218137:  return addReasonReference(); 
         case 1196993265:  return addDiagnosis(); 
         case -1177318867:  return addAccount(); 
         case 1057894634:  return getHospitalization(); 
@@ -3859,7 +4021,8 @@ public class Encounter extends DomainResource {
         case -1474995297: /*appointment*/ return new String[] {"Reference"};
         case -991726143: /*period*/ return new String[] {"Period"};
         case -1106363674: /*length*/ return new String[] {"Duration"};
-        case -934964668: /*reason*/ return new String[] {"CodeableConcept"};
+        case 722137681: /*reasonCode*/ return new String[] {"CodeableConcept"};
+        case -1146218137: /*reasonReference*/ return new String[] {"Reference"};
         case 1196993265: /*diagnosis*/ return new String[] {};
         case -1177318867: /*account*/ return new String[] {"Reference"};
         case 1057894634: /*hospitalization*/ return new String[] {};
@@ -3914,8 +4077,7 @@ public class Encounter extends DomainResource {
           return addParticipant();
         }
         else if (name.equals("appointment")) {
-          this.appointment = new Reference();
-          return this.appointment;
+          return addAppointment();
         }
         else if (name.equals("period")) {
           this.period = new Period();
@@ -3925,8 +4087,11 @@ public class Encounter extends DomainResource {
           this.length = new Duration();
           return this.length;
         }
-        else if (name.equals("reason")) {
-          return addReason();
+        else if (name.equals("reasonCode")) {
+          return addReasonCode();
+        }
+        else if (name.equals("reasonReference")) {
+          return addReasonReference();
         }
         else if (name.equals("diagnosis")) {
           return addDiagnosis();
@@ -4001,13 +4166,22 @@ public class Encounter extends DomainResource {
           for (EncounterParticipantComponent i : participant)
             dst.participant.add(i.copy());
         };
-        dst.appointment = appointment == null ? null : appointment.copy();
+        if (appointment != null) {
+          dst.appointment = new ArrayList<Reference>();
+          for (Reference i : appointment)
+            dst.appointment.add(i.copy());
+        };
         dst.period = period == null ? null : period.copy();
         dst.length = length == null ? null : length.copy();
-        if (reason != null) {
-          dst.reason = new ArrayList<CodeableConcept>();
-          for (CodeableConcept i : reason)
-            dst.reason.add(i.copy());
+        if (reasonCode != null) {
+          dst.reasonCode = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : reasonCode)
+            dst.reasonCode.add(i.copy());
+        };
+        if (reasonReference != null) {
+          dst.reasonReference = new ArrayList<Reference>();
+          for (Reference i : reasonReference)
+            dst.reasonReference.add(i.copy());
         };
         if (diagnosis != null) {
           dst.diagnosis = new ArrayList<DiagnosisComponent>();
@@ -4046,10 +4220,10 @@ public class Encounter extends DomainResource {
            && compareDeep(serviceType, o.serviceType, true) && compareDeep(priority, o.priority, true) && compareDeep(subject, o.subject, true)
            && compareDeep(episodeOfCare, o.episodeOfCare, true) && compareDeep(basedOn, o.basedOn, true) && compareDeep(participant, o.participant, true)
            && compareDeep(appointment, o.appointment, true) && compareDeep(period, o.period, true) && compareDeep(length, o.length, true)
-           && compareDeep(reason, o.reason, true) && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(account, o.account, true)
-           && compareDeep(hospitalization, o.hospitalization, true) && compareDeep(location, o.location, true)
-           && compareDeep(serviceProvider, o.serviceProvider, true) && compareDeep(partOf, o.partOf, true)
-          ;
+           && compareDeep(reasonCode, o.reasonCode, true) && compareDeep(reasonReference, o.reasonReference, true)
+           && compareDeep(diagnosis, o.diagnosis, true) && compareDeep(account, o.account, true) && compareDeep(hospitalization, o.hospitalization, true)
+           && compareDeep(location, o.location, true) && compareDeep(serviceProvider, o.serviceProvider, true)
+           && compareDeep(partOf, o.partOf, true);
       }
 
       @Override
@@ -4065,8 +4239,8 @@ public class Encounter extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, status, statusHistory
           , class_, classHistory, type, serviceType, priority, subject, episodeOfCare, basedOn
-          , participant, appointment, period, length, reason, diagnosis, account, hospitalization
-          , location, serviceProvider, partOf);
+          , participant, appointment, period, length, reasonCode, reasonReference, diagnosis
+          , account, hospitalization, location, serviceProvider, partOf);
       }
 
   @Override
@@ -4113,26 +4287,6 @@ public class Encounter extends DomainResource {
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam IDENTIFIER = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_IDENTIFIER);
-
- /**
-   * Search parameter: <b>reason</b>
-   * <p>
-   * Description: <b>Reason the encounter takes place (code)</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Encounter.reason</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="reason", path="Encounter.reason", description="Reason the encounter takes place (code)", type="token" )
-  public static final String SP_REASON = "reason";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>reason</b>
-   * <p>
-   * Description: <b>Reason the encounter takes place (code)</b><br>
-   * Type: <b>token</b><br>
-   * Path: <b>Encounter.reason</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REASON = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REASON);
 
  /**
    * Search parameter: <b>participant-type</b>
@@ -4234,7 +4388,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.episodeOfCare</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="episode-of-care", path="Encounter.episodeOfCare.where(resolve() is EpisodeOfCare)", description="Episode(s) of care that this encounter should be recorded against", type="reference", target={EpisodeOfCare.class } )
+  @SearchParamDefinition(name="episode-of-care", path="Encounter.episodeOfCare", description="Episode(s) of care that this encounter should be recorded against", type="reference", target={EpisodeOfCare.class } )
   public static final String SP_EPISODE_OF_CARE = "episode-of-care";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>episode-of-care</b>
@@ -4255,17 +4409,17 @@ public class Encounter extends DomainResource {
  /**
    * Search parameter: <b>diagnosis</b>
    * <p>
-   * Description: <b>Reason the encounter takes place (resource)</b><br>
+   * Description: <b>The diagnosis or procedure relevant to the encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.diagnosis.condition</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="diagnosis", path="Encounter.diagnosis.condition", description="Reason the encounter takes place (resource)", type="reference", target={Condition.class, Procedure.class } )
+  @SearchParamDefinition(name="diagnosis", path="Encounter.diagnosis.condition", description="The diagnosis or procedure relevant to the encounter", type="reference", target={Condition.class, Procedure.class } )
   public static final String SP_DIAGNOSIS = "diagnosis";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>diagnosis</b>
    * <p>
-   * Description: <b>Reason the encounter takes place (resource)</b><br>
+   * Description: <b>The diagnosis or procedure relevant to the encounter</b><br>
    * Type: <b>reference</b><br>
    * Path: <b>Encounter.diagnosis.condition</b><br>
    * </p>
@@ -4286,7 +4440,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.appointment</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="appointment", path="Encounter.appointment.where(resolve() is Appointment)", description="The appointment that scheduled this encounter", type="reference", target={Appointment.class } )
+  @SearchParamDefinition(name="appointment", path="Encounter.appointment", description="The appointment that scheduled this encounter", type="reference", target={Appointment.class } )
   public static final String SP_APPOINTMENT = "appointment";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>appointment</b>
@@ -4312,7 +4466,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.partOf</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="part-of", path="Encounter.partOf.where(resolve() is Encounter)", description="Another Encounter this encounter is part of", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="part-of", path="Encounter.partOf", description="Another Encounter this encounter is part of", type="reference", target={Encounter.class } )
   public static final String SP_PART_OF = "part-of";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>part-of</b>
@@ -4351,6 +4505,26 @@ public class Encounter extends DomainResource {
   public static final ca.uhn.fhir.rest.gclient.TokenClientParam TYPE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_TYPE);
 
  /**
+   * Search parameter: <b>reason-code</b>
+   * <p>
+   * Description: <b>Coded reason the encounter takes place</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Encounter.reasonCode</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="reason-code", path="Encounter.reasonCode", description="Coded reason the encounter takes place", type="token" )
+  public static final String SP_REASON_CODE = "reason-code";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>reason-code</b>
+   * <p>
+   * Description: <b>Coded reason the encounter takes place</b><br>
+   * Type: <b>token</b><br>
+   * Path: <b>Encounter.reasonCode</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.TokenClientParam REASON_CODE = new ca.uhn.fhir.rest.gclient.TokenClientParam(SP_REASON_CODE);
+
+ /**
    * Search parameter: <b>participant</b>
    * <p>
    * Description: <b>Persons involved in the encounter other than the patient</b><br>
@@ -4358,7 +4532,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.participant.individual</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="participant", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Practitioner.class, RelatedPerson.class } )
+  @SearchParamDefinition(name="participant", path="Encounter.participant.individual", description="Persons involved in the encounter other than the patient", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner"), @ca.uhn.fhir.model.api.annotation.Compartment(name="RelatedPerson") }, target={Practitioner.class, PractitionerRole.class, RelatedPerson.class } )
   public static final String SP_PARTICIPANT = "participant";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>participant</b>
@@ -4384,7 +4558,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.basedOn</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="based-on", path="Encounter.basedOn.where(resolve() is ServiceRequest)", description="The ServiceRequest that initiated this encounter", type="reference", target={ServiceRequest.class } )
+  @SearchParamDefinition(name="based-on", path="Encounter.basedOn", description="The ServiceRequest that initiated this encounter", type="reference", target={ServiceRequest.class } )
   public static final String SP_BASED_ON = "based-on";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>based-on</b>
@@ -4429,6 +4603,32 @@ public class Encounter extends DomainResource {
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("Encounter:patient").toLocked();
 
  /**
+   * Search parameter: <b>reason-reference</b>
+   * <p>
+   * Description: <b>Reason the encounter takes place (reference)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.reasonReference</b><br>
+   * </p>
+   */
+  @SearchParamDefinition(name="reason-reference", path="Encounter.reasonReference", description="Reason the encounter takes place (reference)", type="reference", target={Condition.class, ImmunizationRecommendation.class, Observation.class, Procedure.class } )
+  public static final String SP_REASON_REFERENCE = "reason-reference";
+ /**
+   * <b>Fluent Client</b> search parameter constant for <b>reason-reference</b>
+   * <p>
+   * Description: <b>Reason the encounter takes place (reference)</b><br>
+   * Type: <b>reference</b><br>
+   * Path: <b>Encounter.reasonReference</b><br>
+   * </p>
+   */
+  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam REASON_REFERENCE = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_REASON_REFERENCE);
+
+/**
+   * Constant for fluent queries to be used to add include statements. Specifies
+   * the path value of "<b>Encounter:reason-reference</b>".
+   */
+  public static final ca.uhn.fhir.model.api.Include INCLUDE_REASON_REFERENCE = new ca.uhn.fhir.model.api.Include("Encounter:reason-reference").toLocked();
+
+ /**
    * Search parameter: <b>location-period</b>
    * <p>
    * Description: <b>Time period during which the patient was present at the location</b><br>
@@ -4456,7 +4656,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.location.location</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="location", path="Encounter.location.location.where(resolve() is Location)", description="Location the encounter takes place", type="reference", target={Location.class } )
+  @SearchParamDefinition(name="location", path="Encounter.location.location", description="Location the encounter takes place", type="reference", target={Location.class } )
   public static final String SP_LOCATION = "location";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>location</b>
@@ -4482,7 +4682,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.serviceProvider</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="service-provider", path="Encounter.serviceProvider.where(resolve() is Organization)", description="The organization (facility) responsible for this encounter", type="reference", target={Organization.class } )
+  @SearchParamDefinition(name="service-provider", path="Encounter.serviceProvider", description="The organization (facility) responsible for this encounter", type="reference", target={Organization.class } )
   public static final String SP_SERVICE_PROVIDER = "service-provider";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>service-provider</b>
@@ -4548,7 +4748,7 @@ public class Encounter extends DomainResource {
    * Path: <b>Encounter.account</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="account", path="Encounter.account.where(resolve() is Account)", description="The set of accounts that may be used for billing for this Encounter", type="reference", target={Account.class } )
+  @SearchParamDefinition(name="account", path="Encounter.account", description="The set of accounts that may be used for billing for this Encounter", type="reference", target={Account.class } )
   public static final String SP_ACCOUNT = "account";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>account</b>

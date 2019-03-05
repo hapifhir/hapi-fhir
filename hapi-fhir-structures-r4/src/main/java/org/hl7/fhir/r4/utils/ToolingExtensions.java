@@ -70,12 +70,11 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 public class ToolingExtensions {
 
   // validated
-  public static final String EXT_SUBSUMES = "http://hl7.org/fhir/StructureDefinition/codesystem-subsumes"; 
 //  private static final String EXT_OID = "http://hl7.org/fhir/StructureDefinition/valueset-oid";
 //  public static final String EXT_DEPRECATED = "http://hl7.org/fhir/StructureDefinition/codesystem-deprecated";
-  public static final String EXT_DEFINITION = "http://hl7.org/fhir/StructureDefinition/valueset-definition";
-  public static final String EXT_CS_COMMENT = "http://hl7.org/fhir/StructureDefinition/codesystem-comments";
-  public static final String EXT_VS_COMMENT = "http://hl7.org/fhir/StructureDefinition/valueset-comments";
+  public static final String EXT_DEFINITION = "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition";
+  public static final String EXT_CS_COMMENT = "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments";
+  public static final String EXT_VS_COMMENT = "http://hl7.org/fhir/StructureDefinition/valueset-concept-comments";
   private static final String EXT_IDENTIFIER = "http://hl7.org/fhir/StructureDefinition/identifier";
   public static final String EXT_TRANSLATION = "http://hl7.org/fhir/StructureDefinition/translation";
   public static final String EXT_ISSUE_SOURCE = "http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-source";
@@ -98,7 +97,7 @@ public class ToolingExtensions {
   public static final String EXT_MAPPING_PREFIX = "http://hl7.org/fhir/tools/StructureDefinition/logical-mapping-prefix";
   public static final String EXT_MAPPING_SUFFIX = "http://hl7.org/fhir/tools/StructureDefinition/logical-mapping-suffix";
 
-//  public static final String EXT_FLYOVER = "http://hl7.org/fhir/StructureDefinition/questionnaire-extensions#flyover";
+//  public static final String EXT_FLYOVER = "http://hl7.org/fhir/Profile/questionnaire-extensions#flyover";
   public static final String EXT_QTYPE = "http://hl7.org/fhir/StructureDefinition/questionnnaire-baseType";
 //  private static final String EXT_QREF = "http://www.healthintersections.com.au/fhir/Profile/metadata#reference";
 //  private static final String EXTENSION_FILTER_ONLY = "http://www.healthintersections.com.au/fhir/Profile/metadata#expandNeedsFilter";
@@ -109,11 +108,13 @@ public class ToolingExtensions {
   public static final String EXT_CIMI_REFERENCE = "http://hl7.org/fhir/StructureDefinition/cimi-reference";
   public static final String EXT_UNCLOSED = "http://hl7.org/fhir/StructureDefinition/valueset-unclosed";
   public static final String EXT_FMM_LEVEL = "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm";
+  public static final String EXT_SEC_CAT = "http://hl7.org/fhir/StructureDefinition/structuredefinition-security-category";
   public static final String EXT_RESOURCE_CATEGORY = "http://hl7.org/fhir/StructureDefinition/structuredefinition-category";
   public static final String EXT_TABLE_NAME = "http://hl7.org/fhir/StructureDefinition/structuredefinition-table-name";
   public static final String EXT_OO_FILE = "http://hl7.org/fhir/StructureDefinition/operationoutcome-file";
   public static final String EXT_WORKGROUP = "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg";
   public static final String EXT_STANDARDS_STATUS = "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status";
+  public static final String EXT_NORMATIVE_VERSION = "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version";
   public static final String EXT_IGP_BASE = "http://hl7.org/fhir/StructureDefinition/igpublisher-res-base";
   public static final String EXT_IGP_DEFNS = "http://hl7.org/fhir/StructureDefinition/igpublisher-res-defns";
   public static final String EXT_IGP_FORMAT = "http://hl7.org/fhir/StructureDefinition/igpublisher-res-format";
@@ -123,6 +124,8 @@ public class ToolingExtensions {
   public static final String EXT_IGP_PAGES = "http://hl7.org/fhir/StructureDefinition/igpublisher-folder-pages";
   public static final String EXT_IGP_SPREADSHEET = "http://hl7.org/fhir/StructureDefinition/igpublisher-spreadsheet";
   public static final String EXT_IGP_BUNDLE = "http://hl7.org/fhir/StructureDefinition/igpublisher-bundle";
+  public static final String EXT_MAX_VALUESET = "http://hl7.org/fhir/StructureDefinition/elementdefinition-maxValueSet";
+  public static final String EXT_PROFILE_ELEMENT = "http://hl7.org/fhir/StructureDefinition/elementdefinition-profile-element";
 
 
   // specific extension helpers
@@ -209,6 +212,14 @@ public class ToolingExtensions {
       dr.getExtension().add(Factory.newExtension(url, new IntegerType(value), true));   
   }
 
+  public static void addCodeExtension(DomainResource dr, String url, String value) {
+    Extension ex = getExtension(dr, url);
+    if (ex != null)
+      ex.setValue(new CodeType(value));
+    else
+      dr.getExtension().add(Factory.newExtension(url, new CodeType(value), true));   
+  }
+
   public static void addVSComment(ConceptSetComponent nc, String comment) {
     if (!StringUtils.isBlank(comment))
       nc.getExtension().add(Factory.newExtension(EXT_VS_COMMENT, Factory.newString_(comment), true));   
@@ -227,9 +238,6 @@ public class ToolingExtensions {
 //    setDeprecated(nc);   
 //  }
 //
-  public static void addSubsumes(ConceptDefinitionComponent nc, String code) {
-    nc.getExtension().add(Factory.newExtension(EXT_SUBSUMES, Factory.newCode(code), true));   
-  }
 
   public static void addDefinition(Element nc, String definition) {
     if (!StringUtils.isBlank(definition))
@@ -359,16 +367,6 @@ public class ToolingExtensions {
 //    return findBooleanExtension(c, EXT_DEPRECATED);    
 //  }
 
-  public static List<CodeType> getSubsumes(ConceptDefinitionComponent c) {
-    List<CodeType> res = new ArrayList<CodeType>();
-
-    for (Extension e : c.getExtension()) {
-      if (EXT_SUBSUMES.equals(e.getUrl()))
-        res.add((CodeType) e.getValue());
-    }
-    return res;
-  }
-
   public static void addFlyOver(QuestionnaireItemComponent item, String text){
     if (!StringUtils.isBlank(text)) {
     	QuestionnaireItemComponent display = item.addItem();
@@ -444,6 +442,16 @@ public class ToolingExtensions {
       resource.getExtension().add(new Extension(new UriType(uri)).setValue(new StringType(value)));
   }
 
+  public static void setStringExtension(Element resource, String uri, String value) {
+    if (Utilities.noString(value))
+      return;
+        Extension ext = getExtension(resource, uri);
+    if (ext != null)
+      ext.setValue(new StringType(value));
+    else
+      resource.getExtension().add(new Extension(new UriType(uri)).setValue(new StringType(value)));
+  }
+
   public static void setCodeExtension(DomainResource resource, String uri, String value) {
     if (Utilities.noString(value))
       return;
@@ -453,6 +461,17 @@ public class ToolingExtensions {
       ext.setValue(new CodeType(value));
     else
       resource.getExtension().add(new Extension(new UriType(uri)).setValue(new CodeType(value)));
+  }
+
+  public static void setCodeExtension(Element element, String uri, String value) {
+    if (Utilities.noString(value))
+      return;
+    
+    Extension ext = getExtension(element, uri);
+    if (ext != null)
+      ext.setValue(new CodeType(value));
+    else
+      element.getExtension().add(new Extension(new UriType(uri)).setValue(new CodeType(value)));
   }
 
   public static void setIntegerExtension(DomainResource resource, String uri, int value) {
@@ -632,11 +651,26 @@ public class ToolingExtensions {
     return StandardsStatus.fromCode(ToolingExtensions.readStringExtension(dr, ToolingExtensions.EXT_STANDARDS_STATUS));
   }
 
-  public static void setStandardsStatus(DomainResource dr, StandardsStatus status) {
+  public static void setStandardsStatus(DomainResource dr, StandardsStatus status, String normativeVersion) {
     if (status == null)
       ToolingExtensions.removeExtension(dr, ToolingExtensions.EXT_STANDARDS_STATUS);
     else
-      ToolingExtensions.setStringExtension(dr, ToolingExtensions.EXT_STANDARDS_STATUS, status.toDisplay());
+      ToolingExtensions.setCodeExtension(dr, ToolingExtensions.EXT_STANDARDS_STATUS, status.toCode());
+    if (normativeVersion == null)
+      ToolingExtensions.removeExtension(dr, ToolingExtensions.EXT_NORMATIVE_VERSION);
+    else
+      ToolingExtensions.setCodeExtension(dr, ToolingExtensions.EXT_NORMATIVE_VERSION, normativeVersion);
+  }
+
+  public static void setStandardsStatus(Element dr, StandardsStatus status, String normativeVersion) {
+    if (status == null)
+      ToolingExtensions.removeExtension(dr, ToolingExtensions.EXT_STANDARDS_STATUS);
+    else
+      ToolingExtensions.setCodeExtension(dr, ToolingExtensions.EXT_STANDARDS_STATUS, status.toCode());
+    if (normativeVersion == null)
+      ToolingExtensions.removeExtension(dr, ToolingExtensions.EXT_NORMATIVE_VERSION);
+    else
+      ToolingExtensions.setCodeExtension(dr, ToolingExtensions.EXT_NORMATIVE_VERSION, normativeVersion);
   }
 
 //  public static boolean hasOID(ValueSet vs) {
