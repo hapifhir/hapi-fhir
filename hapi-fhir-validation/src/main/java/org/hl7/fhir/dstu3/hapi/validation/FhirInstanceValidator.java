@@ -255,11 +255,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 	
 	/**
-	 * Sets a customized {@link IEnableWhenEvaluator} which is injected to created InstanceValidators 
-<<<<<<< HEAD
-	 * @param myEnableWhenEvaluator
-=======
->>>>>>> master
+	 * Sets a function which creates {@link IEnableWhenEvaluator} instance which is injected to the InstanceValidator created during validation 
 	 */
 	public void setEnableWhenEvaluatorSupplier(
 			Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier) {
