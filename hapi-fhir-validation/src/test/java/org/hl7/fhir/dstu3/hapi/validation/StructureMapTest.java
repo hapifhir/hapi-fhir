@@ -7,6 +7,7 @@ import java.util.*;
 import javax.annotation.Nullable;
 
 import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.utils.StructureMapUtilities;

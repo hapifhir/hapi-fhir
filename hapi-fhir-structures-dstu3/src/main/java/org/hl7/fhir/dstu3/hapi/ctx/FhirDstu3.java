@@ -51,7 +51,7 @@ public class FhirDstu3 implements IFhirVersion {
 
   @Override
   public IContextValidationSupport<?, ?, ?, ?, ?, ?> createValidationSupport() {
-    String className = "org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport";
+    String className = "org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport";
     try {
       return (IContextValidationSupport<?, ?, ?, ?, ?, ?>) Class.forName(className).newInstance();
     } catch (Exception theE) {

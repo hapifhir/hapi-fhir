@@ -58,6 +58,15 @@
 				two client threads collide while trying to simultaneously create a resource with the
 				same client-assigned ID. In addition, better error messages are now returned
 				when conflicts such as this one are hit within a FHIR transaction operation.
+			<action type="add">
+				The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions
+				when performing token searches with multiple OR values.
+			</action>
+			<action type="add">
+				The JPA server transaction processor will now automatically detect if the request
+				Bundle contains multiple entries having identical conditional create operations, and
+				collapse these into a single operation. This is done as a convenience, since many
+				conversion algorithms can accidentally generate such duplicates.
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

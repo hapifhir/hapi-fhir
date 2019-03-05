@@ -157,6 +157,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 
+
 	@Test
 	public void testManualPagingLinkOffsetDoesntReturnBeyondEnd() {
 		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 1000));
@@ -226,6 +227,36 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(4, output.getEntry().size());
 		assertNull(output.getLink("next"));
 
+	}
+
+	@Test
+	@Ignore
+	public void testManualPagingLinkOffsetDoesntReturnBeyondEnd() {
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 1000));
+
+		for (int i = 0; i < 50; i++) {
+			Organization o = new Organization();
+			o.setId("O" + i);
+			o.setName("O" + i);
+			ourClient.update().resource(o).execute().getId().toUnqualifiedVersionless();
+		}
+
+		Bundle output = ourClient
+			.search()
+			.forResource("Organization")
+			.count(3)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		String linkNext = output.getLink("next").getUrl();
+		linkNext = linkNext.replaceAll("_getpagesoffset=[0-9]+", "_getpagesoffset=3300");
+		assertThat(linkNext, containsString("_getpagesoffset=3300"));
+
+		Bundle nextPageBundle = ourClient.loadPage().byUrl(linkNext).andReturnBundle(Bundle.class).execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(nextPageBundle));
+		assertEquals(null, nextPageBundle.getLink("next"));
 	}
 
 	@Test

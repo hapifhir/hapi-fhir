@@ -29,9 +29,12 @@ import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
+	private static final Logger ourLog = LoggerFactory.getLogger(InMemorySubscriptionMatcher.class);
 
 	@Autowired
 	private FhirContext myContext;
@@ -49,7 +52,8 @@ public class InMemorySubscriptionMatcher implements ISubscriptionMatcher {
 		try {
 			return match(theSubscription.getCriteriaString(), theMsg.getNewPayload(myContext));
 		} catch (Exception e) {
-			throw new InternalErrorException("Failure processing resource ID[" + theMsg.getId(myContext) + "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(), e);
+			ourLog.error("Failure in in-memory matcher", e);
+			throw new InternalErrorException("Failure performing memory-match for resource ID[" + theMsg.getId(myContext) + "] for subscription ID[" + theSubscription.getIdElementString() + "]: " + e.getMessage(), e);
 		}
 	}
 

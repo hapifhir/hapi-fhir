@@ -65,7 +65,7 @@ public class CaptureQueriesListener implements ProxyDataSourceBuilder.SingleQuer
 				List<String> nextParams = new ArrayList<>(myParams);
 				while (retVal.contains("?") && nextParams.size() > 0) {
 					int idx = retVal.indexOf("?");
-					retVal = retVal.substring(0, idx) + nextParams.remove(0) + retVal.substring(idx + 1);
+					retVal = retVal.substring(0, idx) + "'" + nextParams.remove(0) + "'" + retVal.substring(idx + 1);
 				}
 			}
 

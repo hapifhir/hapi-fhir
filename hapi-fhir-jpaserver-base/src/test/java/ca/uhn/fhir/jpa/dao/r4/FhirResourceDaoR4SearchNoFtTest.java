@@ -2048,6 +2048,95 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 
 	@Test
+	public void testSearchTokenListLike() {
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("FOO");
+		myPatientDao.create(p);
+		p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("BAR");
+		myPatientDao.create(p);
+		p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("BAZ");
+		myPatientDao.create(p);
+		CaptureQueriesListener.clear();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_IDENTIFIER, new TokenOrListParam().addOr(new TokenParam("FOO")).addOr(new TokenParam("BAR")));
+		map.setLoadSynchronous(true);
+		IBundleProvider search = myPatientDao.search(map);
+
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, true))
+			.filter(t -> t.contains("select"))
+			.collect(Collectors.toList());
+		String resultingQueryFormatted = queries.get(queries.size() - 1);
+		ourLog.info("Resulting query formatted:\n{}", resultingQueryFormatted);
+
+		queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.filter(t -> t.contains("select"))
+			.collect(Collectors.toList());
+		String resultingQueryNotFormatted = queries.get(queries.size() - 1);
+
+		assertEquals(resultingQueryFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"));
+		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE in ('3140583648400062149' , '4929264259256651518')"));
+
+		// Ensure that the search actually worked
+		assertEquals(2, search.size().intValue());
+
+	}
+
+
+	@Test
+	public void testSearchTokenListWithMixedCombinations() {
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("FOO");
+		myPatientDao.create(p);
+		p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("BAR");
+		myPatientDao.create(p);
+		p = new Patient();
+		p.addIdentifier().setSystem("SAS").setValue("BAZ");
+		myPatientDao.create(p);
+		CaptureQueriesListener.clear();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_IDENTIFIER, new TokenOrListParam().addOr(new TokenParam("SAS", null)).addOr(new TokenParam("FOO")).addOr(new TokenParam("BAR")));
+		map.setLoadSynchronous(true);
+		IBundleProvider search = myPatientDao.search(map);
+
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, true))
+			.filter(t -> t.contains("select"))
+			.collect(Collectors.toList());
+		String resultingQueryFormatted = queries.get(queries.size() - 1);
+		ourLog.info("Resulting query formatted:\n{}", resultingQueryFormatted);
+
+		queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.filter(t -> t.contains("select"))
+			.collect(Collectors.toList());
+		String resultingQueryNotFormatted = queries.get(queries.size() - 1);
+
+		assertEquals(resultingQueryFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"));
+		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE in ('3140583648400062149' , '4929264259256651518')"));
+
+		// Ensure that the search actually worked
+		assertEquals(3, search.size().intValue());
+
+	}
+
+	@Test
 	public void testSearchStringParam() throws Exception {
 		IIdType pid1;
 		IIdType pid2;
@@ -2258,6 +2347,31 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		String searchQuery = queries.get(0);
 		assertEquals(searchQuery, 3, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
 		assertEquals(searchQuery, 5, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
+	}
+
+
+	@Test
+	public void testSearchWithDateRange() {
+		SearchParameterMap sp = new SearchParameterMap();
+		sp.setLoadSynchronous(true);
+		sp.add(MedicationRequest.SP_INTENT, new TokenParam("FOO", "BAR"));
+		sp.setLastUpdated(new DateRangeParam()
+			.setUpperBound(new DateParam("le2019-02-22T17:50:00"))
+			.setLowerBound(new DateParam("ge2019-02-22T13:50:00")));
+		IBundleProvider retrieved = myMedicationRequestDao.search(sp);
+
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.map(t -> t.getSql(true, true))
+			.collect(Collectors.toList());
+
+		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
+
+		String searchQuery = queries.get(0);
+		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
+		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
+		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
 	}
 
 

@@ -14,6 +14,7 @@ import org.apache.commons.lang3.Validate;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Condition.ConditionClinicalStatus;
