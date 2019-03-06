@@ -26,7 +26,6 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-// FIXME KHS why isn't this test being run?
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public class InMemorySubscriptionMatcherR4Test {
