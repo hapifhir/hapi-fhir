@@ -26,10 +26,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hibernate.HibernateException;
+import org.hibernate.StaleStateException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
@@ -68,10 +70,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		if (isNotBlank(theMessageToPrepend)) {
 			messageToPrepend = theMessageToPrepend + " - ";
 		}
-		if (theException.toString().contains("Batch update")) {
-			theException.toString();
-		}
-		// <editor-fold desc="I HATE YOU">
+
 		if (theException instanceof ConstraintViolationException) {
 			String constraintName = ((ConstraintViolationException) theException).getConstraintName();
 			switch (defaultString(constraintName)) {
@@ -83,7 +82,25 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
 			}
 		}
-		// </editor-fold>
+
+		/*
+		 * It would be nice if we could be more precise here, since technically any optimistic lock
+		 * failure could result in a StaleStateException, but with the error message we're returning
+		 * we're basically assuming it's an optimistic lock failure on HFJ_RESOURCE.
+		 *
+		 * That said, I think this is an OK trade-off. There is a high probability that if this happens
+		 * it is a failure on HFJ_RESOURCE (there aren't many other tables in our schema that
+		 * use @Version at all) and this error message is infinitely more comprehensible
+		 * than the one we'd otherwise return.
+		 *
+		 * The actual StaleStateException is thrown in hibernate's Expectations
+		 * class in a method called "checkBatched" currently. This can all be tested using the
+		 * StressTestR4Test method testMultiThreadedUpdateSameResourceInTransaction()
+		 */
+		if (theException instanceof StaleStateException) {
+			String msg = messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure");
+			throw new ResourceVersionConflictException(msg);
+		}
 
 		return super.convertHibernateAccessException(theException);
 	}

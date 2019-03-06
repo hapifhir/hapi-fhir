@@ -1693,7 +1693,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.setName("content")
 			.setResource(bundle);
 		try {
-			ourClient.operation().onType(MessageHeader.class).named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
+			ourClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
 			fail();
 		} catch (NotImplementedOperationException e) {
 			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));

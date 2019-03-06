@@ -131,7 +131,7 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	 */
 	private List<HookInvoker> scanInterceptorForHookMethods(Object theInterceptor, int theTypeOrder) {
 		ArrayList<HookInvoker> retVal = new ArrayList<>();
-		for (Method nextMethod : theInterceptor.getClass().getDeclaredMethods()) {
+		for (Method nextMethod : theInterceptor.getClass().getMethods()) {
 			Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
 
 			if (hook != null) {
