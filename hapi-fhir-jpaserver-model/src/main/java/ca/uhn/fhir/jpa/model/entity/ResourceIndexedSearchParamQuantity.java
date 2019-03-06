@@ -36,6 +36,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 //@formatter:off
 @Embeddable
@@ -246,7 +247,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 		// Only match on system if it wasn't specified
 		String quantityUnitsString = defaultString(quantity.getUnits());
-		if (quantity.getSystem() == null && quantityUnitsString == null) {
+		if (quantity.getSystem() == null && isBlank(quantityUnitsString)) {
 			if (Objects.equals(getValue(),quantity.getValue())) {
 				retval = true;
 			}
@@ -257,7 +258,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 					Objects.equals(getValue(),quantity.getValue())) {
 					retval = true;
 				}
-			} else if (quantityUnitsString == null) {
+			} else if (isBlank(quantityUnitsString)) {
 				if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
 					Objects.equals(getValue(),quantity.getValue())) {
 					retval = true;
