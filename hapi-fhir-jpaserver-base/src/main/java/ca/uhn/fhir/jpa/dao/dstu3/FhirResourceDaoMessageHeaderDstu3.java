@@ -20,17 +20,9 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.FhirResourceDaoMessageHeaderDstu2;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoMessageHeader;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.dstu3.model.MessageHeader;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public class FhirResourceDaoMessageHeaderDstu3 extends FhirResourceDaoDstu3<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
-
-	@Override
-	public IBaseBundle messageHeaderProcessMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
-		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
-	}
-
+	// nothing right now
 }
