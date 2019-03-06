@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -49,6 +50,7 @@ import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.hibernate.Session;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -64,7 +66,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.PersistenceException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -85,6 +89,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired(required = false)
+	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
 
 	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
 		if (theRequestDetails != null) {
@@ -576,8 +582,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			 */
 			for (int i = 0; i < theEntries.size(); i++) {
 
-				if (i % 100 == 0) {
-					ourLog.debug("Processed {} non-GET entries out of {}", i, theEntries.size());
+				if (i % 250 == 0) {
+					ourLog.info("Processed {} non-GET entries out of {} in transaction", i, theEntries.size());
 				}
 
 				BUNDLEENTRY nextReqEntry = theEntries.get(i);
@@ -749,7 +755,13 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			FhirTerser terser = myContext.newTerser();
 			theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
+			int i = 0;
 			for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
+
+				if (i++ % 250 == 0) {
+					ourLog.info("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.values().size());
+				}
+
 				IBaseResource nextResource = nextOutcome.getResource();
 				if (nextResource == null) {
 					continue;
@@ -803,7 +815,16 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			theTransactionStopWatch.endCurrentTask();
 			theTransactionStopWatch.startTask("Flush writes to database");
 
-			flushJpaSession();
+			try {
+				flushJpaSession();
+			} catch (PersistenceException e) {
+				if (myHapiFhirHibernateJpaDialect != null) {
+					List<String> types = theIdToPersistedOutcome.keySet().stream().filter(t -> t != null).map(t -> t.getResourceType()).collect(Collectors.toList());
+					String message = "Error flushing transaction with resource types: " + types;
+					throw myHapiFhirHibernateJpaDialect.translate(e, message);
+				}
+				throw e;
+			}
 
 			theTransactionStopWatch.endCurrentTask();
 			if (conditionalRequestUrls.size() > 0) {

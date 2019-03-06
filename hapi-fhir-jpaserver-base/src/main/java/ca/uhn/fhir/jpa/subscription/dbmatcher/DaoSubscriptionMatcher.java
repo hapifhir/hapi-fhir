@@ -36,16 +36,20 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
-	private Logger ourLog = LoggerFactory.getLogger(DaoSubscriptionMatcher.class);
-
-	@Autowired
-	private FhirContext myCtx;
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired
 	MatchUrlService myMatchUrlService;
+	private Logger ourLog = LoggerFactory.getLogger(DaoSubscriptionMatcher.class);
+	@Autowired
+	private FhirContext myCtx;
+	@Autowired
+	private PlatformTransactionManager myTxManager;
 
 	@Override
 	public SubscriptionMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
@@ -63,7 +67,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 
 		return SubscriptionMatchResult.fromBoolean(results.size() > 0);
 	}
-	
+
 	/**
 	 * Search based on a query criteria
 	 */
@@ -75,6 +79,10 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		return responseDao.search(responseCriteriaUrl);
+		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		return txTemplate.execute(t -> responseDao.search(responseCriteriaUrl));
+
 	}
+
 }
