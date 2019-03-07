@@ -33,6 +33,10 @@ import org.hibernate.search.annotations.NumericField;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Objects;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 //@formatter:off
 @Embeddable
@@ -242,25 +246,29 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		boolean retval = false;
 
 		// Only match on system if it wasn't specified
-		if (quantity.getSystem() == null && quantity.getUnits() == null) {
-			if (getValue().equals(quantity.getValue())) {
-				retval = true;
-			}
-		} else if (quantity.getSystem() == null) {
-			if (getUnits().equalsIgnoreCase(quantity.getUnits()) &&
-				getValue().equals(quantity.getValue())) {
-				retval = true;
-			}
-		} else if (quantity.getUnits() == null) {
-			if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
-				getValue().equals(quantity.getValue())) {
+		String quantityUnitsString = defaultString(quantity.getUnits());
+		if (quantity.getSystem() == null && isBlank(quantityUnitsString)) {
+			if (Objects.equals(getValue(),quantity.getValue())) {
 				retval = true;
 			}
 		} else {
-			if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
-				getUnits().equalsIgnoreCase(quantity.getUnits()) &&
-				getValue().equals(quantity.getValue())) {
-				retval = true;
+			String unitsString = defaultString(getUnits());
+			if (quantity.getSystem() == null) {
+				if (unitsString.equalsIgnoreCase(quantityUnitsString) &&
+					Objects.equals(getValue(),quantity.getValue())) {
+					retval = true;
+				}
+			} else if (isBlank(quantityUnitsString)) {
+				if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
+					Objects.equals(getValue(),quantity.getValue())) {
+					retval = true;
+				}
+			} else {
+				if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
+					unitsString.equalsIgnoreCase(quantityUnitsString) &&
+					Objects.equals(getValue(),quantity.getValue())) {
+					retval = true;
+				}
 			}
 		}
 		return retval;

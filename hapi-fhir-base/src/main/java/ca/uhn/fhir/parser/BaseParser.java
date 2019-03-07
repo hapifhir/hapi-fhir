@@ -649,7 +649,7 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, InputStream theInputStream) throws DataFormatException {
-		return parseResource(theResourceType, new InputStreamReader(theInputStream, Charsets.UTF_8));
+		return parseResource(theResourceType, new InputStreamReader(theInputStream, Constants.CHARSET_UTF8));
 	}
 
 	@Override

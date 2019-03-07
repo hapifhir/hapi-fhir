@@ -14,7 +14,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.*;
 
-public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test {
+public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test {
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Autowired
@@ -557,5 +557,25 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		CommunicationRequest cr = new CommunicationRequest();
 		cr.getRequester().getAgent().setReference("Organization/O1276");
 		assertMatched(cr, criteria);
+	}
+
+	@Test
+	public void testSystemWithNullValue() {
+		String criteria = "Observation?code=17861-6";
+		Observation observation = new Observation();
+		CodeableConcept code = new CodeableConcept();
+		observation.getCode().addCoding().setSystem("http://loinc.org");
+
+		assertNotMatched(observation, criteria);
+	}
+
+	@Test
+	public void testNullSystemNotNullValue() {
+		String criteria = "Observation?code=17861-6";
+		Observation observation = new Observation();
+		CodeableConcept code = new CodeableConcept();
+		observation.getCode().addCoding().setCode("look ma no system");
+
+		assertNotMatched(observation, criteria);
 	}
 }

@@ -1728,7 +1728,7 @@ public class AuthorizationInterceptorDstu3Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("process-message").onType(MessageHeader.class).andRequireExplicitResponseAuthorization().andThen()
+					.allow("RULE 1").operation().named("process-message").onServer().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1743,7 +1743,7 @@ public class AuthorizationInterceptorDstu3Test {
 
 		// With body
 		ourHitMethod = false;
-		httpPost = new HttpPost("http://localhost:" + ourPort + "/MessageHeader/$process-message");
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/$process-message");
 		httpPost.setEntity(new StringEntity(inputString, ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
@@ -1753,7 +1753,7 @@ public class AuthorizationInterceptorDstu3Test {
 
 		// With body
 		ourHitMethod = false;
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/MessageHeader/$process-message");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$process-message");
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
@@ -3348,21 +3348,6 @@ public class AuthorizationInterceptorDstu3Test {
 
 	}
 
-	public static class DummyMessageHeaderResourceProvider implements IResourceProvider {
-
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return MessageHeader.class;
-		}
-
-		@Operation(name = "process-message", idempotent = true)
-		public Parameters operation0(@OperationParam(name = "content") Bundle theInput) {
-			ourHitMethod = true;
-			return (Parameters) new Parameters().setId("1");
-		}
-
-	}
 
 	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {
 
@@ -3633,6 +3618,13 @@ public class AuthorizationInterceptorDstu3Test {
 			return (Parameters) new Parameters().setId("1");
 		}
 
+		@Operation(name = "process-message", idempotent = true)
+		public Parameters processMessage(@OperationParam(name = "content") Bundle theInput) {
+			ourHitMethod = true;
+			return (Parameters) new Parameters().setId("1");
+		}
+
+
 		@Transaction()
 		public Bundle search(IRequestOperationCallback theRequestOperationCallback, @TransactionParam Bundle theInput) {
 			ourHitMethod = true;
@@ -3664,13 +3656,12 @@ public class AuthorizationInterceptorDstu3Test {
 		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
 		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
 		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
-		DummyMessageHeaderResourceProvider mshProv = new DummyMessageHeaderResourceProvider();
 		PlainProvider plainProvider = new PlainProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, mshProv);
+		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
 		ourServlet.setPlainProviders(plainProvider);
 		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
 		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);

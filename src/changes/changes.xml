@@ -48,9 +48,25 @@
 				using the string name of the datatype (e.g. "dateTime") in order to help
 				building Parameters resources in a version-independent way.
 			</action>
+			<action type="fix">
+				When performing a search using the JPA server, if a search returned between 1500
+				and 2000 results, a query for the final page of results would timeout due to
+				a page calculation error. This has been corrected.
+			</action>
+			<action type="add">
+				In the JPA server, a much more readable error message is now returned returned when 
+				two client threads collide while trying to simultaneously create a resource with the
+				same client-assigned ID. In addition, better error messages are now returned
+				when conflicts such as this one are hit within a FHIR transaction operation.
 			<action type="add">
 				The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions
 				when performing token searches with multiple OR values.
+			</action>
+			<action type="add">
+				The JPA server transaction processor will now automatically detect if the request
+				Bundle contains multiple entries having identical conditional create operations, and
+				collapse these into a single operation. This is done as a convenience, since many
+				conversion algorithms can accidentally generate such duplicates.
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

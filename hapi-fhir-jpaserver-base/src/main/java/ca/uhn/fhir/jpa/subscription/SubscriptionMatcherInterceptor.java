@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PreDestroy;
 
@@ -103,7 +105,6 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
-
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
 		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, msg)) {
 			return;
@@ -112,7 +113,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		submitResourceModified(msg);
 	}
 
-	private void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
+	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");
 		Validate.notNull(myProcessingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		myProcessingChannel.send(new ResourceModifiedJsonMessage(theMessage));
@@ -127,7 +128,26 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	 */
 	@Override
 	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
-		sendToProcessingChannel(theMsg);
+		/*
+		 * We only want to submit the message to the processing queue once the
+		 * transaction is committed. We do this in order to make sure that the
+		 * data is actually in the DB, in case it's the database matcher.
+		 */
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public int getOrder() {
+					return 0;
+				}
+
+				@Override
+				public void afterCommit() {
+					sendToProcessingChannel(theMsg);
+				}
+			});
+		} else {
+			sendToProcessingChannel(theMsg);
+		}
 	}
 
 	@VisibleForTesting

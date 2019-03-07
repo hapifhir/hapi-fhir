@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -136,7 +137,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.create(p).getId();
 			fail();
-		} catch (DataIntegrityViolationException e) {
+		} catch (ResourceVersionConflictException e) {
 			// good
 		}
 

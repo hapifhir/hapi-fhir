@@ -1204,6 +1204,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * <p>
 	 * The default is <code>false</code>
 	 * </p>
+	 * <p>
+	 * Note that this setting is ignored by {@link ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor}
+	 * when streaming HTML, although even when that interceptor it used this setting will
+	 * still be honoured when streaming raw FHIR.
+	 * </p>
 	 *
 	 * @return Returns the default pretty print setting
 	 */
@@ -1218,6 +1223,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * parameter in the request URL.
 	 * <p>
 	 * The default is <code>false</code>
+	 * </p>
+	 * <p>
+	 * Note that this setting is ignored by {@link ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor}
+	 * when streaming HTML, although even when that interceptor it used this setting will
+	 * still be honoured when streaming raw FHIR.
 	 * </p>
 	 *
 	 * @param theDefaultPrettyPrint The default pretty print setting

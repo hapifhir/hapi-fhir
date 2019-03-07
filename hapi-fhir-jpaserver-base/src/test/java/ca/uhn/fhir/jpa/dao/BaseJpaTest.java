@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.JpaConstants;
@@ -312,6 +313,14 @@ public abstract class BaseJpaTest {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (IBaseResource next : theFound) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
+		}
+		return retVal;
+	}
+
+	protected List<String> toUnqualifiedVersionlessIdValues(List<? extends IBaseResource> theFound) {
+		List<String> retVal = new ArrayList<>();
+		for (IBaseResource next : theFound) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
 	}

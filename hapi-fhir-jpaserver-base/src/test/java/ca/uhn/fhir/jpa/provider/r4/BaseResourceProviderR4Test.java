@@ -99,7 +99,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			ourRestServer.setResourceProviders((List) myResourceProviders);
 
-			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(myFhirCtx));
 
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderR4.class);
 			ourGraphQLProvider = myAppCtx.getBean("myGraphQLProvider");

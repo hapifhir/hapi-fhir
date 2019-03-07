@@ -2003,7 +2003,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		try {
 			myEncounterDao.read(outcome.getId(), mySrd);
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (InvalidRequestException e) {
 			// expected
 		}
 		try {

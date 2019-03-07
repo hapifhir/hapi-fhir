@@ -9,6 +9,7 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 
 import org.hamcrest.Matchers;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.dstu3.model.*;

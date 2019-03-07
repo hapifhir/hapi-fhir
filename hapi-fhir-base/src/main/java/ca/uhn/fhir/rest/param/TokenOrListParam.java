@@ -77,6 +77,14 @@ public class TokenOrListParam extends BaseOrListParam<TokenOrListParam, TokenPar
 		return this;
 	}
 
+	/**
+	 * Add a new token to this list
+	 */
+	public TokenOrListParam add(String theValue) {
+		add(new TokenParam(null, theValue));
+		return this;
+	}
+
 	public List<BaseCodingDt> getListAsCodings() {
 		ArrayList<BaseCodingDt> retVal = new ArrayList<BaseCodingDt>();
 		for (TokenParam next : getValuesAsQueryTokens()) {

@@ -1,16 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoMessageHeader;
-import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.MessageHeader;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-
-import javax.servlet.http.HttpServletRequest;
 
 /*
  * #%L
@@ -33,29 +23,5 @@ import javax.servlet.http.HttpServletRequest;
  */
 
 public class BaseJpaResourceProviderMessageHeaderDstu3 extends JpaResourceProviderDstu3<MessageHeader> {
-
-
-	/**
-	 * /MessageHeader/$process-message
-	 */
-	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
-	public IBaseBundle processMessage(
-		HttpServletRequest theServletRequest,
-		RequestDetails theRequestDetails,
-
-		@OperationParam(name = "content", min = 1, max = 1)
-		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
-			Bundle theMessageToProcess
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			return ((IFhirResourceDaoMessageHeader<MessageHeader>) getDao()).messageHeaderProcessMessage(theRequestDetails, theMessageToProcess);
-		} finally {
-			endRequest(theServletRequest);
-		}
-
-	}
-
-
+	// nothing now
 }

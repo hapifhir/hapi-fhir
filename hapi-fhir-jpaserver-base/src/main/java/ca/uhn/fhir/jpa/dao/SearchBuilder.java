@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,9 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -105,7 +108,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private static final List<Long> EMPTY_LONG_LIST = Collections.unmodifiableList(new ArrayList<>());
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchBuilder.class);
-	private static final int maxLoad = 800;
+	/**
+	 * @see #loadResourcesByPid(Collection, List, Set, boolean, EntityManager, FhirContext, IDao)
+	 * for an explanation of why we use the constant 800
+	 */
+	private static final int MAXIMUM_PAGE_SIZE = 800;
 	private static Long NO_MORE = -1L;
 	private static HandlerTypeEnum ourLastHandlerMechanismForUnitTest;
 	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
@@ -137,6 +144,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
@@ -1922,6 +1931,10 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 			}
 
+			// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
+			HookParams params = new HookParams().add(IBaseResource.class, resource);
+			myInterceptorBroadcaster.callHooks(Pointcut.RESOURCE_MAY_BE_RETURNED, params);
+
 			theResourceListToPopulate.set(index, resource);
 		}
 	}
@@ -1989,8 +2002,8 @@ public class SearchBuilder implements ISearchBuilder {
 		 * but this should work too. Sigh.
 		 */
 		List<Long> pids = new ArrayList<>(theIncludePids);
-		for (int i = 0; i < pids.size(); i += maxLoad) {
-			int to = i + maxLoad;
+		for (int i = 0; i < pids.size(); i += MAXIMUM_PAGE_SIZE) {
+			int to = i + MAXIMUM_PAGE_SIZE;
 			to = Math.min(to, pids.size());
 			List<Long> pidsSubList = pids.subList(i, to);
 			doLoadPids(theResourceListToPopulate, theIncludedPids, theForHistoryOperation, entityManager, context, theDao, position, pidsSubList);
@@ -2037,7 +2050,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (matchAll) {
 					String sql;
 					sql = "SELECT r FROM ResourceLink r WHERE r." + searchFieldName + " IN (:target_pids) ";
-					List<Collection<Long>> partitions = partition(nextRoundMatches, maxLoad);
+					List<Collection<Long>> partitions = partition(nextRoundMatches, MAXIMUM_PAGE_SIZE);
 					for (Collection<Long> nextPartition : partitions) {
 						TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
 						q.setParameter("target_pids", nextPartition);
@@ -2090,7 +2103,7 @@ public class SearchBuilder implements ISearchBuilder {
 							sql = "SELECT r FROM ResourceLink r WHERE r.mySourcePath = :src_path AND r." + searchFieldName + " IN (:target_pids)";
 						}
 
-						List<Collection<Long>> partitions = partition(nextRoundMatches, maxLoad);
+						List<Collection<Long>> partitions = partition(nextRoundMatches, MAXIMUM_PAGE_SIZE);
 						for (Collection<Long> nextPartition : partitions) {
 							TypedQuery<ResourceLink> q = theEntityManager.createQuery(sql, ResourceLink.class);
 							q.setParameter("src_path", nextPath);
@@ -2322,16 +2335,16 @@ public class SearchBuilder implements ISearchBuilder {
 		List<String> path = param.getPathsSplit();
 
 		/*
-		 * SearchParameters can declare paths on multiple resources
+		 * SearchParameters can declare paths on multiple resource
 		 * types. Here we only want the ones that actually apply.
 		 */
 		path = new ArrayList<>(path);
 
-		for (int i = 0; i < path.size(); i++) {
-			String nextPath = trim(path.get(i));
+		ListIterator<String> iter = path.listIterator();
+		while (iter.hasNext()) {
+			String nextPath = trim(iter.next());
 			if (!nextPath.contains(theResourceType + ".")) {
-				path.remove(i);
-				i--;
+				iter.remove();
 			}
 		}
 
@@ -2447,6 +2460,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (myMaxResultsToFetch == null) {
 					myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
 				}
+
 				final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false);
 
 				Query<Long> hibernateQuery = (Query<Long>) query;
@@ -2469,8 +2483,6 @@ public class SearchBuilder implements ISearchBuilder {
 							if (myPidSet.add(next)) {
 								myNext = next;
 								break;
-							} else {
-								mySkipCount++;
 							}
 					}
 				}
@@ -2500,8 +2512,6 @@ public class SearchBuilder implements ISearchBuilder {
 								if (myPidSet.add(next)) {
 									myNext = next;
 									break;
-								} else {
-									mySkipCount++;
 								}
 						}
 						if (myNext == null) {
@@ -2546,6 +2556,7 @@ public class SearchBuilder implements ISearchBuilder {
 		public int getSkippedCount() {
 			return mySkipCount;
 		}
+
 	}
 
 	private class UniqueIndexIterator implements IResultIterator {
@@ -2587,6 +2598,7 @@ public class SearchBuilder implements ISearchBuilder {
 		public int getSkippedCount() {
 			return 0;
 		}
+
 	}
 
 	private static class CountQueryIterator implements Iterator<Long> {

@@ -2,7 +2,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 
 import static org.junit.Assert.*;
 
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.junit.AfterClass;
 import org.junit.Test;
 

@@ -474,7 +474,7 @@ public class SearchSearchServerDstu1Test {
 
     ServletHandler proxyHandler = new ServletHandler();
     ourServlet = new RestfulServer(ourCtx);
-    ourServlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+    ourServlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ourCtx));
     ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(10));
 
     ourServlet.setResourceProviders(patientProvider, new DummyObservationResourceProvider());
