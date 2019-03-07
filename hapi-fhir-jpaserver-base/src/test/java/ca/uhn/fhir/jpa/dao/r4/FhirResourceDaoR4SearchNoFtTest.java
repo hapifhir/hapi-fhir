@@ -50,7 +50,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
-public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
+public class FhirResourceDaoR4SerchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
 
 	@Autowired
