@@ -89,7 +89,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.net.URLDecoder;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -217,26 +216,25 @@ public class SearchBuilder implements ISearchBuilder {
 
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
 
-			StringBuilder valueBuilder = new StringBuilder();
 			String targetResourceType = null;
 			String owningParameter = null;
 			String parameterName = null;
+
+			String paramName = null;
+			List<QualifiedParamList> parameters = new ArrayList<>();
 			for (IQueryParameterType nextParam : nextOrList) {
 				HasParam next = (HasParam) nextParam;
-				if (valueBuilder.length() > 0) {
-					valueBuilder.append(',');
-				}
-				valueBuilder.append(UrlUtil.escapeUrlParam(next.getValueAsQueryToken(myContext)));
 				targetResourceType = next.getTargetResourceType();
 				owningParameter = next.getOwningFieldName();
 				parameterName = next.getParameterName();
+				paramName = parameterName.replaceAll("\\..*", "");
+				parameters.add(QualifiedParamList.singleton(paramName, next.getValueAsQueryToken(myContext)));
 			}
 
-			if (valueBuilder.length() == 0) {
+			if (paramName == null) {
 				continue;
 			}
 
-			String matchUrl = targetResourceType + '?' + UrlUtil.escapeUrlParam(parameterName) + '=' + valueBuilder.toString();
 			RuntimeResourceDefinition targetResourceDefinition;
 			try {
 				targetResourceDefinition = myContext.getResourceDefinition(targetResourceType);
@@ -245,7 +243,6 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			assert parameterName != null;
-			String paramName = parameterName.replaceAll("\\..*", "");
 			RuntimeSearchParam owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
 			if (owningParameterDef == null) {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
@@ -257,13 +254,16 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
-			QualifiedParamList qualifiedParam = QualifiedParamList.singleton(paramName, URLDecoder.decode(valueBuilder.toString()));
-			List<QualifiedParamList> qualifiedParams = Collections.singletonList(qualifiedParam);
 
-			IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = ParameterUtil.parseQueryParams(myContext, paramDef, paramName, qualifiedParams);
-			IQueryParameterOr<IQueryParameterType> orValues = parsedParam.getValuesAsQueryTokens().get(0);
+			IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) ParameterUtil.parseQueryParams(myContext, paramDef, paramName, parameters);
 
-			Subquery<Long> subQ = createLinkSubquery(true, parameterName, targetResourceType, orValues.getValuesAsQueryTokens());
+			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
+
+			for (IQueryParameterOr<IQueryParameterType> next : parsedParam.getValuesAsQueryTokens()) {
+				orValues.addAll(next.getValuesAsQueryTokens());
+			}
+
+			Subquery<Long> subQ = createLinkSubquery(true, parameterName, targetResourceType, orValues);
 
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 			Predicate pathPredicate = createResourceLinkPathPredicate(targetResourceType, owningParameter, join);
