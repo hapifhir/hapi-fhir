@@ -60,7 +60,7 @@ public class ParameterUtil {
 	/**
 	 * This is a utility method intended provided to help the JPA module.
 	 */
-	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType,
+	public static IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType,
 			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
 		QueryParameterAndBinder binder = null;
 		switch (paramType) {
@@ -101,13 +101,13 @@ public class ParameterUtil {
 		}
 
 		// FIXME null access
-		return binder.parse(theContext, theUnqualifiedParamName, theParameters);
+		return (IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>>) binder.parse(theContext, theUnqualifiedParamName, theParameters);
 	}
 
 	/**
 	 * This is a utility method intended provided to help the JPA module.
 	 */
-	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RuntimeSearchParam theParamDef,
+	public static IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parseQueryParams(FhirContext theContext, RuntimeSearchParam theParamDef,
 			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
 		RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
 		return parseQueryParams(theContext, paramType, theUnqualifiedParamName, theParameters);

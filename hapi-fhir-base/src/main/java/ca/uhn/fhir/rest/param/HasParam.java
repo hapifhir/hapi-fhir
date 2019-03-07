@@ -33,7 +33,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class HasParam extends BaseParam implements IQueryParameterType {
 
 	private static final long serialVersionUID = 1L;
-	
+
+	// FIXME KHS rename this
 	private String myOwningFieldName;
 	private String myParameterName;
 	private String myParameterValue;

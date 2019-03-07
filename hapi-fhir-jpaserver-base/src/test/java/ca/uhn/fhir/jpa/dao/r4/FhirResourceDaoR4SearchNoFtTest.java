@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.config.CaptureQueriesListener;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -31,6 +32,7 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.junit.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -51,6 +53,9 @@ import static org.mockito.Mockito.mock;
 public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
 
+	@Autowired
+	MatchUrlService myMatchUrlService;
+
 	@After
 	public void afterResetSearchSize() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
@@ -62,6 +67,70 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Before
 	public void beforeDisableCacheReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
+
+	@Test
+	public void testHasCondition() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition condition = new Condition();
+		condition.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		condition.getSubject().setReference(patientId);
+		myConditionDao.create(condition);
+
+		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822004";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(1, ids.size());
+		assertThat(ids, hasItems(patientId));
+	}
+
+	@Test
+	public void testGenderBirthdateHasCondition() {
+		Patient patient = new Patient();
+		patient.setGender(AdministrativeGender.MALE);
+		patient.setBirthDateElement(new DateType("1955-01-01"));
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition condition = new Condition();
+		condition.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		condition.getSubject().setReference(patientId);
+		myConditionDao.create(condition);
+
+		String criteria = "gender=male&birthdate=gt1950-07-01&birthdate=lt1960-07-01&_has:Condition:subject:code=http://snomed.info/sct|55822004";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(1, ids.size());
+		assertThat(ids, hasItems(patientId));
+	}
+
+	@Test
+	public void testHasConditionWrongLink() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition condition = new Condition();
+		condition.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		condition.getSubject().setReference(patientId);
+		myConditionDao.create(condition);
+
+		String criteria = "_has:Condition:asserter:code=http://snomed.info/sct|55822004";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(0, ids.size());
 	}
 
 	@Test

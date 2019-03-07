@@ -51,10 +51,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -92,6 +89,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -258,17 +256,20 @@ public class SearchBuilder implements ISearchBuilder {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + owningParameter);
 			}
 
-			Class<? extends IBaseResource> resourceType = targetResourceDefinition.getImplementingClass();
-			Set<Long> match = myMatchResourceUrlService.processMatchUrl(matchUrl, resourceType);
-			if (match.isEmpty()) {
-				// Pick a PID that can never match
-				match = Collections.singleton(-1L);
-			}
+			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
+			QualifiedParamList qualifiedParam = QualifiedParamList.singleton(paramName, URLDecoder.decode(valueBuilder.toString()));
+			List<QualifiedParamList> qualifiedParams = Collections.singletonList(qualifiedParam);
+
+			IQueryParameterAnd<IQueryParameterOr<IQueryParameterType>> parsedParam = ParameterUtil.parseQueryParams(myContext, paramDef, paramName, qualifiedParams);
+			IQueryParameterOr<IQueryParameterType> orValues = parsedParam.getValuesAsQueryTokens().get(0);
+
+			Subquery<Long> subQ = createLinkSubquery(true, parameterName, targetResourceType, orValues.getValuesAsQueryTokens());
 
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
-
-			Predicate predicate = join.get("mySourceResourcePid").in(match);
-			myPredicates.add(predicate);
+			Predicate pathPredicate = createResourceLinkPathPredicate(targetResourceType, owningParameter, join);
+			Predicate pidPredicate = join.get("mySourceResourcePid").in(subQ);
+			Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate);
+			myPredicates.add(andPredicate);
 		}
 	}
 
@@ -552,44 +553,12 @@ public class SearchBuilder implements ISearchBuilder {
 							orValues.add(chainValue);
 						}
 
-						Subquery<Long> subQ = myResourceTableQuery.subquery(Long.class);
-						Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
-						subQ.select(subQfrom.get("myId").as(Long.class));
-
-						List<List<? extends IQueryParameterType>> andOrParams = new ArrayList<>();
-						andOrParams.add(orValues);
-
-						/*
-						 * We're doing a chain call, so push the current query root
-						 * and predicate list down and put new ones at the top of the
-						 * stack and run a subquery
-						 */
-						Root<ResourceTable> stackRoot = myResourceTableRoot;
-						ArrayList<Predicate> stackPredicates = myPredicates;
-						Map<JoinKey, Join<?, ?>> stackIndexJoins = myIndexJoins;
-						myResourceTableRoot = subQfrom;
-						myPredicates = Lists.newArrayList();
-						myIndexJoins = Maps.newHashMap();
-
-						// Create the subquery predicates
-						myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), subResourceName));
-						myPredicates.add(myBuilder.isNull(myResourceTableRoot.get("myDeleted")));
-
-						if (foundChainMatch) {
-							searchForIdsWithAndOr(subResourceName, chain, andOrParams);
-							subQ.where(toArray(myPredicates));
-						}
-
-						/*
-						 * Pop the old query root and predicate list back
-						 */
-						myResourceTableRoot = stackRoot;
-						myPredicates = stackPredicates;
-						myIndexJoins = stackIndexJoins;
+						Subquery<Long> subQ = createLinkSubquery(foundChainMatch, chain, subResourceName, orValues);
 
 						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
 						Predicate pidPredicate = join.get("myTargetResourcePid").in(subQ);
-						codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
+						Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate);
+						codePredicates.add(andPredicate);
 
 					}
 
@@ -609,6 +578,44 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		myPredicates.add(myBuilder.or(toArray(codePredicates)));
+	}
+
+	private Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues) {
+		Subquery<Long> subQ = myResourceTableQuery.subquery(Long.class);
+		Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
+		subQ.select(subQfrom.get("myId").as(Long.class));
+
+		List<List<? extends IQueryParameterType>> andOrParams = new ArrayList<>();
+		andOrParams.add(theOrValues);
+
+		/*
+		 * We're doing a chain call, so push the current query root
+		 * and predicate list down and put new ones at the top of the
+		 * stack and run a subquery
+		 */
+		Root<ResourceTable> stackRoot = myResourceTableRoot;
+		ArrayList<Predicate> stackPredicates = myPredicates;
+		Map<JoinKey, Join<?, ?>> stackIndexJoins = myIndexJoins;
+		myResourceTableRoot = subQfrom;
+		myPredicates = Lists.newArrayList();
+		myIndexJoins = Maps.newHashMap();
+
+		// Create the subquery predicates
+		myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), theSubResourceName));
+		myPredicates.add(myBuilder.isNull(myResourceTableRoot.get("myDeleted")));
+
+		if (theFoundChainMatch) {
+			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams);
+			subQ.where(toArray(myPredicates));
+		}
+
+		/*
+		 * Pop the old query root and predicate list back
+		 */
+		myResourceTableRoot = stackRoot;
+		myPredicates = stackPredicates;
+		myIndexJoins = stackIndexJoins;
+		return subQ;
 	}
 
 	private IQueryParameterType mapReferenceChainToRawParamType(String remainingChain, RuntimeSearchParam param, String theParamName, String qualifier, Class<? extends IBaseResource> nextType, String chain, boolean isMeta, String resourceId) {
