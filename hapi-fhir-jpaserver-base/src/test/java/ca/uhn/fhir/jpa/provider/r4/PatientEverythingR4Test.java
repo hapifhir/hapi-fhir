@@ -191,12 +191,9 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException, ClientProtocolException {
 		Bundle bundle;
 		HttpGet get = new HttpGet(theUrl);
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)){
 			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
 			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
-		} finally {
-			IOUtils.closeQuietly(resp);
 		}
 		
 		return bundle;
