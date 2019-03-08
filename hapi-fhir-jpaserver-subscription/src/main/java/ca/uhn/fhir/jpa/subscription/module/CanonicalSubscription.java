@@ -29,10 +29,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
@@ -171,6 +171,10 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 			retVal = theContext.getVersion().newIdType().setValue(myIdElement);
 		}
 		return retVal;
+	}
+
+	public String getIdPart() {
+		return new IdType(getIdElementString()).getIdPart();
 	}
 
 	public String getIdElementString() {
