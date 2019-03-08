@@ -50,7 +50,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
-public class FhirResourceDaoR4SerchNoFtTest extends BaseJpaR4Test {
+public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
 
 	@Autowired
@@ -109,6 +109,59 @@ public class FhirResourceDaoR4SerchNoFtTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results);
 		assertEquals(1, ids.size());
 		assertThat(ids, hasItems(patientId));
+	}
+
+	@Test
+	public void testHasConditionAnd() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition conditionS = new Condition();
+		conditionS.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		conditionS.getSubject().setReference(patientId);
+		myConditionDao.create(conditionS);
+
+		Condition conditionA = new Condition();
+		conditionA.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822005");
+		conditionA.getAsserter().setReference(patientId);
+		myConditionDao.create(conditionA);
+
+		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004&"+
+				 			   "_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(1, ids.size());
+		assertThat(ids, hasItems(patientId));
+	}
+
+	@Test
+	public void testHasConditionAndBackwards() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition conditionS = new Condition();
+		conditionS.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		conditionS.getSubject().setReference(patientId);
+		myConditionDao.create(conditionS);
+
+		Condition conditionA = new Condition();
+		conditionA.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822005");
+		conditionA.getAsserter().setReference(patientId);
+		myConditionDao.create(conditionA);
+
+		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005&"+
+			"_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(0, ids.size());
 	}
 
 	@Test
