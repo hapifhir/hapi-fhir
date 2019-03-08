@@ -94,6 +94,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
@@ -830,7 +831,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		List<Predicate> codePredicates = new ArrayList<>();
-		Join<ResourceTable, ResourceIndexedSearchParamToken> join = null;
 		List<IQueryParameterType> tokens = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 
@@ -842,10 +842,6 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 			}
 
-			if (join == null) {
-				join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
-			}
-
 			tokens.add(nextOr);
 		}
 
@@ -853,6 +849,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
+		Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(JoinEnum.TOKEN);
 		List<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myBuilder, join);
 		codePredicates.addAll(singleCode);
 
@@ -1011,33 +1008,36 @@ public class SearchBuilder implements ISearchBuilder {
 	@SuppressWarnings("unchecked")
 	private <T> Join<ResourceTable, T> createOrReuseJoin(JoinEnum theType, String theSearchParameterName) {
 		JoinKey key = new JoinKey(theSearchParameterName, theType);
-		return (Join<ResourceTable, T>) myIndexJoins.computeIfAbsent(key, k -> {
-			Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
-			switch (theType) {
-				case DATE:
-					join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
-					break;
-				case NUMBER:
-					join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
-					break;
-				case QUANTITY:
-					join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
-					break;
-				case REFERENCE:
-					join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
-					break;
-				case STRING:
-					join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
-					break;
-				case URI:
-					join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
-					break;
-				case TOKEN:
-					join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
-					break;
-			}
-			return join;
-		});
+		return (Join<ResourceTable, T>) myIndexJoins.computeIfAbsent(key, k -> createJoin(theType));
+	}
+
+	@SuppressWarnings("unchecked")
+	private  <T> Join<ResourceTable, T> createJoin(JoinEnum theType) {
+		Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
+		switch (theType) {
+			case DATE:
+				join = myResourceTableRoot.join("myParamsDate", JoinType.LEFT);
+				break;
+			case NUMBER:
+				join = myResourceTableRoot.join("myParamsNumber", JoinType.LEFT);
+				break;
+			case QUANTITY:
+				join = myResourceTableRoot.join("myParamsQuantity", JoinType.LEFT);
+				break;
+			case REFERENCE:
+				join = myResourceTableRoot.join("myResourceLinks", JoinType.LEFT);
+				break;
+			case STRING:
+				join = myResourceTableRoot.join("myParamsString", JoinType.LEFT);
+				break;
+			case URI:
+				join = myResourceTableRoot.join("myParamsUri", JoinType.LEFT);
+				break;
+			case TOKEN:
+				join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
+				break;
+		}
+		return (Join<ResourceTable, T>) join;
 	}
 
 	private Predicate createPredicateDate(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamDate> theFrom) {

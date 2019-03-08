@@ -2449,6 +2449,91 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
+
+	@Test
+	public void testSearchDoubleToken() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("TOKENA");
+		patient.addIdentifier().setSystem("urn:system").setValue("TOKENB");
+		String idBoth = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("TOKENA");
+		String idA = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("TOKENB");
+		myPatientDao.create(patient, mySrd);
+
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add(Patient.SP_IDENTIFIER, new TokenAndListParam()
+				.addAnd(new TokenParam("urn:system", "TOKENA"))
+				.addAnd(new TokenParam("urn:system", "TOKENB"))
+			);
+			IBundleProvider retrieved = myPatientDao.search(map);
+			logSelectQueries();
+			assertThat(toUnqualifiedVersionlessIdValues(retrieved), containsInAnyOrder(idBoth));
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "TOKENA"));
+			IBundleProvider retrieved = myPatientDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(retrieved), containsInAnyOrder(idA, idBoth));
+		}
+	}
+
+
+	@Test
+	public void testSearchDoubleString() {
+		Patient patient = new Patient();
+		patient.addName().setFamily("STRINGA");
+		patient.addName().setFamily("STRINGB");
+		String idBoth = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		patient = new Patient();
+		patient.addName().setFamily("STRINGA");
+		String idA = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		patient = new Patient();
+		patient.addName().setFamily("STRINGB");
+		myPatientDao.create(patient, mySrd);
+
+
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add(Patient.SP_FAMILY, new StringAndListParam()
+				.addAnd(new StringParam("STRINGA"))
+				.addAnd(new StringParam( "STRINGB"))
+			);
+			IBundleProvider retrieved = myPatientDao.search(map);
+			logSelectQueries();
+			assertThat(toUnqualifiedVersionlessIdValues(retrieved), containsInAnyOrder(idBoth));
+		}
+		{
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add(Patient.SP_FAMILY, new StringParam("STRINGA"));
+			IBundleProvider retrieved = myPatientDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(retrieved), containsInAnyOrder(idA, idBoth));
+		}
+	}
+
+	private void logSelectQueries() {
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.filter(t -> t.getThreadName().equals("main"))
+			.filter(t -> t.getSql(false, false).toLowerCase().contains("select"))
+			.map(t -> t.getSql(true, true))
+			.collect(Collectors.toList());
+		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
+	}
+
 	@Test
 	public void testSearchTokenParamNoValue() {
 		Patient patient = new Patient();
