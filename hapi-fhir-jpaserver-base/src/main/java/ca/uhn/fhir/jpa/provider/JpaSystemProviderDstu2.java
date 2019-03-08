@@ -18,11 +18,13 @@ import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -246,6 +248,28 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		} finally {
 			endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		}
+	}
+
+	/**
+	 * /$process-message
+	 */
+	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
+	public IBaseBundle processMessage(
+		HttpServletRequest theServletRequest,
+		RequestDetails theRequestDetails,
+
+		@OperationParam(name = "content", min = 1, max = 1)
+		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
+			Bundle theMessageToProcess
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			return getDao().processMessage(theRequestDetails, theMessageToProcess);
+		} finally {
+			endRequest(theServletRequest);
+		}
+
 	}
 
 	public static Parameters toExpungeResponse(org.hl7.fhir.r4.model.Parameters theRetVal) {

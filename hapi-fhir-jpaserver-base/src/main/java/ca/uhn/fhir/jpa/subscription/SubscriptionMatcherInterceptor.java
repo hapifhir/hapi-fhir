@@ -105,31 +105,15 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
-
-		/*
-		 * We only want to submit the message to the processing queue once the
-		 * transaction is committed. We do this in order to make sure that the
-		 * data is actually in the DB, in case it's the database matcher.
-		 */
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-				@Override
-				public int getOrder() {
-					return 0;
-				}
-
-				@Override
-				public void afterCommit() {
-					submitResourceModified(msg);
-				}
-			});
-		} else {
-			submitResourceModified(msg);
+		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, msg)) {
+			return;
 		}
 
+		submitResourceModified(msg);
 	}
 
-	private void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
+	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");
 		Validate.notNull(myProcessingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
 		myProcessingChannel.send(new ResourceModifiedJsonMessage(theMessage));
@@ -144,12 +128,26 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	 */
 	@Override
 	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
-		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, theMsg)) {
-			return;
-		}
+		/*
+		 * We only want to submit the message to the processing queue once the
+		 * transaction is committed. We do this in order to make sure that the
+		 * data is actually in the DB, in case it's the database matcher.
+		 */
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public int getOrder() {
+					return 0;
+				}
 
-		sendToProcessingChannel(theMsg);
+				@Override
+				public void afterCommit() {
+					sendToProcessingChannel(theMsg);
+				}
+			});
+		} else {
+			sendToProcessingChannel(theMsg);
+		}
 	}
 
 	@VisibleForTesting

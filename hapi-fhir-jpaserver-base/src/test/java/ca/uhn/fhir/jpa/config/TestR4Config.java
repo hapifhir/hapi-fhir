@@ -7,10 +7,12 @@ import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -28,7 +30,7 @@ import static org.junit.Assert.fail;
 public class TestR4Config extends BaseJavaConfigR4 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
-	private static int ourMaxThreads;
+	public static Integer ourMaxThreads;
 
 	static {
 		/*
@@ -36,7 +38,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
 		 */
-		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+		if (ourMaxThreads == null) {
+			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+		}
 	}
 
 	private Exception myLastStackTrace;
@@ -93,7 +97,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
-
 		retVal.setMaxTotal(ourMaxThreads);
 
 		DataSource dataSource = ProxyDataSourceBuilder

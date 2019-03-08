@@ -27,11 +27,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public class FhirResourceDaoMessageHeaderDstu2 extends FhirResourceDaoDstu2<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
 
-	@Override
-	public IBaseBundle messageHeaderProcessMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
-		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
-	}
-
 	public static IBaseBundle throwProcessMessageNotImplemented() {
 		throw new NotImplementedOperationException("This operation is not yet implemented on this server");
 	}

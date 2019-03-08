@@ -14,7 +14,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.*;
 
-public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test {
+public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test {
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Autowired

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.stresstest;
 
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.config.UnregisterScheduledProcessor;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
@@ -51,9 +52,14 @@ import static org.junit.Assert.fail;
 @TestPropertySource(properties = {
 	// Since scheduled tasks can cause searches, which messes up the
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
-	UnregisterScheduledProcessor.SCHEDULING_DISABLED + "=true"
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED + "=true",
+	"max_db_connections=10"
 })
 public class StressTestR4Test extends BaseResourceProviderR4Test {
+
+	static {
+		TestR4Config.ourMaxThreads = 10;
+	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
 	private RequestValidatingInterceptor myRequestValidatingInterceptor;
