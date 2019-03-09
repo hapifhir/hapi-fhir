@@ -100,6 +100,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 			.create(basicDataSource())
 //			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(1000, TimeUnit.MILLISECONDS)
+			.afterQuery(new CaptureQueriesListener())
 			.countQuery()
 			.build();
 

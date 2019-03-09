@@ -408,7 +408,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		IBundleProvider search = myPatientDao.search(map);
 
 		List<String> queries = CaptureQueriesListener
-			.getLastNQueries()
+			.getCapturedQueries()
 			.stream()
 			.map(t -> t.getSql(true, true))
 			.filter(t -> t.contains("select"))
@@ -417,7 +417,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		ourLog.info("Resulting query formatted:\n{}", resultingQueryFormatted);
 
 		queries = CaptureQueriesListener
-			.getLastNQueries()
+			.getCapturedQueries()
 			.stream()
 			.map(t -> t.getSql(true, false))
 			.filter(t -> t.contains("select"))

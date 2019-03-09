@@ -872,7 +872,7 @@
 			<dependency>
 				<groupId>net.ttddyy</groupId>
 				<artifactId>datasource-proxy</artifactId>
-				<version>1.4.9</version>
+				<version>1.5</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>

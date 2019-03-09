@@ -108,6 +108,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 			.create(retVal)
 //			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+			.afterQuery(new CaptureQueriesListener())
 			.countQuery(new ThreadQueryCountHolder())
 			.build();
 

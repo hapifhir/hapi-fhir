@@ -57,6 +57,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
 	@Before
@@ -2037,7 +2038,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myPatientDao.search(map);
 
 		List<String> queries = CaptureQueriesListener
-			.getLastNQueries()
+			.getCapturedQueries()
 			.stream()
 			.map(t -> t.getSql(true, true))
 			.filter(t -> t.contains("select"))
@@ -2067,7 +2068,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		IBundleProvider search = myPatientDao.search(map);
 
 		List<String> queries = CaptureQueriesListener
-			.getLastNQueries()
+			.getCapturedQueries()
 			.stream()
 			.map(t -> t.getSql(true, true))
 			.filter(t -> t.contains("select"))
@@ -2076,7 +2077,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ourLog.info("Resulting query formatted:\n{}", resultingQueryFormatted);
 
 		queries = CaptureQueriesListener
-			.getLastNQueries()
+			.getCapturedQueries()
 			.stream()
 			.map(t -> t.getSql(true, false))
 			.filter(t -> t.contains("select"))
@@ -2112,7 +2113,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		IBundleProvider search = myPatientDao.search(map);
 
 		List<String> queries = CaptureQueriesListener
-			.getLastNQueries()
+			.getCapturedQueries()
 			.stream()
 			.map(t -> t.getSql(true, true))
 			.filter(t -> t.contains("select"))
@@ -2121,7 +2122,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ourLog.info("Resulting query formatted:\n{}", resultingQueryFormatted);
 
 		queries = CaptureQueriesListener
-			.getLastNQueries()
+			.getCapturedQueries()
 			.stream()
 			.map(t -> t.getSql(true, false))
 			.filter(t -> t.contains("select"))
@@ -2334,7 +2335,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, retrieved.size().intValue());
 
 		List<String> queries = CaptureQueriesListener
-			.getLastNQueries()
+			.getCapturedQueries()
 			.stream()
 			.filter(t -> t.getThreadName().equals("main"))
 			.filter(t -> t.getSql(false, false).toLowerCase().contains("select"))
@@ -2361,7 +2362,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		IBundleProvider retrieved = myMedicationRequestDao.search(sp);
 
 		List<String> queries = CaptureQueriesListener
-			.getLastNQueries()
+			.getCapturedQueries()
 			.stream()
 			.map(t -> t.getSql(true, true))
 			.collect(Collectors.toList());
@@ -2474,7 +2475,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 				.addAnd(new TokenParam("urn:system", "TOKENB"))
 			);
 			IBundleProvider retrieved = myPatientDao.search(map);
-			logSelectQueries();
+			CaptureQueriesListener.logSelectQueriesForCurrentThread();
 			assertThat(toUnqualifiedVersionlessIdValues(retrieved), containsInAnyOrder(idBoth));
 		}
 		{
@@ -2511,7 +2512,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 				.addAnd(new StringParam( "STRINGB"))
 			);
 			IBundleProvider retrieved = myPatientDao.search(map);
-			logSelectQueries();
+			CaptureQueriesListener.logSelectQueriesForCurrentThread();
 			assertThat(toUnqualifiedVersionlessIdValues(retrieved), containsInAnyOrder(idBoth));
 		}
 		{
@@ -2521,28 +2522,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			IBundleProvider retrieved = myPatientDao.search(map);
 			assertThat(toUnqualifiedVersionlessIdValues(retrieved), containsInAnyOrder(idA, idBoth));
 		}
-	}
-
-	private void logSelectQueries() {
-		List<String> queries = CaptureQueriesListener
-			.getLastNQueries()
-			.stream()
-			.filter(t -> t.getThreadName().equals("main"))
-			.filter(t -> t.getSql(false, false).toLowerCase().contains("select"))
-			.map(t -> t.getSql(true, true))
-			.collect(Collectors.toList());
-		ourLog.info("Select Queries:\n  {}", queries.stream().findFirst());
-	}
-
-	private void logInsertQueries() {
-		List<String> queries = CaptureQueriesListener
-			.getLastNQueries()
-			.stream()
-			.filter(t -> t.getThreadName().equals("main"))
-			.filter(t -> t.getSql(false, false).toLowerCase().contains("insert"))
-			.map(t -> t.getSql(true, true))
-			.collect(Collectors.toList());
-		ourLog.info("Insert Queries:\n  {}", queries.stream().findFirst());
 	}
 
 	@Test
@@ -3674,19 +3653,31 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * CommunicationRequest:occurrence only indexes DateTime, not Period
+	 */
 	@Test
 	public void testSearchOnPeriod() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 
+		// Matching period
 		CaptureQueriesListener.clear();
 		CommunicationRequest cr = new CommunicationRequest();
 		Period occurrence = new Period();
 		occurrence.setStartElement(new DateTimeType("2016-08-10T11:33:00-04:00"));
 		occurrence.setEndElement(new DateTimeType("2016-08-10T11:33:00-04:00"));
 		cr.setOccurrence(occurrence);
-		String crId = myCommunicationRequestDao.create(cr).getId().toUnqualifiedVersionless().getValue();
-		logInsertQueries();
+		myCommunicationRequestDao.create(cr).getId().toUnqualifiedVersionless().getValue();
+		CaptureQueriesListener.logInsertQueriesForCurrentThread();
 
-		// Non matching
+		// Matching dateTime
+		CaptureQueriesListener.clear();
+		cr = new CommunicationRequest();
+		cr.setOccurrence(new DateTimeType("2016-08-10T11:33:00-04:00"));
+		String crId = myCommunicationRequestDao.create(cr).getId().toUnqualifiedVersionless().getValue();
+		CaptureQueriesListener.logInsertQueriesForCurrentThread();
+
+		// Non matching period
 		cr = new CommunicationRequest();
 		occurrence = new Period();
 		occurrence.setStartElement(new DateTimeType("2001-08-10T11:33:00-04:00"));
@@ -3699,8 +3690,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.setLoadSynchronous(true);
 		params.add(CommunicationRequest.SP_OCCURRENCE, new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2015-08-10T11:33:00-04:00"));
 		IBundleProvider outcome = myCommunicationRequestDao.search(params);
-		logSelectQueries();
-		assertThat(toUnqualifiedVersionlessIdValues(outcome), not(contains(crId)));
+		CaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(crId));
 	}
 
 

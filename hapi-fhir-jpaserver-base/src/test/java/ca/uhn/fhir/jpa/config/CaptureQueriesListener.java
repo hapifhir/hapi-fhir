@@ -1,92 +1,87 @@
 package ca.uhn.fhir.jpa.config;
 
-import net.ttddyy.dsproxy.ExecutionInfo;
-import net.ttddyy.dsproxy.QueryInfo;
-import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
+import ca.uhn.fhir.util.StopWatch;
+import com.google.common.collect.Queues;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
+import org.hl7.fhir.dstu3.model.InstantType;
+import org.junit.rules.Stopwatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class CaptureQueriesListener implements ProxyDataSourceBuilder.SingleQueryExecution {
+/**
+ * This is a query listener designed to be plugged into a {@link ProxyDataSourceBuilder proxy DataSource}.
+ * This listener keeps the last 100 queries across all threads in a LinkedList, dropping queries off the
+ * end of the list as new ones are added.
+ * <p>
+ * Note that this class is really only designed for use in testing - It adds a non-trivial overhead
+ * to each query.
+ * </p>
+ */
+public class CaptureQueriesListener extends BaseCaptureQueriesListener {
 
-	private static final LinkedList<Query> LAST_N_QUERIES = new LinkedList<>();
+	private static final int CAPACITY = 100;
+	private static final Queue<Query> LAST_N_QUERIES = Queues.synchronizedQueue(new CircularFifoQueue<>(CAPACITY));
+	private static final Logger ourLog = LoggerFactory.getLogger(CaptureQueriesListener.class);
 
 	@Override
-	public void execute(ExecutionInfo execInfo, List<QueryInfo> queryInfoList) {
-		synchronized (LAST_N_QUERIES) {
-			for (QueryInfo next : queryInfoList) {
-				String sql = next.getQuery();
-				List<String> params;
-				if (next.getParametersList().size() > 0 && next.getParametersList().get(0).size() > 0) {
-					List<ParameterSetOperation> values = next
-						.getParametersList()
-						.get(0);
-					params = values.stream()
-						.map(t -> t.getArgs()[1])
-						.map(t -> t != null ? t.toString() : "NULL")
-						.collect(Collectors.toList());
-				} else {
-					params = new ArrayList<>();
-				}
-				LAST_N_QUERIES.add(0, new Query(sql, params));
-			}
-			while (LAST_N_QUERIES.size() > 100) {
-				LAST_N_QUERIES.removeLast();
-			}
-		}
-	}
-
-	public static class Query {
-		private final String myThreadName = Thread.currentThread().getName();
-		private final String mySql;
-		private final List<String> myParams;
-
-		Query(String theSql, List<String> theParams) {
-			mySql = theSql;
-			myParams = Collections.unmodifiableList(theParams);
-		}
-
-		public String getThreadName() {
-			return myThreadName;
-		}
-
-		public String getSql(boolean theInlineParams, boolean theFormat) {
-			String retVal = mySql;
-			if (theFormat) {
-				retVal = new BasicFormatterImpl().format(retVal);
-			}
-
-			if (theInlineParams) {
-				List<String> nextParams = new ArrayList<>(myParams);
-				while (retVal.contains("?") && nextParams.size() > 0) {
-					int idx = retVal.indexOf("?");
-					retVal = retVal.substring(0, idx) + "'" + nextParams.remove(0) + "'" + retVal.substring(idx + 1);
-				}
-			}
-
-			return retVal;
-
-		}
-
-	}
-
-	public static void clear() {
-		synchronized (LAST_N_QUERIES) {
-			LAST_N_QUERIES.clear();
-		}
+	protected Queue<Query> provideQueryList() {
+		return LAST_N_QUERIES;
 	}
 
 	/**
-	 * Index 0 is newest!
+	 * Clear all stored queries
 	 */
-	public static ArrayList<Query> getLastNQueries() {
-		synchronized (LAST_N_QUERIES) {
-			return new ArrayList<>(LAST_N_QUERIES);
-		}
+	public static void clear() {
+		LAST_N_QUERIES.clear();
 	}
+
+	/**
+	 * Index 0 is oldest
+	 */
+	@SuppressWarnings("UseBulkOperation")
+	public static List<Query> getCapturedQueries() {
+		// Make a copy so that we aren't affected by changes to the list outside of the
+		// synchronized block
+		ArrayList<Query> retVal = new ArrayList<>(CAPACITY);
+		LAST_N_QUERIES.forEach(retVal::add);
+		return Collections.unmodifiableList(retVal);
+	}
+
+	/**
+	 * Log all captured SELECT queries
+	 */
+	public static void logSelectQueriesForCurrentThread() {
+		String currentThreadName = Thread.currentThread().getName();
+		List<String> queries = getCapturedQueries()
+			.stream()
+			.filter(t -> t.getThreadName().equals(currentThreadName))
+			.filter(t -> t.getSql(false, false).toLowerCase().contains("select"))
+			.map(CaptureQueriesListener::formatQueryAsSql)
+			.collect(Collectors.toList());
+		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
+	}
+
+	/**
+	 * Log all captured INSERT queries
+	 */
+	public static void logInsertQueriesForCurrentThread() {
+		String currentThreadName = Thread.currentThread().getName();
+		List<String> queries = getCapturedQueries()
+			.stream()
+			.filter(t -> t.getThreadName().equals(currentThreadName))
+			.filter(t -> t.getSql(false, false).toLowerCase().contains("insert"))
+			.map(CaptureQueriesListener::formatQueryAsSql)
+			.collect(Collectors.toList());
+		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
+	}
+
+	private static String formatQueryAsSql(Query theQuery) {
+		String formattedSql = theQuery.getSql(true, true);
+		return "Query at " + new InstantType(new Date(theQuery.getQueryTimestamp())).getValueAsString() + " took " + StopWatch.formatMillis(theQuery.getElapsedTime()) + "\nSQL:\n" + formattedSql;
+	}
+
 }
