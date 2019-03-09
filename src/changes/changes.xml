@@ -70,7 +70,7 @@
 			</action>
 			<action type="fix" issue="1223">
 				Searching the JPA server with multiple instances of the same token search parameter
-				(e.g. "Patient?identifier=a&identifier=b" returned no results even if resources
+				(e.g. "Patient?identifier=&amp;identifier=b" returned no results even if resources
 				should have matched. Thanks to @mingdatacom for reporting!
 			</action>
 		</release>
