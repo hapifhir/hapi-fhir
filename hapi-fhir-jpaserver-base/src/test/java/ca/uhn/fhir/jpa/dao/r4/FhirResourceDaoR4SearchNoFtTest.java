@@ -2531,7 +2531,18 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.filter(t -> t.getSql(false, false).toLowerCase().contains("select"))
 			.map(t -> t.getSql(true, true))
 			.collect(Collectors.toList());
-		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
+		ourLog.info("Select Queries:\n  {}", queries.stream().findFirst());
+	}
+
+	private void logInsertQueries() {
+		List<String> queries = CaptureQueriesListener
+			.getLastNQueries()
+			.stream()
+			.filter(t -> t.getThreadName().equals("main"))
+			.filter(t -> t.getSql(false, false).toLowerCase().contains("insert"))
+			.map(t -> t.getSql(true, true))
+			.collect(Collectors.toList());
+		ourLog.info("Insert Queries:\n  {}", queries.stream().findFirst());
 	}
 
 	@Test
@@ -3662,6 +3673,36 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, mySearchEntityDao.count());
 
 	}
+
+	@Test
+	public void testSearchOnPeriod() {
+
+		CaptureQueriesListener.clear();
+		CommunicationRequest cr = new CommunicationRequest();
+		Period occurrence = new Period();
+		occurrence.setStartElement(new DateTimeType("2016-08-10T11:33:00-04:00"));
+		occurrence.setEndElement(new DateTimeType("2016-08-10T11:33:00-04:00"));
+		cr.setOccurrence(occurrence);
+		String crId = myCommunicationRequestDao.create(cr).getId().toUnqualifiedVersionless().getValue();
+		logInsertQueries();
+
+		// Non matching
+		cr = new CommunicationRequest();
+		occurrence = new Period();
+		occurrence.setStartElement(new DateTimeType("2001-08-10T11:33:00-04:00"));
+		occurrence.setEndElement(new DateTimeType("2001-08-10T11:33:00-04:00"));
+		cr.setOccurrence(occurrence);
+		myCommunicationRequestDao.create(cr).getId().toUnqualifiedVersionless().getValue();
+
+		CaptureQueriesListener.clear();
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(CommunicationRequest.SP_OCCURRENCE, new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2015-08-10T11:33:00-04:00"));
+		IBundleProvider outcome = myCommunicationRequestDao.search(params);
+		logSelectQueries();
+		assertThat(toUnqualifiedVersionlessIdValues(outcome), not(contains(crId)));
+	}
+
 
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();
