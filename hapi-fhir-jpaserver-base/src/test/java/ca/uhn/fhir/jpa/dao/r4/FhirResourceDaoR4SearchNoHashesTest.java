@@ -400,31 +400,22 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("SYS").setValue("BAZ");
 		myPatientDao.create(p);
-		CaptureQueriesListener.clear();
 
+		CaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_IDENTIFIER, new TokenOrListParam().addOr(new TokenParam("FOO")).addOr(new TokenParam("BAR")));
 		map.setLoadSynchronous(true);
 		IBundleProvider search = myPatientDao.search(map);
 
+		CaptureQueriesListener.logInsertQueriesForCurrentThread();
 		List<String> queries = CaptureQueriesListener
-			.getCapturedQueries()
-			.stream()
-			.map(t -> t.getSql(true, true))
-			.filter(t -> t.contains("select"))
-			.collect(Collectors.toList());
-		String resultingQueryFormatted = queries.get(queries.size() - 1);
-		ourLog.info("Resulting query formatted:\n{}", resultingQueryFormatted);
-
-		queries = CaptureQueriesListener
-			.getCapturedQueries()
+			.getSelectQueriesForCurrentThread()
 			.stream()
 			.map(t -> t.getSql(true, false))
-			.filter(t -> t.contains("select"))
 			.collect(Collectors.toList());
-		String resultingQueryNotFormatted = queries.get(queries.size() - 1);
+		String resultingQueryNotFormatted = queries.get(0);
 
-		assertEquals(resultingQueryFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "SP_VALUE"));
+		assertEquals(resultingQueryNotFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "SP_VALUE"));
 		assertThat(resultingQueryNotFormatted, containsString("SP_VALUE in ('BAR' , 'FOO')"));
 
 		// Ensure that the search actually worked

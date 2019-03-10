@@ -5,7 +5,6 @@ import com.google.common.collect.Queues;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.hl7.fhir.dstu3.model.InstantType;
-import org.junit.rules.Stopwatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,28 +51,45 @@ public class CaptureQueriesListener extends BaseCaptureQueriesListener {
 	}
 
 	/**
-	 * Log all captured SELECT queries
+	 * Returns all SELECT queries executed on the current thread - Index 0 is oldest
 	 */
-	public static void logSelectQueriesForCurrentThread() {
+	public static List<Query> getSelectQueriesForCurrentThread() {
 		String currentThreadName = Thread.currentThread().getName();
-		List<String> queries = getCapturedQueries()
+		return getCapturedQueries()
 			.stream()
 			.filter(t -> t.getThreadName().equals(currentThreadName))
 			.filter(t -> t.getSql(false, false).toLowerCase().contains("select"))
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns all INSERT queries executed on the current thread - Index 0 is oldest
+	 */
+	public static List<Query> getInsertQueriesForCurrentThread() {
+		return getCapturedQueries()
+			.stream()
+			.filter(t -> t.getThreadName().equals(Thread.currentThread().getName()))
+			.filter(t -> t.getSql(false, false).toLowerCase().contains("insert"))
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Log all captured SELECT queries
+	 */
+	public static void logSelectQueriesForCurrentThread() {
+		List<String> queries = getSelectQueriesForCurrentThread()
+			.stream()
 			.map(CaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
-		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
+		ourLog.info("Select Queries:\n{}", String.join("\n", queries));
 	}
 
 	/**
 	 * Log all captured INSERT queries
 	 */
 	public static void logInsertQueriesForCurrentThread() {
-		String currentThreadName = Thread.currentThread().getName();
-		List<String> queries = getCapturedQueries()
+		List<String> queries = getInsertQueriesForCurrentThread()
 			.stream()
-			.filter(t -> t.getThreadName().equals(currentThreadName))
-			.filter(t -> t.getSql(false, false).toLowerCase().contains("insert"))
 			.map(CaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
@@ -81,7 +97,7 @@ public class CaptureQueriesListener extends BaseCaptureQueriesListener {
 
 	private static String formatQueryAsSql(Query theQuery) {
 		String formattedSql = theQuery.getSql(true, true);
-		return "Query at " + new InstantType(new Date(theQuery.getQueryTimestamp())).getValueAsString() + " took " + StopWatch.formatMillis(theQuery.getElapsedTime()) + "\nSQL:\n" + formattedSql;
+		return "Query at " + new InstantType(new Date(theQuery.getQueryTimestamp())).getValueAsString() + " took " + StopWatch.formatMillis(theQuery.getElapsedTime()) + " on Thread: " + theQuery.getThreadName()  + "\nSQL:\n" + formattedSql;
 	}
 
 }

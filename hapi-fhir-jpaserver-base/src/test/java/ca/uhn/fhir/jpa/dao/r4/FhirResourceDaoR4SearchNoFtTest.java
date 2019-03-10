@@ -42,6 +42,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -2060,31 +2061,22 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("SYS").setValue("BAZ");
 		myPatientDao.create(p);
-		CaptureQueriesListener.clear();
 
+		CaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_IDENTIFIER, new TokenOrListParam().addOr(new TokenParam("FOO")).addOr(new TokenParam("BAR")));
 		map.setLoadSynchronous(true);
 		IBundleProvider search = myPatientDao.search(map);
 
+		CaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> queries = CaptureQueriesListener
-			.getCapturedQueries()
-			.stream()
-			.map(t -> t.getSql(true, true))
-			.filter(t -> t.contains("select"))
-			.collect(Collectors.toList());
-		String resultingQueryFormatted = queries.get(queries.size() - 1);
-		ourLog.info("Resulting query formatted:\n{}", resultingQueryFormatted);
-
-		queries = CaptureQueriesListener
-			.getCapturedQueries()
+			.getSelectQueriesForCurrentThread()
 			.stream()
 			.map(t -> t.getSql(true, false))
-			.filter(t -> t.contains("select"))
 			.collect(Collectors.toList());
-		String resultingQueryNotFormatted = queries.get(queries.size() - 1);
+		String resultingQueryNotFormatted = queries.get(0);
 
-		assertEquals(resultingQueryFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"));
+		assertEquals(resultingQueryNotFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"));
 		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE in ('3140583648400062149' , '4929264259256651518')"));
 
 		// Ensure that the search actually worked
@@ -2105,31 +2097,22 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addIdentifier().setSystem("SAS").setValue("BAZ");
 		myPatientDao.create(p);
-		CaptureQueriesListener.clear();
 
+		CaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_IDENTIFIER, new TokenOrListParam().addOr(new TokenParam("SAS", null)).addOr(new TokenParam("FOO")).addOr(new TokenParam("BAR")));
 		map.setLoadSynchronous(true);
 		IBundleProvider search = myPatientDao.search(map);
 
+		CaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> queries = CaptureQueriesListener
-			.getCapturedQueries()
-			.stream()
-			.map(t -> t.getSql(true, true))
-			.filter(t -> t.contains("select"))
-			.collect(Collectors.toList());
-		String resultingQueryFormatted = queries.get(queries.size() - 1);
-		ourLog.info("Resulting query formatted:\n{}", resultingQueryFormatted);
-
-		queries = CaptureQueriesListener
-			.getCapturedQueries()
+			.getSelectQueriesForCurrentThread()
 			.stream()
 			.map(t -> t.getSql(true, false))
-			.filter(t -> t.contains("select"))
 			.collect(Collectors.toList());
-		String resultingQueryNotFormatted = queries.get(queries.size() - 1);
+		String resultingQueryNotFormatted = queries.get(0);
 
-		assertEquals(resultingQueryFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"));
+		assertEquals(resultingQueryNotFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"));
 		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE in ('3140583648400062149' , '4929264259256651518')"));
 
 		// Ensure that the search actually worked
@@ -2331,19 +2314,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		ReferenceParam param3 = new ReferenceParam("valuec").setChain("code:text");
 		sp.add("medication", new ReferenceOrListParam().addOr(param1).addOr(param2).addOr(param3));
 
+		CaptureQueriesListener.clear();
 		IBundleProvider retrieved = myMedicationRequestDao.search(sp);
 		assertEquals(1, retrieved.size().intValue());
 
+		CaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> queries = CaptureQueriesListener
-			.getCapturedQueries()
+			.getSelectQueriesForCurrentThread()
 			.stream()
-			.filter(t -> t.getThreadName().equals("main"))
-			.filter(t -> t.getSql(false, false).toLowerCase().contains("select"))
-			.filter(t -> t.getSql(false, false).toLowerCase().contains("token"))
 			.map(t -> t.getSql(true, true))
 			.collect(Collectors.toList());
-
-		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
 
 		String searchQuery = queries.get(0);
 		assertEquals(searchQuery, 3, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
@@ -2353,6 +2333,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithDateRange() {
+
+		CaptureQueriesListener.clear();
 		SearchParameterMap sp = new SearchParameterMap();
 		sp.setLoadSynchronous(true);
 		sp.add(MedicationRequest.SP_INTENT, new TokenParam("FOO", "BAR"));
@@ -2361,13 +2343,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			.setLowerBound(new DateParam("ge2019-02-22T13:50:00")));
 		IBundleProvider retrieved = myMedicationRequestDao.search(sp);
 
+		CaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> queries = CaptureQueriesListener
-			.getCapturedQueries()
+			.getSelectQueriesForCurrentThread()
 			.stream()
 			.map(t -> t.getSql(true, true))
 			.collect(Collectors.toList());
-
-		ourLog.info("Queries:\n  {}", queries.stream().findFirst());
 
 		String searchQuery = queries.get(0);
 		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
@@ -2511,6 +2492,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 				.addAnd(new StringParam("STRINGA"))
 				.addAnd(new StringParam( "STRINGB"))
 			);
+			CaptureQueriesListener.clear();
 			IBundleProvider retrieved = myPatientDao.search(map);
 			CaptureQueriesListener.logSelectQueriesForCurrentThread();
 			assertThat(toUnqualifiedVersionlessIdValues(retrieved), containsInAnyOrder(idBoth));

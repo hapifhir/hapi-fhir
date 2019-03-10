@@ -197,7 +197,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateDate(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamDate> join = createOrReuseJoin(JoinEnum.DATE, theParamName);
+		Join<ResourceTable, ResourceIndexedSearchParamDate> join = createJoin(JoinEnum.DATE, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			Boolean missing = theList.get(0).getMissing();
@@ -301,7 +301,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateNumber(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = createOrReuseJoin(JoinEnum.NUMBER, theParamName);
+		Join<ResourceTable, ResourceIndexedSearchParamNumber> join = createJoin(JoinEnum.NUMBER, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
@@ -361,7 +361,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void addPredicateQuantity(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
-		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createOrReuseJoin(JoinEnum.QUANTITY, theParamName);
+		Join<ResourceTable, ResourceIndexedSearchParamQuantity> join = createJoin(JoinEnum.QUANTITY, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
@@ -389,7 +389,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		Join<ResourceTable, ResourceLink> join = createOrReuseJoin(JoinEnum.REFERENCE, theParamName);
+		Join<ResourceTable, ResourceLink> join = createJoin(JoinEnum.REFERENCE, theParamName);
 
 		List<Predicate> codePredicates = new ArrayList<>();
 
@@ -677,7 +677,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateString(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamString> join = createOrReuseJoin(JoinEnum.STRING, theParamName);
+		Join<ResourceTable, ResourceIndexedSearchParamString> join = createJoin(JoinEnum.STRING, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
@@ -825,7 +825,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private void addPredicateToken(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
 		if (theList.get(0).getMissing() != null) {
-			Join<ResourceTable, ResourceIndexedSearchParamToken> join = createOrReuseJoin(JoinEnum.TOKEN, theParamName);
+			Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(JoinEnum.TOKEN, theParamName);
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
 			return;
 		}
@@ -849,7 +849,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return;
 		}
 
-		Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(JoinEnum.TOKEN);
+		Join<ResourceTable, ResourceIndexedSearchParamToken> join = createJoin(JoinEnum.TOKEN, theParamName);
 		List<Predicate> singleCode = createPredicateToken(tokens, theResourceName, theParamName, myBuilder, join);
 		codePredicates.addAll(singleCode);
 
@@ -859,7 +859,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void addPredicateUri(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
 
-		Join<ResourceTable, ResourceIndexedSearchParamUri> join = createOrReuseJoin(JoinEnum.URI, theParamName);
+		Join<ResourceTable, ResourceIndexedSearchParamUri> join = createJoin(JoinEnum.URI, theParamName);
 
 		if (theList.get(0).getMissing() != null) {
 			addPredicateParamMissing(theResourceName, theParamName, theList.get(0).getMissing(), join);
@@ -1008,11 +1008,11 @@ public class SearchBuilder implements ISearchBuilder {
 	@SuppressWarnings("unchecked")
 	private <T> Join<ResourceTable, T> createOrReuseJoin(JoinEnum theType, String theSearchParameterName) {
 		JoinKey key = new JoinKey(theSearchParameterName, theType);
-		return (Join<ResourceTable, T>) myIndexJoins.computeIfAbsent(key, k -> createJoin(theType));
+		return (Join<ResourceTable, T>) myIndexJoins.computeIfAbsent(key, k -> createJoin(theType, theSearchParameterName));
 	}
 
 	@SuppressWarnings("unchecked")
-	private  <T> Join<ResourceTable, T> createJoin(JoinEnum theType) {
+	private  <T> Join<ResourceTable, T> createJoin(JoinEnum theType, String theSearchParameterName) {
 		Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
 		switch (theType) {
 			case DATE:
